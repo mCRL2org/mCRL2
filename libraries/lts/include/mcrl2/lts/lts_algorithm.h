@@ -1095,7 +1095,10 @@ void determinise(LTS_TYPE& l)
   std::vector < transition > d_transitions;
 
   std::size_t s;
-  std::size_t i,to,lbl,n_t;
+  std::size_t i;
+  std::size_t to;
+  std::size_t lbl;
+  std::size_t n_t;
 
   while (d_id < tss.get_next_tag())
   {

@@ -93,7 +93,7 @@ void hash_table2::add(std::size_t x,std::size_t y)
     {
       h = hash(x,y);
     }
-    bucket2 new_bucket;
+    bucket2 new_bucket{};
     new_bucket.x = x;
     new_bucket.y = y;
     new_bucket.next = table[h];
@@ -109,8 +109,9 @@ bool hash_table2::find(std::size_t x,std::size_t y)
 
 void hash_table2::remove(std::size_t x,std::size_t y)
 {
-  bucket2 b;
-  std::size_t i, prev_i;
+  bucket2 b{};
+  std::size_t i;
+  std::size_t prev_i;
   std::size_t h = hash(x,y);
   i = table[h];
   if (i != END_OF_LIST)
@@ -144,7 +145,7 @@ void hash_table2::remove(std::size_t x,std::size_t y)
 std::size_t hash_table2::hfind(std::size_t h,std::size_t x,std::size_t y)
 {
   std::size_t i = table[h];
-  bucket2 b;
+  bucket2 b{};
   while (i != END_OF_LIST)
   {
     b = buckets[i];
@@ -213,7 +214,7 @@ void hash_table3::add(std::size_t x,std::size_t y,std::size_t z)
     {
       h = hash(x,y,z);
     }
-    bucket3 new_bucket;
+    bucket3 new_bucket{};
     new_bucket.x = x;
     new_bucket.y = y;
     new_bucket.z = z;
@@ -230,8 +231,9 @@ bool hash_table3::find(std::size_t x,std::size_t y,std::size_t z)
 
 void hash_table3::remove(std::size_t x,std::size_t y,std::size_t z)
 {
-  bucket3 b;
-  std::size_t i, prev_i;
+  bucket3 b{};
+  std::size_t i;
+  std::size_t prev_i;
   std::size_t h = hash(x,y,z);
   i = table[h];
   if (i != END_OF_LIST)
@@ -265,7 +267,7 @@ void hash_table3::remove(std::size_t x,std::size_t y,std::size_t z)
 std::size_t hash_table3::hfind(std::size_t h,std::size_t x,std::size_t y,std::size_t z)
 {
   std::size_t i = table[h];
-  bucket3 b;
+  bucket3 b{};
   while (i != END_OF_LIST)
   {
     b = buckets[i];

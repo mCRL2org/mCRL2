@@ -23,6 +23,8 @@ class simplifier
 {
 
 public:
+  virtual ~simplifier() = default;
+
   /**
    * \brief Creates a data_specification with rewrite rules that improve 'cannonicalness' of
    * expressions.

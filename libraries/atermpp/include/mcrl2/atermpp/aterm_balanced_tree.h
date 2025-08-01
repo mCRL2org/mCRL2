@@ -66,7 +66,10 @@ class term_balanced_tree : public aterm
                           {
                             transformer(reinterpret_cast<Term&>(target), *(p++));
                           }
-                          else make_tree_helper(target, p, new_size, transformer);
+                          else
+                          {
+                            make_tree_helper(target, p, new_size, transformer);
+                          }
                         },
                      [&size, &transformer, &p](aterm& target)
                         { 
@@ -77,7 +80,10 @@ class term_balanced_tree : public aterm
                           {
                             transformer(reinterpret_cast<Term&>(target), *(p++));
                           }
-                          else make_tree_helper(target, p, new_size, transformer);
+                          else
+                          {
+                            make_tree_helper(target, p, new_size, transformer);
+                          }
                         });
     }
 
@@ -455,8 +461,8 @@ namespace std
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term
 /// \param t2 The second term
-template <class T>
-inline void swap(atermpp::term_balanced_tree<T>& t1, atermpp::term_balanced_tree<T>& t2)
+template<class T>
+inline void swap(atermpp::term_balanced_tree<T>& t1, atermpp::term_balanced_tree<T>& t2) noexcept
 {
   t1.swap(t2);
 }

@@ -135,9 +135,11 @@ static bool split_condition_aux(
   if(sort_bool::is_and_application(e) || sort_bool::is_or_application(e))
   {
     // Recursive case
-    std::vector < data_expression_list > real_conditions_aux1, non_real_conditions_aux1;
+    std::vector<data_expression_list> real_conditions_aux1;
+    std::vector<data_expression_list> non_real_conditions_aux1;
     bool left_is_real = split_condition_aux(sort_bool::left(e),real_conditions_aux1,non_real_conditions_aux1,negate);
-    std::vector < data_expression_list > real_conditions_aux2, non_real_conditions_aux2;
+    std::vector<data_expression_list> real_conditions_aux2;
+    std::vector<data_expression_list> non_real_conditions_aux2;
     bool right_is_real = split_condition_aux(sort_bool::right(e),real_conditions_aux2,non_real_conditions_aux2,negate);
     if(!left_is_real && !right_is_real)
     {

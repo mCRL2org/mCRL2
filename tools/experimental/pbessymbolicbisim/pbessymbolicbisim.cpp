@@ -36,10 +36,10 @@ protected:
   using super = rewriter_tool<input_tool>;
 
   simplifier_mode m_mode;
-  std::size_t m_num_refine_steps;
-  bool m_fine_initial_partition;
-  bool m_early_termination;
-  bool m_randomize;
+  std::size_t m_num_refine_steps = 1;
+  bool m_fine_initial_partition = false;
+  bool m_early_termination = false;
+  bool m_randomize = false;
 
   /// Parse the non-default options.
   void parse_options(const command_line_parser& parser) override
@@ -91,9 +91,7 @@ public:
       "Symbolically compute the solution of the given PBES",
       "Computes the solution to the given PBES using symbolic bismulation techniques. "
       "Mostly useful for PBESs of low complexity with an infinite underlying BES. "
-      "This tool is experimental. "),
-      m_num_refine_steps(1),
-      m_fine_initial_partition(false)
+      "This tool is experimental. ")
   {}
 
   /// Runs the algorithm.

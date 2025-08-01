@@ -64,7 +64,9 @@ void CycleFinder::run( ParityGame::Strategy &strategy,
           verti v = mapping_[it];
           verti w = substrat_[it];
           if (w != NO_VERTEX)
+          {
             w = mapping_[w];
+          }
           strategy[v] = w;
           assert(!done_set.count(v));
           done_set.insert(v);
@@ -159,7 +161,10 @@ ParityGame::Strategy DecycleSolver::solve()
         }
 
         // Early out: if all vertices are solved, it is pointless to continue.
-        if (new_size == V) return strategy;
+        if (new_size == V)
+        {
+          return strategy;
+        }
     }
 
     if (solved_set.empty())
@@ -181,7 +186,10 @@ ParityGame::Strategy DecycleSolver::solve()
     unsolved.reserve(num_unsolved);
     for (verti v = 0; v < V; ++v)
     {
-        if (!solved_set.count(v)) unsolved.push_back(v);
+      if (!solved_set.count(v))
+      {
+        unsolved.push_back(v);
+      }
     }
     assert(!unsolved.empty() && unsolved.size() == num_unsolved);
 

@@ -322,8 +322,8 @@ class pins
     using substitution_t = data::rewriter::substitution_type;
 
   protected:
-    std::size_t m_group_count;
-    std::size_t m_state_length; /**< the number of process parameters */
+    std::size_t m_group_count = 0UL;
+    std::size_t m_state_length = 0UL; /**< the number of process parameters */
     std::vector<std::vector<std::size_t> > m_read_group;
     std::vector<std::vector<std::size_t> > m_write_group;
     std::vector<std::vector<std::size_t> > m_update_group;

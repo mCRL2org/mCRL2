@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& out, const identifier_string& x)
 }
 
 /// \\brief swap overload
-inline void swap(identifier_string& t1, identifier_string& t2)
+inline void swap(identifier_string& t1, identifier_string& t2) noexcept
 {
   t1.swap(t2);
 }

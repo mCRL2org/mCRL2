@@ -33,7 +33,9 @@ inline std::string copyright_period()
   // We assume that the version number always starts with a four digit year
   // in which the version was released.
   if (get_toolset_version().size() >= 4)
+  {
     return get_toolset_version().substr(0, 4);
+  }
   return "Today";
 }
 
@@ -278,7 +280,7 @@ class interface_description
         char                                m_short;
 
         /// whether the option is printed as part of the tool-specific interface
-        bool                                m_show;
+        bool m_show = true;
 
       protected:
 
@@ -301,18 +303,16 @@ class interface_description
          * \pre l should be a non-empty string that only contain characters from [0-9a-Z] or `-'
          **/
         option_descriptor(std::string const& l, std::string const& d, const char s) :
-          m_long(l), m_description(d), m_short(s), m_show(true)
+          m_long(l), m_description(d), m_short(s)
         {
-
           assert(!l.empty());
           assert(l.find_first_not_of("_-0123456789abcdefghijklmnopqrstuvwxyz") == std::string::npos);
         }
 
         /// copy constructor
         option_descriptor(option_descriptor const& o) : m_long(o.m_long),
-          m_description(o.m_description), m_argument(o.m_argument), m_short(o.m_short), m_show(true)
-        {
-        }
+          m_description(o.m_description), m_argument(o.m_argument), m_short(o.m_short)
+        {}
 
         option_descriptor operator=(option_descriptor const& o)
         {
@@ -1169,7 +1169,7 @@ class interface_description::enum_argument : public typed_argument< T >
     std::vector< basic_argument::argument_description > m_enum;
 
     std::string m_default;
-    bool m_has_default;
+    bool m_has_default = false;
 
     /// \brief Implementation that adds the value of an enum type
     enum_argument& add_value_with_short(const std::string& long_arg, const std::string& short_arg, const std::string& description, const bool is_default = false)
@@ -1192,8 +1192,7 @@ class interface_description::enum_argument : public typed_argument< T >
   public:
 
     /// Constructor
-    enum_argument(std::string const& name) :
-      m_has_default(false)
+    enum_argument(std::string const& name)
     {
       basic_argument::set_type("enum");
       basic_argument::set_name(name);
@@ -1410,7 +1409,7 @@ class interface_description::file_argument : public typed_argument<std::string>
     std::string m_default;
 
     /// whether a default value has been specified
-    bool        m_has_default;
+    bool m_has_default = false;
 
     /// description
     std::vector< basic_argument::argument_description > m_description;
@@ -1426,7 +1425,7 @@ class interface_description::file_argument : public typed_argument<std::string>
      * Constructor
      * \param[in] n the name of the argument
      **/
-    inline file_argument(std::string const& name) : m_has_default(false)
+    inline file_argument(std::string const& name)
     {
       basic_argument::set_type("file");
       basic_argument::set_name(name);

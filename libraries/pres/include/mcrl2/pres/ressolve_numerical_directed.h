@@ -235,7 +235,7 @@ class internal_const_multiply: public virtual internal_res_expression
 
 // End definition of internal_res_expression.
 
-double evaluate_directed(const internal_res_expression* p, const std::vector<double>& solution)
+inline double evaluate_directed(const internal_res_expression* p, const std::vector<double>& solution)
 {
   switch (p->type())
   {

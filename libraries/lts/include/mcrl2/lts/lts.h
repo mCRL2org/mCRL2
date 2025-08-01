@@ -47,7 +47,7 @@ class lts_default_base
     }
 
     /** \brief Standard swap function. */
-    void swap(lts_default_base& )
+    void swap(lts_default_base&) noexcept
     {
       // Does intentionally not provide any action.
     }
@@ -216,7 +216,7 @@ class lts: public LTS_BASE
 
     /** \brief Swap this lts with the supplied supplied LTS.
      * \param[in] l The LTS to swap. */
-    void swap(lts& l)
+    void swap(lts& l) noexcept
     {
       static_cast<LTS_BASE&>(*this).swap(static_cast<LTS_BASE&>(l));
       {

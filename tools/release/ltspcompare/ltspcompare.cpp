@@ -27,21 +27,17 @@ using namespace mcrl2::log;
 
 struct t_tool_options
 {
-  std::string                   name_for_first;
-  std::string                   name_for_second;
-  lts_type                      format_for_first;
-  lts_type                      format_for_second;
-  lts_probabilistic_equivalence equivalence;
-  lts_probabilistic_preorder    preorder;
-  std::vector<std::string>      tau_actions;   // Actions with these labels must be considered equal to tau.
-  
-  t_tool_options():
-    name_for_first(""),
-    name_for_second(""),
-    format_for_first(lts_none),
-    format_for_second(lts_none),
-    equivalence(lts_probabilistic_eq_none),
-    preorder(lts_probabilistic_pre_none)
+  std::string name_for_first;
+  std::string name_for_second;
+  lts_type format_for_first = lts_none;
+  lts_type format_for_second = lts_none;
+  lts_probabilistic_equivalence equivalence = lts_probabilistic_eq_none;
+  lts_probabilistic_preorder preorder = lts_probabilistic_pre_none;
+  std::vector<std::string> tau_actions; // Actions with these labels must be considered equal to tau.
+
+  t_tool_options()
+      : name_for_first(""),
+        name_for_second("")
   {}
 };
 
@@ -92,7 +88,8 @@ class ltspcompare_tool : public ltscompare_base
     template <class LTS_TYPE>
     bool lts_probabilistic_compare()
     {
-      LTS_TYPE l1,l2;
+      LTS_TYPE l1;
+      LTS_TYPE l2;
       l1.load(tool_options.name_for_first);
       l2.load(tool_options.name_for_second);
 
@@ -210,7 +207,8 @@ class ltspcompare_tool : public ltscompare_base
 
     void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
     {
-      std::string::size_type lastpos = 0, pos;
+      std::string::size_type lastpos = 0;
+      std::string::size_type pos;
       while ((pos = act_names.find(',',lastpos)) != std::string::npos)
       {
         tau_actions.push_back(act_names.substr(lastpos,pos-lastpos));

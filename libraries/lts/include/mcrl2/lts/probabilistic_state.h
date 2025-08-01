@@ -156,7 +156,7 @@ class probabilistic_state
 
     /** \brief Swap this probabilistic state.
      * \param[in] s A probabilistic state. */
-    void swap(probabilistic_state& other)
+    void swap(probabilistic_state& other) noexcept
     {
       std::swap(m_single_state,other.m_single_state);
       m_probabilistic_state.swap(other.m_probabilistic_state);

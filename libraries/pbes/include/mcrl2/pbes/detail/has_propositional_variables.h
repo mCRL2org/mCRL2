@@ -24,11 +24,7 @@ struct has_propositional_variables_traverser: public pbes_expression_traverser<h
   using super::leave;
   using super::apply;
 
-  bool result;
-
-  has_propositional_variables_traverser()
-    : result(false)
-  {}
+  bool result = false;
 
   void enter(const propositional_variable_instantiation&)
   {

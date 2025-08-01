@@ -77,8 +77,8 @@ class reduce_pbes_tool: public pbes_input_tool<input_tool>
   protected:
     const std::size_t undefined = std::size_t(-1);
     using super = pbes_input_tool<input_tool>;
-    bool m_print_max_depth;
-    bool m_verbose;
+    bool m_print_max_depth = false;
+    bool m_verbose = false;
     std::size_t m_depth = undefined;
 
     void parse_options(const utilities::command_line_parser& parser) override

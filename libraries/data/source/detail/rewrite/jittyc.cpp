@@ -53,15 +53,11 @@ class bracket_level_data
 {
   public:
     const std::size_t MCRL2_BRACKET_NESTING_LEVEL=250;  // Some compilers limit the nesting to 256 brackets.
-                                                        // This guarantees that we will not use more. 
-    std::size_t bracket_nesting_level;
+                                                        // This guarantees that we will not use more.
+    std::size_t bracket_nesting_level = 0;
     std::string current_template_parameters;
     std::stack< std::string > current_data_parameters;
     std::stack< std::string > current_data_arguments;
-
-    bracket_level_data()
-     : bracket_nesting_level(0)
-    {}
 };
 
 /// This function returns the variables that occur in a complex subexpression within f.
@@ -589,7 +585,8 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
     }
     pars.Mlist = m;
 
-    match_tree true_tree,false_tree;
+    match_tree true_tree;
+    match_tree false_tree;
     match_tree_Re r ;
     match_tree_list readies;
 
@@ -628,7 +625,8 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
   else if (!pars.Flist.empty())
   {
     match_tree_list F = pars.Flist.front();
-    match_tree true_tree,false_tree;
+    match_tree true_tree;
+    match_tree false_tree;
 
     match_tree_list_list newupstack = pars.upstack;
     match_tree_list_list l;
@@ -3092,7 +3090,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   mCRL2log(verbose) << "compiled in " << time.time() << "ms, loading rewriter..." << std::endl;
 
   bool (*init)(rewriter_interface*, RewriterCompilingJitty* this_rewriter);
-  rewriter_interface interface = { mcrl2::utilities::get_toolset_version(), "Unknown error when loading rewriter.", this, nullptr, nullptr };
+  rewriter_interface interface = {.caller_toolset_version = mcrl2::utilities::get_toolset_version(),
+      .status = "Unknown error when loading rewriter.",
+      .rewriter = this,
+      .rewrite_external = nullptr,
+      .rewrite_cleanup = nullptr};
   try
   {
     using rewrite_function_type = bool(rewriter_interface*, RewriterCompilingJitty*);

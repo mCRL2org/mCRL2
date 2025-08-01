@@ -94,18 +94,22 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
     // Count number of new edges:
     for (ForwardIterator it = vertices_begin; it != vertices_end; ++it)
     {
-        const_iterator a, b;
-        if (graph.edge_dir() & EDGE_SUCCESSOR)
-        {
-            a = graph.succ_begin(*it);
-            b = graph.succ_end(*it);
+      const_iterator a;
+      const_iterator b;
+      if (graph.edge_dir() & EDGE_SUCCESSOR)
+      {
+        a = graph.succ_begin(*it);
+        b = graph.succ_end(*it);
         }
         else
         {
             a = graph.pred_begin(*it);
             b = graph.pred_end(*it);
         }
-        while (a != b) num_edges += (vertex_map.find(*a++) != vertex_map.end());
+        while (a != b)
+        {
+          num_edges += (vertex_map.find(*a++) != vertex_map.end());
+        }
     }
 
     // Allocate memory:
@@ -125,14 +129,20 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
                  succ_it != succ_end; ++succ_it)
             {
                 typename VertexMapT::const_iterator it(vertex_map.find(*succ_it));
-                if (it != vertex_map.end()) successors_[e++] = (*it).second;
+                if (it != vertex_map.end())
+                {
+                  successors_[e++] = (*it).second;
+                }
             }
             verti *end = &successors_[e];
             if (!std::is_sorted(begin, end, std::less<verti>()))
             {
                 std::sort(begin, end);
             }
-            if (proper) assert(begin != end);  /* proper parity game graph */
+            if (proper)
+            {
+              assert(begin != end); /* proper parity game graph */
+            }
         }
         assert(v == V_ && e == E_);
         successor_index_[v] = e;
@@ -152,7 +162,10 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
                  pred_it != pred_end; ++pred_it)
             {
                 typename VertexMapT::const_iterator it(vertex_map.find(*pred_it));
-                if (it != vertex_map.end()) predecessors_[e++] = it->second;
+                if (it != vertex_map.end())
+                {
+                  predecessors_[e++] = it->second;
+                }
             }
             verti *end = &predecessors_[e];
             if (!std::is_sorted(begin, end, std::less<verti>()))

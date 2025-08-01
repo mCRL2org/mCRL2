@@ -30,7 +30,7 @@ class resinfo_tool: public pres_input_tool<input_tool>
   protected:
     using super = pres_input_tool<input_tool>;
 
-    bool opt_full;
+    bool opt_full = false;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser) override
@@ -56,8 +56,7 @@ class resinfo_tool: public pres_input_tool<input_tool>
         "Jan Friso Groote",
         "display basic information about a RES",
         super::make_tool_description("Print basic information about the RES in INFILE.")
-      ),
-      opt_full(false)
+      )
     {}
 
     /// If RES can be loaded from file_name, then

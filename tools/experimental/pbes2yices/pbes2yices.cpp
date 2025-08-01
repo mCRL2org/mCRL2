@@ -36,31 +36,70 @@ inline std::istream& operator>>(std::istream& is, goal_t& goal)
   std::stringbuf buffer;
   is >> &buffer;
 
-  if (buffer.str() == "disjunctiveWitness") goal = disjunctiveWitness;
-  else if (buffer.str() == "disjunctiveAcyclicUnrolling") goal = disjunctiveAcyclicUnrolling;
-  else if (buffer.str() == "conjunctiveWitness") goal = conjunctiveWitness;
-  else if (buffer.str() == "conjunctiveAcyclicUnrolling") goal = conjunctiveAcyclicUnrolling;
-  else is.setstate(std::ios_base::failbit);
+  if (buffer.str() == "disjunctiveWitness")
+  {
+    goal = disjunctiveWitness;
+  }
+  else if (buffer.str() == "disjunctiveAcyclicUnrolling")
+  {
+    goal = disjunctiveAcyclicUnrolling;
+  }
+  else if (buffer.str() == "conjunctiveWitness")
+  {
+    goal = conjunctiveWitness;
+  }
+  else if (buffer.str() == "conjunctiveAcyclicUnrolling")
+  {
+    goal = conjunctiveAcyclicUnrolling;
+  }
+  else
+  {
+    is.setstate(std::ios_base::failbit);
+  }
 
   return is;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const goal_t goal)
 {
-  if (goal == disjunctiveWitness) os << "disjunctiveWitness";
-  else if (goal == disjunctiveAcyclicUnrolling) os << "disjunctiveAcyclicUnrolling";
-  else if (goal == conjunctiveWitness) os << "conjunctiveWitness";
-  else if (goal == conjunctiveAcyclicUnrolling) os << "conjunctiveAcyclicUnrolling";
+  if (goal == disjunctiveWitness)
+  {
+    os << "disjunctiveWitness";
+  }
+  else if (goal == disjunctiveAcyclicUnrolling)
+  {
+    os << "disjunctiveAcyclicUnrolling";
+  }
+  else if (goal == conjunctiveWitness)
+  {
+    os << "conjunctiveWitness";
+  }
+  else if (goal == conjunctiveAcyclicUnrolling)
+  {
+    os << "conjunctiveAcyclicUnrolling";
+  }
   return os;
 }
 
 
 inline std::string description(const goal_t goal)
 {
-  if (goal == disjunctiveWitness) return "a witness for a disjunctive PBES; if satisfiable, shows that the value of the PBES is true";
-  if (goal == disjunctiveAcyclicUnrolling) return "an acyclic unrolling for a disjunctive PBES; if unsatisfiable, shows that the value of the PBES is false";
-  if (goal == conjunctiveWitness) return "a witness for a conjunctive PBES; if satisfiable, shows that the value of the PBES is false";
-  if (goal == conjunctiveAcyclicUnrolling) return "an acyclic unrolling for a disjunctive PBES; if unsatisfiable, shows that the value of the PBES is true";
+  if (goal == disjunctiveWitness)
+  {
+    return "a witness for a disjunctive PBES; if satisfiable, shows that the value of the PBES is true";
+  }
+  if (goal == disjunctiveAcyclicUnrolling)
+  {
+    return "an acyclic unrolling for a disjunctive PBES; if unsatisfiable, shows that the value of the PBES is false";
+  }
+  if (goal == conjunctiveWitness)
+  {
+    return "a witness for a conjunctive PBES; if satisfiable, shows that the value of the PBES is false";
+  }
+  if (goal == conjunctiveAcyclicUnrolling)
+  {
+    return "an acyclic unrolling for a disjunctive PBES; if unsatisfiable, shows that the value of the PBES is true";
+  }
   return "";
 }
 
@@ -68,8 +107,8 @@ class pbes2yices_tool: public pbes_input_tool<input_output_tool>
 {
   protected:
     // Tool options.
-    unsigned int opt_levels; // Number of unrolling levels
-    bool opt_hasgoal;
+    unsigned int opt_levels = 10; // Number of unrolling levels
+    bool opt_hasgoal = false;
     goal_t opt_goal;
 
     using super = pbes_input_tool<input_output_tool>;
@@ -81,8 +120,7 @@ class pbes2yices_tool: public pbes_input_tool<input_output_tool>
         AUTHOR,
         "Generate a BES from a PBES and solve it. ",
         "Solves (P)BES from INFILE. "
-        "If INFILE is not present, stdin is used. "),
-      opt_levels(10)
+        "If INFILE is not present, stdin is used. ")
     {}
 
   protected:

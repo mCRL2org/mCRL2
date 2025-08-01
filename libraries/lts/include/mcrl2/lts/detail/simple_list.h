@@ -112,7 +112,7 @@ namespace mcrl2::lts::detail
       class pool_block_t
       {
       public:
-        char data[NR_ELEMENTS * sizeof(T)];
+        char data[NR_ELEMENTS * sizeof(T)]{};
         pool_block_t* next_block;
 
         pool_block_t(pool_block_t* const new_next_block)
@@ -128,7 +128,7 @@ namespace mcrl2::lts::detail
         void* begin_used_in_first_block;
 
         /// \brief first freed element
-        void* first_free_T;
+        void* first_free_T = nullptr;
 
         static void*& deref_void(void* addr)
         {
@@ -139,9 +139,8 @@ namespace mcrl2::lts::detail
         my_pool()
           : first_block(new pool_block_t(nullptr)),
             begin_used_in_first_block(
-                                &first_block->data[sizeof(first_block->data)]),
-            first_free_T(nullptr)
-        {  }
+                                &first_block->data[sizeof(first_block->data)])
+        {}
 
 
         /// \brief destructor

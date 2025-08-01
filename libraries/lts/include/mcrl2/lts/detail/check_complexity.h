@@ -590,7 +590,7 @@ class check_complexity
                                         (enum counter_type) (LastCounter + 1));
       public:
         /// \brief actual space to store the counters
-        unsigned char counters[LastCounter - FirstCounter + 1];
+        unsigned char counters[LastCounter - FirstCounter + 1]{};
 
         /// \brief cancel temporary work
         /// \details The function registers that all counters from `first` to
@@ -756,7 +756,10 @@ class check_complexity
             assert(to < FirstTempCounter || FirstPostprocessCounter <= to);
             assert(to <= LastCounter);
             assert(max_value <= (to < FirstTempCounter ? log_n : 1U));
-            if (0 == counters[from - FirstCounter])  return complexity_ok;
+            if (0 == counters[from - FirstCounter])
+            {
+              return complexity_ok;
+            }
             if (counters[to - FirstCounter] >= max_value)
             {
                 mCRL2log(log::error) << "Error 2: counter \""

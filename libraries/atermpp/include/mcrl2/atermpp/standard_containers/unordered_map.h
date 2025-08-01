@@ -96,9 +96,9 @@ public:
   {}
   
   /// \brief Constructor.
-  unordered_map (unordered_map&& x)
-   : super::unordered_map(std::move(x)),
-     container_wrapper(*this)     
+  unordered_map(unordered_map&& x) noexcept
+      : super::unordered_map(std::move(x)),
+        container_wrapper(*this)
   {}
 
 
@@ -183,7 +183,7 @@ public:
 
   size_type erase( const Key& key );
 
-  void swap( unordered_map& other );
+  void swap(unordered_map& other) noexcept;
 
   node_type extract( const_iterator position );
   
@@ -300,9 +300,9 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     {}
 
     /// \brief Constructor.
-    unordered_map(unordered_map&& x)
-      : super::unordered_map(std::move(x)),
-      container_wrapper(*this)
+    unordered_map(unordered_map&& x) noexcept
+        : super::unordered_map(std::move(x)),
+          container_wrapper(*this)
     {}
 
     /// \brief Constructor.
@@ -397,7 +397,7 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
 
     size_type erase(const Key& key);
 
-    void swap(unordered_map& other);
+    void swap(unordered_map& other) noexcept;
 
     /*
     node_type extract(const_iterator position);

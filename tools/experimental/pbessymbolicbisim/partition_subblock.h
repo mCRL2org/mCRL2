@@ -34,7 +34,7 @@ protected:
   data_expression m_char_func;
 
   const data_manipulators m_dm;
-  split_cache<subblock>* m_cache;
+  split_cache<subblock>* m_cache = nullptr;
 
 public:
 
@@ -228,7 +228,7 @@ public:
     return m_var < other.m_var || (m_var == other.m_var && m_char_func < other.m_char_func);
   }
 
-  friend void swap(subblock& self, subblock& other)
+  friend void swap(subblock& self, subblock& other) noexcept
   {
     using std::swap;
     swap(self.m_equation, other.m_equation);
@@ -246,7 +246,7 @@ public:
 };
 
 std::string pp(const subblock&);
-std::string pp(const subblock& b)
+inline std::string pp(const subblock& b)
 {
   std::ostringstream out;
   out << b.variable().name() << " - " << b.charachteristic_function();

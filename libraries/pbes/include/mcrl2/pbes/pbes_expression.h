@@ -106,11 +106,10 @@ std::ostream& operator<<(std::ostream& out, const pbes_expression& x)
 }
 
 /// \\brief swap overload
-inline void swap(pbes_expression& t1, pbes_expression& t2)
+inline void swap(pbes_expression& t1, pbes_expression& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief A propositional variable instantiation
 class propositional_variable_instantiation: public pbes_expression
@@ -211,11 +210,10 @@ std::ostream& operator<<(std::ostream& out, const propositional_variable_instant
 }
 
 /// \\brief swap overload
-inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
+inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The not operator for pbes expressions
 class not_: public pbes_expression
@@ -282,11 +280,10 @@ std::ostream& operator<<(std::ostream& out, const not_& x)
 }
 
 /// \\brief swap overload
-inline void swap(not_& t1, not_& t2)
+inline void swap(not_& t1, not_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The and operator for pbes expressions
 class and_: public pbes_expression
@@ -358,11 +355,10 @@ std::ostream& operator<<(std::ostream& out, const and_& x)
 }
 
 /// \\brief swap overload
-inline void swap(and_& t1, and_& t2)
+inline void swap(and_& t1, and_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The or operator for pbes expressions
 class or_: public pbes_expression
@@ -434,11 +430,10 @@ std::ostream& operator<<(std::ostream& out, const or_& x)
 }
 
 /// \\brief swap overload
-inline void swap(or_& t1, or_& t2)
+inline void swap(or_& t1, or_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The implication operator for pbes expressions
 class imp: public pbes_expression
@@ -510,11 +505,10 @@ std::ostream& operator<<(std::ostream& out, const imp& x)
 }
 
 /// \\brief swap overload
-inline void swap(imp& t1, imp& t2)
+inline void swap(imp& t1, imp& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The universal quantification operator for pbes expressions
 class forall: public pbes_expression
@@ -586,11 +580,10 @@ std::ostream& operator<<(std::ostream& out, const forall& x)
 }
 
 /// \\brief swap overload
-inline void swap(forall& t1, forall& t2)
+inline void swap(forall& t1, forall& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The existential quantification operator for pbes expressions
 class exists: public pbes_expression
@@ -662,7 +655,7 @@ std::ostream& operator<<(std::ostream& out, const exists& x)
 }
 
 /// \\brief swap overload
-inline void swap(exists& t1, exists& t2)
+inline void swap(exists& t1, exists& t2) noexcept
 {
   t1.swap(t2);
 }

@@ -152,7 +152,8 @@ void ready_sim_partitioner<LTS_TYPE>::refinei()
   }
 
   /* Some local variables */
-  std::vector<std::size_t>::iterator alphai, last;
+  std::vector<std::size_t>::iterator alphai;
+  std::vector<std::size_t>::iterator last;
   std::size_t l;  
 
   /* The main loop */  
@@ -202,9 +203,12 @@ void ready_sim_partitioner<LTS_TYPE>::updatei()
 {
   using namespace mcrl2::core;
   mCRL2log(log::debug) << "---------------  Updatei ---------------------------------------" << std::endl;
-  
-  std::size_t l,alpha,gamma;
-  std::vector<std::size_t>::iterator alphai, last;
+
+  std::size_t l;
+  std::size_t alpha;
+  std::size_t gamma;
+  std::vector<std::size_t>::iterator alphai;
+  std::vector<std::size_t>::iterator last;
 
   induce_P_on_Pi(); 
 
@@ -251,8 +255,12 @@ void ready_sim_partitioner<LTS_TYPE>::updatei()
       if (exists2->find(beta,l)) 
         {
           for (alpha = 0; alpha < s_Pi; ++alpha)
-          if (Q[alpha][beta] && !forall2->find(alpha,l))
-            Q[alpha][beta] = false ;
+          {
+            if (Q[alpha][beta] && !forall2->find(alpha, l))
+            {
+              Q[alpha][beta] = false;
+            }
+          }
         }
     }
   };
@@ -280,7 +288,7 @@ std::string ready_sim_partitioner<LTS_TYPE>::print_structure(hash_table2* struc)
   return result.str();  
 }
 
-template <class LTS_TYPE>
+template<class LTS_TYPE>
 ready_sim_partitioner<LTS_TYPE>::~ready_sim_partitioner()
 {
   delete exists2;

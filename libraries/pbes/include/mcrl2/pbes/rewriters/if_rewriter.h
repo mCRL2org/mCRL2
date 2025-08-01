@@ -53,7 +53,7 @@ class if_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      detail::if_rewrite_builder f;
+      detail::if_rewrite_builder f{};
       pbes_expression result;
       f.apply(result, x);
       return result;

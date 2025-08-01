@@ -193,7 +193,10 @@ void lts_info::compute_lts_type()
             std::string signature = get_param_signature(varparam);
             bool new_param = true;
             for (auto & param : params) {
-               if (signature == param) new_param = false;
+              if (signature == param)
+              {
+                new_param = false;
+              }
             }
             if (new_param) {
                 params.push_back(signature);
@@ -690,7 +693,10 @@ bool lts_info::is_read_dependent_propvar(int /* group */)
 
 bool lts_info::is_read_dependent_parameter(int group, int part)
 {
-    if (group==0 || group==1) return false;
+  if (group == 0 || group == 1)
+  {
+    return false;
+  }
     std::string p = type.get_state_names()[part];
     mCRL2log(log::debug) << "is_read_dependent_parameter (group=" << group << ", part=" << part << " [" << p << "]" << std::endl;
     pbes_expression phi = transition_expression_plain[group];
@@ -725,7 +731,10 @@ bool lts_info::is_read_dependent_parameter(int group, int part)
 
 bool lts_info::is_write_dependent_propvar(int group)
 {
-    if (group==0 || group==1) return false;
+  if (group == 0 || group == 1)
+  {
+    return false;
+  }
     pbes_expression phi = transition_expression_plain[group];
     std::string X = transition_variable_name[group];
     if (lts_info::tf(phi))
@@ -751,7 +760,10 @@ bool lts_info::is_write_dependent_propvar(int group)
 
 bool lts_info::is_write_dependent_parameter(int group , int part)
 {
-  if (group==0 || group==1) return false;
+  if (group == 0 || group == 1)
+  {
+    return false;
+  }
     std::string p = type.get_state_names().at(part);
     pbes_expression phi = transition_expression_plain[group];
     std::string X = transition_variable_name[group];
@@ -800,7 +812,7 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
         std::set<std::string> LL;
         LL.insert(L.begin(), L.end());
         data::variable_list vars = quantifier_variables(phi);
-        for (auto variable : vars)
+        for (const auto& variable: vars)
         {
             LL.insert(get_param_signature(variable));
         }
@@ -866,11 +878,12 @@ std::set<std::string> lts_info::reset(const pbes_expression& phi, const std::set
             std::string signature = *param;
             params.insert(signature);
         }
-        for (auto signature : d) {
-            if (params.find(signature) == params.end())
-            {
-                result.insert(signature);
-            }
+        for (const auto& signature: d)
+        {
+          if (params.find(signature) == params.end())
+          {
+            result.insert(signature);
+          }
         }
     }
     return result;
@@ -955,26 +968,28 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
         data::data_expression_list values = atermpp::down_cast<propositional_variable_instantiation>(expr).parameters();
         assert(var_params.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
-        for (auto parameter : var_params) {
-            std::string param_signature = get_param_signature(parameter);
-            if (data::is_variable(*val))
+        for (const auto& parameter: var_params)
+        {
+          std::string param_signature = get_param_signature(parameter);
+          if (data::is_variable(*val))
+          {
+            const variable& value = atermpp::down_cast<variable>(*val);
+            std::string value_signature = get_param_signature(value);
+            if (param_signature != value_signature || L.find(value_signature) != L.end())
             {
-                const variable& value = atermpp::down_cast<variable>(*val);
-                std::string value_signature = get_param_signature(value);
-                if (param_signature != value_signature || L.find(value_signature) != L.end())
-                {
-                    result.insert(value_signature);
-                }
+              result.insert(value_signature);
             }
-            else
-            {
-                // add free variables in data expression
-                std::set<std::string> l = used(*val, L);
-                result.insert(l.begin(), l.end());
-            }
-            if (val != values.end()) {
-                ++val;
-            }
+          }
+          else
+          {
+            // add free variables in data expression
+            std::set<std::string> l = used(*val, L);
+            result.insert(l.begin(), l.end());
+          }
+          if (val != values.end())
+          {
+            ++val;
+          }
         }
     }
     else if (is_and(expr) || is_or(expr) || is_imp(expr))
@@ -993,7 +1008,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
         std::set<std::string> LL;
         LL.insert(L.begin(), L.end());
         data::variable_list vars = quantifier_variables(expr);
-        for (auto variable : vars)
+        for (const auto& variable: vars)
         {
             LL.insert(get_param_signature(variable));
         }
@@ -1025,20 +1040,22 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
         data::data_expression_list values = atermpp::down_cast<propositional_variable_instantiation>(expr).parameters();
         assert(var_params.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
-        for (auto parameter : var_params) {
-            std::string param_signature = get_param_signature(parameter);
-            if (data::is_variable(*val))
+        for (const auto& parameter: var_params)
+        {
+          std::string param_signature = get_param_signature(parameter);
+          if (data::is_variable(*val))
+          {
+            const variable& value = atermpp::down_cast<variable>(*val);
+            std::string value_signature = get_param_signature(value);
+            if (param_signature == value_signature && L.find(value_signature) == L.end())
             {
-                const variable& value = atermpp::down_cast<variable>(*val);
-                std::string value_signature = get_param_signature(value);
-                if (param_signature == value_signature && L.find(value_signature) == L.end())
-                {
-                    result.insert(value_signature);
-                }
+              result.insert(value_signature);
             }
-            if (val != values.end()) {
-                ++val;
-            }
+          }
+          if (val != values.end())
+          {
+            ++val;
+          }
         }
     }
     else if (is_and(expr) || is_or(expr) || is_imp(expr))
@@ -1057,7 +1074,7 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
         std::set<std::string> LL;
         LL.insert(L.begin(), L.end());
         data::variable_list vars = quantifier_variables(expr);
-        for (auto variable : vars)
+        for (const auto& variable: vars)
         {
             LL.insert(get_param_signature(variable));
         }
@@ -1083,8 +1100,10 @@ std::string lts_info::state_to_string(const ltsmin_state& state)
             param_signatures.begin();
     for (std::vector<data_expression>::const_iterator param_value =
             param_values.begin(); param_value != param_values.end(); ++param_value) {
-        if (param_value != param_values.begin())
-            ss << ", ";
+      if (param_value != param_values.begin())
+      {
+        ss << ", ";
+      }
         ss << *param_signature << " = ";
         ss << *param_value;
         if (param_signature != param_signatures.end())
@@ -1101,8 +1120,9 @@ std::string lts_info::state_to_string(const ltsmin_state& state)
 std::set<std::string> lts_info::get_param_set(const data::variable_list& params)
 {
     std::set<std::string> result;
-    for (auto parameter : params) {
-        result.insert(get_param_signature(parameter));
+    for (const auto& parameter: params)
+    {
+      result.insert(get_param_signature(parameter));
     }
     return result;
 }
@@ -1111,8 +1131,9 @@ std::set<std::string> lts_info::get_param_set(const data::variable_list& params)
 std::vector<std::string> lts_info::get_param_sequence(const data::variable_list& params)
 {
     std::vector<std::string> result;
-    for (auto parameter : params) {
-        result.push_back(get_param_signature(parameter));
+    for (const auto& parameter: params)
+    {
+      result.push_back(get_param_signature(parameter));
     }
     return result;
 }
@@ -1121,9 +1142,10 @@ std::vector<std::string> lts_info::get_param_sequence(const data::variable_list&
 std::vector<int> lts_info::get_param_indices(const data::variable_list& params)
 {
     std::vector<int> result;
-    for (auto parameter : params) {
-        int index = this->get_index(get_param_signature(parameter));
-        result.push_back(index);
+    for (const auto& parameter: params)
+    {
+      int index = this->get_index(get_param_signature(parameter));
+      result.push_back(index);
     }
     return result;
 }
@@ -1133,10 +1155,11 @@ std::map<int,int> lts_info::get_param_index_positions(const data::variable_list&
 {
     std::map<int,int> result;
     int i = 0;
-    for (auto parameter : params) {
-        int index = this->get_index(get_param_signature(parameter));
-        result.insert(std::make_pair(index,i));
-        i++;
+    for (const auto& parameter: params)
+    {
+      int index = this->get_index(get_param_signature(parameter));
+      result.insert(std::make_pair(index, i));
+      i++;
     }
     return result;
 }
@@ -1205,13 +1228,22 @@ ltsmin_state::ltsmin_state(const std::string& varname,
 
 bool ltsmin_state::operator<( const ltsmin_state& other ) const
 {
-  if (this->var < other.var) return true;
+  if (this->var < other.var)
+  {
+    return true;
+  }
   else if (this->var == other.var)
   {
-    if (param_values.size() < other.param_values.size()) return true;
+    if (param_values.size() < other.param_values.size())
+    {
+      return true;
+    }
     else if (param_values.size() == other.param_values.size())
     {
-      if (param_values < other.param_values) return true;
+      if (param_values < other.param_values)
+      {
+        return true;
+      }
     }
   }
   return false;
@@ -1267,8 +1299,10 @@ std::string ltsmin_state::state_to_string() const
     ss << "[" << std::endl;
     for (std::vector<data_expression>::const_iterator entry =
             param_values.begin(); entry != param_values.end(); ++entry) {
-        if (entry != param_values.begin())
-            ss << std::endl << "  value = ";
+      if (entry != param_values.begin())
+      {
+        ss << std::endl << "  value = ";
+      }
         ss << *entry;
     }
     ss << "]";

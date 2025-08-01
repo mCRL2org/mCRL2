@@ -21,7 +21,6 @@
 namespace mcrl2
 {
 
-using log::log_level_t;
 using lps::stochastic_specification;
 using mcrl2::utilities::tools::input_output_output_tool;
 
@@ -130,7 +129,8 @@ public:
       }
 
       // The resulting LPSs
-      stochastic_specification left_spec, right_spec;
+      stochastic_specification left_spec;
+      stochastic_specification right_spec;
       std::tie(left_spec, right_spec) = cleave(spec, left_parameters, right_parameters, m_indices, invariant, m_action_prefix, m_split_condition, m_split_action, m_merge_heuristic, m_use_next_state);
 
       // Save the resulting components.
@@ -209,11 +209,11 @@ private:
   std::list<std::size_t> m_indices;
   std::string m_invariant_filename;
   std::string m_action_prefix;
-  bool m_use_next_state;
-  bool m_split_condition;
-  bool m_split_action;
-  bool m_split_summands;
-  bool m_merge_heuristic;
+  bool m_use_next_state = false;
+  bool m_split_condition = false;
+  bool m_split_action = false;
+  bool m_split_summands = false;
+  bool m_merge_heuristic = false;
 };
 
 } // namespace mcrl2

@@ -27,7 +27,7 @@ class Induction
     set_identifier_generator fresh_identifier_generator;
 
     /// \brief The number of variables used during the last application of induction.
-    std::size_t f_count;
+    std::size_t f_count = 0UL;
 
     /// \brief An expression of sort Bool in mCRL2 format.
     data_expression f_formula;

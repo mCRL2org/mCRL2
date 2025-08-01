@@ -45,11 +45,26 @@ enum transformation_strategy
 inline
 transformation_strategy parse_transformation_strategy(const std::string& s)
 {
-  if (s == "0") return lazy;
-  else if (s == "1") return optimize;
-  else if (s == "2") return on_the_fly;
-  else if (s == "3") return on_the_fly_with_fixed_points;
-  else throw mcrl2::runtime_error("unknown transformation strategy " + s);
+  if (s == "0")
+  {
+    return lazy;
+  }
+  else if (s == "1")
+  {
+    return optimize;
+  }
+  else if (s == "2")
+  {
+    return on_the_fly;
+  }
+  else if (s == "3")
+  {
+    return on_the_fly_with_fixed_points;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown transformation strategy " + s);
+  }
 }
 
 inline

@@ -46,15 +46,13 @@ class bisim_partitioner
      *  \warning Note that when compiled with optimisations, bisimulation partitioning
      *  is much faster than compiled without any optimisation. The difference can go up to a factor 10.
      *  \param[in] l Reference to the LTS. The LTS l is only changed if \ref replace_transition_system is called. */
-    bisim_partitioner(
-      LTS_TYPE& l,
-      const bool branching=false,
-      const bool preserve_divergence=false,
-      const bool generate_counter_examples=false)
-       : max_state_index(0), 
-         aut(l),
-         branching(branching),
-         store_counter_info(generate_counter_examples)
+    bisim_partitioner(LTS_TYPE& l,
+        const bool branching = false,
+        const bool preserve_divergence = false,
+        const bool generate_counter_examples = false)
+        : aut(l),
+          branching(branching),
+          store_counter_info(generate_counter_examples)
     {
       assert(branching || !preserve_divergence);
       mCRL2log(log::verbose) << (preserve_divergence?"Divergence preserving b":"B") <<
@@ -197,7 +195,7 @@ class bisim_partitioner
     using state_type = std::size_t;
     using label_type = std::size_t;
 
-    state_type max_state_index;
+    state_type max_state_index = 0;
     LTS_TYPE& aut;
     bool branching;
     bool store_counter_info;
@@ -217,9 +215,9 @@ class bisim_partitioner
 
     struct block
     {
-      state_type state_index;                   // The state number that represent the states in this block
-      block_index_type block_index;             // The sequence number of this block.
-      block_index_type parent_block_index;      // Index of the parent block.
+      state_type state_index = 0UL;              // The state number that represent the states in this block
+      block_index_type block_index = 0UL;        // The sequence number of this block.
+      block_index_type parent_block_index = 0UL; // Index of the parent block.
       // If there is no parent block, this refers to the block
       // itself.
       std::vector < state_type > bottom_states; // The non bottom states must be ordered
@@ -230,7 +228,7 @@ class bisim_partitioner
       // with tau labels are at the end of this vector.
       std::vector < transition > non_inert_transitions;
 
-      void swap(block& b)
+      void swap(block& b) noexcept
       {
         state_type state_index1=b.state_index;
         b.state_index=state_index;

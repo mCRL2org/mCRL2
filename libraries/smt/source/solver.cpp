@@ -22,15 +22,15 @@ answer smt_solver::execute_and_check(const std::string& s, const std::chrono::mi
   z3.write(s);
 
   std::string result = timeout == std::chrono::microseconds::zero() ? z3.read() : z3.read(timeout);
-  if(result.compare(0, 3, "sat") == 0)
+  if (result.starts_with("sat"))
   {
     return answer::SAT;
   }
-  else if(result.compare(0, 5, "unsat") == 0)
+  else if (result.starts_with("unsat"))
   {
     return answer::UNSAT;
   }
-  else if(result.compare(0, 7, "unknown") == 0)
+  else if (result.starts_with("unknown"))
   {
     return answer::UNKNOWN;
   }

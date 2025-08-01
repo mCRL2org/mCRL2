@@ -140,24 +140,24 @@ class prob_bisim_partitioner_bem
 
     struct distribution_type
     {
-      distribution_key_type key;
+      distribution_key_type key = 0UL;
       std::vector<std::list<transition*>> incoming_transitions_per_label; // Incoming transitions organized per label
   };
   
   struct block_type
   {
-    block_key_type key;
+    block_key_type key = 0UL;
     std::list<state_type> states;        // The states in the block
-    bool is_in_new_blocks;
+    bool is_in_new_blocks = false;
   };
 
   struct step_class_type {
-    step_class_key_type key;
-    label_type action;                                // action label of the pair <a,M>.
+    step_class_key_type key = 0UL;
+    label_type action = 0UL;                          // action label of the pair <a,M>.
     std::list<distribution_type*> distributions;      // The distributions in the step class <a,M>.
     std::vector< bool > prev_states;                  // Previous states that can reach step_class <a,M>
-    bool is_in_new_step_classes;
-    std::size_t equivalent_step_class;
+    bool is_in_new_step_classes = false;
+    std::size_t equivalent_step_class = 0UL;
   };
 
   std::list<block_type*> state_partition;
@@ -174,9 +174,9 @@ class prob_bisim_partitioner_bem
   struct tree_type
   {
     std::list<state_type> states;
-    std::size_t count;
-    tree_type* left;
-    tree_type* right;
+    std::size_t count = 0UL;
+    tree_type* left = nullptr;
+    tree_type* right = nullptr;
 
     void init_node()
     {
@@ -593,7 +593,7 @@ class prob_bisim_partitioner_bem
         }
 
         // Add the pending new blocks to the front of the list
-        for (typename std::list<step_class_type*>::iterator sc_iter : pending_new_step_classes)
+        for (const typename std::list<step_class_type*>::iterator& sc_iter: pending_new_step_classes)
         {
           step_partition.splice(step_partition.begin(), step_partition_old, sc_iter);
         }
@@ -697,7 +697,7 @@ class prob_bisim_partitioner_bem
         state_partition.splice(state_partition.begin(), state_partition_old);
 
         // move the blocks that should be in new blocks to the begining of the list
-        for (typename std::list<block_type*>::iterator block_iter : blocks_to_move_to_front)
+        for (const typename std::list<block_type*>::iterator& block_iter: blocks_to_move_to_front)
         {
           state_partition.splice(state_partition.begin(), state_partition, block_iter);
         }

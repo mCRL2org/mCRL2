@@ -34,12 +34,11 @@ struct jitty_variable_assignment_for_a_rewrite_rule
 
 struct jitty_assignments_for_a_rewrite_rule
 {
-  std::size_t size;
+  std::size_t size = 0;
   jitty_variable_assignment_for_a_rewrite_rule* assignment;
 
   jitty_assignments_for_a_rewrite_rule(jitty_variable_assignment_for_a_rewrite_rule* a)
-   : size(0),
-     assignment(a)
+      : assignment(a)
   {}
 
 };
@@ -80,7 +79,7 @@ class RewriterJitty: public Rewriter
     // The function symbol below is used to administrate that a term is in normal form. It is put around a term.
     // Terms with this auxiliary function symbol cannot be printed using the pretty printer for data expressions.
     function_symbol this_term_is_in_normal_form_symbol;
-    bool rewriting_in_progress;
+    bool rewriting_in_progress = false;
 
     class rewrite_stack m_rewrite_stack;     // Stack for intermediate rewrite results.
 
@@ -88,8 +87,8 @@ class RewriterJitty: public Rewriter
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
 
-    atermpp::detail::thread_aterm_pool* m_thread_aterm_pool; // Store an explicit reference to the thread aterm pool.
-
+    atermpp::detail::thread_aterm_pool* m_thread_aterm_pool
+        = nullptr; // Store an explicit reference to the thread aterm pool.
 
     template <class ITERATOR>
     void apply_cpp_code_to_higher_order_term(

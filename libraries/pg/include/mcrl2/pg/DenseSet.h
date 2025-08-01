@@ -72,7 +72,9 @@ public:
 
       Iterator& operator++()
       {
-        do ++key_;
+        do {
+          ++key_;
+        }
         while (!set_->used_[key_]);
         return *this;
         }
@@ -93,9 +95,12 @@ public:
     DenseSet(Key begin, Key end, const Alloc &alloc = Alloc())
         : range_begin(begin), range_end(end < begin ? begin : end),
           range_size_(range_end - range_begin), alloc_(alloc),
-          used_(alloc_.allocate(range_size_ + 1)), num_used_(0)
+          used_(alloc_.allocate(range_size_ + 1))
     {
-        for (size_type i = 0; i < range_size_; ++i) used_[i] = false;
+      for (size_type i = 0; i < range_size_; ++i)
+      {
+        used_[i] = false;
+      }
         used_[range_size_] = true;  // marks end of data
     }
 
@@ -118,7 +123,10 @@ public:
     {
         if (num_used_ > 0)
         {
-            for (size_type i = 0; i < range_size_; ++i) used_[i] = false;
+          for (size_type i = 0; i < range_size_; ++i)
+          {
+            used_[i] = false;
+          }
             num_used_ = 0;
         }
     }
@@ -126,7 +134,10 @@ public:
     iterator begin()
     {
         Key k = range_begin;
-        while (!used_[k - range_begin]) ++k;
+        while (!used_[k - range_begin])
+        {
+          ++k;
+        }
         return iterator(this, k);
     }
 
@@ -199,7 +210,7 @@ private:
     const size_type range_size_;
     Alloc           alloc_;
     bool            *used_;
-    std::size_t          num_used_;
+    std::size_t num_used_ = 0;
 
     friend class Iterator;
 

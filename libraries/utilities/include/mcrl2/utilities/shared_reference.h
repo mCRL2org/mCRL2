@@ -211,10 +211,7 @@ public:
   }
 
   /// \brief Swaps *this with the other shared reference.
-  void swap(shared_reference<T>& other)
-  {
-    m_reference.swap(other.m_reference);
-  }
+  void swap(shared_reference<T>& other) noexcept { m_reference.swap(other.m_reference); }
 
   bool tagged() const noexcept
   {

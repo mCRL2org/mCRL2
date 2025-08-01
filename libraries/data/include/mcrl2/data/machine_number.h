@@ -83,7 +83,7 @@ std::ostream& operator<<(std::ostream& out, const machine_number& x)
 }
 
 /// \\brief swap overload
-inline void swap(machine_number& t1, machine_number& t2)
+inline void swap(machine_number& t1, machine_number& t2) noexcept
 {
   t1.swap(t2);
 }

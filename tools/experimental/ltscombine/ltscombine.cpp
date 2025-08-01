@@ -20,7 +20,6 @@
 namespace mcrl2
 {
 
-using log::log_level_t;
 using mcrl2::utilities::tools::parallel_tool;
 using mcrl2::utilities::tools::xinput_output_tool;
 
@@ -301,8 +300,8 @@ private:
   std::vector<core::identifier_string_list> syncs;
   std::vector<core::identifier_string> resulting_actions;
 
-  bool save_at_end;
-  std::size_t nr_of_threads;
+  bool save_at_end = false;
+  std::size_t nr_of_threads = 0UL;
 };
 
 } // namespace mcrl2

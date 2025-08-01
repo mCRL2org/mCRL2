@@ -196,7 +196,7 @@ private:
   bool f_generate_invariants;
 
   /// \brief The number of summands of the current LPS.
-  std::size_t f_number_of_summands;
+  std::size_t f_number_of_summands = 0UL;
 
   /// \brief An integer array, storing intermediate results per summand.
   std::vector<std::size_t> f_intermediate;
@@ -281,10 +281,14 @@ data::data_expression get_subst_equation_from_assignments(
 {
   data::data_expression v_result = data::sort_bool::true_();
 
-  const data::assignment_list v_assignment_1, v_assignment_2;
-  data::variable v_variable_1, v_variable_2;
-  data::data_expression v_expression_1, v_expression_2;
-  bool v_next_1 = true, v_next_2 = true;
+  const data::assignment_list v_assignment_1;
+  const data::assignment_list v_assignment_2;
+  data::variable v_variable_1;
+  data::variable v_variable_2;
+  data::data_expression v_expression_1;
+  data::data_expression v_expression_2;
+  bool v_next_1 = true;
+  bool v_next_2 = true;
 
   for (data::variable_list::const_iterator i=a_variables.begin(); i!=a_variables.end();)
   {

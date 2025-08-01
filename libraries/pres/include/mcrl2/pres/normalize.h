@@ -30,11 +30,7 @@ struct is_normalized_traverser: public pres_expression_traverser<is_normalized_t
   using super::leave;
   using super::apply;
 
-  bool result;
-
-  is_normalized_traverser()
-    : result(true)
-  {}
+  bool result = true;
 
   /// \brief Visit not node
   void enter(const minus& /* x */)
@@ -57,11 +53,7 @@ struct normalize_builder: public pres_expression_builder<normalize_builder>
   using super = pres_expression_builder<normalize_builder>;
   using super::apply;
 
-  bool negated;
-
-  normalize_builder()
-    : negated(false)
-  {}
+  bool negated = false;
 
   template <class T>
   void apply(T& result, const data::data_expression& x)

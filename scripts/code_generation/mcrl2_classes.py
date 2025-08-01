@@ -886,7 +886,7 @@ class Class:
     # TODO: deal with template classes
     def swap_overload(self):
         text = r'''/// \\brief swap overload
-inline void swap(<CLASSNAME>& t1, <CLASSNAME>& t2)
+inline void swap(<CLASSNAME>& t1, <CLASSNAME>& t2) noexcept
 {
   t1.swap(t2);
 }

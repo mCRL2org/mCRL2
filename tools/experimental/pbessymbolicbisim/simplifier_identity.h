@@ -29,7 +29,7 @@ public:
   simplifier_identity(const rewriter& r, const rewriter& pr)
   : super(r, pr)
   {}
-
+  ~simplifier_identity() override = default;
 };
 
 

@@ -54,7 +54,7 @@ class tool
     execution_timer m_timer;
 
     /// Determines whether timing output should be written
-    bool m_timing_enabled;
+    bool m_timing_enabled = false;
 
     /// \brief Add options to an interface description.
     /// \param desc An interface description
@@ -149,8 +149,7 @@ class tool
         m_tool_description(tool_description),
         m_known_issues(known_issues),
         m_timing_filename(""),
-        m_timer(name),
-        m_timing_enabled(false)
+        m_timer(name)
     {}
 
     /// \brief Destructor.

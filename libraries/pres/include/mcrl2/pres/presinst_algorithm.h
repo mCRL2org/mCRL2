@@ -107,7 +107,7 @@ class presinst_algorithm
     enumerate_quantifiers_rewriter R;
 
     /// \brief The number of generated equations.
-    std::size_t m_equation_count;
+    std::size_t m_equation_count = 0;
 
     /// \brief Propositional variable instantiations that need to be handled.
     std::set<propositional_variable_instantiation> todo;
@@ -153,15 +153,13 @@ class presinst_algorithm
     /// \param rewrite_strategy A strategy for the data rewriter.
     /// \param print_equations If true, the generated equations are printed.
     explicit presinst_algorithm(data::data_specification const& data_spec,
-                       data::rewriter::strategy rewrite_strategy = data::jitty,
-                       bool print_equations = false
-                      )
-      :
-        m_data_spec(data_spec),
-        datar(data_spec, rewrite_strategy),
-        R(datar, data_spec),
-        m_equation_count(0),
-        m_print_equations(print_equations)
+        data::rewriter::strategy rewrite_strategy = data::jitty,
+        bool print_equations = false)
+        : m_data_spec(data_spec),
+          datar(data_spec, rewrite_strategy),
+          R(datar, data_spec),
+
+          m_print_equations(print_equations)
     {}
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.

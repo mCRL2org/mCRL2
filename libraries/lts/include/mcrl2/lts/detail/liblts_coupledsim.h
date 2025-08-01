@@ -160,8 +160,8 @@ template <class LTS_TYPE>
     std::map<cs_game_node,std::set<cs_game_node>> predecessors;
     std::map<cs_game_node,int> successor_count;
     std::map<cs_game_node,int> node_winner;
-    const int WIN_DEFENDER = 0, WIN_ATTACKER = 1;
-
+    const int WIN_DEFENDER = 0;
+    const int WIN_ATTACKER = 1;
 
     std::set<cs_game_move> moves;  // moves (node,node)
     std::string move_label; // label as string representation.
@@ -171,12 +171,18 @@ template <class LTS_TYPE>
 
     /* Get Weak transitions. */
     std::stack<transition> todo_weak;
-    std::set<transition> l1_weak_transitions, l2_weak_transitions; // do I need to save them?
+    std::set<transition> l1_weak_transitions;
+    std::set<transition> l2_weak_transitions; // do I need to save them?
 
     /* filter transitions of t2. */
-    std::map<std::size_t, std::map<transition, bool>>  // if strong transition on true
-      l2_tran_from_node, l2_tran_into_node,
-      l1_tran_from_node, l1_tran_into_node;
+    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
+        l2_tran_from_node;
+    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
+        l2_tran_into_node;
+    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
+        l1_tran_from_node;
+    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
+        l1_tran_into_node;
 
     mCRL2log(log::debug)
       << "Find weak transitions."
@@ -324,12 +330,12 @@ template <class LTS_TYPE>
     {
       for (std::size_t q0 = 0; q0 < l2.num_states(); q0++)
       {
-        cs_game_node p0q0 = {NODE_ATK, 0, p0, q0, false};  // atk (p0,q0)
-        cs_game_node cplp0q0 = {NODE_CPL, 0, p0, q0, false}; // (cpl,p0,q0)
+        cs_game_node p0q0 = {.flag = NODE_ATK, .act = 0, .p = p0, .q = q0, .swapped = false};    // atk (p0,q0)
+        cs_game_node cplp0q0 = {.flag = NODE_CPL, .act = 0, .p = p0, .q = q0, .swapped = false}; // (cpl,p0,q0)
 
         /* swapped. */
-        cs_game_node q0p0 = {NODE_ATK, 0, q0, p0, true};  // swapped (q0,p0)
-        cs_game_node cplq0p0 = {NODE_CPL, 0, q0, p0, true};  // swapped (cpl,q0,p0)
+        cs_game_node q0p0 = {.flag = NODE_ATK, .act = 0, .p = q0, .q = p0, .swapped = true};    // swapped (q0,p0)
+        cs_game_node cplq0p0 = {.flag = NODE_CPL, .act = 0, .p = q0, .q = p0, .swapped = true}; // swapped (cpl,q0,p0)
 
         attacker_nodes.insert(p0q0);
         attacker_nodes.insert(q0p0);
@@ -369,13 +375,13 @@ template <class LTS_TYPE>
           if (strong)
           {
             /* (p0,q0) -> (a,p1,q0),  if [p0] a -> [p1] */
-            cs_game_node ap1q0 = {NODE_DEF, a, p1, q0, false};
+            cs_game_node ap1q0 = {.flag = NODE_DEF, .act = a, .p = p1, .q = q0, .swapped = false};
             defender_nodes.insert(ap1q0);
             moves.emplace(p0q0, ap1q0, a, move_label);
 
             if (atau)  // => answering q0 can also stay.
             {
-              cs_game_node q0_stay = {NODE_ATK, 0, p1, q0, false};
+              cs_game_node q0_stay = {.flag = NODE_ATK, .act = 0, .p = p1, .q = q0, .swapped = false};
               attacker_nodes.insert(q0_stay);
               moves.emplace(ap1q0, q0_stay, 0, "");
             }
@@ -387,14 +393,15 @@ template <class LTS_TYPE>
           // XXX reconsider, maybe TODO with delayed checks, bc l2_transitions are later reviewed
           for (const transition &bq1 : l2.get_transitions())
           {
-            std::size_t b = bq1.label(), q1 = bq1.to();
+            std::size_t b = bq1.label();
+            std::size_t q1 = bq1.to();
 
             // strong q a-> q1 demonstrates, p0 a=> p1 simulates.
             if (l2.action_label(b) == l1.action_label(a))
             {
               /* (a, q1, p0) -> (q1, p1), ... if p0 a=> p1.*/
-              cs_game_node bqp0 = {NODE_DEF, b, q1, p0, true};  // (b, q, p0)d
-              cs_game_node qp1 = {NODE_ATK, 0, q1, p1, true};  /// (q,p1)a
+              cs_game_node bqp0 = {.flag = NODE_DEF, .act = b, .p = q1, .q = p0, .swapped = true}; // (b, q, p0)d
+              cs_game_node qp1 = {.flag = NODE_ATK, .act = 0, .p = q1, .q = p1, .swapped = true};  /// (q,p1)a
               defender_nodes.insert(bqp0);
               attacker_nodes.insert(qp1);
               // todo_if.insert();  // waiting list for this move on condition.
@@ -405,7 +412,7 @@ template <class LTS_TYPE>
           /* Coupling, .. if p0 => p1 */
           if (atau)  // for cplq0p0, answer the swapped cpl-challenge
           {
-            cs_game_node p0p1 = {NODE_ATK, 0, p1, q0, false};  // swapping
+            cs_game_node p0p1 = {.flag = NODE_ATK, .act = 0, .p = p1, .q = q0, .swapped = false}; // swapping
             attacker_nodes.insert(p0p1);
             moves.emplace(cplq0p0, p0p1, 0, "p \21d2 p'");
           }
@@ -436,13 +443,13 @@ template <class LTS_TYPE>
           {
             /* swapped.
              * (q0,p0) -> (a,q1,p0),  if [q0] a -> [q1] */
-            cs_game_node bq1p0 = {NODE_DEF, b, q1, p0, true};
+            cs_game_node bq1p0 = {.flag = NODE_DEF, .act = b, .p = q1, .q = p0, .swapped = true};
             defender_nodes.insert(bq1p0);
             moves.emplace(q0p0, bq1p0, b, move_label);
 
             if (btau)  // => answering q0 can also stay.
             {
-              cs_game_node p0_stay = {NODE_ATK, 0, q1, p0, true};
+              cs_game_node p0_stay = {.flag = NODE_ATK, .act = 0, .p = q1, .q = p0, .swapped = true};
               attacker_nodes.insert(p0_stay);
               moves.emplace(bq1p0, p0_stay, 0, "");
             }
@@ -454,14 +461,15 @@ template <class LTS_TYPE>
           // XXX reconsider, maybe TODO with delayed checks, bc l2_transitions are later reviewed
           for (const transition &ap1 : l1.get_transitions())
           {
-            std::size_t a = ap1.label(), p1 = ap1.to();
+            std::size_t a = ap1.label();
+            std::size_t p1 = ap1.to();
 
             // strong q a-> q1 demonstrates, p0 a=> p1 simulates.
             if (l2.action_label(b) == l1.action_label(a))
             {
               /* (a, p1, q0) -> (p1, q1), ... if q0 a=> q1.*/
-              cs_game_node apq0 = {NODE_DEF, a, p1, q0, false};  // (a,p?,q0)d
-              cs_game_node pq1 = {NODE_ATK, 0, p1, q1, false};  // (p?,q1)a
+              cs_game_node apq0 = {.flag = NODE_DEF, .act = a, .p = p1, .q = q0, .swapped = false}; // (a,p?,q0)d
+              cs_game_node pq1 = {.flag = NODE_ATK, .act = 0, .p = p1, .q = q1, .swapped = false};  // (p?,q1)a
               defender_nodes.insert(apq0);
               attacker_nodes.insert(pq1);
               // todo_if.insert();  // waiting list for this move on condition.
@@ -472,7 +480,7 @@ template <class LTS_TYPE>
           /* Coupling, .. if q0 => q1 */
           if (btau)  // strong and weak, for cplp0q0
           {
-            cs_game_node q0q1 = {NODE_ATK, 0, q1, p0, true};  // swapping
+            cs_game_node q0q1 = {.flag = NODE_ATK, .act = 0, .p = q1, .q = p0, .swapped = true}; // swapping
             attacker_nodes.insert(q0q1);
             moves.emplace(cplp0q0, q0q1, 0, "q \21d2 q'");
           }
@@ -507,7 +515,10 @@ template <class LTS_TYPE>
     }
 
     std::stack<cs_game_node> todo;
-    for (const cs_game_node& d : defender_nodes) todo.push(d); // XXX make me better
+    for (const cs_game_node& d: defender_nodes)
+    {
+      todo.push(d); // XXX make me better
+    }
     // todo.assign(defender_nodes.begin(), defender_nodes.end());
 
     mCRL2log(log::verbose)

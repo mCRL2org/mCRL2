@@ -369,12 +369,10 @@ template<>
 class convertor<lts_lts_base, lts_dot_base>
 {
   public:
-    std::size_t m_state_count;
+    std::size_t m_state_count = 0;
 
-    convertor(const lts_lts_base& /* lts_base_in */, lts_dot_base& /* lts_base_out */):
-      m_state_count(0)
-    {
-    }
+    convertor(const lts_lts_base& /* lts_base_in */, lts_dot_base& /* lts_base_out */)
+    {}
 };
 
 inline void lts_convert_base_class(const lts_lts_base& /* base_in */, lts_dot_base& /* base_out */) 
@@ -568,11 +566,11 @@ template<>
 class convertor<lts_fsm_base, lts_dot_base>
 {
   public:
-    std::size_t m_state_count;
+    std::size_t m_state_count = 0;
     const lts_fsm_base& m_lts_in;
 
     convertor(const lts_fsm_base& lts_base_in, const lts_dot_base& /* lts_base_out */)
-      : m_state_count(0), m_lts_in(lts_base_in)
+        : m_lts_in(lts_base_in)
     {
     }
 };

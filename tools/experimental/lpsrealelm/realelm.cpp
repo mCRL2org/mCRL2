@@ -623,7 +623,8 @@ static void add_summand(summand_information& summand_info,
     data_expression substituted_upperbound=
        data::replace_free_variables(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map());
     linear_inequality e(substituted_lowerbound,substituted_upperbound,c_complete->comparison_operator(),r);
-    data_expression t,u;
+    data_expression t;
+    data_expression u;
     detail::comparison_t comparison_operator;
     bool negate=e.typical_pair(t,u,comparison_operator,r);
     bool success=false;

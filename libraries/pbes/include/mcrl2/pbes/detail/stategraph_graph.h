@@ -742,7 +742,7 @@ bool operator<(const global_control_flow_graph_vertex& x, const global_control_f
   return x.name() < y.name() || (x.name() == y.name() && x.values() < y.values());
 }
 
-std::ostream& operator<<(std::ostream& out, const global_control_flow_graph_vertex& u)
+inline std::ostream& operator<<(std::ostream& out, const global_control_flow_graph_vertex& u)
 {
   return out << u.name() << core::detail::print_container(u.values(), "(", ")", "", false, false);
 }

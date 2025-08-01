@@ -37,7 +37,7 @@ class tarjan_scc_algorithm
       std::size_t value;
       std::size_t index;
       std::size_t lowlink;
-      bool onstack;
+      bool onstack = false;
 
       bool operator==(const vertex& other) const
       {
@@ -50,7 +50,7 @@ class tarjan_scc_algorithm
       }
 
       vertex(std::size_t value_, std::size_t index_ = undefined(), std::size_t lowlink_ = undefined())
-        : value(value_), index(index_), lowlink(lowlink_), onstack(false)
+        : value(value_), index(index_), lowlink(lowlink_)
       {}
     };
 
@@ -106,7 +106,7 @@ class tarjan_scc_algorithm
 
     std::vector<vertex> V;
     std::vector<edge> E;
-    std::size_t N;
+    std::size_t N = 0UL;
     std::vector<component> result;
 
   public:

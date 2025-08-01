@@ -77,11 +77,10 @@ std::ostream& operator<<(std::ostream& out, const assignment_expression& x)
 }
 
 /// \\brief swap overload
-inline void swap(assignment_expression& t1, assignment_expression& t2)
+inline void swap(assignment_expression& t1, assignment_expression& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Assignment of a data expression to a variable
 class assignment: public assignment_expression
@@ -168,11 +167,10 @@ std::ostream& operator<<(std::ostream& out, const assignment& x)
 }
 
 /// \\brief swap overload
-inline void swap(assignment& t1, assignment& t2)
+inline void swap(assignment& t1, assignment& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Assignment of a data expression to a string
 class untyped_identifier_assignment: public assignment_expression
@@ -264,7 +262,7 @@ std::ostream& operator<<(std::ostream& out, const untyped_identifier_assignment&
 }
 
 /// \\brief swap overload
-inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignment& t2)
+inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignment& t2) noexcept
 {
   t1.swap(t2);
 }

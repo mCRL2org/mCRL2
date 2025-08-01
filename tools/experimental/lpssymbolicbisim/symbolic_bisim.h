@@ -66,13 +66,13 @@ struct hash<std::tuple<mcrl2::data::data_expression, mcrl2::data::data_expressio
 namespace mcrl2::data
 {
 
-core::identifier_string iff_name()
+inline core::identifier_string iff_name()
 {
   static core::identifier_string iff_name = core::identifier_string("<=>");
   return iff_name;
 }
 
-function_symbol iff()
+inline function_symbol iff()
 {
   static function_symbol iff(iff_name(), make_function_sort_(sort_bool::bool_(), sort_bool::bool_(), sort_bool::bool_()));
   return iff;
@@ -164,7 +164,7 @@ protected:
     data_expression replaced_relation = sort_bool::true_();
 
     uint32_t i = 0;
-    for(data_expression d: linear_inequalities)
+    for (const data_expression& d: linear_inequalities)
     {
       split_block = replace_data_expressions(split_block, data_expression_assignment(d, replacements[i]), true);
       enumeration_condition = replace_data_expressions(enumeration_condition, data_expression_assignment(d, replacements[i]), true);

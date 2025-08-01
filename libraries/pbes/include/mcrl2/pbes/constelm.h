@@ -379,13 +379,14 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
         qvars.emplace_back(is_forall(expr), v);
       }
     }
-    QPVI Q_X_e{qvars, x};
+    QPVI Q_X_e{.Q = qvars, .X_e = x};
 
     // Store the QPVI and the condition true
     emplace(data::sort_bool::true_(), data::sort_bool::true_(), data::find_free_variables(x.parameters()));
     top().edges.emplace(Q_X_e,
-      edge_details{std::set<data::data_expression>{data::sort_bool::true_()},
-        std::set<data::variable>{}, std::set<data::variable>{}});
+        edge_details{.conditions = std::set<data::data_expression>{data::sort_bool::true_()},
+            .conjunctive_context_FV = std::set<data::variable>{},
+            .disjunctive_context_FV = std::set<data::variable>{}});
   }
 
   const edge_map& result() const

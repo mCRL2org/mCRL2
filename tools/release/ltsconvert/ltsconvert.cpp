@@ -24,30 +24,22 @@ using namespace mcrl2::log;
 
 class t_tool_options
 {
-  public:
-    std::string     infilename;
-    std::string     outfilename;
-    std::string     lpsfile;
-    lts_type        intype;
-    lts_type        outtype;
-    lts_equivalence equivalence;
-    std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
-    bool            remove_state_information=false;
-    bool            determinise=false;
-    bool            check_reach=true;
-    bool            add_state_as_state_label=false;
+public:
+  std::string infilename;
+  std::string outfilename;
+  std::string lpsfile;
+  lts_type intype = lts_none;
+  lts_type outtype = lts_none;
+  lts_equivalence equivalence = lts_eq_none;
+  std::vector<std::string> tau_actions; // Actions with these labels must be considered equal to tau.
+  bool remove_state_information = false;
+  bool determinise = false;
+  bool check_reach = true;
+  bool add_state_as_state_label = false;
 
-    inline t_tool_options() 
-     : intype(lts_none), 
-       outtype(lts_none), 
-       equivalence(lts_eq_none)
-    {
-    }
-
-    inline std::string source_string() const
-    {
-      return (infilename.empty()) ? std::string("standard input") :
-             std::string("'" + infilename + "'");
+  inline std::string source_string() const
+  {
+    return (infilename.empty()) ? std::string("standard input") : std::string("'" + infilename + "'");
     }
 
     inline std::string target_string() const
@@ -397,7 +389,8 @@ class ltsconvert_tool : public input_output_tool
 
     void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
     {
-      std::string::size_type lastpos = 0, pos;
+      std::string::size_type lastpos = 0;
+      std::string::size_type pos;
       while ((pos = act_names.find(',',lastpos)) != std::string::npos)
       {
         tau_actions.push_back(act_names.substr(lastpos,pos-lastpos));

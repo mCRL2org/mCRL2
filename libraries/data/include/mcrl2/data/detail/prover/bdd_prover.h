@@ -120,7 +120,7 @@ class BDD_Prover: protected rewriter
     const double f_time_limit;
 
     /// \brief A timestamp representing the moment when the maximal amount of milliseconds has been spent on processing the current formula.
-    std::chrono::milliseconds f_deadline;
+    std::chrono::milliseconds f_deadline{};
 
   private:
     /// \brief A flag indicating whether or not induction on lists is applied.

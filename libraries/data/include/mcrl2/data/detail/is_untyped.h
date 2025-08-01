@@ -24,11 +24,7 @@ struct is_untyped_traverser: public sort_expression_traverser<is_untyped_travers
   using super::leave;
   using super::apply;
 
-  bool result;
-
-  is_untyped_traverser()
-    : result(false)
-  {}
+  bool result = false;
 
   void apply(const data::untyped_identifier& )
   {

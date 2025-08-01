@@ -99,7 +99,7 @@ public:
   using Strategy = std::vector<verti>;
 
   /*! Construct an empty parity game */
-  ParityGame();
+  ParityGame() = default;
 
   /*! Destroy a parity game */
   ~ParityGame();
@@ -117,7 +117,7 @@ public:
   bool empty() const { return graph().empty(); }
 
   /*! Efficiently swaps the contents of this parity game with another one. */
-  void swap(ParityGame& pg);
+  void swap(ParityGame& pg) noexcept;
 
   //!\name Generation
   //!@{
@@ -314,20 +314,20 @@ private:
     ParityGame &operator=(const ParityGame &game);
 
 private:
-    int d_;                 /*!< priority limit (max. priority + 1) */
-    StaticGraph graph_;     /*!< game graph */
+  int d_ = 0;         /*!< priority limit (max. priority + 1) */
+  StaticGraph graph_; /*!< game graph */
 
-    /*! Assignment of players and priorities to vertices (size graph_.V()) */
-    ParityGameVertex *vertex_;
+  /*! Assignment of players and priorities to vertices (size graph_.V()) */
+  ParityGameVertex* vertex_ = nullptr;
 
-    /*! Cardinality counts for priorities.
-        cardinality_[p] is equal to the number of vertices with priority p. */
-    verti *cardinality_;
+  /*! Cardinality counts for priorities.
+      cardinality_[p] is equal to the number of vertices with priority p. */
+  verti* cardinality_ = nullptr;
 };
 
-inline void swap(ParityGame &a, ParityGame &b)
+inline void swap(ParityGame& a, ParityGame& b) noexcept
 {
-    a.swap(b);
+  a.swap(b);
 }
 
 #include "ParityGame_impl.h"

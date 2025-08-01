@@ -41,10 +41,16 @@ void OldMaxMeasureLiftingStrategy::lifted(verti v)
 
         /* Skip this predecessor if it is already queued with an
             equal or greater weight. */
-        if (it1 != queue_.end() && it1->first >= m) continue;
+        if (it1 != queue_.end() && it1->first >= m)
+        {
+          continue;
+        }
 
         // If we have an old entry in the queue, remove it first.
-        if (it1 != queue_.end()) queue_.erase(queue_pos_[u]);
+        if (it1 != queue_.end())
+        {
+          queue_.erase(queue_pos_[u]);
+        }
 
         // Add new entry to the queue
         queue_pos_[u] = queue_.insert(std::make_pair(m, u)).first;

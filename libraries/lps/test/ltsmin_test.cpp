@@ -43,11 +43,10 @@ std::string print_state(const state_vector& s, std::size_t size, const std::stri
 struct state_callback_function
 {
   std::size_t state_size;
-  std::size_t state_count;
+  std::size_t state_count = 0;
 
   explicit state_callback_function(std::size_t size)
-    : state_size(size),
-      state_count(0)
+    : state_size(size)
   {}
 
   void operator()(state_vector const& next_state, int* const& labels, int group=-1)
@@ -322,7 +321,7 @@ void test_serialisation()
   expressions.emplace_back("Red", 2);
   expressions.emplace_back("Yellow", 2);
 
-  for(auto e : expressions)
+  for (const auto& e: expressions)
   {
     std::string s = e.first;
 std::cerr << "STRING " << s << "\n";

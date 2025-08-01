@@ -92,7 +92,7 @@ std::ostream& operator<<(std::ostream& out, const lambda& x)
 }
 
 /// \\brief swap overload
-inline void swap(lambda& t1, lambda& t2)
+inline void swap(lambda& t1, lambda& t2) noexcept
 {
   t1.swap(t2);
 }

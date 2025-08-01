@@ -183,7 +183,7 @@ std::vector<propositional_variable_instantiation> count_propositional_variable_i
   return result;
 }
 
-std::set<propositional_variable_instantiation> filter_pvis(const propositional_variable_instantiation& needle,
+inline std::set<propositional_variable_instantiation> filter_pvis(const propositional_variable_instantiation& needle,
     const std::vector<propositional_variable_instantiation>& haystack)
 {
   std::set<propositional_variable_instantiation> result;
@@ -194,13 +194,17 @@ std::set<propositional_variable_instantiation> filter_pvis(const propositional_v
       [&](const propositional_variable_instantiation& v)
       {
         if (v.name() != needle.name())
+        {
           return false;
+        }
 
         const auto& v_params = as_vector(v.parameters());
         const auto& needle_params = as_vector(needle.parameters());
 
         if (v_params.size() != needle_params.size())
+        {
           return false;
+        }
 
         for (std::size_t i = 0; i < v_params.size(); ++i)
         {
@@ -225,13 +229,17 @@ inline bool pvi_in_set(const propositional_variable_instantiation needle,
       [&](const propositional_variable_instantiation& v)
       {
         if (v.name() != needle.name())
+        {
           return false;
+        }
 
         const auto& v_params = as_vector(v.parameters());
         const auto& needle_params = as_vector(needle.parameters());
 
         if (v_params.size() != needle_params.size())
+        {
           return false;
+        }
 
         for (size_t i = 0; i < v_params.size(); i++)
         {
@@ -319,12 +327,16 @@ inline void self_substitute(pbes_equation& equation,
     std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
     std::vector<propositional_variable_instantiation> set
         = count_propositional_variable_instantiations(equation.formula());
-    for (propositional_variable_instantiation x : set)
+    for (const propositional_variable_instantiation& x: set)
     {
       if (equation.variable().name() != x.name())
+      {
         continue;
+      }
       if (auto it = stable_set.find(x); it != stable_set.end())
+      {
         continue;
+      }
       // Check if during the substitution of the other pvi this one got cancelled out
       std::set<propositional_variable_instantiation> path = {x};
 
@@ -360,7 +372,7 @@ inline void self_substitute(pbes_equation& equation,
 
         // (2) replace all reoccuring with true (nu) and false (mu)
         auto gauss_set = filter_pvis(cur_x, phi_vector);
-        for (auto gauss_pvi : gauss_set)
+        for (const auto& gauss_pvi: gauss_set)
         {
           mCRL2log(log::debug) << "Need to replace this with true/false " << pp(gauss_pvi) << "\n";
           mCRL2log(log::debug) << phi << "\n";
@@ -387,7 +399,7 @@ inline void self_substitute(pbes_equation& equation,
           propositional_variable_instantiation new_x = *phi_vector.begin();
 
           mCRL2log(log::debug) << "Trying loop " << new_x << " in path with \n";
-          for (auto itr : path)
+          for (const auto& itr: path)
           {
             mCRL2log(log::debug) << itr << "\n";
           }
@@ -396,7 +408,7 @@ inline void self_substitute(pbes_equation& equation,
           {
             // We have already seen this, so we are in a loop.
             mCRL2log(log::debug) << "Loop, seen " << new_x << " in path after " << cur_x << "    " << phi << "\n";
-            for (auto itr : path)
+            for (const auto& itr: path)
             {
               mCRL2log(log::debug) << itr << "\n";
             }
@@ -542,7 +554,7 @@ struct pbespathreduction_pbes_backward_substituter
   }
 };
 
-void pbespathreduction(const std::string& input_filename,
+inline void pbespathreduction(const std::string& input_filename,
     const std::string& output_filename,
     const utilities::file_format& input_format,
     const utilities::file_format& output_format,

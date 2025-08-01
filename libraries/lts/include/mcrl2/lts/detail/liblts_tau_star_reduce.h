@@ -204,7 +204,10 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
             }
           }
         }
-        if (found) break;
+        if (found)
+        {
+          break;
+        }
       }
       
       if (!found && !l.is_tau(l.apply_hidden_label_map(label_)))
@@ -222,7 +225,10 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
               found=true; break;
             } 
           }
-          if (found) break;
+          if (found)
+          {
+            break;
+          }
         }
       }
 

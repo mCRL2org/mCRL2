@@ -22,7 +22,6 @@ using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_enum_argument;
-using utilities::tools::tool;
 using utilities::tools::input_input_output_tool;
 using namespace mcrl2::log;
 using pbes_system::tools::pbes_output_tool;
@@ -35,7 +34,7 @@ class lpsbisim2pbes_tool: public super
     bisimulation_type m_bisimulation_type;
 
     /// \brief If true the result is normalized
-    bool m_normalize;
+    bool m_normalize = false;
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser

@@ -57,7 +57,7 @@ class stochastic_action_summand: public action_summand
     }
 
     /// \brief Swaps the contents
-    void swap(stochastic_action_summand& other)
+    void swap(stochastic_action_summand& other) noexcept
     {
       action_summand::swap(other);
       using std::swap;
@@ -86,7 +86,7 @@ std::ostream& operator<<(std::ostream& out, const stochastic_action_summand& x)
 }
 
 /// \\brief swap overload
-inline void swap(stochastic_action_summand& t1, stochastic_action_summand& t2)
+inline void swap(stochastic_action_summand& t1, stochastic_action_summand& t2) noexcept
 {
   t1.swap(t2);
 }

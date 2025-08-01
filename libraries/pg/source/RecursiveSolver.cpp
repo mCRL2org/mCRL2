@@ -22,16 +22,23 @@ static std::vector<verti> get_complement(verti V, const DenseSet<verti> &s)
     std::vector<verti> res;
     verti n = V - s.size();
     res.reserve(n);
-    DenseSet<verti>::const_iterator it = s.begin(), end = s.end();
+    DenseSet<verti>::const_iterator it = s.begin();
+    DenseSet<verti>::const_iterator end = s.end();
     verti v = 0;
     while (it != end)
     {
         verti w = *it;
-        while (v < w) res.push_back(v++);
+        while (v < w)
+        {
+          res.push_back(v++);
+        }
         ++v;
         ++it;
     }
-    while (v < V) res.push_back(v++);
+    while (v < V)
+    {
+      res.push_back(v++);
+    }
     assert(n == (verti)res.size());
     return res;
 }
@@ -45,9 +52,15 @@ int first_inversion(const ParityGame &game)
 {
     int d = game.d();
     int q = 0;
-    while (q < d && game.cardinality(q) == 0) ++q;
+    while (q < d && game.cardinality(q) == 0)
+    {
+      ++q;
+    }
     int p = q + 1;
-    while (p < d && game.cardinality(p) == 0) p += 2;
+    while (p < d && game.cardinality(p) == 0)
+    {
+      p += 2;
+    }
     return p < d ? p : d;
 }
 
@@ -64,7 +77,10 @@ ParityGame::Strategy RecursiveSolver::solve()
     game.assign(game_);
     ParityGame::Strategy strategy(game.graph().V(), NO_VERTEX);
     Substrategy substrat(strategy);
-    if (!solve(game, substrat)) strategy.clear();
+    if (!solve(game, substrat))
+    {
+      strategy.clear();
+    }
     return strategy;
 }
 
@@ -82,7 +98,10 @@ ParityGame::Strategy RecursiveSolver::solve()
 
 bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
 {
-    if (aborted()) return false;
+  if (aborted())
+  {
+    return false;
+  }
 
     std::size_t prio;
     while ((prio = first_inversion(game)) < game.d())
@@ -100,13 +119,19 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
             DenseSet<verti> min_prio_attr(0, V);
             for (verti v = 0; v < V; ++v)
             {
-                if (game.priority(v) < prio) min_prio_attr.insert(v);
+              if (game.priority(v) < prio)
+              {
+                min_prio_attr.insert(v);
+              }
             }
             mCRL2log(mcrl2::log::debug) <<"|min_prio|=" << min_prio_attr.size() << std::endl;
             assert(!min_prio_attr.empty());
             make_attractor_set_2(game, player, min_prio_attr, strat);
             mCRL2log(mcrl2::log::debug) << "|min_prio_attr|=" << min_prio_attr.size() << std::endl;
-            if (min_prio_attr.size() == V) break;
+            if (min_prio_attr.size() == V)
+            {
+              break;
+            }
             get_complement(V, min_prio_attr).swap(unsolved);
         }
 
@@ -116,7 +141,10 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
             subgame.make_subgame(game, unsolved.begin(), unsolved.end(),
                                  true, StaticGraph::EDGE_PREDECESSOR);
             Substrategy substrat(strat, unsolved);
-            if (!solve(subgame, substrat)) return false;
+            if (!solve(subgame, substrat))
+            {
+              return false;
+            }
 
             // Compute attractor set of all vertices won by the opponent:
             ParityGame::Player opponent = (ParityGame::Player)(prio%2);
@@ -131,7 +159,10 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
                 }
             }
             mCRL2log(mcrl2::log::debug) << "|lost|=" << lost_attr.size() << std::endl;
-            if (lost_attr.empty()) break;
+            if (lost_attr.empty())
+            {
+              break;
+            }
             make_attractor_set_2(game, opponent, lost_attr, strat);
             mCRL2log(mcrl2::log::debug) << "|lost_attr|=" << lost_attr.size() << std::endl;
             get_complement(V, lost_attr).swap(unsolved);

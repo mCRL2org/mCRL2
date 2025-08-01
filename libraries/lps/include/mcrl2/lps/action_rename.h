@@ -561,7 +561,11 @@ lps::stochastic_specification action_rename(
               renamed_rule_condition=
                   lazy::and_(renamed_rule_condition,
                            data::equal_to(rule_old_argument_i, *lps_old_argument_i));
-              if (enable_rewriting) renamed_rule_condition=rewr(renamed_rule_condition);  // Make sure that renamed_rule_condition is as simple as possible. 
+              if (enable_rewriting)
+              {
+                renamed_rule_condition
+                    = rewr(renamed_rule_condition); // Make sure that renamed_rule_condition is as simple as possible.
+              }
             }
             lps_old_argument_i++;
           }
@@ -582,7 +586,11 @@ lps::stochastic_specification action_rename(
             }
           }
 
-          if (enable_rewriting) renamed_rule_condition=rewr(renamed_rule_condition);  // Make sure that renamed_rule_condition is as simple as possible. 
+          if (enable_rewriting)
+          {
+            renamed_rule_condition
+                = rewr(renamed_rule_condition); // Make sure that renamed_rule_condition is as simple as possible.
+          }
           if (renamed_rule_condition==sort_bool::true_())
           {
             if (to_delta)

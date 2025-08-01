@@ -27,12 +27,8 @@ struct is_normalized_traverser: public state_formula_traverser<is_normalized_tra
   using super::leave;
   using super::apply;
 
-  bool result;
-
-  is_normalized_traverser()
-    : result(true)
-  {}
-
+  bool result = true;
+  
   /// \brief Visit not node
   void enter(const not_& /* x */)
   {
@@ -150,7 +146,8 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   template <class T>
   void apply(T& result, const and_& x)
   {
-    state_formula left, right;
+    state_formula left;
+    state_formula right;
     apply(left, x.left());
     apply(right, x.right()); 
     if (m_negated)
@@ -166,7 +163,8 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   template <class T>
   void apply(T& result, const or_& x)
   {
-    state_formula left, right;
+    state_formula left;
+    state_formula right;
     apply(left, x.left());
     apply(right, x.right()); 
     if (m_negated)
@@ -182,7 +180,8 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
   template <class T>
   void apply(T& result, const plus& x)
   {
-    state_formula left, right;
+    state_formula left;
+    state_formula right;
     apply(left, x.left());
     apply(right, x.right()); 
     if (m_negated)

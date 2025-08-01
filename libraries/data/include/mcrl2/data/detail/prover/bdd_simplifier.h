@@ -32,7 +32,7 @@ class BDD_Simplifier
   protected:
     /// \brief An integer representing the moment in time when the maximal amount of seconds has been spent on simplifying
     /// \brief the BDD.
-    time_t f_deadline;
+    time_t f_deadline = 0L;
   public:
     /// \brief Destructor without any additional functionality.
     virtual ~BDD_Simplifier() = default;

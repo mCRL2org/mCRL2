@@ -134,10 +134,7 @@ class breadth_first_todo_set : public todo_set
       return todo;
     }
 
-    void swap(breadth_first_todo_set& other)
-    {
-      todo.swap(other.todo);
-    }
+    void swap(breadth_first_todo_set& other) noexcept { todo.swap(other.todo); }
 };
 
 class depth_first_todo_set : public todo_set
@@ -437,6 +434,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_summand& summand)
 
 struct abortable
 {
+  virtual ~abortable() = default;
   virtual void abort() = 0;
 };
 
@@ -1018,7 +1016,7 @@ class explorer: public abortable
       }
     }
 
-    ~explorer() = default;
+    virtual ~explorer() = default;
 
     // Get the initial state of the specification. 
     const data::data_expression_list& initial_state() const
@@ -1113,7 +1111,10 @@ class explorer: public abortable
       std::unique_ptr<todo_set> thread_todo=make_todo_set(dummy.begin(),dummy.end()); // The new states for each process are temporarily stored in this vector for each thread. 
       atermpp::aterm key;
 
-      if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+      {
+        m_exclusive_state_access.lock();
+      }
       while (number_of_active_processes>0 || !todo->empty())
       {
         assert(m_must_abort || thread_todo->empty());
@@ -1122,7 +1123,10 @@ class explorer: public abortable
         {
           todo->choose_element(current_state);
           thread_todo->insert(current_state);
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
+          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+          {
+            m_exclusive_state_access.unlock();
+          }
 
           while (!thread_todo->empty() && !m_must_abort.load(std::memory_order_relaxed))
           { 
@@ -1206,7 +1210,10 @@ class explorer: public abortable
 
             if (number_of_idle_processes>0 && thread_todo->size()>1)
             {
-              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
+              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+              {
+                m_exclusive_state_access.lock();
+              }
 
               if (todo->size() < m_options.number_of_threads) 
               {
@@ -1218,7 +1225,10 @@ class explorer: public abortable
                 }
               }
 
-              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
+              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+              {
+                m_exclusive_state_access.unlock();
+              }
             }
 
             finish_state(thread_index, m_options.number_of_threads, current_state, s_index, thread_todo->size());
@@ -1227,21 +1237,33 @@ class explorer: public abortable
         }
         else
         {
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
+          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+          {
+            m_exclusive_state_access.unlock();
+          }
         }
         // Check whether all processes are ready. If so the number_of_active_processes becomes 0. 
         // Otherwise, this thread becomes active again, and tries to see whether the todo buffer is
         // not empty, to take up more work. 
         number_of_active_processes--;
         number_of_idle_processes++;
-        if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1) m_exclusive_state_access.lock();
-        
+        if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+        {
+          m_exclusive_state_access.lock();
+        }
+
         assert(thread_todo->empty() || m_must_abort);
         if (todo->empty())
         {
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1) m_exclusive_state_access.unlock();
+          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+          {
+            m_exclusive_state_access.unlock();
+          }
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.lock();
+          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+          {
+            m_exclusive_state_access.lock();
+          }
         }
         if (number_of_active_processes>0 || !todo->empty())
         {
@@ -1250,7 +1272,10 @@ class explorer: public abortable
         number_of_idle_processes--;
       } 
       mCRL2log(log::debug) << "Stop thread " << thread_index << ".\n";
-      if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads>1) m_exclusive_state_access.unlock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+      {
+        m_exclusive_state_access.unlock();
+      }
 
     }  // end generate_state_space_thread.
 

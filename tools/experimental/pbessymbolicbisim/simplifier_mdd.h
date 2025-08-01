@@ -117,7 +117,7 @@ public:
   : super(r, pr)
   , dataspec(dataspec_)
   {}
-
+  ~simplifier_mdd() override = default;
 };
 
 

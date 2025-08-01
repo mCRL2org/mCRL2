@@ -35,9 +35,9 @@ using owner_t = bool;
 
 struct node_t
 {
-  identifier_t id;
-  priority_t prio;
-  owner_t owner;
+  identifier_t id = 0ULL;
+  priority_t prio = 0U;
+  owner_t owner = false;
   std::set<identifier_t> successors;
 
   bool operator<(node_t const& other)

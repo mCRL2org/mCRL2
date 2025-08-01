@@ -32,8 +32,7 @@ class prespp_tool: public pres_input_tool<input_output_tool>
               "pretty print a PRES",
               "Print the PRES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
-             ),
-      format(core::print_default)
+             )
     {}
 
     bool run() override
@@ -81,7 +80,7 @@ class prespp_tool: public pres_input_tool<input_output_tool>
     }
 
   protected:
-    core::print_format_type  format;
+    core::print_format_type format = core::print_default;
 
     void add_options(interface_description& desc) override
     {

@@ -41,7 +41,7 @@ template <class COUNTER_EXAMPLE_CONSTRUCTOR>
 class state_states_counter_example_index_triple
 {
 protected:
-  detail::state_type m_state;
+  detail::state_type m_state = 0UL;
   detail::set_of_states m_states;
   typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type m_counter_example_index;
 
@@ -633,7 +633,9 @@ bool refusals_contained_in(const state_type impl,
     const bool structured_output)
 {
   if (!weak_property_cache.stable(impl))
+  {
     return true; // Checking in case of instability is not necessary, but rather time consuming.
+  }
 
   const action_label_set& impl_action_labels = weak_property_cache.action_labels(impl);
   bool success = false;

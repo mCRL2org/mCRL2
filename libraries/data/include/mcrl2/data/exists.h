@@ -79,7 +79,7 @@ std::ostream& operator<<(std::ostream& out, const exists& x)
 }
 
 /// \\brief swap overload
-inline void swap(exists& t1, exists& t2)
+inline void swap(exists& t1, exists& t2) noexcept
 {
   t1.swap(t2);
 }

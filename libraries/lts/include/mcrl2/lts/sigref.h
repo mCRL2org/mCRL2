@@ -39,6 +39,7 @@ public:
   signature(const LTS_T& lts_)
     : m_lts(lts_), m_sig(m_lts.num_states(), signature_t())
   {}
+  virtual ~signature() = default;
 
   /** \brief Compute a new signature based on \a partition.
     * \param[in] partition The current partition
@@ -76,6 +77,7 @@ protected:
   using signature<LTS_T>::m_sig;
 
 public:
+  virtual ~signature_bisim() = default;
   /** \brief Constructor */
   signature_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_)
@@ -141,6 +143,7 @@ protected:
   }
 
 public:
+  virtual ~signature_branching_bisim() = default;
   /** \brief Constructor  */
   signature_branching_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_),
@@ -197,7 +200,8 @@ protected:
    */
   void compute_tau_sccs()
   {
-    std::size_t unused = 1, lastscc = 1;
+    std::size_t unused = 1;
+    std::size_t lastscc = 1;
     std::vector<std::size_t> scc(m_lts.num_states(), 0);
     std::vector<std::size_t> low(m_lts.num_states(), 0);
     std::stack<std::size_t> stack;
@@ -209,7 +213,9 @@ protected:
     for (std::size_t i = 0; i < m_lts.num_states(); ++i)
     {
       if (scc[i] == 0)
+      {
         stack.push(i);
+      }
       while (!stack.empty())
       {
         const std::size_t vi = stack.top();
@@ -243,11 +249,14 @@ protected:
           {
             const outgoing_pair_t& t=m_lts_succ_transitions.get_transitions()[i];
             if ((low[to(t)] != 0) && (m_lts.is_tau(m_lts.apply_hidden_label_map(label(t)))))
+            {
               low[vi] = low[vi] < low[to(t)] ? low[vi] : low[to(t)];
+            }
           }
           if (low[vi] == scc[vi])
           {
-            std::size_t tos, scc_id = lastscc++;
+            std::size_t tos;
+            std::size_t scc_id = lastscc++;
             std::vector<std::size_t> this_scc;
             do
             {
@@ -287,6 +296,7 @@ protected:
   }
 
 public:
+  virtual ~signature_divergence_preserving_branching_bisim() = default;
   /** \brief Constructor
     *
     * This initialises \a m_divergent to record for each vertex whether it is
@@ -352,7 +362,7 @@ protected:
   std::vector<std::size_t> m_partition;
 
   /** \brief The number of blocks in the current partition */
-  std::size_t m_count;
+  std::size_t m_count = 0;
 
   /** \brief The LTS that we are reducing */
   LTS_T& m_lts;
@@ -443,10 +453,10 @@ public:
     * \param[in] lts_ The LTS that is being reduced
     */
   sigref(LTS_T& lts_)
-    : m_partition(std::vector<std::size_t>(lts_.num_states(), 0)),
-      m_count(0),
-      m_lts(lts_),
-      m_signature(lts_)
+      : m_partition(std::vector<std::size_t>(lts_.num_states(), 0)),
+
+        m_lts(lts_),
+        m_signature(lts_)
   {}
 
   /** \brief Perform the reduction, modulo the equivalence for which the

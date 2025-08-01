@@ -47,7 +47,7 @@ class SMT_LIB_Solver: public SMT_Solver
     std::set < variable > f_variables;
     std::set < variable > f_nat_variables;
     std::set < variable > f_pos_variables;
-    bool f_bool2pred;
+    bool f_bool2pred = false;
 
     const data_expression& left(const data_expression& x) const
     {

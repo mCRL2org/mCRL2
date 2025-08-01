@@ -80,7 +80,7 @@ std::ostream& operator<<(std::ostream& out, const bag_comprehension& x)
 }
 
 /// \\brief swap overload
-inline void swap(bag_comprehension& t1, bag_comprehension& t2)
+inline void swap(bag_comprehension& t1, bag_comprehension& t2) noexcept
 {
   t1.swap(t2);
 }

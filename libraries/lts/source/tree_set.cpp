@@ -96,7 +96,8 @@ void tree_set_store::check_buckets()
     {
       throw mcrl2::runtime_error("Out of memory.");
     }
-    ptrdiff_t i,hc;
+    ptrdiff_t i;
+    ptrdiff_t hc;
     for (i=0; i<=hashmask; ++i)
     {
       hashtable[i] = EMPTY_LIST;
@@ -144,7 +145,8 @@ ptrdiff_t tree_set_store::create_set(std::vector<ptrdiff_t> &elems)
 
   ptrdiff_t* nodes = MCRL2_SPECIFIC_STACK_ALLOCATOR(ptrdiff_t,elems.size());
   std::size_t node_size = 0;
-  std::size_t i,j;
+  std::size_t i;
+  std::size_t j;
   for (i=0; i < elems.size(); ++i)
   {
     nodes[i]=find_set(elems[i],EMPTY_SET);

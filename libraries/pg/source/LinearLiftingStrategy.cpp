@@ -13,11 +13,8 @@ LinearLiftingStrategy::LinearLiftingStrategy(const ParityGame& game, bool altern
     : LiftingStrategy(),
       alternate_(alternate),
       last_vertex_(game.graph().V() - 1),
-      dir_(false),
-      vertex_(NO_VERTEX),
-      failed_lifts_(0)
-{
-}
+      vertex_(NO_VERTEX)
+{}
 
 void LinearLiftingStrategy::lifted(verti v)
 {
@@ -27,7 +24,10 @@ void LinearLiftingStrategy::lifted(verti v)
 
 verti LinearLiftingStrategy::next()
 {
-    if (failed_lifts_ > last_vertex_) return NO_VERTEX;
+  if (failed_lifts_ > last_vertex_)
+  {
+    return NO_VERTEX;
+  }
 
     if (vertex_ == NO_VERTEX)
     {

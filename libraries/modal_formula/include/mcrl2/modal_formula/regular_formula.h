@@ -94,11 +94,10 @@ std::ostream& operator<<(std::ostream& out, const regular_formula& x)
 }
 
 /// \\brief swap overload
-inline void swap(regular_formula& t1, regular_formula& t2)
+inline void swap(regular_formula& t1, regular_formula& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The seq operator for regular formulas
 class seq: public regular_formula
@@ -170,11 +169,10 @@ std::ostream& operator<<(std::ostream& out, const seq& x)
 }
 
 /// \\brief swap overload
-inline void swap(seq& t1, seq& t2)
+inline void swap(seq& t1, seq& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The alt operator for regular formulas
 class alt: public regular_formula
@@ -246,11 +244,10 @@ std::ostream& operator<<(std::ostream& out, const alt& x)
 }
 
 /// \\brief swap overload
-inline void swap(alt& t1, alt& t2)
+inline void swap(alt& t1, alt& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The trans operator for regular formulas
 class trans: public regular_formula
@@ -317,11 +314,10 @@ std::ostream& operator<<(std::ostream& out, const trans& x)
 }
 
 /// \\brief swap overload
-inline void swap(trans& t1, trans& t2)
+inline void swap(trans& t1, trans& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The 'trans or nil' operator for regular formulas
 class trans_or_nil: public regular_formula
@@ -388,11 +384,10 @@ std::ostream& operator<<(std::ostream& out, const trans_or_nil& x)
 }
 
 /// \\brief swap overload
-inline void swap(trans_or_nil& t1, trans_or_nil& t2)
+inline void swap(trans_or_nil& t1, trans_or_nil& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief An untyped regular formula or action formula
 class untyped_regular_formula: public regular_formula
@@ -474,7 +469,7 @@ std::ostream& operator<<(std::ostream& out, const untyped_regular_formula& x)
 }
 
 /// \\brief swap overload
-inline void swap(untyped_regular_formula& t1, untyped_regular_formula& t2)
+inline void swap(untyped_regular_formula& t1, untyped_regular_formula& t2) noexcept
 {
   t1.swap(t2);
 }

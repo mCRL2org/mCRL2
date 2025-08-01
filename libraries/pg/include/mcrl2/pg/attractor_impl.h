@@ -18,7 +18,13 @@
 template<class ForwardIterator, class SetT>
 bool is_subset_of(ForwardIterator it, ForwardIterator end, const SetT &set)
 {
-    for (; it != end; ++it) if (!set.count(*it)) return false;
+  for (; it != end; ++it)
+  {
+    if (!set.count(*it))
+    {
+      return false;
+    }
+  }
     return true;
 }
 
@@ -48,7 +54,10 @@ void make_attractor_set( const ParityGame &game, ParityGame::Player player,
             const verti v = *it;
 
             // Skip predecessors that are already in the attractor set:
-            if (vertices.find(v) != vertices.end()) continue;
+            if (vertices.find(v) != vertices.end())
+            {
+              continue;
+            }
 
             if (game.player(v) == player)
             {
@@ -94,8 +103,10 @@ void make_attractor_set_2( const ParityGame &game, ParityGame::Player player,
     std::vector<verti> liberties(graph.V(), 0);
     for (verti v = 0; v < graph.V(); ++v)
     {
-        for (StaticGraph::const_iterator it = graph.pred_begin(v);
-             it != graph.pred_end(v); ++it) ++liberties[*it];
+      for (StaticGraph::const_iterator it = graph.pred_begin(v); it != graph.pred_end(v); ++it)
+      {
+        ++liberties[*it];
+      }
     }
 
     // Mark initial set as included:
@@ -118,7 +129,10 @@ void make_attractor_set_2( const ParityGame &game, ParityGame::Player player,
             const verti v = *it;
 
             // Skip predecessors that are already in the attractor set:
-            if (liberties[v] == 0) continue;
+            if (liberties[v] == 0)
+            {
+              continue;
+            }
 
             if (game.player(v) == player)
             {

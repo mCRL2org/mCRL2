@@ -80,7 +80,7 @@ class trace
 
     std::vector < lps::state > m_states;
     std::vector < mcrl2::lps::multi_action > m_actions;
-    std::size_t m_pos; // Invariant: m_pos <= actions.size().
+    std::size_t m_pos = 0UL; // Invariant: m_pos <= actions.size().
 
     mcrl2::data::data_specification m_spec;
     process::action_label_list m_act_decls;

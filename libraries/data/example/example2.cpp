@@ -3,7 +3,7 @@
 
 using namespace mcrl2::data;
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
 
   // note that the newline characters are significant

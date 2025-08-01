@@ -25,46 +25,74 @@ void ParityGame::read_pgsolver( std::istream &is,
 
     // Read "parity" header line (if present)
     char ch = 0;
-    while (!isalnum(ch)) is.get(ch);
+    while (!isalnum(ch))
+    {
+      is.get(ch);
+    }
     is.putback(ch);
     if (!isdigit(ch))
     {
         std::string parity;
         verti max_vertex;
 
-        if (!(is >> parity >> max_vertex)) return;
-        if (parity != "parity") return;
+        if (!(is >> parity >> max_vertex))
+        {
+          return;
+        }
+        if (parity != "parity")
+        {
+          return;
+        }
         vertices.reserve(max_vertex + 1);
 
         // Skip to terminating semicolon
-        while (is.get(ch) && ch != ';') ch = 0;
+        while (is.get(ch) && ch != ';')
+        {
+          ch = 0;
+        }
     }
 
     // Read and discard "start" line (if present)
-    while (!isalnum(ch)) is.get(ch);
+    while (!isalnum(ch))
+    {
+      is.get(ch);
+    }
     is.putback(ch);
     if (!isdigit(ch))
     {
         std::string start;
         verti vertex;
 
-        if (!(is >> start >> vertex)) return;
-        if (start != "start") return;
+        if (!(is >> start >> vertex))
+        {
+          return;
+        }
+        if (start != "start")
+        {
+          return;
+        }
 
         // Skip to terminating semicolon
-        while (is.get(ch) && ch != ';') ch = 0;
+        while (is.get(ch) && ch != ';')
+        {
+          ch = 0;
+        }
     }
 
     // Invalid vertex (used to mark uninitialized vertices)
-    ParityGameVertex invalid = { PLAYER_EVEN, (priority_t)-1 };
+    ParityGameVertex invalid = {.player = PLAYER_EVEN, .priority = (priority_t)-1};
 
     // Read vertex specs
     while (is)
     {
         verti id;
-        int prio_raw, player_raw;
+        int prio_raw;
+        int player_raw;
 
-        if (!(is >> id >> prio_raw >> player_raw)) break;
+        if (!(is >> id >> prio_raw >> player_raw))
+        {
+          break;
+        }
 
         assert(prio_raw >= 0);
         assert(prio_raw < 65536);
@@ -73,8 +101,14 @@ void ParityGame::read_pgsolver( std::istream &is,
         assert(player_raw == 0 || player_raw == 1);
         player_t player = static_cast<player_t>(player_raw);
 
-        if (prio > max_prio) max_prio = prio;
-        if (id >= vertices.size()) vertices.resize(id + 1, invalid);
+        if (prio > max_prio)
+        {
+          max_prio = prio;
+        }
+        if (id >= vertices.size())
+        {
+          vertices.resize(id + 1, invalid);
+        }
 
         /* FIXME: the PGSolver file format description allows vertices to be
                   defined more than once (in that case, the old vertex should
@@ -88,25 +122,41 @@ void ParityGame::read_pgsolver( std::istream &is,
         // Read successors
         do {
             verti succ;
-            if (!(is >> succ)) break;
-            if (succ >= vertices.size()) vertices.resize(succ + 1, invalid);
+            if (!(is >> succ))
+            {
+              break;
+            }
+            if (succ >= vertices.size())
+            {
+              vertices.resize(succ + 1, invalid);
+            }
 
             edges.emplace_back(id, succ);
 
             // Skip to separator (comma) or end-of-list (semicolon), while
             // ignoring the contents of quoted strings.
-            bool quoted = false, escaped = false;
+            bool quoted = false;
+            bool escaped = false;
             while (is.get(ch)) {
-                if (ch == '"' && !escaped) quoted = !quoted;
+              if (ch == '"' && !escaped)
+              {
+                quoted = !quoted;
+              }
                 escaped = ch == '\\' && !escaped;
-                if ((ch == ',' || ch == ';') && !quoted) break;
+                if ((ch == ',' || ch == ';') && !quoted)
+                {
+                  break;
+                }
             }
 
         } while (is && ch == ',');
     }
 
     // Ensure max_prio is even, so max_prio - p preserves parity:
-    if (max_prio%2 == 1) ++max_prio;
+    if (max_prio % 2 == 1)
+    {
+      ++max_prio;
+    }
 
     // Look for unused vertex indices:
     std::vector<verti> vertex_map(vertices.size(), NO_VERTEX);
@@ -152,18 +202,24 @@ void ParityGame::write_pgsolver(std::ostream &os) const
 {
     // Get max priority and make it even so max_prio - p preserves parity:
     int max_prio = d();
-    if (max_prio%2 == 1) --max_prio;
+    if (max_prio % 2 == 1)
+    {
+      --max_prio;
+    }
 
     // Write out graph
     os << "parity " << (long long)graph_.V() - 1 << ";\n";
     for (verti v = 0; v < graph_.V(); ++v)
     {
         os << v << ' ' << (max_prio - priority(v)) << ' ' << player(v);
-        StaticGraph::const_iterator it  = graph_.succ_begin(v),
-                                    end = graph_.succ_end(v);
+        StaticGraph::const_iterator it = graph_.succ_begin(v);
+        StaticGraph::const_iterator end = graph_.succ_end(v);
         assert(it < end);
         os << ' ' << *it++;
-        while (it != end) os << ',' << *it++;
+        while (it != end)
+        {
+          os << ',' << *it++;
+        }
         os << ";\n";
     }
 }
@@ -186,7 +242,10 @@ void ParityGame::assign_pbes(mcrl2::pbes_system::pbes &pbes, verti *goal_vertex,
              representing true and false (respectively) and 2 representing the
              initial condition. */
 
-    if (goal_vertex) *goal_vertex = 2;
+    if (goal_vertex)
+    {
+      *goal_vertex = 2;
+    }
 
     // Generate min-priority parity game
     mcrl2::pbes_system::parity_game_generator pgg( pbes, true, true,
@@ -194,7 +253,8 @@ void ParityGame::assign_pbes(mcrl2::pbes_system::pbes &pbes, verti *goal_vertex,
 
     // Build the edge list
     StaticGraph::edge_list edges;
-    verti begin = 0, end = 3;
+    verti begin = 0;
+    verti end = 3;
     for (verti v = begin; v < end; ++v)
     {
         std::set<std::size_t> deps = pgg.get_dependencies(v);
@@ -203,7 +263,10 @@ void ParityGame::assign_pbes(mcrl2::pbes_system::pbes &pbes, verti *goal_vertex,
         {
             verti w = (verti)*it;
             assert(w >= begin);
-            if (w >= end) end = w + 1;
+            if (w >= end)
+            {
+              end = w + 1;
+            }
             edges.emplace_back(v - begin, w - begin);
         }
     }
@@ -289,9 +352,16 @@ void ParityGame::write_debug(const Strategy &s, std::ostream &os) const
         os << v << ' ';
 
         // Print controlling player and vertex priority:
-        char l = ' ', r = ' ';
-        if (player(v) == PLAYER_EVEN) l = '<', r = '>';
-        if (player(v) == PLAYER_ODD)  l = '[', r = ']';
+        char l = ' ';
+        char r = ' ';
+        if (player(v) == PLAYER_EVEN)
+        {
+          l = '<', r = '>';
+        }
+        if (player(v) == PLAYER_ODD)
+        {
+          l = '[', r = ']';
+        }
         os << l << priority(v) << r;
 
         // Print outgoing edges:
@@ -304,7 +374,10 @@ void ParityGame::write_debug(const Strategy &s, std::ostream &os) const
         }
 
         // Print strategy (if applicable)
-        if (!s.empty() && s.at(v) != NO_VERTEX) os << " -> " << s.at(v);
+        if (!s.empty() && s.at(v) != NO_VERTEX)
+        {
+          os << " -> " << s.at(v);
+        }
 
         os << '\n';
     }

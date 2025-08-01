@@ -29,7 +29,10 @@ private:
 
         Reference &operator=(verti w)
         {
-            if (w != NO_VERTEX) w = substrat_.global(w);
+          if (w != NO_VERTEX)
+          {
+            w = substrat_.global(w);
+          }
             substrat_.strategy_[v_] = w;
             return *this;
         }
@@ -58,10 +61,10 @@ public:
     }
 
     //! Swaps this substrategy ovbect with another.
-    void swap(Substrategy &other)
+    void swap(Substrategy& other) noexcept
     {
-        strategy_.swap(other.strategy_);
-        global_.swap(other.global_);
+      strategy_.swap(other.strategy_);
+      global_.swap(other.global_);
     }
 
     //! Returns a write-only reference to the strategy for vertex `v`.
@@ -73,7 +76,10 @@ public:
     //! Returns the winner for vertex `v` assuming it is controlled by `p`.
     ParityGame::Player winner(verti v, ParityGame::Player p)
     {
-        if (strategy_[global(v)] == NO_VERTEX) p = opponent(p);
+      if (strategy_[global(v)] == NO_VERTEX)
+      {
+        p = opponent(p);
+      }
         return p;
     }
 

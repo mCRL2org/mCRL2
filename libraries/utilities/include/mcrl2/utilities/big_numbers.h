@@ -182,7 +182,7 @@ inline std::string pp(const big_natural_number& l);
 class big_natural_number
 {
     friend std::hash<big_natural_number>;
-    friend inline void swap(big_natural_number& x, big_natural_number& y);
+    friend inline void swap(big_natural_number& x, big_natural_number& y) noexcept;
 
   protected:
     // Numbers are stored as std::size_t words, with the most significant number last. 
@@ -543,7 +543,8 @@ class big_natural_number
      */
     big_natural_number operator*(const big_natural_number& other) const
     {
-      big_natural_number result, buffer;
+      big_natural_number result;
+      big_natural_number buffer;
       multiply(other,result,buffer);
       return result;
     } 
@@ -753,8 +754,10 @@ result.print_number("div_mod: result na swap: ");
         return big_natural_number(m_number.front()/other.m_number.front());
       }
       
-      // Otherwise do a multiple digit division. 
-      big_natural_number result, remainder, buffer;
+      // Otherwise do a multiple digit division.
+      big_natural_number result;
+      big_natural_number remainder;
+      big_natural_number buffer;
       div_mod(other,result,remainder,buffer);
       return result;
     } 
@@ -776,8 +779,10 @@ result.print_number("div_mod: result na swap: ");
       {
         return big_natural_number(m_number.front()%other.m_number.front());
       }
-      
-      big_natural_number result, remainder, buffer;
+
+      big_natural_number result;
+      big_natural_number remainder;
+      big_natural_number buffer;
       div_mod(other,result,remainder,buffer);
       return remainder;
 
@@ -811,7 +816,7 @@ inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
 
 /** \brief Standard overload of swap.
  **/
-inline void swap(big_natural_number& x, big_natural_number& y)
+inline void swap(big_natural_number& x, big_natural_number& y) noexcept
 {
   x.m_number.swap(y.m_number);
 }

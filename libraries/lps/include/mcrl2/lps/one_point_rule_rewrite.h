@@ -43,7 +43,7 @@ struct one_point_rule_rewrite_builder: public lps::data_expression_builder<one_p
 template <typename T>
 void one_point_rule_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
-  detail::one_point_rule_rewrite_builder f;
+  detail::one_point_rule_rewrite_builder f{};
   f.update(x);
 }
 
@@ -54,7 +54,7 @@ template <typename T>
 T one_point_rule_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
-  detail::one_point_rule_rewrite_builder f;
+  detail::one_point_rule_rewrite_builder f{};
   f.apply(result, x);
   return result;
 }

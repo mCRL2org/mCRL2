@@ -49,10 +49,10 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     std::string m_name;
 
     /// \brief Is set to true if the value true is encountered in the PBES.
-    bool m_has_true;
+    bool m_has_true = false;
 
     /// \brief Is set to true if the value false is encountered in the PBES.
-    bool m_has_false;
+    bool m_has_false = false;
 
     /// \brief For generating fresh variables.
     utilities::number_postfix_generator m_generator;
@@ -122,9 +122,7 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     /// \brief Constructor.
     /// \param recursive_form Determines whether or not the result will be in standard recursive normal form.
     standard_form_traverser(bool recursive_form = false)
-      : m_recursive_form(recursive_form),
-        m_has_true(false),
-        m_has_false(false)
+      : m_recursive_form(recursive_form)
     {
       if (m_recursive_form)
       {
@@ -149,24 +147,6 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     {
       return m_equations;
     }
-
-    /* /// \brief Enter true node.
-    /// \param x A term.
-    void enter(const true_& x)
-    {
-      (void)x; // Suppress a non used variable warning.
-      m_has_true = true;
-      push(m_true, standard_form_both);
-    }
-
-    /// \brief Enter false node
-    /// \param x A term
-    void enter(const false_& x)
-    {
-      (void)x; // Suppress a non used variable warning.
-      m_has_false = true;
-      push(m_false, standard_form_both);
-    } */
 
     /// \brief Enter a data_expression that must be either true or false.
     /// \param x A term

@@ -39,7 +39,7 @@ public:
    */
   bisim_partitioner_minimal_depth(LTS_TYPE& l, const std::size_t init_l2)
       : initial_l2(init_l2),
-        max_state_index(0),
+
         aut(l)
   {
     to_be_processed.clear();
@@ -130,23 +130,23 @@ private:
   using label_type = std::size_t;
   state_type initial_l2;
 
-  state_type max_state_index;
+  state_type max_state_index = 0;
   LTS_TYPE& aut;
   std::set<block_index_type> partition;
 
   struct block
   {
-    state_type state_index;              // The state number that represent the states in this block
-    block_index_type block_index;        // The sequence number of this block.
-    block_index_type parent_block_index; // Index of the parent block.
-    level_type level;
+    state_type state_index = 0UL;              // The state number that represent the states in this block
+    block_index_type block_index = 0UL;        // The sequence number of this block.
+    block_index_type parent_block_index = 0UL; // Index of the parent block.
+    level_type level = 0UL;
 
     // If there is no parent block, this refers to the block itself.
     std::vector<state_type> states;
     std::vector<transition> transitions;
     std::set<std::pair<label_type, block_index_type>> outgoing_observations;
 
-    void swap(block& b)
+    void swap(block& b) noexcept
     {
       std::swap(b.state_index, state_index);
       std::swap(b.block_index, block_index);
@@ -159,9 +159,9 @@ private:
 
   struct formula
   {
-    formula_index_type index;
-    label_type label;
-    bool negated;
+    formula_index_type index = 0UL;
+    label_type label = 0UL;
+    bool negated = false;
     std::vector<formula> conjunctions;
     std::set<block_index_type> truths;
 
@@ -512,7 +512,8 @@ private:
    *		   In other words a lvl i such that B1 and B2 are i-bisimilar. */
   level_type gca_level(const block_index_type B1, const block_index_type B2)
   {
-    block_index_type b1 = B1, b2 = B2;
+    block_index_type b1 = B1;
+    block_index_type b2 = B2;
     if (B1 < B2)
     {
       b1 = B2;
@@ -523,13 +524,15 @@ private:
     {
       return greatest_common_ancestor[bpair];
     }
-    level_type lvl1 = blocks[b1].level, lvl2 = blocks[b2].level;
+    level_type lvl1 = blocks[b1].level;
+    level_type lvl2 = blocks[b2].level;
     if (b1 == b2)
     {
       greatest_common_ancestor.emplace(bpair, lvl1);
       return lvl1;
     }
-    block_index_type B1parent = b1, B2parent = b2;
+    block_index_type B1parent = b1;
+    block_index_type B2parent = b2;
 
     if (lvl1 <= lvl2)
     {

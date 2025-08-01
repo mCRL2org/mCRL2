@@ -349,7 +349,7 @@ public:
     return *this;
   }
 
-  reference_aterm& operator=(reference_aterm&& other)
+  reference_aterm& operator=(reference_aterm&& other) noexcept
   {
     super::first = std::move(other.first);
     super::second = std::move(other.second);

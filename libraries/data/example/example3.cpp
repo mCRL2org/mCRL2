@@ -3,7 +3,7 @@
 
 using namespace mcrl2::data;
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
   // two ways to create the expression m + n
   std::string var_decl = "m, n: Pos;\n";

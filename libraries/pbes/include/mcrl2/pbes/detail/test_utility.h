@@ -23,7 +23,7 @@ namespace mcrl2::pbes_system::detail
 /// \brief Returns a data variable of type Nat with a given name
 /// \param name A string
 /// \return A data variable of type Nat with a given name
-data::variable nat(const std::string& name)
+inline data::variable nat(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_nat::nat());
 }
@@ -31,7 +31,7 @@ data::variable nat(const std::string& name)
 /// \brief Returns a data variable of type Pos with a given name
 /// \param name A string
 /// \return A data variable of type Pos with a given name
-data::variable pos(const std::string& name)
+inline data::variable pos(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_pos::pos());
 }
@@ -39,7 +39,7 @@ data::variable pos(const std::string& name)
 /// \brief Returns a data variable of type Bool with a given name
 /// \param name A string
 /// \return A data variable of type Bool with a given name
-data::variable bool_(const std::string& name)
+inline data::variable bool_(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_bool::bool_());
 }
@@ -48,7 +48,7 @@ data::variable bool_(const std::string& name)
 /// \param name A string
 /// \param parameters A sequence of data variables
 /// \return A propositional variable declaration with the given name and parameters
-propositional_variable propvar(const std::string& name, const data::variable_list& parameters)
+inline propositional_variable propvar(const std::string& name, const data::variable_list& parameters)
 {
   return propositional_variable(core::identifier_string(name), parameters);
 }
@@ -57,7 +57,8 @@ propositional_variable propvar(const std::string& name, const data::variable_lis
 /// \param name A string
 /// \param parameters A sequence of data expressions
 /// \return A propositional variable instantiation with the given name and parameters
-propositional_variable_instantiation propvarinst(const std::string& name, const data::data_expression_list& parameters)
+inline propositional_variable_instantiation propvarinst(const std::string& name,
+    const data::data_expression_list& parameters)
 {
   return propositional_variable_instantiation(core::identifier_string(name), parameters);
 }

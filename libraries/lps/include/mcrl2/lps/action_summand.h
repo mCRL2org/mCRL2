@@ -99,7 +99,7 @@ class action_summand: public summand_base
     data::data_expression_list next_state(const data::variable_list& process_parameters) const;
 
     /// \brief Swaps the contents
-    void swap(action_summand& other)
+    void swap(action_summand& other) noexcept
     {
       summand_base::swap(other);
       using std::swap;
@@ -129,7 +129,7 @@ std::ostream& operator<<(std::ostream& out, const action_summand& x)
 }
 
 /// \\brief swap overload
-inline void swap(action_summand& t1, action_summand& t2)
+inline void swap(action_summand& t1, action_summand& t2) noexcept
 {
   t1.swap(t2);
 }

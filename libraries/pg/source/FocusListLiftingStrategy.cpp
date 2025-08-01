@@ -15,11 +15,14 @@ static const unsigned initial_credit  = 2;
 /*! Credit increase when a vertex on the focus list is successfully lifted. */
 static const unsigned credit_increase = 2;
 
-
-FocusListLiftingStrategy::FocusListLiftingStrategy( const ParityGame &game,
-    bool alternate, verti max_size, std::size_t max_lifts )
-    : LiftingStrategy(), V_(game.graph().V()), max_lift_attempts_(max_lifts),
-      phase_(1), num_lift_attempts_(0), lls_(game, alternate)
+FocusListLiftingStrategy::FocusListLiftingStrategy(const ParityGame& game,
+    bool alternate,
+    verti max_size,
+    std::size_t max_lifts)
+    : LiftingStrategy(),
+      V_(game.graph().V()),
+      max_lift_attempts_(max_lifts),
+      lls_(game, alternate)
 {
     focus_list_.reserve(max_size);
 }
@@ -36,7 +39,10 @@ void FocusListLiftingStrategy::lifted(verti vertex)
     }
     else /* phase_ == 2 */
     {
-        if (vertex == read_pos_->first) prev_lifted_ = true;
+      if (vertex == read_pos_->first)
+      {
+        prev_lifted_ = true;
+      }
     }
 }
 
@@ -129,8 +135,14 @@ LiftingStrategy *FocusListLiftingStrategyFactory::create(
        vertex set if <= 1. */
     verti V = game.graph().V();
     verti max_size  = (size_ratio_ > 1) ? static_cast<verti>(size_ratio_) : static_cast<verti>(size_ratio_*V); // XXX Ugly casting here
-    if (max_size == 0) max_size = 1;
-    if (max_size >  V) max_size = V;
+    if (max_size == 0)
+    {
+      max_size = 1;
+    }
+    if (max_size > V)
+    {
+      max_size = V;
+    }
     verti max_lifts = (verti)(lift_ratio_ * max_size);
     return new FocusListLiftingStrategy(
         game, alternate_, max_size, max_lifts );

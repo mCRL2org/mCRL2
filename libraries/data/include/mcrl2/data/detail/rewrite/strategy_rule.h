@@ -27,7 +27,7 @@ class strategy_rule
     // this using for instance a union type. 
     enum { data_equation_type, rewrite_index_type, cpp_function_type } m_strategy_element_type;
     data_equation m_rewrite_rule;
-    size_t m_rewrite_index;
+    size_t m_rewrite_index = 0UL;
     std::function<void(data_expression&, const data_expression&)> m_cpp_function;
 
   public:

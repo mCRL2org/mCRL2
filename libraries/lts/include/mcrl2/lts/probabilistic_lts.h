@@ -110,7 +110,7 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 
     /** \brief Swap this lts with the supplied supplied LTS.
      * \param[in] l The LTS to swap. */
-    void swap(probabilistic_lts& other)
+    void swap(probabilistic_lts& other) noexcept
     {
       super::swap(other);
       m_probabilistic_states.swap(other.m_probabilistic_states);
