@@ -11,7 +11,7 @@ Formally, an LTS is a tuple :math:`(S, A, \to, s_0)` where:
 
 - :math:`S` is a (finite) set of states;
 - :math:`A` is a set of actions;
-- :math:`\to \subseteq S \times A \times S` is a transition relation;
+- :math:`\to ~\subseteq S \times A \times S` is a transition relation;
 - :math:`s_0 \in S` is the initial state.
 
 For any set of actions :math:`A` we denote by :math:`A^*` the set of all finite
@@ -20,10 +20,10 @@ action sequence or *trace* and the empty trace is denoted by :math:`\epsilon`.
 
 For any LTS :math:`(S, A, \to, s_0)`, states :math:`s,t \in S` and action
 sequence :math:`\sigma \in A^*`, with :math:`\sigma = a_1 \ldots a_n` for some
-:math:`n \ge 0`, we denote by :math:`s \to^\sigma t` the fact that there exist
+:math:`n \ge 0`, we denote by :math:`s \trans{\sigma} t` the fact that there exist
 :math:`s_0 \ldots s_n \in S` such that :math:`s = s_0`, :math:`t = s_n`, and
-:math:`(s_i, a_{i+1}, s_{i+1}) \in \to` for all :math:`0 \le i < n`. Note that
-for all states :math:`s` it holds that :math:`s \to^\epsilon s`.
+:math:`(s_i, a_{i+1}, s_{i+1}) \in\, \to` for all :math:`0 \le i < n`. Note that
+for all states :math:`s` it holds that :math:`s \trans{\epsilon} s`.
 
 An LTS usually describes the (discrete) behaviour of some system or protocol: in
 any state of the system, a number of actions can be performed, each of which
@@ -52,7 +52,7 @@ additional notation to express this. Let :math:`\tau^*` denote any finite sequen
 For any LTS :math:`(S, A, \to, s_0)`, states :math:`s,t \in S` and action
 sequence :math:`\sigma \in (A \setminus \tau)^*`, with :math:`\sigma = a_1
 \ldots a_n` for :math:`n \ge 0`, we denote by
-:math:`s \to^\sigma t` the fact that there exist
+:math:`s \ttrans{\sigma} t` the fact that there exist
 :math:`s_0 \ldots s_n \in S` such that :math:`s = s_0, t = s_n`, and :math:`s_i
 \to^{(\tau^* a_{i+1})} s_{i+1}` for
 all :math:`0 \le i < n`.
@@ -97,7 +97,7 @@ define :math:`\Tr{s}` to be the set of traces possible from :math:`s`:
 
 .. math::
 
-   \Tr{s} = \{ \sigma \in A^* | \exists_{t \in S}~ \trans{\sigma} t \}
+   \Tr{s} = \{ \sigma \in A^* ~|~ \exists_{t \in S}~ s \trans{\sigma} t \}
 
 Given two LTSs :math:`T = (S, A, \to, s_0)` and :math:`T' = (S', A', \to', s'_0)`,
 we say that :math:`T` and :math:`T'` are trace equivalent iff :math:`\Tr{s_0} = \Tr{s'_0}`.
@@ -105,7 +105,7 @@ we say that :math:`T` and :math:`T'` are trace equivalent iff :math:`\Tr{s_0} = 
 Weak trace equivalence
 """"""""""""""""""""""
 
-Weak trace equivalence* is very similar to trace equivalence. The only
+*Weak trace equivalence* is very similar to trace equivalence. The only
 difference is that it "skips" any :math:`\tau` actions that appear on the traces.
 Hence, weak trace equivalence is particularly useful when some parts of the
 behaviour have been hidden.
@@ -125,7 +125,7 @@ define :math:`\Trw{s}` to be the set of weak traces possible from :math:`s`:
 Given two LTSs :math:`T = (S, A, \to, s_0)` and :math:`T' = (S', A', \to', s'_0)`,
 we say that :math:`T` and :math:`T'` are weakly trace equivalent iff :math:`\Trw{s_0} = \Trw{s'_0}`.
 
-Obviously, if :math:`s \trans{\sigma} t` then there exists a sequence
+Obviously, if :math:`s \ttrans{\sigma} t` then there exists a sequence
 :math:`\pi` (possibly containing :math:`\tau` steps) such that :math:`s \trans{\pi} t`.
 Using this fact, it is not hard to see that if two LTSs are trace equivalent
 then they are also weakly trace equivalent.
