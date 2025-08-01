@@ -22,7 +22,6 @@ using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_enum_argument;
-using utilities::tools::tool;
 using utilities::tools::input_input_output_tool;
 using namespace mcrl2::log;
 using pbes_system::tools::pbes_output_tool;

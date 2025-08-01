@@ -117,7 +117,7 @@ public:
   : super(r, pr)
   , dataspec(dataspec_)
   {}
-  virtual ~simplifier_mdd() = default;
+  ~simplifier_mdd() override = default;
 };
 
 

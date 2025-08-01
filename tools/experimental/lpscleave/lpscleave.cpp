@@ -21,7 +21,6 @@
 namespace mcrl2
 {
 
-using log::log_level_t;
 using lps::stochastic_specification;
 using mcrl2::utilities::tools::input_output_output_tool;
 
