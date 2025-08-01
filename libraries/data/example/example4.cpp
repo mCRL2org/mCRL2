@@ -3,7 +3,7 @@
 
 using namespace mcrl2::data;
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
  data_specification data_spec;
   data_spec.add_context_sort(sort_nat::nat());

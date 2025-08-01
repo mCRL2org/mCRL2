@@ -434,6 +434,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_summand& summand)
 
 struct abortable
 {
+  virtual ~abortable() = default;
   virtual void abort() = 0;
 };
 
@@ -1015,7 +1016,7 @@ class explorer: public abortable
       }
     }
 
-    ~explorer() = default;
+    virtual ~explorer() = default;
 
     // Get the initial state of the specification. 
     const data::data_expression_list& initial_state() const

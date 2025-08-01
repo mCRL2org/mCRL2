@@ -3078,7 +3078,7 @@ class bisim_partitioner_gj
             }
             else if (!has_large_splitter /* needed for correctness */)
             {
-              /* Algorithm 2, Line 2.2: state belongs to ReachAlw            */ assert(ReachAlw+1==AvoidSml);
+              /* Algorithm 2, Line 2.2: state belongs to ReachAlw            */ static_assert(ReachAlw + 1 == AvoidSml);
               swap_states_in_states_in_block(start_bottom_states[AvoidSml],
                                           src.ref_state->ref_states_in_blocks);
               ++start_bottom_states[AvoidSml];
@@ -3102,14 +3102,14 @@ class bisim_partitioner_gj
             else if (next_target_constln_in_same_saC(src, splitter_it)==
                                                                 large_splitter)
             {
-              /* Algorithm 2, Line 2.2: state belongs to ReachAlw            */ assert(ReachAlw+1==AvoidSml);
+              /* Algorithm 2, Line 2.2: state belongs to ReachAlw            */ static_assert(ReachAlw + 1 == AvoidSml);
               swap_states_in_states_in_block(start_bottom_states[AvoidSml],
                                           src.ref_state->ref_states_in_blocks);
               ++start_bottom_states[AvoidSml];
             }
             else
             {
-              /* Algorithm 2, Line 2.3: state belongs to AvoidLrg            */ assert(AvoidSml+1==AvoidLrg);
+              /* Algorithm 2, Line 2.3: state belongs to AvoidLrg            */ static_assert(AvoidSml + 1 == AvoidLrg);
               --start_bottom_states[AvoidSml+1];
               swap_states_in_states_in_block(start_bottom_states[AvoidSml+1],
                                           src.ref_state->ref_states_in_blocks);

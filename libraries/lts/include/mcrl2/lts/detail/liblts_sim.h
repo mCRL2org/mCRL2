@@ -162,7 +162,7 @@ sim_partitioner<LTS_TYPE>::sim_partitioner(LTS_TYPE& l)
   forall = new hash_table3(1000);
 }
 
-template <class LTS_TYPE>
+template<class LTS_TYPE>
 sim_partitioner<LTS_TYPE>::~sim_partitioner()
 {
   delete match;

@@ -48,10 +48,9 @@ using namespace mcrl2::pbes_system;
 //Function declarations used by main program
 //------------------------------------------
 
+using mcrl2::data::tools::rewriter_tool;
 using mcrl2::pbes_system::tools::pbes_input_tool;
 using mcrl2::pbes_system::tools::pbes_output_tool;
-using mcrl2::pbes_system::tools::pbes_rewriter_tool;
-using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_output_tool;
 
 class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input_output_tool> > >
