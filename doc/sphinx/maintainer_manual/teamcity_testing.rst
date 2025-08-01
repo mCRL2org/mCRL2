@@ -242,3 +242,11 @@ This script calls the ``vcvarsall.bat`` script supplied by Visual Studio. It con
 .. _Meta-runner: https://confluence.jetbrains.com/display/TCD10/Working+with+Meta-Runner
 .. _Command line: https://confluence.jetbrains.com/display/TCD10/Command+Line
 .. _TeamCity CMake plugin: https://confluence.jetbrains.com/display/TW/CMake+Plugin
+
+ltsmin
+^^^^^^
+
+Furthermore, integration with LTSmin is tested using a Docker scripts. On Linux
+use the following command from the mCRL2 root directory::
+
+    $ docker build -f scripts/docker/ltsmin/Dockerfile .
