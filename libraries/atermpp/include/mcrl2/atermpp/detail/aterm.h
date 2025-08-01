@@ -72,7 +72,7 @@ public:
   /// \brief constructs a term application with the given symbol and its arguments from the iterator.
   template<typename Iterator>
   _aterm_appl(const function_symbol& symbol, Iterator it, [[maybe_unused]] Iterator end, bool)
-    requires mcrl2::utilities::is_iterator<Iterator>::value
+    requires (mcrl2::utilities::is_iterator<Iterator>::value)
       : _aterm(symbol)
   {
     for (std::size_t i = 0; i < symbol.arity(); ++i)
