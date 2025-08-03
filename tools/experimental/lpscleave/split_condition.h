@@ -11,7 +11,8 @@
 #define MCRL2_SPLIT_CONDITION_H_
 
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/standard_utility.h"
+// #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/join.h"
 #include "lpscleave_utility.h"
 
 #include <queue>
@@ -31,7 +32,7 @@ data::data_expression make_conjuntions(const std::set<data::data_expression>& cl
 }
 
 /// \brief Given a set of clauses and a set of variables computes a subset of clauses such that expressions over the given variables are not thrown away.
-std::set<data::data_expression> compute_clauses(const std::list<data::data_expression>& clauses, std::set<data::variable> dependencies)
+std::set<data::data_expression> compute_clauses(const std::set<data::data_expression>& clauses, std::set<data::variable> dependencies)
 {
   std::set<data::data_expression> result;
 
@@ -87,7 +88,7 @@ std::pair<cleave_condition, cleave_condition> split_condition(
   mCRL2log(log::debug) << "Splitting condition " << condition << "...\n";
 
   // First of all consider each clause in a conjunctive form separately.
-  std::list<data::data_expression> clauses = split_conjunction(condition);
+  std::set<data::data_expression> clauses = split_and(condition);
 
   // The resulting conditions and dependencies.
   cleave_condition left_condition;

@@ -32,8 +32,10 @@ class decluster_algorithm: public detail::lps_algorithm<Specification>
     template <typename SummandType, typename OutIter>
     void decluster_summand(const SummandType& summand, OutIter& out)
     {
-      for(const data::data_expression& disjunct: data::split_or(summand.condition()))
+      mCRL2log(log::debug) << "Splitting summand condition " << summand.condition() << " into:\n";
+      for(const data::data_expression& disjunct: data::split_or_aggressive(summand.condition()))
       {
+        mCRL2log(log::debug) << "- " << disjunct << "\n";
         SummandType s(summand);
         s.condition() = disjunct;
         *out++ = s;
@@ -49,18 +51,16 @@ class decluster_algorithm: public detail::lps_algorithm<Specification>
     {
       action_summand_vector_type declustered_action_summands;
       std::back_insert_iterator<action_summand_vector_type> act_it(declustered_action_summands);
-      auto const& action_summands = m_spec.process().action_summands();
-      for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+      for (const action_summand& as:  m_spec.process().action_summands())
       {
-        decluster_summand(*i, act_it);
+        decluster_summand(as, act_it);
       }
 
       deadlock_summand_vector declustered_deadlock_summands;
       std::back_insert_iterator<deadlock_summand_vector> dl_it (declustered_deadlock_summands);
-      auto const& deadlock_summands = m_spec.process().deadlock_summands();
-      for (auto i = deadlock_summands.begin(); i != deadlock_summands.end(); ++i)
+      for (const deadlock_summand ds: m_spec.process().deadlock_summands())
       {
-        decluster_summand(*i, dl_it);
+        decluster_summand(ds, dl_it);
       }
 
       m_spec.process().action_summands() = declustered_action_summands;

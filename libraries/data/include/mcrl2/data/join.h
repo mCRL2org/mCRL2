@@ -55,6 +55,103 @@ namespace mcrl2::data
     return result;
   }
 
+namespace detail
+{
+  /// \brief Splits a boolean term by rewriting it to the shape p1 || p2 || ... || pn or p1 &&...&& pn and then
+  /// yield a set of the form { p1, p2, ..., pn } where pi does not have || or && anymore as main function symbol. 
+  /// The second parameter indicates what the outermost symbol is.
+  /// \param expr A data expression.
+  /// \param outermost_symbol_is_or Indicates whether the outermost symbol is ||. If false it is &&.
+  /// \return A set of data expressions of type bool.
+  inline
+  std::set<data_expression> split_aggressive(const data_expression& expr, bool outermost_symbol_is_or)
+  {
+    if ((outermost_symbol_is_or&&sort_bool::is_or_application(expr)) || (!outermost_symbol_is_or&&sort_bool::is_and_application(expr)))
+    {
+      const std::set<data_expression> left_set=split_aggressive(sort_bool::left(expr), outermost_symbol_is_or);
+      std::set<data_expression> right_set=split_aggressive(sort_bool::right(expr), outermost_symbol_is_or);
+      right_set.insert(left_set.begin(),left_set.end());
+      return right_set;
+    }
+    if ((outermost_symbol_is_or&&sort_bool::is_and_application(expr)) || (!outermost_symbol_is_or&&sort_bool::is_or_application(expr)))
+    {
+      const std::set<data_expression> left_set=split_aggressive(sort_bool::left(expr), outermost_symbol_is_or);
+      std::set<data_expression> right_set=split_aggressive(sort_bool::right(expr), outermost_symbol_is_or);
+      std::set<data_expression> result;
+      for(const data_expression& e1: left_set)
+      {
+        for(const data_expression& e2: right_set)
+        {
+          if (outermost_symbol_is_or)
+          {
+            result.insert(sort_bool::and_(e1,e2));
+          }
+          else
+          {
+            result.insert(sort_bool::or_(e1,e2));
+          }
+        }
+      }
+      return result;
+    }
+    if (sort_bool::is_not_application(expr))
+    {
+      std::set<data_expression> result1=split_aggressive(sort_bool::arg(expr), !outermost_symbol_is_or);
+      std::set<data_expression> result2;
+      for(const data_expression& e: result1)
+      {
+        if (sort_bool::is_not_application(e))
+        {
+          result2.insert(sort_bool::arg(e));
+        }
+        else
+        {
+          result2.insert(sort_bool::not_(e));
+        }
+      }
+      return result2;
+    }
+    if (sort_bool::is_implies_application(expr))
+    {
+      return split_aggressive(sort_bool::or_(sort_bool::not_(sort_bool::left(expr)),sort_bool::right(expr)), outermost_symbol_is_or); 
+    }
+    // Maybe handle if on booleans, and <, <=, >= and > on booleans??
+    std::set<data_expression> result;
+    if (((expr==sort_bool::true_())&&!outermost_symbol_is_or) || ((expr==sort_bool::false_())&&outermost_symbol_is_or))
+    {
+      return result;
+    }
+    result.insert(expr);
+    return result;
+  }
+} // namespace detail
+
+
+  /// \brief Splits a boolean term by rewriting it to the shape p1 || p2 || ... || pn and then
+  /// yield a set of the form { p1, p2, ..., pn } where pi does not have || anymore as main function symbol. 
+  /// The result may be exponentially large.
+  /// \param expr A data expression
+  /// \return A sequence of operands
+  inline
+  std::set<data_expression> split_or_aggressive(const data_expression& expr)
+  {
+    constexpr bool outermost_symbol_is_or = true;
+    return detail::split_aggressive(expr, outermost_symbol_is_or);
+  }
+
+  /// \brief Splits a boolean term by rewriting it to the shape p1 && p2 && ... && pn and then
+  /// yield a set of the form { p1, p2, ..., pn } where pi does not have && anymore as main function symbol. 
+  /// The result may be exponentially large. 
+  /// \param expr A data expression
+  /// \return A sequence of operands
+  inline
+  std::set<data_expression> split_and_aggressive(const data_expression& expr)
+  {
+    constexpr bool outermost_symbol_is_and = false;
+    return detail::split_aggressive(expr, outermost_symbol_is_and);
+  }
+
+
   /// \brief Splits a conjunction into a sequence of operands
   /// Given a data expression of the form p1 && p2 && .... && pn, this will yield a
   /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main

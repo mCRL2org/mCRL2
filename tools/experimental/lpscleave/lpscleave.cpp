@@ -10,7 +10,7 @@
 #include "cleave.h"
 
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/join.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/input_output_output_tool.h"
 
@@ -116,7 +116,7 @@ public:
         std::vector<lps::stochastic_action_summand> summands;
         for (const lps::stochastic_action_summand& summand : spec.process().action_summands())
         {
-          for (const data::data_expression& clause : split_disjunction(summand.condition()))
+          for (const data::data_expression& clause : split_or(summand.condition()))
           {
             summands.emplace_back(summand.summation_variables(), clause, summand.multi_action(), summand.assignments(), summand.distribution());
           }
