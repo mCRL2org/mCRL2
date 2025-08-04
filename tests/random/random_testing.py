@@ -310,9 +310,9 @@ class PbespareqelmTest(PbesTest):
     def __init__(self, name, settings):
         super(PbespareqelmTest, self).__init__(name, ymlfile('pbespareqelm'), settings)
 
-class PbespathreductionTest(PbesTest):
+class PbeschainTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbespathreductionTest, self).__init__(name, ymlfile('pbespathreduction'), settings)
+        super(PbeschainTest, self).__init__(name, ymlfile('pbeschain'), settings)
 
 class Pbespor1Test(PbesTest):
     def __init__(self, name, settings):
@@ -509,10 +509,10 @@ available_tests = {
     'bisimulation-branching-bisim-gjkw'           : lambda name, settings: BisimulationTest(name, 'branching-bisim-gjkw', settings)                    ,
     'bisimulation-branching-bisim-gj'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj', settings)                    ,
     'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                              ,
+    'pbeschain'                           : lambda name, settings: PbeschainTest(name, settings)                                            ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
     'pbesfixpointsolve'                           : lambda name, settings: PbesfixpointsolveTest(name, settings)                                              ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
-    'pbespathreduction'                           : lambda name, settings: PbespathreductionTest(name, settings)                                            ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
     'pbesrewr-pfnf'                               : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                                        ,
     'pbesrewr-quantifier-all'                     : lambda name, settings: PbesrewrTest(name, 'quantifier-all', settings)                              ,
