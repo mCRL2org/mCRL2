@@ -119,7 +119,7 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
       const std::string& name = sync.label().name();
 
       // Find the synchronisation action's index.
-      std::size_t underscore = name.find_last_of("_");
+      std::size_t underscore = name.find_last_of('_');
 
       // Construct the corresponding right synchronisation action.
       right_synclabel[i] = process::action_label(std::string(syncright) += name.substr(underscore), sync.label().sorts());

@@ -33,7 +33,7 @@ core::identifier_string_list nodata(const multi_action& multi_action)
 std::string convert_sync(const std::string& name, const std::string& prefix)
 {
   // Only consider the indices.
-  auto index = name.find_last_of("_");
+  auto index = name.find_last_of('_');
   return std::string(prefix) += std::string("sync") += name.substr(index);
 }
 
@@ -142,7 +142,7 @@ void mcrl2::combine_specification(const lps::stochastic_specification& left_spec
   {
     // The sync_i action must be renamed to syncleft_i and syncright_i and put in a communication expression.
     std::string name = actsync;
-    auto index = name.find_last_of("_");
+    auto index = name.find_last_of('_');
 
     core::identifier_string_list list;
     list.emplace_front(name.substr(0, index) += std::string("left") += name.substr(index));
