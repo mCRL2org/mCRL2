@@ -82,9 +82,9 @@ struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
   using super = Builder<rewrite_if_builder<Builder>>;
   using super::apply;
 
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
 
-  explicit rewrite_if_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
+  explicit rewrite_if_builder(simplify_data_rewriter<data::rewriter>& r)
       : m_pbes_rewriter(r)
   {}
 
@@ -506,7 +506,6 @@ inline void self_substitute(pbes_equation& equation,
         }
       }
 
-      // if_substituter.apply(equation.formula(), equation.formula());
       std::vector<propositional_variable_instantiation> set
           = get_propositional_variable_instantiations(equation.formula());
 
@@ -584,7 +583,7 @@ struct pbeschain_pbes_backward_substituter
     simplify_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
     simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_default_rewriter);
-    rewrite_if_builder<pbes_system::pbes_expression_builder> if_rewriter(pbes_rewriter);
+    rewrite_if_builder<pbes_system::pbes_expression_builder> if_rewriter(pbes_default_rewriter);
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder> pvi_substituter(
         pbes_rewriter);
 
@@ -623,7 +622,6 @@ struct pbeschain_pbes_backward_substituter
         }
       }
     }
-    pbes_rewrite(p, pbes_rewriter);
   }
 };
 
