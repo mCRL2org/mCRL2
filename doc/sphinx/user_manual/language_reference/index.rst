@@ -10,3 +10,4 @@ mCRL2 language reference
    mucalc
    bes
    pbes
+   parsing_2025
