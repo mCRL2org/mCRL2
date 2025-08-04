@@ -58,7 +58,7 @@ class decluster_algorithm: public detail::lps_algorithm<Specification>
 
       deadlock_summand_vector declustered_deadlock_summands;
       std::back_insert_iterator<deadlock_summand_vector> dl_it (declustered_deadlock_summands);
-      for (const deadlock_summand ds: m_spec.process().deadlock_summands())
+      for (const deadlock_summand& ds: m_spec.process().deadlock_summands())
       {
         decluster_summand(ds, dl_it);
       }
