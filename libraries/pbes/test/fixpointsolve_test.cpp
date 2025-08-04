@@ -44,7 +44,7 @@ void test_result(std::string input, std::string expected_result, bool option_che
   BOOST_CHECK(replace_whitespace(result) == replace_whitespace(expected_result));
 }
 
-BOOST_AUTO_TEST_CASE(test_nu_sacks)
+BOOST_AUTO_TEST_CASE(test_fixpointsolve)
 {
   std::string text;
   std::string expected_result;
@@ -106,6 +106,8 @@ BOOST_AUTO_TEST_CASE(test_nu_sacks)
                     "\n"
                     "pbes nu Z(s3_P: Pos, s_P: Sluice, col_P1,col_P2: Colour) =\n"
                     "val(true);\n"
+                    "nu X0(s3_P: Pos, s_P: Sluice, col_P1,col_P2: Colour) =\n"
+                    "(val(!(s_P == s1)) || val(!(s3_P == 2))) && (val(s_P == s1) || val(!(s3_P == 3)) || val(!(col_P1 == green))) && (val(!(s3_P == 2)) || val(!(if(s_P == s1, red, col_P1) == green))) && (val(!(s3_P == 1 && !(col_P1 == green))) || val(!(col_P1 == green))) && (val(!(s3_P == 1 && col_P1 == green)) || val(false)) && (val(!(s3_P == 1 && !(col_P2 == green))) || val(!(col_P1 == green))) && (val(!(s3_P == 1 && col_P2 == green)) || val(true)) && (val(!(s3_P == 1 && !(col_P1 == red))) || val(!(col_P1 == green))) && (val(!(s3_P == 1 && col_P1 == red)) || val(true)) && (val(!(s3_P == 1 && !(col_P2 == red))) || val(!(col_P1 == green))) && (val(!(s3_P == 1 && col_P2 == red)) || val(true));\n"
                     "\n"
                     "init Z(1, dc, red, red);\n";
   test_result(text, expected_result, false);
