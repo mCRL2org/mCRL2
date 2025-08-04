@@ -564,7 +564,7 @@ BOOST_AUTO_TEST_CASE(test_utility_functionality)
 
 
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) != sorts.end());
-  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(a,spec)) != sorts.end());
+  BOOST_CHECK(sorts.find(normalize_sorts(a, spec)) != sorts.end());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) != sorts.end());
 
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) == mappings.end());
@@ -625,8 +625,8 @@ BOOST_AUTO_TEST_CASE(test_normalisation)
   structured_sort sB(data::structured_sort(structured_sort_constructor_list(constructors.begin() + 1, constructors.end())));
 
   const std::set<sort_expression> sorts(specification.sorts());
-  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sA,specification)) != sorts.end());
-  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sB,specification)) != sorts.end());
+  BOOST_CHECK(sorts.find(normalize_sorts(sA, specification)) != sorts.end());
+  BOOST_CHECK(sorts.find(normalize_sorts(sB, specification)) != sorts.end());
 
   BOOST_CHECK(normalize_sorts(sA,specification) == normalize_sorts(normalize_sorts(sA,specification),specification));
   BOOST_CHECK(normalize_sorts(sB,specification) == normalize_sorts(normalize_sorts(sB,specification),specification));

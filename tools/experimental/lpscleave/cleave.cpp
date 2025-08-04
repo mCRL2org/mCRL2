@@ -255,7 +255,7 @@ std::vector<per_summand_information> static_analysis(
           right_synchronised.erase(var);
         }
 
-        if (std::find(right_synchronised.begin(), right_synchronised.end(), var) == right_synchronised.end())
+        if (right_synchronised.find(var) == right_synchronised.end())
         {
           result.synchronised.erase(var);
         }
@@ -264,7 +264,7 @@ std::vector<per_summand_information> static_analysis(
       // Find problematic parameters.
       for (const data::variable& var : result.synchronised)
       {
-        if (std::find(left_condition_dependencies.begin(), left_condition_dependencies.end(), var) == left_condition_dependencies.end())
+        if (left_condition_dependencies.find(var) == left_condition_dependencies.end())
         {
           variable_info[var].occurs_unbounded = true;
         }
@@ -272,7 +272,7 @@ std::vector<per_summand_information> static_analysis(
 
       for (const data::variable& var : right_synchronised)
       {
-        if (std::find(right_condition_dependencies.begin(), right_condition_dependencies.end(), var) == right_condition_dependencies.end())
+        if (right_condition_dependencies.find(var) == right_condition_dependencies.end())
         {
           variable_info[var].occurs_unbounded = true;
         }
