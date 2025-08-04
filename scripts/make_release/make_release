@@ -43,10 +43,8 @@ set +x
 # N.B. Do not call this variable PWD, since it is overwritten during the LTSMin installation!
 MYPWD=`pwd`
 MCRL2_ROOT=$MYPWD/mcrl2
-LTSMIN_DIR=$MYPWD/ltsmin
 MCRL2_RELEASE_DIR=$MYPWD/mcrl2-release
 MCRL2_TEST_DIR=$MYPWD/mcrl2-test
-MCRL2_LTSMIN_DIR=$MYPWD/mcrl2-ltsmin
 DEBIAN_PACKAGING_DIR=$MYPWD/debian-packaging
 
 function clear_path
@@ -141,60 +139,6 @@ function test_mcrl2_release
 }
 
 #-----------------------------------------------------------#
-# Build mcrl2-ltsmin
-#-----------------------------------------------------------#
-function build_mcrl2_ltsmin
-{
-  clear_path
-  cd $MYPWD
-  rm -rf $MCRL2_LTSMIN_DIR
-  mkdir $MCRL2_LTSMIN_DIR
-  cd $MCRL2_LTSMIN_DIR
-  cmake $MCRL2_ROOT -DCMAKE_INSTALL_PREFIX="`pwd`/install"
-  make install -j8
-}
-
-#-----------------------------------------------------------#
-# Build LTSMin
-#-----------------------------------------------------------#
-function build_ltsmin
-{
-  unset CADP # Otherwise the LTSMin build may fail
-  clear_path
-  cd $MYPWD
-  rm -rf ltsmin
-  git clone -b next https://github.com/utwente-fmt/ltsmin.git
-  cd ltsmin
-  git submodule update --init
-  ./ltsminreconf
-  ./configure --disable-dependency-tracking --without-libddd --without-scoop --without-spins --without-sylvan --with-mcrl2=$MCRL2_LTSMIN_DIR/install --prefix=$LTSMIN_DIR/install CPPFLAGS="-I$BOOST_ROOT -I$MCRL2_LTSMIN_DIR/install/include"
-  export PATH=$MCRL2_LTSMIN_DIR/install/bin:$PATH
-  make
-  make install
-}
-
-#-----------------------------------------------------------#
-# Test LTSMin
-#-----------------------------------------------------------#
-function test_ltsmin
-{
-  clear_path
-  cd $MYPWD
-  $MCRL2_LTSMIN_DIR/install/bin/mcrl22lps ../../examples/academic/abp/abp.mcrl2 abp.lps
-  $MCRL2_LTSMIN_DIR/install/bin/lps2pbes abp.lps -f../../examples/modal-formulas/nodeadlock.mcf abp.pbes
-  export PATH=$MCRL2_LTSMIN_DIR/install/bin:$PATH
-  export LD_LIBRARY_PATH=$MCRL2_LTSMIN_DIR/install/lib/mcrl2:$LD_LIBRARY_PATH
-  $LTSMIN_DIR/install/bin/lps2lts-dist abp.lps
-  $LTSMIN_DIR/install/bin/lps2lts-mc abp.lps
-  $LTSMIN_DIR/install/bin/lps2lts-seq abp.lps
-  $LTSMIN_DIR/install/bin/lps2lts-sym abp.lps
-  $LTSMIN_DIR/install/bin/pbes2lts-dist abp.pbes
-  $LTSMIN_DIR/install/bin/pbes2lts-mc abp.pbes
-  $LTSMIN_DIR/install/bin/pbes2lts-seq abp.pbes
-  $LTSMIN_DIR/install/bin/pbes2lts-sym abp.pbes
-}
-
-#-----------------------------------------------------------#
 # Build and upload the source package
 #-----------------------------------------------------------#
 function build_source_package
@@ -280,7 +224,7 @@ function build_ppa_package
 #build_source_package
 
 #test_ppa_package bionic
-#test_ppa_package focal
+#test_ppa_package focalcd ../
 #test_ppa_package groovy
 
 #build_ppa_package bionic
