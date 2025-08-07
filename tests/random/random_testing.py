@@ -373,19 +373,19 @@ class PbessolvesymbolicCounterexampleTest(ProcessTest):
 
         if arguments:
             self.add_command_line_options('t3', arguments)
-            
+
     def create_inputfiles(self, runpath = '.'):
         super().create_inputfiles(runpath)
         filename = f'{self.name}.mcf'
         formula = random_state_formula_generator.make_modal_formula()
         write_text(filename, str(formula))
         self.inputfiles += [filename]
-        
+
 class Pbes2boolTest(PbesTest):
     def __init__(self, name, parallel, settings):
         super().__init__(name, ymlfile('pbessolve'), settings)
 
-        if parallel:            
+        if parallel:
             self.add_command_line_options('t2', ["--threads=4"])
             self.add_command_line_options('t3', ["--threads=4"])
             self.add_command_line_options('t4', ["--threads=4"])
@@ -569,8 +569,8 @@ if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic-chaining' : lambda name, settings: PbessolvesymbolicTest(name, ['--chaining'], settings) })
     available_tests.update({'pbessolvesymbolic-total-chaining' : lambda name, settings: PbessolvesymbolicTest(name, ['--total', '--chaining'], settings) })
     available_tests.update({'pbessolvesymbolic-saturation' : lambda name, settings: PbessolvesymbolicTest(name, ['--total', '--saturation'], settings) })
-    available_tests.update({'pbessolvesymbolic-split' : lambda name, settings: PbessolvesymbolicTest(name, ['--total', '--split-conditions'], settings) })    
-    
+    available_tests.update({'pbessolvesymbolic-split' : lambda name, settings: PbessolvesymbolicTest(name, ['--total', '--split-conditions'], settings) })
+
     available_tests.update({'pbessolvesymbolic-partial-s1' : lambda name, settings: PbessolvesymbolicTest(name, ['-s1', '--aggressive'], settings) })
     available_tests.update({'pbessolvesymbolic-partial-s2' : lambda name, settings: PbessolvesymbolicTest(name, ['-s2', '--aggressive'], settings) })
     available_tests.update({'pbessolvesymbolic-partial-s3' : lambda name, settings: PbessolvesymbolicTest(name, ['-s3', '--aggressive'], settings) })
@@ -580,6 +580,11 @@ if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic-partial-s7' : lambda name, settings: PbessolvesymbolicTest(name, ['-s7', '--aggressive'], settings) })
 
     available_tests.update({'pbessolvesymbolic-counter-example' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, [], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-s1' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['-s1'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-s2' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['-s2'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-s3' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['-s3'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-s4' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['-s4'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-s7' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['-s7'], settings) })
     available_tests.update({'ltsconvertsymbolic' :  lambda name, settings: LtsconvertsymbolicTest(name, [], settings)})
     available_tests.update({'ltsconvertsymbolic-parallel' : lambda name, settings: LtsconvertsymbolicTest(name, ['--threads=8'], settings) })
 
@@ -614,14 +619,14 @@ def main():
     if args.names:
         print_names(tests)
         return
-    
+
     python_path = None
     if args.python:
         # Check if the given path exists
         python_path = args.python
     else:
         python_path = shutil.which("python3")
-    
+
     if python_path is None:
         print("Cannot find python in the PATH environment, and --python was not supplied")
         sys.exit(-1)
@@ -629,7 +634,7 @@ def main():
     if not args.toolpath:
         print("To run tests the --toolpath argument is required")
         sys.exit(-1)
-       
+
     settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True, 'python_path': python_path}
 
     repeats = range(int(args.repetitions))
