@@ -56,9 +56,9 @@ public:
     /*! Compute winning strategies by means of priority promotion, follows the
         paper as closely as possible.
     */
-    ParityGame::Strategy solve();
+    ParityGame::Strategy solve() override;
 
-private:
+  private:
 
     /*! From the state (region_function, strategy, prio) compute the new alpha-region
         R and update region_function[R -> p]. The strategy will be updated in
@@ -134,9 +134,7 @@ private:
 class PriorityPromotionSolverFactory : public ParityGameSolverFactory
 {
     //! Returns a new PriorityPromotionSolver instance.
-    ParityGameSolver *create(const ParityGame &game,
-        const verti *vertex_map,
-        verti vertex_map_size);
+    ParityGameSolver* create(const ParityGame& game, const verti* vertex_map, verti vertex_map_size) override;
 };
 
 #endif

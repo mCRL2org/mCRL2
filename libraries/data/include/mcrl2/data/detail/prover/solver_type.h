@@ -15,11 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief The enumeration type smt_solver_type enumerates all available SMT solvers.
@@ -33,9 +29,18 @@ enum smt_solver_type
 inline
 smt_solver_type parse_solver_type(const std::string& s)
 {
-  if(s == "cvc") return solver_type_cvc;
-  else if(s == "z3") return solver_type_z3;
-  else throw mcrl2::runtime_error("unknown solver type " + s);
+  if (s == "cvc")
+  {
+    return solver_type_cvc;
+  }
+  else if (s == "z3")
+  {
+    return solver_type_z3;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown solver type " + s);
+  }
 }
 
 /// \brief standard conversion from stream to solver type
@@ -86,8 +91,6 @@ std::string description(const smt_solver_type s)
   }
 }
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_PROVER_SOLVER_TYPE_H

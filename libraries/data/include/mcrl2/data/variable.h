@@ -16,10 +16,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated class variable ---//
@@ -83,10 +80,10 @@ inline void make_variable(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of variables
-typedef atermpp::term_list<variable> variable_list;
+using variable_list = atermpp::term_list<variable>;
 
 /// \\brief vector of variables
-typedef std::vector<variable>    variable_vector;
+using variable_vector = std::vector<variable>;
 
 // prototype declaration
 std::string pp(const variable& x, bool precedence_aware = true);
@@ -102,7 +99,7 @@ std::ostream& operator<<(std::ostream& out, const variable& x)
 }
 
 /// \\brief swap overload
-inline void swap(variable& t1, variable& t2)
+inline void swap(variable& t1, variable& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -117,10 +114,7 @@ std::set<data::variable> find_all_variables(const data::variable& x);
 std::set<data::variable> find_all_variables(const data::variable_list& x);
 std::set<core::identifier_string> find_identifiers(const data::variable_list& x);
 
-} // namespace data
-
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 namespace std 
 {
@@ -128,14 +122,13 @@ namespace std
 template<>
 struct hash<mcrl2::data::variable>
 {
-  // Default constructor, required for const qualified hash functions. 
-    hash()
-    {}
-  
-    std::size_t operator()(const mcrl2::data::variable& v) const
-    {
-      const hash<atermpp::aterm> hasher; 
-      return hasher(v);
+  // Default constructor, required for const qualified hash functions.
+  hash() = default;
+
+  std::size_t operator()(const mcrl2::data::variable& v) const
+  {
+    const hash<atermpp::aterm> hasher;
+    return hasher(v);
     }
 };
   

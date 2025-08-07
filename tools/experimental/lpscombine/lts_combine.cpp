@@ -36,7 +36,7 @@ std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(con
     for (const process::action& action : label.actions())
     {
       const std::string& name = action.label().name();
-      if (action == tag || name.find(syncname) == 0)
+      if (action == tag || name.starts_with(syncname))
       {
         assert(first == process::action()); // Can only contain one tag or sync.
         first = action;
@@ -119,7 +119,7 @@ void mcrl2::combine_lts(lts::lts_lts_t& left_lts,
       const std::string& name = sync.label().name();
 
       // Find the synchronisation action's index.
-      std::size_t underscore = name.find_last_of("_");
+      std::size_t underscore = name.find_last_of('_');
 
       // Construct the corresponding right synchronisation action.
       right_synclabel[i] = process::action_label(std::string(syncright) += name.substr(underscore), sync.label().sorts());

@@ -14,10 +14,7 @@
 
 #include "mcrl2/process/action_name_multiset.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated class process_identifier ---//
@@ -79,10 +76,10 @@ inline void make_process_identifier(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of process_identifiers
-typedef atermpp::term_list<process_identifier> process_identifier_list;
+using process_identifier_list = atermpp::term_list<process_identifier>;
 
 /// \\brief vector of process_identifiers
-typedef std::vector<process_identifier>    process_identifier_vector;
+using process_identifier_vector = std::vector<process_identifier>;
 
 /// \\brief Test for a process_identifier expression
 /// \\param x A term
@@ -107,7 +104,7 @@ std::ostream& operator<<(std::ostream& out, const process_identifier& x)
 }
 
 /// \\brief swap overload
-inline void swap(process_identifier& t1, process_identifier& t2)
+inline void swap(process_identifier& t1, process_identifier& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -118,8 +115,8 @@ std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
 void normalize_sorts(process_identifier_vector& x, const data::sort_specification& sortspec);
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_PROCESS_IDENTIFIER_H

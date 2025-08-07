@@ -23,22 +23,21 @@ extern "C"
   extern D_ParserTables parser_tables_pg;
 }
 
-namespace mcrl2
+
+
+namespace mcrl2::pbes_system
 {
 
-namespace pbes_system
-{
+using identifier_t = unsigned long long;
+using priority_t = unsigned short;
 
-typedef unsigned long long identifier_t;
-typedef unsigned short priority_t;
-
-typedef bool owner_t;
+using owner_t = bool;
 
 struct node_t
 {
-  identifier_t id;
-  priority_t prio;
-  owner_t owner;
+  identifier_t id = 0ULL;
+  priority_t prio = 0U;
+  owner_t owner = false;
   std::set<identifier_t> successors;
 
   bool operator<(node_t const& other)
@@ -251,8 +250,8 @@ inline void parse_pgsolver(const std::string& filename, pbes& b, bool maxpg = tr
   }
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_BES_PG_PARSE_H

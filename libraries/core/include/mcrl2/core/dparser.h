@@ -21,15 +21,11 @@ struct D_ParseNode;
 struct D_ParserTables;
 struct D_Parser;
 struct d_loc_t;
-typedef void (*D_SyntaxErrorFn)(struct D_Parser *);
-typedef struct D_ParseNode *(*D_AmbiguityFn)(struct D_Parser *,
-               int n, struct D_ParseNode **v);
+using D_SyntaxErrorFn = void (*)(struct D_Parser*);
+using D_AmbiguityFn = struct D_ParseNode* (*)(struct D_Parser*, int, struct D_ParseNode**);
 
-
-
-namespace mcrl2 {
-
-namespace core {
+namespace mcrl2::core
+{
 
 namespace detail
 {
@@ -150,7 +146,7 @@ struct parser
 {
   parser_table m_table;
   D_Parser* m_parser;
-  std::size_t m_max_error_message_count;
+  std::size_t m_max_error_message_count = 0UL;
 
   explicit parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = nullptr, D_SyntaxErrorFn syntax_error_fn = nullptr, std::size_t max_error_message_count = 1);
 
@@ -200,8 +196,6 @@ struct parser
   }
 };
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_DPARSER_H

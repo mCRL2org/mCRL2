@@ -15,9 +15,7 @@
 #include "mcrl2/utilities/hashtable.h"    // necessary for header test.
 #include "mcrl2/utilities/indexed_set.h"    // necessary for header test.
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 template <class Key, typename Hash, typename Equals, typename Allocator>
@@ -169,8 +167,8 @@ inline std::size_t hashtable<Key,Hash,Equals,Allocator>::get_index(const Key& ke
 }
 
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_UTILITIES_DETAIL_INDEXED_SET_H

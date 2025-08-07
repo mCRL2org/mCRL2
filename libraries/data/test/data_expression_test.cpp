@@ -91,8 +91,8 @@ BOOST_AUTO_TEST_CASE(application_test)
   basic_sort s1("S1");
   basic_sort s("S");
   sort_expression_vector s01;
-  s01.push_back(sort_expression(s0));
-  s01.push_back(sort_expression(s1));
+  s01.emplace_back(s0);
+  s01.emplace_back(s1);
   function_sort s01s(s01, s);
 
   data::function_symbol f("f", s01s);

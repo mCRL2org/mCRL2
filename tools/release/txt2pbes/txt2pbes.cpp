@@ -27,15 +27,15 @@ using mcrl2::pbes_system::tools::pbes_output_tool;
 
 class txt2pbes_tool: public pbes_output_tool<input_output_tool>
 {
-  typedef pbes_output_tool<input_output_tool> super;
+  using super = pbes_output_tool<input_output_tool>;
 
-  protected:
-    bool m_normalize = false;
+protected:
+  bool m_normalize = false;
 
-    void parse_options(const command_line_parser& parser) override
-    {
-      super::parse_options(parser);
-      m_normalize = 0 < parser.options.count("normalize");
+  void parse_options(const command_line_parser& parser) override
+  {
+    super::parse_options(parser);
+    m_normalize = 0 < parser.options.count("normalize");
     }
 
     void add_options(interface_description& desc) override

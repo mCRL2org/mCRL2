@@ -11,7 +11,7 @@ A Telephone Book
 none.
 
 In this section we describe the model of a telephone book in
-mCRL2. 
+mCRL2.
 We base our model on the following requirements:
 
 #. A phone book shall store phone numbers.
@@ -109,10 +109,10 @@ following specification, that is also available as
 .. admonition:: Exercise
 
    Fix these issues in the above specification.
-   
+
 .. admonition:: Solution
    :class: collapse
-   
+
    Preventing the assignment of ``p0`` to a name can easily prevented by
    guarding the ``addPhone`` action with ``p != p0``. Fixing the second issue
    requires some more thought. There are two possible ways around fixing the
@@ -165,15 +165,15 @@ to change the data structures used in a specification.
            add_phone: PhoneBook # Name # PhoneNumber -> PhoneBook;
            del_phone: PhoneBook # Name -> PhoneBook;
            find_phone: PhoneBook # Name -> PhoneNumber;
-           
+
    Define equations implementing the above operations.
 
 .. admonition:: Solution
    :class: collapse
-   
+
    A solution to the above exercise is given by the following specification
    (also available as :download:`phonebook3.mcrl2 <files/phonebook3.mcrl2>`).
-   
+
    .. literalinclude:: files/phonebook3.mcrl2
       :language: mcrl2
 
@@ -208,50 +208,50 @@ A suitable property for our specification is the following:
   lookup of name ``n`` is performed, then phone number ``p`` should be reported,
   provided that in the meantime no other phone number has been added for name
   ``n``, and the phone number for name ``n`` has not been deleted".
-  
+
 .. admonition:: Exercise
 
    Write the above propery in the µ-calculus.
-   
+
 .. admonition:: Solution
    :class: collapse
-   
+
    A solution (available as :download:`phonebook1.mcf <files/phonebook1.mcf>`)
    is the following:
-   
+
    .. literalinclude:: files/phonebook1.mcf
       :language: mcrl2
-      
+
 .. admonition:: Exercise
 
    Try to verify this property using the tools. What do you observe?
-   
+
 .. admonition:: Hint
    :class: collapse
-   
+
    You need to use the tools :ref:`tool-mcrl22lps`, :ref:`tool-lps2pbes` and
    :ref:`tool-pbes2bool`.
-   
+
 .. admonition:: Solution
    :class: collapse
-   
+
    We try checking this property using the following command::
 
      $ mcrl22lps phonebook2b.mcrl2 | lps2pbes -f phonebook1.mcf | pbes2bool
      [20:54:11.222 error]   Cannot find a term of sort Name
-   
+
    Observe that the tools fail to verify this requirement because of an error.
 
    The tool is telling you that it wants to find some representative term of
    sort ``Name``, but is not able to do so. This indeed makes sense as we have
    not given a specification of names and phone numbers yet.
-  
+
 .. admonition:: Exercise
-  
+
    Fix the specification by making sure there are 3 names, and 3 phone numbers
    (apart from the special phone number ``p0``). Rerun the verification on the
    fixed specification.
-   
+
 .. admonition:: Solution
    :class: collapse
 
@@ -271,26 +271,26 @@ A suitable property for our specification is the following:
 
    Verify whether the following property holds for :download:`phonebook5.mcrl2
    <files/phonebook5.mcrl2>`.
-   
+
      "if a name ``n`` with phone number ``p`` is added to the phone book, and a
      lookup of name ``n`` is performed, then phone number ``p`` should be
      reported, provided that in the meantime the phone number for name ``n`` has
      not been deleted".
-    
+
    You first need to formalise this property as a  µ-calculus formula, and then
    verify whether it holds. Explain the outcome of the verification.
-   
+
 .. admonition:: Solution
    :class: collapse
-   
+
    The following formula (available as :download:`phonebook2.mcf <files/phonebook2.mcf>`)
    formalises this property.
-   
+
    .. literalinclude:: files/phonebook2.mcf
       :language: mcrl2
-      
+
    It can be verified using the commands::
-   
+
      $ mcrl22lps phonebook5.mcrl2 | lps2pbes -f phonebook2.mcf | pbes2bool
      false
 
@@ -312,13 +312,13 @@ A suitable property for our specification is the following:
    such that ``changePhone(n,p)`` can only be executed if ``n`` already has a
    phone number, and that afterwards the phone number of ``n`` has been updated
    to ``p``. Save the result as :file:`phonebook6.mcrl2`
-   
+
 .. admonition:: Solution
    :class: collapse
-   
+
    A sample solution is the following (:download:`phonebook6.mcrl2
    <files/phonebook6.mcrl2>`)
-   
+
    .. literalinclude:: files/phonebook6.mcrl2
       :language: mcrl2
 
@@ -326,12 +326,12 @@ A suitable property for our specification is the following:
 
    Verify whether your new specification satisfies the property you formulated
    before. Explain the outcome.
-   
+
 .. admonition:: Solution
 
    For our version of the property, the verification delivers the following
    result::
-   
+
      $ mcrl22lps phonebook6.mcrl2 | lps2pbes -f phonebook2.mcf | pbes2bool
      false
 
@@ -341,19 +341,19 @@ A suitable property for our specification is the following:
    of the ``changePhone`` action on the validity of the property you are trying
    to check. Describe the changed property in natural language, give the modal
    µ-calculus formula, and do the verification.
-   
+
 .. admonition:: Solution
 
    Our modified property is the following (:download:`phonebook3.mcf <files/phonebook3.mcf>`).
-   
+
    .. literalinclude:: files/phonebook3.mcf
       :language: mcrl2
 
    Now the following verification succeeds::
-   
+
      $ mcrl22lps phonebook6.mcrl2 | lps2pbes -f phonebook3.mcf | pbes2bool
-     false
-     
+     true
+
 As an alternative approach to the verification, you can make the phonebook that
 is used internally available externally through a ``getPhoneBook`` action.
 A specification in which this modification has been made is the following
@@ -361,7 +361,7 @@ A specification in which this modification has been made is the following
 
 .. literalinclude:: files/phonebook7.mcrl2
    :language: mcrl2
-   
+
 Our last property (:download:`phonebook3.mcf <files/phonebook3.mcf>`) can now
 also be formulated as follows (:download:`phonebook4.mcf <files/phonebook4.mcf>`)
 using the internally stored phonebook.
@@ -372,5 +372,4 @@ using the internally stored phonebook.
 The verification result is still the same::
 
   $ mcrl22lps phonebook7.mcrl2 | lps2pbes -f phonebook4.mcf | pbes2bool
-  false
-
+  true

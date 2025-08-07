@@ -34,7 +34,7 @@ class ParityGameSolver : public Abortable, RefCounted
 public:
     ParityGameSolver(const ParityGame &game)
         : game_(game) { };
-    virtual ~ParityGameSolver() { };
+    ~ParityGameSolver() override = default;
 
     /*! Solve the game and return the strategies for both players. */
     virtual ParityGame::Strategy solve() = 0;
@@ -50,15 +50,15 @@ protected:
 class ParityGameSolverFactory : public RefCounted
 {
 public:
-    virtual ~ParityGameSolverFactory() { };
+  ~ParityGameSolverFactory() override = default;
 
-    /*! Create a parity game solver for the given game.
-        \param vertex_map maps vertex indices from the given subgame to the
-            main game. (This allows the SPM solver to correctly collect per-
-            vertex lifting statistics even if the game is decomposed first.)
-        \param vertex_map_size number of vertices mapped */
-    virtual ParityGameSolver *create( const ParityGame &game,
-        const verti *vertex_map = NULL, verti vertex_map_size = 0 ) = 0;
+  /*! Create a parity game solver for the given game.
+      \param vertex_map maps vertex indices from the given subgame to the
+          main game. (This allows the SPM solver to correctly collect per-
+          vertex lifting statistics even if the game is decomposed first.)
+      \param vertex_map_size number of vertices mapped */
+  virtual ParityGameSolver* create(const ParityGame& game, const verti* vertex_map = nullptr, verti vertex_map_size = 0)
+      = 0;
 };
 
 #include "ParityGameSolver_impl.h"

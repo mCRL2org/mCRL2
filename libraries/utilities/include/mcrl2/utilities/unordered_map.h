@@ -31,7 +31,7 @@ public:
   using key_type = Key;
   using mapped_type = T;
   using value_type = std::pair<const Key, T>;
-  typedef value_type node_type;
+  using node_type = value_type;
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;
 
@@ -65,9 +65,10 @@ private:
     {
       return hash(pair.first);
     }
-        
-    template<typename U, typename ...V, typename = std::enable_if_t<!std::is_same_v<U, std::pair<Key, T>>>>
-    std::size_t operator()(const U& key, const V&... /* args */) const 
+
+    template <typename U, typename... V>
+    std::size_t operator()(const U& key, const V&... /* args */) const
+      requires(!std::is_same_v<U, std::pair<Key, T>>)
     {
       return hash(key);
     }
@@ -91,8 +92,9 @@ private:
       return equals(first.first, second.first);
     }
 
-    template <typename U, typename...V, typename = std::enable_if_t<!std::is_same_v<U, std::pair<Key, T>>>>
+    template <typename U, typename... V>
     bool operator()(const value_type& first, const U& key, const V&... /* args */) const
+      requires(!std::is_same_v<U, std::pair<Key, T>>)
     {
       return equals(first.first, key);
     }
@@ -108,7 +110,7 @@ public:
   using const_iterator = typename Set::const_iterator;
   using local_iterator = typename bucket_type::iterator;
   using const_local_iterator = typename Set::const_local_iterator;
-  typedef typename std::pair<unordered_map::iterator, bool> insert_return_type;
+  using insert_return_type = typename std::pair<unordered_map::iterator, bool>;
 
   unordered_map()
     : m_set(0, PairHash(hasher()), PairEquals(key_equal()))
@@ -162,7 +164,7 @@ public:
   iterator try_emplace(const_iterator /*hint*/, const Key& k, Args&&... args) { return try_emplace(k, std::forward<Args>(args)...); }
 
   template< class... Args >
-  iterator try_emplace(const_iterator /*hint*/, Key&& k, Args&&... args) { return try_emplace(std::forward<Key>(k), std::forward<Args>(args)...); }
+  iterator try_emplace(const_iterator /*hint*/, Key&& k, Args&&... args) { return try_emplace(std::move<Key>(k), std::forward<Args>(args)...); }
 
   template <typename M>
   std::pair<iterator, bool> insert_or_assign(Key&& k, M&& obj)
@@ -175,7 +177,7 @@ public:
     }
     else
     {
-      return emplace(std::forward<Key>(obj), std::forward<M>(obj));
+      return emplace(std::move(k), std::forward(obj));
     }
   }
 
@@ -186,7 +188,7 @@ public:
   std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, const Key& k, M&& obj) { return insert_or_emplace(k, std::forward<M>(obj)); }
 
   template <typename M>
-  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, Key&& k, M&& obj) { return insert_or_emplace(k, std::forward<M>(obj)); }
+  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, Key&& k, M&& obj) { return insert_or_emplace(std::move<Key>(k), std::forward<M>(obj)); }
 
   /// \brief Erases elements.
   void erase(const key_type& key) { const_iterator it = m_set.find(key); m_set.erase(it); }

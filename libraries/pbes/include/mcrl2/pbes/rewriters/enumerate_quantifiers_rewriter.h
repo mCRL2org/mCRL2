@@ -18,9 +18,8 @@
 #include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -29,9 +28,9 @@ namespace detail {
 template <typename Derived, typename DataRewriter, typename MutableSubstitution>
 struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution>
 {
-  typedef simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution> super;
-  typedef enumerate_quantifiers_builder<Derived, DataRewriter, MutableSubstitution> self;
-  typedef data::enumerator_list_element<pbes_expression> enumerator_element;
+  using super = simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution>;
+  using self = enumerate_quantifiers_builder<Derived, DataRewriter, MutableSubstitution>;
+  using enumerator_element = data::enumerator_list_element<pbes_expression>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -243,7 +242,8 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
 template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
 struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>
 {
-  typedef Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution> super;
+  using super
+      = Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>;
   using super::enter;
   using super::leave;
 
@@ -277,8 +277,8 @@ struct enumerate_quantifiers_rewriter
     mutable data::enumerator_identifier_generator m_id_generator;
 
   public:
-    typedef pbes_expression term_type;
-    typedef data::variable variable_type;
+    using term_type = pbes_expression;
+    using variable_type = data::variable;
 
     enumerate_quantifiers_rewriter(const data::rewriter& R, const data::data_specification& dataspec, bool enumerate_infinite_sorts = true)
       : m_rewriter(R), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
@@ -330,8 +330,6 @@ struct enumerate_quantifiers_rewriter
     }
 };
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H

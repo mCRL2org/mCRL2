@@ -46,11 +46,11 @@ class term_list_iterator
     } 
 
   public:
-    typedef Term value_type;
-    typedef Term& reference;
-    typedef Term* pointer;
-    typedef ptrdiff_t difference_type;
-    typedef std::forward_iterator_tag iterator_category;
+    using value_type = Term;
+    using reference = Term&;
+    using pointer = Term*;
+    using difference_type = ptrdiff_t;
+    using iterator_category = std::forward_iterator_tag;
 
     /// \brief Default constructor.
     term_list_iterator()
@@ -66,11 +66,7 @@ class term_list_iterator
 
     /// \brief Assignment
     /// \param other A sequence of terms
-    term_list_iterator& operator=(const term_list_iterator& other)
-    { 
-      m_list=other.m_list;
-      return *this;
-    } 
+    term_list_iterator& operator=(const term_list_iterator& other) = default;
 
     /// \brief Dereference operator on an iterator
     const Term& operator*() const
@@ -182,11 +178,11 @@ class reverse_term_list_iterator
     } 
 
   public:
-    typedef Term value_type;
-    typedef Term& reference;
-    typedef Term* pointer;
-    typedef ptrdiff_t difference_type;
-    typedef std::forward_iterator_tag iterator_category;
+    using value_type = Term;
+    using reference = Term&;
+    using pointer = Term*;
+    using difference_type = ptrdiff_t;
+    using iterator_category = std::forward_iterator_tag;
 
     /// \brief Default constructor.
     reverse_term_list_iterator()

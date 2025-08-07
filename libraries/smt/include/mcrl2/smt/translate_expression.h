@@ -11,9 +11,7 @@
 
 #include "mcrl2/smt/translate_sort.h"
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 
 template <typename T, typename OutputStream>
@@ -72,7 +70,7 @@ template <template <class> class Traverser, class OutputStream>
 struct translate_data_expression_traverser
     : public Traverser<translate_data_expression_traverser<Traverser, OutputStream>>
 {
-  typedef Traverser<translate_data_expression_traverser<Traverser, OutputStream>> super;
+  using super = Traverser<translate_data_expression_traverser<Traverser, OutputStream>>;
   using super::apply;
 
   stack_outstream<OutputStream> out;
@@ -236,7 +234,6 @@ void translate_variable_declaration(const Container& vars,
   translate_assertion(vars_conditions, o, c, nt);
 }
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif

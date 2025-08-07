@@ -19,17 +19,14 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 // Normalizes conjunctions and disjunctions.
 template <typename Derived>
 struct normalize_and_or_builder: public data_expression_builder<Derived>
 {
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -83,9 +80,7 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
 };
 
 template <typename T>
-T normalize_and_or(const T& x,
-                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                  )
+T normalize_and_or(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_apply_builder<normalize_and_or_builder>().apply(result, x);
@@ -93,9 +88,7 @@ T normalize_and_or(const T& x,
 }
 
 template <typename T>
-void normalize_and_or(T& x,
-                      typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                     )
+void normalize_and_or(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_apply_builder<normalize_and_or_builder>().update(x);
 }
@@ -104,7 +97,7 @@ void normalize_and_or(T& x,
 template <typename Derived>
 struct normalize_equality_builder: public data_expression_builder<Derived>
 {
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -149,9 +142,7 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
 };
 
 template <typename T>
-T normalize_equality(const T& x,
-                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                    )
+T normalize_equality(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_apply_builder<normalize_equality_builder>().apply(result, x);
@@ -159,9 +150,7 @@ T normalize_equality(const T& x,
 }
 
 template <typename T>
-void normalize_equality(T& x,
-                        typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                       )
+void normalize_equality(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_apply_builder<normalize_equality_builder>().update(x);
 }
@@ -250,11 +239,7 @@ data_expression I(const data_expression& x)
   return x;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_TEST_REWRITERS_H
 

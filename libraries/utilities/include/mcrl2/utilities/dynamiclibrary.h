@@ -67,14 +67,13 @@
   }
 #else
   #include <dlfcn.h>
-  typedef void* library_handle;
-  typedef void* library_proc;
+using library_handle = void*;
+using library_proc = void*;
 
-  inline
-  library_handle get_module_handle(const std::string& fname)
-  {
-    // return dlopen(fname.c_str(), RTLD_LAZY);
-    return dlopen(fname.c_str(), RTLD_NOW);
+inline library_handle get_module_handle(const std::string& fname)
+{
+  // return dlopen(fname.c_str(), RTLD_LAZY);
+  return dlopen(fname.c_str(), RTLD_NOW);
   }
 
   inline
@@ -99,7 +98,7 @@
 class dynamic_library 
 {
   protected:
-    library_handle m_library;
+    library_handle m_library = nullptr;
     std::string m_filename;
 
     void load() 
@@ -127,9 +126,8 @@ class dynamic_library
     }
   
   public:
-    dynamic_library(const std::string& filename = std::string()) 
-     : m_library(nullptr), 
-       m_filename(filename) 
+    dynamic_library(const std::string& filename = std::string())
+        : m_filename(filename)
     {
     }
 
@@ -152,7 +150,7 @@ class dynamic_library
         load();
       }
       library_proc result = get_proc_address(m_library, name.c_str());
-      if (result == 0)
+      if (result == nullptr)
       {
         throw std::runtime_error("Could not find proc address (" + m_filename + ":" + name + "): " + get_last_error());
       }

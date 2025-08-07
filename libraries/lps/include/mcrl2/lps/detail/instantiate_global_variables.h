@@ -15,13 +15,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/remove.h"
 
-namespace mcrl2
-{
-
-namespace lps
-{
-
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 /// \brief Applies a global variable substitution to an LPS.
@@ -59,10 +53,10 @@ data::mutable_map_substitution<> instantiate_global_variables(Specification& lps
   return sigma;
 }
 
-} // namespace detail
+} // namespace mcrl2::lps::detail
 
-} // namespace lps
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_LPS_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H

@@ -16,9 +16,8 @@
 #include "mcrl2/process/add_binding.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -26,7 +25,10 @@ namespace detail {
 template <template <class> class Builder, class Derived, class Substitution, class IdentifierGenerator>
 struct add_capture_avoiding_replacement_with_an_identifier_generator: public data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>
 {
-  typedef data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator> super;
+  using super = data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder,
+      Derived,
+      Substitution,
+      IdentifierGenerator>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -105,7 +107,13 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator: public dat
 template <template <class> class Builder, template <template <class> class, class, class, class> class Binder, class Substitution, class IdentifierGenerator>
 struct replace_capture_avoiding_variables__with_an_identifier_generator_builder: public Binder<Builder, replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator>
 {
-  typedef Binder<Builder, replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator> super;
+  using super = Binder<Builder,
+      replace_capture_avoiding_variables__with_an_identifier_generator_builder<Builder,
+          Binder,
+          Substitution,
+          IdentifierGenerator>,
+      Substitution,
+      IdentifierGenerator>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -138,9 +146,9 @@ apply_replace_capture_avoiding_variables__with_an_identifier_generator_builder(S
 template <typename T, typename Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
-                       IdentifierGenerator& id_generator,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                       IdentifierGenerator& id_generator
                       )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<process::data_expression_builder, process::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
 }
@@ -157,9 +165,9 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 template <typename T, typename Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
-                    IdentifierGenerator& id_generator,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                    IdentifierGenerator& id_generator
                    )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<process::data_expression_builder, process::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
@@ -167,8 +175,6 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
 }
 //--- end generated process replace_capture_avoiding_with_identifier_generator code ---//
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H

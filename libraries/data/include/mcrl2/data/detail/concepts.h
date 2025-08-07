@@ -7,19 +7,14 @@
 
 #include <boost/concept/detail/concept_def.hpp>
 
-namespace mcrl2
-{
-namespace data
-{
-namespace concepts
+namespace mcrl2::data::concepts
 {
 
 BOOST_concept(Substitution,(S)) :
   boost::UnaryFunction< S, typename S::expression_type, typename S::expression_type >
 {
-
-  typedef typename S::variable_type   variable_type;
-  typedef typename S::expression_type expression_type;
+  using variable_type = typename S::variable_type;
+  using expression_type = typename S::expression_type;
 
   variable_type    v;
   expression_type  e;
@@ -28,7 +23,8 @@ BOOST_concept(Substitution,(S)) :
 
   BOOST_CONCEPT_USAGE(Substitution)
   {
-    static_assert(std::is_convertible< variable_type, expression_type >::value,"variable_type and expression_type must be convertible");
+    static_assert(std::is_convertible_v<variable_type, expression_type>,
+        "variable_type and expression_type must be convertible");
 
     s(static_cast< expression_type const& >(e)) == e;
     s(static_cast< variable_type const& >(v)) == v;
@@ -39,9 +35,8 @@ BOOST_concept(MutableSubstitution,(S)) :
   boost::DefaultConstructible< S >,
   Substitution< S >
 {
-
-  typedef typename S::variable_type   variable_type;
-  typedef typename S::expression_type expression_type;
+  using variable_type = typename S::variable_type;
+  using expression_type = typename S::expression_type;
 
   variable_type    v;
   expression_type  e;
@@ -88,9 +83,9 @@ BOOST_concept(Enumerator,(E)) : boost_concepts::ForwardTraversal< E >
     s = *e;
   }
 };
-} // namespace concepts
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::concepts
+
+
 
 #include <boost/concept/detail/concept_undef.hpp>
 

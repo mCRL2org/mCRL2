@@ -15,10 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Search strategy when generating a BES from a PBES.
@@ -33,11 +30,26 @@ enum search_strategy
 inline
 search_strategy parse_search_strategy(const std::string& s)
 {
-  if (s == "breadth-first") return breadth_first;
-  else if (s == "b") return breadth_first_short;
-  else if (s == "depth-first") return depth_first;
-  else if (s == "d") return depth_first_short;
-  else throw mcrl2::runtime_error("unknown search strategy " + s);
+  if (s == "breadth-first")
+  {
+    return breadth_first;
+  }
+  else if (s == "b")
+  {
+    return breadth_first_short;
+  }
+  else if (s == "depth-first")
+  {
+    return depth_first;
+  }
+  else if (s == "d")
+  {
+    return depth_first_short;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown search strategy " + s);
+  }
 }
 
 inline
@@ -94,8 +106,8 @@ std::string description(const search_strategy s)
   throw mcrl2::runtime_error("unknown search strategy");
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_SEARCH_STRATEGY_H

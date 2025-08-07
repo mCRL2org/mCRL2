@@ -14,9 +14,7 @@
 
 #include "mcrl2/process/action_label.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process {
 
 /// \brief Merges two action specifications.
 inline
@@ -28,8 +26,8 @@ action_label_list merge_action_specifications(const action_label_list& actspec1,
   return action_label_list(result.begin(), result.end());
 }
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_MERGE_ACTION_SPECIFICATIONS_H

@@ -14,11 +14,7 @@
 
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 class RewriterProver: public Rewriter
@@ -26,7 +22,7 @@ class RewriterProver: public Rewriter
   public:
     BDD_Prover prover_obj;
 
-    typedef Rewriter::substitution_type substitution_type;
+    using substitution_type = Rewriter::substitution_type;
 
   public:
     RewriterProver(const data_specification& data_spec, mcrl2::data::rewriter::strategy strat, 
@@ -36,11 +32,10 @@ class RewriterProver: public Rewriter
     {
       thread_initialise();
     }
-    
-    virtual ~RewriterProver()
-    {}
 
-    rewrite_strategy getStrategy()
+    ~RewriterProver() override = default;
+
+    rewrite_strategy getStrategy() override
     {
       switch (prover_obj.rewriter_strategy())
       {
@@ -55,10 +50,7 @@ class RewriterProver: public Rewriter
       }
     }
 
-    void rewrite(
-         data_expression& result,
-         const data_expression& t,
-         substitution_type& sigma)
+    void rewrite(data_expression& result, const data_expression& t, substitution_type& sigma) override
     {
       // The prover rewriter should also work on terms with other types than Bool. 
       // Up till 14/5/2020 this was not the case. The old code is left here, to
@@ -78,16 +70,14 @@ class RewriterProver: public Rewriter
       //}
     }
 
-    data_expression rewrite(
-         const data_expression& t,
-         substitution_type& sigma)
+    data_expression rewrite(const data_expression& t, substitution_type& sigma) override
     {
       data_expression result;
       rewrite(result,t,sigma);
       return result;
     }
 
-    void thread_initialise() 
+    void thread_initialise() override
     {
       Rewriter::thread_initialise();
       prover_obj.thread_initialise();
@@ -106,15 +96,13 @@ class RewriterProver: public Rewriter
     {
       thread_initialise();
     }
-    
-    std::shared_ptr<Rewriter> clone()
+
+    std::shared_ptr<Rewriter> clone() override
     {
       return std::shared_ptr<Rewriter>(new RewriterProver(*this,prover_obj.clone()));
     }
 };
 
-}
-}
 }
 
 #endif

@@ -17,9 +17,7 @@
 #include <cctype>
 #include <map>
 
-namespace mcrl2 {
-
-namespace utilities {
+namespace mcrl2::utilities {
 
 /// \brief Identifier generator that generates names consisting of a prefix followed by a number.
 /// For each prefix an index is maintained, that is incremented after each call to operator()(prefix).
@@ -134,8 +132,8 @@ class number_postfix_generator
     }
 };
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_UTILITIES_NUMBER_POSTFIX_GENERATOR_H

@@ -14,10 +14,9 @@
 
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 //--- start generated class basic_sort ---//
@@ -82,20 +81,20 @@ std::ostream& operator<<(std::ostream& out, const basic_sort& x)
 }
 
 /// \\brief swap overload
-inline void swap(basic_sort& t1, basic_sort& t2)
+inline void swap(basic_sort& t1, basic_sort& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated class basic_sort ---//
 
 /// \brief list of basic sorts
-typedef atermpp::term_list<basic_sort> basic_sort_list;
+using basic_sort_list = atermpp::term_list<basic_sort>;
 /// \brief vector of basic sorts
-typedef std::vector<basic_sort> basic_sort_vector;
+using basic_sort_vector = std::vector<basic_sort>;
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_BASIC_SORT_H
 

@@ -16,10 +16,7 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Algorithm class for the eqelm algorithm
@@ -27,7 +24,7 @@ template <typename Term, typename DataRewriter, typename PbesRewriter>
 class pbes_eqelm_algorithm
 {
   protected:
-    typedef std::set<data::variable> equivalence_class;
+    using equivalence_class = std::set<data::variable>;
 
     /// \brief Compares data expressions for equality.
     const DataRewriter& m_data_rewriter;
@@ -332,7 +329,7 @@ void eqelm(pbes& p,
   {
     case pbes_rewriter_type::simplify:
     {
-      typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
+      using pbes_rewriter = simplify_data_rewriter<data::rewriter>;
       pbes_rewriter pbesr(datar);
       pbes_eqelm_algorithm<pbes_expression, data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, ignore_initial_state);
@@ -352,8 +349,8 @@ void eqelm(pbes& p,
   }
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_EQELM_H

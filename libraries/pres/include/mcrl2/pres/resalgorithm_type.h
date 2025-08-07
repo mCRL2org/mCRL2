@@ -15,9 +15,9 @@
 #include <iomanip>
 #include "mcrl2/core/detail/print_utility.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 enum solution_algorithm { gauss_elimination, numerical, numerical_directed };
 
@@ -96,8 +96,8 @@ std::ostream& operator<<(std::ostream& os, const solution_algorithm l)
   return os;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_RESALGORITHM_TYPE_H

@@ -25,17 +25,17 @@ class LinearLiftingStrategy : public LiftingStrategy
 {
 public:
     LinearLiftingStrategy(const ParityGame &game, bool alternate);
-    void lifted(verti v);
-    verti next();
+    void lifted(verti v) override;
+    verti next() override;
 
     bool alternate() const { return alternate_; }
 
 private:
     const bool alternate_;      //!< alternate direction after each pass
     const verti last_vertex_;   //!< last vertex index
-    bool dir_;                  //!< current direction of iteration
+    bool dir_ = false;          //!< current direction of iteration
     verti vertex_;              //!< next vertex to lift
-    verti failed_lifts_;        //!< number of consecutive failed lift attempts
+    verti failed_lifts_ = 0;    //!< number of consecutive failed lift attempts
 };
 
 /*! \ingroup LiftingStrategies
@@ -47,10 +47,9 @@ public:
         : alternate_(alternate) { };
 
     //! Return a new LinearLiftingStrategy instance.
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm );
+    LiftingStrategy* create(const ParityGame& game, const SmallProgressMeasures& spm) override;
 
-private:
+  private:
     const bool alternate_;
 };
 

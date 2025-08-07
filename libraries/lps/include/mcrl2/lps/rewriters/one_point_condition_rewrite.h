@@ -20,14 +20,14 @@
 #include "mcrl2/lps/rewriters/data_rewriter.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
 // Extracts all conjuncts d == e from the data expression x, for variables d, and with e a constant.
-void find_equality_conjuncts(const data::data_expression& x, std::map<data::variable, data::data_expression>& result)
+inline void find_equality_conjuncts(const data::data_expression& x,
+    std::map<data::variable, data::data_expression>& result)
 {
   std::set<data::data_expression> conjuncts = data::split_and(x);
   for (const data::data_expression& expr: conjuncts)
@@ -70,7 +70,7 @@ void find_equality_conjuncts(const data::data_expression& x, std::map<data::vari
 template <typename DataRewriter>
 struct one_point_condition_rewrite_builder: public lps::data_expression_builder<one_point_condition_rewrite_builder<DataRewriter> >
 {
-  typedef lps::data_expression_builder<one_point_condition_rewrite_builder<DataRewriter> > super;
+  using super = lps::data_expression_builder<one_point_condition_rewrite_builder<DataRewriter>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -162,7 +162,9 @@ struct one_point_condition_rewrite_builder: public lps::data_expression_builder<
 /// \brief Applies the one point condition rewriter to all embedded data expressions in an object x
 /// \param x an object containing data expressions
 template <typename T, typename DataRewriter>
-void one_point_condition_rewrite(T& x, const DataRewriter& R, typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+void one_point_condition_rewrite(T& x,
+    const DataRewriter& R,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   detail::one_point_condition_rewrite_builder<DataRewriter>  f(R);
   f.update(x);
@@ -172,7 +174,9 @@ void one_point_condition_rewrite(T& x, const DataRewriter& R, typename std::enab
 /// \param x an object containing data expressions
 /// \return the rewrite result
 template <typename T, typename DataRewriter>
-T one_point_condition_rewrite(const T& x, const DataRewriter& R, typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+T one_point_condition_rewrite(const T& x,
+    const DataRewriter& R,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   detail::one_point_condition_rewrite_builder<DataRewriter> f(R);
@@ -180,9 +184,7 @@ T one_point_condition_rewrite(const T& x, const DataRewriter& R, typename std::e
   return result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_DETAIL_ONE_POINT_CONDITION_REWRITE_H
 

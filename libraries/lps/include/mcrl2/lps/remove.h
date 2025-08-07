@@ -14,10 +14,7 @@
 
 #include "mcrl2/lps/replace.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -59,7 +56,7 @@ struct is_singleton_sort
 /// Assignments to these parameters are removed as well.
 struct remove_parameters_builder: public data_expression_builder<remove_parameters_builder>
 {
-  typedef data_expression_builder<remove_parameters_builder> super;
+  using super = data_expression_builder<remove_parameters_builder>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -253,8 +250,8 @@ void remove_redundant_assignments(Specification& lpsspec)
   }
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_REMOVE_H

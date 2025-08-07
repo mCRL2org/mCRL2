@@ -65,11 +65,7 @@
 
 #define USE_POOL_ALLOCATOR
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 
@@ -109,17 +105,19 @@ namespace detail
     /// have the same size as type T.
     template <class T, std::size_t NR_ELEMENTS = 4000>
     class my_pool
-    {                                                                           static_assert(std::is_trivially_destructible<T>::value);
-      private:                                                                  static_assert(sizeof(void*) <= sizeof(T));
-        class pool_block_t
-        {
-          public:
-            char data[NR_ELEMENTS*sizeof(T)];
-            pool_block_t* next_block;
+    {
+      static_assert(std::is_trivially_destructible_v<T>);
+    private:
+      static_assert(sizeof(void*) <= sizeof(T));
+      class pool_block_t
+      {
+      public:
+        char data[NR_ELEMENTS * sizeof(T)]{};
+        pool_block_t* next_block;
 
-            pool_block_t(pool_block_t* const new_next_block)
-              : next_block(new_next_block)
-            {  }
+        pool_block_t(pool_block_t* const new_next_block)
+            : next_block(new_next_block)
+        {}
         };                                                                      static_assert(sizeof(T) <= sizeof(pool_block_t::data));
 
         /// \brief first chunk in list of chunks
@@ -130,7 +128,7 @@ namespace detail
         void* begin_used_in_first_block;
 
         /// \brief first freed element
-        void* first_free_T;
+        void* first_free_T = nullptr;
 
         static void*& deref_void(void* addr)
         {
@@ -141,9 +139,8 @@ namespace detail
         my_pool()
           : first_block(new pool_block_t(nullptr)),
             begin_used_in_first_block(
-                                &first_block->data[sizeof(first_block->data)]),
-            first_free_T(nullptr)
-        {  }
+                                &first_block->data[sizeof(first_block->data)])
+        {}
 
 
         /// \brief destructor
@@ -242,10 +239,11 @@ namespace detail
         /// \brief allocate and construct a new element (of any type)
         template <class U, class... Args>
         U* construct(Args&&... args)
-        {                                                                       static_assert(std::is_trivially_destructible<U>::value);
-            if constexpr (sizeof(U) == sizeof(T))
-            {
-                return construct_samesize<U>(std::forward<Args>(args)...);
+        {
+          static_assert(std::is_trivially_destructible_v<U>);
+          if constexpr (sizeof(U) == sizeof(T))
+          {
+            return construct_samesize<U>(std::forward<Args>(args)...);
             }
             else
             {                                                                   static_assert(sizeof(U) <= sizeof(first_block->data));
@@ -263,8 +261,9 @@ namespace detail
         template <class U>
         void destroy(U* const old_el)
         {                                                                       static_assert(sizeof(T) == sizeof(U));
-            old_el->~U();                                                       static_assert(std::is_trivially_destructible<U>::value);
-                                                                                #ifndef NDEBUG
+            old_el->~U();
+            static_assert(std::is_trivially_destructible_v<U>);
+#ifndef NDEBUG
                                                                                     // ensure that old_el points to an element in some block
                                                                                     static std::less<const void*> const total_order;
                                                                                     for (const pool_block_t* block(first_block);
@@ -340,11 +339,11 @@ namespace detail
         class const_iterator
         {
           public:
-            typedef T value_type;
-            typedef T* pointer;
-            typedef T& reference;
-            typedef std::ptrdiff_t difference_type;
-            typedef std::forward_iterator_tag iterator_category;
+            using value_type = T;
+            using pointer = T*;
+            using reference = T&;
+            using difference_type = std::ptrdiff_t;
+            using iterator_category = std::forward_iterator_tag;
           protected:
             entry* ptr;
 
@@ -457,7 +456,8 @@ namespace detail
         /// \brief constructor
         simple_list()
           : first(nullptr)
-        {                                                                       static_assert(std::is_trivially_destructible<entry>::value);
+        {
+          static_assert(std::is_trivially_destructible_v<entry>);
         }
 
         #ifndef USE_POOL_ALLOCATOR
@@ -1085,7 +1085,7 @@ namespace detail
 #endif
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 
 #endif // ifndef SIMPLE_LIST_H

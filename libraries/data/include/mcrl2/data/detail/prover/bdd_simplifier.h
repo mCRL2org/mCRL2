@@ -14,11 +14,7 @@
 
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /** \brief A base class for simplifying binary decision diagrams.
@@ -36,12 +32,10 @@ class BDD_Simplifier
   protected:
     /// \brief An integer representing the moment in time when the maximal amount of seconds has been spent on simplifying
     /// \brief the BDD.
-    time_t f_deadline;
+    time_t f_deadline = 0L;
   public:
     /// \brief Destructor without any additional functionality.
-    virtual ~BDD_Simplifier()
-    {
-    }
+    virtual ~BDD_Simplifier() = default;
 
     /// \brief Sets the attribute BDD_Simplifier::f_deadline.
     void set_time_limit(time_t a_time_limit)
@@ -66,8 +60,6 @@ class BDD_Simplifier
       return a_bdd;
     }
 };
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

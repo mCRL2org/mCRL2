@@ -30,18 +30,18 @@ using pbes_system::tools::pbes_input_tool;
 class besinfo_tool: public pbes_input_tool<input_tool>
 {
   protected:
-    typedef pbes_input_tool<input_tool> super;
+    using super = pbes_input_tool<input_tool>;
 
-    bool opt_full;
+    bool opt_full = false;
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       opt_full = parser.options.count("full") > 0;
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("full",
@@ -58,8 +58,7 @@ class besinfo_tool: public pbes_input_tool<input_tool>
         "Jeroen Keiren",
         "display basic information about a BES",
         super::make_tool_description("Print basic information about the BES in INFILE.")
-      ),
-      opt_full(false)
+      )
     {}
 
     /// If BES can be loaded from file_name, then
@@ -70,7 +69,7 @@ class besinfo_tool: public pbes_input_tool<input_tool>
     /// - Show predicate variables and their type
     /// else
     /// - Give error
-    bool run()
+    bool run() override
     {
       pbes b;
       load_pbes(b,input_filename(), pbes_input_format());

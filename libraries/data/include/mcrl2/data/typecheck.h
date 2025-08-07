@@ -17,16 +17,13 @@
 #include "mcrl2/data/detail/variable_context.h"
 #include "mcrl2/data/sort_type_checker.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 class data_type_checker: public sort_type_checker
 {
   protected:
-    mutable bool was_warning_upcasting; // This variable is used to limit the number of upcasting warnings.
+    mutable bool was_warning_upcasting = false; // This variable is used to limit the number of upcasting warnings.
 
     std::map<core::identifier_string,sort_expression_list> system_constants;   //name -> Set(sort expression)
     std::map<core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)
@@ -161,7 +158,7 @@ class data_type_checker: public sort_type_checker
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors);
     void add_function(const data::function_symbol& f, const std::string& msg, bool allow_double_decls=false);
     void add_constant(const data::function_symbol& f, const std::string& msg);
-    void initialise_system_defined_functions(void);
+    void initialise_system_defined_functions();
     void add_system_constant(const data::function_symbol& f);
     void add_system_function(const data::function_symbol& f);
     void add_system_constants_and_functions(const std::vector<data::function_symbol>& v);
@@ -367,10 +364,6 @@ data_expression typecheck_untyped_data_parameter(data_type_checker& typechecker,
   }
 }
 
-typedef atermpp::term_list<sort_expression_list> sorts_list;
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_TYPECHECK_H

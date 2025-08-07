@@ -13,11 +13,7 @@
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/lts/detail/liblts_plts_merge.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template < class LTS_TYPE>
@@ -135,33 +131,33 @@ class prob_bisim_partitioner_bem
 
   private:
 
-  typedef std::size_t block_key_type;
-  typedef std::size_t step_class_key_type;
-  typedef std::size_t state_type;
-  typedef std::size_t label_type;
-  typedef std::size_t distribution_key_type;
-  typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_fraction_type;
+    using block_key_type = std::size_t;
+    using step_class_key_type = std::size_t;
+    using state_type = std::size_t;
+    using label_type = std::size_t;
+    using distribution_key_type = std::size_t;
+    using probability_fraction_type = typename LTS_TYPE::probabilistic_state_t::probability_t;
 
-  struct distribution_type
-  {
-    distribution_key_type key;
-    std::vector< std::list<transition*> > incoming_transitions_per_label; // Incoming transitions organized per label
+    struct distribution_type
+    {
+      distribution_key_type key = 0UL;
+      std::vector<std::list<transition*>> incoming_transitions_per_label; // Incoming transitions organized per label
   };
   
   struct block_type
   {
-    block_key_type key;
+    block_key_type key = 0UL;
     std::list<state_type> states;        // The states in the block
-    bool is_in_new_blocks;
+    bool is_in_new_blocks = false;
   };
 
   struct step_class_type {
-    step_class_key_type key;
-    label_type action;                                // action label of the pair <a,M>.
+    step_class_key_type key = 0UL;
+    label_type action = 0UL;                          // action label of the pair <a,M>.
     std::list<distribution_type*> distributions;      // The distributions in the step class <a,M>.
     std::vector< bool > prev_states;                  // Previous states that can reach step_class <a,M>
-    bool is_in_new_step_classes;
-    std::size_t equivalent_step_class;
+    bool is_in_new_step_classes = false;
+    std::size_t equivalent_step_class = 0UL;
   };
 
   std::list<block_type*> state_partition;
@@ -178,22 +174,22 @@ class prob_bisim_partitioner_bem
   struct tree_type
   {
     std::list<state_type> states;
-    std::size_t count;
-    tree_type* left;
-    tree_type* right;
+    std::size_t count = 0UL;
+    tree_type* left = nullptr;
+    tree_type* right = nullptr;
 
     void init_node()
     {
       count = 0;
-      left = NULL;
-      right = NULL;
+      left = nullptr;
+      right = nullptr;
     }
   };
 
   /** \brief Creates the initial partition of step classes and blocks.
    *  \detail The blocks are initially partitioned based on the actions that can perform.
    *          The step classes are partitioned based on the action that leads to the probabilistic state */
-  void create_initial_partition (void) 
+  void create_initial_partition()
   {
     std::vector< std::vector< std::list<distribution_type*> > > steps; // Representation of transition in 2-d array
     std::vector<transition>& transitions = aut.get_transitions();
@@ -273,7 +269,7 @@ class prob_bisim_partitioner_bem
           
           step_classes[i].prev_states[s] = true;
 
-          if (v->left == NULL)
+          if (v->left == nullptr)
           {
             // create left node
             tree_type w;
@@ -292,7 +288,7 @@ class prob_bisim_partitioner_bem
         }
         else
         {
-          if (v->right == NULL)
+          if (v->right == nullptr)
           {
             // create left node
             tree_type w;
@@ -482,7 +478,7 @@ class prob_bisim_partitioner_bem
   *   \detail Refinement of state partition and step partition until no new blocks/step classes
   *           are in front of the partition lists
   */
-  void refine_partition_until_it_becomes_stable (void) 
+  void refine_partition_until_it_becomes_stable()
   {
     std::list<step_class_type*> step_partition_old;
     std::list<block_type*> state_partition_old;
@@ -597,7 +593,7 @@ class prob_bisim_partitioner_bem
         }
 
         // Add the pending new blocks to the front of the list
-        for (typename std::list<step_class_type*>::iterator sc_iter : pending_new_step_classes)
+        for (const typename std::list<step_class_type*>::iterator& sc_iter: pending_new_step_classes)
         {
           step_partition.splice(step_partition.begin(), step_partition_old, sc_iter);
         }
@@ -701,7 +697,7 @@ class prob_bisim_partitioner_bem
         state_partition.splice(state_partition.begin(), state_partition_old);
 
         // move the blocks that should be in new blocks to the begining of the list
-        for (typename std::list<block_type*>::iterator block_iter : blocks_to_move_to_front)
+        for (const typename std::list<block_type*>::iterator& block_iter: blocks_to_move_to_front)
         {
           state_partition.splice(state_partition.begin(), state_partition, block_iter);
         }
@@ -716,7 +712,7 @@ class prob_bisim_partitioner_bem
     }
   }
 
-  void postprocessing_stage(void)
+  void postprocessing_stage()
   {
     //---- Post processing to keep track of the parent block of each state ----//
     //block_index_of_a_state.resize(aut.num_states());
@@ -854,8 +850,6 @@ bool destructive_probabilistic_bisimulation_compare_bem(
     initial_probabilistic_state_key_l1);
 }
 
-}  // namespace detail
-}  // namespace lts
-}  // namespace mcrl2
+} // namespace mcrl2::lts::detail
 
 #endif // _LIBLTS_PBISIM_BEM_H

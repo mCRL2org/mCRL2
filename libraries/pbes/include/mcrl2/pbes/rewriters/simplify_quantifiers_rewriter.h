@@ -14,16 +14,14 @@
 
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
 template <template <class> class Builder, class Derived>
 struct add_simplify_quantifiers: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::apply;
 
   template <class T>
@@ -138,7 +136,10 @@ struct simplify_quantifiers_builder: public add_simplify_quantifiers<pbes_system
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<pbes_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction>
 {
-  typedef add_data_rewriter<pbes_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction> super;
+  using super = add_data_rewriter<pbes_system::detail::simplify_quantifiers_builder,
+      Derived,
+      DataRewriter,
+      SubstitutionFunction>;
   using super::enter;
   using super::leave;
 
@@ -152,8 +153,8 @@ struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<pbes
 /// \brief A rewriter that simplifies boolean expressions and quantifiers.
 struct simplify_quantifiers_rewriter
 {
-  typedef pbes_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pbes_expression;
+  using variable_type = data::variable;
 
   pbes_expression operator()(const pbes_expression& x) const
   {
@@ -167,8 +168,8 @@ struct simplify_quantifiers_rewriter
 template <typename DataRewriter>
 struct simplify_quantifiers_data_rewriter
 {
-  typedef pbes_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pbes_expression;
+  using variable_type = data::variable;
 
   const DataRewriter& R;
 
@@ -193,8 +194,8 @@ struct simplify_quantifiers_data_rewriter
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H

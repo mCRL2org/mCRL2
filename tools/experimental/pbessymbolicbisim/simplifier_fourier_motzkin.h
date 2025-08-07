@@ -16,14 +16,12 @@
 
 #include "simplifier_mdd.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 class simplifier_fourier_motzkin : public simplifier
 {
-  typedef simplifier super;
+  using super = simplifier;
   using super::rewr;
   using super::proving_rewr;
 
@@ -54,7 +52,7 @@ protected:
     }
   }
 
-  data_expression simplify_expression(const data_expression& expr)
+  data_expression simplify_expression(const data_expression& expr) override
   {
     // Split the expression into two equally sized lists of
     // expressions over real numbers and expressions over other
@@ -75,7 +73,7 @@ protected:
     {
       // Reduce each of the linear systems individually
       data_expression real_condition = sort_bool::false_();
-      for(data_expression_list zone: it->second)
+      for (const data_expression_list& zone: it->second)
       {
         real_condition = lazy::or_(real_condition, reduce_lineq(zone));
       }
@@ -90,11 +88,11 @@ public:
   : super(r, pr)
   , simpl_discr(r, pr, dataspec_)
   {}
-
+  ~simplifier_fourier_motzkin() override = default;
 };
 
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_FOURIER_MOTZKIN_H

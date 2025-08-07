@@ -20,17 +20,15 @@
 #include "mcrl2/data/print.h"
 #endif
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Represents a quantifier Qv:V. If the bool is true it is a forall, otherwise an exists.
-typedef std::pair<bool, data::variable_list> pfnf_traverser_quantifier;
+using pfnf_traverser_quantifier = std::pair<bool, data::variable_list>;
 
 struct variable_variable_substitution
 {
@@ -75,8 +73,8 @@ struct variable_variable_substitution
 
 struct variable_data_expression_substitution
 {
-  typedef data::variable variable_type;
-  typedef data::data_expression expression_type;
+  using variable_type = data::variable;
+  using expression_type = data::data_expression;
 
   const variable_variable_substitution& sigma;
 
@@ -148,19 +146,17 @@ struct pfnf_traverser_expression
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Concatenates two containers
@@ -178,7 +174,7 @@ Container concat(const Container& x, const Container& y)
 /// \brief Applies the PFNF rewriter to a PBES expression.
 struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
 {
-  typedef pbes_expression_traverser<pfnf_traverser> super;
+  using super = pbes_expression_traverser<pfnf_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -349,10 +345,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     std::cout << "value = " << pbes_system::pp(evaluate()) << std::endl;
   }
 
-  void enter(const data::data_expression& x)
-  {
-    expression_stack.push_back(pfnf_traverser_expression(x));
-  }
+  void enter(const data::data_expression& x) { expression_stack.emplace_back(x); }
 
   void enter(const not_&)
   {
@@ -371,7 +364,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     pbes_expression h = make_and(left, right);
     std::vector<pfnf_traverser_implication> g = concat(left.implications, right.implications);
 //std::cout << "AND RESULT\n"; print_expression(pfnf_traverser_expression(h, q, g));
-    expression_stack.push_back(pfnf_traverser_expression(h, q, g));
+    expression_stack.emplace_back(h, q, g);
   }
 
   void leave(const or_&)
@@ -400,13 +393,13 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     // first conjunction
     for (const pfnf_traverser_implication& i: q_phi)
     {
-      g.push_back(pfnf_traverser_implication(make_and(not_h_psi, i.g), i.rhs));
+      g.emplace_back(make_and(not_h_psi, i.g), i.rhs);
     }
 
     // second conjunction
     for (const pfnf_traverser_implication& i: q_psi)
     {
-      g.push_back(pfnf_traverser_implication(make_and(not_h_phi, i.g), i.rhs));
+      g.emplace_back(make_and(not_h_phi, i.g), i.rhs);
     }
 
     // third conjunction
@@ -414,11 +407,11 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     {
       for (const pfnf_traverser_implication& k: q_psi)
       {
-        g.push_back(pfnf_traverser_implication(make_and(i.g, k.g), concat(i.rhs, k.rhs)));
+        g.emplace_back(make_and(i.g, k.g), concat(i.rhs, k.rhs));
       }
     }
 //std::cout << "OR RESULT\n"; print_expression(pfnf_traverser_expression(h, q, g));
-    expression_stack.push_back(pfnf_traverser_expression(h, q, g));
+    expression_stack.emplace_back(h, q, g);
   }
 
   void enter(const imp& /*x*/)
@@ -434,7 +427,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
   void leave(const forall&)
   {
     // push the quantifier on the expression stack
-    expression_stack.back().quantifiers.push_back(std::make_pair(true, quantifier_stack.back()));
+    expression_stack.back().quantifiers.emplace_back(true, quantifier_stack.back());
     quantifier_stack.pop_back();
   }
 
@@ -446,7 +439,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
   void leave(const exists&)
   {
     // push the quantifier on the expression stack
-    expression_stack.back().quantifiers.push_back(std::make_pair(false, quantifier_stack.back()));
+    expression_stack.back().quantifiers.emplace_back(false, quantifier_stack.back());
     quantifier_stack.pop_back();
   }
 
@@ -456,14 +449,14 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     std::vector<pfnf_traverser_quantifier> q;
     pbes_expression h = true_();
     std::vector<pfnf_traverser_implication> g(1, pfnf_traverser_implication(true_(), std::vector<propositional_variable_instantiation>(1, x)));
-    expression_stack.push_back(pfnf_traverser_expression(h, q, g));
+    expression_stack.emplace_back(h, q, g);
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_PFNF_TRAVERSER_H

@@ -13,10 +13,7 @@
 
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \cond INTERNAL_DOCS
@@ -51,7 +48,7 @@ atermpp::term_list<Term> remove_elements(const atermpp::term_list<Term>& l, cons
 template <typename Derived>
 struct remove_parameters_builder: public pbes_system::pbes_expression_builder<Derived>
 {
-  typedef pbes_system::pbes_expression_builder<Derived> super;
+  using super = pbes_system::pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -105,9 +102,8 @@ struct remove_parameters_builder: public pbes_system::pbes_expression_builder<De
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
 T remove_parameters(const T& x,
-                    const std::vector<std::size_t>& to_be_removed,
-                    typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                   )
+    const std::vector<std::size_t>& to_be_removed,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed).apply(result, x);
@@ -120,9 +116,8 @@ T remove_parameters(const T& x,
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
 void remove_parameters(T& x,
-                       const std::vector<std::size_t>& to_be_removed,
-                       typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                      )
+    const std::vector<std::size_t>& to_be_removed,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed).update(x);
 }
@@ -134,7 +129,7 @@ namespace detail
 template <typename Derived>
 struct map_based_remove_parameters_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -206,9 +201,8 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
 T remove_parameters(const T& x,
-                    const std::map<core::identifier_string, std::vector<std::size_t> >& to_be_removed,
-                    typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                   )
+    const std::map<core::identifier_string, std::vector<std::size_t>>& to_be_removed,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed).apply(result, x);
@@ -222,9 +216,8 @@ T remove_parameters(const T& x,
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
 void remove_parameters(T& x,
-                       const std::map<core::identifier_string, std::vector<std::size_t> >& to_be_removed,
-                       typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                      )
+    const std::map<core::identifier_string, std::vector<std::size_t>>& to_be_removed,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed).update(x);
 }
@@ -236,7 +229,7 @@ namespace detail
 template <typename Derived>
 struct set_based_remove_parameters_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -316,9 +309,8 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
 T remove_parameters(const T& x,
-                    const std::set<data::variable>& to_be_removed,
-                    typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                   )
+    const std::set<data::variable>& to_be_removed,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   T result;
   core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed).apply(result, x);
@@ -331,9 +323,8 @@ T remove_parameters(const T& x,
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
 void remove_parameters(T& x,
-                       const std::set<data::variable>& to_be_removed,
-                       typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                      )
+    const std::set<data::variable>& to_be_removed,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed).update(x);
 }
@@ -350,8 +341,6 @@ void remove_pbes_parameters(pbes& x,
 }
 /// \endcond
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REMOVE_PARAMETERS_H

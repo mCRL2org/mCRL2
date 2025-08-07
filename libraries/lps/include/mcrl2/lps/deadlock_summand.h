@@ -16,16 +16,14 @@
 #include "mcrl2/lps/stochastic_distribution.h"
 #include "mcrl2/lps/summand.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 /// \brief LPS summand containing a deadlock.
 class deadlock_summand: public summand_base
 {
   protected:
     /// \brief The super class
-    typedef summand_base super;
+    using super = summand_base;
 
     /// \brief The deadlock of the summand
     lps::deadlock m_deadlock;
@@ -33,8 +31,7 @@ class deadlock_summand: public summand_base
   public:
     /// \brief Constructor.
     // TODO: check if the default constructor results in a deadlock summand
-    deadlock_summand()
-    {}
+    deadlock_summand() = default;
 
     /// \brief Constructor.
     deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& delta)
@@ -68,7 +65,7 @@ class deadlock_summand: public summand_base
     }
 
     /// \brief Swaps the contents
-    void swap(deadlock_summand& other)
+    void swap(deadlock_summand& other) noexcept
     {
       summand_base::swap(other);
       using std::swap;
@@ -78,10 +75,10 @@ class deadlock_summand: public summand_base
 
 //--- start generated class deadlock_summand ---//
 /// \\brief list of deadlock_summands
-typedef atermpp::term_list<deadlock_summand> deadlock_summand_list;
+using deadlock_summand_list = atermpp::term_list<deadlock_summand>;
 
 /// \\brief vector of deadlock_summands
-typedef std::vector<deadlock_summand>    deadlock_summand_vector;
+using deadlock_summand_vector = std::vector<deadlock_summand>;
 
 // prototype declaration
 std::string pp(const deadlock_summand& x, bool precedence_aware = true);
@@ -97,7 +94,7 @@ std::ostream& operator<<(std::ostream& out, const deadlock_summand& x)
 }
 
 /// \\brief swap overload
-inline void swap(deadlock_summand& t1, deadlock_summand& t2)
+inline void swap(deadlock_summand& t1, deadlock_summand& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -119,8 +116,8 @@ atermpp::aterm deadlock_summand_to_aterm(const deadlock_summand& s)
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_DEADLOCK_SUMMAND_H

@@ -15,10 +15,7 @@
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -27,14 +24,16 @@ namespace detail
 template <class INITIALIZER>
 INITIALIZER make_process_initializer(const data::data_expression_list& expressions, const INITIALIZER& init);
 
-template <>
-process_initializer make_process_initializer(const data::data_expression_list& expressions, const process_initializer& /* init */)
+template<>
+inline process_initializer make_process_initializer(const data::data_expression_list& expressions,
+    const process_initializer& /* init */)
 {
   return lps::process_initializer(expressions);
 }
 
-template <>
-stochastic_process_initializer make_process_initializer(const data::data_expression_list& expressions, const stochastic_process_initializer& init)
+template<>
+inline stochastic_process_initializer make_process_initializer(const data::data_expression_list& expressions,
+    const stochastic_process_initializer& init)
 {
   return stochastic_process_initializer(expressions, init.distribution());
 }
@@ -45,9 +44,9 @@ template <typename Specification>
 class untime_algorithm: public detail::lps_algorithm<Specification>
 {
   protected:
-    typedef typename detail::lps_algorithm<Specification> super;
-    typedef typename Specification::process_type process_type;
-    typedef typename process_type::action_summand_type action_summand_type;
+    using super = typename detail::lps_algorithm<Specification>;
+    using process_type = typename Specification::process_type;
+    using action_summand_type = typename process_type::action_summand_type;
     using super::m_spec;
 
     bool m_add_invariants;
@@ -151,7 +150,8 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
         std::set< variable > variables_in_action = process::find_all_variables(s.multi_action());
         std::set< variable > variables_in_assignments = process::find_all_variables(s.assignments());
         // Split the variables that do/do not occur in actions and assignments.
-        variable_list do_occur, do_not_occur;
+        variable_list do_occur;
+        variable_list do_not_occur;
 
         for(const variable& v: s.summation_variables())
         {
@@ -254,8 +254,6 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_UNTIME_H

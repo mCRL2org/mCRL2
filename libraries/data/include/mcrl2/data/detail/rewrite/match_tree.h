@@ -15,11 +15,7 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/machine_number.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// This is a list where variables and aterm ints can be stored.
@@ -27,8 +23,7 @@ class variable_or_number: public atermpp::aterm
 {
   public:
     /// Default constructor
-    variable_or_number()
-    {}
+    variable_or_number() = default;
 
     /// Constructor
     variable_or_number(const atermpp::aterm& v):
@@ -38,7 +33,7 @@ class variable_or_number: public atermpp::aterm
     }
 };
 
-typedef atermpp::term_list<variable_or_number> variable_or_number_list;
+using variable_or_number_list = atermpp::term_list<variable_or_number>;
 
 class match_tree:public atermpp::aterm
 {
@@ -219,8 +214,7 @@ class match_tree:public atermpp::aterm
 class match_tree_S:public match_tree
 {
   public:
-    match_tree_S()
-    {}
+    match_tree_S() = default;
 
     match_tree_S(const atermpp::aterm& t)
      : match_tree(t)
@@ -248,8 +242,7 @@ class match_tree_S:public match_tree
 class match_tree_A:public match_tree
 {
   public:
-    match_tree_A()
-    {}
+    match_tree_A() = default;
 
     match_tree_A(const atermpp::aterm& t)
      : match_tree(t)
@@ -272,8 +265,7 @@ class match_tree_A:public match_tree
 class match_tree_M:public match_tree
 {
   public:
-    match_tree_M()
-    {}
+    match_tree_M() = default;
 
     match_tree_M(const atermpp::aterm& t)
      : match_tree(t)
@@ -305,8 +297,7 @@ class match_tree_M:public match_tree
 class match_tree_F: public match_tree
 {
   public:
-    match_tree_F()
-    {}
+    match_tree_F() = default;
 
     match_tree_F(const atermpp::aterm& t)
      : match_tree(t)
@@ -338,8 +329,7 @@ class match_tree_F: public match_tree
 class match_tree_MachineNumber: public match_tree
 {
   public:
-    match_tree_MachineNumber()
-    {}
+    match_tree_MachineNumber() = default;
 
     match_tree_MachineNumber(const atermpp::aterm& t):
           match_tree(t)
@@ -372,8 +362,7 @@ class match_tree_MachineNumber: public match_tree
 class match_tree_N:public match_tree
 {
   public:
-    match_tree_N()
-    {}
+    match_tree_N() = default;
 
     match_tree_N(const atermpp::aterm& t)
      : match_tree(t)
@@ -398,8 +387,7 @@ class match_tree_N:public match_tree
 class match_tree_D:public match_tree
 {
   public:
-    match_tree_D()
-    {}
+    match_tree_D() = default;
 
     match_tree_D(const atermpp::aterm& t)
      : match_tree(t)
@@ -425,8 +413,7 @@ class match_tree_R:public match_tree
 {
 
   public:
-    match_tree_R()
-    {}
+    match_tree_R() = default;
 
     match_tree_R(const atermpp::aterm& t)
      : match_tree(t)
@@ -448,8 +435,7 @@ class match_tree_R:public match_tree
 class match_tree_C:public match_tree
 {
   public:
-    match_tree_C()
-    {}
+    match_tree_C() = default;
 
     match_tree_C(const atermpp::aterm& t)
      : match_tree(t)
@@ -497,8 +483,7 @@ class match_tree_X:public match_tree
 class match_tree_Re:public match_tree
 {
   public:
-    match_tree_Re()
-    {}
+    match_tree_Re() = default;
 
     match_tree_Re(const atermpp::aterm& t)
      : match_tree(t)
@@ -526,8 +511,7 @@ class match_tree_Re:public match_tree
 class match_tree_CRe:public match_tree
 {
   public:
-    match_tree_CRe()
-    {}
+    match_tree_CRe() = default;
 
     match_tree_CRe(const atermpp::aterm& t)
      : match_tree(t)
@@ -564,8 +548,7 @@ class match_tree_CRe:public match_tree
 class match_tree_Me:public match_tree
 {
   public:
-    match_tree_Me()
-    {}
+    match_tree_Me() = default;
 
     match_tree_Me(const atermpp::aterm& t)
      : match_tree(t)
@@ -588,10 +571,10 @@ class match_tree_Me:public match_tree
     }
 };
 
-typedef atermpp::term_list < match_tree > match_tree_list;
-typedef std::vector < match_tree > match_tree_vector;
-typedef atermpp::term_list < match_tree_list > match_tree_list_list;
-typedef atermpp::term_list < match_tree_list_list > match_tree_list_list_list;
+using match_tree_list = atermpp::term_list<match_tree>;
+using match_tree_vector = std::vector<match_tree>;
+using match_tree_list_list = atermpp::term_list<match_tree_list>;
+using match_tree_list_list_list = atermpp::term_list<match_tree_list_list>;
 
 // Structure for build_tree parameters
 class build_pars
@@ -702,10 +685,6 @@ std::ostream& operator<<(std::ostream& s, const match_tree& t)
   return s;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_MATCH_TREE_H

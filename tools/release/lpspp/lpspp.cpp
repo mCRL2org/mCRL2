@@ -24,7 +24,7 @@ using namespace mcrl2;
 class lpspp_tool: public input_output_tool
 {
   private:
-    typedef input_output_tool super;
+    using super = input_output_tool;
 
   public:
     lpspp_tool()
@@ -32,8 +32,7 @@ class lpspp_tool: public input_output_tool
               "pretty print an LPS",
               "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
-             ),
-      m_format(print_default)
+             )
     {}
 
     bool run() override
@@ -76,7 +75,7 @@ class lpspp_tool: public input_output_tool
     }
 
   protected:
-    print_format_type m_format;
+    print_format_type m_format = print_default;
     bool m_print_summand_numbers = false;
 
     void add_options(interface_description& desc) override

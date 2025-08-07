@@ -13,17 +13,15 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/function_update.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 template <template <class> class Traverser>
 struct double_variable_traverser : public Traverser<double_variable_traverser<Traverser> >
 {
-  typedef Traverser<double_variable_traverser<Traverser> > super;
+  using super = Traverser<double_variable_traverser<Traverser>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -202,7 +200,7 @@ inline void rewrite_all_arguments(data_expression& result, const application& t,
 } 
 
 }
-}
-}
+
+
 
 #endif // REWRITE_JITTY_JITTYC_COMMON_H

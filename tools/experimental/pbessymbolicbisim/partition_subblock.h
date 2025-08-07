@@ -13,9 +13,7 @@
 #include "eliminate_real_if.h"
 #include "utilities.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 /**
@@ -24,8 +22,8 @@ namespace data
  */
 class subblock
 {
-  typedef pbes_system::detail::ppg_summand summand_type_t;
-  typedef pbes_system::detail::ppg_equation equation_type_t;
+  using summand_type_t = pbes_system::detail::ppg_summand;
+  using equation_type_t = pbes_system::detail::ppg_equation;
 
 protected:
   // pointer to a const equation_type_t object
@@ -36,7 +34,7 @@ protected:
   data_expression m_char_func;
 
   const data_manipulators m_dm;
-  split_cache<subblock>* m_cache;
+  split_cache<subblock>* m_cache = nullptr;
 
 public:
 
@@ -230,7 +228,7 @@ public:
     return m_var < other.m_var || (m_var == other.m_var && m_char_func < other.m_char_func);
   }
 
-  friend void swap(subblock& self, subblock& other)
+  friend void swap(subblock& self, subblock& other) noexcept
   {
     using std::swap;
     swap(self.m_equation, other.m_equation);
@@ -248,7 +246,7 @@ public:
 };
 
 std::string pp(const subblock&);
-std::string pp(const subblock& b)
+inline std::string pp(const subblock& b)
 {
   std::ostringstream out;
   out << b.variable().name() << " - " << b.charachteristic_function();
@@ -261,8 +259,7 @@ std::ostream& operator<<(std::ostream& out, const subblock& b)
   return out << pp(b);
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 namespace std
 {

@@ -14,9 +14,7 @@
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 namespace detail
@@ -33,8 +31,8 @@ namespace detail
   class indexed_sorted_vector_for_tau_transitions
   {
     protected:
-      typedef std::size_t state_type;
-      typedef std::size_t label_type;
+      using state_type = std::size_t;
+      using label_type = std::size_t;
 
       std::vector <state_type> m_states_with_outgoing_or_incoming_tau_transition;
       std::vector <size_t> m_indices;
@@ -186,14 +184,14 @@ class scc_partitioner
 
   private:
 
-    typedef std::size_t state_type;
-    typedef std::size_t label_type;
+    using state_type = std::size_t;
+    using label_type = std::size_t;
 
     LTS_TYPE& aut;
 
     std::vector < state_type > block_index_of_a_state;
     std::vector < state_type > dfsn2state;
-    state_type equivalence_class_index;
+    state_type equivalence_class_index = 0;
 
     void group_components(const state_type t,
                           const state_type equivalence_class_index,
@@ -209,8 +207,7 @@ class scc_partitioner
 template < class LTS_TYPE>
 scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   :aut(l),
-    block_index_of_a_state(aut.num_states(),0),
-    equivalence_class_index(0)
+    block_index_of_a_state(aut.num_states(),0)
 {
   mCRL2log(log::debug) << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
               l.num_transitions() << " transitions" << std::endl;
@@ -398,5 +395,5 @@ void scc_reduce(LTS_TYPE& l,const bool preserve_divergence_loops = false)
 }
 
 }
-}
+
 #endif // _LIBLTS_SCC_H

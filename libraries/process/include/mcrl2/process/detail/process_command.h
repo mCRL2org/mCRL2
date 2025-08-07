@@ -16,11 +16,8 @@
 #include "mcrl2/process/detail/process_io.h"
 #include "mcrl2/utilities/detail/command.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 struct process_command: public utilities::detail::command
 {
@@ -34,10 +31,7 @@ struct process_command: public utilities::detail::command
     : utilities::detail::command(name, input_filename, output_filename, options)
   {}
 
-  void execute()
-  {
-    procspec = detail::parse_process_specification(input_filename);
-  }
+  void execute() override { procspec = detail::parse_process_specification(input_filename); }
 };
 
 /// \brief Process command that uses a rewrite strategy
@@ -56,10 +50,6 @@ struct process_rewriter_command: public process_command
   {}
 };
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_PROCESS_COMMAND_H

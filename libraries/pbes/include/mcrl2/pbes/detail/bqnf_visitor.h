@@ -18,11 +18,11 @@
 
 #include "mcrl2/pbes/pbes_functions.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 /// \brief The current indent level. Used for debug output.
 static int indent_count = 0;
@@ -53,7 +53,7 @@ static void indent()
 struct bqnf_visitor
 {
   /// \brief flag that indicates if debug output should be printed.
-  bool debug;
+  bool debug = false;
 
   /// \brief Returns a string representation of the type of the root node of the expression.
   /// \param e a PBES expression
@@ -128,13 +128,7 @@ struct bqnf_visitor
   }
 
   /// \brief Destructor.
-  virtual ~bqnf_visitor()
-  { }
-
-  /// \brief Constructor.
-  bqnf_visitor():
-    debug(false)
-  { }
+  virtual ~bqnf_visitor() = default;
 
   /// \brief Visits a simple expression.
   /// An expression is simple if it does not contain propositional variables.
@@ -469,12 +463,19 @@ struct bqnf_visitor
   /// \return true if the right hand side of the equation is in BQNF.
   virtual bool visit_bqnf_equation(const pbes_equation& eqn)
   {
-    if (debug) std::clog << "visit_bqnf_equation." << std::endl;
+    if (debug)
+    {
+      std::clog << "visit_bqnf_equation." << std::endl;
+    }
     const fixpoint_symbol& sigma = eqn.symbol();
     const propositional_variable& var = eqn.variable();
     const pbes_expression& e = eqn.formula();
     bool result = visit_bqnf_expression(sigma, var, e);
-    if (debug) std::clog << "visit_bqnf_equation: equation " << var.name() << " is " << (result ? "" : "NOT ") << "in BQNF." << std::endl;
+    if (debug)
+    {
+      std::clog << "visit_bqnf_equation: equation " << var.name() << " is " << (result ? "" : "NOT ") << "in BQNF."
+                << std::endl;
+    }
     return result;
   }
 
@@ -489,10 +490,10 @@ struct bqnf_visitor
 
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_BQNF_VISITOR_H

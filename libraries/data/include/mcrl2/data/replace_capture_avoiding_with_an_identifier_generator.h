@@ -18,9 +18,8 @@
 
 #include <ranges>
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 namespace detail {
 
@@ -130,7 +129,13 @@ template<template<class> class Builder,
 struct replace_capture_avoiding_variables_builder_with_an_identifier_generator
   : public Binder<Builder, replace_capture_avoiding_variables_builder_with_an_identifier_generator<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator>
 {
-  typedef Binder<Builder, replace_capture_avoiding_variables_builder_with_an_identifier_generator<Builder, Binder, Substitution, IdentifierGenerator>, Substitution, IdentifierGenerator> super;
+  using super = Binder<Builder,
+      replace_capture_avoiding_variables_builder_with_an_identifier_generator<Builder,
+          Binder,
+          Substitution,
+          IdentifierGenerator>,
+      Substitution,
+      IdentifierGenerator>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -161,26 +166,25 @@ apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator(Su
 template<template<class> class Builder, class Derived, class Substitution, class IdentifierGenerator>
 struct add_capture_avoiding_replacement_with_an_identifier_generator : public Builder<Derived>
 {
-    typedef Builder<Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::apply;
-    using super::update;
+  using super = Builder<Derived>;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::update;
 
-  protected:
-    substitution_updater_with_an_identifier_generator <Substitution, IdentifierGenerator> update_sigma;
+protected:
+  substitution_updater_with_an_identifier_generator<Substitution, IdentifierGenerator> update_sigma;
 
-  public:
-    add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma_,
-                                                                  IdentifierGenerator& id_generator_)
+public:
+  add_capture_avoiding_replacement_with_an_identifier_generator(Substitution& sigma_,
+      IdentifierGenerator& id_generator_)
       : update_sigma(sigma_, id_generator_)
-    {
-    }
+  {}
 
-    template <class T>
-    void apply(T& result, const variable& v)
-    {
-      result = update_sigma.substitution()(v);
+  template <class T>
+  void apply(T& result, const variable& v)
+  {
+    result = update_sigma.substitution()(v);
     }
 
     template <class T>
@@ -206,7 +210,7 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator : public Bu
       {
         data::data_expression rhs;
         apply(rhs, (*i).rhs());
-        a.push_back(data::assignment(*j, rhs));
+        a.emplace_back(*j, rhs);
       }
       data::make_where_clause(result, new_body, assignment_list(a.begin(), a.end()));
     }
@@ -263,9 +267,9 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator : public Bu
 template <typename T, typename Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
-                       IdentifierGenerator& id_generator,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                       IdentifierGenerator& id_generator
                       )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<data::data_expression_builder, data::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
 }
@@ -282,9 +286,9 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 template <typename T, typename Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
-                    IdentifierGenerator& id_generator,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                    IdentifierGenerator& id_generator
                    )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<data::data_expression_builder, data::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
@@ -292,8 +296,6 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
 }
 //--- end generated data replace_capture_avoiding_with_identifier_generator code ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H

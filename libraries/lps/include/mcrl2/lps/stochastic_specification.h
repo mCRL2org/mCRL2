@@ -13,9 +13,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_linear_process.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 class stochastic_specification;
 void complete_data_specification(stochastic_specification& spec);
@@ -35,12 +33,11 @@ void normalize_sorts(stochastic_specification& x, const data::sort_specification
 class stochastic_specification: public specification_base<stochastic_linear_process, stochastic_process_initializer>
 {
   protected:
-    typedef specification_base<stochastic_linear_process, stochastic_process_initializer> super;
+    using super = specification_base<stochastic_linear_process, stochastic_process_initializer>;
 
   public:
     /// \brief Constructor.
-    stochastic_specification()
-    { }
+    stochastic_specification() = default;
 
     /// \brief Constructor.
     /// \param data A data specification
@@ -143,8 +140,8 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_STOCHASTIC_SPECIFICATION_H

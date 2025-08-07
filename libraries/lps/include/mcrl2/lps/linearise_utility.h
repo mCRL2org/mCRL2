@@ -20,10 +20,7 @@
 
 #include <optional>
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// Data structure to store the statistics about summands in a linear process
@@ -343,9 +340,9 @@ bool occursinterm(const data::data_expression& t, const data::variable& var)
   return data::search_free_variable(t, var);
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 
 

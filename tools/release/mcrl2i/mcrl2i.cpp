@@ -245,7 +245,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       }
 
       term=rewr(term);
-      typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
+      using enumerator_type = enumerator_algorithm_with_iterator<rewriter>;
       data::enumerator_identifier_generator id_generator;
       enumerator_type enumerator(rewr, spec, rewr, id_generator, 10000, true);
 
@@ -333,8 +333,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       return mcrl2::data::data_specification();
     }
 
-    
-    void add_options(mcrl2::utilities::interface_description& desc)
+    void add_options(mcrl2::utilities::interface_description& desc) override
     {
       super::add_options(desc);
       
@@ -343,8 +342,8 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
                       "evaluates the given expression and prints the result",
                       'e');
     }
-    
-    void parse_options(const mcrl2::utilities::command_line_parser& parser)
+
+    void parse_options(const mcrl2::utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -355,7 +354,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     }
 
     /// Runs the algorithm.
-    bool run()
+    bool run() override
     {
       spec=read_data_specification();
 

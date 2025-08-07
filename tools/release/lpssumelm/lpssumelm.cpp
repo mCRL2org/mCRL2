@@ -24,16 +24,16 @@ class sumelm_tool: public input_output_tool
 {
   protected:
 
-    typedef input_output_tool super;
-    bool m_decluster;
+    using super = input_output_tool;
+    bool m_decluster = false;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("decluster", "first decluster disjunctive conditions", 'c');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_decluster = 0 < parser.options.count("decluster");
@@ -48,13 +48,12 @@ class sumelm_tool: public input_output_tool
         "remove superfluous summations from an LPS",
         "Remove superfluous summations from the linear process specification (LPS) in "
         "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
-        "If OUTFILE is not present, stdout is used."),
-        m_decluster(false)
+        "If OUTFILE is not present, stdout is used.")
     {}
 
     /// Reads a specification from input_file,
     /// applies sum elimination to it and writes the result to output_file.
-    bool run()
+    bool run() override
     {      
       stochastic_specification spec;
       load_lps(spec, input_filename());

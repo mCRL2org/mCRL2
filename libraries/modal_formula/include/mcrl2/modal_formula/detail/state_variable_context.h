@@ -16,11 +16,7 @@
 #include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/modal_formula/state_formula.h"
 
-namespace mcrl2 {
-
-namespace state_formulas {
-
-namespace detail {
+namespace mcrl2::state_formulas::detail {
 
 class state_variable_context
 {
@@ -64,10 +60,10 @@ class state_variable_context
     }
 };
 
-} // namespace detail
+} // namespace mcrl2::state_formulas::detail
 
-} // namespace state_formulas
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_CONTEXT_H

@@ -14,9 +14,8 @@
 
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -37,7 +36,7 @@ std::string print_removed_equations(const std::vector<propositional_variable>& r
 inline
 std::set<propositional_variable> reachable_variables(const pbes& p)
 {
-  typedef std::vector<pbes_equation>::const_iterator iterator;
+  using iterator = std::vector<pbes_equation>::const_iterator;
 
   // create a mapping from variable names to iterators
   std::map<core::identifier_string, iterator> index;
@@ -100,8 +99,6 @@ std::vector<propositional_variable> remove_unreachable_variables(pbes& p)
   return result;
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REMOVE_EQUATIONS_H

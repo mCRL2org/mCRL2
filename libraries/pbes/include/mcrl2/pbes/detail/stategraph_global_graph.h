@@ -15,11 +15,11 @@
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/pbes/detail/stategraph_influence.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 struct stategraph_vertex;
 
@@ -198,9 +198,9 @@ struct stategraph_global_graph
   // an index for the vertices in the control flow graph with a given name
   std::map<core::identifier_string, std::set<stategraph_vertex*> > m_stategraph_index;
 
-  typedef std::map<propositional_variable_instantiation, stategraph_vertex>::iterator vertex_iterator;
-  typedef std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator vertex_const_iterator;
-  typedef stategraph_vertex vertex_type;
+  using vertex_iterator = std::map<propositional_variable_instantiation, stategraph_vertex>::iterator;
+  using vertex_const_iterator = std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator;
+  using vertex_type = stategraph_vertex;
 
   void create_index()
   {
@@ -256,8 +256,7 @@ struct stategraph_global_graph
     }
   }
 
-  stategraph_global_graph()
-  {}
+  stategraph_global_graph() = default;
 
   stategraph_global_graph(const stategraph_global_graph& other)
     : m_control_vertices(other.m_control_vertices)
@@ -394,8 +393,8 @@ struct stategraph_global_graph
   }
 };
 
-} // namespace detail
-} // namespace pbes_system
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_GRAPH_H

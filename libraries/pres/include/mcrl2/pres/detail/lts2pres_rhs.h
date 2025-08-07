@@ -18,13 +18,10 @@
 #include "mcrl2/pres/detail/lts2pres_lts.h"
 #include "mcrl2/utilities/progress_meter.h"
 
-namespace mcrl2 {
+namespace mcrl2::pres_system::detail
+{
 
-namespace pres_system {
-
-namespace detail {
-
-typedef lts::probabilistic_lts_lts_t::states_size_type lts2pres_state_type;
+using lts2pres_state_type = lts::probabilistic_lts_lts_t::states_size_type;
 
 inline
 core::identifier_string make_identifier(const core::identifier_string& name, lts2pres_state_type s)
@@ -60,7 +57,7 @@ struct lts2pres_parameters
                                TermTraits
                               )
   {
-    typedef TermTraits tr;
+    using tr = TermTraits;
     if (is_must)
     {
       return tr::imp(left, right);
@@ -81,8 +78,8 @@ pres_expression RHS(const state_formulas::state_formula& x,
 template <typename Derived, typename TermTraits, typename Parameters>
 struct rhs_lts2pres_traverser: public state_formulas::state_formula_traverser<Derived>
 {
-  typedef state_formulas::state_formula_traverser<Derived> super;
-  typedef TermTraits tr;
+  using super = state_formulas::state_formula_traverser<Derived>;
+  using tr = TermTraits;
 
   using super::enter;
   using super::leave;
@@ -333,7 +330,7 @@ struct rhs_lts2pres_traverser: public state_formulas::state_formula_traverser<De
 template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
 struct apply_rhs_lts2pres_traverser: public Traverser<apply_rhs_lts2pres_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_rhs_lts2pres_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
+  using super = Traverser<apply_rhs_lts2pres_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -354,10 +351,6 @@ pres_expression RHS(const state_formulas::state_formula& x,
   return f.top();
 }
 
-} // namespace detail
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::detail
 
 #endif // MCRL2_PBES_DETAIL_LTS2PBES_RHS_H

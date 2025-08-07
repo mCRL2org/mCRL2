@@ -17,10 +17,9 @@
 #include "mcrl2/data/real.h"
 #include "mcrl2/utilities/detail/join.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 namespace sort_bool
@@ -209,66 +208,9 @@ inline data_expression join_and(ForwardTraversalIterator first, ForwardTraversal
 }
 } // namespace lazy
 
+} // namespace mcrl2::data
 
-/// \brief Split a disjunctive expression into a set of clauses.
-inline std::list<data_expression> split_disjunction(const data_expression& condition)
-{
-  std::list<data_expression> clauses;
 
-  std::queue<data_expression> todo;
-  todo.push(condition);
-
-  while (!todo.empty())
-  {
-    data::data_expression expr = todo.front();
-    todo.pop();
-
-    if (sort_bool::is_or_application(expr))
-    {
-      const auto& appl = static_cast<application>(expr);
-      todo.push(appl[0]);
-      todo.push(appl[1]);
-    }
-    else
-    {
-      clauses.push_front(expr);
-    }
-  }
-
-  return clauses;
-}
-
-/// \brief Split a disjunctive expression into a set of clauses.
-inline std::list<data_expression> split_conjunction(const data_expression& condition)
-{
-  std::list<data_expression> clauses;
-
-  std::queue<data_expression> todo;
-  todo.push(condition);
-
-  while (!todo.empty())
-  {
-    data_expression expr = todo.front();
-    todo.pop();
-
-    if (sort_bool::is_and_application(expr))
-    {
-      const auto& appl = static_cast<application>(expr);
-      todo.push(appl[0]);
-      todo.push(appl[1]);
-    }
-    else
-    {
-      clauses.push_front(expr);
-    }
-  }
-
-  return clauses;
-}
-
-} // namespace data
-
-} // namespace mcrl2
 
 #endif
 

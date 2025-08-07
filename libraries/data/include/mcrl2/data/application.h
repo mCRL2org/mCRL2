@@ -16,10 +16,8 @@
 #ifndef MCRL2_DATA_APPLICATION_H
 #define MCRL2_DATA_APPLICATION_H
 
-namespace mcrl2
-{
 
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -33,14 +31,14 @@ template <class IteratorTag>
 class prepend_iterator_tag_convertor
 {
   public:
-    typedef std::forward_iterator_tag iterator_category;
+    using iterator_category = std::forward_iterator_tag;
 };
 
 template <>
 class prepend_iterator_tag_convertor<std::input_iterator_tag>
 {
   public:
-    typedef std::input_iterator_tag iterator_category;
+    using iterator_category = std::input_iterator_tag;
 };
 
 // Iterator for term_appl which prepends a data_expression to a list convertible to data_expressions.
@@ -48,21 +46,21 @@ template <class Iterator >
 class term_appl_prepend_iterator
 {
   private:
-    typedef std::iterator_traits<int*> traits;
+    using traits = std::iterator_traits<int*>;
 
   public:
     // The value_type.
-    typedef data_expression value_type;
+    using value_type = data_expression;
     // The reference type.
-    typedef const data_expression& reference;
+    using reference = const data_expression&;
     // The pointer type.
-    typedef const data_expression* pointer;
+    using pointer = const data_expression*;
     // Difference type
-    typedef ptrdiff_t difference_type;
+    using difference_type = ptrdiff_t;
     // The iterator category.
     // The iterator category is a forward_iterator, unless Iterator is an input iterator, in which case
     // it is an input iterator.
-    typedef typename prepend_iterator_tag_convertor<traits::iterator_category>::iterator_category iterator_category;
+    using iterator_category = typename prepend_iterator_tag_convertor<traits::iterator_category>::iterator_category;
 
   protected:
     Iterator m_it;
@@ -99,12 +97,7 @@ class term_appl_prepend_iterator
     // The assignment operator.
     // other The term to be assigned.
     // Returns a reference to the assigned iterator.
-    term_appl_prepend_iterator& operator=(const term_appl_prepend_iterator& other)
-    {
-      m_it=other.m_it;
-      m_prepend=other.m_prepend;
-      return *this;
-    }
+    term_appl_prepend_iterator& operator=(const term_appl_prepend_iterator& other) = default;
 
     // The dereference operator.
     // Return the dereferenced term.
@@ -187,13 +180,13 @@ class skip_function_application_to_head
 {
   protected:
     ArgumentConverter& m_f;
-    std::size_t m_current_index;
+    std::size_t m_current_index = 0;
     const bool m_skip_head;
   public:
-    skip_function_application_to_head(ArgumentConverter&f, const bool skip_head )
-     : m_f(f),
-       m_current_index(0),
-       m_skip_head(skip_head)
+    skip_function_application_to_head(ArgumentConverter& f, const bool skip_head)
+        : m_f(f),
+
+          m_skip_head(skip_head)
     {}
 
     data_expression operator()(const data_expression& d)
@@ -214,13 +207,13 @@ class skip_function_application_to_head_assignment
 {
   protected:
     ArgumentConverter& m_f;
-    std::size_t m_current_index;
+    std::size_t m_current_index = 0;
     const bool m_skip_head;
   public:
-    skip_function_application_to_head_assignment(ArgumentConverter& f, const bool skip_head )
-     : m_f(f),
-       m_current_index(0),
-       m_skip_head(skip_head)
+    skip_function_application_to_head_assignment(ArgumentConverter& f, const bool skip_head)
+        : m_f(f),
+
+          m_skip_head(skip_head)
     {}
  
     void operator()(data_expression& result, const data_expression& d)
@@ -273,20 +266,18 @@ inline const data_expression& evaluate_lambda_data_expression(const data_express
   return t;
 }
 
-template <class TERM> 
-inline data_expression evaluate_lambda_data_expression(
-               const TERM& t,
-               typename std::enable_if<std::is_invocable_r<void, TERM, data_expression&>::value>::type* = nullptr) 
+template <class TERM>
+inline data_expression evaluate_lambda_data_expression(const TERM& t,
+    std::enable_if_t<std::is_invocable_r_v<void, TERM, data_expression&>>* = nullptr)
 {
   data_expression result;
   t(result);
   return result;
 }
 
-template <class TERM >
-inline data_expression evaluate_lambda_data_expression(
-               const TERM& t, 
-               typename std::enable_if<std::is_invocable_r<const data_expression, TERM, void>::value>::type* = nullptr)
+template <class TERM>
+inline data_expression evaluate_lambda_data_expression(const TERM& t,
+    std::enable_if_t<std::is_invocable_r_v<const data_expression, TERM, void>>* = nullptr)
 {
   return t();
 }
@@ -358,14 +349,13 @@ class application: public data_expression
     {}
 
     /// \brief Constructor.
-    template<typename ...Terms,
-             typename = std::enable_if_t<std::conjunction_v<std::is_convertible<Terms, data_expression>...>> >
-    application(const data_expression& head,
-                const data_expression& arg1,
-                const Terms& ...other_arguments
-               )
-      : data_expression(atermpp::aterm(
-              core::detail::function_symbol_DataAppl(sizeof...(Terms)+2),head,arg1,other_arguments...))
+    template <typename... Terms>
+    application(const data_expression& head, const data_expression& arg1, const Terms&... other_arguments)
+      requires(std::conjunction_v<std::is_convertible<Terms, data_expression>...>)
+        : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(sizeof...(Terms) + 2),
+              head,
+              arg1,
+              other_arguments...))
     {
       assert(detail::check_whether_sorts_match(head, detail::get_arguments(arg1, other_arguments...)));
     }
@@ -395,7 +385,7 @@ class application: public data_expression
     // forbid the use of iterator, which is silently inherited from
     // aterm. Modifying the arguments of an application through the iterator
     // is not allowed!
-    typedef data_expression::iterator iterator;
+    using iterator = data_expression::iterator;
 
   public:
 
@@ -407,17 +397,17 @@ class application: public data_expression
     ///          application starts at the first argument. This also means that
     ///          t[n] for t an application is equal to t[n+1] if t is interpreted as an
     ///          aterm.
-    typedef atermpp::term_appl_iterator<data_expression> const_iterator;
+    using const_iterator = atermpp::term_appl_iterator<data_expression>;
 
     /// \brief Constructor.
     template <typename FwdIter>
     application(const data_expression& head,
-                FwdIter first,
-                FwdIter last,
-                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr)
-      : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
-                                         detail::term_appl_prepend_iterator<FwdIter>(first, &head),
-                                         detail::term_appl_prepend_iterator<FwdIter>(last)))
+        FwdIter first,
+        FwdIter last,
+        std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr)
+        : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
+              detail::term_appl_prepend_iterator<FwdIter>(first, &head),
+              detail::term_appl_prepend_iterator<FwdIter>(last)))
     {
       assert(first!=last);
       assert(detail::check_whether_sorts_match(head,data_expression_list(begin(), end())));
@@ -426,13 +416,13 @@ class application: public data_expression
     /// \brief Constructor.
     template <typename FwdIter>
     application(const std::size_t arity,
-                const data_expression& head,
-                FwdIter first,
-                FwdIter last,
-                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0)
-      : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(arity + 1),
-                                         detail::term_appl_prepend_iterator<FwdIter>(first, &head),
-                                         detail::term_appl_prepend_iterator<FwdIter>(last)))
+        const data_expression& head,
+        FwdIter first,
+        FwdIter last,
+        std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = 0)
+        : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(arity + 1),
+              detail::term_appl_prepend_iterator<FwdIter>(first, &head),
+              detail::term_appl_prepend_iterator<FwdIter>(last)))
     {
       assert(arity>0);
       assert(std::distance(first, last)==arity);
@@ -450,18 +440,18 @@ class application: public data_expression
     /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
     template <typename FwdIter, class ArgumentConverter>
     application(const data_expression& head,
-                FwdIter first,
-                FwdIter last,
-                ArgumentConverter convert_arguments,
-                const bool skip_first_argument=false,
-                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr,
-                typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = nullptr )
-                // typename std::enable_if< std::is_convertible<typename std::invoke_result<ArgumentConverter,typename FwdIter::value_type>::type, data_expression>::value>::type* = nullptr)
-      : data_expression(atermpp::aterm(
-                                 core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
-                                 detail::term_appl_prepend_iterator<FwdIter>(first, &head),
-                                 detail::term_appl_prepend_iterator<FwdIter>(last),
-                                 detail::skip_function_application_to_head(convert_arguments,skip_first_argument)))
+        FwdIter first,
+        FwdIter last,
+        ArgumentConverter convert_arguments,
+        const bool skip_first_argument = false,
+        std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr,
+        std::enable_if_t<!std::is_base_of_v<data_expression, ArgumentConverter>>* = nullptr)
+        // typename std::enable_if< std::is_convertible<typename std::invoke_result<ArgumentConverter,typename
+        // FwdIter::value_type>::type, data_expression>::value>::type* = nullptr)
+        : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
+              detail::term_appl_prepend_iterator<FwdIter>(first, &head),
+              detail::term_appl_prepend_iterator<FwdIter>(last),
+              detail::skip_function_application_to_head(convert_arguments, skip_first_argument)))
     {
       assert(first!=last);
       assert(detail::check_whether_sorts_match(head,data_expression_list(begin(), end())));
@@ -477,19 +467,20 @@ class application: public data_expression
     /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
     template <typename FwdIter, class ArgumentConverter>
     application(const data_expression& head,
-                FwdIter first,
-                FwdIter last,
-                ArgumentConverter convert_arguments,
-                const bool skip_first_argument=false,
-                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr,
-                typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = nullptr,
-                typename std::enable_if<std::is_same<typename std::invoke_result<ArgumentConverter,data_expression&,typename FwdIter::value_type>::type, void>::value>::type* = nullptr)
- 
-      : data_expression(atermpp::aterm(
-                                 core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
-                                 detail::term_appl_prepend_iterator<FwdIter>(first, &head),
-                                 detail::term_appl_prepend_iterator<FwdIter>(last),
-                                 detail::skip_function_application_to_head_assignment(convert_arguments,skip_first_argument)))
+        FwdIter first,
+        FwdIter last,
+        ArgumentConverter convert_arguments,
+        const bool skip_first_argument = false,
+        std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr,
+        std::enable_if_t<!std::is_base_of_v<data_expression, ArgumentConverter>>* = nullptr,
+        std::enable_if_t<
+            std::is_same_v<std::invoke_result_t<ArgumentConverter, data_expression&, typename FwdIter::value_type>,
+                void>>* = nullptr)
+
+        : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
+              detail::term_appl_prepend_iterator<FwdIter>(first, &head),
+              detail::term_appl_prepend_iterator<FwdIter>(last),
+              detail::skip_function_application_to_head_assignment(convert_arguments, skip_first_argument)))
     {
       assert(first!=last);
       assert(detail::check_whether_sorts_match(head,data_expression_list(begin(), end())));
@@ -536,7 +527,7 @@ class application: public data_expression
 };
 
 /// \brief swap overload
-inline void swap(application& t1, application& t2)
+inline void swap(application& t1, application& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -566,21 +557,17 @@ struct yields_a_data_expression<TERM,
 
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
-template<typename HEAD, typename TERM, typename ...Terms,
-                  typename = std::enable_if_t<
-                                 std::disjunction<typename std::is_convertible<HEAD, data_expression>,
-                                                  typename std::is_invocable_r<void, HEAD, data_expression&>,
-                                                  typename std::is_invocable_r<const data_expression, HEAD, void> >::value >,
-                  typename = std::enable_if_t<std::conjunction_v<
-                                 std::disjunction<typename std::is_convertible<Terms, data_expression>,
-                                                  typename std::is_invocable_r<void, Terms, data_expression&>,
-                                                  typename std::is_invocable_r<const data_expression, Terms, void> > ...>> > 
-inline void make_application(
-                atermpp::aterm& result,
-                const HEAD& head,
-                const TERM& arg1,
-                const Terms& ...other_arguments
-               )
+template <typename HEAD,
+    typename TERM,
+    typename... Terms,
+    typename = std::enable_if_t<std::disjunction_v<typename std::is_convertible<HEAD, data_expression>,
+        typename std::is_invocable_r<void, HEAD, data_expression&>,
+        typename std::is_invocable_r<const data_expression, HEAD, void>>>>
+inline void
+make_application(atermpp::aterm& result, const HEAD& head, const TERM& arg1, const Terms&... other_arguments)
+  requires(std::conjunction_v<std::disjunction<typename std::is_convertible<Terms, data_expression>,
+          typename std::is_invocable_r<void, Terms, data_expression&>,
+          typename std::is_invocable_r<const data_expression, Terms, void>>...>)
 {
   assert(detail::check_whether_sorts_match(head, detail::get_arguments(arg1, other_arguments...)));
   atermpp::make_term_appl(result,
@@ -610,10 +597,10 @@ inline void make_application(data_expression& result,
 /// \param result variable into which the application is constructed.
 template <typename FwdIter>
 inline void make_application(atermpp::aterm& result,
-                      const data_expression& head,
-                      FwdIter first,
-                      FwdIter last,
-                      typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr)
+    const data_expression& head,
+    FwdIter first,
+    FwdIter last,
+    std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr)
 {
   assert(first!=last);
   atermpp::make_term_appl(result,
@@ -629,11 +616,11 @@ inline void make_application(atermpp::aterm& result,
 /// \param result variable into which the application is constructed.
 template <typename FwdIter>
 inline void make_application(atermpp::aterm& result,
-                      const std::size_t arity,
-                      const data_expression& head,
-                      FwdIter first,
-                      FwdIter last,
-                      typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0)
+    const std::size_t arity,
+    const data_expression& head,
+    FwdIter first,
+    FwdIter last,
+    std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = 0)
 {
   assert(arity>0);
   assert(std::distance(first, last)==arity);
@@ -658,14 +645,15 @@ inline void make_application(atermpp::aterm& result,
 /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
 template <typename FwdIter, class ArgumentConverter>
 inline void make_application(atermpp::aterm& result,
-                      const data_expression& head,
-                      FwdIter first,
-                      FwdIter last,
-                      ArgumentConverter convert_arguments,
-                      const bool skip_first_argument=false,
-                      typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr,
-                      typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = nullptr,
-                      typename std::enable_if< std::is_same<typename std::invoke_result<ArgumentConverter,typename FwdIter::value_type>::type, data_expression>::value>::type* = nullptr)
+    const data_expression& head,
+    FwdIter first,
+    FwdIter last,
+    ArgumentConverter convert_arguments,
+    const bool skip_first_argument = false,
+    std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr,
+    std::enable_if_t<!std::is_base_of_v<data_expression, ArgumentConverter>>* = nullptr,
+    std::enable_if_t<std::is_same_v<std::invoke_result_t<ArgumentConverter, typename FwdIter::value_type>,
+        data_expression>>* = nullptr)
 {
   assert(first!=last);
   atermpp::make_term_appl(result,
@@ -688,16 +676,17 @@ inline void make_application(atermpp::aterm& result,
 /// \parameter convert_arguments This is a function applied to optionally the head and the arguments.
 /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
 template <typename FwdIter, class ArgumentConverter>
-static inline void make_application(
-            atermpp::aterm& result,
-            const data_expression& head,
-            FwdIter first,
-            FwdIter last,
-            ArgumentConverter convert_arguments,
-            const bool skip_first_argument=false,
-            typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr,
-            typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = nullptr,
-            typename std::enable_if<std::is_same<typename std::invoke_result<ArgumentConverter,data_expression&,typename FwdIter::value_type>::type, void>::value>::type* = nullptr)
+static inline void make_application(atermpp::aterm& result,
+    const data_expression& head,
+    FwdIter first,
+    FwdIter last,
+    ArgumentConverter convert_arguments,
+    const bool skip_first_argument = false,
+    std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr,
+    std::enable_if_t<!std::is_base_of_v<data_expression, ArgumentConverter>>* = nullptr,
+    std::enable_if_t<
+        std::is_same_v<std::invoke_result_t<ArgumentConverter, data_expression&, typename FwdIter::value_type>,
+            void>>* = nullptr)
 {
   atermpp::make_term_appl(
                           result,
@@ -762,8 +751,8 @@ const data_expression& binary_right1(const data_expression & x)
   return y[1];
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_APPLICATION_H

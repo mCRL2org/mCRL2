@@ -15,16 +15,14 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/pres/rewriters/data_rewriter.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
+namespace mcrl2::pres_system {
 
 namespace detail {
 
 template <template <class> class Builder, class Derived>
 struct add_simplify: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::apply;
 
 protected:
@@ -434,7 +432,8 @@ public:
     if (is_and(result))
     {  
        const and_& resulta = atermpp::down_cast<and_>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqinf(t1, resulta.left());
        apply(t2, t1);
        make_eqinf(t1, resulta.right());
@@ -446,7 +445,8 @@ public:
     if (is_or(result))
     {  
        const or_& resulta = atermpp::down_cast<or_>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqinf(t1, resulta.left());
        apply(t2, t1);
        make_eqinf(t1, resulta.right());
@@ -458,7 +458,8 @@ public:
     if (is_plus(result))
     {  
        const plus& resulta = atermpp::down_cast<plus>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqinf(t1, resulta.left());
        apply(t2, t1);
        make_eqinf(t1, resulta.right());
@@ -516,7 +517,8 @@ public:
     if (is_and(result))
     {
        const and_& resulta = atermpp::down_cast<and_>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqninf(t1, resulta.left());
        apply(t2, t1);
        make_eqninf(t1, resulta.right());
@@ -528,7 +530,8 @@ public:
     if (is_or(result))
     {
        const or_& resulta = atermpp::down_cast<or_>(result);
-       pres_expression t1, t2;
+       pres_expression t1;
+       pres_expression t2;
        make_eqninf(t1, resulta.left());
        apply(t2, t1);
        make_eqninf(t1, resulta.right());
@@ -540,7 +543,11 @@ public:
     if (is_plus(result))
     {
        const plus& resulta = atermpp::down_cast<plus>(result);
-       pres_expression t, t1, t2, t3, t4;
+       pres_expression t;
+       pres_expression t1;
+       pres_expression t2;
+       pres_expression t3;
+       pres_expression t4;
        make_eqninf(t, resulta.left());
        apply(t1, t);
        make_eqinf(t, resulta.right());
@@ -596,7 +603,7 @@ struct simplify_builder: public add_simplify<pres_system::pres_expression_builde
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct simplify_data_rewriter_builder : public mcrl2::pres_system::detail::add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction >
 {
-  typedef add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction > super;
+  using super = add_data_rewriter<pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction>;
 
   using super::apply;
   const data::data_specification m_data_spec;
@@ -804,8 +811,8 @@ public:
 /// \brief A rewriter that simplifies boolean expressions in a term.
 struct simplify_rewriter
 {
-  typedef pres_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pres_expression;
+  using variable_type = data::variable;
 
   pres_expression operator()(const pres_expression& x) const
   {
@@ -824,8 +831,8 @@ struct simplify_rewriter
 template <typename DataRewriter>
 struct simplify_data_rewriter
 {
-  typedef pres_expression term_type;
-  typedef data::variable variable_type;
+  using term_type = pres_expression;
+  using variable_type = data::variable;
 
   const DataRewriter& R;
   const data::data_specification& m_dataspec;
@@ -858,8 +865,8 @@ struct simplify_data_rewriter
   }
 };
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REWRITERS_SIMPLIFY_REWRITER_H

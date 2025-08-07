@@ -16,11 +16,11 @@
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include <iomanip>
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 /// \brief Algorithm class for the stategraph algorithm
 class stategraph_influence_graph_algorithm
@@ -157,10 +157,10 @@ class stategraph_influence_graph_algorithm
     }
   };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_INFLUENCE_H

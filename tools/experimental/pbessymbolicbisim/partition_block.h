@@ -14,16 +14,14 @@
 
 #include "partition_subblock.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 
 class block
 {
-  typedef subblock subblock_t;
-  typedef pbes_system::structure_graph::index_type sg_index_t;
+  using subblock_t = subblock;
+  using sg_index_t = pbes_system::structure_graph::index_type;
 
 protected:
   // const pbes_type_t m_spec;
@@ -80,7 +78,8 @@ public:
     // lists
     // pos_subblocks contains subblocks with a transittion to other
     // neg_subblocks contains subblocks without a transittion to other
-    std::list<subblock_t> pos_subblocks, neg_subblocks;
+    std::list<subblock_t> pos_subblocks;
+    std::list<subblock_t> neg_subblocks;
     for(const subblock_t& sb: *m_subblocks)
     {
       std::pair<subblock_t,subblock_t> sb_split = sb.split(*other.m_subblocks, subblock_list);
@@ -170,7 +169,7 @@ public:
 };
 
 std::string pp(const block&);
-std::string pp(const block& b)
+inline std::string pp(const block& b)
 {
   std::ostringstream out;
   for(const subblock& sb: b.subblocks())
@@ -186,8 +185,7 @@ std::ostream& operator<<(std::ostream& out, const block& b)
   return out << pp(b);
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 namespace std
 {
@@ -196,8 +194,7 @@ namespace std
   struct hash<mcrl2::data::block>
   {
     // Default constructor, required for const qualified hash functions.
-    hash()
-    {}
+    hash() = default;
 
     std::size_t operator()(const mcrl2::data::block& t) const
     {

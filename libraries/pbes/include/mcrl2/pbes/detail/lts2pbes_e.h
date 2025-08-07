@@ -14,11 +14,11 @@
 
 #include "mcrl2/pbes/detail/lts2pbes_rhs.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 template <typename TermTraits, typename Parameters>
 void E_lts2pbes(const state_formulas::state_formula& x,
@@ -30,12 +30,12 @@ void E_lts2pbes(const state_formulas::state_formula& x,
 template <typename Derived, typename TermTraits, typename Parameters>
 struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Derived>
 {
-  typedef state_formulas::state_formula_traverser<Derived> super;
+  using super = state_formulas::state_formula_traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  typedef std::vector<pbes_equation> result_type;
+  using result_type = std::vector<pbes_equation>;
 
   Parameters& parameters;
   std::vector<result_type> result_stack;
@@ -196,7 +196,7 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
 template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
 struct apply_e_lts2pbes_traverser: public Traverser<apply_e_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_e_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
+  using super = Traverser<apply_e_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -219,10 +219,10 @@ void E_lts2pbes(const state_formulas::state_formula& x,
   result.insert(result.end(), f.top().begin(), f.top().end());
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LTS2PBES_E_H

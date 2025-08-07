@@ -10,9 +10,8 @@
 #ifndef MCRL2_UTILITIES_NONCOPYABLE_H_
 #define MCRL2_UTILITIES_NONCOPYABLE_H_
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \brief Inherit from this class to prevent it from being copyable.
@@ -21,11 +20,15 @@ class noncopyable
 {
 public:
   noncopyable() = default;
+  ~noncopyable() = default;
+  
+  noncopyable(noncopyable&&) = default;
+  noncopyable& operator=(noncopyable&&) = default;
   noncopyable(const noncopyable&) = delete;
   noncopyable& operator=(const noncopyable&) = delete;
 };
 
 }
-}
+
 
 #endif // MCRL2_UTILITIES_NONCOPYABLE_H_

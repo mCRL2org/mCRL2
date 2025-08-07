@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/abstraction.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief existential quantification.
@@ -82,15 +79,15 @@ std::ostream& operator<<(std::ostream& out, const exists& x)
 }
 
 /// \\brief swap overload
-inline void swap(exists& t1, exists& t2)
+inline void swap(exists& t1, exists& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated class exists ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_EXISTS_H
 

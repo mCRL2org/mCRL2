@@ -14,9 +14,7 @@
 
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 /// \brief Maps variables to their corresponding equations in a boolean_equation_system or PBES.
 template <typename EquationSystem>
@@ -70,8 +68,8 @@ class equation_index
 //    }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_EQUATION_INDEX_H

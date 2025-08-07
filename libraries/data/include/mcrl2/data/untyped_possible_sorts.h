@@ -14,9 +14,9 @@
 
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2 {
 
-namespace data {
+
+namespace mcrl2::data {
 
 //--- start generated class untyped_possible_sorts ---//
 /// \\brief Multiple possible sorts
@@ -81,14 +81,14 @@ std::ostream& operator<<(std::ostream& out, const untyped_possible_sorts& x)
 }
 
 /// \\brief swap overload
-inline void swap(untyped_possible_sorts& t1, untyped_possible_sorts& t2)
+inline void swap(untyped_possible_sorts& t1, untyped_possible_sorts& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated class untyped_possible_sorts ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_UNTYPED_POSSIBLE_SORTS_H

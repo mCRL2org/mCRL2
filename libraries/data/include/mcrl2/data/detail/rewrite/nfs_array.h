@@ -18,12 +18,7 @@
 #include <cassert>
 #include <vector>
 
-
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 class nfs_array : public std::vector<bool>
@@ -51,8 +46,6 @@ public:
   } 
 };
 
-}
-}
 }
 
 #endif // MCRL2_DATA_NFS_ARRAY_H

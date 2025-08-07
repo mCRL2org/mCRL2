@@ -24,10 +24,7 @@
 #include "mcrl2/lts/action_label_string.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 
-
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 namespace detail
@@ -45,7 +42,7 @@ class lts_aut_base
     }
 
     /** \brief Standard swap function. */
-    void swap(lts_aut_base& )
+    void swap(lts_aut_base&) noexcept
     {
       // Does intentionally not provide any action.
     }
@@ -123,7 +120,7 @@ class probabilistic_lts_aut_t :
     void save(const std::string& filename) const;
 };
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
+
 
 #endif

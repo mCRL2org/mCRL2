@@ -6,14 +6,14 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/tools/pbesiteration.h
+/// \file mcrl2/pbes/tools/pbesfixpointsolve.h
 /// \brief This file provides a tool that can simplify PBESs by
 ///        substituting PBES equations for variables in the rhs,
 ///        simplifying the result, and keeping it when it can
 ///        eliminate PBES variables.
 
-#ifndef MCRL2_PBES_TOOLS_PBESITERATION_H
-#define MCRL2_PBES_TOOLS_PBESITERATION_H
+#ifndef MCRL2_PBES_TOOLS_PBESFIXPOINTSOLVE_H
+#define MCRL2_PBES_TOOLS_PBESFIXPOINTSOLVE_H
 
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/merge_data_specifications.h"
@@ -29,13 +29,12 @@
 #include <map>
 #include <optional>
 
-namespace mcrl2
+
+
+namespace mcrl2::pbes_system
 {
 
-namespace pbes_system
-{
-
-struct pbesiteration_options
+struct pbesfixpointsolve_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
 
@@ -44,7 +43,7 @@ struct pbesiteration_options
   bool early_stopping = false;
 };
 
-void substitute(pbes_equation& into,
+inline void substitute(pbes_equation& into,
     const pbes_equation& by,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
 {
@@ -55,7 +54,7 @@ void substitute(pbes_equation& into,
   into.formula() = p;
 }
 
-data::data_expression pbestodata(pbes_equation& equation,
+inline data::data_expression pbestodata(pbes_equation& equation,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
         replace_substituter)
 {
@@ -79,7 +78,7 @@ enum class InvResult
 };
 
 // Equation should be in full form.
-InvResult global_invariant_check(pbes_equation& equation,
+inline InvResult global_invariant_check(pbes_equation& equation,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
         replace_substituter,
@@ -129,7 +128,7 @@ InvResult global_invariant_check(pbes_equation& equation,
   mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
   mCRL2log(log::verbose) << "INV: PVI set size " << set.size() << "\n";
   int i = 0;
-  for (propositional_variable_instantiation pvi : set)
+  for (const propositional_variable_instantiation& pvi: set)
   {
     if (i % 5 == 0)
     {
@@ -220,12 +219,12 @@ InvResult global_invariant_check(pbes_equation& equation,
   return InvResult::INV_FALSE;
 }
 
-void perform_iteration(pbes_equation& equation,
+inline void perform_iteration(pbes_equation& equation,
     detail::substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter,
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
         replace_substituter,
     data::data_specification data_spec,
-    pbesiteration_options options,
+    pbesfixpointsolve_options options,
     propositional_variable_instantiation initial_state)
 {
   std::optional<smt::smt_solver> solv;
@@ -369,9 +368,9 @@ void perform_iteration(pbes_equation& equation,
   equation.formula() = eq.formula();
 }
 
-struct pbesiteration_pbes_fixpoint_iterator
+struct pbesfixpointsolve_pbes_fixpoint_iterator
 {
-  void run(pbes& p, pbesiteration_options options)
+  void run(pbes& p, pbesfixpointsolve_options options)
   {
     data::rewriter data_rewriter(p.data(), options.rewrite_strategy);
     simplify_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
@@ -406,16 +405,11 @@ struct pbesiteration_pbes_fixpoint_iterator
         substitute(*j, *i, substituter);
       }
     }
-    if (!p.equations().empty())
-    {
-      // Remove all but the first equation, as they have been solved
-      p.equations().erase(p.equations().begin() + 1, p.equations().end());
-    }
   }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
 
-#endif // MCRL2_PBES_TOOLS_PBESITERATION_H
+
+#endif // MCRL2_PBES_TOOLS_PBESFIXPOINTSOLVE_H

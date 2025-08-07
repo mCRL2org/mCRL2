@@ -16,13 +16,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include <set>
 
-namespace mcrl2
-{
-
-namespace pres_system
-{
-
-namespace tools
+namespace mcrl2::pres_system::tools
 {
 
 /// \brief Base class for filter tools that use a pres rewriter.
@@ -58,7 +52,7 @@ class pres_rewriter_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       Tool::add_options(desc);
 
@@ -81,7 +75,7 @@ class pres_rewriter_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
       m_pres_rewriter_type = parser.option_argument_as<pres_system::pres_rewriter_type>("pres-rewriter");
@@ -105,7 +99,7 @@ class pres_rewriter_tool: public Tool
     {}
 
     /// \brief Destructor.
-    virtual ~pres_rewriter_tool() = default;
+    ~pres_rewriter_tool() override = default;
 
     /// \brief Returns the rewriter type
     /// \return The rewriter type
@@ -115,10 +109,6 @@ class pres_rewriter_tool: public Tool
     }
 };
 
-} // namespace tools
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::tools
 
 #endif // MCRL2_RES_PRES_REWRITER_TOOL_H

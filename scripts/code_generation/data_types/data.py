@@ -1979,7 +1979,7 @@ class mapping_specification():
       code += "      }\n"
       code += "\n\n"
       code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
-      code += "      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;\n"
+      code += "      using implementation_map = std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> >;\n"
       code += "      /// \\brief Give all system defined mappings that are to be implemented in C++ code for %s\n" % (escape(namespace_string))
       for s in self.declarations.sort_parameters(spec):
         code += "      /// \\param %s A sort expression\n" % (escape(str(s).lower()))
@@ -2063,7 +2063,7 @@ class constructor_specification():
     code += "      }\n"
 
     code += "      // The typedef is the sort that maps a function symbol to an function that rewrites it as well as a string of a function that can be used to implement it\n"
-    code += "      typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;\n"
+    code += "      using implementation_map = std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> >;\n"
     code += "      /// \\brief Give all system defined constructors which have an implementation in C++ and not in rewrite rules for %s.\n" % (escape(namespace_string))
     for s in self.declarations.sort_parameters(spec):
       code += "      /// \\param %s A sort expression.\n" % (escape(str(s).lower()))

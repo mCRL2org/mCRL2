@@ -16,9 +16,8 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 namespace detail {
 
@@ -26,7 +25,7 @@ template <typename Derived>
 class simplify_rewrite_builder: public data_expression_builder<Derived>
 {
   public:
-    typedef data_expression_builder<Derived> super;
+    using super = data_expression_builder<Derived>;
 
     using super::apply;
 
@@ -146,22 +145,20 @@ struct simplify_rewriter
 };
 
 template <typename T>
-void simplify(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
+void simplify(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).update(x);
 }
 
 template <typename T>
-T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
+T simplify(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).apply(result, x);
   return result;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITER_H
 

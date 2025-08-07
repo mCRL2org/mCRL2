@@ -15,11 +15,7 @@
 
 #include "mcrl2/data/standard_numbers_utility.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace sort_real
+namespace mcrl2::data::sort_real
 {
 
 inline data_expression& real_zero()
@@ -59,9 +55,9 @@ inline bool is_larger_zero(const atermpp::aterm& e)
 
 
 } // namespace real
-} // namespace data
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_DATA_REAL_UTILITIES_H
 

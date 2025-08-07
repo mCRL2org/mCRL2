@@ -18,9 +18,8 @@
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/list.h"
 
-namespace mcrl2
-{
-namespace data
+
+namespace mcrl2::data
 {
 
 class finiteness_helper
@@ -880,5 +879,5 @@ data_specification::data_specification(const basic_sort_vector& sorts,
   assert(is_well_typed());
 }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
+

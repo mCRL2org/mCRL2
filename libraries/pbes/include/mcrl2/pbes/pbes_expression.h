@@ -16,10 +16,7 @@
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 //--- start generated classes ---//
@@ -63,10 +60,10 @@ class pbes_expression: public atermpp::aterm
 };
 
 /// \\brief list of pbes_expressions
-typedef atermpp::term_list<pbes_expression> pbes_expression_list;
+using pbes_expression_list = atermpp::term_list<pbes_expression>;
 
 /// \\brief vector of pbes_expressions
-typedef std::vector<pbes_expression>    pbes_expression_vector;
+using pbes_expression_vector = std::vector<pbes_expression>;
 
 // prototypes
 inline bool is_propositional_variable_instantiation(const atermpp::aterm& x);
@@ -109,11 +106,10 @@ std::ostream& operator<<(std::ostream& out, const pbes_expression& x)
 }
 
 /// \\brief swap overload
-inline void swap(pbes_expression& t1, pbes_expression& t2)
+inline void swap(pbes_expression& t1, pbes_expression& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief A propositional variable instantiation
 class propositional_variable_instantiation: public pbes_expression
@@ -186,10 +182,10 @@ inline void make_propositional_variable_instantiation(atermpp::aterm& t, const A
 }
 
 /// \\brief list of propositional_variable_instantiations
-typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
+using propositional_variable_instantiation_list = atermpp::term_list<propositional_variable_instantiation>;
 
 /// \\brief vector of propositional_variable_instantiations
-typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
+using propositional_variable_instantiation_vector = std::vector<propositional_variable_instantiation>;
 
 /// \\brief Test for a propositional_variable_instantiation expression
 /// \\param x A term
@@ -214,11 +210,10 @@ std::ostream& operator<<(std::ostream& out, const propositional_variable_instant
 }
 
 /// \\brief swap overload
-inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
+inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The not operator for pbes expressions
 class not_: public pbes_expression
@@ -285,11 +280,10 @@ std::ostream& operator<<(std::ostream& out, const not_& x)
 }
 
 /// \\brief swap overload
-inline void swap(not_& t1, not_& t2)
+inline void swap(not_& t1, not_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The and operator for pbes expressions
 class and_: public pbes_expression
@@ -361,11 +355,10 @@ std::ostream& operator<<(std::ostream& out, const and_& x)
 }
 
 /// \\brief swap overload
-inline void swap(and_& t1, and_& t2)
+inline void swap(and_& t1, and_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The or operator for pbes expressions
 class or_: public pbes_expression
@@ -437,11 +430,10 @@ std::ostream& operator<<(std::ostream& out, const or_& x)
 }
 
 /// \\brief swap overload
-inline void swap(or_& t1, or_& t2)
+inline void swap(or_& t1, or_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The implication operator for pbes expressions
 class imp: public pbes_expression
@@ -513,11 +505,10 @@ std::ostream& operator<<(std::ostream& out, const imp& x)
 }
 
 /// \\brief swap overload
-inline void swap(imp& t1, imp& t2)
+inline void swap(imp& t1, imp& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The universal quantification operator for pbes expressions
 class forall: public pbes_expression
@@ -589,11 +580,10 @@ std::ostream& operator<<(std::ostream& out, const forall& x)
 }
 
 /// \\brief swap overload
-inline void swap(forall& t1, forall& t2)
+inline void swap(forall& t1, forall& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The existential quantification operator for pbes expressions
 class exists: public pbes_expression
@@ -665,7 +655,7 @@ std::ostream& operator<<(std::ostream& out, const exists& x)
 }
 
 /// \\brief swap overload
-inline void swap(exists& t1, exists& t2)
+inline void swap(exists& t1, exists& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -1070,14 +1060,9 @@ data::variable_list free_variables(const pbes_expression& x)
   return data::variable_list(v.begin(), v.end());
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
-
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /// \brief Contains type information for pbes expressions.
@@ -1085,28 +1070,28 @@ template <>
 struct term_traits<pbes_system::pbes_expression>
 {
   /// \brief The term type
-  typedef pbes_system::pbes_expression term_type;
+  using term_type = pbes_system::pbes_expression;
 
   /// \brief The data term type
-  typedef data::data_expression data_term_type;
+  using data_term_type = data::data_expression;
 
   /// \brief The data term sequence type
-  typedef data::data_expression_list data_term_sequence_type;
+  using data_term_sequence_type = data::data_expression_list;
 
   /// \brief The variable type
-  typedef data::variable variable_type;
+  using variable_type = data::variable;
 
   /// \brief The variable sequence type
-  typedef data::variable_list variable_sequence_type;
+  using variable_sequence_type = data::variable_list;
 
   /// \brief The propositional variable declaration type
-  typedef pbes_system::propositional_variable propositional_variable_decl_type;
+  using propositional_variable_decl_type = pbes_system::propositional_variable;
 
   /// \brief The propositional variable instantiation type
-  typedef pbes_system::propositional_variable_instantiation propositional_variable_type;
+  using propositional_variable_type = pbes_system::propositional_variable_instantiation;
 
   /// \brief The string type
-  typedef core::identifier_string string_type;
+  using string_type = core::identifier_string;
 
   /// \brief Make the value true
   /// \return The value \p true
@@ -1453,9 +1438,7 @@ struct term_traits<pbes_system::pbes_expression>
   }
 };
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 namespace std
 {

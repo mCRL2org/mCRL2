@@ -15,13 +15,7 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/print.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
-{
-
-namespace detail
+namespace mcrl2::pbes_system::detail
 {
 
 /// \brief Algorithm class for algorithms on linear process specifications.
@@ -103,10 +97,6 @@ class bes_algorithm
 
 };
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_BES_ALGORITHM_H

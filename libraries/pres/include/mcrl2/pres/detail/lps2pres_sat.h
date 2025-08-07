@@ -17,11 +17,11 @@
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/pres/detail/lps2pres_utility.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
 
-namespace detail {
+
+
+namespace mcrl2::pres_system::detail {
 
 template <typename TermTraits>
 typename TermTraits::term_type Sat(const lps::multi_action& a,
@@ -33,9 +33,9 @@ typename TermTraits::term_type Sat(const lps::multi_action& a,
 template <typename Derived, typename TermTraits>
 struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 {
-  typedef action_formulas::action_formula_traverser<Derived> super;
-  typedef TermTraits tr;
-  typedef typename tr::term_type expression_type;
+  using super = action_formulas::action_formula_traverser<Derived>;
+  using tr = TermTraits;
+  using expression_type = typename tr::term_type;
 
   using super::enter;
   using super::leave;
@@ -151,7 +151,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 template <template <class, class> class Traverser, typename TermTraits>
 struct apply_sat_traverser: public Traverser<apply_sat_traverser<Traverser, TermTraits>, TermTraits>
 {
-  typedef Traverser<apply_sat_traverser<Traverser, TermTraits>, TermTraits> super;
+  using super = Traverser<apply_sat_traverser<Traverser, TermTraits>, TermTraits>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -174,10 +174,10 @@ typename TermTraits::term_type Sat(const lps::multi_action& a,
   return f.top();
 }
 
-} // namespace detail
+} // namespace mcrl2::pres_system::detail
 
-} // namespace pres_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PRES_DETAIL_LPS2PRES_SAT_H

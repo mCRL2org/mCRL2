@@ -14,9 +14,7 @@
 
 #include <cassert>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief An interface to implement a replacement policy for the fixed_size_cache.
@@ -24,6 +22,7 @@ template<typename Map>
 class replacement_policy
 {
 public:
+  virtual ~replacement_policy() = default;
   using key_type = typename Map::key_type;
   using map_type = Map;
 
@@ -63,9 +62,8 @@ public:
   using key_type = typename Map::key_type;
 
   fifo_policy()
-  {
-    m_last_element_it = m_queue.before_begin();
-  }
+      : m_last_element_it(m_queue.before_begin())
+  {}
 
   fifo_policy(const fifo_policy& other)
     : m_queue(other.m_queue)
@@ -123,7 +121,6 @@ private:
   typename std::forward_list<key_type>::iterator m_last_element_it;
 };
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_CACHE_POLICY_H

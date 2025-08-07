@@ -16,16 +16,15 @@
 #include "mcrl2/process/join.h"
 #include "mcrl2/utilities/detail/join.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail
 {
 struct balance_summands_builder
     : public process_expression_builder<balance_summands_builder>
 {
-  typedef process_expression_builder<balance_summands_builder> super;
+  using super = process_expression_builder<balance_summands_builder>;
   using super::apply;
 
   template <class T>
@@ -52,7 +51,7 @@ struct balance_summands_builder
 
 /// \brief Reduces the nesting depth of the choice operator
 template <typename T>
-void balance_summands(T& x, typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+void balance_summands(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   detail::balance_summands_builder f;
   f.update(x);
@@ -60,7 +59,7 @@ void balance_summands(T& x, typename std::enable_if<!std::is_base_of<atermpp::at
 
 /// \brief Reduces the nesting depth of the choice operator
 template <typename T>
-T balance_summands(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+T balance_summands(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   detail::balance_summands_builder f;
@@ -68,8 +67,6 @@ T balance_summands(const T& x, typename std::enable_if<std::is_base_of<atermpp::
   return result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_BALANCE_NESTING_DEPTH_H

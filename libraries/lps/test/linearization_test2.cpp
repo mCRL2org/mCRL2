@@ -12,8 +12,6 @@
 #define BOOST_TEST_MODULE linearization_test
 #include <boost/test/included/unit_test.hpp>
 
-#ifndef MCRL2_SKIP_LONG_TESTS
-
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/linearise.h"
@@ -21,8 +19,8 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-typedef data::rewriter::strategy rewrite_strategy;
-typedef std::vector<rewrite_strategy> rewrite_strategy_vector;
+using rewrite_strategy = data::rewriter::strategy;
+using rewrite_strategy_vector = std::vector<rewrite_strategy>;
 
 void run_linearisation_instance(const std::string& spec, const t_lin_options& options, bool expect_success)
 {
@@ -487,12 +485,4 @@ BOOST_AUTO_TEST_CASE(unguarded_recursion_with_parallel_operator)
 
   run_linearisation_test_case(spec,false);
 }
-
-#else // ndef MCRL2_SKIP_LONG_TESTS
-
-BOOST_AUTO_TEST_CASE(skip_linearization_test)
-{
-}
-
-#endif // ndef MCRL2_SKIP_LONG_TESTS
 

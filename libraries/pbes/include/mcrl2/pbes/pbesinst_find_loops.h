@@ -17,11 +17,11 @@
 #include "mcrl2/pbes/simple_structure_graph.h"
 #include "mcrl2/pbes/structure_graph_builder.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 inline
 bool find_loop(const simple_structure_graph& G,
@@ -165,10 +165,10 @@ inline void find_loops(const simple_structure_graph& G,
   mCRL2log(log::debug) << "Find loops: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_PBESINST_FIND_LOOPS_H

@@ -14,24 +14,17 @@
 
 #include "mcrl2/data/traverser.h"
 
-namespace mcrl2 {
-
-namespace data {
-
-namespace detail {
+namespace mcrl2::data::detail
+{
 
 struct is_untyped_traverser: public sort_expression_traverser<is_untyped_traverser>
 {
-  typedef sort_expression_traverser<is_untyped_traverser> super;
+  using super = sort_expression_traverser<is_untyped_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  bool result;
-
-  is_untyped_traverser()
-    : result(false)
-  {}
+  bool result = false;
 
   void apply(const data::untyped_identifier& )
   {
@@ -77,10 +70,6 @@ bool is_untyped(const data_expression& x)
   return f.result;
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_IS_UNTYPED_H

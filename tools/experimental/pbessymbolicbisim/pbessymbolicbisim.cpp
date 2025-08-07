@@ -33,16 +33,16 @@ class pbessymbolicbisim_tool: public rewriter_tool<input_tool>
 {
 
 protected:
-  typedef rewriter_tool<input_tool> super;
+  using super = rewriter_tool<input_tool>;
 
   simplifier_mode m_mode;
-  std::size_t m_num_refine_steps;
-  bool m_fine_initial_partition;
-  bool m_early_termination;
-  bool m_randomize;
+  std::size_t m_num_refine_steps = 1;
+  bool m_fine_initial_partition = false;
+  bool m_early_termination = false;
+  bool m_randomize = false;
 
   /// Parse the non-default options.
-  void parse_options(const command_line_parser& parser)
+  void parse_options(const command_line_parser& parser) override
   {
     super::parse_options(parser);
 
@@ -56,7 +56,7 @@ protected:
     m_randomize = parser.options.count("randomize") > 0;
   }
 
-  void add_options(interface_description& desc)
+  void add_options(interface_description& desc) override
   {
     super::add_options(desc);
     desc.add_option("simplifier", make_enum_argument<simplifier_mode>("MODE")
@@ -91,15 +91,13 @@ public:
       "Symbolically compute the solution of the given PBES",
       "Computes the solution to the given PBES using symbolic bismulation techniques. "
       "Mostly useful for PBESs of low complexity with an infinite underlying BES. "
-      "This tool is experimental. "),
-      m_num_refine_steps(1),
-      m_fine_initial_partition(false)
+      "This tool is experimental. ")
   {}
 
   /// Runs the algorithm.
   /// Reads a specification from input_file,
   /// applies real time abstraction to it and writes the result to output_file.
-  bool run()
+  bool run() override
   {
     mCRL2log(verbose) << "Parameters of pbessymbolicbisim:" << std::endl;
     mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;

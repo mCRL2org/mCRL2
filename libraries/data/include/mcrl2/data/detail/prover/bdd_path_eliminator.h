@@ -18,11 +18,7 @@
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /** \brief Base class for eliminating inconsistent paths from BDDs.
@@ -216,14 +212,12 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// expression with an expression of sort Bool  as guard, and a then-branch and an else-branch that again follow
     /// these restrictions
     /// \param a_bdd A binary decision diagram.
-    virtual data_expression simplify(const data_expression& a_bdd)
+    data_expression simplify(const data_expression& a_bdd) override
     {
       return aux_simplify(a_bdd, data_expression_list());
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

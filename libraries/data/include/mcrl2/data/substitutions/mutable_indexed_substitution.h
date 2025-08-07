@@ -25,9 +25,7 @@
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 /// \brief Generic substitution function.
 /// \details This substitution assumes a function variable -> std::size_t, that, for
@@ -44,8 +42,8 @@ template <typename VariableType = data::variable, typename ExpressionType = data
 class mutable_indexed_substitution
 {
 protected:
-  typedef atermpp::utilities::unordered_map < VariableType, ExpressionType > substitution_type;
-  
+  using substitution_type = atermpp::utilities::unordered_map<VariableType, ExpressionType>;
+
   /// \brief Internal storage for substitutions.
   /// Required to be a container with random access through [] operator.
   /// It is essential to store the variable also in the container, as it might be that
@@ -59,10 +57,10 @@ protected:
 public:
 
   /// \brief Type of variables
-  typedef VariableType variable_type;
+  using variable_type = VariableType;
 
   /// \brief Type of expressions
-  typedef ExpressionType expression_type;
+  using expression_type = ExpressionType;
 
   using argument_type = variable_type;
   using result_type = expression_type;
@@ -174,8 +172,8 @@ public:
   template <class ResultType>
   void apply(const variable_type& v, ResultType& target)
   {
-    static_assert(std::is_same<ResultType&,expression_type&>::value ||
-                  std::is_same<ResultType&,atermpp::unprotected_aterm_core&>::value);
+    static_assert(
+        std::is_same_v<ResultType&, expression_type&> || std::is_same_v<ResultType&, atermpp::unprotected_aterm_core&>);
     const typename substitution_type::const_iterator i=m_substitution.find(v);
     if (i==m_substitution.end()) // not found.
     {
@@ -311,8 +309,8 @@ std::multiset<variable> substitution_variables(const mutable_indexed_substitutio
   return sigma.variables_occurring_in_right_hand_sides();
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_MUTABLE_INDEXED_SUBSTITUTION_H

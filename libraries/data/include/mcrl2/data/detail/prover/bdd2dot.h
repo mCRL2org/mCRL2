@@ -15,11 +15,7 @@
 #include "mcrl2/data/detail/prover/bdd_info.h"
 #include <fstream>
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief The class BDD2Dot offers the ability to write binary decision diagrams to dot files.
@@ -30,7 +26,7 @@ class BDD2Dot
 {
   private:
     /// \brief The smallest unused node number.
-    int f_node_number;
+    int f_node_number = 0;
 
     /// \brief The file the output is written to.
     std::ofstream f_dot_file;
@@ -102,8 +98,6 @@ class BDD2Dot
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

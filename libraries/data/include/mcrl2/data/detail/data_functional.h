@@ -15,13 +15,11 @@
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_symbol.h"
 
-namespace mcrl2
-{
 
-namespace data
-{
 
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 template <typename Term>
@@ -92,7 +90,7 @@ struct sort_of_expression
 };
 
 /// \brief Function object that returns the sort of a data variable
-typedef sort_of_expression<variable> sort_of_variable;
+using sort_of_variable = sort_of_expression<variable>;
 
 struct sort_has_name
 {
@@ -128,10 +126,10 @@ struct function_symbol_has_name
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::data::detail
 
-} // namespace data
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_DATA_DETAIL_DATA_FUNCTIONAL_H

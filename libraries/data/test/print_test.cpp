@@ -27,17 +27,17 @@ void test_term(const std::string& , const T& x)
 void test_term(const std::string& s)
 {
   atermpp::aterm a = atermpp::read_term_from_string(s);
-  if (s.find("DataEqn") == 0)
+  if (s.starts_with("DataEqn"))
   {
     data_equation x (a);
     test_term(s, x);
   }
-  else if (s.find("SortCons") == 0)
+  else if (s.starts_with("SortCons"))
   {
     sort_expression x (a);
     test_term(s, x);
   }
-  else if (s.find("OpId") == 0)
+  else if (s.starts_with("OpId"))
   {
     data::function_symbol x (a);
     test_term(s, x);

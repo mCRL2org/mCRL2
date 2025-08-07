@@ -15,9 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 /// \brief An enumerated type for the available bisimulation types
 enum bisimulation_type
@@ -32,10 +30,22 @@ enum bisimulation_type
 inline
 bisimulation_type parse_bisimulation_type(const std::string& type)
 {
-  if (type == "strong-bisim"        ) return strong_bisim;
-  else if (type == "weak-bisim"     ) return weak_bisim;
-  else if (type == "branching-bisim") return branching_bisim;
-  else if (type == "branching-sim"  ) return branching_sim;
+  if (type == "strong-bisim")
+  {
+    return strong_bisim;
+  }
+  else if (type == "weak-bisim")
+  {
+    return weak_bisim;
+  }
+  else if (type == "branching-bisim")
+  {
+    return branching_bisim;
+  }
+  else if (type == "branching-sim")
+  {
+    return branching_sim;
+  }
   throw mcrl2::runtime_error(std::string("unknown bisimulation type ") + type + "!");
   return strong_bisim;
 }
@@ -100,8 +110,8 @@ std::ostream& operator<<(std::ostream& os, const bisimulation_type t)
 }
 
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_BISIMULATION_TYPE_H

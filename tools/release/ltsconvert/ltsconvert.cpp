@@ -24,30 +24,22 @@ using namespace mcrl2::log;
 
 class t_tool_options
 {
-  public:
-    std::string     infilename;
-    std::string     outfilename;
-    std::string     lpsfile;
-    lts_type        intype;
-    lts_type        outtype;
-    lts_equivalence equivalence;
-    std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
-    bool            remove_state_information=false;
-    bool            determinise=false;
-    bool            check_reach=true;
-    bool            add_state_as_state_label=false;
+public:
+  std::string infilename;
+  std::string outfilename;
+  std::string lpsfile;
+  lts_type intype = lts_none;
+  lts_type outtype = lts_none;
+  lts_equivalence equivalence = lts_eq_none;
+  std::vector<std::string> tau_actions; // Actions with these labels must be considered equal to tau.
+  bool remove_state_information = false;
+  bool determinise = false;
+  bool check_reach = true;
+  bool add_state_as_state_label = false;
 
-    inline t_tool_options() 
-     : intype(lts_none), 
-       outtype(lts_none), 
-       equivalence(lts_eq_none)
-    {
-    }
-
-    inline std::string source_string() const
-    {
-      return (infilename.empty()) ? std::string("standard input") :
-             std::string("'" + infilename + "'");
+  inline std::string source_string() const
+  {
+    return (infilename.empty()) ? std::string("standard input") : std::string("'" + infilename + "'");
     }
 
     inline std::string target_string() const
@@ -180,9 +172,8 @@ class ltsconvert_tool : public input_output_tool
 
       if (tool_options.add_state_as_state_label)
       {
-        // Add the state numbers as the labels of the states. 
-        if constexpr (std::is_same<LTS_TYPE,probabilistic_lts_fsm_t>::value ||
-                      std::is_same<LTS_TYPE,lts_fsm_t>::value)
+        // Add the state numbers as the labels of the states.
+        if constexpr (std::is_same_v<LTS_TYPE, probabilistic_lts_fsm_t> || std::is_same_v<LTS_TYPE, lts_fsm_t>)
         {
           l.clear_process_parameters();
           l.add_process_parameter("state_number","Nat");
@@ -191,8 +182,7 @@ class ltsconvert_tool : public input_output_tool
             l.add_state_element_value(0,std::to_string(i));
           }
         }
-        if constexpr (std::is_same<LTS_TYPE,probabilistic_lts_lts_t>::value ||
-                      std::is_same<LTS_TYPE,lts_lts_t>::value)
+        if constexpr (std::is_same_v<LTS_TYPE, probabilistic_lts_lts_t> || std::is_same_v<LTS_TYPE, lts_lts_t>)
         {
           // l.set_process_parameters(atermpp::term_list<mcrl2::data::variable>(mcrl2::data::variable("state_number",mcrl2::data::sort_nat::nat())));
           l.set_process_parameters({mcrl2::data::variable("state_number",mcrl2::data::sort_nat::nat())});
@@ -301,7 +291,7 @@ class ltsconvert_tool : public input_output_tool
     }
 
   public:
-    bool run()
+    bool run() override
     {
       switch (tool_options.intype)
       {
@@ -339,7 +329,7 @@ class ltsconvert_tool : public input_output_tool
     }
 
   protected:
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       input_output_tool::add_options(desc);
 
@@ -383,6 +373,7 @@ class ltsconvert_tool : public input_output_tool
                       .add_value(lts_eq_divergence_preserving_weak_bisim)
                       .add_value(lts_eq_sim)
                       .add_value(lts_eq_ready_sim)		      
+                      .add_value(lts_eq_coupled_sim)
                       .add_value(lts_eq_trace)
                       .add_value(lts_eq_weak_trace)
                       .add_value(lts_red_tau_star),
@@ -399,7 +390,8 @@ class ltsconvert_tool : public input_output_tool
 
     void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
     {
-      std::string::size_type lastpos = 0, pos;
+      std::string::size_type lastpos = 0;
+      std::string::size_type pos;
       while ((pos = act_names.find(',',lastpos)) != std::string::npos)
       {
         tau_actions.push_back(act_names.substr(lastpos,pos-lastpos));
@@ -408,7 +400,7 @@ class ltsconvert_tool : public input_output_tool
       tau_actions.push_back(act_names.substr(lastpos));
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       input_output_tool::parse_options(parser);
 

@@ -15,9 +15,7 @@
 #include <string>
 #include <memory>
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 
 class child_process
@@ -62,7 +60,6 @@ public:
   std::string read(const std::chrono::microseconds& timeout) const;
 };
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif // MCRL2_SMT_CHILD_PROCESS_H

@@ -37,18 +37,18 @@ class SmallProgressMeasures;
 class LiftingStrategy
 {
 public:
-    virtual ~LiftingStrategy() { }
+  virtual ~LiftingStrategy() = default;
 
-    /*! Record that the given vertex was lifted: */
-    virtual void lifted(verti vertex) = 0;
+  /*! Record that the given vertex was lifted: */
+  virtual void lifted(verti vertex) = 0;
 
-    /*! Select the next vertex to lift. This method is called repeatedly by the
-        SPM solver until it returns NO_VERTEX to indicate the solution is
-        complete.
+  /*! Select the next vertex to lift. This method is called repeatedly by the
+      SPM solver until it returns NO_VERTEX to indicate the solution is
+      complete.
 
-        \see lifted(verti vertex)
-    */
-    virtual verti next() = 0;
+      \see lifted(verti vertex)
+  */
+  virtual verti next() = 0;
 };
 
 
@@ -67,12 +67,12 @@ public:
 class LiftingStrategy2
 {
 public:
-    virtual ~LiftingStrategy2() { }
+  virtual ~LiftingStrategy2() = default;
 
-    // TODO: document each separately like LiftingStrategy above
-    virtual void push(verti vertex) = 0;
-    virtual void bump(verti vertex) = 0;
-    virtual verti pop() = 0;
+  // TODO: document each separately like LiftingStrategy above
+  virtual void push(verti vertex) = 0;
+  virtual void bump(verti vertex) = 0;
+  virtual verti pop() = 0;
 };
 
 
@@ -81,27 +81,28 @@ public:
 class LiftingStrategyFactory : public RefCounted
 {
 public:
-    virtual ~LiftingStrategyFactory();
+  ~LiftingStrategyFactory() override;
 
-    /*! Returns pre-formatted plain-text documentation of the description
-        strings accepted by create(), intended to be shown to the user.
-        \see create(const std::string &description) */
-    static const char *usage();
+  /*! Returns pre-formatted plain-text documentation of the description
+      strings accepted by create(), intended to be shown to the user.
+      \see create(const std::string &description) */
+  static const char* usage();
 
-    /*! Creates a lifting strategy factory from a string description.
-    \returns A factory object or NULL if the description could not be parsed.
-    \see usage() for a description of available format strings. */
-    static LiftingStrategyFactory *create(const std::string &description);
+  /*! Creates a lifting strategy factory from a string description.
+  \returns A factory object or NULL if the description could not be parsed.
+  \see usage() for a description of available format strings. */
+  static LiftingStrategyFactory* create(const std::string& description);
 
-    virtual bool supports_version(int version) { return version == 1; }
+  virtual bool supports_version(int version) { return version == 1; }
 
-    /*! Create a lifting strategy for the given game, to be used by the given
-        Small Progress Measures solver. */
-    virtual LiftingStrategy *create( const ParityGame &game,
-                                     const SmallProgressMeasures &spm ) = 0;
+  /*! Create a lifting strategy for the given game, to be used by the given
+      Small Progress Measures solver. */
+  virtual LiftingStrategy* create(const ParityGame& game, const SmallProgressMeasures& spm) = 0;
 
-    virtual LiftingStrategy2 *create2( const ParityGame & /*game*/,
-                                       const SmallProgressMeasures &/*spm*/ ) { return 0; }
+  virtual LiftingStrategy2* create2(const ParityGame& /*game*/, const SmallProgressMeasures& /*spm*/)
+  {
+    return nullptr;
+    }
 };
 
 

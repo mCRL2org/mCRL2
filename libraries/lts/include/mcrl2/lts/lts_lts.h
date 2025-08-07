@@ -25,9 +25,7 @@
 #include "mcrl2/lps/probabilistic_data_expression.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief This class contains state labels for an labelled transition system in .lts format.
@@ -39,12 +37,11 @@ namespace lts
 class state_label_lts : public atermpp::term_list< lps::state >
 {
   public:
-    typedef atermpp::term_list< lps::state > super;
+    using super = atermpp::term_list<lps::state>;
 
     /** \brief Default constructor.
     */
-    state_label_lts()
-    {}
+    state_label_lts() = default;
 
     /** \brief Copy constructor. */
     state_label_lts(const state_label_lts& )=default;
@@ -57,7 +54,8 @@ class state_label_lts : public atermpp::term_list< lps::state >
     template < class CONTAINER >
     explicit state_label_lts(const CONTAINER& l)
     {
-      static_assert(std::is_same<typename CONTAINER::value_type, data::data_expression>::value,"Value type must be a data_expression");
+      static_assert(std::is_same_v<typename CONTAINER::value_type, data::data_expression>,
+          "Value type must be a data_expression");
       this->push_front(lps::state(l.begin(),l.size()));
     }
 
@@ -145,8 +143,7 @@ class action_label_lts: public mcrl2::lps::multi_action
   public:
 
     /** \brief Default constructor. */
-    action_label_lts()
-    {}
+    action_label_lts() = default;
 
     /** \brief Copy constructor. */
     action_label_lts(const action_label_lts& )=default;
@@ -287,8 +284,7 @@ class lts_lts_base
 
   public:
     /// \brief Default constructor
-    lts_lts_base()
-    {}
+    lts_lts_base() = default;
 
     /// \brief Standard equality function;
     bool operator==(const lts_lts_base& other) const
@@ -298,7 +294,7 @@ class lts_lts_base
              m_action_decls==other.m_action_decls;
     }
 
-    void swap(lts_lts_base& l)
+    void swap(lts_lts_base& l) noexcept
     {
       const data::data_specification auxd=m_data_spec;
       m_data_spec=l.m_data_spec;
@@ -385,7 +381,7 @@ class lts_lts_t : public lts< state_label_lts, action_label_lts, detail::lts_lts
 {
   public:
     /** \brief Creates an object containing no information. */
-    lts_lts_t() {}
+    lts_lts_t() = default;
 
     /** \brief Load the labelled transition system from file.
      *  \details If the filename is empty, the result is read from stdout.
@@ -413,7 +409,7 @@ class probabilistic_lts_lts_t :
 {
   public:
     /** \brief Creates an object containing no information. */
-    probabilistic_lts_lts_t() {}
+    probabilistic_lts_lts_t() = default;
 
     /** \brief Load the labelled transition system from file.
      *  \details If the filename is empty, the result is read from stdout.
@@ -427,8 +423,7 @@ class probabilistic_lts_lts_t :
      */
     void save(const std::string& filename) const;
 };
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 namespace std
 {

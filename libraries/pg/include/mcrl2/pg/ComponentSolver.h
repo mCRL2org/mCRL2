@@ -33,12 +33,14 @@ public:
         been partially solved already (i.e. when some of their vertices lie in
         the attractor sets of winning regions identified earlier).
     */
-    ComponentSolver( const ParityGame &game, ParityGameSolverFactory &pgsf,
-                     int max_depth, const verti *vmap = 0, verti vmap_size = 0
-                   );
-    ~ComponentSolver();
+  ComponentSolver(const ParityGame& game,
+      ParityGameSolverFactory& pgsf,
+      int max_depth,
+      const verti* vmap = nullptr,
+      verti vmap_size = 0);
+  ~ComponentSolver() override;
 
-    ParityGame::Strategy solve();
+  ParityGame::Strategy solve() override;
 
 private:
     // SCC callback
@@ -51,7 +53,7 @@ protected:
     const verti              *vmap_;        //!< Current vertex map
     const verti              vmap_size_;    //!< Size of vertex map
     ParityGame::Strategy     strategy_;     //!< Resulting strategy
-    DenseSet<verti>          *winning_[2];  //!< Resulting winning sets
+    DenseSet<verti>* winning_[2]{};         //!< Resulting winning sets
 };
 
 //! Factory class for ComponentSolver instances.
@@ -61,13 +63,12 @@ public:
     //! \see ComponentSolver::ComponentSolver()
     ComponentSolverFactory(ParityGameSolverFactory &pgsf, int max_depth = 10)
         : pgsf_(pgsf), max_depth_(max_depth) { pgsf_.ref(); }
-    ~ComponentSolverFactory() { pgsf_.deref(); }
+    ~ComponentSolverFactory() override { pgsf_.deref(); }
 
     //! Return a new ComponentSolver instance.
-    ParityGameSolver *create( const ParityGame &game,
-        const verti *vertex_map, verti vertex_map_size );
+    ParityGameSolver* create(const ParityGame& game, const verti* vertex_map, verti vertex_map_size) override;
 
-protected:
+  protected:
     ParityGameSolverFactory &pgsf_;     //!< Factory used to create subsolvers
     const int max_depth_;               //!< Maximum recursion depth
 };

@@ -14,10 +14,7 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -30,13 +27,13 @@ enum standard_form_type
   standard_form_or
 };
 
-typedef std::pair<pbes_expression, standard_form_type> standard_form_pair;
+using standard_form_pair = std::pair<pbes_expression, standard_form_type>;
 
 /// \brief Traverser that implements the standard form normalization.
 class standard_form_traverser: public pbes_system::pbes_expression_traverser<standard_form_traverser>
 {
   public:
-    typedef pbes_system::pbes_expression_traverser<standard_form_traverser> super;
+    using super = pbes_system::pbes_expression_traverser<standard_form_traverser>;
 
     using super::apply;
     using super::enter;
@@ -52,10 +49,10 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     std::string m_name;
 
     /// \brief Is set to true if the value true is encountered in the PBES.
-    bool m_has_true;
+    bool m_has_true = false;
 
     /// \brief Is set to true if the value false is encountered in the PBES.
-    bool m_has_false;
+    bool m_has_false = false;
 
     /// \brief For generating fresh variables.
     utilities::number_postfix_generator m_generator;
@@ -89,7 +86,7 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     /// \brief Pushes (first, second) on the stack.
     void push(const pbes_expression& first, standard_form_type second)
     {
-      m_expression_stack.push_back(standard_form_pair(first, second));
+      m_expression_stack.emplace_back(first, second);
     }
 
     /// \brief Generates a fresh pbes variable.
@@ -113,11 +110,11 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
       m_table[expr] = varinst;
       if (type == standard_form_and)
       {
-        m_equations2.push_back(pbes_equation(m_symbol, var, expr));
+        m_equations2.emplace_back(m_symbol, var, expr);
       }
       else
       {
-        m_equations2.push_back(pbes_equation(m_symbol, var, expr));
+        m_equations2.emplace_back(m_symbol, var, expr);
       }
       return varinst;
     }
@@ -125,9 +122,7 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     /// \brief Constructor.
     /// \param recursive_form Determines whether or not the result will be in standard recursive normal form.
     standard_form_traverser(bool recursive_form = false)
-      : m_recursive_form(recursive_form),
-        m_has_true(false),
-        m_has_false(false)
+      : m_recursive_form(recursive_form)
     {
       if (m_recursive_form)
       {
@@ -152,24 +147,6 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     {
       return m_equations;
     }
-
-    /* /// \brief Enter true node.
-    /// \param x A term.
-    void enter(const true_& x)
-    {
-      (void)x; // Suppress a non used variable warning.
-      m_has_true = true;
-      push(m_true, standard_form_both);
-    }
-
-    /// \brief Enter false node
-    /// \param x A term
-    void enter(const false_& x)
-    {
-      (void)x; // Suppress a non used variable warning.
-      m_has_false = true;
-      push(m_false, standard_form_both);
-    } */
 
     /// \brief Enter a data_expression that must be either true or false.
     /// \param x A term
@@ -250,7 +227,7 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     void leave(const pbes_equation& eq)
     {
       standard_form_pair p = pop();
-      m_equations.push_back(pbes_equation(eq.symbol(), eq.variable(), p.first));
+      m_equations.emplace_back(eq.symbol(), eq.variable(), p.first);
       // m_table[p.first] = eq.variable();
     }
 
@@ -281,15 +258,15 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
       {
         if (m_has_true)
         {
-          m_equations.push_back(pbes_equation(fixpoint_symbol::nu(), 
-                                              propositional_variable(atermpp::down_cast<propositional_variable_instantiation>(m_true).name()), 
-                                              m_true));
+          m_equations.emplace_back(fixpoint_symbol::nu(),
+              propositional_variable(atermpp::down_cast<propositional_variable_instantiation>(m_true).name()),
+              m_true);
         }
         if (m_has_false)
         {
-          m_equations.push_back(pbes_equation(fixpoint_symbol::mu(), 
-                                              propositional_variable(atermpp::down_cast<propositional_variable_instantiation>(m_false).name()), 
-                                              m_false));
+          m_equations.emplace_back(fixpoint_symbol::mu(),
+              propositional_variable(atermpp::down_cast<propositional_variable_instantiation>(m_false).name()),
+              m_false);
         }
       }
     }
@@ -311,8 +288,6 @@ void make_standard_form(pbes& eqn, bool recursive_form = false)
   eqn.equations() = t.m_equations;
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_NORMAL_FORMS_H

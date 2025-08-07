@@ -14,13 +14,7 @@
 
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief Base class for storing properties of mCRL2 types.
@@ -35,15 +29,16 @@ class data_property_map
   protected:
 
     /// \brief Add start/end separators for non-set container types
-    template < typename Container >
-    static std::string add_separators(std::string const& c, typename std::enable_if< atermpp::is_set< Container >::value >::type* = nullptr)
+    template <typename Container>
+    static std::string add_separators(std::string const& c,
+        std::enable_if_t<atermpp::is_set<Container>::value>* = nullptr)
     {
       return "[" + c + "]";
     }
 
     /// \brief Add start/end separators for set container types
-    template < typename Container >
-    static std::string add_separators(std::string const& c, typename std::enable_if< !atermpp::is_set< Container >::value >::type* = 0)
+    template <typename Container>
+    static std::string add_separators(std::string const& c, std::enable_if_t<!atermpp::is_set<Container>::value>* = 0)
     {
       return "{" + c + "}";
     }
@@ -222,9 +217,7 @@ class data_property_map
     }
 
     /// \brief Default constructor for derived types
-    data_property_map()
-    {
-    }
+    data_property_map() = default;
 
     /// \brief Initializes the property map with text containing lines in
     /// <tt>KEY = VALUE</tt> format.
@@ -319,10 +312,6 @@ bool compare_property_maps(const std::string& message, const PropertyMap& map1, 
   return result.empty();
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H

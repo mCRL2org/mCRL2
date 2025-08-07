@@ -16,10 +16,7 @@
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/detail/parameter_selection.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 // Compute the number of booleans needed to represent a set of size n.
@@ -43,10 +40,10 @@ std::size_t nr_of_booleans_for_elements(std::size_t n)
 template<typename DataRewriter, typename Specification>
 class binary_algorithm: public detail::lps_algorithm<Specification>
 {
-  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-  typedef typename detail::lps_algorithm<Specification> super;
-  typedef typename Specification::process_type process_type;
-  typedef typename process_type::action_summand_type action_summand_type;
+  using enumerator_element = data::enumerator_list_element_with_substitution<>;
+  using super = typename detail::lps_algorithm<Specification>;
+  using process_type = typename Specification::process_type;
+  using action_summand_type = typename process_type::action_summand_type;
   using super::m_spec;
 
   protected:
@@ -340,7 +337,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
                 disjuncts.push_back(data::equal_to(a.rhs(), *k++));
               }
             }
-            result.push_back(data::assignment(new_parameters[j], data::lazy::join_or(disjuncts.begin(), disjuncts.end())));
+            result.emplace_back(new_parameters[j], data::lazy::join_or(disjuncts.begin(), disjuncts.end()));
           }
 
         }
@@ -427,8 +424,6 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     }
 };
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_BINARY_H

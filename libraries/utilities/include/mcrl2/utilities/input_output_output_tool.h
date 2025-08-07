@@ -12,13 +12,7 @@
 
 #include "mcrl2/utilities/input_tool.h"
 
-namespace mcrl2
-{
-
-namespace utilities
-{
-
-namespace tools
+namespace mcrl2::utilities::tools
 {
 
 /// \brief Base class for tools that optionally takes one file as input, and writes the results
@@ -35,7 +29,7 @@ protected:
 
   /// \brief Checks if the number of positional options is OK.
   /// \param parser A command line parser
-  void check_positional_options(const command_line_parser& parser)
+  void check_positional_options(const command_line_parser& parser) override
   {
     if (3 < parser.arguments.size())
     {
@@ -44,14 +38,11 @@ protected:
   }
 
   /// \brief Returns the synopsis of the tool.
-  std::string synopsis() const
-  {
-    return "[OPTION]... [INFILE] OUTFILE1 OUTFILE2\n";
-  }
+  std::string synopsis() const override { return "[OPTION]... [INFILE] OUTFILE1 OUTFILE2\n"; }
 
   /// \brief Parse non-standard options
   /// \param parser A command line parser
-  void parse_options(const command_line_parser& parser)
+  void parse_options(const command_line_parser& parser) override
   {
     tool::parse_options(parser);
 
@@ -111,10 +102,6 @@ public:
   std::string& output_filename2() { return m_output_filename2; }
 };
 
-} // namespace tools
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::tools
 
 #endif // MCRL2_UTILITIES_INPUT_INPUT_OUTPUT_TOOL_H

@@ -17,10 +17,7 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 
-
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 using namespace mcrl2::lps;
@@ -28,8 +25,8 @@ using namespace mcrl2::data;
 
 /// \brief transform an lts in lts format into a linear process.
 /// \param l A labelled transition system in lts format.
-/// \return The function returns a linear process with the same behaviour as the lts. 
-lps::specification transform_lts2lps(const lts_lts_t& l)
+/// \return The function returns a linear process with the same behaviour as the lts.
+inline lps::specification transform_lts2lps(const lts_lts_t& l)
 {
   action_summand_vector action_summands;
   const variable process_parameter("x",mcrl2::data::sort_pos::pos());
@@ -69,11 +66,11 @@ lps::specification transform_lts2lps(const lts_lts_t& l)
 /// \param data A separate data specification.
 /// \param action_labels A list containing the action labels used in the lts.
 /// \param process_parameters The process parameters of the current process. 
-/// \return The function returns a linear process with the same behaviour as the lts. 
-lps::specification transform_lts2lps(const lts_aut_t& l1, 
-                                     const data_specification& data, 
-                                     const process::action_label_list& action_labels,
-                                     const variable_list& process_parameters)
+/// \return The function returns a linear process with the same behaviour as the lts.
+inline lps::specification transform_lts2lps(const lts_aut_t& l1,
+    const data_specification& data,
+    const process::action_label_list& action_labels,
+    const variable_list& process_parameters)
 {
   lts_lts_t l2;
   mcrl2::lts::detail::lts_convert(l1,l2,data,action_labels,process_parameters);  
@@ -85,19 +82,18 @@ lps::specification transform_lts2lps(const lts_aut_t& l1,
 /// \param data A separate data specification.
 /// \param action_labels A list containing the action labels used in the lts.
 /// \param process_parameters The process parameters of the current process. XXXXX Is this needed????
-/// \return The function returns a linear process with the same behaviour as the lts. 
+/// \return The function returns a linear process with the same behaviour as the lts.
 
-lps::specification transform_lts2lps(const lts_fsm_t& l1, 
-                                     const data_specification& data, 
-                                     const process::action_label_list& action_labels,
-                                     const variable_list& process_parameters)
+inline lps::specification transform_lts2lps(const lts_fsm_t& l1,
+    const data_specification& data,
+    const process::action_label_list& action_labels,
+    const variable_list& process_parameters)
 {
   lts_lts_t l2;
   mcrl2::lts::detail::lts_convert(l1,l2,data,action_labels,process_parameters);  
   return transform_lts2lps(l2);
 }
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif // MCRL2_LTS_LTS2LPS_H

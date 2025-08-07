@@ -93,24 +93,26 @@ struct is_well_typed_command: public lps::detail::lps_command
 
 class lpstransform_tool: public transform_tool<rewriter_tool<input_output_tool>>
 {
-  typedef transform_tool<rewriter_tool<input_output_tool>> super;
+  using super = transform_tool<rewriter_tool<input_output_tool>>;
 
-  public:
-    lpstransform_tool()
+public:
+  lpstransform_tool()
       : super("lpstransform",
-              "Wieger Wesselink",
-              "applies a transformation to an LPS",
-              "Transform the object in INFILE and write the result to OUTFILE. If OUTFILE "
-              "is not present, stdout is used. If INFILE is not present, stdin is used."
-             )
-    {}
+            "Wieger Wesselink",
+            "applies a transformation to an LPS",
+            "Transform the object in INFILE and write the result to OUTFILE. If OUTFILE "
+            "is not present, stdout is used. If INFILE is not present, stdin is used.")
+  {}
 
-    void add_commands(const std::vector<std::string>& options) override
-    {
-      add_command(std::make_shared<one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<if_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(std::make_shared<if_rewriter_with_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(std::make_shared<is_well_typed_command>(input_filename(), output_filename(), options));
+  void add_commands(const std::vector<std::string>& options) override
+  {
+    add_command(std::make_shared<one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<if_rewriter_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<if_rewriter_with_rewriter_command>(input_filename(),
+        output_filename(),
+        options,
+        rewrite_strategy()));
+    add_command(std::make_shared<is_well_typed_command>(input_filename(), output_filename(), options));
     }
 };
 

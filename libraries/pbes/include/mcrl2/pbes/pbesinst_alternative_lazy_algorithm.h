@@ -19,10 +19,9 @@
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 namespace detail
@@ -30,30 +29,30 @@ namespace detail
   // The following function is a helper function to allow to create m_pv_renaming outside
   // the class such that the class becomes a lightweight object.
 
-  std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>
-  create_pv_renaming(std::vector<std::vector<propositional_variable_instantiation> >& instantiations,
-                                bool short_renaming_scheme)
+inline std::unordered_map<propositional_variable_instantiation, propositional_variable_instantiation>
+create_pv_renaming(std::vector<std::vector<propositional_variable_instantiation>>& instantiations,
+    bool short_renaming_scheme)
+{
+  std::size_t index = 0;
+  std::unordered_map<propositional_variable_instantiation, propositional_variable_instantiation> pv_renaming;
+  for (const std::vector<propositional_variable_instantiation>& vec: instantiations)
   {
-    std::size_t index=0;
-    std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
-    for(const std::vector<propositional_variable_instantiation>& vec: instantiations)
+    for (const propositional_variable_instantiation& inst: vec)
     {
-      for(const propositional_variable_instantiation& inst:vec)
+      if (short_renaming_scheme)
       {
-        if (short_renaming_scheme)
-        {
-          std::stringstream ss;
-          ss << "X" << index;
-          pv_renaming[inst]=propositional_variable_instantiation(ss.str(),data::data_expression_list());
-        }
-        else
-        {
-          pv_renaming[inst]=pbesinst_rename()(inst);
-        }
-        index++;
+        std::stringstream ss;
+        ss << "X" << index;
+        pv_renaming[inst] = propositional_variable_instantiation(ss.str(), data::data_expression_list());
       }
+      else
+      {
+        pv_renaming[inst] = pbesinst_rename()(inst);
+      }
+      index++;
     }
-    return pv_renaming;
+  }
+  return pv_renaming;
   }
 
   class rename_pbesinst_consecutively
@@ -149,7 +148,7 @@ class pbesinst_alternative_lazy_algorithm
 
     /// When the todo buffer is limited, due to m_maximum_todo_size, then the variable below counts how
     /// many elements are dropped out of the todo buffer.
-    std::size_t m_elements_not_stored_in_todo_buffer;
+    std::size_t m_elements_not_stored_in_todo_buffer = 0;
 
     /// Indicate to which extent explored bes equations that turn out not to reachable can be thrown away.
     /// Values are: none, some or all.
@@ -232,35 +231,39 @@ class pbesinst_alternative_lazy_algorithm
     ///                          true or false, depending on the parameter \p approximate_true.
     /// \param approximate_true If true BES variables that are not investigated are set to false. If false
     ///                         these variables are set to true.
-    pbesinst_alternative_lazy_algorithm(
-        const data::data_specification& data_spec,
+    pbesinst_alternative_lazy_algorithm(const data::data_specification& data_spec,
         const data::rewriter& datar,
         search_strategy search_strategy = breadth_first,
         transformation_strategy transformation_strategy = lazy,
         const mcrl2::pbes_system::remove_level erase_unused_bes_variables = mcrl2::pbes_system::none,
         const std::size_t maximum_todo_size = std::numeric_limits<std::size_t>::max(),
-        const bool approximate_true = true
-        )
-      :
-        m_data_spec(data_spec),
-        m_datar(datar),
-        R(datar, data_spec),
-        m_maximum_todo_size(maximum_todo_size),
-        m_approximate_true(approximate_true),
-        m_elements_not_stored_in_todo_buffer(0),
-        m_erase_unused_bes_variables(erase_unused_bes_variables),
-        m_search_strategy(search_strategy),
-        m_transformation_strategy(transformation_strategy)
+        const bool approximate_true = true)
+        : m_data_spec(data_spec),
+          m_datar(datar),
+          R(datar, data_spec),
+          m_maximum_todo_size(maximum_todo_size),
+          m_approximate_true(approximate_true),
+
+          m_erase_unused_bes_variables(erase_unused_bes_variables),
+          m_search_strategy(search_strategy),
+          m_transformation_strategy(transformation_strategy)
     {
       // Initialize the random generator, with an arbitrary seed, depending on a new time.
       time_t t=time(nullptr);
-      for( ; t==time(nullptr) ; ); // Wait until time changes.
+      for (; t == time(nullptr);)
+      {
+        ; // Wait until time changes.
+      }
       srand((unsigned)time(nullptr));
 
       if (m_search_strategy == breadth_first_short)
+      {
         m_search_strategy = breadth_first;
+      }
       else if (m_search_strategy == depth_first_short)
+      {
         m_search_strategy = depth_first;
+      }
     }
 
     inline propositional_variable_instantiation next_todo()
@@ -480,7 +483,7 @@ class pbesinst_alternative_lazy_algorithm
     // false, then p2 can be removed, as its value does not influence the rewrite system.
     // The result of the function is a pair, with the simplified expression as first term, and the expression that is rewritten under the
     // simplifications in trivial as the second term.
-    typedef std::pair < pbes_expression, pbes_expression > pbes_expression_pair;
+    using pbes_expression_pair = std::pair<pbes_expression, pbes_expression>;
     pbes_expression_pair simplify_pbes_expression(const pbes_expression& p, const std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial)
     {
       if (is_propositional_variable_instantiation(p))
@@ -723,7 +726,7 @@ class pbesinst_alternative_lazy_algorithm
         {
           const propositional_variable lhs = propositional_variable(renamer(X_e).name(), data::variable_list());
           const pbes_expression rhs = replace_propositional_variables(equation[X_e], renamer);
-          result.equations().push_back(pbes_equation(symbol, lhs, rhs));
+          result.equations().emplace_back(symbol, lhs, rhs);
           mCRL2log(log::debug) << "BESEquation: " << atermpp::aterm(symbol) << " " << lhs << " = " << rhs << std::endl;
 
         }
@@ -739,8 +742,8 @@ class pbesinst_alternative_lazy_algorithm
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H

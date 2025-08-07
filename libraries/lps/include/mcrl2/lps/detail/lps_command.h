@@ -16,11 +16,8 @@
 #include "mcrl2/lps/io.h" 
 #include "mcrl2/utilities/detail/command.h"
 
-namespace mcrl2 {
-
-namespace lps {
-
-namespace detail {
+namespace mcrl2::lps::detail
+{
 
 struct lps_command: public utilities::detail::command
 {
@@ -34,10 +31,7 @@ struct lps_command: public utilities::detail::command
     : utilities::detail::command(name, input_filename, output_filename, options)
   {}
 
-  void execute()
-  {
-    lps::load_lps(lpsspec, input_filename);
-  }
+  void execute() override { lps::load_lps(lpsspec, input_filename); }
 };
 
 /// \brief PBES command that uses a rewrite strategy
@@ -55,10 +49,6 @@ struct lps_rewriter_command: public lps_command
   {}
 };
 
-} // namespace detail
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif // MCRL2_LPS_DETAIL_LPS_COMMAND_H

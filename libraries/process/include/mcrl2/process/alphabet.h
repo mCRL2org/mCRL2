@@ -15,9 +15,8 @@
 #include "mcrl2/process/alphabet_operations.h"
 #include "mcrl2/process/utility.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -25,8 +24,7 @@ struct alphabet_node
 {
   multi_action_name_set alphabet;
 
-  alphabet_node()
-  {}
+  alphabet_node() = default;
 
   alphabet_node(const multi_action_name_set& alphabet_)
     : alphabet(alphabet_)
@@ -43,7 +41,7 @@ std::ostream& operator<<(std::ostream& out, const alphabet_node& x)
 template <typename Derived, typename Node = alphabet_node>
 struct alphabet_traverser: public process_expression_traverser<Derived>
 {
-  typedef process_expression_traverser<Derived> super;
+  using super = process_expression_traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -247,7 +245,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
 
 struct apply_alphabet_traverser: public alphabet_traverser<apply_alphabet_traverser>
 {
-  typedef alphabet_traverser<apply_alphabet_traverser> super;
+  using super = alphabet_traverser<apply_alphabet_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -275,8 +273,6 @@ multi_action_name_set alphabet(const process_expression& x, const std::vector<pr
   return detail::alphabet(x, equations, W).alphabet;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ALPHABET_H

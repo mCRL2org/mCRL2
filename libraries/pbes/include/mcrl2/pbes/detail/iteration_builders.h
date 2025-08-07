@@ -7,13 +7,11 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace detail
+
+
+namespace mcrl2::pbes_system::detail
 {
 
 // Substitutor to replace predicate variables OTHER than the self-referencing onces to functions from params to booleans
@@ -21,7 +19,7 @@ template <template <class> class Builder>
 struct replace_other_propositional_variables_with_functions_builder
     : public Builder<replace_other_propositional_variables_with_functions_builder<Builder>>
 {
-  typedef Builder<replace_other_propositional_variables_with_functions_builder<Builder>> super;
+  using super = Builder<replace_other_propositional_variables_with_functions_builder<Builder>>;
   using super::apply;
 
   core::identifier_string name;
@@ -59,7 +57,7 @@ struct replace_other_propositional_variables_with_functions_builder
     {
       data::variable da = atermpp::down_cast<data::variable>(d);
 
-      for (auto var : var_list)
+      for (const auto& var: var_list)
       {
         if (var.name() == da.name())
         {
@@ -78,12 +76,12 @@ struct replace_other_propositional_variables_with_functions_builder
       if (data::is_function_symbol(da.head()))
       {
         data::function_symbol fname = atermpp::down_cast<data::function_symbol>(da.head());
-        for (auto var : var_list)
+        for (const auto& var: var_list)
         {
           if (var.name() == fname.name())
           {
             data::data_expression_list params;
-            for (auto param : da)
+            for (const auto& param: da)
             {
               params.push_front(param);
             }
@@ -114,7 +112,7 @@ struct replace_other_propositional_variables_with_functions_builder
         atermpp::aterm sort(x.sort());
         term_list.push_front(sort);
       }
-      reverse(term_list);
+      term_list = reverse(term_list); 
       data::sort_expression_list sort_list(term_list);
 
       if (sort_list.size() > 0)
@@ -142,7 +140,7 @@ template <template <class> class Builder>
 struct substitute_propositional_variables_for_bools_builder
     : public Builder<substitute_propositional_variables_for_bools_builder<Builder>>
 {
-  typedef Builder<substitute_propositional_variables_for_bools_builder<Builder>> super;
+  using super = Builder<substitute_propositional_variables_for_bools_builder<Builder>>;
   using super::apply;
 
   simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
@@ -174,7 +172,7 @@ struct substitute_propositional_variables_for_bools_builder
 template <template <class> class Builder>
 struct substitute_propositional_variables_builder : public Builder<substitute_propositional_variables_builder<Builder>>
 {
-  typedef Builder<substitute_propositional_variables_builder<Builder>> super;
+  using super = Builder<substitute_propositional_variables_builder<Builder>>;
   using super::apply;
 
   pbes_equation m_eq;
@@ -231,10 +229,10 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif

@@ -22,21 +22,19 @@
 #include "mcrl2/data/find_equalities.h"
 #include "mcrl2/lps/decluster.h"
 
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Class implementing the sum elimination lemma.
 template <typename Specification = specification>
 class sumelm_algorithm: public detail::lps_algorithm<Specification>
 {
-  typedef typename detail::lps_algorithm<Specification> super;
+  using super = typename detail::lps_algorithm<Specification>;
   using super::m_spec;
 
   protected:
     /// Stores the number of summation variables that has been removed.
-    std::size_t m_removed;
+    std::size_t m_removed = 0;
 
     /// Whether to decluster disjunctive conditions first.
     bool m_decluster;
@@ -48,9 +46,9 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
     /// \param decluster Control whether disjunctive conditions need to be split
     ///        into multiple summands.
     sumelm_algorithm(Specification& spec, bool decluster = false)
-      : lps::detail::lps_algorithm<Specification>(spec),
-        m_removed(0),
-        m_decluster(decluster)
+        : lps::detail::lps_algorithm<Specification>(spec),
+
+          m_decluster(decluster)
     {}
 
     /// \brief Apply the sum elimination lemma to all summands in the
@@ -143,8 +141,8 @@ bool sumelm(deadlock_summand& s)
   return algorithm.removed() > 0;
 }
 
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
+
 
 #endif // MCRL2_LPS_SUMELM_H
 

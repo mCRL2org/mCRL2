@@ -14,10 +14,7 @@
 
 #include "mcrl2/modal_formula/replace.h"
 
-namespace mcrl2
-{
-
-namespace state_formulas
+namespace mcrl2::state_formulas
 {
 
 /// Visitor that renames predicate variables using the specified identifier generator.
@@ -25,7 +22,8 @@ namespace state_formulas
 template <typename IdentifierGenerator>
 struct state_formula_predicate_variable_rename_builder: public state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> >
 {
-  typedef state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> > super;
+  using super
+      = state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator>>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -49,7 +47,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
   core::identifier_string push(const core::identifier_string& n)
   {
     core::identifier_string new_name = generator(n);
-    replacements.push_front(std::make_pair(n, new_name));
+    replacements.emplace_front(n, new_name);
     return new_name;
   }
 
@@ -129,7 +127,7 @@ state_formula rename_predicate_variables(const state_formula& f, IdentifierGener
 /// Visitor that renames variables using the specified identifier generator. Also bound variables are renamed!
 struct state_formula_variable_rename_builder: public state_formulas::sort_expression_builder<state_formula_variable_rename_builder>
 {
-  typedef state_formulas::sort_expression_builder<state_formula_variable_rename_builder> super;
+  using super = state_formulas::sort_expression_builder<state_formula_variable_rename_builder>;
 
   using super::enter;
   using super::leave;
@@ -197,8 +195,6 @@ state_formula rename_variables(const state_formula& f, const std::set<core::iden
   return result;
 }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_STATE_FORMULA_RENAME_H

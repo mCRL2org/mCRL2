@@ -15,10 +15,9 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/sort_specification.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 // template function overloads
@@ -47,7 +46,8 @@ bool is_data_specification(const atermpp::aterm& x)
 class data_specification: public sort_specification
 {
   public:
-    typedef std::map<function_symbol,std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > implementation_map;
+    using implementation_map = std::map<function_symbol,
+        std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
 
   private:
 
@@ -55,12 +55,8 @@ class data_specification: public sort_specification
     /// \brief Cached constructors by target sort
     struct target_sort_to_function_map
     {
-      bool _outdated;
+      bool _outdated = true;
       std::map<sort_expression, std::vector<function_symbol> > _mapping;
-
-      target_sort_to_function_map()
-        : _outdated(true)
-      {}
 
       /// \brief Groups functions according to their target sorts.
       /// \param [in,out] c container in which the functions are stored grouped by target sort.
@@ -242,7 +238,8 @@ class data_specification: public sort_specification
 
     void add_normalised_cpp_implemented_functions(const implementation_map& c) const
     {
-      typedef std::pair < function_symbol, std::pair<std::function<void(data_expression&, const data_expression&)>, std::string> > map_result_type;
+      using map_result_type = std::pair<function_symbol,
+          std::pair<std::function<void(data_expression&, const data_expression&)>, std::string>>;
       for(const map_result_type f: c)
       {
         const function_symbol g(normalize_sorts(f.first,*this));
@@ -309,13 +306,11 @@ class data_specification: public sort_specification
 
     ///\brief Default constructor. Generate a data specification that contains
     ///       only booleans and positive numbers.
-    data_specification()
-    {
-    }
+    data_specification() = default;
 
     ///\brief Constructor from an aterm.
     /// \param[in] t a term adhering to the internal format.
-    data_specification(const atermpp::aterm& t)
+    explicit data_specification(const atermpp::aterm& t)
     {
       build_from_aterm(t);
     }
@@ -919,8 +914,8 @@ std::set<core::identifier_string> function_and_mapping_identifiers(const data_sp
   return result;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H

@@ -13,6 +13,7 @@
 #define MCRL2_DATA_DETAIL_PROVER_SMT_LIB_SOLVER_H
 
 #include "mcrl2/core/print.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
 
@@ -20,11 +21,7 @@
 #include <unistd.h>
 #endif
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 /// The class SMT_LIB_Solver is a base class for SMT solvers that read the SMT-LIB format
 /// [Silvio Ranise and Cesare Tinelli. The SMT-LIB Standard: Version 1.1. Technical Report, Department of Computer
@@ -50,7 +47,7 @@ class SMT_LIB_Solver: public SMT_Solver
     std::set < variable > f_variables;
     std::set < variable > f_nat_variables;
     std::set < variable > f_pos_variables;
-    bool f_bool2pred;
+    bool f_bool2pred = false;
 
     const data_expression& left(const data_expression& x) const
     {
@@ -117,7 +114,7 @@ class SMT_LIB_Solver: public SMT_Solver
               v_sort_domain_list = sort_expression_list({v_sort});
               v_sort = sort_expression();
             }
-            for (auto v_sort_domain_elt : v_sort_domain_list)
+            for (const sort_expression& v_sort_domain_elt : v_sort_domain_list)
             {
               if (is_function_sort(v_sort_domain_elt))
               {
@@ -173,7 +170,7 @@ class SMT_LIB_Solver: public SMT_Solver
         f_variables_extrafuns = "  :extrafuns (";
       }
 
-      for(auto v_variable : f_variables)
+      for(const variable& v_variable : f_variables)
       {
         std::string v_variable_string = v_variable.name();
         sort_expression v_sort = data_expression(v_variable).sort();
@@ -655,10 +652,10 @@ class SMT_LIB_Solver: public SMT_Solver
       if (data::is_application(a_clause))
       {
         const data::application& a = atermpp::down_cast<data::application>(a_clause);
-        for (application::const_iterator i = a.begin(); i != a.end(); ++i)
+        for (const data_expression& i : a)
         {
           f_formula = f_formula + " ";
-          translate_clause(*i, false);
+          translate_clause(i, false);
         }
       }
       f_formula = f_formula + ")";
@@ -807,13 +804,9 @@ class SMT_LIB_Solver: public SMT_Solver
 
 
   public:
-    SMT_LIB_Solver()
-    {
-    }
+    SMT_LIB_Solver() = default;
 
-    virtual ~SMT_LIB_Solver()
-    {
-    }
+    ~SMT_LIB_Solver() override = default;
 };
 
 namespace prover
@@ -885,7 +878,7 @@ class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(const data_expression_list& a_formula)
+    bool is_satisfiable(const data_expression_list& a_formula) override
     {
       translate(a_formula);
 
@@ -923,7 +916,7 @@ class z3_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< z3_smt_so
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(const data_expression_list& a_formula)
+    bool is_satisfiable(const data_expression_list& a_formula) override
     {
       translate(a_formula);
 
@@ -960,7 +953,7 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    bool is_satisfiable(const data_expression_list& a_formula)
+    bool is_satisfiable(const data_expression_list& a_formula) override
     {
       translate(a_formula);
 
@@ -970,8 +963,6 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
 #endif
 } // namespace prover
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

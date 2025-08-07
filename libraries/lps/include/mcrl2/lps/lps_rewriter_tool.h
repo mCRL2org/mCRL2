@@ -16,13 +16,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/lps/lps_rewriter_type.h"
 
-namespace mcrl2
-{
-
-namespace lps
-{
-
-namespace tools
+namespace mcrl2::lps::tools
 {
 
 /// \brief Base class for filter tools that use a lps rewriter.
@@ -56,7 +50,7 @@ class lps_rewriter_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       Tool::add_options(desc);
 
@@ -78,7 +72,7 @@ class lps_rewriter_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
       m_lps_rewriter_type = parser.option_argument_as<lps::lps_rewriter_type>("lps-rewriter");
@@ -102,7 +96,7 @@ class lps_rewriter_tool: public Tool
     {}
 
     /// \brief Destructor.
-    virtual ~lps_rewriter_tool() = default;
+    ~lps_rewriter_tool() override = default;
 
     /// \brief Returns the rewriter type
     /// \return The rewriter type
@@ -112,10 +106,6 @@ class lps_rewriter_tool: public Tool
     }
 };
 
-} // namespace tools
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps::tools
 
 #endif // MCRL2_LPS_LPS_REWRITER_TOOL_H

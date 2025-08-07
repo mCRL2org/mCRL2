@@ -40,35 +40,37 @@ template<class Key, class Val, Val Used = Val(0), Val Unused = Val(-1),
 class DenseMap
 {
 public:
-    typedef std::pair<Key, Val> value_type;
+  using value_type = std::pair<Key, Val>;
 
-    class Iterator
-    {
-        value_type *pos_;
+  class Iterator
+  {
+    value_type* pos_;
 
-    public:
-        Iterator(value_type *pos) : pos_(pos) { };
-        Iterator(const Iterator &it) : pos_(it.pos_) { };
-        Iterator& operator=(const Iterator &it) { pos_ = it.pos_; }
+  public:
+    Iterator(value_type* pos)
+        : pos_(pos) {};
+    Iterator(const Iterator& it)
+        : pos_(it.pos_) {};
+    Iterator& operator=(const Iterator& it) { pos_ = it.pos_; }
 
-        bool operator== (const Iterator &other) { return pos_ == other.pos_; }
-        bool operator!= (const Iterator &other) { return pos_ != other.pos_; }
-        bool operator<  (const Iterator &other) { return pos_ <  other.pos_; }
-        bool operator>  (const Iterator &other) { return pos_ >  other.pos_; }
-        bool operator<= (const Iterator &other) { return pos_ <= other.pos_; }
-        bool operator>= (const Iterator &other) { return pos_ >= other.pos_; }
+    bool operator==(const Iterator& other) { return pos_ == other.pos_; }
+    bool operator!=(const Iterator& other) { return pos_ != other.pos_; }
+    bool operator<(const Iterator& other) { return pos_ < other.pos_; }
+    bool operator>(const Iterator& other) { return pos_ > other.pos_; }
+    bool operator<=(const Iterator& other) { return pos_ <= other.pos_; }
+    bool operator>=(const Iterator& other) { return pos_ >= other.pos_; }
 
-        value_type operator*() { return *pos_; };
-        value_type *operator->() { return pos_; };
+    value_type operator*() { return *pos_; };
+    value_type* operator->() { return pos_; };
     };
 
-    typedef Iterator iterator;
-    typedef Iterator const_iterator;
+    using iterator = Iterator;
+    using const_iterator = Iterator;
 
     DenseMap(Key begin, Key end, const Alloc &alloc = Alloc())
         : range_begin(begin), range_end(end < begin ? begin : end),
           range_size_(range_end - range_begin),
-          values_(alloc), used_(0)
+          values_(alloc)
     {
         values_.reserve(range_size_ + 1);
         for (Key k = range_begin; k != range_end; ++k)
@@ -97,7 +99,10 @@ public:
     iterator begin()
     {
         Val *v = &values_[0];
-        while (v->second == Unused) ++v;
+        while (v->second == Unused)
+        {
+          ++v;
+        }
         return iterator(v);
     }
 
@@ -159,11 +164,11 @@ public:
 private:
     const std::size_t range_size_;
     std::vector<value_type> values_;
-    std::size_t used_;
+    std::size_t used_ = 0;
 
-private:
-    DenseMap(const DenseMap &);
-    DenseMap &operator=(const DenseMap &);
+  private:
+    DenseMap(const DenseMap&) = delete;
+    DenseMap& operator=(const DenseMap&) = delete;
 };
 
 #endif /* ndef MCRL2_PG_DENSE_MAP_H */

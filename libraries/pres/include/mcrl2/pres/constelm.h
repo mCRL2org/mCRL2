@@ -17,10 +17,7 @@
 #include "mcrl2/pres/replace.h"
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 namespace detail
@@ -114,7 +111,7 @@ struct edge_details
 
 struct edge_traverser_stack_elem
 {
-  typedef std::multimap<QPVI, edge_details> edge_map;
+  using edge_map = std::multimap<QPVI, edge_details>;
 
   data::data_expression Cpos;
   data::data_expression Cneg;
@@ -130,14 +127,14 @@ struct edge_traverser_stack_elem
 
 struct edge_condition_traverser: public pres_expression_traverser<edge_condition_traverser>
 {
-  typedef pres_expression_traverser<edge_condition_traverser> super;
+  using super = pres_expression_traverser<edge_condition_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  typedef edge_traverser_stack_elem stack_elem;
-  typedef stack_elem::edge_map edge_map;
-  typedef std::list<detail::quantified_variable> qvar_list;
+  using stack_elem = edge_traverser_stack_elem;
+  using edge_map = stack_elem::edge_map;
+  using qvar_list = std::list<detail::quantified_variable>;
 
   std::vector<stack_elem> condition_fv_stack;
   std::list<pres_expression> quantified_context;
@@ -380,13 +377,14 @@ std::cerr << "MUST STILL BE DONE\n";
         qvars.emplace_back(is_infimum(expr), v);
       }
     }
-    QPVI Q_X_e{qvars, x};
+    QPVI Q_X_e{.Q = qvars, .X_e = x};
 
     // Store the QPVI and the condition true
     stack_elem ec(data::sort_bool::true_(), data::sort_bool::true_(), data::find_free_variables(x.parameters()));
     ec.edges.insert(std::make_pair(Q_X_e,
-      edge_details{std::set<data::data_expression>{data::sort_bool::true_()},
-        std::set<data::variable>{}, std::set<data::variable>{}}));
+        edge_details{.conditions = std::set<data::data_expression>{data::sort_bool::true_()},
+            .conjunctive_context_FV = std::set<data::variable>{},
+            .disjunctive_context_FV = std::set<data::variable>{}}));
     push(ec);
   }
 
@@ -407,8 +405,8 @@ class pres_constelm_algorithm
 {
   protected:
     /// \brief A map with constraints on the vertices of the graph
-    typedef std::map<data::variable, data::data_expression> constraint_map;
-    typedef std::list<detail::quantified_variable> qvar_list;
+    using constraint_map = std::map<data::variable, data::data_expression>;
+    using qvar_list = std::list<detail::quantified_variable>;
 
     /// \brief Compares data expressions for equality.
     const DataRewriter& m_data_rewriter;
@@ -729,10 +727,10 @@ class pres_constelm_algorithm
     };
 
     /// \brief The storage type for vertices
-    typedef std::map<core::identifier_string, vertex> vertex_map;
+    using vertex_map = std::map<core::identifier_string, vertex>;
 
     /// \brief The storage type for edges
-    typedef std::map<core::identifier_string, std::vector<edge> > edge_map;
+    using edge_map = std::map<core::identifier_string, std::vector<edge>>;
 
     /// \brief The vertices of the dependency graph. They are stored in a map, to
     /// support searching for a vertex.
@@ -1019,7 +1017,7 @@ void constelm(pres& p,
   {
     case simplify:
     {
-      typedef simplify_data_rewriter<data::rewriter> pres_rewriter;
+      using pres_rewriter = simplify_data_rewriter<data::rewriter>;
       pres_rewriter presr(p.data(), datar);
       pres_constelm_algorithm<data::rewriter, pres_rewriter> algorithm(datar, presr);
       algorithm.run(p, compute_conditions, check_quantifiers);
@@ -1049,8 +1047,8 @@ void constelm(pres& p,
   }
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_CONSTELM_H

@@ -17,11 +17,8 @@
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_functions.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail
+{
 
 struct fresh_variable_name_generator
 {
@@ -66,7 +63,7 @@ struct fresh_variable_name_generator
 /// \brief Traverser that rewrites the given PBES to PPG format.
 struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
 {
-  typedef pbes_expression_traverser<ppg_rewriter> super;
+  using super = pbes_expression_traverser<ppg_rewriter>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -100,10 +97,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     throw mcrl2::runtime_error("Unexpected implication in PPG rewriter: " + pp(x));
   }
 
-  void enter(const data::data_expression& x)
-  {
-    expression_stack.push(x);
-  }
+  void enter(const data::data_expression& x) { expression_stack.emplace(x); }
 
   void enter(const propositional_variable_instantiation& x)
   {
@@ -440,10 +434,6 @@ pbes to_ppg(pbes x)
   return result;
 }
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_PPG_REWRITER_H

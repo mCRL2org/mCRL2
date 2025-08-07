@@ -15,12 +15,11 @@
 namespace mcrl2
 {
 
-using log::log_level_t;
 using mcrl2::utilities::tools::input_input_output_tool;
 
 class lpscombine_tool : public input_input_output_tool
 {
-  typedef input_input_output_tool super;
+  using super = input_input_output_tool;
 
 public:
   lpscombine_tool() : super(
@@ -113,8 +112,8 @@ protected:
 
 private:
   std::string m_action_prefix;
-  bool m_lts_mode;
-  bool m_introduce_tags;
+  bool m_lts_mode = false;
+  bool m_introduce_tags = false;
 };
 
 } // namespace mcrl2

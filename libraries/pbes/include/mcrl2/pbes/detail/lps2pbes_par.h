@@ -14,17 +14,13 @@
 
 #include "mcrl2/modal_formula/traverser.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail {
 
 data::variable_list Par(const core::identifier_string& X, const data::variable_list& l, const state_formulas::state_formula& x);
 
 struct par_traverser: public state_formulas::state_formula_traverser<par_traverser>
 {
-  typedef state_formulas::state_formula_traverser<par_traverser> super;
+  using super = state_formulas::state_formula_traverser<par_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -175,10 +171,10 @@ data::variable_list Par(const core::identifier_string& X, const data::variable_l
   return f.top();
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_LPS2PBES_PAR_H

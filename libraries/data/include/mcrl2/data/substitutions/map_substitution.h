@@ -15,17 +15,16 @@
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 /// \brief Generic substitution function. The substitution is stored as a mapping
 /// of variables to expressions.
 template <typename AssociativeContainer>
 struct map_substitution
 {
-  typedef typename AssociativeContainer::key_type variable_type;
-  typedef typename AssociativeContainer::mapped_type expression_type;
+  using variable_type = typename AssociativeContainer::key_type;
+  using expression_type = typename AssociativeContainer::mapped_type;
   using argument_type = variable_type;
   using result_type = expression_type;
 
@@ -95,8 +94,6 @@ bool is_simple_substitution(const map_substitution<AssociativeContainer>& sigma)
   return true;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_MAP_SUBSTITUTION_H

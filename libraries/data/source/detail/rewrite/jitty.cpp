@@ -25,11 +25,9 @@ using namespace mcrl2::log;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 // The function below is intended to remove the auxiliary function this_term_is_in_normal_form from a term
@@ -76,7 +74,7 @@ data_expression RewriterJitty::remove_normal_form_function(const data_expression
     for(const assignment_expression& ae: assignments)
     {
       const assignment& assignment_expr = atermpp::down_cast<assignment>(ae);
-      new_assignments.push_back(assignment(assignment_expr.lhs(), remove_normal_form_function(assignment_expr.rhs())));
+      new_assignments.emplace_back(assignment_expr.lhs(), remove_normal_form_function(assignment_expr.rhs()));
     }
     return where_clause(remove_normal_form_function(body),assignment_list(new_assignments.begin(),new_assignments.end()));
   }
@@ -169,8 +167,7 @@ RewriterJitty::RewriterJitty(
         Rewriter(data_spec,equation_selector),
         this_term_is_in_normal_form_symbol(
                          std::string("Rewritten@@term"),
-                         function_sort({ untyped_sort() },untyped_sort())),
-        rewriting_in_progress(false)
+                         function_sort({ untyped_sort() },untyped_sort()))
 {
   thread_initialise();
   for (const data_equation& eq: data_spec.equations())
@@ -203,9 +200,7 @@ RewriterJitty::RewriterJitty(
   rebuild_strategy(data_spec, equation_selector);
 }
 
-RewriterJitty::~RewriterJitty()
-{
-}
+RewriterJitty::~RewriterJitty() = default;
 
 // Find the variables that occur in the lhs and the rhs of the assignments;
 //
@@ -323,13 +318,13 @@ void RewriterJitty::subst_values(
       {
         // Replace variable in the assignment and in the body by a new variable name.
         const variable fresh_variable(generator(),v.sort());
-        new_assignments.push_back(assignment(fresh_variable,result));
+        new_assignments.emplace_back(fresh_variable, result);
         sigma[v]=fresh_variable;
         sigma_trivial=false;
       }
       else
       {
-        new_assignments.push_back(assignment(v,result));
+        new_assignments.emplace_back(v, result);
       }
     }
     subst_values(result,
@@ -942,5 +937,5 @@ rewrite_strategy RewriterJitty::getStrategy()
   return jitty;
 }
 }
-}
-}
+
+

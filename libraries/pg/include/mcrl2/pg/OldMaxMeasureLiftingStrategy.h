@@ -28,23 +28,23 @@ class OldMaxMeasureLiftingStrategy : public LiftingStrategy
 public:
     OldMaxMeasureLiftingStrategy( const ParityGame &game,
                                   const SmallProgressMeasures &spm );
-    ~OldMaxMeasureLiftingStrategy();
+    ~OldMaxMeasureLiftingStrategy() override;
 
-    void lifted(verti v);
-    verti next();
+    void lifted(verti v) override;
+    verti next() override;
 
-protected:
+  protected:
     std::vector<verti> vec(verti v) {
         return std::vector<verti>(spm_.vec(v), spm_.vec(v) + spm_.len(v));
     }
 
 private:
-    OldMaxMeasureLiftingStrategy(const OldMaxMeasureLiftingStrategy &);
-    OldMaxMeasureLiftingStrategy operator=(const OldMaxMeasureLiftingStrategy &);
+  OldMaxMeasureLiftingStrategy(const OldMaxMeasureLiftingStrategy&) = delete;
+  OldMaxMeasureLiftingStrategy operator=(const OldMaxMeasureLiftingStrategy&) = delete;
 
 private:
     const SmallProgressMeasures &spm_;
-    typedef std::set<std::pair<std::vector<verti>, verti> > queue_t;
+    using queue_t = std::set<std::pair<std::vector<verti>, verti>>;
     queue_t queue_;
     std::vector<queue_t::iterator> queue_pos_;
 };
@@ -54,8 +54,7 @@ private:
 class OldMaxMeasureLiftingStrategyFactory : public LiftingStrategyFactory
 {
 public:
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm );
+  LiftingStrategy* create(const ParityGame& game, const SmallProgressMeasures& spm) override;
 };
 
 #endif /* ndef OLD_PREDECESSOR_LIFTING_STRATEGY_H_INCLUDED */

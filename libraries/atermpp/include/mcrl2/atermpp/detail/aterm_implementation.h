@@ -19,18 +19,20 @@ namespace atermpp
 
 namespace detail
 {
-  template<typename T>
-  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>&
-    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>::operator=(const unprotected_aterm_core& other) noexcept
-  {
-    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    m_term = address(other);
-    return *this;
+template <typename T>
+const reference_aterm<T, typename std::enable_if_t<std::is_base_of_v<aterm_core, T>>>&
+reference_aterm<T, typename std::enable_if_t<std::is_base_of_v<aterm_core, T>>>::operator=(
+    const unprotected_aterm_core& other) noexcept
+{
+  mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+  m_term = address(other);
+  return *this;
   }
 
-  template<typename T>
-  const reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>&
-    reference_aterm<T, typename std::enable_if_t<std::is_base_of<aterm_core, T>::value>>::operator=(unprotected_aterm_core&& other) noexcept
+  template <typename T>
+  const reference_aterm<T, typename std::enable_if_t<std::is_base_of_v<aterm_core, T>>>&
+  reference_aterm<T, typename std::enable_if_t<std::is_base_of_v<aterm_core, T>>>::operator=(
+      unprotected_aterm_core&& other) noexcept
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     m_term = address(other);
@@ -106,7 +108,10 @@ inline aterm_core& aterm_core::assign(const aterm_core& other,
 template <bool CHECK_BUSY_FLAG /* =true*/>
 inline aterm_core& aterm_core::unprotected_assign(const aterm_core& other) noexcept
 {
-  if constexpr (mcrl2::utilities::detail::GlobalThreadSafe && CHECK_BUSY_FLAG) assert(detail::g_thread_term_pool().is_shared_locked());
+  if constexpr (mcrl2::utilities::detail::GlobalThreadSafe && CHECK_BUSY_FLAG)
+  {
+    assert(detail::g_thread_term_pool().is_shared_locked());
+  }
   m_term = other.m_term;
   return *this;
 }

@@ -21,10 +21,9 @@
 #include <ranges>
 #include <type_traits>
 
-namespace mcrl2
-{
 
-namespace pbes_system
+
+namespace mcrl2::pbes_system
 {
 
 /// \brief Base class for bisimulation algorithms.
@@ -32,11 +31,11 @@ class bisimulation_algorithm
 {
   public:
     /// \brief The iterator type for non-delta summands
-    typedef lps::action_summand_vector::const_iterator my_iterator;
+    using my_iterator = lps::action_summand_vector::const_iterator;
 
   protected:
     /// \brief A map type for mapping summands to strings.
-    typedef std::map<const lps::action_summand*, std::string> name_map;
+    using name_map = std::map<const lps::action_summand*, std::string>;
 
     /// \brief Maps summands to strings.
     name_map summand_names;
@@ -891,8 +890,8 @@ pbes branching_simulation_equivalence(const lps::specification& model, const lps
   return branching_simulation_equivalence_algorithm().run(model, spec);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_BISIMULATION_H

@@ -15,9 +15,7 @@
 #include "mcrl2/process/alphabet_operations.h"
 #include "mcrl2/process/utility.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process {
 
 struct allow_set;
 std::ostream& operator<<(std::ostream& out, const allow_set& x);
@@ -28,7 +26,7 @@ std::ostream& operator<<(std::ostream& out, const allow_set& x);
 struct allow_set
 {
   multi_action_name_set A;
-  bool A_includes_subsets;
+  bool A_includes_subsets = false;
   std::set<core::identifier_string> I;
 
   bool is_empty() const
@@ -82,8 +80,7 @@ struct allow_set
     return true;
   }
 
-  allow_set()
-  {}
+  allow_set() = default;
 
   explicit allow_set(const multi_action_name_set& A_, bool A_includes_subsets_ = false, const std::set<core::identifier_string>& I_ = std::set<core::identifier_string>())
     : A_includes_subsets(A_includes_subsets_), I(I_)
@@ -334,8 +331,8 @@ allow_set subsets(const allow_set& x)
 
 } // namespace alphabet_operations
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_ALLOW_SET_H

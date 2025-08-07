@@ -447,9 +447,9 @@ data_equation unfold_pattern_matching(
   if (is_function_sort(mapping.sort()))
   {
     const function_sort& sort = atermpp::down_cast<function_sort>(mapping.sort());
-    for (sort_expression s: sort.domain())
+    for (const sort_expression& s: sort.domain())
     {
-      temp_par.push_back(variable(id_gen("x"), s));
+      temp_par.emplace_back(id_gen("x"), s);
     }
   }
   variable_list new_parameters(temp_par.begin(), temp_par.end());

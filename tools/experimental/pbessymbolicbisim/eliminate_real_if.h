@@ -12,9 +12,7 @@
 #ifndef MCRL2_PBESSYMBOLICBISIM_ELIMINATE_REAL_IF_H
 #define MCRL2_PBESSYMBOLICBISIM_ELIMINATE_REAL_IF_H
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -23,7 +21,7 @@ namespace detail
 template <template <class> class Builder>
 struct eliminate_real_if_builder: public Builder<eliminate_real_if_builder<Builder> >
 {
-  typedef Builder<eliminate_real_if_builder<Builder> > super;
+  using super = Builder<eliminate_real_if_builder<Builder>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -69,19 +67,14 @@ make_eliminate_real_if_builder()
 
 } // namespace detail
 
-
 template <typename T>
-void eliminate_real_if(T& x,
-                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                       )
+void eliminate_real_if(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   data::detail::make_eliminate_real_if_builder<data::data_expression_builder>().update(x);
 }
 
 template <typename T>
-T eliminate_real_if(const T x,
-                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                    )
+T eliminate_real_if(const T x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result; 
   data::detail::make_eliminate_real_if_builder<data::data_expression_builder>().apply(result, x);
@@ -89,6 +82,6 @@ T eliminate_real_if(const T x,
 }
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_ELIMINATE_REAL_IF_H

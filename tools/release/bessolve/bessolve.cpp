@@ -31,15 +31,14 @@ using namespace mcrl2::pbes_system;
 class bessolve_tool: public pbes_input_tool<input_tool>
 {
   private:
-    typedef pbes_input_tool<input_tool> super;
+    using super = pbes_input_tool<input_tool>;
 
   public:
     bessolve_tool()
       : super(NAME, AUTHOR,
               "solve a BES",
               "Solve the BES in INFILE. If INFILE is not present, stdin is used."
-             ),
-      strategy(small_progr_measures)
+             )
     {}
 
     bool run() override
@@ -74,7 +73,7 @@ class bessolve_tool: public pbes_input_tool<input_tool>
     }
 
   protected:
-    solution_strategy_t strategy;
+    solution_strategy_t strategy = small_progr_measures;
 
     void add_options(interface_description& desc) override
     {

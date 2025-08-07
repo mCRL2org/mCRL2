@@ -9,6 +9,8 @@
 /// \file jittyc.cpp
 
 #include "mcrl2/data/detail/rewrite.h" // Required for MCRL2_JITTTYC_AVAILABLE.
+#include "mcrl2/data/detail/rewrite/match_tree.h"
+#include "mcrl2/data/sort_expression.h"
 
 #ifdef MCRL2_ENABLE_JITTYC
 
@@ -16,13 +18,15 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
-#include "mcrl2/utilities/basename.h"
-#include "mcrl2/utilities/stopwatch.h"
+
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/detail/aterm_list_implementation.h"
-#include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
+#include "mcrl2/data/detail/rewrite/jittyc.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/utilities/basename.h"
+#include "mcrl2/utilities/stopwatch.h"
+#include <memory>
 
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
 #include "mcrl2/data/detail/rewrite_statistics.h"
@@ -33,11 +37,9 @@ using namespace mcrl2::core::detail;
 using namespace atermpp;
 using namespace mcrl2::log;
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 // Some compilers can only deal with a limited number of nested curly brackets. 
@@ -51,15 +53,11 @@ class bracket_level_data
 {
   public:
     const std::size_t MCRL2_BRACKET_NESTING_LEVEL=250;  // Some compilers limit the nesting to 256 brackets.
-                                                        // This guarantees that we will not use more. 
-    std::size_t bracket_nesting_level;
+                                                        // This guarantees that we will not use more.
+    std::size_t bracket_nesting_level = 0;
     std::string current_template_parameters;
     std::stack< std::string > current_data_parameters;
     std::stack< std::string > current_data_arguments;
-
-    bracket_level_data()
-     : bracket_nesting_level(0)
-    {}
 };
 
 /// This function returns the variables that occur in a complex subexpression within f.
@@ -158,8 +156,7 @@ static std::set<variable> find_variables_in_the_scope_of_main_function_symbol_in
   return result;
 }
 
-
-typedef atermpp::term_list<variable_list> variable_list_list;
+using variable_list_list = atermpp::term_list<variable_list>;
 
 static std::vector<bool> dep_vars(const data_equation& eqn)
 {
@@ -428,9 +425,8 @@ match_tree_list RewriterCompilingJitty::subst_var(const match_tree_list& l,
                                                   const mutable_map_substitution<>& substs)
 {
   match_tree_vector result;
-  for(match_tree_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+  for (match_tree head : l)
   {
-    match_tree head=*i;
     if (head.isM())
     {
       const match_tree_M headM(head);
@@ -545,9 +541,9 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
     if (!r.is_defined())
     {
       match_tree tree = build_tree(pars,i);
-      for (match_tree_list::const_iterator i=readies.begin(); i!=readies.end(); ++i)
+      for (const match_tree& ready : readies)
       {
-        match_tree_CRe t(*i);
+        match_tree_CRe t(ready);
         inc_usedcnt(t.variables_condition());
         inc_usedcnt(t.variables_result());
         tree = match_tree_C(t.condition(),match_tree_R(t.result()),tree);
@@ -589,7 +585,8 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
     }
     pars.Mlist = m;
 
-    match_tree true_tree,false_tree;
+    match_tree true_tree;
+    match_tree false_tree;
     match_tree_Re r ;
     match_tree_list readies;
 
@@ -628,7 +625,8 @@ match_tree RewriterCompilingJitty::build_tree(build_pars pars, std::size_t i)
   else if (!pars.Flist.empty())
   {
     match_tree_list F = pars.Flist.front();
-    match_tree true_tree,false_tree;
+    match_tree true_tree;
+    match_tree false_tree;
 
     match_tree_list_list newupstack = pars.upstack;
     match_tree_list_list l;
@@ -857,9 +855,10 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
       for(sort_list_vector::const_iterator sl=requested_sorts.begin(); sl!=requested_sorts.end(); ++sl)
       {
         variable_vector var_vec;
-        for(sort_expression_list::const_iterator s=sl->begin(); s!=sl->end(); ++s)
+        for (const sort_expression& s : *sl)
         {
-          variable v=variable(jitty_rewriter.identifier_generator()(),*s); // Find a new name for a variable that is temporarily in use.
+          variable v = variable(jitty_rewriter.identifier_generator()(),
+              s); // Find a new name for a variable that is temporarily in use.
           var_vec.push_back(v);
           vars.push_front(v);
         }
@@ -879,7 +878,7 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
 
 match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list& rules, const std::size_t arity)
 {
-  typedef std::list<std::size_t> dep_list_t;
+  using dep_list_t = std::list<std::size_t>;
   match_tree_list strat;
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
   std::vector<std::size_t> arg_use_count(arity, 0);
@@ -888,7 +887,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
   {
     if (recursive_number_of_args(eq.lhs()) <= arity)
     {
-      rule_deps.push_front(std::make_pair(eq, dep_list_t()));
+      rule_deps.emplace_front(eq, dep_list_t());
       dep_list_t& deps = rule_deps.front().second;
 
       const std::vector<bool> is_dependent_arg = dep_vars(eq);
@@ -1071,9 +1070,9 @@ class RewriterCompilingJitty::ImplementTree
   bool opid_is_nf(const function_symbol& opid, std::size_t num_args)
   {
     data_equation_list l = m_rewriter.jittyc_eqns[opid];
-    for (data_equation_list::const_iterator it = l.begin(); it != l.end(); ++it)
+    for (const auto& it : l)
     {
-      if (recursive_number_of_args(it->lhs()) <= num_args)
+      if (recursive_number_of_args(it.lhs()) <= num_args)
       {
         return false;
       }
@@ -3061,7 +3060,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     compile_script = "mcrl2compilerewriter";
   }
 
-   rewriter_so = std::shared_ptr<uncompiled_library>(new uncompiled_library(compile_script));
+  rewriter_so = std::make_shared<uncompiled_library>(compile_script);
 
   mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
   stopwatch time;
@@ -3091,10 +3090,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   mCRL2log(verbose) << "compiled in " << time.time() << "ms, loading rewriter..." << std::endl;
 
   bool (*init)(rewriter_interface*, RewriterCompilingJitty* this_rewriter);
-  rewriter_interface interface = { mcrl2::utilities::get_toolset_version(), "Unknown error when loading rewriter.", this, nullptr, nullptr };
+  rewriter_interface interface = {.caller_toolset_version = mcrl2::utilities::get_toolset_version(),
+      .status = "Unknown error when loading rewriter.",
+      .rewriter = this,
+      .rewrite_external = nullptr,
+      .rewrite_cleanup = nullptr};
   try
   {
-    typedef bool rewrite_function_type(rewriter_interface*, RewriterCompilingJitty*);
+    using rewrite_function_type = bool(rewriter_interface*, RewriterCompilingJitty*);
     init = reinterpret_cast<rewrite_function_type*>(rewriter_so->proc_address("init"));
   }
   catch(std::runtime_error& e)
@@ -3232,7 +3235,7 @@ rewrite_strategy RewriterCompilingJitty::getStrategy()
 }
 
 }
-}
-}
+
+
 
 #endif

@@ -18,28 +18,24 @@
 #ifndef MCRL2_UTILITIES_BIG_NUMBERS_H
 #define MCRL2_UTILITIES_BIG_NUMBERS_H
 
-#include <algorithm>
-#include <limits>
-#include <string>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/hash_utility.h"
+#include <algorithm>
+#include <limits>
+#include <ranges>
+#include <string>
 
 // Prototype.
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 class big_natural_number;
 
 inline std::string pp(const big_natural_number& l);
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
-
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 namespace detail
 {
@@ -186,7 +182,7 @@ inline std::string pp(const big_natural_number& l);
 class big_natural_number
 {
     friend std::hash<big_natural_number>;
-    friend inline void swap(big_natural_number& x, big_natural_number& y);
+    friend inline void swap(big_natural_number& x, big_natural_number& y) noexcept;
 
   protected:
     // Numbers are stored as std::size_t words, with the most significant number last. 
@@ -240,9 +236,7 @@ class big_natural_number
 
   public:
     // Default constructor. The value is 0 by default.
-    explicit big_natural_number()
-    {
-    }
+    explicit big_natural_number() = default;
 
     // Constructor based on a std::size_t. The value of the number will be n.
     explicit big_natural_number(const std::size_t n)
@@ -549,7 +543,8 @@ class big_natural_number
      */
     big_natural_number operator*(const big_natural_number& other) const
     {
-      big_natural_number result, buffer;
+      big_natural_number result;
+      big_natural_number buffer;
       multiply(other,result,buffer);
       return result;
     } 
@@ -759,8 +754,10 @@ result.print_number("div_mod: result na swap: ");
         return big_natural_number(m_number.front()/other.m_number.front());
       }
       
-      // Otherwise do a multiple digit division. 
-      big_natural_number result, remainder, buffer;
+      // Otherwise do a multiple digit division.
+      big_natural_number result;
+      big_natural_number remainder;
+      big_natural_number buffer;
       div_mod(other,result,remainder,buffer);
       return result;
     } 
@@ -782,8 +779,10 @@ result.print_number("div_mod: result na swap: ");
       {
         return big_natural_number(m_number.front()%other.m_number.front());
       }
-      
-      big_natural_number result, remainder, buffer;
+
+      big_natural_number result;
+      big_natural_number remainder;
+      big_natural_number buffer;
       div_mod(other,result,remainder,buffer);
       return remainder;
 
@@ -806,9 +805,9 @@ inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
   }
   else
   {
-    for(std::string::const_reverse_iterator i=s.rbegin(); i!=s.rend(); ++i)
+    for (char i : std::ranges::reverse_view(s))
     {
-      ss << *i;
+      ss << i;
     }
   }
   return ss;
@@ -817,13 +816,12 @@ inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
 
 /** \brief Standard overload of swap.
  **/
-inline void swap(big_natural_number& x, big_natural_number& y)
+inline void swap(big_natural_number& x, big_natural_number& y) noexcept
 {
   x.m_number.swap(y.m_number);
 }
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
 
 namespace std
 {
@@ -841,9 +839,7 @@ struct hash< mcrl2::utilities::big_natural_number >
   
 } // namespace std
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 /* \brief A pretty print operator on action labels, returning it as a string.
 */
@@ -853,9 +849,7 @@ inline std::string pp(const big_natural_number& l)
   s << l;
   return s.str();
 }
-}  // namespace utilities
-}  // namespace mcrl2
-
+} // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_BIG_NUMBERS_H
 

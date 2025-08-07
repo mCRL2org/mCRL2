@@ -15,32 +15,23 @@
 #include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 template <typename T>
-void translate_user_notation(T& x,
-                             typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = nullptr
-                            )
+void translate_user_notation(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   core::make_update_apply_builder<process::data_expression_builder>(data::detail::translate_user_notation_function()).update(x);
 }
 
 template <typename T>
-T translate_user_notation(const T& x,
-                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = nullptr
-                         )
+T translate_user_notation(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<process::data_expression_builder>(data::detail::translate_user_notation_function()).apply(result, x);
   return result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_TRANSLATE_USER_NOTATION_H

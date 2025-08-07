@@ -13,11 +13,9 @@
 
 #include "mcrl2/data/data_equation.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+
+
+namespace mcrl2::data::detail
 {
 
 /// \brief Is either a rewrite rule to be matched or an index that should be rewritten.
@@ -29,7 +27,7 @@ class strategy_rule
     // this using for instance a union type. 
     enum { data_equation_type, rewrite_index_type, cpp_function_type } m_strategy_element_type;
     data_equation m_rewrite_rule;
-    size_t m_rewrite_index;
+    size_t m_rewrite_index = 0UL;
     std::function<void(data_expression&, const data_expression&)> m_cpp_function;
 
   public:
@@ -120,9 +118,9 @@ class strategy
 /// \brief Creates a strategy for given set of rewrite rules with head symbol f.
 strategy create_strategy(data_equation_list rules);
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
+
+
 
 #endif // MCRL2_DATA_DETAIL_REWRITE_STRATEGY_RULE_H
 

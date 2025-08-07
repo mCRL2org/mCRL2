@@ -23,10 +23,7 @@
 #include "mcrl2/lps/state_probability_pair.h"
 
 
-namespace mcrl2
-{
-
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief A class that contains a probabilistic state.
@@ -51,13 +48,13 @@ class probabilistic_state
 
     friend std::hash<probabilistic_state>;
 
-    typedef typename lps::state_probability_pair< STATE, PROBABILITY > state_probability_pair;
-    typedef STATE state_t;
-    typedef PROBABILITY probability_t;
-    typedef typename std::vector<state_probability_pair>::iterator iterator;
-    typedef typename std::vector<state_probability_pair>::const_iterator const_iterator;
-    typedef typename std::vector<state_probability_pair>::reverse_iterator reverse_iterator;
-    typedef typename std::vector<state_probability_pair>::const_reverse_iterator const_reverse_iterator;
+    using state_probability_pair = typename lps::state_probability_pair<STATE, PROBABILITY>;
+    using state_t = STATE;
+    using probability_t = PROBABILITY;
+    using iterator = typename std::vector<state_probability_pair>::iterator;
+    using const_iterator = typename std::vector<state_probability_pair>::const_iterator;
+    using reverse_iterator = typename std::vector<state_probability_pair>::reverse_iterator;
+    using const_reverse_iterator = typename std::vector<state_probability_pair>::const_reverse_iterator;
 
   protected:
 
@@ -159,7 +156,7 @@ class probabilistic_state
 
     /** \brief Swap this probabilistic state.
      * \param[in] s A probabilistic state. */
-    void swap(probabilistic_state& other)
+    void swap(probabilistic_state& other) noexcept
     {
       std::swap(m_single_state,other.m_single_state);
       m_probabilistic_state.swap(other.m_probabilistic_state);
@@ -360,8 +357,8 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_state<STATE, PRO
 
 
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
+
 
 namespace std
 {

@@ -59,16 +59,18 @@ void CycleFinder::run( ParityGame::Strategy &strategy,
                             winning_set_, winning_queue_, substrat_ );
 
         // Map computed winning set and strategy back to global game:
-        for ( DenseSet<verti>::const_iterator it = winning_set_.begin();
-              it != winning_set_.end(); ++it )
+        for (unsigned long it : winning_set_)
         {
-            verti v = mapping_[*it];
-            verti w = substrat_[*it];
-            if (w != NO_VERTEX) w = mapping_[w];
-            strategy[v] = w;
-            assert(!done_set.count(v));
-            done_set.insert(v);
-            done_queue.push_back(v);
+          verti v = mapping_[it];
+          verti w = substrat_[it];
+          if (w != NO_VERTEX)
+          {
+            w = mapping_[w];
+          }
+          strategy[v] = w;
+          assert(!done_set.count(v));
+          done_set.insert(v);
+          done_queue.push_back(v);
         }
     }
 }
@@ -159,7 +161,10 @@ ParityGame::Strategy DecycleSolver::solve()
         }
 
         // Early out: if all vertices are solved, it is pointless to continue.
-        if (new_size == V) return strategy;
+        if (new_size == V)
+        {
+          return strategy;
+        }
     }
 
     if (solved_set.empty())
@@ -181,7 +186,10 @@ ParityGame::Strategy DecycleSolver::solve()
     unsolved.reserve(num_unsolved);
     for (verti v = 0; v < V; ++v)
     {
-        if (!solved_set.count(v)) unsolved.push_back(v);
+      if (!solved_set.count(v))
+      {
+        unsolved.push_back(v);
+      }
     }
     assert(!unsolved.empty() && unsolved.size() == num_unsolved);
 

@@ -14,10 +14,7 @@
 
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 namespace detail
@@ -165,7 +162,7 @@ bool is_linear_process_term(const process_expression& x)
 /// Use the is_linear() member function for this.
 struct linear_process_expression_traverser: public process_expression_traverser<linear_process_expression_traverser>
 {
-  typedef process_expression_traverser<linear_process_expression_traverser> super;
+  using super = process_expression_traverser<linear_process_expression_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -395,8 +392,6 @@ bool is_linear(const process_expression& x, const process_equation& eqn)
   return f.is_linear(x);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_LINEAR_H

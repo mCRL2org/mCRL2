@@ -14,9 +14,9 @@
 
 #include "mcrl2/data/abstraction.h"
 
-namespace mcrl2 {
 
-namespace data {
+
+namespace mcrl2::data {
 
 /// \brief universal quantification.
 ///
@@ -80,14 +80,14 @@ std::ostream& operator<<(std::ostream& out, const bag_comprehension& x)
 }
 
 /// \\brief swap overload
-inline void swap(bag_comprehension& t1, bag_comprehension& t2)
+inline void swap(bag_comprehension& t1, bag_comprehension& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated class bag_comprehension ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_BAG_COMPREHENSION_H

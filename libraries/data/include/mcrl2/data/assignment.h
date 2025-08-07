@@ -15,10 +15,7 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/data/untyped_identifier.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated classes ---//
@@ -47,10 +44,10 @@ class assignment_expression: public atermpp::aterm
 };
 
 /// \\brief list of assignment_expressions
-typedef atermpp::term_list<assignment_expression> assignment_expression_list;
+using assignment_expression_list = atermpp::term_list<assignment_expression>;
 
 /// \\brief vector of assignment_expressions
-typedef std::vector<assignment_expression>    assignment_expression_vector;
+using assignment_expression_vector = std::vector<assignment_expression>;
 
 // prototypes
 inline bool is_assignment(const atermpp::aterm& x);
@@ -80,11 +77,10 @@ std::ostream& operator<<(std::ostream& out, const assignment_expression& x)
 }
 
 /// \\brief swap overload
-inline void swap(assignment_expression& t1, assignment_expression& t2)
+inline void swap(assignment_expression& t1, assignment_expression& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Assignment of a data expression to a variable
 class assignment: public assignment_expression
@@ -143,10 +139,10 @@ inline void make_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of assignments
-typedef atermpp::term_list<assignment> assignment_list;
+using assignment_list = atermpp::term_list<assignment>;
 
 /// \\brief vector of assignments
-typedef std::vector<assignment>    assignment_vector;
+using assignment_vector = std::vector<assignment>;
 
 /// \\brief Test for a assignment expression
 /// \\param x A term
@@ -171,11 +167,10 @@ std::ostream& operator<<(std::ostream& out, const assignment& x)
 }
 
 /// \\brief swap overload
-inline void swap(assignment& t1, assignment& t2)
+inline void swap(assignment& t1, assignment& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Assignment of a data expression to a string
 class untyped_identifier_assignment: public assignment_expression
@@ -239,10 +234,10 @@ inline void make_untyped_identifier_assignment(atermpp::aterm& t, const ARGUMENT
 }
 
 /// \\brief list of untyped_identifier_assignments
-typedef atermpp::term_list<untyped_identifier_assignment> untyped_identifier_assignment_list;
+using untyped_identifier_assignment_list = atermpp::term_list<untyped_identifier_assignment>;
 
 /// \\brief vector of untyped_identifier_assignments
-typedef std::vector<untyped_identifier_assignment>    untyped_identifier_assignment_vector;
+using untyped_identifier_assignment_vector = std::vector<untyped_identifier_assignment>;
 
 /// \\brief Test for a untyped_identifier_assignment expression
 /// \\param x A term
@@ -267,7 +262,7 @@ std::ostream& operator<<(std::ostream& out, const untyped_identifier_assignment&
 }
 
 /// \\brief swap overload
-inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignment& t2)
+inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignment& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -324,9 +319,9 @@ data_expression_list right_hand_sides(const assignment_list& x)
 std::string pp(const assignment_list& x, bool precedence_aware = true);
 std::string pp(const assignment_vector& x, bool precedence_aware = true);
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_ASSIGNMENT_H
 

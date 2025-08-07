@@ -15,18 +15,14 @@
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
-namespace mcrl2
-{
-
 /// \brief The main namespace for the PBES library.
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 class pbes;
 void complete_data_specification(pbes&);
 
 // template function overloads
-std::string pp(const pbes& x, bool precedence_aware = true);
 void normalize_sorts(pbes& x, const data::sort_specification& sortspec);
 void translate_user_notation(pbes_system::pbes& x);
 std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes& x);
@@ -57,7 +53,7 @@ atermpp::aterm pbes_to_aterm(const pbes& p);
 class pbes
 {
   public:
-    typedef pbes_equation equation_type;
+    using equation_type = pbes_equation;
 
   protected:
     /// \brief The data specification
@@ -292,7 +288,7 @@ class pbes
 
 //--- start generated class pbes ---//
 // prototype declaration
-std::string pp(const pbes& x, bool precedence_aware);
+std::string pp(const pbes& x, bool precedence_aware = true);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
@@ -325,8 +321,8 @@ bool operator==(const pbes& p1, const pbes& p2)
   return pbes_to_aterm(p1) == pbes_to_aterm(p2);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBES_H

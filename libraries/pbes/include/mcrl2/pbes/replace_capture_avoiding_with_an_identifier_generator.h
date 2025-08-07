@@ -16,9 +16,8 @@
 #include "mcrl2/pbes/add_binding.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
@@ -28,7 +27,10 @@ template<template<class> class Builder, class Derived, class Substitution, class
 struct add_capture_avoiding_replacement_with_an_identifier_generator
   : public data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder, Derived, Substitution, IdentifierGenerator>
 {
-  typedef data::detail::add_capture_avoiding_replacement_with_an_identifier_generator <Builder, Derived, Substitution, IdentifierGenerator> super;
+  using super = data::detail::add_capture_avoiding_replacement_with_an_identifier_generator<Builder,
+      Derived,
+      Substitution,
+      IdentifierGenerator>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -94,9 +96,9 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator
 template <typename T, typename Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
-                       IdentifierGenerator& id_generator,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                       IdentifierGenerator& id_generator
                       )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
 }
@@ -113,9 +115,9 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 template <typename T, typename Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
-                    IdentifierGenerator& id_generator,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                    IdentifierGenerator& id_generator
                    )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);
@@ -123,8 +125,6 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
 }
 //--- end generated pbes_system replace_capture_avoiding_with_identifier_generator code ---//
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H

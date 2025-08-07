@@ -19,10 +19,7 @@
 #include <map>
 #include <string>
 
-namespace mcrl2
-{
-
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief Simple timer to time the CPU time used by a piece of code.
@@ -53,8 +50,8 @@ class execution_timer
       std::chrono::steady_clock::time_point start;      
       std::chrono::steady_clock::time_point finish;
 
-      clock_t start_user;      
-      clock_t finish_user;
+      clock_t start_user = 0L;
+      clock_t finish_user = 0L;
 
       timing() :
         start(),
@@ -108,8 +105,7 @@ class execution_timer
     {}
 
     /// \brief Destructor
-    ~execution_timer()
-    {}
+    ~execution_timer() = default;
 
     /// \brief Start measurement with a hint
     /// \param[in] timing_name Name of the measurement being started
@@ -172,8 +168,8 @@ class execution_timer
 
 };
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_UTILITIES_EXECUTION_TIMER_H

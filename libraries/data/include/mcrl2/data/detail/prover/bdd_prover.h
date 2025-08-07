@@ -15,13 +15,10 @@
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/induction.h"
 #include <chrono>
+#include <memory>
 #include <ratio>
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /** \brief A prover that uses EQ-BDDs.
@@ -87,7 +84,7 @@ enum Answer
 class BDD_Prover: protected rewriter
 {
   public:
-    typedef rewriter::substitution_type substitution_type;
+    using substitution_type = rewriter::substitution_type;
 
   private:
 
@@ -123,7 +120,7 @@ class BDD_Prover: protected rewriter
     const double f_time_limit;
 
     /// \brief A timestamp representing the moment when the maximal amount of milliseconds has been spent on processing the current formula.
-    std::chrono::milliseconds f_deadline;
+    std::chrono::milliseconds f_deadline{};
 
   private:
     /// \brief A flag indicating whether or not induction on lists is applied.
@@ -467,19 +464,18 @@ class BDD_Prover: protected rewriter
     data_expression f_bdd;
   public:
 
-    BDD_Prover(
-      const data_specification& data_spec,
-      const used_data_equation_selector& equations_selector,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
-      double a_time_limit = 0,
-      bool a_path_eliminator = false,
-      smt_solver_type a_solver_type = solver_type_cvc,
-      bool a_apply_induction = false)
-    : rewriter(data_spec, equations_selector, a_rewrite_strategy),
-      f_time_limit(a_time_limit),
-      f_apply_induction(a_apply_induction),
-      f_bdd_simplifier(a_path_eliminator ? std::shared_ptr<BDD_Simplifier>(new BDD_Path_Eliminator(a_solver_type)) : 
-                                           std::shared_ptr<BDD_Simplifier>(new BDD_Simplifier()))
+    BDD_Prover(const data_specification& data_spec,
+        const used_data_equation_selector& equations_selector,
+        mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
+        double a_time_limit = 0,
+        bool a_path_eliminator = false,
+        smt_solver_type a_solver_type = solver_type_cvc,
+        bool a_apply_induction = false)
+        : rewriter(data_spec, equations_selector, a_rewrite_strategy),
+          f_time_limit(a_time_limit),
+          f_apply_induction(a_apply_induction),
+          f_bdd_simplifier(a_path_eliminator ? std::shared_ptr<BDD_Simplifier>(new BDD_Path_Eliminator(a_solver_type))
+                                             : std::make_shared<BDD_Simplifier>())
     {
       rewriter::thread_initialise();
       switch (a_rewrite_strategy)
@@ -649,8 +645,6 @@ class BDD_Prover: protected rewriter
 
 
 };
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

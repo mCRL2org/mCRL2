@@ -23,11 +23,7 @@
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// This is an exception that is thrown when the rewrite 
@@ -49,15 +45,14 @@ struct recalculate_term_as_stack_is_too_small {};
 class rewrite_stack : protected atermpp::vector<data_expression>
 {
   protected:
-    std::size_t m_stack_size;
-    std::size_t m_reserved_stack_size; // This is equal to the size() of the underlying stack.
-                                       // Access of "size()" expensive as it is surrounded by a mutex. 
-                                       
+    std::size_t m_stack_size = 0;
+    std::size_t m_reserved_stack_size = 0UL; // This is equal to the size() of the underlying stack.
+                                             // Access of "size()" expensive as it is surrounded by a mutex.
+
   public:
 
     /// \brief Constructor
-    rewrite_stack() 
-      : m_stack_size(0)
+    rewrite_stack()
     {
       reserve_more_space();
     }
@@ -131,9 +126,7 @@ class rewrite_stack : protected atermpp::vector<data_expression>
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_REWRITE_STACK_H
 

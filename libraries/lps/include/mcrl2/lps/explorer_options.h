@@ -18,10 +18,8 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/exploration_strategy.h"
 
-
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 struct explorer_options
 {
@@ -58,8 +56,7 @@ struct explorer_options
   std::string confluence_action = "ctau";
 
   // Constructor.
-  explorer_options()
-  {}
+  explorer_options() = default;
 
   // Constructor.
   explorer_options(data::rewrite_strategy rewr_strat)
@@ -105,8 +102,6 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   return out;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_EXPLORER_OPTIONS_H

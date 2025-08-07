@@ -15,10 +15,7 @@
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated classes ---//
@@ -47,10 +44,10 @@ class binder_type: public atermpp::aterm
 };
 
 /// \\brief list of binder_types
-typedef atermpp::term_list<binder_type> binder_type_list;
+using binder_type_list = atermpp::term_list<binder_type>;
 
 /// \\brief vector of binder_types
-typedef std::vector<binder_type>    binder_type_vector;
+using binder_type_vector = std::vector<binder_type>;
 
 // prototype declaration
 std::string pp(const binder_type& x, bool precedence_aware = true);
@@ -66,11 +63,10 @@ std::ostream& operator<<(std::ostream& out, const binder_type& x)
 }
 
 /// \\brief swap overload
-inline void swap(binder_type& t1, binder_type& t2)
+inline void swap(binder_type& t1, binder_type& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Binder for untyped set or bag comprehension
 class untyped_set_or_bag_comprehension_binder: public binder_type
@@ -119,11 +115,10 @@ std::ostream& operator<<(std::ostream& out, const untyped_set_or_bag_comprehensi
 }
 
 /// \\brief swap overload
-inline void swap(untyped_set_or_bag_comprehension_binder& t1, untyped_set_or_bag_comprehension_binder& t2)
+inline void swap(untyped_set_or_bag_comprehension_binder& t1, untyped_set_or_bag_comprehension_binder& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Binder for set comprehension
 class set_comprehension_binder: public binder_type
@@ -172,11 +167,10 @@ std::ostream& operator<<(std::ostream& out, const set_comprehension_binder& x)
 }
 
 /// \\brief swap overload
-inline void swap(set_comprehension_binder& t1, set_comprehension_binder& t2)
+inline void swap(set_comprehension_binder& t1, set_comprehension_binder& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Binder for bag comprehension
 class bag_comprehension_binder: public binder_type
@@ -225,11 +219,10 @@ std::ostream& operator<<(std::ostream& out, const bag_comprehension_binder& x)
 }
 
 /// \\brief swap overload
-inline void swap(bag_comprehension_binder& t1, bag_comprehension_binder& t2)
+inline void swap(bag_comprehension_binder& t1, bag_comprehension_binder& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Binder for universal quantification
 class forall_binder: public binder_type
@@ -278,11 +271,10 @@ std::ostream& operator<<(std::ostream& out, const forall_binder& x)
 }
 
 /// \\brief swap overload
-inline void swap(forall_binder& t1, forall_binder& t2)
+inline void swap(forall_binder& t1, forall_binder& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Binder for existential quantification
 class exists_binder: public binder_type
@@ -331,11 +323,10 @@ std::ostream& operator<<(std::ostream& out, const exists_binder& x)
 }
 
 /// \\brief swap overload
-inline void swap(exists_binder& t1, exists_binder& t2)
+inline void swap(exists_binder& t1, exists_binder& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Binder for lambda abstraction
 class lambda_binder: public binder_type
@@ -384,14 +375,12 @@ std::ostream& operator<<(std::ostream& out, const lambda_binder& x)
 }
 
 /// \\brief swap overload
-inline void swap(lambda_binder& t1, lambda_binder& t2)
+inline void swap(lambda_binder& t1, lambda_binder& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated classes ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_BINDER_TYPE_H

@@ -13,6 +13,7 @@
 
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
 
+#include <algorithm>
 #include <fstream>
 #include <optional>
 
@@ -131,9 +132,8 @@ static void set_initial_state(probabilistic_lts_lts_t& lts, const probabilistic_
 template <class LTS>
 static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 {
-  static_assert(std::is_same<LTS,probabilistic_lts_lts_t>::value ||
-                std::is_same<LTS,lts_lts_t>::value,
-                "Function read_lts can only be applied to a (probabilistic) lts. ");
+  static_assert(std::is_same_v<LTS, probabilistic_lts_lts_t> || std::is_same_v<LTS, lts_lts_t>,
+      "Function read_lts can only be applied to a (probabilistic) lts. ");
 
   atermpp::aterm_stream_state state(stream);
   stream >> data::detail::add_index_impl;
@@ -196,7 +196,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       const auto [index, inserted] = multi_actions.insert(action);
 
       std::size_t target_index = to.value();
-      if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
+      if constexpr (std::is_same_v<LTS, probabilistic_lts_lts_t>)
       {
         probabilistic_lts_lts_t::probabilistic_state_t lts_state(to.value());
 
@@ -214,7 +214,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
       // Add the transition and update the number of states.
       lts.add_transition(transition(from.value(), index, target_index));
-      number_of_states = std::max(number_of_states, std::max(from.value() + 1, to.value() + 1));
+      number_of_states = std::max({number_of_states, from.value() + 1, to.value() + 1});
 
       if (inserted)
       {
@@ -226,7 +226,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     }
     else if(term == probabilistic_transition_mark())
     {
-      if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
+      if constexpr (std::is_same_v<LTS, probabilistic_lts_lts_t>)
       {
         probabilistic_lts_lts_t::probabilistic_state_t to;
 
@@ -249,7 +249,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
         lts.add_transition(transition(from.value(), index, to_index));
 
         // Update the number of states
-        number_of_states = std::max(number_of_states, std::max(from.value() + 1, to_index + 1));
+        number_of_states = std::max({number_of_states, from.value() + 1, to_index + 1});
 
         if (inserted)
         {
@@ -298,9 +298,9 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 template <class LTS_TRANSITION_SYSTEM>     
 static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filename)
 {
-  static_assert(std::is_same<LTS_TRANSITION_SYSTEM,probabilistic_lts_lts_t>::value || 
-                std::is_same<LTS_TRANSITION_SYSTEM,lts_lts_t>::value,
-                "Function read_from_lts can only be applied to a (probabilistic) lts. ");
+  static_assert(std::is_same_v<LTS_TRANSITION_SYSTEM, probabilistic_lts_lts_t>
+                    || std::is_same_v<LTS_TRANSITION_SYSTEM, lts_lts_t>,
+      "Function read_from_lts can only be applied to a (probabilistic) lts. ");
 
   std::ifstream fstream;
   if (!filename.empty())
@@ -353,9 +353,8 @@ void write_initial_state(atermpp::aterm_ostream& stream, const lts_lts_t& lts)
 template <class LTS>
 static void write_lts(atermpp::aterm_ostream& stream, const LTS& lts)
 {
-  static_assert(std::is_same<LTS,probabilistic_lts_lts_t>::value ||
-                std::is_same<LTS,lts_lts_t>::value,
-                "Function write_lts can only be applied to a (probabilistic) lts. ");
+  static_assert(std::is_same_v<LTS, probabilistic_lts_lts_t> || std::is_same_v<LTS, lts_lts_t>,
+      "Function write_lts can only be applied to a (probabilistic) lts. ");
 
   // Write the process related information.
   write_lts_header(stream,
@@ -367,7 +366,7 @@ static void write_lts(atermpp::aterm_ostream& stream, const LTS& lts)
   {
     lts_lts_t::action_label_t label = lts.action_label(lts.apply_hidden_label_map(trans.label()));
 
-    if constexpr (std::is_same<LTS, probabilistic_lts_lts_t>::value)
+    if constexpr (std::is_same_v<LTS, probabilistic_lts_lts_t>)
     {
       write_transition(stream, trans.from(), label, lts.probabilistic_state(trans.to()));
     }
@@ -393,9 +392,9 @@ static void write_lts(atermpp::aterm_ostream& stream, const LTS& lts)
 template <class LTS_TRANSITION_SYSTEM>
 static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& filename)
 {
-  static_assert(std::is_same<LTS_TRANSITION_SYSTEM,probabilistic_lts_lts_t>::value ||
-                std::is_same<LTS_TRANSITION_SYSTEM,lts_lts_t>::value,
-                "Function write_to_lts can only be applied to a (probabilistic) lts. ");
+  static_assert(std::is_same_v<LTS_TRANSITION_SYSTEM, probabilistic_lts_lts_t>
+                    || std::is_same_v<LTS_TRANSITION_SYSTEM, lts_lts_t>,
+      "Function write_to_lts can only be applied to a (probabilistic) lts. ");
 
   bool to_stdout = filename.empty() || filename == "-";
   std::ofstream fstream;

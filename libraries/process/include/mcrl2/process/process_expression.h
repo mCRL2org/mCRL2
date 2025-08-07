@@ -19,10 +19,7 @@
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
 
-namespace mcrl2
-{
-
-namespace process
+namespace mcrl2::process
 {
 
 //--- start generated classes ---//
@@ -56,10 +53,10 @@ class process_expression: public atermpp::aterm
 };
 
 /// \\brief list of process_expressions
-typedef atermpp::term_list<process_expression> process_expression_list;
+using process_expression_list = atermpp::term_list<process_expression>;
 
 /// \\brief vector of process_expressions
-typedef std::vector<process_expression>    process_expression_vector;
+using process_expression_vector = std::vector<process_expression>;
 
 // prototypes
 inline bool is_action(const atermpp::aterm& x);
@@ -130,11 +127,10 @@ std::ostream& operator<<(std::ostream& out, const process_expression& x)
 }
 
 /// \\brief swap overload
-inline void swap(process_expression& t1, process_expression& t2)
+inline void swap(process_expression& t1, process_expression& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief An action
 class action: public process_expression
@@ -184,10 +180,10 @@ inline void make_action(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of actions
-typedef atermpp::term_list<action> action_list;
+using action_list = atermpp::term_list<action>;
 
 /// \\brief vector of actions
-typedef std::vector<action>    action_vector;
+using action_vector = std::vector<action>;
 
 /// \\brief Test for a action expression
 /// \\param x A term
@@ -212,11 +208,10 @@ std::ostream& operator<<(std::ostream& out, const action& x)
 }
 
 /// \\brief swap overload
-inline void swap(action& t1, action& t2)
+inline void swap(action& t1, action& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief A process
 class process_instance: public process_expression
@@ -288,11 +283,10 @@ std::ostream& operator<<(std::ostream& out, const process_instance& x)
 }
 
 /// \\brief swap overload
-inline void swap(process_instance& t1, process_instance& t2)
+inline void swap(process_instance& t1, process_instance& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief A process assignment
 class process_instance_assignment: public process_expression
@@ -364,11 +358,10 @@ std::ostream& operator<<(std::ostream& out, const process_instance_assignment& x
 }
 
 /// \\brief swap overload
-inline void swap(process_instance_assignment& t1, process_instance_assignment& t2)
+inline void swap(process_instance_assignment& t1, process_instance_assignment& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The value delta
 class delta: public process_expression
@@ -417,11 +410,10 @@ std::ostream& operator<<(std::ostream& out, const delta& x)
 }
 
 /// \\brief swap overload
-inline void swap(delta& t1, delta& t2)
+inline void swap(delta& t1, delta& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The value tau
 class tau: public process_expression
@@ -470,11 +462,10 @@ std::ostream& operator<<(std::ostream& out, const tau& x)
 }
 
 /// \\brief swap overload
-inline void swap(tau& t1, tau& t2)
+inline void swap(tau& t1, tau& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The sum operator
 class sum: public process_expression
@@ -546,11 +537,10 @@ std::ostream& operator<<(std::ostream& out, const sum& x)
 }
 
 /// \\brief swap overload
-inline void swap(sum& t1, sum& t2)
+inline void swap(sum& t1, sum& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The block operator
 class block: public process_expression
@@ -622,11 +612,10 @@ std::ostream& operator<<(std::ostream& out, const block& x)
 }
 
 /// \\brief swap overload
-inline void swap(block& t1, block& t2)
+inline void swap(block& t1, block& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The hide operator
 class hide: public process_expression
@@ -698,11 +687,10 @@ std::ostream& operator<<(std::ostream& out, const hide& x)
 }
 
 /// \\brief swap overload
-inline void swap(hide& t1, hide& t2)
+inline void swap(hide& t1, hide& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The rename operator
 class rename: public process_expression
@@ -774,11 +762,10 @@ std::ostream& operator<<(std::ostream& out, const rename& x)
 }
 
 /// \\brief swap overload
-inline void swap(rename& t1, rename& t2)
+inline void swap(rename& t1, rename& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The communication operator
 class comm: public process_expression
@@ -850,11 +837,10 @@ std::ostream& operator<<(std::ostream& out, const comm& x)
 }
 
 /// \\brief swap overload
-inline void swap(comm& t1, comm& t2)
+inline void swap(comm& t1, comm& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The allow operator
 class allow: public process_expression
@@ -926,11 +912,10 @@ std::ostream& operator<<(std::ostream& out, const allow& x)
 }
 
 /// \\brief swap overload
-inline void swap(allow& t1, allow& t2)
+inline void swap(allow& t1, allow& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The synchronization operator
 class sync: public process_expression
@@ -1002,11 +987,10 @@ std::ostream& operator<<(std::ostream& out, const sync& x)
 }
 
 /// \\brief swap overload
-inline void swap(sync& t1, sync& t2)
+inline void swap(sync& t1, sync& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The at operator
 class at: public process_expression
@@ -1078,11 +1062,10 @@ std::ostream& operator<<(std::ostream& out, const at& x)
 }
 
 /// \\brief swap overload
-inline void swap(at& t1, at& t2)
+inline void swap(at& t1, at& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The sequential composition
 class seq: public process_expression
@@ -1154,11 +1137,10 @@ std::ostream& operator<<(std::ostream& out, const seq& x)
 }
 
 /// \\brief swap overload
-inline void swap(seq& t1, seq& t2)
+inline void swap(seq& t1, seq& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The if-then operator
 class if_then: public process_expression
@@ -1230,11 +1212,10 @@ std::ostream& operator<<(std::ostream& out, const if_then& x)
 }
 
 /// \\brief swap overload
-inline void swap(if_then& t1, if_then& t2)
+inline void swap(if_then& t1, if_then& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The if-then-else operator
 class if_then_else: public process_expression
@@ -1311,11 +1292,10 @@ std::ostream& operator<<(std::ostream& out, const if_then_else& x)
 }
 
 /// \\brief swap overload
-inline void swap(if_then_else& t1, if_then_else& t2)
+inline void swap(if_then_else& t1, if_then_else& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The bounded initialization
 class bounded_init: public process_expression
@@ -1387,11 +1367,10 @@ std::ostream& operator<<(std::ostream& out, const bounded_init& x)
 }
 
 /// \\brief swap overload
-inline void swap(bounded_init& t1, bounded_init& t2)
+inline void swap(bounded_init& t1, bounded_init& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The merge operator
 class merge: public process_expression
@@ -1463,11 +1442,10 @@ std::ostream& operator<<(std::ostream& out, const merge& x)
 }
 
 /// \\brief swap overload
-inline void swap(merge& t1, merge& t2)
+inline void swap(merge& t1, merge& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The left merge operator
 class left_merge: public process_expression
@@ -1539,11 +1517,10 @@ std::ostream& operator<<(std::ostream& out, const left_merge& x)
 }
 
 /// \\brief swap overload
-inline void swap(left_merge& t1, left_merge& t2)
+inline void swap(left_merge& t1, left_merge& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The choice operator
 class choice: public process_expression
@@ -1615,11 +1592,10 @@ std::ostream& operator<<(std::ostream& out, const choice& x)
 }
 
 /// \\brief swap overload
-inline void swap(choice& t1, choice& t2)
+inline void swap(choice& t1, choice& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The distribution operator
 class stochastic_operator: public process_expression
@@ -1696,11 +1672,10 @@ std::ostream& operator<<(std::ostream& out, const stochastic_operator& x)
 }
 
 /// \\brief swap overload
-inline void swap(stochastic_operator& t1, stochastic_operator& t2)
+inline void swap(stochastic_operator& t1, stochastic_operator& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief An untyped process assginment
 class untyped_process_assignment: public process_expression
@@ -1777,7 +1752,7 @@ std::ostream& operator<<(std::ostream& out, const untyped_process_assignment& x)
 }
 
 /// \\brief swap overload
-inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
+inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -1819,9 +1794,7 @@ bool equal_signatures(const action& a, const action& b)
   return std::equal(a_args.begin(), a_args.end(), b_args.begin(), [](const data::data_expression& x, const data::data_expression& y) { return x.sort() == y.sort(); });
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 namespace std
 {

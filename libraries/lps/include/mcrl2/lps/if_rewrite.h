@@ -15,15 +15,14 @@
 #include "mcrl2/data/rewriters/if_rewriter.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
 struct if_rewrite_builder: public lps::data_expression_builder<if_rewrite_builder>
 {
-  typedef lps::data_expression_builder<if_rewrite_builder> super;
+  using super = lps::data_expression_builder<if_rewrite_builder>;
   using super::apply;
   using super::update;
 
@@ -41,9 +40,9 @@ struct if_rewrite_builder: public lps::data_expression_builder<if_rewrite_builde
 /// \brief Applies the one point rule rewriter to all embedded data expressions in an object x
 /// \param x an object containing data expressions
 template <typename T>
-void if_rewrite(T& x, typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+void if_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
-  detail::if_rewrite_builder f;
+  detail::if_rewrite_builder f{};
   f.update(x);
 }
 
@@ -51,16 +50,14 @@ void if_rewrite(T& x, typename std::enable_if<!std::is_base_of<atermpp::aterm, T
 /// \param x an object containing data expressions
 /// \return the rewrite result
 template <typename T>
-T if_rewrite(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+T if_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
-  detail::if_rewrite_builder f;
+  detail::if_rewrite_builder f{};
   f.apply(result, x);
   return result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_IF_REWRITE_H

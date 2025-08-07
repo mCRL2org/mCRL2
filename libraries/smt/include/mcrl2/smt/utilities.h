@@ -14,20 +14,18 @@
 #include "mcrl2/smt/native_translation.h"
 #include "mcrl2/smt/translation_error.h"
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 
 inline
 std::string translate_identifier(const std::string& id)
 {
   std::string result = id;
-  for(std::size_t i = 0; i < result.size(); i++)
+  for (char& i : result)
   {
-    if(result[i] == '\'')
+    if (i == '\'')
     {
-      result[i] = '!';
+      i = '!';
     }
   }
   return result;
@@ -196,7 +194,6 @@ public:
   }
 };
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif

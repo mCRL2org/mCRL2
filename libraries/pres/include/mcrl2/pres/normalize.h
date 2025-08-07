@@ -16,26 +16,21 @@
 #include "mcrl2/pres/builder.h"
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 /// \cond INTERNAL_DOCS
 // \brief Visitor for checking if a pres expression is normalized.
 struct is_normalized_traverser: public pres_expression_traverser<is_normalized_traverser>
 {
-  typedef pres_expression_traverser<is_normalized_traverser> super;
+  using super = pres_expression_traverser<is_normalized_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  bool result;
-
-  is_normalized_traverser()
-    : result(true)
-  {}
+  bool result = true;
 
   /// \brief Visit not node
   void enter(const minus& /* x */)
@@ -55,14 +50,10 @@ struct is_normalized_traverser: public pres_expression_traverser<is_normalized_t
 // \brief Visitor for checking if a pres expression is normalized.
 struct normalize_builder: public pres_expression_builder<normalize_builder>
 {
-  typedef pres_expression_builder<normalize_builder> super;
+  using super = pres_expression_builder<normalize_builder>;
   using super::apply;
 
-  bool negated;
-
-  normalize_builder()
-    : negated(false)
-  {}
+  bool negated = false;
 
   template <class T>
   void apply(T& result, const data::data_expression& x)
@@ -174,9 +165,7 @@ bool is_normalized(const T& x)
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing pres expressions
 template <typename T>
-void normalize(T& x,
-               typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-              )
+void normalize(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   normalize_builder f;
   f.update(x);
@@ -186,9 +175,7 @@ void normalize(T& x,
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing pres expressions
 template <typename T>
-T normalize(const T& x,
-            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-           )
+T normalize(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   normalize_builder f;
@@ -196,8 +183,8 @@ T normalize(const T& x,
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_NORMALIZE_H

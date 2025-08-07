@@ -104,82 +104,80 @@ class pbessolve_tool
     : public parallel_tool<rewriter_tool<pbes_input_tool<input_tool>>>
 {
   protected:
-  typedef parallel_tool<rewriter_tool<pbes_input_tool<input_tool>>> super;
+    using super = parallel_tool<rewriter_tool<pbes_input_tool<input_tool>>>;
 
-  pbessolve_options options;
-  int m_short_strategy = 0;
-  partial_solve_strategy m_long_strategy = partial_solve_strategy::no_optimisation;
-  std::string lpsfile;
-  std::string ltsfile;
-  std::string evidence_file;
+    pbessolve_options options;
+    int m_short_strategy = 0;
+    partial_solve_strategy m_long_strategy = partial_solve_strategy::no_optimisation;
+    std::string lpsfile;
+    std::string ltsfile;
+    std::string evidence_file;
 
-  void add_options(utilities::interface_description& desc) override
-  {
-    super::add_options(desc);
-    desc.add_hidden_option("check-strategy",
-                           "do a sanity check on the computed strategy", 'c');
-    desc.add_option("search-strategy",
-                    utilities::make_enum_argument<search_strategy>("NAME")
-                        .add_value_desc(breadth_first,
-                                        "Leads to smaller counter examples",
-                                        true)
-                        .add_value_desc(depth_first, ""),
-                    "Use search strategy NAME:", 'z');
-    desc.add_option("file", utilities::make_file_argument("NAME"),
-                    "The file containing the LPS or LTS that was used to "
-                    "generate the PBES using lps2pbes -c. If this "
-                    "option is set, a counter example or witness for the "
-                    "encoded property will be generated. The "
-                    "extension of the file should be .lps in case of an LPS "
-                    "file, in all other cases it is assumed to "
-                    "be an LTS.",
-                    'f');
-    desc.add_option("prune-todo-list", "Prune the todo list periodically.");
-    desc.add_hidden_option("naive-counter-example-instantiation",
-                           "run the naive instantiation algorithm for pbes with counter example information");
-    desc.add_hidden_option("no-remove-unused-rewrite-rules",
-                           "do not remove unused rewrite rules. ", 'u');
-    desc.add_option("evidence-file", utilities::make_file_argument("NAME"),
-                    "The file to which the evidence is written. If not set, a "
-                    "default name will be chosen.");
-    desc.add_option(
-        "solve-strategy",
-        utilities::make_enum_argument<int>("NAME")
-            .add_value_desc(0, "No on-the-fly solving is applied", true)
-            .add_value_desc(1, "Propagate solved equations using an attractor.")
-            .add_value_desc(2, "Detect winning loops.")
-            .add_value_desc(3, "Solve subgames using a fatal attractor.")
-            .add_value_desc(4, "Solve subgames using the solver."),
-        "Use solve strategy NAME. Strategies 1-4 periodically apply on-the-fly "
-        "solving, which may lead to early termination.",
-        's');
-    desc.add_hidden_option(
-        "long-strategy",
-        utilities::make_enum_argument<partial_solve_strategy>("STRATEGY")
-            .add_value_desc(partial_solve_strategy::no_optimisation, "Do not apply any optimizations.")
-            .add_value_desc(partial_solve_strategy::remove_self_loops, "Remove self loops.")
-            .add_value_desc(partial_solve_strategy::propagate_solved_equations_using_substitution, "Propagate solved equations using substitution.")
-            .add_value_desc(partial_solve_strategy::propagate_solved_equations_using_attractor, "Propagate solved equations using an attractor.")
-            .add_value_desc(partial_solve_strategy::detect_winning_loops_using_fatal_attractor, "Detect winning loops using a fatal attractor.")
-            .add_value_desc(
-                partial_solve_strategy::solve_subgames_using_fatal_attractor_local, "Solve subgames using a fatal attractor (local version).")
-            .add_value_desc(
-                partial_solve_strategy::solve_subgames_using_fatal_attractor_original, "Solve subgames using a fatal attractor (original version).")
-            .add_value_desc(partial_solve_strategy::solve_subgames_using_solver, "Solve subgames using the solver.")
-            .add_value_desc(partial_solve_strategy::detect_winning_loops_original, "Detect winning loops (original version)."
-                               " N.B. This optimization does not work "
-                               "correctly in combination with counter examples."
-                               " It may also cause stack overflow."),
-        "use strategy STRATEGY (N.B. This is a developer option that overrides "
-        "--strategy)",
-        'l');
-    desc.add_hidden_option(
-        "no-replace-constants-by-variables",
-        "Do not move constant expressions to a substitution.");
-    desc.add_hidden_option("aggressive",
-                           "Apply optimizations 4 and 5 at every iteration.");
-    desc.add_hidden_option("prune-todo-alternative",
-                           "Use a variation of todo list pruning.");
+    void add_options(utilities::interface_description& desc) override
+    {
+      super::add_options(desc);
+      desc.add_hidden_option("check-strategy", "do a sanity check on the computed strategy", 'c');
+      desc.add_option("search-strategy",
+          utilities::make_enum_argument<search_strategy>("NAME")
+              .add_value_desc(breadth_first, "Leads to smaller counter examples", true)
+              .add_value_desc(depth_first, ""),
+          "Use search strategy NAME:",
+          'z');
+      desc.add_option("file",
+          utilities::make_file_argument("NAME"),
+          "The file containing the LPS or LTS that was used to "
+          "generate the PBES using lps2pbes -c. If this "
+          "option is set, a counter example or witness for the "
+          "encoded property will be generated. The "
+          "extension of the file should be .lps in case of an LPS "
+          "file, in all other cases it is assumed to "
+          "be an LTS.",
+          'f');
+      desc.add_option("prune-todo-list", "Prune the todo list periodically.");
+      desc.add_hidden_option("naive-counter-example-instantiation",
+          "run the naive instantiation algorithm for pbes with counter example information");
+      desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
+      desc.add_option("evidence-file",
+          utilities::make_file_argument("NAME"),
+          "The file to which the evidence is written. If not set, a "
+          "default name will be chosen.");
+      desc.add_option("solve-strategy",
+          utilities::make_enum_argument<int>("NAME")
+              .add_value_desc(0, "No on-the-fly solving is applied", true)
+              .add_value_desc(1, "Propagate solved equations using an attractor.")
+              .add_value_desc(2, "Detect winning loops.")
+              .add_value_desc(3, "Solve subgames using a fatal attractor.")
+              .add_value_desc(4, "Solve subgames using the solver."),
+          "Use solve strategy NAME. Strategies 1-4 periodically apply on-the-fly "
+          "solving, which may lead to early termination.",
+          's');
+      desc.add_hidden_option("long-strategy",
+          utilities::make_enum_argument<partial_solve_strategy>("STRATEGY")
+              .add_value_desc(partial_solve_strategy::no_optimisation, "Do not apply any optimizations.")
+              .add_value_desc(partial_solve_strategy::remove_self_loops, "Remove self loops.")
+              .add_value_desc(partial_solve_strategy::propagate_solved_equations_using_substitution,
+                  "Propagate solved equations using substitution.")
+              .add_value_desc(partial_solve_strategy::propagate_solved_equations_using_attractor,
+                  "Propagate solved equations using an attractor.")
+              .add_value_desc(partial_solve_strategy::detect_winning_loops_using_fatal_attractor,
+                  "Detect winning loops using a fatal attractor.")
+              .add_value_desc(partial_solve_strategy::solve_subgames_using_fatal_attractor_local,
+                  "Solve subgames using a fatal attractor (local version).")
+              .add_value_desc(partial_solve_strategy::solve_subgames_using_fatal_attractor_original,
+                  "Solve subgames using a fatal attractor (original version).")
+              .add_value_desc(partial_solve_strategy::solve_subgames_using_solver, "Solve subgames using the solver.")
+              .add_value_desc(partial_solve_strategy::detect_winning_loops_original,
+                  "Detect winning loops (original version)."
+                  " N.B. This optimization does not work "
+                  "correctly in combination with counter examples."
+                  " It may also cause stack overflow."),
+          "use strategy STRATEGY (N.B. This is a developer option that overrides "
+          "--strategy)",
+          'l');
+      desc.add_hidden_option("no-replace-constants-by-variables",
+          "Do not move constant expressions to a substitution.");
+      desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
+      desc.add_hidden_option("prune-todo-alternative", "Use a variation of todo list pruning.");
   }
 
   void parse_options(const utilities::command_line_parser& parser) override

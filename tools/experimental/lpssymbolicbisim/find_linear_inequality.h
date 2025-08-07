@@ -11,29 +11,31 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_FIND_LINEAR_INEQUALITY_H
 #define MCRL2_LPSSYMBOLICBISIM_FIND_LINEAR_INEQUALITY_H
 
-namespace mcrl2
-{
-namespace data
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/traverser.h"
+#include "mcrl2/data/variable.h"
+
+#include <set>
+
+namespace mcrl2::data
 {
 
 template <template <class> class Traverser, class OutputIterator>
 struct find_linear_inequality_traverser: public Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> >
 {
-  typedef Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> > super;
+  using super = Traverser<find_linear_inequality_traverser<Traverser, OutputIterator>>;
   using super::enter;
   using super::leave;
   using super::apply;
 
   OutputIterator out;
   std::set< variable > real_free_vars;
-  bool search_free_var;
-  bool found_free_var;
+  bool search_free_var = false;
+  bool found_free_var = false;
 
   find_linear_inequality_traverser(OutputIterator out_, std::set< variable > real_free_vars_)
     : out(out_)
     , real_free_vars(real_free_vars_)
-    , search_free_var(false)
-    , found_free_var(false)
   {}
 
   void apply(const data::variable& v)
@@ -93,9 +95,6 @@ std::set<data::data_expression> find_linear_inequalities(const T& x, std::set< v
   return result;
 }
 
-
-} // namespace data
-} // namespace mcrl2
-
+} // namespace mcrl2::data
 
 #endif // MCRL2_LPSSYMBOLICBISIM_FIND_LINEAR_INEQUALITY_H

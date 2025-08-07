@@ -14,9 +14,9 @@
 
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 
-namespace mcrl2 {
 
-namespace process {
+
+namespace mcrl2::process {
 
 struct push_block_cache
 {
@@ -159,7 +159,7 @@ process_expression push_block(const std::set<core::identifier_string>& B, const 
 template <typename Derived>
 struct push_block_builder: public process_expression_builder<Derived>
 {
-  typedef process_expression_builder<Derived> super;
+  using super = process_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -224,7 +224,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     const process_expression& p = eqn.expression();
 
     // Add (P(e), B, P1(e)) to W
-    W.equation_cache[x].push_back(std::make_pair(B, process_instance(P1, x.actual_parameters())));
+    W.equation_cache[x].emplace_back(B, process_instance(P1, x.actual_parameters()));
 
     process_expression p1 = push_block(B, p, equations, W, id_generator);
 
@@ -332,7 +332,7 @@ struct push_block_builder: public process_expression_builder<Derived>
 template <template <class> class Traverser>
 struct apply_push_block_builder: public Traverser<apply_push_block_builder<Traverser> >
 {
-  typedef Traverser<apply_push_block_builder<Traverser> > super;
+  using super = Traverser<apply_push_block_builder<Traverser>>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -367,8 +367,8 @@ process_expression push_block(const core::identifier_string_list& B,
   return detail::push_block(B1, x, equations, W, id_generator);
 }
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H

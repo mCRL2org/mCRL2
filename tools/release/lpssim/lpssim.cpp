@@ -26,31 +26,31 @@ using mcrl2::data::tools::rewriter_tool;
 
 class sim_tool : public rewriter_tool< input_tool >
 {
-    typedef rewriter_tool<input_tool> super;
+  using super = rewriter_tool<input_tool>;
 
-  private:
-    static std::string print_state(const state& s)
+private:
+  static std::string print_state(const state& s)
+  {
+    std::string output;
+    bool first = true;
+    for (const data_expression& d : s)
     {
-      std::string output;
-      bool first = true;
-      for (const data_expression& d: s)
+      if (!first)
       {
-        if (!first)
-        {
-          output += ", ";
-        }
-        first = false;
+        output += ", ";
+      }
+      first = false;
 
-        if (mcrl2::data::is_variable(d))
-        {
-          output += "_";
-        }
-        else
-        {
-          output += data::pp(d);
-        }   
-      }       
-      return "[" + output + "]";
+      if (mcrl2::data::is_variable(d))
+      {
+        output += "_";
+      }
+      else
+      {
+        output += data::pp(d);
+      }
+    }
+    return "[" + output + "]";
     }     
 
     static std::string print_state(const stochastic_state& s)
@@ -65,15 +65,15 @@ class sim_tool : public rewriter_tool< input_tool >
 
   protected:
 
-    bool m_do_not_use_dummies;
+    bool m_do_not_use_dummies = false;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("nodummy", "do not replace global variables in the LPS with dummy values", 'y');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_do_not_use_dummies = 0 < parser.options.count("nodummy");
@@ -360,11 +360,10 @@ class sim_tool : public rewriter_tool< input_tool >
         "Muck van Weerdenburg",
         "Command-line simulation of an LPS",
         "Simulate the LPS in INFILE via a text-based interface."
-      ),
-      m_do_not_use_dummies(false)
+      )
     {}
 
-    bool run()
+    bool run() override
     {
       mcrl2::lps::stochastic_specification spec;
       load_lps(spec, input_filename());

@@ -18,7 +18,7 @@
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-typedef core::term_traits<pbes_expression> tr;
+using tr = core::term_traits<pbes_expression>;
 
 void test_join()
 {

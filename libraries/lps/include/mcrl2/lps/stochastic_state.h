@@ -17,9 +17,8 @@
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/lps/state.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 /* inline
 const data::data_expression& real_zero()
@@ -120,8 +119,6 @@ void check_stochastic_state(const stochastic_state& s, const data::rewriter& rew
   }
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_STOCHASTIC_STATE_H

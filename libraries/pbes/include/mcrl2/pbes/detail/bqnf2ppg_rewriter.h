@@ -19,18 +19,18 @@
 
 #include "mcrl2/pbes/detail/bqnf_visitor.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 struct bqnf2ppg_rewriter: public bqnf_visitor
   {
     /// \brief The equation type.
-    typedef pbes_equation equation_type;
+    using equation_type = pbes_equation;
     /// \brief The expression type of the equation.
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The set of variable names already in use.
     std::set<std::string> variable_names;
@@ -167,7 +167,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the expression e conforms to BQNF.
-    virtual bool visit_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool
+    visit_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_bounded_forall: " << print_brief(e) << std::endl;
@@ -271,7 +272,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the expression e conforms to BQNF.
-    virtual bool visit_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool
+    visit_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_bounded_exists" << print_brief(e) << std::endl;
@@ -372,7 +374,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the expression e conforms to BQNF.
-    virtual bool visit_and(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool visit_and(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_and: " << print_brief(e) << std::endl;
@@ -476,7 +478,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the expression e conforms to BQNF.
-    virtual bool visit_or(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool visit_or(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_or: " << print_brief(e) << std::endl;
@@ -513,7 +515,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param var propositional variable of the parent equation.
     /// \param e a PBES expression.
     /// \return true if the right hand side of the equation is in BQNF.
-    virtual bool visit_bqnf_expression(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+    bool
+    visit_bqnf_expression(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
       //indent(); std::clog << "visit_bqnf_expression: " << print_brief(e) << std::endl;
@@ -539,7 +542,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// The resulting equations are added to the sequence of result equations.
     /// \param eqn a PBES equation
     /// \return true if the right hand side of the equation is in BQNF.
-    virtual bool visit_bqnf_equation(const equation_type& eqn)
+    bool visit_bqnf_equation(const equation_type& eqn) override
     {
       const fixpoint_symbol& sigma = eqn.symbol();
       const propositional_variable& var = eqn.variable();
@@ -559,10 +562,10 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
 
   };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_BQNF2PPG_REWRITER_H

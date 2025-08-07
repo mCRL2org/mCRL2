@@ -16,20 +16,16 @@ using namespace mcrl2;
 
 struct print_sub_expressions_traverser: public data::data_expression_traverser<print_sub_expressions_traverser>
 {
-  typedef data::data_expression_traverser<print_sub_expressions_traverser> super;
+  using super = data::data_expression_traverser<print_sub_expressions_traverser>;
 
   template <typename T>
-  void leave(const T& x,
-             typename std::enable_if<std::is_base_of<data::data_expression, T>::value>::type* = nullptr
-            )
+  void leave(const T& x, std::enable_if_t<std::is_base_of_v<data::data_expression, T>>* = nullptr)
   {
     std::cout << "    " << x << " : " << x.sort() << std::endl;
   }
 
   template <typename T>
-  void leave(const T& /* x */,
-             typename std::enable_if<!std::is_base_of<data::data_expression, T>::value>::type* = nullptr
-            )
+  void leave(const T& /* x */, std::enable_if_t<!std::is_base_of_v<data::data_expression, T>>* = nullptr)
   {}
 };
 
@@ -116,16 +112,16 @@ void rewrite_expressions(std::string text, bool print_subterms)
 class mcrl2typecheck_tool: public utilities::tools::input_tool
 {
   protected:
-    typedef utilities::tools::input_tool super;
+    using super = utilities::tools::input_tool;
     bool print_subterms = false;
 
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       print_subterms = parser.options.count("print-subterms") > 0;
     }
 
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("print-subterms", "print the sorts of subterms", 's');
@@ -141,7 +137,7 @@ class mcrl2typecheck_tool: public utilities::tools::input_tool
              )
     {}
 
-    bool run()
+    bool run() override
     {
       std::string text = utilities::read_text(input_filename());
       rewrite_expressions(text, print_subterms);

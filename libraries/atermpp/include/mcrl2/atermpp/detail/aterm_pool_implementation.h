@@ -15,10 +15,7 @@
 #include "aterm_pool.h"
 #include "aterm_pool_storage_implementation.h"   // For store_in_argument_array. 
 
-
-namespace atermpp
-{
-namespace detail
+namespace atermpp::detail
 {
 
 aterm_pool::aterm_pool() :
@@ -327,19 +324,19 @@ bool aterm_pool::create_appl_dynamic(aterm& term,
   case 0:
     return std::get<0>(m_appl_storage).create_term(term, sym);
   case 1:
-    return std::get<1>(m_appl_storage).template create_appl_iterator<ForwardIterator>(term, sym, begin, end);
+    return std::get<1>(m_appl_storage).create_appl_iterator<ForwardIterator>(term, sym, begin, end);
   case 2:
-    return std::get<2>(m_appl_storage).template create_appl_iterator<ForwardIterator>(term, sym, begin, end);
+    return std::get<2>(m_appl_storage).create_appl_iterator<ForwardIterator>(term, sym, begin, end);
   case 3:
-    return std::get<3>(m_appl_storage).template create_appl_iterator<ForwardIterator>(term, sym, begin, end);
+    return std::get<3>(m_appl_storage).create_appl_iterator<ForwardIterator>(term, sym, begin, end);
   case 4:
-    return std::get<4>(m_appl_storage).template create_appl_iterator<ForwardIterator>(term, sym, begin, end);
+    return std::get<4>(m_appl_storage).create_appl_iterator<ForwardIterator>(term, sym, begin, end);
   case 5:
-    return std::get<5>(m_appl_storage).template create_appl_iterator<ForwardIterator>(term, sym, begin, end);
+    return std::get<5>(m_appl_storage).create_appl_iterator<ForwardIterator>(term, sym, begin, end);
   case 6:
-    return std::get<6>(m_appl_storage).template create_appl_iterator<ForwardIterator>(term, sym, begin, end);
+    return std::get<6>(m_appl_storage).create_appl_iterator<ForwardIterator>(term, sym, begin, end);
   case 7:
-    return std::get<7>(m_appl_storage).template create_appl_iterator<ForwardIterator>(term, sym, begin, end);
+    return std::get<7>(m_appl_storage).create_appl_iterator<ForwardIterator>(term, sym, begin, end);
   default:
     return m_appl_dynamic_storage.create_appl_dynamic(term, sym, begin, end);
   }
@@ -358,19 +355,19 @@ bool aterm_pool::create_appl_dynamic(aterm& term,
   case 0:
     return std::get<0>(m_appl_storage).create_term(term, sym);
   case 1:
-    return std::get<1>(m_appl_storage).template create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
+    return std::get<1>(m_appl_storage).create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
   case 2:
-    return std::get<2>(m_appl_storage).template create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
+    return std::get<2>(m_appl_storage).create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
   case 3:
-    return std::get<3>(m_appl_storage).template create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
+    return std::get<3>(m_appl_storage).create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
   case 4:
-    return std::get<4>(m_appl_storage).template create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
+    return std::get<4>(m_appl_storage).create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
   case 5:
-    return std::get<5>(m_appl_storage).template create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
+    return std::get<5>(m_appl_storage).create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
   case 6:
-    return std::get<6>(m_appl_storage).template create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
+    return std::get<6>(m_appl_storage).create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
   case 7:
-    return std::get<7>(m_appl_storage).template create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
+    return std::get<7>(m_appl_storage).create_appl_iterator<InputIterator, ATermConverter>(term, sym, converter, begin, end);
   default:
     return m_appl_dynamic_storage.create_appl_dynamic(term, sym, converter, begin, end);
   }
@@ -428,7 +425,7 @@ std::size_t aterm_pool::protection_set_size() const
   return result;
 }
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif // ATERMPP_DETAIL_ATERM_POOL_IMPLEMENTATION_H

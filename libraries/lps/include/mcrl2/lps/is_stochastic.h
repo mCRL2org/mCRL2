@@ -14,25 +14,20 @@
 
 #include "mcrl2/lps/traverser.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
 struct is_stochastic_traverser: public lps::data_expression_traverser<is_stochastic_traverser>
 {
-  typedef lps::data_expression_traverser<is_stochastic_traverser> super;
+  using super = lps::data_expression_traverser<is_stochastic_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  bool result;
-
-  is_stochastic_traverser()
-    : result(false)
-  {}
-
+  bool result = false;
+  
   void apply(const lps::stochastic_distribution& x)
   {
     if (x.is_defined())
@@ -54,8 +49,6 @@ bool is_stochastic(const T& x)
   return f.result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_IS_STOCHASTIC_H

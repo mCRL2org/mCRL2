@@ -31,22 +31,22 @@ namespace mcrl2::lts
 namespace detail
 {
 
-typedef std::size_t state_type;
-typedef std::size_t label_type;
-typedef boost::container::flat_set<state_type> set_of_states;
-typedef boost::container::flat_set<label_type> action_label_set;
-typedef std::multimap<detail::state_type, detail::set_of_states> anti_chain_type;
+using state_type = std::size_t;
+using label_type = std::size_t;
+using set_of_states = boost::container::flat_set<state_type>;
+using action_label_set = boost::container::flat_set<label_type>;
+using anti_chain_type = std::multimap<detail::state_type, detail::set_of_states>;
 
 template <class COUNTER_EXAMPLE_CONSTRUCTOR>
 class state_states_counter_example_index_triple
 {
 protected:
-  detail::state_type m_state;
+  detail::state_type m_state = 0UL;
   detail::set_of_states m_states;
   typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type m_counter_example_index;
 
 public:
-  state_states_counter_example_index_triple() {}
+  state_states_counter_example_index_triple() = default;
 
   /// \brief Constructor.
   state_states_counter_example_index_triple(const state_type state,
@@ -633,7 +633,9 @@ bool refusals_contained_in(const state_type impl,
     const bool structured_output)
 {
   if (!weak_property_cache.stable(impl))
+  {
     return true; // Checking in case of instability is not necessary, but rather time consuming.
+  }
 
   const action_label_set& impl_action_labels = weak_property_cache.action_labels(impl);
   bool success = false;

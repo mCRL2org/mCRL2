@@ -15,14 +15,14 @@
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \brief Visitor for printing the root node of a PBES.
 struct print_brief_traverser: public pbes_expression_traverser<print_brief_traverser>
 {
-  typedef pbes_expression_traverser<print_brief_traverser> super;
+  using super = pbes_expression_traverser<print_brief_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -79,17 +79,16 @@ std::string print_brief(const T& x)
 /// \brief Visitor for checking if a pbes object is a simple pbes expression.
 struct is_simple_expression_traverser: public pbes_expression_traverser<is_simple_expression_traverser>
 {
-  typedef pbes_expression_traverser<is_simple_expression_traverser> super;
+  using super = pbes_expression_traverser<is_simple_expression_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result = true;
   bool allow_counter_example_variables = false;
 
   is_simple_expression_traverser(bool allow_counter_example_variables)
-    : result(true),
-      allow_counter_example_variables(allow_counter_example_variables)
+      : allow_counter_example_variables(allow_counter_example_variables)
   {}
 
   void enter(const propositional_variable_instantiation& x)
@@ -187,8 +186,8 @@ std::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool s
   return result;
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBES_FUNCTIONS_H

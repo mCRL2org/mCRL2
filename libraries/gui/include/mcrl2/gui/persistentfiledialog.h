@@ -12,13 +12,7 @@
 
 #include <QFileDialog>
 
-namespace mcrl2
-{
-
-namespace gui
-{
-
-namespace qt
+namespace mcrl2::gui::qt
 {
 
 class PersistentFileDialog : QObject
@@ -48,10 +42,6 @@ private:
 
 };
 
-} // namespace qt
-
-} // namespace gui
-
-} // namespace mcrl2
+} // namespace mcrl2::gui::qt
 
 #endif // MCRL2_UTILITIES_PERSISTENTFILEDIALOG_H

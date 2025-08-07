@@ -16,13 +16,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace tools
+namespace mcrl2::data::tools
 {
 
 /// \brief Base class for tools that use a rewriter.
@@ -31,7 +25,7 @@ class rewriter_tool: public Tool
 {
   protected:
     /// The data rewriter strategy
-    data::rewrite_strategy m_rewrite_strategy;
+    data::rewrite_strategy m_rewrite_strategy = mcrl2::data::jitty;
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
@@ -70,15 +64,11 @@ class rewriter_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
-    {
-      add_options(desc,false);
-    }
-
+    void add_options(utilities::interface_description& desc) override { add_options(desc, false); }
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
       m_rewrite_strategy = parser.option_argument_as< data::rewrite_strategy >("rewriter");
@@ -104,8 +94,7 @@ class rewriter_tool: public Tool
                   const std::string& tool_description,
                   std::string known_issues = ""
                  )
-      : Tool(name, author, what_is, tool_description, known_issues),
-        m_rewrite_strategy(mcrl2::data::jitty)
+      : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
     /// \brief Returns the rewrite strategy
@@ -124,10 +113,10 @@ class rewriter_tool: public Tool
     }
 };
 
-} // namespace tools
+} // namespace mcrl2::data::tools
 
-} // namespace data
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_DATA_REWRITER_TOOL_H

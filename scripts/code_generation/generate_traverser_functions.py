@@ -16,9 +16,9 @@ REWRITE_TEXT = '''/// \\\\brief Rewrites all embedded expressions in an object x
 /// \\\\param R a rewriter
 template <typename T, typename Rewriter>
 void rewrite(T& x,
-             Rewriter R,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             Rewriter R
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R).update(x);
 }
@@ -29,9 +29,9 @@ void rewrite(T& x,
 /// \\\\return the rewrite result
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
-          Rewriter R,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          Rewriter R
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R).apply(result, x);
@@ -45,9 +45,9 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
-             const Substitution& sigma,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             const Substitution& sigma
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma).update(x);
 }
@@ -60,9 +60,9 @@ void rewrite(T& x,
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
-          const Substitution& sigma,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          const Substitution& sigma
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result; 
   data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma).apply(result, x);
@@ -73,9 +73,9 @@ T rewrite(const T& x,
 SUBSTITUTE_FUNCTION_TEXT = '''template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
                               const Substitution& sigma,
-                              bool innermost,
-                              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                              bool innermost
                              )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost).update(x);
 }
@@ -83,9 +83,9 @@ void replace_sort_expressions(T& x,
 template <typename T, typename Substitution>
 T replace_sort_expressions(const T& x,
                            const Substitution& sigma,
-                           bool innermost,
-                           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                           bool innermost
                           )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost).apply(result, x);
@@ -95,9 +95,9 @@ T replace_sort_expressions(const T& x,
 template <typename T, typename Substitution>
 void replace_data_expressions(T& x,
                               const Substitution& sigma,
-                              bool innermost,
-                              typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                              bool innermost
                              )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost).update(x);
 }
@@ -105,9 +105,9 @@ void replace_data_expressions(T& x,
 template <typename T, typename Substitution>
 T replace_data_expressions(const T& x,
                            const Substitution& sigma,
-                           bool innermost,
-                           typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                           bool innermost
                           )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost).apply(result, x);
@@ -117,18 +117,18 @@ T replace_data_expressions(const T& x,
 
 template <typename T, typename Substitution>
 void replace_variables(T& x,
-                       const Substitution& sigma,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                       const Substitution& sigma
                       )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
 T replace_variables(const T& x,
-                    const Substitution& sigma,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                    const Substitution& sigma
                    )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma).apply(result, x);
@@ -137,18 +137,18 @@ T replace_variables(const T& x,
 
 template <typename T, typename Substitution>
 void replace_all_variables(T& x,
-                           const Substitution& sigma,
-                           typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                           const Substitution& sigma
                           )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
 T replace_all_variables(const T& x,
-                        const Substitution& sigma,
-                        typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                        const Substitution& sigma
                        )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   core::make_update_apply_builder<NAMESPACE::variable_builder>(sigma).apply(result, x);
@@ -159,9 +159,9 @@ T replace_all_variables(const T& x,
 /// \\\\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 void replace_free_variables(T& x,
-                            const Substitution& sigma,
-                            typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                            const Substitution& sigma
                            )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   assert(data::is_simple_substitution(sigma));
   data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).update(x);
@@ -171,9 +171,9 @@ void replace_free_variables(T& x,
 /// \\\\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 T replace_free_variables(const T& x,
-                         const Substitution& sigma,
-                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                         const Substitution& sigma
                         )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   assert(data::is_simple_substitution(sigma));
   T result;
@@ -186,9 +186,9 @@ T replace_free_variables(const T& x,
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_free_variables(T& x,
                             const Substitution& sigma,
-                            const VariableContainer& bound_variables,
-                            typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                            const VariableContainer& bound_variables
                            )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   assert(data::is_simple_substitution(sigma));
   data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_builder_binding>(sigma).update(x, bound_variables);
@@ -199,9 +199,9 @@ void replace_free_variables(T& x,
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_free_variables(const T& x,
                          const Substitution& sigma,
-                         const VariableContainer& bound_variables,
-                         typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                         const VariableContainer& bound_variables
                         )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   assert(data::is_simple_substitution(sigma));
   T result;
@@ -217,9 +217,9 @@ REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT = '''/// \\\\brief Applies sigma as a cap
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
-                                        data::set_identifier_generator& id_generator,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        data::set_identifier_generator& id_generator
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma1).update(x);
@@ -232,9 +232,9 @@ void replace_variables_capture_avoiding(T& x,
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
-                                     data::set_identifier_generator& id_generator,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     data::set_identifier_generator& id_generator
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   T result;
@@ -247,9 +247,9 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\\\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                                        Substitution& sigma,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        Substitution& sigma
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(NAMESPACE::find_identifiers(x));
@@ -265,9 +265,9 @@ void replace_variables_capture_avoiding(T& x,
 /// \\\\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                                     Substitution& sigma,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     Substitution& sigma
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(NAMESPACE::find_identifiers(x));
@@ -291,9 +291,9 @@ REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT = ''' /// \\\\b
 template <typename T, typename Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
-                       IdentifierGenerator& id_generator,
-                       typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                       IdentifierGenerator& id_generator
                       )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).update(x);
 }
@@ -310,9 +310,9 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 template <typename T, typename Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
-                    IdentifierGenerator& id_generator,
-                    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                    IdentifierGenerator& id_generator
                    )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::apply_replace_capture_avoiding_variables_builder_with_an_identifier_generator<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement_with_an_identifier_generator>(sigma, id_generator).apply(result, x);

@@ -15,16 +15,15 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
 /// Computes dependencies of a process expression
 struct process_variable_dependency_traverser: public process_expression_traverser<process_variable_dependency_traverser>
 {
-  typedef process_expression_traverser<process_variable_dependency_traverser> super;
+  using super = process_expression_traverser<process_variable_dependency_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -45,7 +44,7 @@ struct process_variable_dependency_traverser: public process_expression_traverse
 /// Creates a dependency graph of process variables
 struct process_variable_dependency_graph_traverser: public process_expression_traverser<process_variable_dependency_graph_traverser>
 {
-  typedef process_expression_traverser<process_variable_dependency_graph_traverser> super;
+  using super = process_expression_traverser<process_variable_dependency_graph_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -145,8 +144,6 @@ void eliminate_unused_equations(std::vector<process_equation>& equations, const 
   algorithm.run();
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_ELIMINATE_UNUSED_EQUATIONS_H

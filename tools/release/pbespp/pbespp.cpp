@@ -27,7 +27,7 @@ using pbes_system::tools::pbes_input_tool;
 class pbespp_tool: public pbes_input_tool<input_output_tool>
 {
   private:
-    typedef pbes_input_tool<input_output_tool> super;
+    using super = pbes_input_tool<input_output_tool>;
 
   public:
     pbespp_tool()
@@ -35,8 +35,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
               "pretty print a PBES",
               "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
-             ),
-      format(core::print_default)
+             )
     {}
 
     bool run() override
@@ -92,7 +91,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
     }
 
   protected:
-    core::print_format_type  format;
+    core::print_format_type format = core::print_default;
     bool use_pfnf_printer = false;
 
     void add_options(interface_description& desc) override

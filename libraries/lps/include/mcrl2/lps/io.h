@@ -18,10 +18,7 @@
 
 #include <fstream>
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Writes LPS to the stream.
@@ -55,7 +52,7 @@ void load_lps(Specification& spec, std::istream& stream, const std::string& sour
 {
   mCRL2log(log::debug) << "Loading LPS" << (source.empty() ? "" : " from " + source) << ".\n";
 
-  if constexpr (std::is_same<Specification, specification>::value)
+  if constexpr (std::is_same_v<Specification, specification>)
   {
     stochastic_specification stoch_spec;
     atermpp::binary_aterm_istream(stream) >> stoch_spec;
@@ -108,8 +105,6 @@ void load_lps(Specification& spec, const std::string& filename)
   load_lps(spec, ifs, filename);
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_IO_H

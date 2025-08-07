@@ -16,16 +16,15 @@
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/find.h"
 
-namespace mcrl2 {
-
-namespace action_formulas {
+namespace mcrl2::action_formulas
+{
 
 namespace detail {
 
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = lps::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -67,9 +66,9 @@ struct add_capture_avoiding_replacement: public lps::detail::add_capture_avoidin
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
-                                        data::set_identifier_generator& id_generator,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        data::set_identifier_generator& id_generator
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<action_formulas::data_expression_builder, action_formulas::detail::add_capture_avoiding_replacement>(sigma1).update(x);
@@ -82,9 +81,9 @@ void replace_variables_capture_avoiding(T& x,
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
-                                     data::set_identifier_generator& id_generator,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     data::set_identifier_generator& id_generator
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   T result;
@@ -97,9 +96,9 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                                        Substitution& sigma,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        Substitution& sigma
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(action_formulas::find_identifiers(x));
@@ -115,9 +114,9 @@ void replace_variables_capture_avoiding(T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                                     Substitution& sigma,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     Substitution& sigma
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(action_formulas::find_identifiers(x));
@@ -129,20 +128,17 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated action_formulas replace_capture_avoiding code ---//
 
-} // namespace action_formulas
+} // namespace mcrl2::action_formulas
 
-} // namespace mcrl2
-
-namespace mcrl2 {
-
-namespace regular_formulas {
+namespace mcrl2::regular_formulas
+{
 
 namespace detail {
 
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public action_formulas::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef action_formulas::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = action_formulas::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -164,9 +160,9 @@ struct add_capture_avoiding_replacement: public action_formulas::detail::add_cap
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
-                                        data::set_identifier_generator& id_generator,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        data::set_identifier_generator& id_generator
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<regular_formulas::data_expression_builder, regular_formulas::detail::add_capture_avoiding_replacement>(sigma1).update(x);
@@ -179,9 +175,9 @@ void replace_variables_capture_avoiding(T& x,
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
-                                     data::set_identifier_generator& id_generator,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     data::set_identifier_generator& id_generator
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   T result;
@@ -194,9 +190,9 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                                        Substitution& sigma,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        Substitution& sigma
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(regular_formulas::find_identifiers(x));
@@ -212,9 +208,9 @@ void replace_variables_capture_avoiding(T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                                     Substitution& sigma,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     Substitution& sigma
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(regular_formulas::find_identifiers(x));
@@ -226,20 +222,17 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated regular_formulas replace_capture_avoiding code ---//
 
-} // namespace regular_formulas
+} // namespace mcrl2::regular_formulas
 
-} // namespace mcrl2
-
-namespace mcrl2 {
-
-namespace state_formulas {
+namespace mcrl2::state_formulas
+{
 
 namespace detail {
 
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -277,9 +270,9 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
-                                        data::set_identifier_generator& id_generator,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        data::set_identifier_generator& id_generator
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<state_formulas::data_expression_builder, state_formulas::detail::add_capture_avoiding_replacement>(sigma1).update(x);
@@ -292,9 +285,9 @@ void replace_variables_capture_avoiding(T& x,
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
-                                     data::set_identifier_generator& id_generator,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     data::set_identifier_generator& id_generator
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   T result;
@@ -307,9 +300,9 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                                        Substitution& sigma,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        Substitution& sigma
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(state_formulas::find_identifiers(x));
@@ -325,9 +318,9 @@ void replace_variables_capture_avoiding(T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                                     Substitution& sigma,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     Substitution& sigma
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(state_formulas::find_identifiers(x));
@@ -339,8 +332,6 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated state_formulas replace_capture_avoiding code ---//
 
-} // namespace state_formulas
-
-} // namespace mcrl2
+} // namespace mcrl2::state_formulas
 
 #endif // MCRL2_MODAL_FORMULA_REPLACE_CAPTURE_AVOIDING_H

@@ -15,15 +15,14 @@
 #include "mcrl2/data/replace_constants_by_variables.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
 struct replace_constants_by_variables_builder: public data::detail::replace_constants_by_variables_builder<lps::data_expression_builder>
 {
-  typedef data::detail::replace_constants_by_variables_builder<lps::data_expression_builder> super;
+  using super = data::detail::replace_constants_by_variables_builder<lps::data_expression_builder>;
   using super::apply;
   using super::update;
 
@@ -39,10 +38,9 @@ struct replace_constants_by_variables_builder: public data::detail::replace_cons
 /// multiple times.
 template <typename T>
 void replace_constants_by_variables(T& x,
-                                    const data::rewriter& r,
-                                    data::mutable_indexed_substitution<>& sigma,
-                                    typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-                                   )
+    const data::rewriter& r,
+    data::mutable_indexed_substitution<>& sigma,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   detail::replace_constants_by_variables_builder f(r, sigma);
   f.update(x);
@@ -53,10 +51,9 @@ void replace_constants_by_variables(T& x,
 /// multiple times.
 template <typename T>
 T replace_constants_by_variables(const T& x,
-                                 const data::rewriter& r,
-                                 data::mutable_indexed_substitution<>& sigma,
-                                 typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
-)
+    const data::rewriter& r,
+    data::mutable_indexed_substitution<>& sigma,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   detail::replace_constants_by_variables_builder f(r, sigma);
@@ -64,8 +61,6 @@ T replace_constants_by_variables(const T& x,
   return result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_REPLACE_CONSTANTS_BY_VARIABLES_H

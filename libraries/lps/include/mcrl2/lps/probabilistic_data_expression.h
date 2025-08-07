@@ -22,10 +22,7 @@
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/data/rewriter.h"
 
-
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -107,8 +104,14 @@ namespace detail
   // An algorithm to calculate the greatest common divisor
   inline std::size_t greatest_common_divisor(std::size_t x, std::size_t y)
   {
-    if (x==0) return y;
-    if (y==0) return x;
+    if (x == 0)
+    {
+      return y;
+    }
+    if (y == 0)
+    {
+      return x;
+    }
     if (x>y)
     {
       const std::size_t temp=x; x=y; y=temp; // swap(x,y)
@@ -261,7 +264,8 @@ class probabilistic_data_expression: public data::data_expression
       const utilities::big_natural_number bnn_other_denominator=detail::make_bnn_pos(other_denominator);
       const utilities::probabilistic_arbitrary_precision_fraction left_arg(bnn_this_enumerator, bnn_this_denominator);
       const utilities::probabilistic_arbitrary_precision_fraction right_arg(bnn_other_enumerator, bnn_other_denominator);
-      data::data_expression result1, result2;
+      data::data_expression result1;
+      data::data_expression result2;
       if (negate_first==negate_second)
       {
         utilities::probabilistic_arbitrary_precision_fraction result=left_arg+right_arg;
@@ -549,9 +553,7 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_data_expression&
   return out << static_cast<data::data_expression>(x);
 }
 
-
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 namespace std
 {

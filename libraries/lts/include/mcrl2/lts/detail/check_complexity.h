@@ -95,12 +95,7 @@
 
 #include "mcrl2/utilities/logger.h"
 
-
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 /// \brief type used to store state (numbers and) counts
@@ -109,7 +104,7 @@ namespace detail
 ///
 /// It would be better to define it as LTS_TYPE::states_size_type but that
 /// would require most classes to become templates.
-typedef std::size_t state_type;
+using state_type = std::size_t;
 #define STATE_TYPE_MIN (std::numeric_limits<state_type>::min())
 #define STATE_TYPE_MAX (std::numeric_limits<state_type>::max())
 
@@ -119,14 +114,14 @@ typedef std::size_t state_type;
 ///
 /// It would be better to define it as LTS_TYPE::transitions_size_type but that
 /// would require most classes to become templates.
-typedef std::size_t trans_type;
+using trans_type = std::size_t;
 #define TRANS_TYPE_MIN (std::numeric_limits<trans_type>::min())
 #define TRANS_TYPE_MAX (std::numeric_limits<trans_type>::max())
 
 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
 
 /// \brief type used to store differences between transition counters
-typedef std::make_signed<trans_type>::type signed_trans_type;
+using signed_trans_type = std::make_signed_t<trans_type>;
 
 /// \brief class for time complexity checks
 /// \details The class stores (as static members) the global counters needed
@@ -595,7 +590,7 @@ class check_complexity
                                         (enum counter_type) (LastCounter + 1));
       public:
         /// \brief actual space to store the counters
-        unsigned char counters[LastCounter - FirstCounter + 1];
+        unsigned char counters[LastCounter - FirstCounter + 1]{};
 
         /// \brief cancel temporary work
         /// \details The function registers that all counters from `first` to
@@ -761,7 +756,10 @@ class check_complexity
             assert(to < FirstTempCounter || FirstPostprocessCounter <= to);
             assert(to <= LastCounter);
             assert(max_value <= (to < FirstTempCounter ? log_n : 1U));
-            if (0 == counters[from - FirstCounter])  return complexity_ok;
+            if (0 == counters[from - FirstCounter])
+            {
+              return complexity_ok;
+            }
             if (counters[to - FirstCounter] >= max_value)
             {
                 mCRL2log(log::error) << "Error 2: counter \""
@@ -1985,7 +1983,7 @@ class check_complexity
 #endif // ifndef NDEBUG
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 
 #endif // ifndef _COUNT_ITERATIONS_H

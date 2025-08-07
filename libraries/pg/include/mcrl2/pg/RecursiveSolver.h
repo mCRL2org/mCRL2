@@ -29,7 +29,10 @@ private:
 
         Reference &operator=(verti w)
         {
-            if (w != NO_VERTEX) w = substrat_.global(w);
+          if (w != NO_VERTEX)
+          {
+            w = substrat_.global(w);
+          }
             substrat_.strategy_[v_] = w;
             return *this;
         }
@@ -58,10 +61,10 @@ public:
     }
 
     //! Swaps this substrategy ovbect with another.
-    void swap(Substrategy &other)
+    void swap(Substrategy& other) noexcept
     {
-        strategy_.swap(other.strategy_);
-        global_.swap(other.global_);
+      strategy_.swap(other.strategy_);
+      global_.swap(other.global_);
     }
 
     //! Returns a write-only reference to the strategy for vertex `v`.
@@ -73,7 +76,10 @@ public:
     //! Returns the winner for vertex `v` assuming it is controlled by `p`.
     ParityGame::Player winner(verti v, ParityGame::Player p)
     {
-        if (strategy_[global(v)] == NO_VERTEX) p = opponent(p);
+      if (strategy_[global(v)] == NO_VERTEX)
+      {
+        p = opponent(p);
+      }
         return p;
     }
 
@@ -102,11 +108,11 @@ class RecursiveSolver : public ParityGameSolver
 {
 public:
     RecursiveSolver(const ParityGame &game);
-    ~RecursiveSolver();
+    ~RecursiveSolver() override;
 
-    ParityGame::Strategy solve();
+    ParityGame::Strategy solve() override;
 
-private:
+  private:
     /*! Solves a subgame recursively, or returns false if solving is aborted. */
     bool solve(ParityGame &game, Substrategy &strat);
 };
@@ -115,8 +121,7 @@ private:
 class RecursiveSolverFactory : public ParityGameSolverFactory
 {
     //! Returns a new ResuriveSolver instance.
-    ParityGameSolver *create( const ParityGame &game,
-        const verti *vertex_map, verti vertex_map_size );
+    ParityGameSolver* create(const ParityGame& game, const verti* vertex_map, verti vertex_map_size) override;
 };
 
 #endif /* ndef MCRL2_PG_RECURSIVE_SOLVER_H */

@@ -16,18 +16,14 @@
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/pres/pres_equation.h"
 
-namespace mcrl2
-{
-
 /// \brief The main namespace for the PRES library.
-namespace pres_system
+namespace mcrl2::pres_system
 {
 
 class pres;
 void complete_data_specification(pres&);
 
 // template function overloads
-std::string pp(const pres& x, bool precedence_aware = true);
 void normalize_sorts(pres& x, const data::sort_specification& sortspec);
 void translate_user_notation(pres_system::pres& x);
 std::set<data::sort_expression> find_sort_expressions(const pres_system::pres& x);
@@ -58,7 +54,7 @@ atermpp::aterm pres_to_aterm(const pres& p);
 class pres
 {
   public:
-    typedef pres_equation equation_type;
+    using equation_type = pres_equation;
 
   protected:
     /// \brief The data specification
@@ -298,7 +294,7 @@ class pres
 
 //--- start generated class pres ---//
 // prototype declaration
-std::string pp(const pres& x, bool precedence_aware);
+std::string pp(const pres& x, bool precedence_aware = true);
 
 /// \\brief Outputs the object to a stream
 /// \\param out An output stream
@@ -333,8 +329,8 @@ bool operator==(const pres& p1, const pres& p2)
   return pres_to_aterm(p1) == pres_to_aterm(p2);
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_PRES_H

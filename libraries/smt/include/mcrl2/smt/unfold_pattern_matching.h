@@ -17,9 +17,7 @@
 #include "mcrl2/data/substitutions/variable_substitution.h"
 #include "mcrl2/smt/utilities.h"
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 
 /**
@@ -257,7 +255,9 @@ find_structured_sort_functions(const data::data_specification& dataspec, Skip sk
  * \details Also sets native translations and build a set of all recognisers and
  * projections in dataspec.
  */
-std::set<data::function_symbol> complete_recognisers_projections(const data::data_specification& dataspec, native_translations& nt, structured_sort_functions& ssf)
+inline std::set<data::function_symbol> complete_recognisers_projections(const data::data_specification& dataspec,
+    native_translations& nt,
+    structured_sort_functions& ssf)
 {
   std::set<data::function_symbol> recog_and_proj;
 
@@ -329,7 +329,6 @@ void unfold_pattern_matching(const data::data_specification& dataspec, native_tr
   }
 }
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif

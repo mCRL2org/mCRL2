@@ -12,10 +12,7 @@
 #include "mcrl2/lps/explorer.h"
 #include "mcrl2/lts/trace.h"
 
-namespace mcrl2
-{
-
-namespace lps  // TODO: This should become lts. We should not declare objects in namespace lps within the lts library. 
+namespace mcrl2::lps  // TODO: This should become lts. We should not declare objects in namespace lps within the lts library. 
 {
 
 /// \brief Simulation process.
@@ -25,15 +22,16 @@ class simulation : protected explorer<true, false, stochastic_specification>
 {
   public:
 
-    typedef transition transition_t;
+    using transition_t = transition;
 
     struct simulator_state_t
     {
       lps::stochastic_state source_state;
-      std::size_t state_number; // This represents the number of the selected probabilistic state, or a number out of range
-                                // if not source state is chosen.
+      std::size_t state_number = 0UL; // This represents the number of the selected probabilistic state, or a number out
+                                      // of range if not source state is chosen.
       std::vector<transition_t> transitions;
-      std::size_t transition_number; // This indicates the chosen transition, or a number out of range if no transition is chosen.
+      std::size_t transition_number
+          = 0UL; // This indicates the chosen transition, or a number out of range if no transition is chosen.
     };
 
     /// Constructor.
@@ -77,8 +75,7 @@ class simulation : protected explorer<true, false, stochastic_specification>
     /// Load a trace from a file.
     void load(const std::string& filename);
 
-    virtual ~simulation()
-    {}
+    virtual ~simulation() = default;
 
   protected:
     stochastic_specification m_specification;
@@ -99,8 +96,8 @@ class simulation : protected explorer<true, false, stochastic_specification>
 
 };
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif

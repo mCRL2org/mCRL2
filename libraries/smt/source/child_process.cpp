@@ -28,9 +28,8 @@
 #include <cerrno>
 
 
-namespace mcrl2
-{
-namespace smt
+
+namespace mcrl2::smt
 {
 
 #ifdef MCRL2_PLATFORM_WINDOWS
@@ -210,7 +209,7 @@ std::string child_process::read() const
 
 std::string child_process::read(const std::chrono::microseconds& timeout) const
 {
-  struct timeval tv;
+  struct timeval tv{};
   tv.tv_sec = 0;
   tv.tv_usec = timeout.count();
 
@@ -218,7 +217,7 @@ std::string child_process::read(const std::chrono::microseconds& timeout) const
   FD_ZERO(&readfds);
   FD_SET(m_pimpl->pipe_stdout[0], &readfds);
 
-  int result = ::select(m_pimpl->pipe_stdout[0] + 1, &readfds, NULL, NULL, &tv);
+  int result = ::select(m_pimpl->pipe_stdout[0] + 1, &readfds, nullptr, nullptr, &tv);
 
   if(result == -1)
   {
@@ -308,5 +307,5 @@ child_process::~child_process()
 #endif // MCRL2_PLATFORM_WINDOWS
 
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
+

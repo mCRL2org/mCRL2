@@ -16,20 +16,15 @@
 
 #include "mcrl2/data/rewriter.h"
 
-namespace mcrl2
-{
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 struct rewriter_wrapper
 {
   public:
-    typedef Rewriter::substitution_type substitution_type;
+    using substitution_type = Rewriter::substitution_type;
 
-    typedef data_expression term_type;
+    using term_type = data_expression;
 
     rewriter_wrapper(Rewriter* r):
       m_rewriter(r)
@@ -61,9 +56,6 @@ struct rewriter_wrapper
     Rewriter* m_rewriter;
 };
 
-
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H

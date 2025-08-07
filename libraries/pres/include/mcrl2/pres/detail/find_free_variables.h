@@ -14,18 +14,12 @@
 
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2
-{
-
-namespace pres_system
-{
-
-namespace detail
+namespace mcrl2::pres_system::detail
 {
 
 struct find_free_variables_traverser: public pres_expression_traverser<find_free_variables_traverser>
 {
-  typedef pres_expression_traverser<find_free_variables_traverser> super;
+  using super = pres_expression_traverser<find_free_variables_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -139,10 +133,6 @@ std::set<data::variable> find_free_variables(const pres_expression& x, const dat
   return f.result;
 }
 
-} // namespace detail
-
-} // namespace pres_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pres_system::detail
 
 #endif // MCRL2_PRES_DETAIL_FIND_FREE_VARIABLES_H

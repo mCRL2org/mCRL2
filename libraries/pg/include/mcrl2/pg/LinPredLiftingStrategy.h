@@ -33,17 +33,22 @@ public:
     {
         (void)spm;  // unused
         cur_queue.reserve(graph_.V());
-        for (verti v = 0; v < graph_.V(); ++v) cur_queue.push_back(v);
+        for (verti v = 0; v < graph_.V(); ++v)
+        {
+          cur_queue.push_back(v);
+        }
         pos = cur_queue.begin();
     }
 
-    void lifted(verti v)
+    void lifted(verti v) override
     {
-        for ( StaticGraph::const_iterator it = graph_.pred_begin(v);
-              it != graph_.pred_end(v); ++it ) next_queue.push_back(*it);
+      for (StaticGraph::const_iterator it = graph_.pred_begin(v); it != graph_.pred_end(v); ++it)
+      {
+        next_queue.push_back(*it);
+      }
     }
 
-    verti next()
+    verti next() override
     {
         if (pos == cur_queue.end())
         {
@@ -54,7 +59,10 @@ public:
             cur_queue.swap(next_queue);
             pos = cur_queue.begin();
         }
-        if (pos == cur_queue.end()) return NO_VERTEX;
+        if (pos == cur_queue.end())
+        {
+          return NO_VERTEX;
+        }
         return *pos++;
     }
 
@@ -81,10 +89,9 @@ class LinPredLiftingStrategyFactory : public LiftingStrategyFactory
 {
 public:
     //! Return a new LinPredLiftingStrategy instance.
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm )
-    {
-        return new LinPredLiftingStrategy(game, spm);
+  LiftingStrategy* create(const ParityGame& game, const SmallProgressMeasures& spm) override
+  {
+    return new LinPredLiftingStrategy(game, spm);
     }
 };
 

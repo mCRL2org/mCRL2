@@ -25,9 +25,9 @@ namespace action_formulas {
 /// \\param R a rewriter
 template <typename T, typename Rewriter>
 void rewrite(T& x,
-             Rewriter R,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             Rewriter R
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_builder<action_formulas::data_expression_builder>(R).update(x);
 }
@@ -38,9 +38,9 @@ void rewrite(T& x,
 /// \\return the rewrite result
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
-          Rewriter R,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          Rewriter R
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::make_rewrite_data_expressions_builder<action_formulas::data_expression_builder>(R).apply(result, x);
@@ -54,9 +54,9 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
-             const Substitution& sigma,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             const Substitution& sigma
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<action_formulas::data_expression_builder>(R, sigma).update(x);
 }
@@ -69,9 +69,9 @@ void rewrite(T& x,
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
-          const Substitution& sigma,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          const Substitution& sigma
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result; 
   data::detail::make_rewrite_data_expressions_with_substitution_builder<action_formulas::data_expression_builder>(R, sigma).apply(result, x);
@@ -89,9 +89,9 @@ namespace regular_formulas {
 /// \\param R a rewriter
 template <typename T, typename Rewriter>
 void rewrite(T& x,
-             Rewriter R,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             Rewriter R
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_builder<regular_formulas::data_expression_builder>(R).update(x);
 }
@@ -102,9 +102,9 @@ void rewrite(T& x,
 /// \\return the rewrite result
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
-          Rewriter R,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          Rewriter R
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::make_rewrite_data_expressions_builder<regular_formulas::data_expression_builder>(R).apply(result, x);
@@ -118,9 +118,9 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
-             const Substitution& sigma,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             const Substitution& sigma
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<regular_formulas::data_expression_builder>(R, sigma).update(x);
 }
@@ -133,9 +133,9 @@ void rewrite(T& x,
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
-          const Substitution& sigma,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          const Substitution& sigma
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result; 
   data::detail::make_rewrite_data_expressions_with_substitution_builder<regular_formulas::data_expression_builder>(R, sigma).apply(result, x);
@@ -153,9 +153,9 @@ namespace state_formulas {
 /// \\param R a rewriter
 template <typename T, typename Rewriter>
 void rewrite(T& x,
-             Rewriter R,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             Rewriter R
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_builder<state_formulas::data_expression_builder>(R).update(x);
 }
@@ -166,9 +166,9 @@ void rewrite(T& x,
 /// \\return the rewrite result
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
-          Rewriter R,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          Rewriter R
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::make_rewrite_data_expressions_builder<state_formulas::data_expression_builder>(R).apply(result, x);
@@ -182,9 +182,9 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
-             const Substitution& sigma,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             const Substitution& sigma
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<state_formulas::data_expression_builder>(R, sigma).update(x);
 }
@@ -197,9 +197,9 @@ void rewrite(T& x,
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
-          const Substitution& sigma,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          const Substitution& sigma
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result; 
   data::detail::make_rewrite_data_expressions_with_substitution_builder<state_formulas::data_expression_builder>(R, sigma).apply(result, x);

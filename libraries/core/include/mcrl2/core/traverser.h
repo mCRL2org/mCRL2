@@ -14,10 +14,7 @@
 
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /**
@@ -67,7 +64,7 @@ struct traverser
 template <template <class> class Traverser>
 struct apply_traverser: public Traverser<apply_traverser<Traverser> >
 {
-  typedef Traverser<apply_traverser<Traverser> > super;
+  using super = Traverser<apply_traverser<Traverser>>;
 
   using super::enter;
   using super::leave;
@@ -81,8 +78,6 @@ make_apply_traverser()
   return apply_traverser<Traverser>();
 }
 
-} // namespace core
-
-} // namespace mcrl2
+} // namespace mcrl2::core
 
 #endif // MCRL2_CORE_TRAVERSER_H

@@ -15,24 +15,21 @@
 #include "mcrl2/utilities/detail/command.h"
 #include "mcrl2/utilities/tool.h"
 
-namespace mcrl2 {
-
-namespace utilities {
-
-namespace detail {
+namespace mcrl2::utilities::detail
+{
 
 template <typename Tool>
 class transform_tool: public Tool
 {
   protected:
-    typedef Tool super;
+    using super = Tool;
 
     std::string algorithm_and_options;
     int algorithm_number = -1;
     bool print_algorithms = false;
     std::map<std::string, std::shared_ptr<utilities::detail::command>> commands;
 
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
       algorithm_and_options = parser.option_argument("algorithm");
@@ -40,7 +37,7 @@ class transform_tool: public Tool
       print_algorithms = parser.options.count("print-algorithms") > 0;
     }
 
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("algorithm", utilities::make_optional_argument<std::string>("NAME", ""), "the algorithm that is to be applied", 'a');
@@ -66,7 +63,7 @@ class transform_tool: public Tool
       : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
-    bool run()
+    bool run() override
     {
       std::vector<std::string> options;
       std::set<std::string> algorithms;
@@ -131,10 +128,6 @@ class transform_tool: public Tool
     }
 };
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::detail
 
 #endif // MCRL2_UTILITIES_DETAIL_TRANSFORM_TOOL_H

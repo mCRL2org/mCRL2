@@ -42,11 +42,11 @@ thread_aterm_pool& g_thread_term_pool()
 
 } // end namespace atermpp::detail
 
-aterm_stream::~aterm_stream() {}
+aterm_stream::~aterm_stream() = default;
 
-aterm_istream::~aterm_istream() {}
+aterm_istream::~aterm_istream() = default;
 
-aterm_ostream::~aterm_ostream() {}
+aterm_ostream::~aterm_ostream() = default;
 
 /// Definition of the extern global term pool.
 alignas(aterm_pool)

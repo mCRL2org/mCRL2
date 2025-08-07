@@ -23,9 +23,9 @@ using pres_system::tools::pres_input_tool;
 class presinfo_tool: public pres_input_tool<input_tool>
 {
   protected:
-    typedef pres_input_tool<input_tool> super;
+    using super = pres_input_tool<input_tool>;
 
-    bool opt_full;
+    bool opt_full = false;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser) override
@@ -51,8 +51,7 @@ class presinfo_tool: public pres_input_tool<input_tool>
         "Jan Friso Groote",
         "display basic information about a PRES",
         super::make_tool_description("Print basic information about the PRES in INFILE.")
-      ),
-      opt_full(false)
+      )
     {}
 
     /// If PRES can be loaded from file_name, then

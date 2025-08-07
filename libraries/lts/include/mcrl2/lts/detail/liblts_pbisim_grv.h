@@ -14,11 +14,7 @@
 #include "mcrl2/lts/detail/embedded_list.h"
 #include "mcrl2/lts/detail/liblts_plts_merge.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 template < class LTS_TYPE>
@@ -138,16 +134,16 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
   protected:
 
     // --------------- BEGIN DECLARATION OF DATA TYPES ---------------------------------------------------------------
-    
-    typedef std::size_t block_key_type;
-    typedef std::size_t constellation_key_type;
-    typedef std::size_t transition_key_type;
-    typedef std::size_t state_key_type;
-    typedef std::size_t label_type;
+
+    using block_key_type = std::size_t;
+    using constellation_key_type = std::size_t;
+    using transition_key_type = std::size_t;
+    using state_key_type = std::size_t;
+    using label_type = std::size_t;
     // typedef probabilistic_arbitrary_precision_fraction probability_label_type;
-    typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_label_type;
+    using probability_label_type = typename LTS_TYPE::probabilistic_state_t::probability_t;
     // typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
-    typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_fraction_type;
+    using probability_fraction_type = typename LTS_TYPE::probabilistic_state_t::probability_t;
 
     struct action_transition_type : public embedded_list_node <action_transition_type>
     {
@@ -159,29 +155,29 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
     struct probabilistic_transition_type : public embedded_list_node < probabilistic_transition_type >
     {
-      state_key_type from;
+      state_key_type from = 0UL;
       probability_label_type label;
-      state_key_type to;
+      state_key_type to = 0UL;
     };
 
     struct action_state_type : public embedded_list_node < action_state_type >
     {
-      block_key_type parent_block;
+      block_key_type parent_block = 0UL;
       std::vector<probabilistic_transition_type*> incoming_transitions;
 
       // Temporary
-      bool mark_state;
-      std::size_t residual_transition_cnt;
-      std::size_t* transition_count_ptr;
+      bool mark_state = false;
+      std::size_t residual_transition_cnt = 0UL;
+      std::size_t* transition_count_ptr = nullptr;
     };
 
     struct probabilistic_state_type : public embedded_list_node < probabilistic_state_type >
     {
-      block_key_type parent_block;
+      block_key_type parent_block = 0UL;
       std::vector<action_transition_type*> incoming_transitions;
 
       // Temporary.
-      bool mark_state;
+      bool mark_state = false;
       probability_label_type cumulative_probability;
     };
 
@@ -190,7 +186,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
     struct action_block_type : public embedded_list_node <action_block_type>
     {
-      constellation_key_type parent_constellation;
+      constellation_key_type parent_constellation = 0UL;
       embedded_list<action_state_type> states;
       embedded_list<probabilistic_transition_type> incoming_probabilistic_transitions;
       action_mark_type* marking;  // This value is nullptr if the block is not marked.
@@ -217,7 +213,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
     struct probabilistic_block_type : public embedded_list_node <probabilistic_block_type>
     {
-      constellation_key_type parent_constellation;
+      constellation_key_type parent_constellation = 0UL;
       embedded_list<probabilistic_state_type> states;
       probabilistic_mark_type* marking;
 
@@ -241,13 +237,13 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     struct action_constellation_type 
     {
       embedded_list<action_block_type> blocks;
-      std::size_t number_of_states;    // number of states in this constellation.
+      std::size_t number_of_states = 0UL; // number of states in this constellation.
     }; 
     
     struct probabilistic_constellation_type 
     {
       embedded_list<probabilistic_block_type> blocks;
-      std::size_t number_of_states;    // number of states in this constellation.
+      std::size_t number_of_states = 0UL; // number of states in this constellation.
     };
 
     // --------------- END DECLARATION OF DATA TYPES ---------------------------------------------------------------
@@ -445,7 +441,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     /** Creates the initial partition.
     *  \details The blocks are initially partitioned based on the actions that can perform. 
     */
-    void create_initial_partition(void)
+    void create_initial_partition()
     {
       transitions_per_label.initialize(aut.num_action_labels());
       
@@ -713,7 +709,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     /** \brief Refine partition until it becomes stable.
     *  \details
     */
-    void refine_partition_until_it_becomes_stable(void)
+    void refine_partition_until_it_becomes_stable()
     {
 
       // Refine until all the constellations are trivial.
@@ -1399,6 +1395,6 @@ bool destructive_probabilistic_bisimulation_compare_grv(
 }
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 #endif //_LIBLTS_PBISIM_GRV_H

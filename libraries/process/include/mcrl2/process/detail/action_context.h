@@ -15,11 +15,8 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/action_label.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 class action_context
 {
@@ -60,32 +57,32 @@ class action_context
       }
     }
 
-    data::sorts_list matching_action_sorts(const core::identifier_string& name) const
+    std::set<data::sort_expression_list> matching_action_sorts(const core::identifier_string& name) const
     {
       auto range = m_actions.equal_range(name);
       assert(range.first != m_actions.end());
-      data::sorts_list result;
+      std::set<data::sort_expression_list> result;
       for (auto k = range.first; k != range.second; ++k)
       {
         const action_label& a = k->second;
-        result.push_front(a.sorts());
+        result.insert(a.sorts());
       }
-      return atermpp::reverse(result);
+      return result;
     }
 
-    data::sorts_list matching_action_sorts(const core::identifier_string& name, const data::data_expression_list& parameters) const
+    std::set<data::sort_expression_list> matching_action_sorts(const core::identifier_string& name, const data::data_expression_list& parameters) const
     {
-      data::sorts_list result;
+      std::set<data::sort_expression_list> result;
       auto range = m_actions.equal_range(name);
       for (auto k = range.first; k != range.second; ++k)
       {
         const action_label& a = k->second;
         if (a.sorts().size() == parameters.size())
         {
-          result.push_front(a.sorts());
+          result.insert(a.sorts());
         }
       }
-      return atermpp::reverse(result);
+      return result;
     }
 
     void clear()
@@ -94,10 +91,6 @@ class action_context
     }
 };
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_ACTION_CONTEXT_H

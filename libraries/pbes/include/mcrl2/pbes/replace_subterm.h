@@ -15,15 +15,14 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/position_count_traverser.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system
+{
 
 namespace detail {
 
 struct find_subterm_traverser: public pbes_expression_traverser<find_subterm_traverser>
 {
-  typedef pbes_expression_traverser<find_subterm_traverser> super;
+  using super = pbes_expression_traverser<find_subterm_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -87,7 +86,7 @@ struct find_subterm_traverser: public pbes_expression_traverser<find_subterm_tra
 
 struct replace_subterm_builder: public pbes_expression_builder<replace_subterm_builder>
 {
-  typedef pbes_expression_builder<replace_subterm_builder> super;
+  using super = pbes_expression_builder<replace_subterm_builder>;
   using super::apply;
   using super::update;
 
@@ -196,8 +195,6 @@ pbes_expression find_subterm(const pbes& pbesspec, std::size_t x, std::size_t y)
   return f.result;
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_REPLACE_SUBTERM_H

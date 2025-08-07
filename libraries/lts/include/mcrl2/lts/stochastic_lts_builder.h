@@ -14,13 +14,11 @@
 
 #include "mcrl2/lts/lts_builder.h"
 
-namespace mcrl2 {
-
-namespace lts {
+namespace mcrl2::lts {
 
 struct stochastic_lts_builder
 {
-  typedef atermpp::indexed_set<lps::state, mcrl2::utilities::detail::GlobalThreadSafe> indexed_set_for_states_type;
+  using indexed_set_for_states_type = atermpp::indexed_set<lps::state, mcrl2::utilities::detail::GlobalThreadSafe>;
   // All LTS classes use integers to represent actions in transitions. A mapping from actions to integers
   // is needed to avoid duplicates.
   utilities::unordered_map_large<lps::multi_action, std::size_t> m_actions;
@@ -133,12 +131,18 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
     // Add a transition to the LTS
     void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities, const std::size_t number_of_threads) override
     {
-      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads > 1)
+      {
+        m_exclusive_transition_access.lock();
+      }
       std::size_t to = m_stochastic_states.size();
       std::size_t label = add_action(a);
       m_stochastic_states.emplace_back(targets, probabilities);
       m_transitions.emplace_back(from, label, to);
-      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads > 1)
+      {
+        m_exclusive_transition_access.unlock();
+      }
     }
 
     // Add actions and states to the LTS
@@ -239,13 +243,18 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     // Add a transition to the LTS
     void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities, const std::size_t number_of_threads) override
     {
-      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.lock();
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads > 1)
+      {
+        m_exclusive_transition_access.lock();
+      }
       auto s1 = make_probabilistic_state(targets, probabilities);
       std::size_t label = add_action(a);
       std::size_t to = m_lts.add_probabilistic_state(s1);
       m_lts.add_transition(transition(from, label, to));
-      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads>1) m_exclusive_transition_access.unlock();
-
+      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads > 1)
+      {
+        m_exclusive_transition_access.unlock();
+      }
     }
 
     // Add actions and states to the LTS
@@ -291,7 +300,7 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
 class stochastic_lts_fsm_builder: public stochastic_lts_lts_builder
 {
   public:
-    typedef stochastic_lts_lts_builder super;
+    using super = stochastic_lts_lts_builder;
     stochastic_lts_fsm_builder(const data::data_specification& dataspec, const process::action_label_list& action_labels, const data::variable_list& process_parameters)
       : super(dataspec, action_labels, process_parameters)
     { }
@@ -316,8 +325,8 @@ std::unique_ptr<stochastic_lts_builder> create_stochastic_lts_builder(const lps:
   }
 }
 
-} // namespace lts
+} // namespace mcrl2::lts
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LTS_STOCHASTIC_LTS_BUILDER_H

@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "mcrl2/data/data_expression.h"
 #include "pbes2yices.h"
 
 using namespace mcrl2;
@@ -61,11 +62,14 @@ static bool parse_condition(pbes_expression expression, bool disjunctive, bool n
 		quantification_domain.insert(quantification_domain.end(), variables.begin(), variables.end());
 		return result;
 	} else if (is_pbes_and(expression) || is_pbes_or(expression)) {
-		data_expression left_condition, right_condition;
-		variable_vector left_domain, right_domain;
-		
-		if (!parse_condition(accessors::left(expression), disjunctive, negate, left_condition, left_domain)) {
-			return false;
+          data_expression left_condition;
+          data_expression right_condition;
+          variable_vector left_domain;
+          variable_vector right_domain;
+
+          if (!parse_condition(accessors::left(expression), disjunctive, negate, left_condition, left_domain))
+          {
+            return false;
 		}
 		if (!parse_condition(accessors::right(expression), disjunctive, negate, right_condition, right_domain)) {
 			return false;
@@ -121,9 +125,17 @@ bool parse_clauses(pbes_expression expression, bool disjunctive, propositional_v
 		pbes_expression right = accessors::right(expression);
 		
 		if (is_pbes_and(expression) ^ disjunctive ^ negate) {
-			std::vector<clause> left_clauses, right_clauses;
-			if (!parse_clauses(left, disjunctive, constant_instantiation, quantification_domain, condition, negate, left_clauses)) {
-				return false;
+                  std::vector<clause> left_clauses;
+                  std::vector<clause> right_clauses;
+                  if (!parse_clauses(left,
+                          disjunctive,
+                          constant_instantiation,
+                          quantification_domain,
+                          condition,
+                          negate,
+                          left_clauses))
+                  {
+                    return false;
 			}
 			if (!parse_clauses(right, disjunctive, constant_instantiation, quantification_domain, condition, negate, right_clauses)) {
 				return false;
@@ -323,11 +335,13 @@ static std::string assert_initial_state(const parsed_pbes &pbes, const translate
 	const std::vector<std::string> &equation_variables = variables.parameter_variables[0][variable_index];
 	data_expression_list values = pbes.initial_state.parameters();
 	size_t index = 0;
-	for (data_expression_list::const_iterator i = values.begin(); i != values.end(); ++i) {
-		output += "(assert (= " + equation_variables[index++] + " " + translate_expression(*i, variables.global_variables, translation) + "))\n";
-	}
-	
-	return output;
+        for (const data_expression& value : values)
+        {
+          output += "(assert (= " + equation_variables[index++] + " "
+                    + translate_expression(value, variables.global_variables, translation) + "))\n";
+        }
+
+        return output;
 }
 
 static std::string join(const std::vector<std::string> &clauses, const std::string &op, bool simplify = true)
@@ -358,9 +372,11 @@ static std::string assert_occurs(const parsed_pbes &pbes, const translated_data_
 			
 			std::map<mcrl2::data::variable, std::string> bound_variables = variables.global_variables;
 			size_t index = 0;
-			for (variable_list::const_iterator k = i->variable.parameters().begin(); k != i->variable.parameters().end(); ++k) {
-				bound_variables[*k] = variables.parameter_variables[from_round][from_variable_index][index++];
+			for (const mcrl2::data::variable& k: i->variable.parameters())
+			{
+				bound_variables[k] = variables.parameter_variables[from_round][from_variable_index][index++];
 			}
+
 			for (variable_vector::const_iterator k = j->quantification_domain.begin(); k != j->quantification_domain.end(); ++k) {
 				bound_variables[*k] = variables.quantification_variables[from_round][from_variable_index][j - i->clauses.begin()][k - j->quantification_domain.begin()];
 			}
@@ -370,12 +386,13 @@ static std::string assert_occurs(const parsed_pbes &pbes, const translated_data_
 			}
 			
 			index = 0;
-			for (data_expression_list::const_iterator k = j->instantiation.parameters().begin(); k != j->instantiation.parameters().end(); ++k) {
-				std::string rhs = translate_expression(*k, bound_variables, translation);
+			for (const mcrl2::data::data_expression& k: j->instantiation.parameters())
+			{
+				std::string rhs = translate_expression(k, bound_variables, translation);
 				std::string lhs = variables.parameter_variables[to_round][to_variable_index][index++];
 				clauses.push_back("(= " + lhs + " " + rhs + ")");
 			}
-			
+
 			possibilities.push_back("\n  " + join(clauses, "and"));
 		}
 	}
@@ -490,12 +507,14 @@ static std::string assert_distinct(const parsed_pbes &pbes, const translated_dat
 	output += "))\n";
 	
 	output += "(define make-pbes-state::(-> nat";
-	for (size_t i = 0; i < pbes.equations.size(); ++i) {
-		for (data::variable_list::const_iterator j = pbes.equations[i].variable.parameters().begin(); j != pbes.equations[i].variable.parameters().end(); ++j) {
-			output += " " + translation.sort_names.at(j->sort());
-		}
-	}
-	output += " pbes-state) (lambda (equation::nat";
+        for (const equation& equation: pbes.equations)
+        {
+          for (const mcrl2::data::variable& j: equation.variable.parameters())
+          {
+            output += " " + translation.sort_names.at(j.sort());
+          }
+        }
+        output += " pbes-state) (lambda (equation::nat";
 	for (size_t i = 0; i < pbes.equations.size(); ++i) {
 		size_t index = 0;
 		for (data::variable_list::const_iterator j = pbes.equations[i].variable.parameters().begin(); j != pbes.equations[i].variable.parameters().end(); ++j) {
@@ -530,9 +549,11 @@ static std::string assert_distinct(const parsed_pbes &pbes, const translated_dat
 	output += "(define pbes-state-number::(-> pbes-state nat))\n";
 	for (size_t i = 0; i < levels; ++i) {
 		output += "(assert (= " + itoa(i) + " (pbes-state-number (make-pbes-state " + unrolling.equation_number_variables[i];
-		for (size_t j = 0; j < unrolling.parameter_variables[i].size(); ++j) {
-			for (size_t k = 0; k < unrolling.parameter_variables[i][j].size(); ++k) {
-				output += " " + unrolling.parameter_variables[i][j][k];
+		for (const std::vector<std::basic_string<char>>& j: unrolling.parameter_variables[i])
+		{
+			for (const std::basic_string<char>& k: j)
+			{
+				output += " " + k;
 			}
 		}
 		output += "))))\n";

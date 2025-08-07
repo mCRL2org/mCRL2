@@ -15,10 +15,9 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 
-namespace mcrl2
-{
 
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \brief Split a string into paragraphs.
@@ -29,7 +28,7 @@ std::vector<std::string> split_paragraphs(const std::string& text)
   std::vector<std::string> result;
 
   // find multiple line endings
-  std::regex paragraph_split {"\\n\\s*\\n"};
+  std::regex paragraph_split{R"(\n\s*\n)"};
 
   // the -1 below directs the token iterator to display the parts of
   // the string that did NOT match the regular expression.
@@ -225,6 +224,6 @@ void trim(std::string& text)
   boost::trim(text);
 }
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+

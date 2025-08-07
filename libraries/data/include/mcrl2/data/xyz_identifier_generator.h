@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/set_identifier_generator.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief Identifier generator that generates names from the range X, Y, Z, X0, Y0, Z0, X1, ...
@@ -76,7 +73,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     /// \param add_to_context If true, the generated identifier is added to the context,
     /// it is not added otherwise.
     /// \return A fresh identifier.
-    core::identifier_string operator()(const std::string& hint, bool add_to_context = true)
+    core::identifier_string operator()(const std::string& hint, bool add_to_context = true) override
     {
       core::identifier_string result(hint);
 
@@ -99,8 +96,8 @@ class xyz_identifier_generator: public multiset_identifier_generator
     }
 };
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H

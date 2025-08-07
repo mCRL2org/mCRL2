@@ -18,9 +18,7 @@
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Return a set with all finite sorts in data specification s.
@@ -43,11 +41,11 @@ std::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 template<typename DataRewriter, typename Specification>
 class suminst_algorithm: public detail::lps_algorithm<Specification>
 {
-  typedef detail::lps_algorithm<Specification> super;
-  typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-  typedef typename Specification::process_type process_type;
-  typedef typename process_type::action_summand_type action_summand_type;
-  typedef std::vector<action_summand_type> action_summand_vector_type;
+  using super = detail::lps_algorithm<Specification>;
+  using enumerator_element = data::enumerator_list_element_with_substitution<>;
+  using process_type = typename Specification::process_type;
+  using action_summand_type = typename process_type::action_summand_type;
+  using action_summand_vector_type = std::vector<action_summand_type>;
   using super::m_spec;
 
   protected:
@@ -63,9 +61,9 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
     data::enumerator_identifier_generator m_id_generator;
 
     /// Statistiscs for verbose output
-    std::size_t m_processed;
-    std::size_t m_deleted;
-    std::size_t m_added;
+    std::size_t m_processed = 0;
+    std::size_t m_deleted = 0;
+    std::size_t m_added = 0;
 
     template <typename SummandType, typename Container>
     std::size_t instantiate_summand(const SummandType& s, Container& result)
@@ -186,10 +184,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
-        m_enumerator(r, spec.data(), r, m_id_generator, false),
-        m_processed(0),
-        m_deleted(0),
-        m_added(0)
+        m_enumerator(r, spec.data(), r, m_id_generator, false)
     {
       if(sorts.empty())
       {
@@ -214,8 +209,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
 
 }; // suminst_algorithm
 
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_SUMINST_H
 

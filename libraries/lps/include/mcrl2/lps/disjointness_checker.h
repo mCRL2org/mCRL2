@@ -15,6 +15,7 @@
 #ifndef MCRL2_LPS_DISJOINTNESS_CHECKER_H
 #define MCRL2_LPS_DISJOINTNESS_CHECKER_H
 
+#include "mcrl2/data/assignment.h"
 #include "mcrl2/lps/linear_process.h"
 
 /// \brief Class that can determine if two summands are syntactically disjoint.
@@ -28,11 +29,7 @@
 /// checked for disjointness. The function Disjointness_Checker::disjoint indicates whether the two summands with numbers
 /// n_1 and n_2 are syntactically disjoint.
 
-namespace mcrl2
-{
-namespace lps
-{
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 class Disjointness_Checker
@@ -90,7 +87,7 @@ void Disjointness_Checker::process_data_expression(std::size_t n, const data::da
     const data::where_clause& t = atermpp::down_cast<data::where_clause>(x);
     process_data_expression(n, t.body());
     const data::assignment_list& assignments = t.assignments();
-    for (const auto & assignment : assignments)
+    for (const data::assignment& assignment : assignments)
     {
       process_data_expression(n, assignment.rhs());
     }
@@ -103,9 +100,9 @@ void Disjointness_Checker::process_data_expression(std::size_t n, const data::da
   {
     const data::application& t = atermpp::down_cast<data::application>(x);
     process_data_expression(n, t.head());
-    for (auto i = t.begin(); i != t.end(); ++i)
+    for (const auto& i : t)
     {
-      process_data_expression(n,*i);
+      process_data_expression(n, i);
     }
   }
   else if (data::is_abstraction(x))
@@ -190,8 +187,6 @@ bool Disjointness_Checker::disjoint(std::size_t n1, std::size_t n2)
   return v_used_1_changed_2 && v_used_2_changed_1 && v_changed_1_changed_2;
 }
 
-} // namespace detail
-} // namespace lps
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif

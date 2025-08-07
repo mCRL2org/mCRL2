@@ -18,7 +18,7 @@ tools:
     input: [l2]
     output: [l3]
     args: []
-    name: pbespathreduction
+    name: pbeschain
   t3:
     input: [l2]
     output: []
@@ -33,7 +33,7 @@ tools:
     input: [l2]
     output: [l4]
     args: [-b]
-    name: pbespathreduction
+    name: pbeschain
   t6:
     input: [l4]
     output: []

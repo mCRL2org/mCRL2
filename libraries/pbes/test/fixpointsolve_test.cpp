@@ -9,13 +9,14 @@
 /// \file iteration_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/pbes/tools/pbesfixpointsolve.h"
 #define BOOST_TEST_MODULE iteration_test
 #include <boost/regex.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <regex>
 
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/tools/pbesiteration.h"
+#include "mcrl2/pbes/tools/pbesfixpointsolve.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
@@ -33,8 +34,8 @@ void test_result(std::string input, std::string expected_result, bool option_che
 {
   bool normalize = false;
   pbes p = txt2pbes(input, normalize);
-  pbesiteration_pbes_fixpoint_iterator fixpoint_iterator;
-  pbesiteration_options options;
+  pbesfixpointsolve_pbes_fixpoint_iterator fixpoint_iterator;
+  pbesfixpointsolve_options options;
   options.check_global_invariant = option_check_global_invariant;
   fixpoint_iterator.run(p, options);
   std::string result = pbes_system::pp(p);
@@ -43,7 +44,7 @@ void test_result(std::string input, std::string expected_result, bool option_che
   BOOST_CHECK(replace_whitespace(result) == replace_whitespace(expected_result));
 }
 
-BOOST_AUTO_TEST_CASE(test_nu_sacks)
+BOOST_AUTO_TEST_CASE(test_fixpointsolve)
 {
   std::string text;
   std::string expected_result;
@@ -105,6 +106,8 @@ BOOST_AUTO_TEST_CASE(test_nu_sacks)
                     "\n"
                     "pbes nu Z(s3_P: Pos, s_P: Sluice, col_P1,col_P2: Colour) =\n"
                     "val(true);\n"
+                    "nu X0(s3_P: Pos, s_P: Sluice, col_P1,col_P2: Colour) =\n"
+                    "(val(!(s_P == s1)) || val(!(s3_P == 2))) && (val(s_P == s1) || val(!(s3_P == 3)) || val(!(col_P1 == green))) && (val(!(s3_P == 2)) || val(!(if(s_P == s1, red, col_P1) == green))) && (val(!(s3_P == 1 && !(col_P1 == green))) || val(!(col_P1 == green))) && (val(!(s3_P == 1 && col_P1 == green)) || val(false)) && (val(!(s3_P == 1 && !(col_P2 == green))) || val(!(col_P1 == green))) && (val(!(s3_P == 1 && col_P2 == green)) || val(true)) && (val(!(s3_P == 1 && !(col_P1 == red))) || val(!(col_P1 == green))) && (val(!(s3_P == 1 && col_P1 == red)) || val(true)) && (val(!(s3_P == 1 && !(col_P2 == red))) || val(!(col_P1 == green))) && (val(!(s3_P == 1 && col_P2 == red)) || val(true));\n"
                     "\n"
                     "init Z(1, dc, red, red);\n";
   test_result(text, expected_result, false);

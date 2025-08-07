@@ -148,7 +148,10 @@ std::string print_transition(const std::vector<data_expression_index>& data_inde
 } // internal
 
 /// \brief Print a transition vector as 'x -> y' where x is the from vector and y the to vector based on the read and write indices.
-std::string print_transition(const std::vector<data_expression_index>& data_index, const std::uint32_t* xy, const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
+inline std::string print_transition(const std::vector<data_expression_index>& data_index,
+    const std::uint32_t* xy,
+    const std::vector<std::size_t>& read,
+    const std::vector<std::size_t>& write)
 {
   std::vector<std::uint32_t> x;
   std::vector<std::uint32_t> y;
@@ -182,7 +185,10 @@ std::string print_transition(const std::vector<data_expression_index>& data_inde
 }
 
 /// \brief Prints a short vector transition relation R explicitly as 'x -> y' for every transition  where x is the from vector and y the to vector based on the read and write indices.
-std::string print_relation(const std::vector<data_expression_index>& data_index, const sylvan::ldds::ldd& R, const std::vector<std::size_t>& read, const std::vector<std::size_t>& write)
+inline std::string print_relation(const std::vector<data_expression_index>& data_index,
+    const sylvan::ldds::ldd& R,
+    const std::vector<std::size_t>& read,
+    const std::vector<std::size_t>& write)
 {
   std::ostringstream out;
   for (const std::vector<std::uint32_t>& xy: ldd_solutions(R))
@@ -193,7 +199,7 @@ std::string print_relation(const std::vector<data_expression_index>& data_index,
 }
 
 /// \brief Prints the number of elements represented by the ldd L and optionally also include the number of nodes of L.
-std::string print_size(const sylvan::ldds::ldd& L, bool print_exact, bool print_nodecount)
+inline std::string print_size(const sylvan::ldds::ldd& L, bool print_exact, bool print_nodecount)
 {
   std::ostringstream out;
   if (print_exact)

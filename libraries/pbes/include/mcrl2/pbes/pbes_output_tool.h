@@ -15,13 +15,11 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/pbes/io.h"
 
-namespace mcrl2
-{
 
-namespace pbes_system
-{
 
-namespace tools
+
+
+namespace mcrl2::pbes_system::tools
 {
 
 /// \brief Base class for filter tools that produce a pbes as output.
@@ -64,7 +62,7 @@ class pbes_output_tool: public Tool
     /// \brief Add options to an interface description. Also includes
     /// output format options.
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       Tool::add_options(desc);
       std::set<utilities::file_format> types = available_output_formats();
@@ -78,7 +76,7 @@ class pbes_output_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
       m_pbes_output_format = utilities::file_format();
@@ -123,7 +121,7 @@ class pbes_output_tool: public Tool
     {}
 
     /// \brief Destructor.
-    virtual ~pbes_output_tool() = default;
+    ~pbes_output_tool() override = default;
 
     /// \brief Returns the output format
     /// \return The output format
@@ -133,10 +131,10 @@ class pbes_output_tool: public Tool
     }
 };
 
-} // namespace tools
+} // namespace mcrl2::pbes_system::tools
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_PBES_OUTPUT_TOOL_H

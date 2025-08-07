@@ -9,6 +9,7 @@ Build-Depends: debhelper (>= 5),
  libgl1-mesa-dev,
  libglu1-mesa-dev,
  qt6-base-dev,
+ libqt6opengl6-dev,
  git
 Standards-Version: 3.9.5
 Homepage: http://www.mcrl2.org/

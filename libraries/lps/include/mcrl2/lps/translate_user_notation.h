@@ -15,32 +15,23 @@
 #include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 template <typename T>
-void translate_user_notation(T& x,
-                             typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                            )
+void translate_user_notation(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   core::make_update_apply_builder<lps::data_expression_builder>(data::detail::translate_user_notation_function()).update(x);
 }
 
 template <typename T>
-T translate_user_notation(const T& x,
-                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                         )
+T translate_user_notation(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<lps::data_expression_builder>(data::detail::translate_user_notation_function()).apply(result, x);
   return result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_TRANSLATE_USER_NOTATION_H

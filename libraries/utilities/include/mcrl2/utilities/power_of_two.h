@@ -15,24 +15,23 @@
 #include <limits>
 #include <type_traits>
 
-namespace mcrl2
-{
-namespace utilities
+
+namespace mcrl2::utilities
 {
 
 /// \returns True when the given value is a power of two.
-template<typename T,
-         typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
+template <typename T>
 static constexpr bool is_power_of_two(T value)
+  requires std::is_integral_v<T>
 {
   // It is a power of two whenever exactly a single bit is one.
   return value != 0 && (value & (value - 1)) == 0;
 }
 
 /// \returns The smallest power of two that is larger than the given value.
-template<typename T,
-         typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
+template <typename T>
 static T round_up_to_power_of_two(T value)
+  requires std::is_integral_v<T>
 {
   if (is_power_of_two(value)) {
     return value;
@@ -54,7 +53,7 @@ static T round_up_to_power_of_two(T value)
   return value + 1;
 }
 
-} // namespace utilities
-} // namespace mcrl2`
+} // namespace mcrl2::utilities
+// namespace mcrl2`
 
 #endif // MCRL2_UTILITY_POWER_OF_TWO_H_

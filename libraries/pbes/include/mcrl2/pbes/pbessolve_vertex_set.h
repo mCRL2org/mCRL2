@@ -15,9 +15,7 @@
 #include <deque>
 #include "mcrl2/pbes/structure_graph.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 struct deque_vertex_set
 {
@@ -458,7 +456,7 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
 {
   using utilities::detail::contains;
 
-  typedef structure_graph::vertex vertex;
+  using vertex = structure_graph::vertex;
   std::vector<const vertex*> result;
 
   std::set<structure_graph::index_type> todo = { init };
@@ -510,7 +508,7 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(
 {
   using utilities::detail::contains;
 
-  typedef structure_graph::vertex vertex;
+  using vertex = structure_graph::vertex;
   std::vector<const vertex*> result;
 
   std::set<structure_graph::index_type> todo = { init };
@@ -582,8 +580,8 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
   }
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESSOLVE_VERTEX_SET_H

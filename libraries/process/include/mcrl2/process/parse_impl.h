@@ -16,9 +16,8 @@
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 struct untyped_process_specification: public data::untyped_data_specification
 {
@@ -70,7 +69,7 @@ struct action_actions: public data::detail::data_specification_actions
       }
       for (const core::identifier_string& id: ids)
       {
-        result.push_back(action_label(id, sorts));
+        result.emplace_back(id, sorts);
       }
       return true;
     }
@@ -268,8 +267,6 @@ struct process_actions: public process::detail::action_actions
 
 } // namespace detail
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_PARSE_IMPL_H

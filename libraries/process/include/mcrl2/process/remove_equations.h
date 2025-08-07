@@ -15,9 +15,8 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/replace.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
@@ -35,9 +34,9 @@ namespace detail {
 // the equations for S2 and T1 will be removed
 struct duplicate_equation_removal
 {
-  typedef std::vector<process_equation>::const_iterator iterator;
-  typedef std::set<iterator> group;
-  typedef data::mutable_map_substitution<std::map<process_identifier, process_identifier> > substitution;
+  using iterator = std::vector<process_equation>::const_iterator;
+  using group = std::set<iterator>;
+  using substitution = data::mutable_map_substitution<std::map<process_identifier, process_identifier>>;
 
   process_specification& procspec;
   data::set_identifier_generator generator;
@@ -46,7 +45,7 @@ struct duplicate_equation_removal
   std::string print_group(const group& g)
   {
     std::ostringstream out;
-    for (auto i: g)
+    for (const auto& i: g)
     {
       const process_equation& eq = *i;
 
@@ -103,7 +102,7 @@ struct duplicate_equation_removal
     {
       const process_equation& first_equation = **g.begin();
       process_identifier id(generator("X"), first_equation.formal_parameters());
-      for (iterator i: g)
+      for (const iterator& i: g)
       {
         const process_equation& eq = *i;
         result[eq.identifier()] = id;
@@ -116,7 +115,7 @@ struct duplicate_equation_removal
   void split_group(const group& g, const substitution& sigma, std::vector<group>& result)
   {
     std::map<process_expression, group> m;
-    for (auto i: g)
+    for (const auto& i: g)
     {
       const process_equation& eq = *i;
       process_expression expr = replace_process_identifiers(eq.expression(), sigma);
@@ -199,8 +198,6 @@ void remove_duplicate_equations(process_specification& procspec)
   f.run();
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_REMOVE_EQUATIONS_H

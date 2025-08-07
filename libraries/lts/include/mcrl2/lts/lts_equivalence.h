@@ -19,9 +19,7 @@
 #include <string>
 #include "mcrl2/utilities/exception.h"
 
-namespace mcrl2
-{
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief LTS equivalence relations.
@@ -35,7 +33,7 @@ enum lts_equivalence
   lts_eq_bisim_gv,         /**< Strong bisimulation equivalence using the O(mn) algorithm [Groote/Vaandrager 1990] */
   lts_eq_bisim_gjkw,        /**< Strong bisimulation equivalence using the O(m log m) algorithm [Groote/Jansen/Keiren/Wijs 2017] */
 #ifdef BRANCH_BIS_EXPERIMENT_JFG
-  lts_eq_bisim_gj,        /**< Strong bisimulation equivalence using an O(m log n) experimental algorithm [Groote/Jansen 2024] */
+  lts_eq_bisim_gj,        /**< Strong bisimulation equivalence using an O(m log n) experimental algorithm [Groote/Jansen 2025] */
 #endif
   lts_eq_bisim_sigref,     /**< Strong bisimulation equivalence using the signature refinement algorithm [Blom/Orzan 2003] */
   lts_eq_branching_bisim,  /**< Branching bisimulation equivalence using the O(m log n) algorithm [Jansen/Groote/Keiren/Wijs 2019] */
@@ -373,8 +371,7 @@ inline std::string description(const lts_equivalence eq)
   }
 }
 
-} // namespace lts
-} // namespace mcrl2
+} // namespace mcrl2::lts
 
 #endif // MCRL2_LTS_LTS_EQUIVALENCE_H
 

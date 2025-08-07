@@ -16,9 +16,7 @@
 #include <cstddef>
 #include <iterator>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief Provides (a subset of) the interface of std::array<T> for a portion of preallocated memory. Can be used to
@@ -87,16 +85,17 @@ private:
   std::size_t m_size;
 };
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
+
 
 /// \brief Define a (hopefully) unique name for the underlying reserved stack memory.
 #define MCRL2_STACK_ARRAY_NAME(NAME) \
   NAME ## _reserved_stack_memory
 
 /// \brief Declares a stack_array<TYPE> with the specified NAME that stores SIZE elements type TYPE.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define MCRL2_DECLARE_STACK_ARRAY(NAME, TYPE, SIZE) \
   TYPE* MCRL2_STACK_ARRAY_NAME(NAME) = MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE); \
-  mcrl2::utilities::stack_array<TYPE> NAME (MCRL2_STACK_ARRAY_NAME(NAME), SIZE)
+  mcrl2::utilities::stack_array<TYPE> NAME (MCRL2_STACK_ARRAY_NAME(NAME), SIZE) 
 
 #endif // MCRL2_UTILITIES_STACK_VECTOR_H

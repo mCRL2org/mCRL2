@@ -15,21 +15,19 @@
 #include <cstddef>
 #include "mcrl2/utilities/logger.h"
 
-namespace mcrl2 {
-
-namespace utilities {
+namespace mcrl2::utilities {
 
 /// \brief Displays progress messages for a task that performs a fixed number of steps.
 class progress_meter
 {
   protected:
-    std::size_t n;
+    std::size_t n = 0;
     std::size_t N;
 
   public:
     /// \brief Constructor
     progress_meter(std::size_t N_ = 0)
-      : n(0), N(N_)
+        : N(N_)
     {}
 
     /// \brief Set the number of steps of the task
@@ -50,8 +48,8 @@ class progress_meter
     }
 };
 
-} // namespace utilities
+} // namespace mcrl2::utilities
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_UTILITIES_PROGRESS_METER_H

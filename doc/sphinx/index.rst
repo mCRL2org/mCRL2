@@ -34,16 +34,9 @@ Computer Science of the `Technische Universiteit Eindhoven
 <http://www.tue.nl>`_, in collaboration with
 the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
-.. warning::
-
-   In the latest release, mCRL2 202407.1, the tool `lpsxsim` does not work on
-   Ubuntu. This will be fixed in the next release, but in the meantime the
-   nightly builds can be used.
-
 .. note::
 
-   The latest release, mCRL2 202407.1, is now available from the :ref:`download` page.
-   This release contains a critical bug fix for the mCRL2 ide.
+   The latest release, mCRL2 202507.0, is now available from the :ref:`download` page.
    See the `changelog <https://github.com/mCRL2org/mCRL2/blob/master/CHANGES>`_ for a detailed list
    of changes.
 

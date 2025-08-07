@@ -14,6 +14,7 @@
 #include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/utilities/reachable_nodes.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
 namespace mcrl2::pbes_system {
 
@@ -45,17 +46,17 @@ class pbes_parelm_algorithm
 {
   protected:
     /// \brief The graph type of the dependency graph
-    typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS> graph;
+    using graph = boost::adjacency_list<boost::setS, boost::vecS, boost::directedS>;
 
     /// \brief The vertex type of the dependency graph
-    typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
+    using vertex_descriptor = boost::graph_traits<graph>::vertex_descriptor;
 
     /// \brief The edge type of the dependency graph
-    typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
+    using edge_descriptor = boost::graph_traits<graph>::edge_descriptor;
 
     struct parelm_dependency_traverser: public pbes_expression_traverser<parelm_dependency_traverser>
     {
-      typedef pbes_expression_traverser<parelm_dependency_traverser> super;
+      using super = pbes_expression_traverser<parelm_dependency_traverser>;
       using super::enter;
       using super::leave;
       using super::apply;
@@ -283,7 +284,7 @@ class pbes_parelm_algorithm
         mCRL2log(log::debug) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
       }
       mCRL2log(log::debug) << "\ndependencies:" << std::endl;
-      typedef boost::graph_traits<graph>::edge_iterator edge_iterator;
+      using edge_iterator = boost::graph_traits<graph>::edge_iterator;
       std::pair<edge_iterator, edge_iterator> e = edges(G);
       edge_iterator first = e.first;
       edge_iterator last  = e.second;
@@ -308,6 +309,11 @@ class pbes_parelm_algorithm
 inline
 void parelm(pbes& p)
 {
+  const bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
+  if (has_counter_example)
+  {
+    mCRL2log(log::warning) << "Warning: the PBES has counter example information, which may not be preserved by parameter elimination." << std::endl;
+  }
   pbes_parelm_algorithm algorithm;
   algorithm.run(p);
 }

@@ -26,9 +26,7 @@ std::string tolower(std::string s)
   return s;
 }
 
-LiftingStrategyFactory::~LiftingStrategyFactory()
-{
-}
+LiftingStrategyFactory::~LiftingStrategyFactory() = default;
 
 const char *LiftingStrategyFactory::usage()
 {
@@ -78,16 +76,20 @@ const char *LiftingStrategyFactory::usage()
 LiftingStrategyFactory *
     LiftingStrategyFactory::create(const std::string &description)
 {
-    if (description.empty()) return NULL;
+  if (description.empty())
+  {
+    return nullptr;
+  }
 
     // Split into parts, separated by semicolon characters
     std::vector<std::string> parts;
-    std::string::size_type i, j;
+    std::string::size_type i;
+    std::string::size_type j;
     for (i = 0; (j = description.find(':', i)) != std::string::npos; i = j + 1)
     {
-        parts.push_back(std::string(description, i, j - i));
+      parts.emplace_back(description, i, j - i);
     }
-    parts.push_back(std::string(description, i, j));
+    parts.emplace_back(description, i, j);
 
     std::string case_ = tolower(parts[0]);
     if ( case_ == "linear" || case_ == "lin" )

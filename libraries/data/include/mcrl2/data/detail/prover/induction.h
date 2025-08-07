@@ -17,11 +17,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 /// The class Induction generates statements corresponding to
 
@@ -31,7 +27,7 @@ class Induction
     set_identifier_generator fresh_identifier_generator;
 
     /// \brief The number of variables used during the last application of induction.
-    std::size_t f_count;
+    std::size_t f_count = 0UL;
 
     /// \brief An expression of sort Bool in mCRL2 format.
     data_expression f_formula;
@@ -205,8 +201,6 @@ class Induction
     }
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

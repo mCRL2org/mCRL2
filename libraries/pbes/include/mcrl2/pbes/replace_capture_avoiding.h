@@ -16,9 +16,9 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/find.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
@@ -26,7 +26,7 @@ template<template<class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement
   : public data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef data::detail::add_capture_avoiding_replacement <Builder, Derived, Substitution> super;
+  using super = data::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -86,9 +86,9 @@ struct add_capture_avoiding_replacement
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
-                                        data::set_identifier_generator& id_generator,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        data::set_identifier_generator& id_generator
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<pbes_system::data_expression_builder, pbes_system::detail::add_capture_avoiding_replacement>(sigma1).update(x);
@@ -101,9 +101,9 @@ void replace_variables_capture_avoiding(T& x,
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
-                                     data::set_identifier_generator& id_generator,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     data::set_identifier_generator& id_generator
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   T result;
@@ -116,9 +116,9 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                                        Substitution& sigma,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        Substitution& sigma
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(pbes_system::find_identifiers(x));
@@ -134,9 +134,9 @@ void replace_variables_capture_avoiding(T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                                     Substitution& sigma,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     Substitution& sigma
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(pbes_system::find_identifiers(x));
@@ -148,8 +148,8 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated pbes_system replace_capture_avoiding code ---//
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REPLACE_CAPTURE_AVOIDING_H

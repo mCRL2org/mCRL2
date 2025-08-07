@@ -15,20 +15,14 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/join.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
-{
-
-namespace detail
+namespace mcrl2::pbes_system::detail
 {
 
 // Simplifying PBES rewriter.
 template <typename Derived>
 struct normalize_and_or_builder: public pbes_expression_builder<Derived>
 {
-  typedef pbes_expression_builder<Derived> super;
+  using super = pbes_expression_builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -93,9 +87,7 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
 };
 
 template <typename T>
-T normalize_and_or(const T& x,
-                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                  )
+T normalize_and_or(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_apply_builder<normalize_and_or_builder>().apply(result, x);
@@ -103,17 +95,15 @@ T normalize_and_or(const T& x,
 }
 
 template <typename T>
-void normalize_and_or(T& x,
-                      typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                     )
+void normalize_and_or(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_apply_builder<normalize_and_or_builder>().update(x);
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_NORMALIZE_AND_OR_H

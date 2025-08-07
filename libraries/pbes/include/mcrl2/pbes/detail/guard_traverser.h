@@ -22,11 +22,11 @@
 #include "mcrl2/pbes/find.h"
 #endif
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 #ifdef MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
 inline
@@ -257,7 +257,7 @@ std::ostream& operator<<(std::ostream& out, const guard_expression& x)
 /// \brief Computes a multimap of propositional variable instantiations and the corresponding guards from a PBES expression
 struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 {
-  typedef pbes_expression_traverser<guard_traverser> super;
+  using super = pbes_expression_traverser<guard_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -438,10 +438,10 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H

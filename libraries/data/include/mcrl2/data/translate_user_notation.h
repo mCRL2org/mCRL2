@@ -16,10 +16,7 @@
 #include "mcrl2/data/standard_container_utility.h"
 #include "mcrl2/data/standard_utility.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -29,7 +26,7 @@ template <typename Derived>
 class translate_user_notation_builder: public data_expression_builder<Derived>
 {
 public:
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
 
   using super::enter;
   using super::leave;
@@ -167,17 +164,13 @@ struct translate_user_notation_function
 } // namespace detail
 
 template <typename T>
-void translate_user_notation(T& x,
-                             typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-                            )
+void translate_user_notation(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<data::data_expression_builder>(detail::translate_user_notation_function()).update(x);
 }
 
 template <typename T>
-T translate_user_notation(const T& x,
-                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                         )
+T translate_user_notation(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<data::data_expression_builder>(detail::translate_user_notation_function()).apply(result, x);
@@ -194,8 +187,8 @@ data_equation translate_user_notation_data_equation(const data_equation& x)
 }
 } // namespace detail
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_TRANSLATE_USER_NOTATION_H

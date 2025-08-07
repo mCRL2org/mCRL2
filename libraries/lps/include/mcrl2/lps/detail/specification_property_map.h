@@ -18,13 +18,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-namespace mcrl2
-{
-
-namespace lps
-{
-
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 /// \brief Stores the following properties of a linear process specification:
@@ -57,7 +51,7 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
     // Allow base class access to protected functions
     friend class data::detail::data_property_map<specification_property_map<Specification> >;
 
-    typedef data::detail::data_property_map<specification_property_map> super;
+    using super = data::detail::data_property_map<specification_property_map>;
 
     using super::m_data;
     using super::names;
@@ -297,10 +291,6 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
     }
 };
 
-} // namespace detail
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif // MCRL2_LPS_DETAIL_SPECIFICATION_PROPERTY_MAP_H

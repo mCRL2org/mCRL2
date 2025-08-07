@@ -19,9 +19,7 @@
 #include "mcrl2/process/replace.h"
 #include "mcrl2/utilities/sequence.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process {
 
 /// \brief Returns true if x is a pCRL expression. N.B. This test depends on the assumption that
 /// in mCRL2 a top level pCRL expression may never contain a non-pCRL expression.
@@ -82,7 +80,7 @@ process_expression make_allow(const multi_action_name_set& A, const process_expr
   {
     if (!alpha.empty()) // exclude tau
     {
-      v.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
+      v.emplace_back(core::identifier_string_list(alpha.begin(), alpha.end()));
     }
   }
   action_name_multiset_list B(v.begin(), v.end());
@@ -129,8 +127,8 @@ process_expression make_block(const core::identifier_string_list& B, const proce
   }
 }
 
-} // namespace process
+} // namespace mcrl2::process
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PROCESS_UTILITY_H

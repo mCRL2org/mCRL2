@@ -16,16 +16,15 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/process/replace_capture_avoiding.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps
+{
 
 namespace detail {
 
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public process::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>
 {
-  typedef process::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution> super;
+  using super = process::detail::add_capture_avoiding_replacement<Builder, Derived, Substitution>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -187,9 +186,9 @@ struct add_capture_avoiding_replacement: public process::detail::add_capture_avo
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
-                                        data::set_identifier_generator& id_generator,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        data::set_identifier_generator& id_generator
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<lps::data_expression_builder, lps::detail::add_capture_avoiding_replacement>(sigma1).update(x);
@@ -202,9 +201,9 @@ void replace_variables_capture_avoiding(T& x,
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
-                                     data::set_identifier_generator& id_generator,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     data::set_identifier_generator& id_generator
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   T result;
@@ -217,9 +216,9 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                                        Substitution& sigma,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        Substitution& sigma
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(lps::find_identifiers(x));
@@ -235,9 +234,9 @@ void replace_variables_capture_avoiding(T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                                     Substitution& sigma,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     Substitution& sigma
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(lps::find_identifiers(x));
@@ -287,11 +286,8 @@ stochastic_distribution replace_variables_capture_avoiding(
     id_generator.add_identifier(v.name());
   } 
   return lps::replace_variables_capture_avoiding(x, pars, sigma, id_generator);
-} 
+}
 
-
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_REPLACE_CAPTURE_AVOIDING_H

@@ -28,9 +28,9 @@ std::vector<T> project(const std::vector<T>& v, const std::vector<std::size_t>& 
 {
   std::vector<T> result;
   result.reserve(used.size());
-  for (std::size_t i = 0; i < used.size(); i++)
+  for (unsigned long i : used)
   {
-    result.push_back(v[used[i]]);
+    result.push_back(v[i]);
   }
   return result;
 }

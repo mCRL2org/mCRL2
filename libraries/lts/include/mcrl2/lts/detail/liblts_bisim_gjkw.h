@@ -31,11 +31,7 @@
 #include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief include something in Debug mode
@@ -51,11 +47,7 @@ namespace detail
 // state_type and trans_type are defined in check_complexity.h.
 
 /// \brief type used to store label numbers and counts
-typedef std::size_t label_type;
-
-
-
-
+using label_type = std::size_t;
 
 /* ************************************************************************* */
 /*                                                                           */
@@ -115,8 +107,8 @@ namespace bisim_gjkw
 
 class state_info_entry;
 
-typedef state_info_entry* state_info_ptr;
-typedef const state_info_entry* state_info_const_ptr;
+using state_info_ptr = state_info_entry*;
+using state_info_const_ptr = const state_info_entry*;
 
 /// \class permutation_t
 /// \brief stores a permutation of the states, ordered by block
@@ -127,9 +119,9 @@ typedef const state_info_entry* state_info_const_ptr;
 ///
 /// Iterating over the states of a block or the blocks of a constellation will
 /// therefore be done using the permutation_t array.
-typedef fixed_vector<state_info_ptr> permutation_t;
-typedef permutation_t::iterator permutation_iter_t;
-typedef permutation_t::const_iterator permutation_const_iter_t;
+using permutation_t = fixed_vector<state_info_ptr>;
+using permutation_iter_t = permutation_t::iterator;
+using permutation_const_iter_t = permutation_t::const_iterator;
 
 class block_t;
 class constln_t;
@@ -137,17 +129,17 @@ class constln_t;
 class B_to_C_entry;
 class pred_entry;
 class succ_entry;
-typedef fixed_vector<B_to_C_entry>::iterator B_to_C_iter_t;
-typedef fixed_vector<pred_entry>::iterator pred_iter_t;
-typedef fixed_vector<succ_entry>::iterator succ_iter_t;
+using B_to_C_iter_t = fixed_vector<B_to_C_entry>::iterator;
+using pred_iter_t = fixed_vector<pred_entry>::iterator;
+using succ_iter_t = fixed_vector<succ_entry>::iterator;
 
-typedef fixed_vector<B_to_C_entry>::const_iterator B_to_C_const_iter_t;
-typedef fixed_vector<pred_entry>::const_iterator pred_const_iter_t;
-typedef fixed_vector<succ_entry>::const_iterator succ_const_iter_t;
+using B_to_C_const_iter_t = fixed_vector<B_to_C_entry>::const_iterator;
+using pred_const_iter_t = fixed_vector<pred_entry>::const_iterator;
+using succ_const_iter_t = fixed_vector<succ_entry>::const_iterator;
 class B_to_C_descriptor;
-typedef std::list<B_to_C_descriptor> B_to_C_desc_list;
-typedef B_to_C_desc_list::iterator B_to_C_desc_iter_t;
-typedef B_to_C_desc_list::const_iterator B_to_C_desc_const_iter_t;
+using B_to_C_desc_list = std::list<B_to_C_descriptor>;
+using B_to_C_desc_iter_t = B_to_C_desc_list::iterator;
+using B_to_C_desc_const_iter_t = B_to_C_desc_list::const_iterator;
 
 /// \class state_info_entry
 /// \brief stores information about a single state
@@ -183,13 +175,13 @@ class state_info_entry
     succ_iter_t state_inert_out_end;
   public:
     /// block where the state belongs
-    block_t* block;
+    block_t* block = nullptr;
 
     /// position of the state in the permutation array
     permutation_iter_t pos;
 
     /// number of inert transitions to non-blue states
-    state_type notblue;
+    state_type notblue = 0UL;
   private:
     /// iterator to first outgoing transition to the constellation of interest
     succ_iter_t int_current_constln;
@@ -445,7 +437,7 @@ class block_t
     /// \details If this is the last block in the list, `refinable_next` points
     /// to this very block.  Consequently, it is possible to check whether some
     /// block is refinable without an additional variable.
-    block_t* refinable_next;
+    block_t* refinable_next = nullptr;
 
     /// first block in the list of refinable blocks
     static block_t* refinable_first;
@@ -471,19 +463,18 @@ class block_t
     /// \param constln_ constellation to which the block belongs
     /// \param begin_   initial iterator to the first state of the block
     /// \param end_     initial iterator past the last state of the block
-    block_t(constln_t* const constln_, permutation_iter_t const begin_,
-                                                 permutation_iter_t const end_)
-      : int_end(end_),
-        int_begin(begin_),
-        int_marked_nonbottom_begin(begin_), // no non-bottom state is marked
-        int_bottom_begin(begin_), // all states are bottom states
-        int_marked_bottom_begin(end_), // no bottom state is marked
-        // int_inert_begin -- is initialised by part_trans_t::create_new_block
-        // int_inert_end -- is initialised by part_trans_t::create_new_block
-        to_constln(), // empty list
-        int_constln(constln_),
-        refinable_next(nullptr),
-        int_seqnr(BLOCK_NO_SEQNR)
+    block_t(constln_t* const constln_, permutation_iter_t const begin_, permutation_iter_t const end_)
+        : int_end(end_),
+          int_begin(begin_),
+          int_marked_nonbottom_begin(begin_), // no non-bottom state is marked
+          int_bottom_begin(begin_),           // all states are bottom states
+          int_marked_bottom_begin(end_),      // no bottom state is marked
+          // int_inert_begin -- is initialised by part_trans_t::create_new_block
+          // int_inert_end -- is initialised by part_trans_t::create_new_block
+          to_constln(), // empty list
+          int_constln(constln_),
+
+          int_seqnr(BLOCK_NO_SEQNR)
     {                                                                           // The following assertions hold trivially.
                                                                                 // assert(int_begin <= int_marked_nonbottom_begin);
                                                                                 // assert(int_marked_nonbottom_begin <= int_bottom_begin);
@@ -496,7 +487,7 @@ class block_t
                                                                                 // assert(int_end <= int_constln->end());
     }
 
-    ~block_t()  {  }
+    ~block_t() = default;
 
     /// assigns a unique sequence number
     void assign_seqnr()
@@ -742,7 +733,10 @@ class block_t
     /// \returns true if the state was not marked before
     bool mark_nonbottom(state_info_ptr s)
     {                                                                           assert(s->pos < nonbottom_end());  assert(nonbottom_begin() <= s->pos);
-        if (marked_nonbottom_begin() <= s->pos)  return false;
+      if (marked_nonbottom_begin() <= s->pos)
+      {
+        return false;
+      }
         set_marked_nonbottom_begin(marked_nonbottom_begin() - 1);
         swap_permutation(s->pos, marked_nonbottom_begin());
         return true;
@@ -758,7 +752,10 @@ class block_t
     {                                                                           assert(s->pos < end());
         if (bottom_begin() <= s->pos)
         {
-            if (marked_bottom_begin() <= s->pos)  return false;
+          if (marked_bottom_begin() <= s->pos)
+          {
+            return false;
+          }
             set_marked_bottom_begin(marked_bottom_begin() - 1);
             swap_permutation(s->pos, marked_bottom_begin());
             return true;
@@ -826,7 +823,7 @@ class constln_t
     /// `nontrivial_next` points to this very constellation.  Consequently, it
     /// is possible to check whether some constellation is trivial without an
     /// additional variable.
-    constln_t* nontrivial_next;
+    constln_t* nontrivial_next = nullptr;
 
     /// first constellation in the list of non-trivial constellations
     static constln_t* nontrivial_first;
@@ -859,19 +856,18 @@ class constln_t
     /// \brief constructor
     /// \param begin_ iterator to the first state in the constellation
     /// \param end_   iterator past the last state in the constellation
-    constln_t(state_type sort_key_, permutation_iter_t begin_,
-                       permutation_iter_t end_, B_to_C_iter_t postprocess_none)
-      : int_end(end_),
-        int_begin(begin_),
-        nontrivial_next(nullptr),
-        postprocess_begin(postprocess_none),
-        postprocess_end(postprocess_none),
-        sort_key(sort_key_)
+    constln_t(state_type sort_key_, permutation_iter_t begin_, permutation_iter_t end_, B_to_C_iter_t postprocess_none)
+        : int_end(end_),
+          int_begin(begin_),
+
+          postprocess_begin(postprocess_none),
+          postprocess_end(postprocess_none),
+          sort_key(sort_key_)
     {                                                                           assert(int_begin<int_end);  assert((state_type)(int_end-int_begin)<=sort_key);
     }
 
     /// \brief destructor
-    ~constln_t()  {  }
+    ~constln_t() = default;
 
     /// \brief provides an arbitrary non-trivial constellation
     /// \details The static function is implemented in a way to provide the
@@ -1088,9 +1084,15 @@ class part_state_t
             block_t* const B = permutation_iter[-1]->block;                     assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
                                                                                 #ifndef NDEBUG
-                                                                                    if (BLOCK_NO_SEQNR != B->seqnr())  ++deleted_blocks;
-                                                                                    else                               assert(0 == deleted_blocks);
-                                                                                #endif
+            if (BLOCK_NO_SEQNR != B->seqnr())
+            {
+              ++deleted_blocks;
+            }
+            else
+            {
+              assert(0 == deleted_blocks);
+            }
+#endif
             delete B;
         }                                                                       assert(deleted_blocks == block_t::nr_of_blocks);
         block_t::nr_of_blocks = 0;
@@ -1192,7 +1194,7 @@ class succ_entry
 {
   public:
     B_to_C_iter_t B_to_C;
-    state_info_ptr target;
+    state_info_ptr target = nullptr;
 
   private:
     /// \brief points to the last or the first transition to the same
@@ -1286,8 +1288,8 @@ class pred_entry
 {
   public:
     succ_iter_t succ;
-    state_info_ptr source;
-                                                                                #ifndef NDEBUG
+    state_info_ptr source = nullptr;
+#ifndef NDEBUG
                                                                                     /// \brief print a short transition identification for debugging
                                                                                     /// \details This function is only available if compiled in Debug mode.
                                                                                     std::string debug_id_short() const
@@ -1386,9 +1388,13 @@ class B_to_C_descriptor
                                                                                         assert(begin < end);
                                                                                         std::string result("slice containing transition");
                                                                                         if (end - begin > 1)
-                                                                                            result += "s ";
+                                                                                        {
+                                                                                          result += "s ";
+                                                                                        }
                                                                                         else
-                                                                                            result += " ";
+                                                                                        {
+                                                                                          result += " ";
+                                                                                        }
                                                                                         B_to_C_const_iter_t iter = begin;
                                                                                         assert(iter->pred->succ->B_to_C == iter);
                                                                                         result += iter->pred->debug_id_short();
@@ -1728,7 +1734,7 @@ class bisim_partitioner_gjkw_initialise_helper
     std::vector<state_type> noninert_in_per_state, inert_in_per_state;
     std::vector<state_type> noninert_out_per_block, inert_out_per_block;
     std::vector<state_type> states_per_block;
-    state_type nr_of_nonbottom_states;
+    state_type nr_of_nonbottom_states = 0;
   public:
     bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool branching,
                                                      bool preserve_divergence);
@@ -2101,7 +2107,7 @@ inline bool state_info_entry::surely_has_no_transition_to(
 
 } // end namespace bisim_gjkw
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 
 #endif // ifndef _LIBLTS_BISIM_GJKW_H

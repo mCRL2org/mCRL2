@@ -18,7 +18,7 @@
 
 using namespace mcrl2;
 
-typedef int* state_vector;
+using state_vector = int*;
 
 inline
 std::string print_state(const state_vector& s, std::size_t size, const std::string& msg = "state: ")
@@ -43,11 +43,10 @@ std::string print_state(const state_vector& s, std::size_t size, const std::stri
 struct state_callback_function
 {
   std::size_t state_size;
-  std::size_t state_count;
+  std::size_t state_count = 0;
 
   explicit state_callback_function(std::size_t size)
-    : state_size(size),
-      state_count(0)
+    : state_size(size)
   {}
 
   void operator()(state_vector const& next_state, int* const& labels, int group=-1)
@@ -316,13 +315,13 @@ void test_serialisation()
     std::cout << i << ": " << p1.data_type(i).name() << std::endl;
   }
   std::vector<std::pair<std::string, std::size_t>> expressions;
-  expressions.push_back(std::make_pair("1", 0));
-  expressions.push_back(std::make_pair("0", 1));
-  expressions.push_back(std::make_pair("1", 1));
-  expressions.push_back(std::make_pair("Red", 2));
-  expressions.push_back(std::make_pair("Yellow", 2));
+  expressions.emplace_back("1", 0);
+  expressions.emplace_back("0", 1);
+  expressions.emplace_back("1", 1);
+  expressions.emplace_back("Red", 2);
+  expressions.emplace_back("Yellow", 2);
 
-  for(auto e : expressions)
+  for (const auto& e: expressions)
   {
     std::string s = e.first;
 std::cerr << "STRING " << s << "\n";

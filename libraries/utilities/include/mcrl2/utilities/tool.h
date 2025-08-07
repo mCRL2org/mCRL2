@@ -23,14 +23,8 @@
   #include <fcntl.h>
 #endif
 
-namespace mcrl2
-{
-
-namespace utilities
-{
-
 /// \brief The namespace for command line tool classes
-namespace tools
+namespace mcrl2::utilities::tools
 {
 
 /// \brief Base class for command line tools.
@@ -60,7 +54,7 @@ class tool
     execution_timer m_timer;
 
     /// Determines whether timing output should be written
-    bool m_timing_enabled;
+    bool m_timing_enabled = false;
 
     /// \brief Add options to an interface description.
     /// \param desc An interface description
@@ -155,13 +149,11 @@ class tool
         m_tool_description(tool_description),
         m_known_issues(known_issues),
         m_timing_filename(""),
-        m_timer(name),
-        m_timing_enabled(false)
+        m_timer(name)
     {}
 
     /// \brief Destructor.
-    virtual ~tool()
-    {}
+    virtual ~tool() = default;
 
     /// \brief Run the tool. The options must be set manually.
     /// \return True if the tool execution was successful.
@@ -247,10 +239,6 @@ class tool
     }
 };
 
-} // namespace tools
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::tools
 
 #endif // MCRL2_UTILITIES_TOOL_H

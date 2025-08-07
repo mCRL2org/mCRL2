@@ -46,15 +46,15 @@ public:
     bool stack() const { return stack_; }
 
     // v1 API
-    void lifted(verti v);
-    verti next();
+    void lifted(verti v) override;
+    verti next() override;
 
     // v2 API
-    void push(verti v);
-    verti pop();
-    void bump(verti /*vertex*/) { }
+    void push(verti v) override;
+    verti pop() override;
+    void bump(verti /*vertex*/) override {}
 
-private:
+  private:
     const SmallProgressMeasures &spm_;
     const bool stack_;
     std::unique_ptr<bool[]> queued_;
@@ -69,13 +69,11 @@ class PredecessorLiftingStrategyFactory : public LiftingStrategyFactory
 public:
     PredecessorLiftingStrategyFactory(bool stack = false) : stack_(stack) { };
 
-    bool supports_version(int version);
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm );
-    LiftingStrategy2 *create2( const ParityGame &game,
-                               const SmallProgressMeasures &spm );
+    bool supports_version(int version) override;
+    LiftingStrategy* create(const ParityGame& game, const SmallProgressMeasures& spm) override;
+    LiftingStrategy2* create2(const ParityGame& game, const SmallProgressMeasures& spm) override;
 
-private:
+  private:
     const bool stack_;
 };
 

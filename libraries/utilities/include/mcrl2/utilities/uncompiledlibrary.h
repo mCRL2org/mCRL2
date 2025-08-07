@@ -141,7 +141,7 @@ class uncompiled_library : public dynamic_library
       }
     }
 
-    virtual ~uncompiled_library()
+    ~uncompiled_library() override
     {
 #ifndef NDEBUG // In debug mode, the compiled rewriter has not been removed directly after loading, 
                // and we still have to remove it.

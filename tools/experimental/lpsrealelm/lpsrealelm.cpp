@@ -36,12 +36,12 @@ using namespace mcrl2::log;
 class lpsrealelm_tool: public rewriter_tool<input_output_tool >
 {
   protected:
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
-    unsigned int max_iterations;
+    unsigned int max_iterations = DEFAULT_MAX_ITERATIONS;
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -51,7 +51,7 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.
@@ -67,14 +67,13 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
         AUTHORS,
         "remove real numbers from an LPS",
         "Remove Real numbers from the linear process specification (LPS) in "
-        "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "),
-      max_iterations(DEFAULT_MAX_ITERATIONS)
+        "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. ")
     {}
 
     /// Runs the algorithm.
     /// Reads a specification from input_file,
     ///i applies real time abstraction to it and writes the result to output_file.
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "Parameters of lpsrealelm:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;

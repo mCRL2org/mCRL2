@@ -14,11 +14,7 @@
 #include <cassert>
 #include <vector>
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+namespace mcrl2::lts::detail
 {
 
 // The list type below embeds a list in existing data structures. 
@@ -54,7 +50,7 @@ class embedded_list
   protected:
     TYPE* m_first;   // Points to the last element of the list. nulllptr if not valid.
     TYPE* m_last;    // Points to the first element of the list
-    std::size_t m_size;   // The number of elements in the list.
+    std::size_t m_size = 0; // The number of elements in the list.
 
   protected:
 
@@ -93,7 +89,7 @@ class embedded_list
     
     // Constructor.
     embedded_list()
-      : m_first(nullptr), m_last(nullptr), m_size(0)
+      : m_first(nullptr), m_last(nullptr)
     {}
 
     // Copy constructor.
@@ -301,6 +297,6 @@ class embedded_list
 };
 
 } // end namespace detail
-} // end namespace lts
-} // end namespace mcrl2
+// end namespace lts
+// end namespace mcrl2
 #endif //_EMBEDDED_LIST_H

@@ -15,10 +15,7 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \brief Strategies for the generation of a BES from a PBES
@@ -48,11 +45,26 @@ enum transformation_strategy
 inline
 transformation_strategy parse_transformation_strategy(const std::string& s)
 {
-  if (s == "0") return lazy;
-  else if (s == "1") return optimize;
-  else if (s == "2") return on_the_fly;
-  else if (s == "3") return on_the_fly_with_fixed_points;
-  else throw mcrl2::runtime_error("unknown transformation strategy " + s);
+  if (s == "0")
+  {
+    return lazy;
+  }
+  else if (s == "1")
+  {
+    return optimize;
+  }
+  else if (s == "2")
+  {
+    return on_the_fly;
+  }
+  else if (s == "3")
+  {
+    return on_the_fly_with_fixed_points;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("unknown transformation strategy " + s);
+  }
 }
 
 inline
@@ -123,8 +135,8 @@ std::string description(const transformation_strategy s)
   throw mcrl2::runtime_error("unknown transformation strategy");
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_TRANSFORMATION_STRATEGY_H

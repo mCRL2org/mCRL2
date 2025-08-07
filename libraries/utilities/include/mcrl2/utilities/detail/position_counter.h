@@ -15,11 +15,8 @@
 #include <cstddef>
 #include <vector>
 
-namespace mcrl2 {
-
-namespace utilities {
-
-namespace detail {
+namespace mcrl2::utilities::detail
+{
 
 // Registers the current position (x, y) in a tree, and counts the number of nodes on every depth
 struct position_counter
@@ -61,10 +58,6 @@ struct position_counter
   }
 };
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::detail
 
 #endif // MCRL2_UTILITIES_DETAIL_POSITION_COUNTER_H

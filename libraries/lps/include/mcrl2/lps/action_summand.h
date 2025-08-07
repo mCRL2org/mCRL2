@@ -16,16 +16,14 @@
 #include "mcrl2/lps/stochastic_distribution.h"
 #include "mcrl2/lps/summand.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 /// \brief LPS summand containing a multi-action.
 class action_summand: public summand_base
 {
   protected:
     /// \brief The super class
-    typedef summand_base super;
+    using super = summand_base;
 
     /// \brief The summation variables of the summand
     lps::multi_action m_multi_action;
@@ -35,8 +33,7 @@ class action_summand: public summand_base
 
   public:
     /// \brief Constructor.
-    action_summand()
-    {}
+    action_summand() = default;
 
     /// \brief Constructor.
     action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& action, const data::assignment_list& assignments)
@@ -102,7 +99,7 @@ class action_summand: public summand_base
     data::data_expression_list next_state(const data::variable_list& process_parameters) const;
 
     /// \brief Swaps the contents
-    void swap(action_summand& other)
+    void swap(action_summand& other) noexcept
     {
       summand_base::swap(other);
       using std::swap;
@@ -113,10 +110,10 @@ class action_summand: public summand_base
 
 //--- start generated class action_summand ---//
 /// \\brief list of action_summands
-typedef atermpp::term_list<action_summand> action_summand_list;
+using action_summand_list = atermpp::term_list<action_summand>;
 
 /// \\brief vector of action_summands
-typedef std::vector<action_summand>    action_summand_vector;
+using action_summand_vector = std::vector<action_summand>;
 
 // prototype declaration
 std::string pp(const action_summand& x, bool precedence_aware = true);
@@ -132,7 +129,7 @@ std::ostream& operator<<(std::ostream& out, const action_summand& x)
 }
 
 /// \\brief swap overload
-inline void swap(action_summand& t1, action_summand& t2)
+inline void swap(action_summand& t1, action_summand& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -182,8 +179,8 @@ atermpp::aterm action_summand_to_aterm(const action_summand& s)
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_ACTION_SUMMAND_H

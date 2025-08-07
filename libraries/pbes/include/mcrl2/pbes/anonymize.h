@@ -15,16 +15,14 @@
 #include "mcrl2/data/anonymize.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 namespace detail {
 
 template <typename Derived>
 struct anonymize_builder: public add_sort_expressions<data::detail::anonymize_builder, Derived>
 {
-  typedef add_sort_expressions<data::detail::anonymize_builder, Derived> super;
+  using super = add_sort_expressions<data::detail::anonymize_builder, Derived>;
   using super::enter;
   using super::leave;
   using super::update;
@@ -84,8 +82,8 @@ void anonymize(pbes& pbesspec)
   f.update(pbesspec);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_ANONYMIZE_H

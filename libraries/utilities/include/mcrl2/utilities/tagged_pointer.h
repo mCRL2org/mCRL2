@@ -66,7 +66,7 @@ template<typename T>
 class tagged_pointer
 {
 public:
-  tagged_pointer() {}
+  tagged_pointer() = default;
   explicit tagged_pointer(T* p)
     : m_pointer(p)
   {}
@@ -94,9 +94,10 @@ public:
     return get() != nullptr;
   }
 
-  void operator=(std::nullptr_t)
+  tagged_pointer& operator=(std::nullptr_t)
   {
     m_pointer = mcrl2::utilities::tag(static_cast<T*>(nullptr));
+    return *this;
   }
 
   bool operator==(std::nullptr_t) const
@@ -144,7 +145,7 @@ public:
     return pointer(m_pointer);
   }
 
-  void swap(tagged_pointer<T>& other)
+  void swap(tagged_pointer<T>& other) noexcept
   {
     // This is not atomic, so swaps are only allowed when no tags are being applied concurrently.
     auto tmp = other.m_pointer;

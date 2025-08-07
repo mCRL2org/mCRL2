@@ -14,21 +14,15 @@
 
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 class SMT_Solver
 {
   public:
-    virtual ~SMT_Solver() {};
+    virtual ~SMT_Solver() = default;
     virtual bool is_satisfiable(const data_expression_list &a_formula) = 0;
 };
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

@@ -37,11 +37,11 @@ public:
                                 const SmallProgressMeasures &spm,
                                 Order order, Metric metric );
 
-    void push(verti v);
-    void bump(verti v);
-    verti pop();
+    void push(verti v) override;
+    void bump(verti v) override;
+    verti pop() override;
 
-protected:
+  protected:
 
     /*! Moves the element at index i up the heap until the heap property
         is restored. */
@@ -64,20 +64,20 @@ protected:
     bool check();
 
 private:
-    MaxMeasureLiftingStrategy2(const MaxMeasureLiftingStrategy2 &);
-    MaxMeasureLiftingStrategy2 &operator=(const MaxMeasureLiftingStrategy2 &);
+  MaxMeasureLiftingStrategy2(const MaxMeasureLiftingStrategy2&) = delete;
+  MaxMeasureLiftingStrategy2& operator=(const MaxMeasureLiftingStrategy2&) = delete;
 
 private:
     const SmallProgressMeasures &spm_;  //!< SPM instance being solved
     const Order order_;                 //!< vertex extraction order
     const Metric metric_;               //!< comparison metric
 
-    uint64_t next_id_;                         //!< number of insertions
+    uint64_t next_id_ = 0;                     //!< number of insertions
     std::unique_ptr<uint64_t[]> insert_id_;    //!< for each vertex: last insertion time
 
     const std::unique_ptr<verti[]> pq_pos_;      //!< for each vertex: position in the p.q. or -1
     const std::unique_ptr<verti[]> pq_;          //!< priority queue of lifted vertices
-    verti pq_size_;             //!< priority queue size
+    verti pq_size_ = 0;                          //!< priority queue size
 
     std::vector<verti> bumped_;
 };
@@ -94,14 +94,13 @@ public:
                 MaxMeasureLiftingStrategy2::MAX_VALUE )
         : order_(order), metric_(metric) { };
 
-    bool supports_version(int version);
+    bool supports_version(int version) override;
 
-    LiftingStrategy *create(const ParityGame&, const SmallProgressMeasures &);
+    LiftingStrategy* create(const ParityGame&, const SmallProgressMeasures&) override;
 
-    LiftingStrategy2 *create2( const ParityGame &game,
-                               const SmallProgressMeasures &spm );
+    LiftingStrategy2* create2(const ParityGame& game, const SmallProgressMeasures& spm) override;
 
-private:
+  private:
     const MaxMeasureLiftingStrategy2::Order  order_;
     const MaxMeasureLiftingStrategy2::Metric metric_;
 };

@@ -15,15 +15,15 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/pres/traverser.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 /// \cond INTERNAL_DOCS
 /// \brief Visitor for checking if a pres object is in BES form.
 struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
 {
-  typedef pres_expression_traverser<is_res_traverser> super;
+  using super = pres_expression_traverser<is_res_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -37,8 +37,7 @@ struct is_res_traverser: public pres_expression_traverser<is_res_traverser>
     return error_message;
   }
 
-  is_res_traverser()
-  {}
+  is_res_traverser() = default;
 
   void enter(const infimum& x)
   {
@@ -95,12 +94,15 @@ bool is_res(const T& x, std::string& error_message)
 {
   is_res_traverser f;
   f.apply(x);
-  if (!f.result) error_message=f.get_error_message();
+  if (!f.result)
+  {
+    error_message = f.get_error_message();
+  }
   return f.result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_IS_BES_H

@@ -32,23 +32,23 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 {
     //Type definitions
     //----------------
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
   protected:
 
-    bool            m_rewrite;
-    bool            m_sumelm;
-    bool            m_typecheck;
-    bool            m_use_renamefile;
-    std::string     m_action_rename_filename;
-    std::string     m_regex;
+    bool m_rewrite = true;
+    bool m_sumelm = true;
+    bool m_typecheck = true;
+    bool m_use_renamefile = false;
+    std::string m_action_rename_filename;
+    std::string m_regex;
 
-    std::string synopsis() const
+    std::string synopsis() const override
     {
       return "[OPTION]... (--renamefile=NAME | --regex=EXPR) [INFILE [OUTFILE]]\n";
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("renamefile", make_file_argument("NAME"),
@@ -68,7 +68,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -99,13 +99,10 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         "rename actions of an LPS",
         "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
         "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
-      ),
-      m_rewrite(true),
-      m_sumelm(true),
-      m_typecheck(true)
+      )
     {}
 
-    bool run()
+    bool run() override
     {
       //load LPS
       if (input_filename().empty())

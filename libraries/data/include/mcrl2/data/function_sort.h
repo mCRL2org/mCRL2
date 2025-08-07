@@ -14,10 +14,9 @@
 
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2
-{
 
-namespace data
+
+namespace mcrl2::data
 {
 
 //--- start generated class function_sort ---//
@@ -88,16 +87,16 @@ std::ostream& operator<<(std::ostream& out, const function_sort& x)
 }
 
 /// \\brief swap overload
-inline void swap(function_sort& t1, function_sort& t2)
+inline void swap(function_sort& t1, function_sort& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated class function_sort ---//
 
 /// \brief list of function sorts
-typedef atermpp::term_list<function_sort> function_sort_list;
+using function_sort_list = atermpp::term_list<function_sort>;
 /// \brief vector of function sorts
-typedef std::vector<function_sort> function_sort_vector;
+using function_sort_vector = std::vector<function_sort>;
 
 /// \brief Convenience constructor for function sort with domain size 1
 ///
@@ -194,9 +193,9 @@ inline function_sort make_function_sort_(const sort_expression& dom1,
   return function_sort({ dom1, dom2, dom3, dom4, dom5, dom6 }, codomain);
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 namespace std
 {

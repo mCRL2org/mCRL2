@@ -14,9 +14,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/smt/translate_expression.h"
 
-namespace mcrl2
-{
-namespace smt
+namespace mcrl2::smt
 {
 namespace detail
 {
@@ -333,7 +331,6 @@ void translate_data_specification(const data::data_specification& dataspec,
   }
 }
 
-} // namespace smt
-} // namespace mcrl2
+} // namespace mcrl2::smt
 
 #endif

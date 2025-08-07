@@ -15,9 +15,9 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/pres/builder.h"
 
-namespace mcrl2 {
 
-namespace pres_system {
+
+namespace mcrl2::pres_system {
 
 namespace detail
 {
@@ -25,7 +25,7 @@ namespace detail
 template <template <class> class Builder, class Rewriter>
 struct rewrite_pres_expressions_builder: public Builder<rewrite_pres_expressions_builder<Builder, Rewriter> >
 {
-  typedef Builder<rewrite_pres_expressions_builder<Builder, Rewriter> > super;
+  using super = Builder<rewrite_pres_expressions_builder<Builder, Rewriter>>;
   using super::apply;
   using super::update;
 
@@ -61,7 +61,7 @@ make_rewrite_pres_expressions_builder(const Rewriter& R)
 template <template <class> class Builder, class Rewriter, class Substitution>
 struct rewrite_pres_expressions_with_substitution_builder: public Builder<rewrite_pres_expressions_with_substitution_builder<Builder, Rewriter, Substitution> >
 {
-  typedef Builder<rewrite_pres_expressions_with_substitution_builder<Builder, Rewriter, Substitution> > super;
+  using super = Builder<rewrite_pres_expressions_with_substitution_builder<Builder, Rewriter, Substitution>>;
   using super::apply;
 
   const Rewriter& R;
@@ -95,9 +95,9 @@ make_rewrite_pres_expressions_with_substitution_builder(const Rewriter& R, Subst
 /// \\param R a rewriter
 template <typename T, typename Rewriter>
 void rewrite(T& x,
-             Rewriter R,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             Rewriter R
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_builder<pres_system::data_expression_builder>(R).update(x);
 }
@@ -108,9 +108,9 @@ void rewrite(T& x,
 /// \\return the rewrite result
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
-          Rewriter R,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          Rewriter R
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::make_rewrite_data_expressions_builder<pres_system::data_expression_builder>(R).apply(result, x);
@@ -124,9 +124,9 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
-             const Substitution& sigma,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+             const Substitution& sigma
             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<pres_system::data_expression_builder>(R, sigma).update(x);
 }
@@ -139,9 +139,9 @@ void rewrite(T& x,
 template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
-          const Substitution& sigma,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+          const Substitution& sigma
          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result; 
   data::detail::make_rewrite_data_expressions_with_substitution_builder<pres_system::data_expression_builder>(R, sigma).apply(result, x);
@@ -153,10 +153,7 @@ T rewrite(const T& x,
 /// \param x an object containing expressions
 /// \param R a pres rewriter
 template <typename T, typename Rewriter>
-void pres_rewrite(T& x,
-                  const Rewriter& R,
-                  typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                 )
+void pres_rewrite(T& x, const Rewriter& R, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   pres_system::detail::make_rewrite_pres_expressions_builder<pres_system::pres_expression_builder>(R).update(x);
 }
@@ -166,10 +163,7 @@ void pres_rewrite(T& x,
 /// \param R a pres rewriter
 /// \return the rewrite result
 template <typename T, typename Rewriter>
-T pres_rewrite(const T& x,
-               const Rewriter& R,
-               typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-              )
+T pres_rewrite(const T& x, const Rewriter& R, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   T result;
   pres_system::detail::make_rewrite_pres_expressions_builder<pres_system::pres_expression_builder>(R).apply(result, x);
@@ -182,10 +176,9 @@ T pres_rewrite(const T& x,
 /// \param sigma a substitution
 template <typename T, typename Rewriter, typename Substitution>
 void pres_rewrite(T& x,
-                  const Rewriter& R,
-                  Substitution sigma,
-                  typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-                 )
+    const Rewriter& R,
+    Substitution sigma,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   pres_system::detail::make_rewrite_pres_expressions_with_substitution_builder<pres_system::pres_expression_builder>(R, sigma).update(x);
 }
@@ -197,18 +190,17 @@ void pres_rewrite(T& x,
 /// \return the rewrite result
 template <typename T, typename Rewriter, typename Substitution>
 T pres_rewrite(const T& x,
-               const Rewriter& R,
-               Substitution sigma,
-               typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
-              )
+    const Rewriter& R,
+    Substitution sigma,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   T result;
   pres_system::detail::make_rewrite_pres_expressions_with_substitution_builder<pres_system::pres_expression_builder>(R, sigma).apply(result, x);
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_REWRITE_H

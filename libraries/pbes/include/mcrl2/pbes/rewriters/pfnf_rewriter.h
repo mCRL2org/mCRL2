@@ -14,19 +14,19 @@
 
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \brief A rewriter that brings PBES expressions into PFNF normal form.
 class pfnf_rewriter
 {
   public:
     /// \brief The term type
-    typedef pbes_expression term_type;
+    using term_type = pbes_expression;
 
     /// \brief The variable type
-    typedef data::variable variable_type;
+    using variable_type = data::variable;
 
     /// \brief Rewrites a pbes expression.
     /// \param x A term
@@ -49,8 +49,8 @@ class pfnf_rewriter
     }
 };
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_REWRITERS_PFNF_REWRITER_H

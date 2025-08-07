@@ -14,9 +14,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \returns The number of bits needed to represent a value of type T in most significant bit encoding.
@@ -63,7 +61,7 @@ private:
 
   unsigned int bits_in_buffer = 0; ///< how many bits in are used in the buffer.
 
-  std::uint8_t integer_buffer[integer_encoding_size<std::size_t>()]; ///< Reserved space to store an n byte integer.
+  std::uint8_t integer_buffer[integer_encoding_size<std::size_t>()]{}; ///< Reserved space to store an n byte integer.
 };
 
 /// \brief The counterpart of obitstream, guarantees that the same data is read as has been written when calling the read operators
@@ -99,7 +97,7 @@ private:
   std::vector<char> m_text_buffer; ///< A temporary buffer to store char array strings.
 };
 
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities
+
 
 #endif // MCRL2_UTILITIES_BITSTREAM_H

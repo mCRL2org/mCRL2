@@ -15,9 +15,8 @@
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 /// \brief Generic substitution function. The substitution is stored as a sequence
 /// of variables and a sequence of expressions.
@@ -25,10 +24,10 @@ template <typename VariableContainer, typename ExpressionContainer>
 struct sequence_sequence_substitution
 {
   /// \brief type used to represent variables
-  typedef typename VariableContainer::value_type variable_type;
+  using variable_type = typename VariableContainer::value_type;
 
   /// \brief type used to represent expressions
-  typedef typename ExpressionContainer::value_type  expression_type;
+  using expression_type = typename ExpressionContainer::value_type;
 
   using argument_type = variable_type;
   using result_type = expression_type;
@@ -102,8 +101,6 @@ bool is_simple_substitution(const sequence_sequence_substitution<VariableContain
   return true;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_SUBSTITUTIONS_SEQUENCE_SEQUENCE_SUBSTITUTION_H

@@ -17,9 +17,7 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/standard.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data {
 
 namespace detail {
 
@@ -51,7 +49,7 @@ data_expression push_if_outside(const application& x)
 template <typename Derived>
 struct if_rewrite_builder: public data_expression_builder<Derived>
 {
-  typedef data_expression_builder<Derived> super;
+  using super = data_expression_builder<Derived>;
 
   using super::apply;
 
@@ -170,7 +168,7 @@ struct if_rewrite_builder: public data_expression_builder<Derived>
 
 struct if_rewrite_with_rewriter_builder: public if_rewrite_builder<if_rewrite_with_rewriter_builder>
 {
-  typedef if_rewrite_builder<if_rewrite_with_rewriter_builder> super;
+  using super = if_rewrite_builder<if_rewrite_with_rewriter_builder>;
   using super::apply;
   using super::apply_if;
 
@@ -217,21 +215,21 @@ struct if_rewriter
 };
 
 template <typename T>
-void if_rewrite(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
+void if_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<data::data_expression_builder>(if_rewriter()).update(x);
 }
 
 template <typename T>
-T if_rewrite(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
+T if_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   T result;
   core::make_update_apply_builder<data::data_expression_builder>(if_rewriter()).apply(result, x);
   return result;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_REWRITERS_IF_REWRITER_H

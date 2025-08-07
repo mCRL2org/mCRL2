@@ -18,15 +18,11 @@
 #include "mcrl2/data/cardinality.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
-namespace mcrl2
+namespace mcrl2::pres_system
 {
 
-
-namespace pres_system
-{
-
-/// \brief The propositional variable is taken from a pbes_system. 
-typedef pbes_system::propositional_variable propositional_variable;
+/// \brief The propositional variable is taken from a pbes_system.
+using propositional_variable = pbes_system::propositional_variable;
 
 //--- start generated classes ---//
 /// \\brief A pres expression
@@ -69,10 +65,10 @@ class pres_expression: public atermpp::aterm
 };
 
 /// \\brief list of pres_expressions
-typedef atermpp::term_list<pres_expression> pres_expression_list;
+using pres_expression_list = atermpp::term_list<pres_expression>;
 
 /// \\brief vector of pres_expressions
-typedef std::vector<pres_expression>    pres_expression_vector;
+using pres_expression_vector = std::vector<pres_expression>;
 
 // prototypes
 inline bool is_propositional_variable_instantiation(const atermpp::aterm& x);
@@ -131,11 +127,10 @@ std::ostream& operator<<(std::ostream& out, const pres_expression& x)
 }
 
 /// \\brief swap overload
-inline void swap(pres_expression& t1, pres_expression& t2)
+inline void swap(pres_expression& t1, pres_expression& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief A propositional variable instantiation
 class propositional_variable_instantiation: public pres_expression
@@ -196,10 +191,10 @@ inline void make_propositional_variable_instantiation(atermpp::aterm& t, const A
 }
 
 /// \\brief list of propositional_variable_instantiations
-typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
+using propositional_variable_instantiation_list = atermpp::term_list<propositional_variable_instantiation>;
 
 /// \\brief vector of propositional_variable_instantiations
-typedef std::vector<propositional_variable_instantiation>    propositional_variable_instantiation_vector;
+using propositional_variable_instantiation_vector = std::vector<propositional_variable_instantiation>;
 
 /// \\brief Test for a propositional_variable_instantiation expression
 /// \\param x A term
@@ -224,11 +219,10 @@ std::ostream& operator<<(std::ostream& out, const propositional_variable_instant
 }
 
 /// \\brief swap overload
-inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2)
+inline void swap(propositional_variable_instantiation& t1, propositional_variable_instantiation& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The not operator for pres expressions
 class minus: public pres_expression
@@ -295,11 +289,10 @@ std::ostream& operator<<(std::ostream& out, const minus& x)
 }
 
 /// \\brief swap overload
-inline void swap(minus& t1, minus& t2)
+inline void swap(minus& t1, minus& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The and operator for pres expressions
 class and_: public pres_expression
@@ -371,11 +364,10 @@ std::ostream& operator<<(std::ostream& out, const and_& x)
 }
 
 /// \\brief swap overload
-inline void swap(and_& t1, and_& t2)
+inline void swap(and_& t1, and_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The or operator for pres expressions
 class or_: public pres_expression
@@ -447,11 +439,10 @@ std::ostream& operator<<(std::ostream& out, const or_& x)
 }
 
 /// \\brief swap overload
-inline void swap(or_& t1, or_& t2)
+inline void swap(or_& t1, or_& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The implication operator for pres expressions
 class imp: public pres_expression
@@ -523,11 +514,10 @@ std::ostream& operator<<(std::ostream& out, const imp& x)
 }
 
 /// \\brief swap overload
-inline void swap(imp& t1, imp& t2)
+inline void swap(imp& t1, imp& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The addition operator for pres expressions
 class plus: public pres_expression
@@ -599,11 +589,10 @@ std::ostream& operator<<(std::ostream& out, const plus& x)
 }
 
 /// \\brief swap overload
-inline void swap(plus& t1, plus& t2)
+inline void swap(plus& t1, plus& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The multiplication with a positive constant with the constant at the left.
 class const_multiply: public pres_expression
@@ -675,11 +664,10 @@ std::ostream& operator<<(std::ostream& out, const const_multiply& x)
 }
 
 /// \\brief swap overload
-inline void swap(const_multiply& t1, const_multiply& t2)
+inline void swap(const_multiply& t1, const_multiply& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The multiplication with a positive constant with the constant at the right.
 class const_multiply_alt: public pres_expression
@@ -751,11 +739,10 @@ std::ostream& operator<<(std::ostream& out, const const_multiply_alt& x)
 }
 
 /// \\brief swap overload
-inline void swap(const_multiply_alt& t1, const_multiply_alt& t2)
+inline void swap(const_multiply_alt& t1, const_multiply_alt& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The infimum over a data type for pres expressions
 class infimum: public pres_expression
@@ -827,11 +814,10 @@ std::ostream& operator<<(std::ostream& out, const infimum& x)
 }
 
 /// \\brief swap overload
-inline void swap(infimum& t1, infimum& t2)
+inline void swap(infimum& t1, infimum& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The supremeum over a data type for pres expressions
 class supremum: public pres_expression
@@ -903,11 +889,10 @@ std::ostream& operator<<(std::ostream& out, const supremum& x)
 }
 
 /// \\brief swap overload
-inline void swap(supremum& t1, supremum& t2)
+inline void swap(supremum& t1, supremum& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The generic sum operator for pres expressions
 class sum: public pres_expression
@@ -979,11 +964,10 @@ std::ostream& operator<<(std::ostream& out, const sum& x)
 }
 
 /// \\brief swap overload
-inline void swap(sum& t1, sum& t2)
+inline void swap(sum& t1, sum& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The indicator whether the argument is infinite
 class eqinf: public pres_expression
@@ -1050,11 +1034,10 @@ std::ostream& operator<<(std::ostream& out, const eqinf& x)
 }
 
 /// \\brief swap overload
-inline void swap(eqinf& t1, eqinf& t2)
+inline void swap(eqinf& t1, eqinf& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The indicator whether the argument is -infinite
 class eqninf: public pres_expression
@@ -1121,11 +1104,10 @@ std::ostream& operator<<(std::ostream& out, const eqninf& x)
 }
 
 /// \\brief swap overload
-inline void swap(eqninf& t1, eqninf& t2)
+inline void swap(eqninf& t1, eqninf& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Conditional operator with condition smaller than 0
 class condsm: public pres_expression
@@ -1202,11 +1184,10 @@ std::ostream& operator<<(std::ostream& out, const condsm& x)
 }
 
 /// \\brief swap overload
-inline void swap(condsm& t1, condsm& t2)
+inline void swap(condsm& t1, condsm& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Conditional operator with condition smaller than or equal to 0
 class condeq: public pres_expression
@@ -1283,7 +1264,7 @@ std::ostream& operator<<(std::ostream& out, const condeq& x)
 }
 
 /// \\brief swap overload
-inline void swap(condeq& t1, condeq& t2)
+inline void swap(condeq& t1, condeq& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -1647,7 +1628,10 @@ void optimized_plus(pres_expression& result, const pres_expression& p, const pre
   {
     result=p;
   }
-  else make_plus(result, p, q);
+  else
+  {
+    make_plus(result, p, q);
+  }
 }
 
 /// \brief Make an implication
@@ -1967,19 +1951,14 @@ inline void make_propositional_variable(atermpp::aterm& t, const ARGUMENTS&... a
 }
 
 /// \\brief list of propositional_variables
-typedef atermpp::term_list<pbes_system::propositional_variable> propositional_variable_list;
+using propositional_variable_list = atermpp::term_list<pbes_system::propositional_variable>;
 
 /// \\brief vector of propositional_variables
-typedef std::vector<pbes_system::propositional_variable>    propositional_variable_vector;
+using propositional_variable_vector = std::vector<pbes_system::propositional_variable>;
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
-
-namespace mcrl2
-{
-
-namespace core
+namespace mcrl2::core
 {
 
 /// \brief Contains type information for pres expressions.
@@ -1987,28 +1966,28 @@ template <>
 struct term_traits<pres_system::pres_expression>
 {
   /// \brief The term type
-  typedef pres_system::pres_expression term_type;
+  using term_type = pres_system::pres_expression;
 
   /// \brief The data term type
-  typedef data::data_expression data_term_type;
+  using data_term_type = data::data_expression;
 
   /// \brief The data term sequence type
-  typedef data::data_expression_list data_term_sequence_type;
+  using data_term_sequence_type = data::data_expression_list;
 
   /// \brief The variable type
-  typedef data::variable variable_type;
+  using variable_type = data::variable;
 
   /// \brief The variable sequence type
-  typedef data::variable_list variable_sequence_type;
+  using variable_sequence_type = data::variable_list;
 
   /// \brief The propositional variable declaration type
-  typedef pres_system::propositional_variable propositional_variable_decl_type;
+  using propositional_variable_decl_type = pres_system::propositional_variable;
 
   /// \brief The propositional variable instantiation type
-  typedef pres_system::propositional_variable_instantiation propositional_variable_type;
+  using propositional_variable_type = pres_system::propositional_variable_instantiation;
 
   /// \brief The string type
-  typedef core::identifier_string string_type;
+  using string_type = core::identifier_string;
 
   /// \brief Make the value true
   /// \return The value \p true
@@ -2445,9 +2424,9 @@ struct term_traits<pres_system::pres_expression>
   }
 };
 
-} // namespace core
+} // namespace mcrl2::core
 
-} // namespace mcrl2
+
 
 namespace std
 {

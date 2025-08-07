@@ -22,12 +22,11 @@ using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_enum_argument;
-using utilities::tools::tool;
 using utilities::tools::input_input_output_tool;
 using namespace mcrl2::log;
 using pbes_system::tools::pbes_output_tool;
 
-typedef pbes_output_tool<input_input_output_tool> super;
+using super = pbes_output_tool<input_input_output_tool>;
 class lpsbisim2pbes_tool: public super
 {
   protected:
@@ -35,18 +34,18 @@ class lpsbisim2pbes_tool: public super
     bisimulation_type m_bisimulation_type;
 
     /// \brief If true the result is normalized
-    bool m_normalize;
+    bool m_normalize = false;
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       m_normalize = parser.options.count("normalize") > 0;
       m_bisimulation_type = parser.option_argument_as<bisimulation_type>("bisimulation");
     }
 
-    void add_options(interface_description& desc) /*< One can add command line
+    void add_options(interface_description& desc) override /*< One can add command line
                      options by overriding the virtual function `add_options`. >*/
     {
       super::add_options(desc);
@@ -73,7 +72,7 @@ class lpsbisim2pbes_tool: public super
       )
     {}
 
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "lpsbisim2pbes parameters:" << std::endl;
       mCRL2log(verbose) << "  input file 1 :         " << input_filename1() << std::endl;

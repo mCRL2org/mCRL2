@@ -28,6 +28,9 @@ BreakStringLiterals: true
 ColumnLimit: 120
 CompactNamespaces: false
 IncludeBlocks: Preserve
+SpaceBeforeRangeBasedForLoopColon: false
+SpaceBeforeSquareBrackets: false
+SpaceAfterTemplateKeyword: false
 BraceWrapping:
   AfterCaseLabel: true
   AfterClass: true

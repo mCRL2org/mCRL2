@@ -16,10 +16,7 @@
 #include "mcrl2/lps/deadlock_summand.h"
 // #include "mcrl2/lps/process_initializer.h" Is not used in this file. 
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 namespace detail
@@ -74,7 +71,7 @@ class linear_process_base
 
   public:
     /// \brief The action summand type
-    typedef ActionSummand action_summand_type;
+    using action_summand_type = ActionSummand;
 
     /// \brief Constructor.
     linear_process_base() = default;
@@ -200,25 +197,24 @@ class linear_process_base
 /// \brief linear process.
 class linear_process: public linear_process_base<action_summand>
 {
-  typedef linear_process_base<action_summand> super;
+  using super = linear_process_base<action_summand>;
 
-  public:
-    /// \brief Constructor.
-    linear_process() = default;
+public:
+  /// \brief Constructor.
+  linear_process() = default;
 
-    /// \brief Constructor.
-    linear_process(const data::variable_list& process_parameters,
-                   const deadlock_summand_vector& deadlock_summands,
-                   const action_summand_vector& action_summands
-                  )
+  /// \brief Constructor.
+  linear_process(const data::variable_list& process_parameters,
+      const deadlock_summand_vector& deadlock_summands,
+      const action_summand_vector& action_summands)
       : super(process_parameters, deadlock_summands, action_summands)
-    { }
+  {}
 
-    /// \brief Constructor.
-    /// \param lps A term
-    explicit linear_process(const atermpp::aterm& lps, bool = false)
+  /// \brief Constructor.
+  /// \param lps A term
+  explicit linear_process(const atermpp::aterm& lps, bool = false)
       : super(lps, false)
-    { }
+  {}
 };
 
 /// \brief Conversion to aterm.
@@ -273,8 +269,8 @@ std::set<data::variable> find_all_variables(const lps::linear_process& x);
 std::set<data::variable> find_free_variables(const lps::linear_process& x);
 std::set<process::action_label> find_action_labels(const lps::linear_process& x);
  
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_LINEAR_PROCESS_H

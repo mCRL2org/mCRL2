@@ -16,11 +16,9 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::log;
 
 
-namespace mcrl2
-{
-namespace lts
-{
-namespace detail
+
+
+namespace mcrl2::lts::detail
 {
 
 lts_type guess_format(std::string const& s, const bool be_verbose/*=true*/)
@@ -194,7 +192,8 @@ std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_
             types.end(),
             [](const lts_type& t1, const lts_type& t2){ return lts_named_cmp<lts_type>(extension_strings, t1, t2); });
 
-  std::string r, prev;
+  std::string r;
+  std::string prev;
   bool first = true;
   for (std::vector<lts_type>::iterator i=types.begin(); i!=types.end(); i++)
   {
@@ -222,6 +221,6 @@ std::string lts_extensions_as_string(const std::set<lts_type>& supported)
   return lts_extensions_as_string(",",supported);
 }
 
-} // namespace detail
-} //lts
-} //data
+} // namespace mcrl2::lts::detail
+//lts
+//data

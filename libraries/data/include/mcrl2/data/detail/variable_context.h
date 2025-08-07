@@ -14,9 +14,8 @@
 
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 class data_type_checker;
 
@@ -46,8 +45,7 @@ class variable_context
     void typecheck_variable(const data_type_checker& typechecker, const variable& v) const;
 
   public:
-    variable_context()
-    { }
+    variable_context() = default;
 
     explicit variable_context(const std::map<core::identifier_string, sort_expression>& variables)
       : m_variables(variables)
@@ -103,8 +101,6 @@ class variable_context
 
 } // namespace detail
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_DETAIL_VARIABLE_CONTEXT_H

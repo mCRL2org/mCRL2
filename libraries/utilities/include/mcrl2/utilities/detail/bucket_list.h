@@ -15,11 +15,7 @@
 #include <iterator>
 #include <memory>
 
-namespace mcrl2
-{
-namespace utilities
-{
-namespace detail
+namespace mcrl2::utilities::detail
 {
 
 struct Sentinel{};
@@ -106,14 +102,14 @@ public:
     friend class bucket_list;
 
   public:
-    using value_type = typename std::conditional<Constant, const Key, Key>::type;
-    using reference = typename std::conditional<Constant, const Key&, Key&>::type;
-    using pointer = typename std::conditional<Constant, const Key*, Key*>::type;
+    using value_type = std::conditional_t<Constant, const Key, Key>;
+    using reference = std::conditional_t<Constant, const Key&, Key&>;
+    using pointer = std::conditional_t<Constant, const Key*, Key*>;
     using difference_type = std::ptrdiff_t;
     using iterator_category = std::forward_iterator_tag;
 
     /// Default constructor.
-    key_iterator() {}
+    key_iterator() = default;
 
     /// \brief Implicit conversion to const_iterator.
     operator key_iterator<true>() const
@@ -374,8 +370,8 @@ private:
   node_base m_head;
 };
 
-} // namespace detail
-} // namespace utilities
-} // namespace mcrl2
+} // namespace mcrl2::utilities::detail
+
+
 
 #endif // MCRL2_UTILITIES_DETAIL_BUCKETLIST_H_

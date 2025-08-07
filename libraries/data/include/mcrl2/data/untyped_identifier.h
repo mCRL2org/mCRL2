@@ -14,9 +14,9 @@
 
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2 {
 
-namespace data {
+
+namespace mcrl2::data {
 
 //--- start generated class untyped_identifier ---//
 /// \\brief An untyped identifier
@@ -80,14 +80,14 @@ std::ostream& operator<<(std::ostream& out, const untyped_identifier& x)
 }
 
 /// \\brief swap overload
-inline void swap(untyped_identifier& t1, untyped_identifier& t2)
+inline void swap(untyped_identifier& t1, untyped_identifier& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated class untyped_identifier ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_UNTYPED_IDENTIFIER_H

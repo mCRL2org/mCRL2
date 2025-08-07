@@ -23,7 +23,7 @@ def make_traverser(filename, traverser, add_traverser, parent_traverser, class_m
     TRAVERSER = '''template <template <class> class Traverser, class Derived>
 struct <ADD_TRAVERSER>: public Traverser<Derived>
 {
-  typedef Traverser<Derived> super;
+  using super = Traverser<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -73,7 +73,7 @@ def make_builder(filename, builder, add_builder, parent_builder, class_map, all_
     BUILDER = '''template <template <class> class Builder, class Derived>
 struct <ADD_BUILDER>: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::update;

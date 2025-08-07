@@ -376,7 +376,7 @@ class divergence_detector
     using state_index_type = typename Explorer::state_index_type;
 
     // data type for storing the last discovered states
-    using last_discovered_type = typename std::conditional<Explorer::is_stochastic, std::forward_list<lps::state>, lps::state>::type;
+    using last_discovered_type = std::conditional_t<Explorer::is_stochastic, std::forward_list<lps::state>, lps::state>;
 
   protected:
     Explorer& explorer;

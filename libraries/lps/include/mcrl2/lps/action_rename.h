@@ -44,10 +44,7 @@
 // <ActionRenameSpec>
 //                ::= ActionRenameSpec(<DataSpec>, <ActSpec>, <ActionRenameRules>)
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 //                ::= ActionRenameRule(<DataVarId>*, <DataExprOrNil>,
@@ -76,8 +73,7 @@ class action_rename_rule
 
   public:
     /// \brief Constructor.
-    action_rename_rule()
-    { }
+    action_rename_rule() = default;
 
     /// \brief Constructor.
     /// \param t A term
@@ -168,8 +164,7 @@ class action_rename_specification
 
   public:
     /// \brief Constructor.
-    action_rename_specification()
-    { }
+    action_rename_specification() = default;
 
     /// \brief Constructor.
     /// \param t A term
@@ -177,13 +172,13 @@ class action_rename_specification
     {
       assert(core::detail::check_rule_ActionRenameSpec(t));
       atermpp::aterm::iterator i = t.begin();
-      m_data            = *i++;
+      m_data            = static_cast<data::data_specification>(*i++);
       m_action_labels   = atermpp::down_cast<process::action_label_list>((*i++)[0]);
 
       atermpp::aterm_list rules_list = atermpp::down_cast<atermpp::aterm_list>((*i)[0]);
       for (const atermpp::aterm& r: rules_list)
       {
-        m_rules.push_back(action_rename_rule(r));
+        m_rules.emplace_back(r);
       }
     }
 
@@ -271,13 +266,8 @@ atermpp::aterm action_rename_specification_to_aterm(const action_rename_specific
 }
 
 }
-}
 
-
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \cond INTERNAL_DOCS
@@ -571,7 +561,11 @@ lps::stochastic_specification action_rename(
               renamed_rule_condition=
                   lazy::and_(renamed_rule_condition,
                            data::equal_to(rule_old_argument_i, *lps_old_argument_i));
-              if (enable_rewriting) renamed_rule_condition=rewr(renamed_rule_condition);  // Make sure that renamed_rule_condition is as simple as possible. 
+              if (enable_rewriting)
+              {
+                renamed_rule_condition
+                    = rewr(renamed_rule_condition); // Make sure that renamed_rule_condition is as simple as possible.
+              }
             }
             lps_old_argument_i++;
           }
@@ -592,7 +586,11 @@ lps::stochastic_specification action_rename(
             }
           }
 
-          if (enable_rewriting) renamed_rule_condition=rewr(renamed_rule_condition);  // Make sure that renamed_rule_condition is as simple as possible. 
+          if (enable_rewriting)
+          {
+            renamed_rule_condition
+                = rewr(renamed_rule_condition); // Make sure that renamed_rule_condition is as simple as possible.
+          }
           if (renamed_rule_condition==sort_bool::true_())
           {
             if (to_delta)
@@ -847,7 +845,7 @@ stochastic_specification action_rename(
     else
     {
       // Add a new deadlock summand, copying most of the information for the old action summand
-      new_deadlock_summands.push_back(deadlock_summand(as.summation_variables(), as.condition(), deadlock(as.multi_action().time())));
+      new_deadlock_summands.emplace_back(as.summation_variables(), as.condition(), deadlock(as.multi_action().time()));
     }
   }
 
@@ -862,9 +860,7 @@ stochastic_specification action_rename(
   return lps_new_spec;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 namespace std
 {

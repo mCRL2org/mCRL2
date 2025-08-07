@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_PBESPGSOLVE_H
 #define MCRL2_PBES_PBESPGSOLVE_H
 
+#include <memory>
+
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pg/ComponentSolver.h"
@@ -21,9 +23,9 @@
 #include "mcrl2/pg/PriorityPromotionSolver.h"
 #include "mcrl2/utilities/execution_timer.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 enum pbespg_solver_type
 {
@@ -128,24 +130,13 @@ std::string print(StaticGraph::EdgeDirection edge_direction)
 
 struct pbespgsolve_options
 {
-  pbespg_solver_type solver_type;
-  bool use_scc_decomposition;
-  bool use_decycle_solver;
-  bool use_deloop_solver;
-  bool verify_solution;
-  bool only_generate;
-  data::rewriter::strategy rewrite_strategy;
-
-  pbespgsolve_options()
-    : solver_type(spm_solver),
-      use_scc_decomposition(true),
-      use_decycle_solver(false),
-      use_deloop_solver(true),
-      verify_solution(true),
-      only_generate(false),
-      rewrite_strategy(data::jitty)
-  {
-  }
+  pbespg_solver_type solver_type = spm_solver;
+  bool use_scc_decomposition = true;
+  bool use_decycle_solver = false;
+  bool use_deloop_solver = true;
+  bool verify_solution = true;
+  bool only_generate = false;
+  data::rewriter::strategy rewrite_strategy = data::jitty;
 };
 
 class pbespgsolve_algorithm
@@ -166,19 +157,19 @@ class pbespgsolve_algorithm
         bool alternative_solver = (options.solver_type == alternative_spm_solver);
 
         // Create a SPM solver factory:
-        solver_factory.reset(
-          new SmallProgressMeasuresSolverFactory
-                (std::make_shared<PredecessorLiftingStrategyFactory>(), 2, alternative_solver)
-        );
+        solver_factory = std::make_unique<SmallProgressMeasuresSolverFactory>(
+            std::make_shared<PredecessorLiftingStrategyFactory>(),
+            2,
+            alternative_solver);
       }
       else if (options.solver_type == recursive_solver)
       {
         // Create a recursive solver factory:
-        solver_factory.reset(new RecursiveSolverFactory);
+        solver_factory = std::make_unique<RecursiveSolverFactory>();
       }
       else if (options.solver_type == priority_promotion)
       {
-        solver_factory.reset(new PriorityPromotionSolverFactory);
+        solver_factory = std::make_unique<PriorityPromotionSolverFactory>();
       }
       else
       {
@@ -188,20 +179,17 @@ class pbespgsolve_algorithm
       if (options.use_scc_decomposition)
       {
         // Wrap solver factory into a component solver factory:
-        solver_factory.reset(
-          new ComponentSolverFactory(*solver_factory.release()));
+        solver_factory = std::make_unique<ComponentSolverFactory>(*solver_factory.release());
       }
 
       if (options.use_decycle_solver)
       {
-        solver_factory.reset(
-          new DecycleSolverFactory(*solver_factory.release()));
+        solver_factory = std::make_unique<DecycleSolverFactory>(*solver_factory.release());
       }
 
       if (options.use_deloop_solver)
       {
-        solver_factory.reset(
-          new DeloopSolverFactory(*solver_factory.release()));
+        solver_factory = std::make_unique<DeloopSolverFactory>(*solver_factory.release());
       }
     }
 
@@ -275,8 +263,8 @@ bool pbespgsolve(pbes& p, utilities::execution_timer& timer, const pbespgsolve_o
   return algorithm.run(p);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_PBESPGSOLVE_H

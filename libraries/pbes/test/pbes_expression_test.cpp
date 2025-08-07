@@ -51,7 +51,9 @@ BOOST_AUTO_TEST_CASE(test_accessors)
   {
     using namespace mcrl2::pbes_system::accessors;
 
-    pbes_expression a, b, c;
+    pbes_expression a;
+    pbes_expression b;
+    pbes_expression c;
     data::variable_list w;
     core::identifier_string s;
     data::data_expression e;
@@ -130,7 +132,7 @@ BOOST_AUTO_TEST_CASE(test_accessors)
 
 BOOST_AUTO_TEST_CASE(test_term_traits)
 {
-  typedef core::term_traits<pbes_expression> tr;
+  using tr = core::term_traits<pbes_expression>;
 
   const std::string VARSPEC =
     "datavar         \n"
@@ -144,7 +146,9 @@ BOOST_AUTO_TEST_CASE(test_term_traits)
     "  Y: Nat;       \n"
     ;
 
-  pbes_expression x, y, z;
+  pbes_expression x;
+  pbes_expression y;
+  pbes_expression z;
   data::variable_list v;
   data::data_expression_list e;
 

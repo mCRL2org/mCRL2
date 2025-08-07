@@ -16,11 +16,8 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/typecheck.h"
 
-namespace mcrl2 {
-
-namespace process {
-
-namespace detail {
+namespace mcrl2::process::detail
+{
 
 inline
 std::tuple<bool, data::data_expression_vector, std::string> match_action_parameters(const data::data_expression_list& parameters,
@@ -48,7 +45,7 @@ std::tuple<bool, data::data_expression_vector, std::string> match_action_paramet
 
 inline
 std::pair<data::data_expression_list, data::sort_expression_list> match_action_parameters(const data::data_expression_list& parameters,
-                                                                                          const data::sorts_list& possible_parameter_sorts,
+                                                                                          const std::set<data::sort_expression_list>& possible_parameter_sorts,
                                                                                           const data::detail::variable_context& variable_context,
                                                                                           const core::identifier_string& name,
                                                                                           const std::string& msg,
@@ -98,10 +95,6 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
   return { data::data_expression_list(typechecked_parameters.begin(), typechecked_parameters.end()), data::detail::parameter_sorts(typechecked_parameters) };
 }
 
-} // namespace detail
-
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process::detail
 
 #endif // MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H

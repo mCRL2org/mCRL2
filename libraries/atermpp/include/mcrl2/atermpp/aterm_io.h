@@ -50,7 +50,7 @@ protected:
 class aterm_ostream : public aterm_stream
 {
 public:
-  virtual ~aterm_ostream();
+  ~aterm_ostream() override;
 
   /// \brief Write the given term to the stream.
   virtual void put(const aterm& term) = 0;
@@ -61,7 +61,7 @@ public:
 class aterm_istream : public aterm_stream
 {
 public:
-  virtual ~aterm_istream();
+  ~aterm_istream() override;
 
   /// \brief Reads an aterm from this stream.
   virtual void get(aterm& t) = 0;

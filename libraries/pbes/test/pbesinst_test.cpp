@@ -296,11 +296,3 @@ BOOST_AUTO_TEST_CASE(test_pbesinst_symbolic1)
   test_pbesinst_symbolic(test5);
   test_pbesinst_symbolic(test6);
 }
-
-#ifdef MCRL2_EXTENDED_TESTS
-BOOST_AUTO_TEST_CASE(test_pbesinst_slow)
-{
-  test_pbes(random1, false, true);
-  test_pbes(random2, false, true);
-}
-#endif // MCRL2_EXTENDED_TESTS

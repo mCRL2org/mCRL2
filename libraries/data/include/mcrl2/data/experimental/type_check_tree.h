@@ -16,12 +16,10 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/experimental/type_checker.h"
 
-namespace mcrl2 {
+namespace mcrl2::data {
 
-namespace data {
-
-typedef std::map<untyped_sort_variable, sort_expression> sort_substitution;
-typedef std::pair<sort_substitution, int> solution; // the second element is the cost of the solution
+using sort_substitution = std::map<untyped_sort_variable, sort_expression>;
+using solution = std::pair<sort_substitution, int>; // the second element is the cost of the solution
 
 template <typename T>
 bool has_untyped_sort(const T& x)
@@ -89,7 +87,7 @@ std::string print_vector(const std::string& name, const Container& nodes)
 
 struct type_check_node;
 
-typedef std::shared_ptr<type_check_node> type_check_node_ptr;
+using type_check_node_ptr = std::shared_ptr<type_check_node>;
 
 struct type_check_context
 {
@@ -98,10 +96,9 @@ struct type_check_context
   std::map<core::identifier_string, sort_expression> user_constants;
   std::map<core::identifier_string, function_sort_list> user_functions;
   std::map<core::identifier_string, std::vector<sort_expression> > declared_variables;
-  mutable std::size_t sort_variable_index;
+  mutable std::size_t sort_variable_index = 0;
 
   type_check_context(const data::data_specification& dataspec = data::data_specification())
-    : sort_variable_index(0)
   {
     type_checker checker(dataspec);
     system_constants = checker.system_constants();
@@ -185,7 +182,7 @@ protected:
 };
 
 struct type_check_constraint;
-typedef std::shared_ptr<type_check_constraint> constraint_ptr;
+using constraint_ptr = std::shared_ptr<type_check_constraint>;
 constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& sigma);
 
 struct type_check_constraint
@@ -195,6 +192,7 @@ struct type_check_constraint
   type_check_constraint(int cost_ = 0)
     : cost(cost_)
   {}
+  virtual ~type_check_constraint() = default;
 
   virtual std::string print() const = 0;
 };
@@ -496,10 +494,7 @@ struct or_constraint final: public type_check_constraint
     : alternatives(alternatives_)
   {}
 
-  std::string print() const
-  {
-    return print_node_vector("or", alternatives, "\n  ", "\n  ", "\n  ");
-  }
+  std::string print() const override { return print_node_vector("or", alternatives, "\n  ", "\n  ", "\n  "); }
 };
 
 inline
@@ -600,7 +595,7 @@ struct type_check_node
     sort = context.create_sort_variable();
   }
 
-  virtual ~type_check_node() {};
+  virtual ~type_check_node() = default;
 
   // Adds a value to the 'sort' attribute
   // Sets the constraints that apply to this node to 'constraint'
@@ -718,7 +713,7 @@ struct constant_node: public type_check_node
     : type_check_node(context, {}), name(name_)
   {}
 
-  virtual ~constant_node() {}
+  ~constant_node() override = default;
 
   void set_constraint(type_check_context& context) override
   {
@@ -978,7 +973,7 @@ struct unary_operator_node: public type_check_node
     : type_check_node(context, { arg }), name(name_)
   {}
 
-  virtual ~unary_operator_node() {}
+  ~unary_operator_node() override = default;
 
   void set_constraint(type_check_context& context) override
   {
@@ -1128,7 +1123,7 @@ struct where_clause_node final: public type_check_node
     for (const std::pair<std::string, type_check_node_ptr>& a: assignments)
     {
       children.push_back(a.second);
-      variables.push_back(variable(a.first, a.second->sort));
+      variables.emplace_back(a.first, a.second->sort);
     }
   }
 
@@ -1365,8 +1360,8 @@ constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& 
   return p;
 }
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_EXPERIMENTAL_TYPE_CHECK_TREE_H

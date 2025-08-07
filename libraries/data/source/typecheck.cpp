@@ -6,7 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/typecheck.h"
 
 using namespace mcrl2::log;
@@ -16,10 +20,9 @@ using namespace atermpp;
 
 namespace mcrl2
 {
-namespace data
-{
 
-namespace detail
+
+namespace data::detail
 {
 
 void variable_context::typecheck_variable(const data_type_checker& typechecker, const variable& v) const
@@ -71,8 +74,8 @@ inline atermpp::term_list<S> insert_sort_unique(const atermpp::term_list<S>& lis
   return list;
 }
 
-} // namespace detail
-} // namespace data
+} // namespace data::detail
+
 
 // ------------------------------  Here starts the new class based data expression checker -----------------------
 
@@ -106,10 +109,9 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
   {
     const where_clause& where=down_cast<const where_clause>(d);
     const assignment_expression_list& where_asss=where.declarations();
-    for (assignment_expression_list::const_iterator i=where_asss.begin(); i!=where_asss.end(); ++i)
+    for (const assignment_expression& WhereElem : where_asss)
     {
-      const assignment_expression WhereElem= *i;
-      const assignment& t=down_cast<const assignment>(WhereElem);
+      const assignment& t = down_cast<const assignment>(WhereElem);
       strict_type_check(t.rhs());
     }
     strict_type_check(where.body());
@@ -231,13 +233,13 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
   {
     untyped_possible_sorts mps(NeededType);
     const sort_expression_list& l=mps.sorts();
-    for(sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+    for (const sort_expression& i : l)
     {
       bool found_solution=true;
       sort_expression r;
       try
       {
-        r=UpCastNumericType(*i,Type,Par,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+        r = UpCastNumericType(i, Type, Par, DeclaredVars, strictly_ambiguous, warn_upcasting, print_cast_error);
       }
       catch (mcrl2::runtime_error&)
       {
@@ -1880,9 +1882,9 @@ bool mcrl2::data::data_type_checker::MaximumType(const sort_expression& Type1, c
 sort_expression_list mcrl2::data::data_type_checker::ExpandNumTypesUpL(const sort_expression_list& type_list) const
 {
   sort_expression_vector result;
-  for(sort_expression_list::const_iterator i=type_list.begin(); i!=type_list.end(); ++i)
+  for (const sort_expression& i : type_list)
   {
-    result.push_back(ExpandNumTypesUp(*i));
+    result.push_back(ExpandNumTypesUp(i));
   }
   return sort_expression_list(result.begin(),result.end());
 }
@@ -2879,9 +2881,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     variable_list WhereVarList;
     assignment_list NewWhereList;
     const assignment_expression_list& where_asss=where.declarations();
-    for (assignment_expression_list::const_iterator i=where_asss.begin(); i!=where_asss.end(); ++i)
+    for (const assignment_expression& WhereElem : where_asss)
     {
-      const assignment_expression WhereElem= *i;
       data_expression WhereTerm;
       variable NewWhereVar;
       if (data::is_untyped_identifier_assignment(WhereElem))
@@ -2949,9 +2950,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         //First time to determine the common type only!
         data_expression_list NewArguments;
         bool Type_is_stable=true;
-        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (data_expression Argument : appl)
         {
-          data_expression Argument= *i;
           sort_expression Type0;
           try
           {
@@ -2973,10 +2973,14 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         if (!Type_is_stable)
         {
           NewArguments=data_expression_list();
-          for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+          for (data_expression Argument : appl)
           {
-            data_expression Argument= *i;
-            sort_expression Type0=TraverseVarConsTypeD(DeclaredVars,Argument,Type,strictly_ambiguous,warn_upcasting,print_cast_error);
+            sort_expression Type0 = TraverseVarConsTypeD(DeclaredVars,
+                Argument,
+                Type,
+                strictly_ambiguous,
+                warn_upcasting,
+                print_cast_error);
             NewArguments.push_front(Argument);
             Type=Type0;
           }
@@ -2997,9 +3001,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         //First time to determine the common type only (which will be NewType)!
         bool NewTypeDefined=false;
         sort_expression NewType;
-        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (data_expression Argument : appl)
         {
-          data_expression Argument= *i;
           sort_expression Type0;
           try
           {
@@ -3037,9 +3040,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
         //Second time to do the real work.
         data_expression_list NewArguments;
-        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (data_expression Argument : appl)
         {
-          data_expression Argument= *i;
           sort_expression Type0;
           try
           {
@@ -3182,10 +3184,10 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     sort_expression_list NewArgumentTypes;
     data_expression_list NewArguments;
     sort_expression_list argument_sorts;
-    for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+    for (data_expression Arg : appl)
     {
-      data_expression Arg= *i;
-      sort_expression Type=TraverseVarConsTypeD(DeclaredVars,Arg,data::untyped_sort(),false,warn_upcasting,print_cast_error);
+      sort_expression Type
+          = TraverseVarConsTypeD(DeclaredVars, Arg, data::untyped_sort(), false, warn_upcasting, print_cast_error);
       assert(Type.defined());
       NewArguments.push_front(Arg);
       NewArgumentTypes.push_front(Type);
@@ -3478,9 +3480,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     {
       sort_expression_list TypeList=j->second;
       sort_expression_list NewParList;
-      for (sort_expression_list::const_iterator i=TypeList.begin(); i!=TypeList.end(); ++i)
+      for (const sort_expression& Type: TypeList)
       {
-        const sort_expression Type=*i;
         sort_expression result;
         if (TypeMatchA(Type,PosType,result))
         {
@@ -3492,10 +3493,9 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       if (ParList.empty())
       {
         // Try to do the matching again with relaxed typing.
-        for (sort_expression_list::const_iterator i=TypeList.begin(); i!=TypeList.end(); ++i)
+        for (sort_expression Type : TypeList)
         {
-          sort_expression Type=*i;
-          if (is_untyped_identifier(DataTerm) )
+          if (is_untyped_identifier(DataTerm))
           {
             DataTerm=data::function_symbol(Name,Type);
           }
@@ -3749,10 +3749,8 @@ bool mcrl2::data::data_type_checker::TypeMatchA(
   {
     sort_expression_list NewTypeList;
     const untyped_possible_sorts& mps=down_cast<const untyped_possible_sorts>(PosType);
-    for (sort_expression_list::const_iterator i=mps.sorts().begin(); i!=mps.sorts().end(); ++i)
+    for (sort_expression NewPosType : mps.sorts())
     {
-      sort_expression NewPosType= *i;
-
       sort_expression new_type;
       if (TypeMatchA(Type,NewPosType,new_type))
       {
@@ -3959,7 +3957,7 @@ void mcrl2::data::data_type_checker::add_system_constants_and_functions(const st
   }
 }
 
-void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
+void mcrl2::data::data_type_checker::initialise_system_defined_functions()
 {
   //Creation of operation identifiers for system defined operations.
   //Bool
@@ -4234,11 +4232,13 @@ bool mcrl2::data::data_type_checker::IsTypeAllowedL(const sort_expression_list& 
   //Checks if TypeList is allowed by PosTypeList (each respective element)
   assert(TypeList.size()==PosTypeList.size());
   sort_expression_list::const_iterator j=PosTypeList.begin();
-  for (sort_expression_list::const_iterator i=TypeList.begin(); i!=TypeList.end(); ++i,++j)
+  for (sort_expression_list::const_iterator i = TypeList.begin(); i != TypeList.end(); ++i, ++j)
+  {
     if (!IsTypeAllowedA(*i,*j))
     {
       return false;
     }
+  }
   return true;
 }
 
@@ -4281,11 +4281,9 @@ std::pair<bool,sort_expression_list> mcrl2::data::data_type_checker::AdjustNotIn
 
   //Filter TypeListList to contain only compatible with TypeList lists of parameters.
   term_list<sort_expression_list> NewTypeListList;
-  for (term_list<sort_expression_list>::const_iterator i=TypeListList.begin();
-                    i!=TypeListList.end(); ++i)
+  for (const term_list<sort_expression>& TypeList : TypeListList)
   {
-    sort_expression_list TypeList= *i;
-    if (IsTypeAllowedL(TypeList,PosTypeList))
+    if (IsTypeAllowedL(TypeList, PosTypeList))
     {
       NewTypeListList.push_front(TypeList);
     }
@@ -4321,10 +4319,9 @@ sort_expression_list mcrl2::data::data_type_checker::GetNotInferredList(const te
     Pars[i]=sort_expression_list();
   }
 
-  for (term_list<sort_expression_list>::const_iterator j=TypeListList.begin(); j!=TypeListList.end(); ++j)
+  for (term_list<sort_expression> TypeList : TypeListList)
   {
-    sort_expression_list TypeList=*j;
-    for (std::size_t i=0; i<nFormPars; TypeList=TypeList.tail(),i++)
+    for (std::size_t i = 0; i < nFormPars; TypeList = TypeList.tail(), i++)
     {
       Pars[i]=InsertType(Pars[i],TypeList.front());
     }
@@ -4347,8 +4344,7 @@ sort_expression_list mcrl2::data::data_type_checker::GetNotInferredList(const te
 }
 
 mcrl2::data::data_type_checker::data_type_checker(const data_specification& data_spec)
-      : sort_type_checker(data_spec),
-        was_warning_upcasting(false)
+      : sort_type_checker(data_spec)
 {
   initialise_system_defined_functions();
 
@@ -4583,7 +4579,7 @@ void mcrl2::data::data_type_checker::operator()(data_equation_vector& eqns)
         throw mcrl2::runtime_error("The variable " + data::pp(culprit) + " in the condition is not included in the left hand side of the equation " + data::pp(eqn) + ".");
       }
     }
-    resulting_equations.push_back(data_equation(vars,cond,left,right));
+    resulting_equations.emplace_back(vars, cond, left, right);
   }
   eqns = resulting_equations;
 }
@@ -4645,9 +4641,8 @@ const data_specification mcrl2::data::data_type_checker::operator()() const
 
 
 
-namespace data
-{
-namespace detail
+
+namespace data::detail
 {
 
 static sort_expression_list GetVarTypes(variable_list VarDecls)
@@ -4691,9 +4686,9 @@ static sort_expression replace_possible_sorts(const sort_expression& Type)
   {
     const function_sort& s=down_cast<function_sort>(Type);
     sort_expression_list NewTypeList;
-    for (sort_expression_list::const_iterator TypeList=s.domain().begin(); TypeList!=s.domain().end(); ++TypeList)
+    for (const sort_expression& TypeList : s.domain())
     {
-      NewTypeList.push_front(replace_possible_sorts(*TypeList));
+      NewTypeList.push_front(replace_possible_sorts(TypeList));
     }
     const sort_expression& ResultType=s.codomain();
     return function_sort(reverse(NewTypeList),replace_possible_sorts(ResultType));
@@ -4725,11 +4720,13 @@ static bool HasUnknown(const sort_expression& Type)
   if (is_function_sort(Type))
   {
     const function_sort& s=down_cast<function_sort>(Type);
-    for (sort_expression_list::const_iterator TypeList=s.domain().begin(); TypeList!=s.domain().end(); ++TypeList)
-      if (HasUnknown(*TypeList))
+    for (const sort_expression& TypeList: s.domain())
+    {
+      if (HasUnknown(TypeList))
       {
         return true;
       }
+    }
     return HasUnknown(s.codomain());
   }
 
@@ -4757,6 +4754,6 @@ static sort_expression MinType(const sort_expression_list& TypeList)
   return TypeList.front();
 }
 
-} //namespace detail
-} //namespace data
+} // namespace data::detail
+
 }

@@ -16,26 +16,19 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 /// \cond INTERNAL_DOCS
 // \brief Visitor for checking if a pbes expression is normalized.
 struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_traverser>
 {
-  typedef pbes_expression_traverser<is_normalized_traverser> super;
+  using super = pbes_expression_traverser<is_normalized_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  bool result;
-
-  is_normalized_traverser()
-    : result(true)
-  {}
+  bool result = true;
 
   /// \brief Visit not node
   void enter(const not_& /* x */)
@@ -55,14 +48,10 @@ struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_t
 // \brief Visitor for checking if a pbes expression is normalized.
 struct normalize_builder: public pbes_expression_builder<normalize_builder>
 {
-  typedef pbes_expression_builder<normalize_builder> super;
+  using super = pbes_expression_builder<normalize_builder>;
   using super::apply;
 
-  bool negated;
-
-  normalize_builder()
-    : negated(false)
-  {}
+  bool negated = false;
 
   template <class T>
   void apply(T& result, const data::data_expression& x)
@@ -174,9 +163,7 @@ bool is_normalized(const T& x)
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing pbes expressions
 template <typename T>
-void normalize(T& x,
-               typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-              )
+void normalize(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   normalize_builder f;
   f.update(x);
@@ -186,9 +173,7 @@ void normalize(T& x,
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing pbes expressions
 template <typename T>
-T normalize(const T& x,
-            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-           )
+T normalize(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   normalize_builder f;
@@ -196,8 +181,6 @@ T normalize(const T& x,
   return result;
 }
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_NORMALIZE_H

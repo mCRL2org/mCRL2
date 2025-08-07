@@ -14,31 +14,26 @@
 
 #include "simplifier.h"
 
-namespace mcrl2
-{
-namespace data
+namespace mcrl2::data
 {
 
 class simplifier_identity: public simplifier
 {
-  typedef simplifier super;
+  using super = simplifier;
 
 protected:
 
-  data_expression simplify_expression(const data_expression& expr)
-  {
-    return expr;
-  }
+  data_expression simplify_expression(const data_expression& expr) override { return expr; }
 
 public:
   simplifier_identity(const rewriter& r, const rewriter& pr)
   : super(r, pr)
   {}
-
+  ~simplifier_identity() override = default;
 };
 
 
 } // namespace mcrl2
-} // namespace data
+// namespace data
 
 #endif // MCRL2_PBESSYMBOLICBISIM_SIMPLIFIER_IDENTITY_H

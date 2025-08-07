@@ -17,25 +17,20 @@
 
 #include "mcrl2/pbes/detail/bqnf_visitor.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail
+{
 
 class ppg_visitor
   {
   public:
     /// \brief The BQNF visitor type.
-    typedef bqnf_visitor bqnf;
+    using bqnf = bqnf_visitor;
 
     /// \brief Destructor.
-    virtual ~ppg_visitor()
-    { }
+    virtual ~ppg_visitor() = default;
 
     /// \brief Constructor.
-    ppg_visitor()
-    { }
+    ppg_visitor() = default;
 
     /// \brief Returns a string representation of the type of the root node of the expression.
     /// \param e a PBES expression
@@ -205,10 +200,6 @@ class ppg_visitor
     }
   };
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
+  } // namespace mcrl2::pbes_system::detail
 
 #endif // MCRL2_PBES_DETAIL_PPG_VISITOR_H

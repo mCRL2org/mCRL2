@@ -2,7 +2,7 @@
 Changes between toolset releases 202507.0 and 202407.1:
 ===============================================================================
 
-This release focuses mostly on improving the usability androbustness of the
+This release focuses mostly on improving the usability and robustness of the
 toolset. The symbolic solving tool 'pbessolvesymbolic' has been extended with
 the ability to generate counter examples, and generating counter examples in
 'pbessolve' has been made more efficient. Furthermore, linearisation of
@@ -24,7 +24,7 @@ List of other changes:
     algorithm.
   - mcrl2ide can now set the enumeration limit for tools, which must sometimes
     be increased to when rewriting expressions with quantifiers since it limits
-    the amount of values that are enumerated.
+    the number of values that are enumerated.
   - Introduced the tool lpsfununfold which, similarly to lpsparunfold, can unfold
     a parameter of a function type with a finite domain into multiple parameters.
 

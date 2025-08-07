@@ -21,8 +21,8 @@
 #include <vector>
 
 // Note: these should be unsigned types; some algorithms depend on it!
-typedef std::size_t verti;    //!< type used to number vertices
-typedef std::size_t edgei;    //!< type used to number edges
+using verti = std::size_t; //!< type used to number vertices
+using edgei = std::size_t; //!< type used to number edges
 
 #define NO_VERTEX ((verti)-1)
 
@@ -63,7 +63,7 @@ public:
 
 public:
     /*! Iterator used to iterate over predecessor/successor vertices. */
-    typedef const verti *const_iterator;
+  using const_iterator = const verti*;
 
 #if 0
     /*! Iterator used to iterate over edges. */
@@ -71,21 +71,21 @@ public:
 #endif
 
     /*! A list of edges */
-    typedef std::vector<std::pair<verti, verti> > edge_list;
+  using edge_list = std::vector<std::pair<verti, verti>>;
 
-    /*! Specifies which parts of the edges are stored.
-        When storing successors only, the functions succ_begin() and succ_end()
-        can be used to iterate over the successors of a given vertex.
-        Conversely, when storing predecessors, pred_begin() and pred_end()
-        can be used to iterate over predecessors.
-        When storing bidirectional edges, both pairs of functions can be used,
-        but this requires more memory. */
-    enum EdgeDirection
-    {
-        EDGE_NONE           = 0,  /* for internal use only! */
-        EDGE_SUCCESSOR      = 1,
-        EDGE_PREDECESSOR    = 2,
-        EDGE_BIDIRECTIONAL  = 3
+  /*! Specifies which parts of the edges are stored.
+      When storing successors only, the functions succ_begin() and succ_end()
+      can be used to iterate over the successors of a given vertex.
+      Conversely, when storing predecessors, pred_begin() and pred_end()
+      can be used to iterate over predecessors.
+      When storing bidirectional edges, both pairs of functions can be used,
+      but this requires more memory. */
+  enum EdgeDirection
+  {
+    EDGE_NONE = 0, /* for internal use only! */
+    EDGE_SUCCESSOR = 1,
+    EDGE_PREDECESSOR = 2,
+    EDGE_BIDIRECTIONAL = 3
     };
 
     StaticGraph();          /*!< Construct an empty static graph. */
@@ -170,7 +170,7 @@ public:
     void read_raw(std::istream &is);
 
     /*! Swaps the contents of this graph with another one. */
-    void swap(StaticGraph &g);
+    void swap(StaticGraph& g) noexcept;
 
     /*! Returns whether the graph is empty. */
     bool empty() const { return V_ == 0; }
@@ -264,26 +264,26 @@ protected:
                         EdgeDirection edge_dir = EDGE_NONE );
 
 private:
-    explicit StaticGraph(const StaticGraph &graph);
-    StaticGraph &operator=(const StaticGraph &graph);
+  explicit StaticGraph(const StaticGraph& graph) = delete;
+  StaticGraph& operator=(const StaticGraph& graph) = delete;
 
 private:
-    verti V_;  /*!< number of vertices */
-    edgei E_;  /*!< number of edges */
+  verti V_ = 0UL; /*!< number of vertices */
+  edgei E_ = 0UL; /*!< number of edges */
 
-    /*! Successor/predecessor lists (of size E).
-        If edges are pairs of nodes (i,j), then `successors` is the list of
-        successors (j's) obtained after sorting edges by predecessors (i's),
-        and vice versa for `predecessors`. */
-    verti *successors_, *predecessors_;
+  /*! Successor/predecessor lists (of size E).
+      If edges are pairs of nodes (i,j), then `successors` is the list of
+      successors (j's) obtained after sorting edges by predecessors (i's),
+      and vice versa for `predecessors`. */
+  verti *successors_ = nullptr, *predecessors_ = nullptr;
 
-    /*! Indices into the successor/predecessor lists (of size V + 1).
-        successor_index[i] is the lowest index of an edge in `successors` with
-        a predecessor >= i; successor_index[V] is E. */
-    edgei *successor_index_, *predecessor_index_;
+  /*! Indices into the successor/predecessor lists (of size V + 1).
+      successor_index[i] is the lowest index of an edge in `successors` with
+      a predecessor >= i; successor_index[V] is E. */
+  edgei *successor_index_ = nullptr, *predecessor_index_ = nullptr;
 
-    /*! Direction of stored edges. */
-    EdgeDirection edge_dir_;
+  /*! Direction of stored edges. */
+  EdgeDirection edge_dir_;
 
 private:
     /* This is a bit of a hack to allow the small progress measures code to
@@ -293,10 +293,9 @@ private:
     friend class EdgeIterator;
 };
 
-
-inline void swap(StaticGraph &a, StaticGraph &b)
+inline void swap(StaticGraph& a, StaticGraph& b) noexcept
 {
-    a.swap(b);
+  a.swap(b);
 }
 
 #include "Graph_impl.h"

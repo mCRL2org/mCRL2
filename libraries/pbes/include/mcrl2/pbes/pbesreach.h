@@ -102,7 +102,7 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes, std::s
       if (data::sort_bool::is_or_application(summand.condition()))
       {
         // For disjunctive conditions we can introduce one summand per clause.
-        for (const data::data_expression& clause : split_disjunction(summand.condition()))
+        for (const data::data_expression& clause : split_or(summand.condition()))
         {
           split_summands.emplace_back(summand.parameters(), clause, summand.variable());
           mCRL2log(log::debug) << "Added summand " << split_summands.back() << std::endl;
@@ -114,7 +114,7 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes, std::s
         bool simple = granularity == 3 || summand.variable().name() == Xtrue.name() || summand.variable().name() == Xfalse.name();
 
         std::vector<srf_summand> split_summands_inner; // The summands for the added equation.
-        for (const data::data_expression& clause : split_conjunction(summand.condition()))
+        for (const data::data_expression& clause : split_and(summand.condition()))
         {
           if (simple)
           {
@@ -353,14 +353,14 @@ class pbesreach_algorithm
 
       for (const data::variable& param: m_process_parameters)
       {
-        m_data_index.push_back(symbolic::data_expression_index(param.sort()));
+        m_data_index.emplace_back(param.sort());
       }
 
       mCRL2log(log::debug) << "Final read/write matrix:" << std::endl;
       mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
     }
 
-    virtual ~pbesreach_algorithm() {}
+    virtual ~pbesreach_algorithm() = default;
 
     ldd initial_state()
     {

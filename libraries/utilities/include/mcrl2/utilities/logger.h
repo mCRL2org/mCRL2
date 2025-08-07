@@ -101,12 +101,10 @@ class output_policy
 {
   public:
     /// \brief Constructor.
-    output_policy()
-    {}
+    output_policy() = default;
 
     /// \brief Destructor.
-    virtual ~output_policy()
-    {}
+    virtual ~output_policy() = default;
 
     /// \brief Output message.
     /// \param[in] msg Message that is written to output.
@@ -137,9 +135,9 @@ class logger: private utilities::noncopyable
     log_level_t m_level;
 
     /// \brief Timestamp of the current message
-    time_t m_timestamp;
+    time_t m_timestamp = 0L;
 
-   static std::atomic<log_level_t>& log_level()
+    static std::atomic<log_level_t>& log_level()
     {
       static std::atomic<log_level_t> g_log_level(log_level_t::info);
       return g_log_level;
@@ -326,12 +324,10 @@ class file_output: public output_policy
     }
 
   public:
-    file_output()
-    {}
+    file_output() = default;
 
-    virtual ~file_output()
-    {}
- 
+    ~file_output() override = default;
+
     /// \param[in] stream A file handle
     static
     void set_stream(FILE* stream)
@@ -348,7 +344,10 @@ class file_output: public output_policy
     ///
     /// \note This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
     /// atomic.
-    virtual void output(const log_level_t level, const time_t timestamp, const std::string& msg, const bool print_time_information) override
+    void output(const log_level_t level,
+        const time_t timestamp,
+        const std::string& msg,
+        const bool print_time_information) override
     {
       assert(quiet != level);
       FILE* p_stream = get_stream();
@@ -357,6 +356,7 @@ class file_output: public output_policy
         return;
       }
 
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg) Maurice: waiting for std::format to be supported.
       fprintf(p_stream, "%s", formatter::format(level, timestamp, msg, print_time_information).c_str());
       fflush(p_stream);
     }
@@ -389,6 +389,7 @@ inline bool mCRL2logEnabled(const log_level_t level)
 } // namespace mcrl2::log
 
 /// \brief mCRL2log(LEVEL) provides the stream used to log.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define mCRL2log(LEVEL) if (mcrl2::log::mCRL2logEnabled(LEVEL)) mcrl2::log::logger(LEVEL).get()
 
 #endif // MCRL2_UTILITIES_LOGGER_H

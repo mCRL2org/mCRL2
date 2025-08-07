@@ -19,11 +19,8 @@
 
 #include <cerrno>
 
-namespace mcrl2
-{
-
 /// \brief The main namespace for the LPS library.
-namespace lps
+namespace mcrl2::lps
 {
 
 // prototype definitions
@@ -67,14 +64,13 @@ class specification_base
 
   public:
     /// \brief The process type
-    typedef LinearProcess process_type;
+    using process_type = LinearProcess;
 
     /// \brief The initial process type
-    typedef InitialProcessExpression initial_process_type;
+    using initial_process_type = InitialProcessExpression;
 
     /// \brief Constructor.
-    specification_base()
-    { }
+    specification_base() = default;
 
     /// \brief Constructor.
     /// \param data A data specification
@@ -174,7 +170,7 @@ class specification_base
 class specification: public specification_base<linear_process, process_initializer>
 {
   protected:
-    typedef specification_base<linear_process, process_initializer> super;
+    using super = specification_base<linear_process, process_initializer>;
 
   public:
     /// \brief Constructor.
@@ -259,8 +255,6 @@ void complete_data_specification(specification& spec)
   spec.data().add_context_sorts(s);
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_SPECIFICATION_H

@@ -16,10 +16,7 @@
 #include "mcrl2/lps/traverser.h"
 #include "mcrl2/process/find.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 //--- start generated lps find code ---//
@@ -185,8 +182,6 @@ std::set<process::action_label> find_action_labels(const T& x)
   return result;
 }
 
-} // namespace lps
-
-} // namespace mcrl2
+} // namespace mcrl2::lps
 
 #endif

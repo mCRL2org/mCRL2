@@ -15,23 +15,21 @@
 #include <mcrl2/atermpp/standard_containers/unordered_map.h>
 #include "mcrl2/pbes/pbessolve_vertex_set.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-namespace detail {
+namespace mcrl2::pbes_system::detail {
 
 struct structure_graph_builder
 {
   using index_type = structure_graph::index_type;
 
   structure_graph& m_graph;
-  atermpp::utilities::unordered_map<pbes_expression, 
-    index_type,
-    std::hash<atermpp::detail::reference_aterm<pbes_expression> >,
-    std::equal_to<atermpp::detail::reference_aterm<pbes_expression> >,
-    std::allocator< std::pair<const atermpp::detail::reference_aterm<pbes_expression>, atermpp::detail::reference_aterm<index_type> > >,
-    true> m_vertex_map;
+  atermpp::utilities::unordered_map<pbes_expression,
+      index_type,
+      std::hash<atermpp::detail::reference_aterm<pbes_expression>>,
+      std::equal_to<>,
+      std::allocator<std::pair<const atermpp::detail::reference_aterm<pbes_expression>,
+          atermpp::detail::reference_aterm<index_type>>>,
+      true>
+      m_vertex_map;
   pbes_expression m_initial_state; // The initial state.
 
   explicit structure_graph_builder(structure_graph& G)
@@ -236,11 +234,11 @@ struct structure_graph_builder
 
 struct manual_structure_graph_builder
 {
-  typedef structure_graph::index_type index_type;
+  using index_type = structure_graph::index_type;
 
   structure_graph& m_graph;
   structure_graph::vertex_vector m_vertices;
-  index_type m_initial_state; // The initial state.
+  index_type m_initial_state = 0U; // The initial state.
 
   explicit manual_structure_graph_builder(structure_graph& G)
     : m_graph(G)
@@ -290,10 +288,10 @@ struct manual_structure_graph_builder
   }
 };
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_STRUCTURE_GRAPH_BUILDER_H

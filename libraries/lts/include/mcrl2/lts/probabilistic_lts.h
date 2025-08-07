@@ -21,11 +21,7 @@
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/probabilistic_state.h"
 
-
-namespace mcrl2
-{
-
-namespace lts
+namespace mcrl2::lts
 {
 
 /** \brief A class that contains a labelled transition system.
@@ -47,18 +43,18 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 {
   public:
 
-    typedef lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE> super;
+    using super = lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>;
 
     /** \brief The type of probabilistic labels.
     */
-    typedef PROBABILISTIC_STATE_T probabilistic_state_t;
+    using probabilistic_state_t = PROBABILISTIC_STATE_T;
 
-    typedef typename super::state_label_t         state_label_t        ;
-    typedef typename super::action_label_t        action_label_t       ;
-    typedef typename super::base_t                base_t               ;
-    typedef typename super::states_size_type      states_size_type     ;
-    typedef typename super::labels_size_type      labels_size_type     ;
-    typedef typename super::transitions_size_type transitions_size_type;
+    using state_label_t = typename super::state_label_t;
+    using action_label_t = typename super::action_label_t;
+    using base_t = typename super::base_t;
+    using states_size_type = typename super::states_size_type;
+    using labels_size_type = typename super::labels_size_type;
+    using transitions_size_type = typename super::transitions_size_type;
 
     /** \brief An indicator that this is a probabilistic lts. 
     */
@@ -85,8 +81,7 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 
     /** \brief Creates an empty LTS.
      */
-    probabilistic_lts()
-    {}
+    probabilistic_lts() = default;
 
     /** \brief Standard copy constructor. 
      * \param[in] other The LTS to copy. */
@@ -115,7 +110,7 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 
     /** \brief Swap this lts with the supplied supplied LTS.
      * \param[in] l The LTS to swap. */
-    void swap(probabilistic_lts& other)
+    void swap(probabilistic_lts& other) noexcept
     {
       super::swap(other);
       m_probabilistic_states.swap(other.m_probabilistic_states);
@@ -209,6 +204,6 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 };
 
 }
-}
+
 
 #endif // MCRL2_LTS_LTS_H

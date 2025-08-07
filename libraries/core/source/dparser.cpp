@@ -33,9 +33,9 @@ extern "C"
   extern D_ParserTables parser_tables_mcrl2;
 }
 
-namespace mcrl2 {
 
-namespace core {
+
+namespace mcrl2::core {
 
 std::string parse_node::add_context(const std::string& message) const
 {
@@ -76,11 +76,15 @@ std::string parse_node::string() const
 std::string parse_node::tree() const
 {
   if (child_count() < 2)
+  {
     return this->string();
+  }
   std::stringstream result;
   result << "(" << child(0).tree();
   for (int i = 1; i < child_count(); ++i)
+  {
     result << " " << child(i).tree();
+  }
   result << ")";
   return result.str();
 }
@@ -114,11 +118,17 @@ std::string parser_table::tree(const core::parse_node& node) const
   std::stringstream result;
   result << symbol_name(node) << "(";
   if (node.child_count() == 0)
+  {
     result << '"' << node.string() << '"';
+  }
   else
+  {
     result << tree(node.child(0));
+  }
   for (int i = 1; i < node.child_count(); ++i)
+  {
     result << " " << tree(node.child(i));
+  }
   result << ")";
   return result.str();
 }
@@ -466,7 +476,9 @@ void syntax_error_fn(struct D_Parser *ap)
         /* DParser stores production rules in order: search for the corresponding nonterminal. */
         int parentsym = n.symbol() - 1;
         while (p->t->symbols[parentsym].kind == D_SYMBOL_INTERNAL)
+        {
           --parentsym;
+        }
         s = p->t->symbols[parentsym];
       }
 
@@ -505,7 +517,7 @@ void parser::custom_parse_error(const std::string& message) const
   mCRL2log(log::error) << message << std::endl;
 }
 
-} // namespace core
+} // namespace mcrl2::core
 
-} // namespace mcrl2
+
 

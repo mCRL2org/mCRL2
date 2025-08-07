@@ -15,10 +15,7 @@
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 //--- start generated classes ---//
@@ -47,10 +44,10 @@ class container_type: public atermpp::aterm
 };
 
 /// \\brief list of container_types
-typedef atermpp::term_list<container_type> container_type_list;
+using container_type_list = atermpp::term_list<container_type>;
 
 /// \\brief vector of container_types
-typedef std::vector<container_type>    container_type_vector;
+using container_type_vector = std::vector<container_type>;
 
 // prototype declaration
 std::string pp(const container_type& x, bool precedence_aware = true);
@@ -66,11 +63,10 @@ std::ostream& operator<<(std::ostream& out, const container_type& x)
 }
 
 /// \\brief swap overload
-inline void swap(container_type& t1, container_type& t2)
+inline void swap(container_type& t1, container_type& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for lists
 class list_container: public container_type
@@ -119,11 +115,10 @@ std::ostream& operator<<(std::ostream& out, const list_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(list_container& t1, list_container& t2)
+inline void swap(list_container& t1, list_container& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for sets
 class set_container: public container_type
@@ -172,11 +167,10 @@ std::ostream& operator<<(std::ostream& out, const set_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(set_container& t1, set_container& t2)
+inline void swap(set_container& t1, set_container& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for bags
 class bag_container: public container_type
@@ -225,11 +219,10 @@ std::ostream& operator<<(std::ostream& out, const bag_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(bag_container& t1, bag_container& t2)
+inline void swap(bag_container& t1, bag_container& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for finite sets
 class fset_container: public container_type
@@ -278,11 +271,10 @@ std::ostream& operator<<(std::ostream& out, const fset_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(fset_container& t1, fset_container& t2)
+inline void swap(fset_container& t1, fset_container& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief Container type for finite bags
 class fbag_container: public container_type
@@ -331,15 +323,15 @@ std::ostream& operator<<(std::ostream& out, const fbag_container& x)
 }
 
 /// \\brief swap overload
-inline void swap(fbag_container& t1, fbag_container& t2)
+inline void swap(fbag_container& t1, fbag_container& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated classes ---//
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 namespace std
 {

@@ -12,9 +12,8 @@
 
 #include "mcrl2/atermpp/detail/aterm_core.h"
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 /// \brief The underlying integer term that actually carries the integer data.
@@ -38,8 +37,8 @@ private:
 
 static_assert(sizeof(_aterm_int) == sizeof(_aterm) + sizeof(std::size_t), "Sanity check: _aterm_int size");
 
-} // namespace detail 
+} // namespace atermpp::detail
 
-} // namespace atermpp
+
 
 #endif // MCRL2_ATERMPP_DETAIL_ATERM_INT_H

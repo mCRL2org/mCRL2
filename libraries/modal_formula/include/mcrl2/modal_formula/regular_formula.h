@@ -14,10 +14,7 @@
 
 #include "mcrl2/modal_formula/action_formula.h"
 
-namespace mcrl2
-{
-
-namespace regular_formulas
+namespace mcrl2::regular_formulas
 {
 
 //--- start generated classes ---//
@@ -56,10 +53,10 @@ class regular_formula: public atermpp::aterm
 };
 
 /// \\brief list of regular_formulas
-typedef atermpp::term_list<regular_formula> regular_formula_list;
+using regular_formula_list = atermpp::term_list<regular_formula>;
 
 /// \\brief vector of regular_formulas
-typedef std::vector<regular_formula>    regular_formula_vector;
+using regular_formula_vector = std::vector<regular_formula>;
 
 // prototypes
 inline bool is_seq(const atermpp::aterm& x);
@@ -97,11 +94,10 @@ std::ostream& operator<<(std::ostream& out, const regular_formula& x)
 }
 
 /// \\brief swap overload
-inline void swap(regular_formula& t1, regular_formula& t2)
+inline void swap(regular_formula& t1, regular_formula& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The seq operator for regular formulas
 class seq: public regular_formula
@@ -173,11 +169,10 @@ std::ostream& operator<<(std::ostream& out, const seq& x)
 }
 
 /// \\brief swap overload
-inline void swap(seq& t1, seq& t2)
+inline void swap(seq& t1, seq& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The alt operator for regular formulas
 class alt: public regular_formula
@@ -249,11 +244,10 @@ std::ostream& operator<<(std::ostream& out, const alt& x)
 }
 
 /// \\brief swap overload
-inline void swap(alt& t1, alt& t2)
+inline void swap(alt& t1, alt& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The trans operator for regular formulas
 class trans: public regular_formula
@@ -320,11 +314,10 @@ std::ostream& operator<<(std::ostream& out, const trans& x)
 }
 
 /// \\brief swap overload
-inline void swap(trans& t1, trans& t2)
+inline void swap(trans& t1, trans& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief The 'trans or nil' operator for regular formulas
 class trans_or_nil: public regular_formula
@@ -391,11 +384,10 @@ std::ostream& operator<<(std::ostream& out, const trans_or_nil& x)
 }
 
 /// \\brief swap overload
-inline void swap(trans_or_nil& t1, trans_or_nil& t2)
+inline void swap(trans_or_nil& t1, trans_or_nil& t2) noexcept
 {
   t1.swap(t2);
 }
-
 
 /// \\brief An untyped regular formula or action formula
 class untyped_regular_formula: public regular_formula
@@ -477,14 +469,14 @@ std::ostream& operator<<(std::ostream& out, const untyped_regular_formula& x)
 }
 
 /// \\brief swap overload
-inline void swap(untyped_regular_formula& t1, untyped_regular_formula& t2)
+inline void swap(untyped_regular_formula& t1, untyped_regular_formula& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated classes ---//
 
-} // namespace regular_formulas
+} // namespace mcrl2::regular_formulas
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_MODAL_FORMULA_REGULAR_FORMULA_H

@@ -15,10 +15,7 @@
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/application.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief function symbol.
@@ -27,8 +24,7 @@ class lambda: public abstraction
 {
   public:
     /// Constructor.
-    lambda()
-    {}
+    lambda() = default;
 
     /// Constructor.
     ///
@@ -96,15 +92,13 @@ std::ostream& operator<<(std::ostream& out, const lambda& x)
 }
 
 /// \\brief swap overload
-inline void swap(lambda& t1, lambda& t2)
+inline void swap(lambda& t1, lambda& t2) noexcept
 {
   t1.swap(t2);
 }
 //--- end generated class lambda ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_LAMBDA_H
 

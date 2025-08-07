@@ -20,17 +20,17 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::log;
 
-typedef input_tool ltsinfo_base;
+using ltsinfo_base = input_tool;
 class ltsinfo_tool : public ltsinfo_base
 {
 
   private:
 
     std::string                 infilename;
-    mcrl2::lts::lts_type        intype;
-    bool                        print_action_labels;
-    bool                        print_state_labels;
-    bool                        print_branching_factor;
+    mcrl2::lts::lts_type intype = mcrl2::lts::lts_none;
+    bool print_action_labels = false;
+    bool print_state_labels = false;
+    bool print_branching_factor = false;
 
   public:
 
@@ -44,15 +44,12 @@ class ltsinfo_tool : public ltsinfo_base
                    "The option --in can be used to force the format for INFILE. "
                    "The supported formats are:\n"
                    +mcrl2::lts::detail::supported_lts_formats_text()
-                  ),
-      intype(mcrl2::lts::lts_none),
-      print_state_labels(false)
-    {
-    }
+                  )
+    {}
 
   protected:
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       using namespace mcrl2::lts;
 
@@ -69,7 +66,7 @@ class ltsinfo_tool : public ltsinfo_base
                  "print the average, minimal and maximal branching factor",'b');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       using namespace mcrl2::lts;
 
@@ -305,7 +302,7 @@ class ltsinfo_tool : public ltsinfo_base
 
   public:
 
-    bool run()
+    bool run() override
     {
       using namespace mcrl2::lts;
       using namespace mcrl2::lts::detail;

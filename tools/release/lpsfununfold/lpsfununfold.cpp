@@ -198,16 +198,16 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 {
   protected:
 
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
     std::set< std::size_t > m_set_index; ///< Options of the algorithm
     std::string m_unfoldsort;
-    std::size_t m_repeat_unfold;
-    bool m_alt_case_placement;
-    bool m_possibly_inconsistent;
-    bool m_disable_pattern_unfolding;
+    std::size_t m_repeat_unfold = 0UL;
+    bool m_alt_case_placement = false;
+    bool m_possibly_inconsistent = false;
+    bool m_disable_pattern_unfolding = false;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       /* desc.add_option("index", make_mandatory_argument("[NUM]"),
@@ -224,11 +224,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
                       "do not unfold pattern matching functions in state updates", 'x'); */
     }
 
-    void parse_options(const command_line_parser& parser)
-    {
-      super::parse_options(parser);
-
-    }
+    void parse_options(const command_line_parser& parser) override { super::parse_options(parser); }
 
     bool add_rewrite_rules_for_functions(const function_sort& s, data_specification& data_spec)
     {                         
@@ -240,8 +236,13 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
         variable vf("f",s);
         variable vg("g",s);
         variable_list vt;
-        for(const sort_expression& s1: s.domain()) { vt=push_back(vt,variable("t",s1)); } ;
-        // Equation: if(b, f, g)(t) = if(b, f(t), g(t)).
+        std::size_t i=0;
+        for(const sort_expression& s1: s.domain()) 
+        { 
+          vt=push_back(vt,variable("t"+std::to_string(i),s1)); 
+          ++i;
+        } 
+        // Equation: if(b, f, g)(t0, t1,....) = if(b, f(t0,t1,...), g(t0,t1,...)).
         data_spec.add_equation(data_equation(variable_list({vb, vf, vg}) + vt, 
                                              application(if_(vb, vf, vg),vt),
                                              if_(vb,application(vf,vt),application(vg,vt))));
@@ -372,7 +373,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 
     ///Reads a specification from input_file,
     ///applies instantiation of sums to it and writes the result to output_file.
-    bool run()
+    bool run() override
     {
       lps::stochastic_specification spec;
       load_lps(spec, input_filename());
@@ -383,7 +384,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 
       std::vector<data::variable> resulting_parameters;
       bool new_rewrite_rules_added=false;
-      for (data::variable v: spec.process().process_parameters())
+      for (const data::variable& v: spec.process().process_parameters())
       {
         if (is_function_sort(v.sort()))
         {
@@ -408,18 +409,20 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
               data_expression_vector new_elements=enumerate_expressions(se, spec.data(), R);
               std::vector<data::data_expression_list> old_enumerated_domain_elements=new_enumerated_domain_elements;
               new_enumerated_domain_elements.clear();
-              for(data_expression d: new_elements)
+              for (const data_expression& d: new_elements)
               {
-                for(data_expression_list l: old_enumerated_domain_elements)
+                for (const data_expression_list& l: old_enumerated_domain_elements)
                 {
                   new_enumerated_domain_elements.push_back(l);
-                  new_enumerated_domain_elements.back().push_front(d);
+                  new_enumerated_domain_elements.back().push_front(d); 
                 }
               }
             }
-            for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
+            for(data_expression_list& l: new_enumerated_domain_elements)
+            // for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
             {
               new_parameters.emplace_back(fresh_name_generator(v.name()), s.codomain());
+              l=reverse(l); // Then new_enumerated_domain_elements were stored in the wrong order. 
             }
             mCRL2log(verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by " 
                               << new_enumerated_domain_elements.size() << " new parameters.\n";
@@ -458,7 +461,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
                 new_arguments.emplace_back(fresh_name_generator("x"), s.element_sort());
                 std::vector<data::data_expression_list> new_enumerated_domain_elements;
                 data_expression_vector new_elements=enumerate_expressions(s.element_sort(), spec.data(), R);
-                for(data_expression d: new_elements)
+                for (const data_expression& d: new_elements)
                 {
                   data_expression_list l;
                   l.push_front(d);
@@ -612,7 +615,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
       unfold_initializer(spec.initial_process(), representation_for_the_new_parameters, old_process_parameters, R);
       assert(spec.initial_process().expressions().size()==new_parameters.size());
       spec.process().process_parameters()=variable_list(new_parameters.begin(), new_parameters.end());
-      
+      assert(check_well_typedness(spec));      
       save_lps(spec, output_filename());
 
       return true;

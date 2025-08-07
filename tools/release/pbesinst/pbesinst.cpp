@@ -41,16 +41,16 @@ using utilities::make_enum_argument;
 class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_tool> >
 {
   protected:
-    typedef rewriter_tool<pbes_input_output_tool<input_output_tool> > super;
+    using super = rewriter_tool<pbes_input_output_tool<input_output_tool>>;
 
-    pbesinst_strategy m_strategy;
+    pbesinst_strategy m_strategy = pbesinst_lazy_strategy;
     std::string m_finite_parameter_selection;
-    bool m_remove_redundant_equations;
+    bool m_remove_redundant_equations = false;
     search_strategy m_search_strategy;
     transformation_strategy m_transformation_strategy;
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -76,7 +76,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.
@@ -127,12 +127,11 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         "by an option). The supported formats are:\n"
         "  'pbes' for the mCRL2 PBES format,\n"
         "  'bes'  for the mCRL2 BES format,\n"
-      ),
-      m_strategy(pbesinst_lazy_strategy)
+      )
     {}
 
     /// Runs the algorithm.
-    bool run()
+    bool run() override
     {
       using namespace mcrl2::pbes_system;
 

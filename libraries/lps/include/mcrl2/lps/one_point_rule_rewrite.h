@@ -15,9 +15,7 @@
 #include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/lps/builder.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 namespace detail {
 
@@ -25,7 +23,7 @@ namespace detail {
 
 struct one_point_rule_rewrite_builder: public lps::data_expression_builder<one_point_rule_rewrite_builder>
 {
-  typedef lps::data_expression_builder<one_point_rule_rewrite_builder> super;
+  using super = lps::data_expression_builder<one_point_rule_rewrite_builder>;
   using super::apply;
   using super::update;
 
@@ -43,9 +41,9 @@ struct one_point_rule_rewrite_builder: public lps::data_expression_builder<one_p
 /// \brief Applies the one point rule rewriter to all embedded data expressions in an object x
 /// \param x an object containing data expressions
 template <typename T>
-void one_point_rule_rewrite(T& x, typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+void one_point_rule_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
-  detail::one_point_rule_rewrite_builder f;
+  detail::one_point_rule_rewrite_builder f{};
   f.update(x);
 }
 
@@ -53,16 +51,16 @@ void one_point_rule_rewrite(T& x, typename std::enable_if<!std::is_base_of<aterm
 /// \param x an object containing data expressions
 /// \return the rewrite result
 template <typename T>
-T one_point_rule_rewrite(const T& x, typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+T one_point_rule_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
-  detail::one_point_rule_rewrite_builder f;
+  detail::one_point_rule_rewrite_builder f{};
   f.apply(result, x);
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_ONE_POINT_RULE_REWRITE_H

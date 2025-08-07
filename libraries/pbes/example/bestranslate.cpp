@@ -20,7 +20,7 @@ using namespace mcrl2;
 class bestranslate_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {
   private:
-    typedef pbes_input_tool<pbes_output_tool<input_output_tool> > super;
+    using super = pbes_input_tool<pbes_output_tool<input_output_tool>>;
 
   public:
     bestranslate_tool()
@@ -32,7 +32,7 @@ class bestranslate_tool: public pbes_input_tool<pbes_output_tool<input_output_to
              )
     {}
 
-    bool run()
+    bool run() override
     {
       pbes bes;
       load_pbes(bes, input_filename(), pbes_input_format());

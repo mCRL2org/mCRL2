@@ -12,8 +12,6 @@
 #define BOOST_TEST_MODULE linearization_test1
 #include <boost/test/included/unit_test.hpp>
 
-#ifndef MCRL2_SKIP_LONG_TESTS
-
 #include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/linearise.h"
@@ -471,12 +469,4 @@ BOOST_AUTO_TEST_CASE(bug_report_1576)
     "init delta;\n";
   run_linearisation_test_case(report_1576, false);
 }
-
-#else // ndef MCRL2_SKIP_LONG_TESTS
-
-BOOST_AUTO_TEST_CASE(skip_linearization_test)
-{
-}
-
-#endif // ndef MCRL2_SKIP_LONG_TESTS
 

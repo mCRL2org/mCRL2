@@ -20,11 +20,7 @@
 
 #include "mcrl2/data/real.h"
 
-namespace mcrl2
-{
-namespace lps
-{
-namespace detail
+namespace mcrl2::lps::detail
 {
 
 using namespace data;
@@ -101,9 +97,7 @@ class ultimate_delay
 ///        the variables in delay2 are renamed to avoid conflict with those in delay1. 
 ultimate_delay combine_ultimate_delays(const ultimate_delay& delay1, const ultimate_delay& delay2);
 
-}  // namespace detail
-}  // namespace lps
-}  // namespace mcrl2
+} // namespace mcrl2::lps::detail
 
 #endif // MCRL2_LPS_DETAIL_ULTIMATE_DELAY_H
 

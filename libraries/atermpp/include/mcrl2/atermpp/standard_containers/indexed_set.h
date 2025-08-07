@@ -28,14 +28,13 @@ template<typename Key,
          typename KeyTable = atermpp::deque<Key > >
 class indexed_set: public mcrl2::utilities::indexed_set<Key, ThreadSafe, Hash, Equals, Allocator, KeyTable>
 {
-  typedef mcrl2::utilities::indexed_set<Key, ThreadSafe, Hash, Equals, Allocator, KeyTable> super;
+  using super = mcrl2::utilities::indexed_set<Key, ThreadSafe, Hash, Equals, Allocator, KeyTable>;
 
 public:
-  typedef typename super::size_type size_type;
+  using size_type = typename super::size_type;
 
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
-  indexed_set()
-  {}
+  indexed_set() = default;
 
   /// \brief Constructor of an empty indexed set. Starts with a hashtable of size 128.
   indexed_set(std::size_t number_of_threads)
@@ -69,11 +68,8 @@ public:
 
 } // end namespace atermppp
 
-namespace mcrl2 {
-
-namespace utilities {
-
-namespace detail {
+namespace mcrl2::utilities::detail
+{
 
 // Specialization of a function defined in mcrl2/utilities/detail/container_utility.h.
 // In utilities, atermpp is not known. 
@@ -90,12 +86,6 @@ bool contains(const atermpp::indexed_set<Key, ThreadSafe, Hash, Equals, Allocato
   return c.find(v, thread_index) != c.end(thread_index);
 }
 
-} // namespace detail
-
-} // namespace utilities
-
-} // namespace mcrl2
-
-
+} // namespace mcrl2::utilities::detail
 
 #endif // MCRL2_ATERMPP_INDEXED_SET_H

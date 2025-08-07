@@ -16,17 +16,17 @@
 
 #include "mcrl2/pbes/pbes_functions.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
 
-namespace detail {
+
+
+namespace mcrl2::pbes_system::detail {
 
 /// \cond INTERNAL_DOCS
 /// \brief Visitor for checking if a pbes object is in BQNF.
 struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
 {
-  typedef pbes_expression_traverser<bqnf_traverser> super;
+  using super = pbes_expression_traverser<bqnf_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -38,12 +38,8 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     UNDETERMINED
   };
 
-  bool result;
+  bool result = true;
   std::stack<expression_mode> mode_stack;
-
-  bqnf_traverser()
-    : result(true)
-  {}
 
   void enter(const pbes_system::forall& x)
   {
@@ -241,10 +237,10 @@ bool is_bqnf(const T& x)
   return f.result;
 }
 
-} // namespace detail
+} // namespace mcrl2::pbes_system::detail
 
-} // namespace pbes_system
 
-} // namespace mcrl2
+
+
 
 #endif // MCRL2_PBES_DETAIL_BQNF_TRAVERSER_H

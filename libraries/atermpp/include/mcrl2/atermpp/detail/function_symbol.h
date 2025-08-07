@@ -20,9 +20,8 @@
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
 
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 /// \brief Stores the data for a function symbol (name, arity) pair.
@@ -57,8 +56,8 @@ private:
   const std::string m_name;
 };
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #endif // DETAIL_FUNCTION_SYMBOL_H
 

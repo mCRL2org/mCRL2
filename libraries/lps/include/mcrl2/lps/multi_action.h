@@ -15,10 +15,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/process/process_expression.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 // prototype declaration
@@ -107,10 +104,10 @@ inline void make_multi_action(atermpp::aterm& t, const ARGUMENTS&... args)
 }
 
 /// \\brief list of multi_actions
-typedef atermpp::term_list<multi_action> multi_action_list;
+using multi_action_list = atermpp::term_list<multi_action>;
 
 /// \\brief vector of multi_actions
-typedef std::vector<multi_action>    multi_action_vector;
+using multi_action_vector = std::vector<multi_action>;
 
 /// \\brief Test for a multi_action expression
 /// \\param x A term
@@ -135,7 +132,7 @@ std::ostream& operator<<(std::ostream& out, const multi_action& x)
 }
 
 /// \\brief swap overload
-inline void swap(multi_action& t1, multi_action& t2)
+inline void swap(multi_action& t1, multi_action& t2) noexcept
 {
   t1.swap(t2);
 }
@@ -185,7 +182,8 @@ inline bool equal_action_signatures(const std::vector<process::action>& a, const
   {
     return false;
   }
-  std::vector<process::action>::const_iterator i, j;
+  std::vector<process::action>::const_iterator i;
+  std::vector<process::action>::const_iterator j;
   for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
   {
     if (i->label() != j->label())
@@ -246,13 +244,15 @@ struct equal_data_parameters_builder
   void operator()()
   {
     std::vector<data::data_expression> v;
-    std::vector<process::action>::const_iterator i, j;
+    std::vector<process::action>::const_iterator i;
+    std::vector<process::action>::const_iterator j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
       data::data_expression_list d1 = i->arguments();
       data::data_expression_list d2 = j->arguments();
       assert(d1.size() == d2.size());
-      data::data_expression_list::iterator i1 = d1.begin(), i2 = d2.begin();
+      data::data_expression_list::iterator i1 = d1.begin();
+      data::data_expression_list::iterator i2 = d2.begin();
       for (     ; i1 != d1.end(); ++i1, ++i2)
       {
         v.push_back(data::lazy::equal_to(*i1, *i2));
@@ -285,13 +285,15 @@ struct not_equal_multi_actions_builder
     using namespace data::lazy;
 
     std::vector<data::data_expression> v;
-    std::vector<process::action>::const_iterator i, j;
+    std::vector<process::action>::const_iterator i;
+    std::vector<process::action>::const_iterator j;
     for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
     {
       data::data_expression_list d1 = i->arguments();
       data::data_expression_list d2 = j->arguments();
       assert(d1.size() == d2.size());
-      data::data_expression_list::iterator i1=d1.begin(), i2=d2.begin();
+      data::data_expression_list::iterator i1 = d1.begin();
+      data::data_expression_list::iterator i2 = d2.begin();
       for (   ; i1 != d1.end(); ++i1, ++i2)
       {
         v.push_back(data::not_equal_to(*i1, *i2));
@@ -335,13 +337,13 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   }
 
   // compute the intervals of a with equal names
-  typedef std::vector<process::action>::iterator action_iterator;
+  using action_iterator = std::vector<process::action>::iterator;
   std::vector<std::pair<action_iterator, action_iterator> > intervals;
   action_iterator first = va.begin();
   while (first != va.end())
   {
     action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
-    intervals.push_back(std::make_pair(first, next));
+    intervals.emplace_back(first, next);
     first = next;
   }
 
@@ -373,13 +375,13 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   }
 
   // compute the intervals of a with equal names
-  typedef std::vector<process::action>::iterator action_iterator;
+  using action_iterator = std::vector<process::action>::iterator;
   std::vector<std::pair<action_iterator, action_iterator> > intervals;
   action_iterator first = va.begin();
   while (first != va.end())
   {
     action_iterator next = std::upper_bound(first, va.end(), *first, detail::compare_action_labels());
-    intervals.push_back(std::make_pair(first, next));
+    intervals.emplace_back(first, next);
     first = next;
   }
   std::vector<data::data_expression> z;
@@ -389,9 +391,9 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   return result;
 }
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 namespace std
 {

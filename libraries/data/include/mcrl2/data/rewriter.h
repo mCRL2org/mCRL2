@@ -16,10 +16,7 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/expression_traits.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 /// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
@@ -29,7 +26,7 @@ class basic_rewriter
 {
   public:
     /// \brief The type for the substitution that is used internally.
-    typedef data::mutable_indexed_substitution<> substitution_type;
+    using substitution_type = data::mutable_indexed_substitution<>;
 
   protected:
     /// \brief The wrapped Rewriter.
@@ -38,10 +35,10 @@ class basic_rewriter
   public:
 
     /// \brief The type for expressions manipulated by the rewriter.
-    typedef Term term_type;
+    using term_type = Term;
 
     /// \brief The rewrite strategies of the rewriter.
-    typedef rewrite_strategy strategy;
+    using strategy = rewrite_strategy;
 
   protected:
 
@@ -111,7 +108,7 @@ class rewriter: public basic_rewriter<data_expression>
 #endif
 
   public:
-    typedef basic_rewriter<data_expression>::substitution_type substitution_type;
+    using substitution_type = basic_rewriter<data_expression>::substitution_type;
 
     /// \brief Constructor.
     /// \param[in] r a rewriter.
@@ -237,8 +234,8 @@ class rewriter: public basic_rewriter<data_expression>
     }
 };
 
-} // namespace data
+} // namespace mcrl2::data
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_REWRITER_H

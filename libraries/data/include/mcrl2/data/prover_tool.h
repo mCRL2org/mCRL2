@@ -15,13 +15,7 @@
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace tools
+namespace mcrl2::data::tools
 {
 
 /// \brief Base class for tools that use a rewriter.
@@ -29,15 +23,15 @@ template <typename Tool>
 class prover_tool: public Tool
 {
   protected:
-    typedef mcrl2::data::detail::smt_solver_type smt_solver_type;
+    using smt_solver_type = mcrl2::data::detail::smt_solver_type;
 
     /// The data rewriter strategy
-    smt_solver_type m_solver_type;
+    smt_solver_type m_solver_type = mcrl2::data::detail::solver_type_cvc;
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       Tool::add_options(desc, true);  // The parameter true suppresses messages allowing the jittyp rewriter. 
 
@@ -51,7 +45,7 @@ class prover_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
 
@@ -70,8 +64,7 @@ class prover_tool: public Tool
                 const std::string& tool_description,
                 std::string known_issues = ""
                )
-      : Tool(name, author, what_is, tool_description, known_issues),
-        m_solver_type(mcrl2::data::detail::solver_type_cvc)
+      : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
     /// \brief Returns the rewrite strategy
@@ -82,10 +75,6 @@ class prover_tool: public Tool
     }
 };
 
-} // namespace tools
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::tools
 
 #endif // MCRL2_DATA_PROVER_TOOL_H

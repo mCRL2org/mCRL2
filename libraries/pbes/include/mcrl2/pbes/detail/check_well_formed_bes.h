@@ -15,15 +15,15 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-namespace mcrl2 {
 
-namespace pbes_system {
+
+namespace mcrl2::pbes_system {
 
 /// \cond INTERNAL_DOCS
 /// \brief Visitor for checking if a pbes expression is in BES form.
 struct is_well_formed_bes_traverser: public pbes_expression_traverser<is_well_formed_bes_traverser>
 {
-  typedef pbes_expression_traverser<is_well_formed_bes_traverser> super;
+  using super = pbes_expression_traverser<is_well_formed_bes_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -53,14 +53,14 @@ struct is_well_formed_bes_traverser: public pbes_expression_traverser<is_well_fo
 /// \brief This function checks whether x is a well formed bes expression, without quantifiers and
 //         where all data expressions are equal to either true or false.
 /// \param x a pbes expression to be checked.
-void check_whether_argument_is_a_well_formed_bes(const pbes_expression& x)
+inline void check_whether_argument_is_a_well_formed_bes(const pbes_expression& x)
 {
   is_well_formed_bes_traverser f;
   f.apply(x);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_DETAIL_CHECK_WELL_FORMED_BES_H

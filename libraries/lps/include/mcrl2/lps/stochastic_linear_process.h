@@ -16,9 +16,7 @@
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/lps/stochastic_process_initializer.h"
 
-namespace mcrl2 {
-
-namespace lps {
+namespace mcrl2::lps {
 
 namespace detail {
 
@@ -40,7 +38,7 @@ stochastic_action_summand_vector convert_action_summands(const action_summand_ve
   stochastic_action_summand_vector result;
   for (const action_summand& s: action_summands)
   {
-    result.push_back(stochastic_action_summand(s));
+    result.emplace_back(s);
   }
   return result;
 }
@@ -50,30 +48,30 @@ stochastic_action_summand_vector convert_action_summands(const action_summand_ve
 /// \brief linear process.
 class stochastic_linear_process: public linear_process_base<stochastic_action_summand>
 {
-  typedef linear_process_base<stochastic_action_summand> super;
+  using super = linear_process_base<stochastic_action_summand>;
 
-  public:
-    /// \brief Constructor.
-    stochastic_linear_process()
-    { }
+public:
+  /// \brief Constructor.
+  stochastic_linear_process() = default;
 
-    /// \brief Constructor.
-    stochastic_linear_process(const atermpp::aterm& t, bool stochastic_distributions_allowed = true)
+  /// \brief Constructor.
+  stochastic_linear_process(const atermpp::aterm& t, bool stochastic_distributions_allowed = true)
       : super(t, stochastic_distributions_allowed)
-    { }
+  {}
 
-    /// \brief Constructor.
-    stochastic_linear_process(const data::variable_list& process_parameters,
-                              const deadlock_summand_vector& deadlock_summands,
-                              const stochastic_action_summand_vector& action_summands
-                             )
+  /// \brief Constructor.
+  stochastic_linear_process(const data::variable_list& process_parameters,
+      const deadlock_summand_vector& deadlock_summands,
+      const stochastic_action_summand_vector& action_summands)
       : super(process_parameters, deadlock_summands, action_summands)
-    { }
+  {}
 
-    /// \brief Constructor.
-    explicit stochastic_linear_process(const linear_process& other)
-      : super(other.process_parameters(), other.deadlock_summands(), detail::convert_action_summands(other.action_summands()))
-    { }
+  /// \brief Constructor.
+  explicit stochastic_linear_process(const linear_process& other)
+      : super(other.process_parameters(),
+            other.deadlock_summands(),
+            detail::convert_action_summands(other.action_summands()))
+  {}
 };
 
 //--- start generated class stochastic_linear_process ---//
@@ -95,8 +93,8 @@ std::ostream& operator<<(std::ostream& out, const stochastic_linear_process& x)
 std::set<data::variable> find_all_variables(const lps::stochastic_linear_process& x);
 std::set<data::variable> find_free_variables(const lps::stochastic_linear_process& x);
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_STOCHASTIC_LINEAR_PROCESS_H

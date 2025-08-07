@@ -24,9 +24,7 @@
 #include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/atermpp/aterm.h"
 
-namespace mcrl2
-{
-namespace lps
+namespace mcrl2::lps
 {
 
 template < class STATE, class PROBABILITY >
@@ -65,7 +63,7 @@ class state_probability_pair
      */
     bool operator==(const state_probability_pair& other) const
     {
-      if constexpr(std::is_convertible<PROBABILITY,atermpp::aterm>::value)
+      if constexpr (std::is_convertible_v<PROBABILITY, atermpp::aterm>)
       {
         // The probabilities are compared as aterms, and not based on their value, as comparing
         // probabilities using their value is expensive as it requires an application of the rewriter. 
@@ -74,7 +72,7 @@ class state_probability_pair
       }
       else
       {
-        static_assert(!std::is_convertible<PROBABILITY,atermpp::aterm>::value);
+        static_assert(!std::is_convertible_v<PROBABILITY, atermpp::aterm>);
         return m_state==other.m_state && m_probability==other.m_probability;
       }
     }
@@ -105,8 +103,8 @@ class state_probability_pair
 
 };
 
-} // namespace lps
-} // namespace mcrl2 
+} // namespace mcrl2::lps
+
 
 namespace std
 {

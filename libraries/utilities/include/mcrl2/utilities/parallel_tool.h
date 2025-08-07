@@ -15,13 +15,7 @@
 #include "mcrl2/utilities/configuration.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2
-{
-
-namespace utilities
-{
-
-namespace tools
+namespace mcrl2::utilities::tools
 {
 
 /// \brief Base class for tools that are using multiple threads.
@@ -34,7 +28,7 @@ class parallel_tool: public Tool
 
     /// \brief Add the --threads option to an interface description. 
     /// \param desc An interface description
-    void add_options(utilities::interface_description& desc)
+    void add_options(utilities::interface_description& desc) override
     {
       Tool::add_options(desc);
       if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
@@ -50,7 +44,7 @@ class parallel_tool: public Tool
 
     /// \brief Parse non-standard options
     /// \param parser A command line parser
-    void parse_options(const utilities::command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser) override
     {
       Tool::parse_options(parser);
 
@@ -90,10 +84,6 @@ class parallel_tool: public Tool
     }
 };
 
-} // namespace tools
-
-} // namespace utilities
-
-} // namespace mcrl2
+} // namespace mcrl2::utilities::tools
 
 #endif // MCRL2_UTILITIES_PARALLEL_TOOL_H

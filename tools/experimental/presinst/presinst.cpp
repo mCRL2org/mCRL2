@@ -41,14 +41,14 @@ using utilities::make_enum_argument;
 class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_tool> >
 {
   protected:
-    typedef rewriter_tool<pres_input_output_tool<input_output_tool> > super;
+    using super = rewriter_tool<pres_input_output_tool<input_output_tool>>;
 
-    presinst_strategy m_strategy;
+    presinst_strategy m_strategy = presinst_lazy_strategy;
     std::string m_finite_parameter_selection;
-    bool m_remove_redundant_equations;
+    bool m_remove_redundant_equations = false;
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -72,7 +72,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.
@@ -108,12 +108,11 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
         "by an option). The supported formats are:\n"
         "  'pres' for the mCRL2 PRES format,\n"
         "  'res'  for the mCRL2 BES format,\n"
-      ),
-      m_strategy(presinst_lazy_strategy)
+      )
     {}
 
     /// Runs the algorithm.
-    bool run()
+    bool run() override
     {
       using namespace mcrl2::pres_system;
 

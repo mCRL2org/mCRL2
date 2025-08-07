@@ -15,34 +15,31 @@
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/pres/builder.h"
 
-namespace mcrl2
-{
 
-namespace pres_system
+
+namespace mcrl2::pres_system
 {
 
 template <typename T>
 void normalize_sorts(T& x,
-                     const data::sort_specification& sortspec,
-                     typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                    )
+    const data::sort_specification& sortspec,
+    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   core::make_update_apply_builder<pres_system::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).update(x);
 }
 
 template <typename T>
 T normalize_sorts(const T& x,
-                  const data::sort_specification& sortspec,
-                  typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
-                 )
+    const data::sort_specification& sortspec,
+    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
 {
   T result;
   core::make_update_apply_builder<pres_system::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);
   return result;
 }
 
-} // namespace pres_system
+} // namespace mcrl2::pres_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PRES_NORMALIZE_SORTS_H

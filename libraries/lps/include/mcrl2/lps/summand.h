@@ -14,10 +14,7 @@
 
 #include "mcrl2/data/real.h"
 
-namespace mcrl2
-{
-
-namespace lps
+namespace mcrl2::lps
 {
 
 /// \brief Base class for LPS summands.
@@ -32,8 +29,7 @@ class summand_base
 
   public:
     /// \brief Constructor.
-    summand_base()
-    {}
+    summand_base() = default;
 
     /// \brief Constructor.
     summand_base(const data::variable_list& summation_variables, const data::data_expression& condition)
@@ -70,7 +66,7 @@ class summand_base
     }
 
     /// \brief Swaps the contents
-    void swap(summand_base& other)
+    void swap(summand_base& other) noexcept
     {
       using std::swap;
       swap(m_summation_variables, other.m_summation_variables);
@@ -78,8 +74,8 @@ class summand_base
     }
 };
 
-} // namespace lps
+} // namespace mcrl2::lps
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_LPS_SUMMAND_H

@@ -44,35 +44,39 @@ public:
         Key key_;
 
     public:
-        typedef ptrdiff_t                  difference_type;
-        typedef std::forward_iterator_tag  iterator_category;
-        typedef Key                        value_type;
-        typedef Key*                       pointer;
-        typedef Key&                       reference;
+      using difference_type = ptrdiff_t;
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = Key;
+      using pointer = Key*;
+      using reference = Key&;
 
-        Iterator(const DenseSet *set, Key key) : set_(set), key_(key) { }
-        Iterator(const Iterator &it) : set_(it.set_), key_(it.key_) { }
+      Iterator(const DenseSet* set, Key key)
+          : set_(set),
+            key_(key)
+      {}
+      Iterator(const Iterator& it)
+          : set_(it.set_),
+            key_(it.key_)
+      {}
 
-        Iterator& operator=(const Iterator &it)
-        {
-            set_ = it.set_;
-            key_ = it.key_;
-            return *this;
+      Iterator& operator=(const Iterator& it) = default;
+
+      bool operator==(const Iterator& other) const { return key_ == other.key_; }
+      bool operator!=(const Iterator& other) const { return key_ != other.key_; }
+      bool operator<(const Iterator& other) const { return key_ < other.key_; }
+      bool operator>(const Iterator& other) const { return key_ > other.key_; }
+      bool operator<=(const Iterator& other) const { return key_ <= other.key_; }
+      bool operator>=(const Iterator& other) const { return key_ >= other.key_; }
+
+      value_type operator*() { return key_; }
+
+      Iterator& operator++()
+      {
+        do {
+          ++key_;
         }
-
-        bool operator== (const Iterator &other) const { return key_ == other.key_; }
-        bool operator!= (const Iterator &other) const { return key_ != other.key_; }
-        bool operator<  (const Iterator &other) const { return key_ <  other.key_; }
-        bool operator>  (const Iterator &other) const { return key_ >  other.key_; }
-        bool operator<= (const Iterator &other) const { return key_ <= other.key_; }
-        bool operator>= (const Iterator &other) const { return key_ >= other.key_; }
-
-        value_type operator*() { return key_; }
-
-        Iterator& operator++()
-        {
-            do ++key_; while (!set_->used_[key_]);
-            return *this;
+        while (!set_->used_[key_]);
+        return *this;
         }
 
         Iterator& operator++(int)
@@ -83,17 +87,20 @@ public:
         }
     };
 
-    typedef std::size_t size_type;
-    typedef Key value_type;
-    typedef Iterator iterator;
-    typedef Iterator const_iterator;
+    using size_type = std::size_t;
+    using value_type = Key;
+    using iterator = Iterator;
+    using const_iterator = Iterator;
 
     DenseSet(Key begin, Key end, const Alloc &alloc = Alloc())
         : range_begin(begin), range_end(end < begin ? begin : end),
           range_size_(range_end - range_begin), alloc_(alloc),
-          used_(alloc_.allocate(range_size_ + 1)), num_used_(0)
+          used_(alloc_.allocate(range_size_ + 1))
     {
-        for (size_type i = 0; i < range_size_; ++i) used_[i] = false;
+      for (size_type i = 0; i < range_size_; ++i)
+      {
+        used_[i] = false;
+      }
         used_[range_size_] = true;  // marks end of data
     }
 
@@ -116,7 +123,10 @@ public:
     {
         if (num_used_ > 0)
         {
-            for (size_type i = 0; i < range_size_; ++i) used_[i] = false;
+          for (size_type i = 0; i < range_size_; ++i)
+          {
+            used_[i] = false;
+          }
             num_used_ = 0;
         }
     }
@@ -124,7 +134,10 @@ public:
     iterator begin()
     {
         Key k = range_begin;
-        while (!used_[k - range_begin]) ++k;
+        while (!used_[k - range_begin])
+        {
+          ++k;
+        }
         return iterator(this, k);
     }
 
@@ -197,13 +210,13 @@ private:
     const size_type range_size_;
     Alloc           alloc_;
     bool            *used_;
-    std::size_t          num_used_;
+    std::size_t num_used_ = 0;
 
     friend class Iterator;
 
 private:
-    DenseSet(const DenseSet &);
-    DenseSet &operator=(const DenseSet &);
+  DenseSet(const DenseSet&) = delete;
+  DenseSet& operator=(const DenseSet&) = delete;
 };
 
 #endif /* ndef MCRL2_PG_DENSE_SET_H */

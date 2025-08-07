@@ -19,9 +19,7 @@
 #include "mcrl2/pbes/pbessolve_attractors.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
+namespace mcrl2::pbes_system {
 
 inline
 std::tuple<std::size_t, std::size_t, vertex_set> get_minmax_rank(const structure_graph& G)
@@ -271,7 +269,7 @@ class solve_structure_graph_algorithm
       log_vertex_set(G, Wconj, "Wconj");
       log_vertex_set(G, Wdisj, "Wdisj");
 
-      typedef structure_graph::vertex vertex;
+      using vertex = structure_graph::vertex;
       structure_graph::index_type init = G.initial_vertex();
 
       // V contains the vertices of G, but not the edges
@@ -452,6 +450,11 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
               std::size_t index = 0;
               for (const process::action& a: summand.multi_action().actions())
               {
+                if (index > e1.size() || index + a.arguments().size() > e1.size())
+                {
+                  throw mcrl2::runtime_error("Invalid parameter index");
+                }
+
                 process::action a1(a.label(), data::data_expression_list(e1.begin() + n + index, e1.begin() + n + index + a.arguments().size()));
                 actions.push_back(a1);
                 index = index + a.arguments().size();
@@ -476,7 +479,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
       }
       catch (const std::exception& e)
       {
-        throw mcrl2::runtime_error(std::string("Counter-example cannot be reconstructed from this LPS. ") + e.what());
+        throw mcrl2::runtime_error(std::string("Counter-example cannot be reconstructed, either wrong file provided or an internal error occurred. ") + e.what());
       }
     }
 
@@ -529,7 +532,7 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
         {
           throw mcrl2::runtime_error("Counter-example cannot be reconstructed from this LTS. Did you supply the correct file?");
         }
-        transitions.push_back(lts_transitions[i]);
+        transitions.push_back(lts_transitions.at(i));
       }
       ltsspec.get_transitions() = transitions;
 
@@ -543,23 +546,30 @@ class lts_solve_structure_graph_algorithm: public solve_structure_graph_algorith
     {
       std::regex re("Z(neg|pos)_(\\d+)_.*");
 
-      std::set<std::size_t> transition_indices;
-      for (structure_graph::index_type vi: V)
+      try 
       {
-        const auto& v = G.find_vertex(vi);
-        if (is_propositional_variable_instantiation(v.formula()))
+        std::set<std::size_t> transition_indices;
+        for (structure_graph::index_type vi: V)
         {
-          const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula());
-          std::string Zname = Z.name();
-          std::smatch match;
-          if (std::regex_match(Zname, match, re))
+          const auto& v = G.find_vertex(vi);
+          if (is_propositional_variable_instantiation(v.formula()))
           {
-            std::size_t transition_index = std::stoul(match[2]);
-            transition_indices.insert(transition_index);
+            const propositional_variable_instantiation& Z = atermpp::down_cast<propositional_variable_instantiation>(v.formula());
+            std::string Zname = Z.name();
+            std::smatch match;
+            if (std::regex_match(Zname, match, re))
+            {
+              std::size_t transition_index = std::stoul(match[2]);
+              transition_indices.insert(transition_index);
+            }
           }
         }
+        filter_transitions(ltsspec, transition_indices);
       }
-      filter_transitions(ltsspec, transition_indices);
+      catch (const std::exception& e)
+      {
+        throw mcrl2::runtime_error(std::string("Counter-example cannot be reconstructed, either wrong file provided or an internal error occurred. ") + e.what());
+      }
     }
 
   public:
@@ -640,8 +650,8 @@ bool solve_structure_graph_with_counter_example(structure_graph& G, lts::lts_lts
   return algorithm.solve_with_counter_example(G, ltsspec);
 }
 
-} // namespace pbes_system
+} // namespace mcrl2::pbes_system
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_PBES_SOLVE_STRUCTURE_GRAPH_H

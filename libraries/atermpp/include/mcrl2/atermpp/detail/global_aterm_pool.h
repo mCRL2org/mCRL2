@@ -13,9 +13,8 @@
 #include "mcrl2/atermpp/detail/aterm_pool.h"
 #include "mcrl2/atermpp/detail/thread_aterm_pool.h"
 
-namespace atermpp
-{
-namespace detail
+
+namespace atermpp::detail
 {
 
 /// \brief Storage for a global term pool that is not initialized.
@@ -23,7 +22,7 @@ alignas(aterm_pool)
 extern std::byte g_aterm_pool_storage[sizeof(aterm_pool)];
 
 /// \brief A reference to the global term pool storage
-static aterm_pool& g_aterm_pool_instance = *static_cast<aterm_pool*>(static_cast<void*>(&g_aterm_pool_storage));
+static aterm_pool& g_aterm_pool_instance = *reinterpret_cast<aterm_pool*>(&g_aterm_pool_storage);
 
 /// \brief obtain a reference to the global aterm pool.
 /// \details provides lazy initialization which should be used when instantiating
@@ -47,8 +46,8 @@ inline aterm_pool& g_term_pool()
 // Implemented in a .cpp file. 
 //thread_aterm_pool& g_thread_term_pool();
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
+
 
 #include "mcrl2/atermpp/detail/aterm_implementation.h"
 

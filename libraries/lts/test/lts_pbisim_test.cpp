@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 // are considered the same object for equality and the hash function.
 BOOST_AUTO_TEST_CASE(hash_and_equality_test)
 {
-  typedef probabilistic_state<std::size_t, mcrl2::lps::probabilistic_data_expression> prob_state;
+  using prob_state = probabilistic_state<std::size_t, mcrl2::lps::probabilistic_data_expression>;
   prob_state s1(1);
   prob_state s2;
   s2.add(1,mcrl2::lps::probabilistic_data_expression::one());
@@ -401,7 +401,7 @@ BOOST_AUTO_TEST_CASE(hash_and_equality_test)
   std::hash<prob_state> hasher;
   BOOST_CHECK(hasher(s1)==hasher(s2));
 
-  typedef probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction> prob_state_alt;
+  using prob_state_alt = probabilistic_state<std::size_t, mcrl2::utilities::probabilistic_arbitrary_precision_fraction>;
   prob_state_alt s3(1);
   prob_state_alt s4;
   s4.add(1,mcrl2::utilities::probabilistic_arbitrary_precision_fraction::one());

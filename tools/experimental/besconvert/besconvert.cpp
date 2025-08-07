@@ -25,9 +25,7 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
 using mcrl2::pbes_system::tools::pbes_input_output_tool;
 
-namespace mcrl2
-{
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 class bes_reduction_algorithm: public detail::bes_algorithm
@@ -49,7 +47,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
     };
 
   protected:
-    typedef detail::bes_algorithm super;
+    using super = detail::bes_algorithm;
     using super::m_bes; // Why doesn't the compiler see this by itself?
 
     equivalence_t m_equivalence;
@@ -115,7 +113,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
 
     boolean_operand_t get_operand(pbes_expression const& e)
     {
-      typedef core::term_traits<pbes_expression> tr;
+      using tr = core::term_traits<pbes_expression>;
 
       if (tr::is_and(e))
       {
@@ -434,7 +432,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
               // Construct part of formula
               std::stringstream name;
               name << "X" << i->to();
-              variables.push_back(propositional_variable_instantiation(name.str()));
+              variables.emplace_back(name.str());
             }
           }
           else
@@ -442,7 +440,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
             // Construct part of formula
             std::stringstream name;
             name << "X" << i->to();
-            variables.push_back(propositional_variable_instantiation(name.str()));
+            variables.emplace_back(name.str());
           }
           ++i;
         }
@@ -540,22 +538,20 @@ class bes_reduction_algorithm: public detail::bes_algorithm
     }
 
 };
-} // namespace pbes_system
-} // namespace mcrl2
-
+} // namespace mcrl2::pbes_system
 
 /// \brief Simple input/output tool to perform strong as well as oblivious bisimulation
 ///        reduction on a boolean equation system.
-typedef pbes_input_output_tool<input_output_tool> super;
+using super = pbes_input_output_tool<input_output_tool>;
 class besconvert_tool: public super
 {
   protected:
-    bes_reduction_algorithm::equivalence_t equivalence;
+    bes_reduction_algorithm::equivalence_t equivalence = bes_reduction_algorithm::eq_none;
     std::string m_lts_filename;
-    bes_reduction_algorithm::to_lts_translation_t m_translation;
-    bool m_no_reduction;
+    bes_reduction_algorithm::to_lts_translation_t m_translation = bes_reduction_algorithm::to_lts_selfloop;
+    bool m_no_reduction = false;
 
-    void add_options(mcrl2::utilities::interface_description& desc)
+    void add_options(mcrl2::utilities::interface_description& desc) override
     {
       using namespace mcrl2::utilities::tools;
       using namespace mcrl2::utilities;
@@ -578,7 +574,7 @@ class besconvert_tool: public super
                       "do not perform the reduction, only store the intermediate LTS", 'n');
     }
 
-    void parse_options(const mcrl2::utilities::command_line_parser& parser)
+    void parse_options(const mcrl2::utilities::command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -637,13 +633,10 @@ class besconvert_tool: public super
         "reduce a BES (or PBES) using (variations of) behavioural equivalences",
         "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
         "If INFILE is not "
-        "present, stdin is used. If OUTFILE is not present, stdout is used."),
-      equivalence(bes_reduction_algorithm::eq_none),
-      m_translation(bes_reduction_algorithm::to_lts_selfloop),
-      m_no_reduction(false)
+        "present, stdin is used. If OUTFILE is not present, stdout is used.")
     {}
 
-    bool run()
+    bool run() override
     {
       using namespace mcrl2::pbes_system;
       using namespace mcrl2;

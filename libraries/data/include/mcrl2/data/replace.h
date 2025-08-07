@@ -16,10 +16,7 @@
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/replace_capture_avoiding.h"
 
-namespace mcrl2
-{
-
-namespace data
+namespace mcrl2::data
 {
 
 namespace detail
@@ -29,7 +26,7 @@ namespace detail
 template <template <class> class Builder, class Substitution>
 struct replace_sort_expressions_builder : public Builder<replace_sort_expressions_builder<Builder, Substitution>>
 {
-  typedef Builder<replace_sort_expressions_builder<Builder, Substitution>> super;
+  using super = Builder<replace_sort_expressions_builder<Builder, Substitution>>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -67,7 +64,7 @@ replace_sort_expressions_builder<Builder, Substitution> make_replace_sort_expres
 template <template <class> class Builder, class Substitution>
 struct replace_data_expressions_builder : public Builder<replace_data_expressions_builder<Builder, Substitution>>
 {
-  typedef Builder<replace_data_expressions_builder<Builder, Substitution>> super;
+  using super = Builder<replace_data_expressions_builder<Builder, Substitution>>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -106,7 +103,7 @@ template <template <class> class Builder, template <template <class> class, clas
 struct replace_free_variables_builder
     : public Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution>>
 {
-  typedef Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution>> super;
+  using super = Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution>>;
   using super::apply;
   using super::bound_variables;
   using super::enter;
@@ -172,18 +169,20 @@ std::set<data::variable> substitution_variables(const Substitution& /* sigma */)
 //--- start generated data replace code ---//
 template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
-    const Substitution& sigma,
-    bool innermost,
-    typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+                              const Substitution& sigma,
+                              bool innermost
+                             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_replace_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
 T replace_sort_expressions(const T& x,
-    const Substitution& sigma,
-    bool innermost,
-    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+                           const Substitution& sigma,
+                           bool innermost
+                          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::make_replace_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost).apply(result, x);
@@ -192,33 +191,41 @@ T replace_sort_expressions(const T& x,
 
 template <typename T, typename Substitution>
 void replace_data_expressions(T& x,
-    const Substitution& sigma,
-    bool innermost,
-    typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+                              const Substitution& sigma,
+                              bool innermost
+                             )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
 T replace_data_expressions(const T& x,
-    const Substitution& sigma,
-    bool innermost,
-    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+                           const Substitution& sigma,
+                           bool innermost
+                          )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(sigma, innermost).apply(result, x);
   return result;
 }
 
-template <atermpp::IsATerm T, typename Substitution>
-void replace_variables_update(T& x, const Substitution& sigma)
+
+template <typename T, typename Substitution>
+void replace_variables(T& x,
+                       const Substitution& sigma
+                      )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   core::make_update_apply_builder<data::data_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
-[[nodiscard("resulting term should be assigned")]]
-T replace_variables(const T& x, const Substitution& sigma)
+T replace_variables(const T& x,
+                    const Substitution& sigma
+                   )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   core::make_update_apply_builder<data::data_expression_builder>(sigma).apply(result, x);
@@ -226,17 +233,19 @@ T replace_variables(const T& x, const Substitution& sigma)
 }
 
 template <typename T, typename Substitution>
-void replace_all_variables_update(T& x,
-    const Substitution& sigma,
-    typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+void replace_all_variables(T& x,
+                           const Substitution& sigma
+                          )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   core::make_update_apply_builder<data::variable_builder>(sigma).update(x);
 }
 
-template <atermpp::IsATerm T, typename Substitution>
-[[nodiscard("resulting term should be assigned")]]
+template <typename T, typename Substitution>
 T replace_all_variables(const T& x,
-    const Substitution& sigma)
+                        const Substitution& sigma
+                       )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
   core::make_update_apply_builder<data::variable_builder>(sigma).apply(result, x);
@@ -247,27 +256,25 @@ T replace_all_variables(const T& x,
 /// \\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 void replace_free_variables(T& x,
-    const Substitution& sigma,
-    typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+                            const Substitution& sigma
+                           )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<data::data_expression_builder,
-      data::add_data_variable_builder_binding>(sigma)
-      .update(x);
+  data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_builder_binding>(sigma).update(x);
 }
 
 /// \\brief Applies the substitution sigma to x.
 /// \\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution>
 T replace_free_variables(const T& x,
-    const Substitution& sigma,
-    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+                         const Substitution& sigma
+                        )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   assert(data::is_simple_substitution(sigma));
   T result;
-  data::detail::make_replace_free_variables_builder<data::data_expression_builder,
-      data::add_data_variable_builder_binding>(sigma)
-      .apply(result, x);
+  data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_builder_binding>(sigma).apply(result, x);
   return result;
 }
 
@@ -275,53 +282,45 @@ T replace_free_variables(const T& x,
 /// \\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_free_variables(T& x,
-    const Substitution& sigma,
-    const VariableContainer& bound_variables,
-    typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+                            const Substitution& sigma,
+                            const VariableContainer& bound_variables
+                           )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   assert(data::is_simple_substitution(sigma));
-  data::detail::make_replace_free_variables_builder<data::data_expression_builder,
-      data::add_data_variable_builder_binding>(sigma)
-      .update(x, bound_variables);
+  data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_builder_binding>(sigma).update(x, bound_variables);
 }
 
 /// \\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
 /// \\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_free_variables(const T& x,
-    const Substitution& sigma,
-    const VariableContainer& bound_variables,
-    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr)
+                         const Substitution& sigma,
+                         const VariableContainer& bound_variables
+                        )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   assert(data::is_simple_substitution(sigma));
   T result;
-  data::detail::make_replace_free_variables_builder<data::data_expression_builder,
-      data::add_data_variable_builder_binding>(sigma)
-      .apply(result, x, bound_variables);
+  data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_builder_binding>(sigma).apply(result, x, bound_variables);
   return result;
 }
 //--- end generated data replace code ---//
 
 template <typename T, typename Substitution>
-void substitute_sorts(T& x,
-    const Substitution& sigma,
-    typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0)
+void substitute_sorts(T& x, const Substitution& sigma, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   core::make_update_apply_builder<data::sort_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
-T substitute_sorts(const T& x,
-    const Substitution& sigma,
-    typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0)
+T substitute_sorts(const T& x, const Substitution& sigma, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
 {
   T result;
   core::make_update_apply_builder<data::sort_expression_builder>(sigma).apply(result, x);
   return result;
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REPLACE_H

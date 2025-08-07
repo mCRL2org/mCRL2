@@ -20,9 +20,8 @@
 
 #include <ranges>
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 namespace detail {
 
@@ -110,7 +109,8 @@ std::ostream& operator<<(std::ostream& out, const capture_avoiding_substitution_
 template <template <class> class Builder, template <template <class> class, class, class> class Binder, class Substitution>
 struct replace_capture_avoiding_variables_builder: public Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution>
 {
-  typedef Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution> super;
+  using super
+      = Binder<Builder, replace_capture_avoiding_variables_builder<Builder, Binder, Substitution>, Substitution>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -131,7 +131,7 @@ apply_replace_capture_avoiding_variables_builder(capture_avoiding_substitution_u
 template <template <class> class Builder, class Derived, class Substitution>
 struct add_capture_avoiding_replacement: public Builder<Derived>
 {
-  typedef Builder<Derived> super;
+  using super = Builder<Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -241,9 +241,9 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
-                                        data::set_identifier_generator& id_generator,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        data::set_identifier_generator& id_generator
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   data::detail::apply_replace_capture_avoiding_variables_builder<data::data_expression_builder, data::detail::add_capture_avoiding_replacement>(sigma1).update(x);
@@ -256,9 +256,9 @@ void replace_variables_capture_avoiding(T& x,
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
-                                     data::set_identifier_generator& id_generator,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     data::set_identifier_generator& id_generator
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::detail::capture_avoiding_substitution_updater<Substitution> sigma1(sigma, id_generator);
   T result;
@@ -271,9 +271,9 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 void replace_variables_capture_avoiding(T& x,
-                                        Substitution& sigma,
-                                        typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                        Substitution& sigma
 )
+  requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(data::find_identifiers(x));
@@ -289,9 +289,9 @@ void replace_variables_capture_avoiding(T& x,
 /// \\param sigma A substitution.
 template <typename T, typename Substitution>
 T replace_variables_capture_avoiding(const T& x,
-                                     Substitution& sigma,
-                                     typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
+                                     Substitution& sigma
 )
+  requires std::is_base_of_v<atermpp::aterm, T>
 {
   data::set_identifier_generator id_generator;
   id_generator.add_identifiers(data::find_identifiers(x));
@@ -303,8 +303,6 @@ T replace_variables_capture_avoiding(const T& x,
 }
 //--- end generated data replace_capture_avoiding code ---//
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_H
