@@ -297,7 +297,7 @@ class symbolic_parity_game
       using namespace sylvan::ldds;
       using utilities::detail::contains;
       assert(!(strategy && chaining));
-      
+
       // Determine priority and owner from the given pbes.
       auto equation_info = detail::compute_equation_info(pbes, data_index);
 
@@ -331,7 +331,7 @@ class symbolic_parity_game
         }
       }
     }
-    
+
     /// \brief Determine a symbolic parity game from the given pbes, transition groups and index.
     /// \param V the set of reachable vertices.
     symbolic_parity_game(
@@ -537,7 +537,7 @@ class symbolic_parity_game
 
     /// \brief Computes all vertices above priority c.
     ldd prio_above(const ldd& V, std::size_t c) const
-    {      
+    {
       // Compute the set of states with at least priority c.
       ldd Vc = sylvan::ldds::empty_set();
       for (const auto&[rank, Vrank] : m_rank_map)
@@ -565,8 +565,13 @@ class symbolic_parity_game
         winning[1] = union_(winning[1], intersect(Vsinks, m_V[0]));
       }
 
-      std::tie(winning[0], strategy[0]) = safe_attractor(winning[0], 0, V, Vplayer, I);
-      std::tie(winning[1], strategy[1]) = safe_attractor(winning[1], 1, V, Vplayer, I);
+      std::array<ldd, 2> attr_strategy;
+      std::tie(winning[0], attr_strategy[0]) = safe_attractor(winning[0], 0, V, Vplayer, I);
+      std::tie(winning[1], attr_strategy[1]) = safe_attractor(winning[1], 1, V, Vplayer, I);
+
+      // Update strategy with attractor strategy. Note this is done in-place
+      strategy[0] = union_(strategy[0], attr_strategy[0]);
+      strategy[1] = union_(strategy[1], attr_strategy[1]);
 
       // After removing the deadlock (winning) states the resulting set of states is a total graph.
       return minus(minus(V, winning[0]), winning[1]);
@@ -589,7 +594,7 @@ class symbolic_parity_game
     /// \brief Returns the mapping from priorities (ranks) to vertex sets.
     const std::map<std::size_t, ldd>& ranks() const { return m_rank_map; }
 
-    /// \returns The set { u in U | exists v in V: u -> v } 
+    /// \returns The set { u in U | exists v in V: u -> v }
     ldd predecessors(const ldd& U, const ldd& V) const
     {
       using namespace sylvan::ldds;
@@ -631,12 +636,12 @@ class symbolic_parity_game
     symbolic_parity_game apply_strategy(bool alpha, const ldd& strategy) const
     {
       std::vector<symbolic::summand_group> summand_groups;
-  
+
       for (auto group : m_summand_groups)
       {
         std::vector<std::uint32_t> read_projection;
         for (const auto& idx : group.read_pos)
-        {        
+        {
           if (idx + 1 > read_projection.size())
           {
             read_projection.resize(idx + 1);
@@ -686,7 +691,7 @@ class symbolic_parity_game
           }
         }
         mCRL2log(log::trace) << "L = " << print_relation(m_data_index, group.L, group.read, group.write) << std::endl;
-          
+
         summand_groups.push_back(group);
       }
 
@@ -709,7 +714,7 @@ class symbolic_parity_game
         m_V[0],
         prio,
         m_no_relprod,
-        m_chaining        
+        m_chaining
       );
     }
 
@@ -773,7 +778,7 @@ private:
       }
 
       return std::make_pair(union_(Palpha, Pforced), strategy);
-    } 
+    }
 };
 
 } // namespace mcrl2::pbes_system

@@ -53,10 +53,10 @@ class symbolic_pbessolve_algorithm
       // Compute the partitioning of V for players 0 (in V[0]) and 1 (in V[1]).
       std::array<const ldd, 2> Vplayer = m_G.players(V);
 
-      ldd W[2];
-      ldd strategy[2];
-      ldd W_1[2];
-      ldd strategy_1[2];
+      std::array<ldd, 2> W;
+      std::array<ldd, 2> strategy;
+      std::array<ldd, 2> W_1;
+      std::array<ldd, 2> strategy_1;
 
       const auto [A, A_strategy] = m_G.safe_attractor(U, alpha, V, Vplayer);
       mCRL2log(log::trace) << "A = attractor(" << m_G.print_nodes(U) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(A) << std::endl;
