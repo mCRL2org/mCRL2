@@ -15,6 +15,7 @@ set(MCRL2_TOOLS
   pbesfixpointsolve
   pbespareqelm
   pbespor
+  pbessortfilter
   pbessymbolicbisim
   presconstelm
   presinfo
