@@ -152,7 +152,7 @@ class symbolic_pbessolve_algorithm
       {
         if (m_check_strategy)
         {
-          check_strategy(initial_vertex, V, Vsinks, solved0, solved1, false, strategy0);
+          check_strategy(initial_vertex, V, solved0, solved1, false, strategy0);
         }
         return std::make_tuple(true, solved0, solved1, strategy0, strategy1);
       }
@@ -160,7 +160,7 @@ class symbolic_pbessolve_algorithm
       {
         if (m_check_strategy)
         {
-          check_strategy(initial_vertex, V, Vsinks, solved0, solved1, true, strategy1);
+          check_strategy(initial_vertex, V, solved0, solved1, true, strategy1);
         }
         return std::make_tuple(false, solved0, solved1, strategy0, strategy1);
       }
@@ -493,7 +493,6 @@ class symbolic_pbessolve_algorithm
     /// Throws an exception when the strategy is invalid.
     void check_strategy(const ldd& initial_vertex,
       const ldd& V,
-      const ldd& Vsinks,
       const ldd& W0,
       const ldd& W1,
       bool alpha,
