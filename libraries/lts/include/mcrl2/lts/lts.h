@@ -127,7 +127,7 @@ class lts: public LTS_BASE
       {
         for(transition& t: m_transitions)
         {
-          auto i = action_rename_map.find(t.label());
+          const typename std::map<labels_size_type, labels_size_type>::const_iterator i = action_rename_map.find(t.label());
           if (i!=action_rename_map.end())
           { 
             t=transition(t.from(),i->second,t.to());
@@ -572,6 +572,24 @@ class lts: public LTS_BASE
       return (action==const_tau_label_index);
     }
 
+    /** \brief Rename the hidden labels in the hidden label map explicitly in the lts. 
+     *  \details The hidden label set is cleared as this information is not of any use anymore.
+     */
+    void rename_hidden_labels_to_tau(void)
+    {
+      if (m_hidden_label_set.size()>0)    // Check whether there is something to rename.
+      {
+        for(transition& t: m_transitions)
+        {
+          const typename std::set<labels_size_type>::const_iterator i = m_hidden_label_set.find(t.label());
+          if (i!=m_hidden_label_set.end())
+          {  
+            t=transition(t.from(),const_tau_label_index,t.to());
+          }
+        }
+        m_hidden_label_set.clear();
+      }
+    }
 
     /** \brief Records all actions with a string that occurs in tau_actions internally.
      *  \details In case actions are partially hidden, e.g. action a is hidden in a|b
@@ -604,7 +622,7 @@ class lts: public LTS_BASE
         }
         else if (a!=action_label(i))
         {
-          /* In this the action_label i is changed by the tau_actions but not renamed to tau.
+          /* In this the action_label i is changed by the tau_actions but not renamed to tau, which can happen in multi-actions.
              We check whether a maps onto another action label index. If yes, it is added to 
              the rename map, and we explicitly rename transition labels with this label afterwards.
              If no, we rename the action label.

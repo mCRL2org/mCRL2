@@ -5797,7 +5797,9 @@ class bisim_partitioner_gj
         for (transition_index ti=0; ti<m_transitions.size(); ++ti)
         {
           const transition& t=m_aut.get_transitions()[ti];                      // mCRL2complexity(&m_transitions[ti], add_work(..., 1), *this);
-                                                                                  // Because every transition is touched exactly once, we do not store a physical counter for this.
+                                                                                // Because every transition is touched exactly once, we do not 
+                                                                                // store a physical counter for this.
+
           const label_index label=label_or_divergence(t,
                                                     m_aut.num_action_labels()); assert(m_aut.apply_hidden_label_map(t.label())==t.label());
           transition_index& c=count_transitions_per_action[label];
@@ -6696,11 +6698,12 @@ class bisim_partitioner_gj
           m_branching(branching),
           m_preserve_divergence(preserve_divergence)
     {                                                                           assert(m_branching || !m_preserve_divergence);
-      log::logger::set_reporting_level(log::debug);
-      mCRL2log(log::verbose) << "Start initialisation.\n";
+      mCRL2log(log::debug) << "Start initialisation.\n";
+      // Apply the hidden labels explicitly as the information about hidden labels is not used.
+      aut.rename_hidden_labels_to_tau(); 
       create_initial_partition();
       end_initial_part=std::clock();
-      mCRL2log(log::verbose) << "After initialisation there are "
+      mCRL2log(log::debug) << "After initialisation there are "
               << no_of_blocks << " equivalence classes. Start refining. \n";
       refine_partition_until_it_becomes_stable();                               assert(check_data_structures("READY"));
     }
@@ -6755,15 +6758,15 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
     // Now apply the branching bisimulation reduction algorithm.  If there
     // are no taus, this will automatically yield strong bisimulation.
     const std::clock_t start_part=std::clock();
-    mCRL2log(log::verbose) << "Start Partitioning\n";
+    mCRL2log(log::debug) << "Start Partitioning\n";
     bisim_partitioner_gj<LTS_TYPE> bisim_part(l,branching,preserve_divergence);
 
     // Assign the reduced LTS
     const std::clock_t end_part=std::clock();
-    mCRL2log(log::verbose) << "Start finalizing\n";
+    mCRL2log(log::debug) << "Start finalizing\n";
     bisim_part.finalize_minimized_LTS();
 
-    if (mCRL2logEnabled(log::verbose))
+    if (mCRL2logEnabled(log::debug))
     {
         const std::clock_t end_finalizing=std::clock();
         const int prec=static_cast<int>
@@ -6796,7 +6799,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                 }
                 int width = static_cast<int>(std::log10(h[0])) + 1;
 
-                mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
+                mCRL2log(log::debug) << std::fixed << std::setprecision(prec)
                     << "Time spent on contracting SCCs: " << std::setw(width) << h[1] << "h " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
                        "Time spent on initial partition:" << std::setw(width) << h[2] << "h " << std::setw(2) << min[2] << "min " << std::setw(prec+3) << runtime[2] << "s\n"
                        "Time spent on stabilize+refine: " << std::setw(width) << h[3] << "h " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
@@ -6807,7 +6810,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
             }
             else
             {
-                mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
+                mCRL2log(log::debug) << std::fixed << std::setprecision(prec)
                     << "Time spent on contracting SCCs: " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
                        "Time spent on initial partition:" << std::setw(2) << min[2] << "min " << std::setw(prec+3) << runtime[2] << "s\n"
                        "Time spent on stabilize+refine: " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
@@ -6819,7 +6822,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
         }
         else
         {
-            mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
+            mCRL2log(log::debug) << std::fixed << std::setprecision(prec)
                 << "Time spent on contracting SCCs: " << std::setw(prec+3) << runtime[1] << "s\n"
                    "Time spent on initial partition:" << std::setw(prec+3) << runtime[2] << "s\n"
                    "Time spent on stabilize+refine: " << std::setw(prec+3) << runtime[3] << "s\n"
@@ -6860,7 +6863,7 @@ bool destructive_bisimulation_compare_gj(LTS_TYPE& l1, LTS_TYPE& l2,
 {
     if (generate_counter_examples)
     {
-        mCRL2log(log::warning) << "The GJ24 branching bisimulation "
+        mCRL2log(log::warning) << "The GJ25 branching bisimulation "
                               "algorithm does not generate counterexamples.\n";
     }
     std::size_t init_l2(l2.initial_state() + l1.num_states());
