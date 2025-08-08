@@ -15,9 +15,11 @@
 #ifndef MCRL2_PBES_TOOLS_PBESCHAIN_H
 #define MCRL2_PBES_TOOLS_PBESCHAIN_H
 
+#include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/selection.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/file_utility.h"
 
@@ -25,8 +27,7 @@ namespace mcrl2::pbes_system
 {
 
 struct pbessortfilter_options
-{
-};
+{};
 
 inline pbes filterSort(pbes& p)
 {
@@ -34,23 +35,26 @@ inline pbes filterSort(pbes& p)
       pbes_system::find_function_symbols(p),
       p.global_variables(),
       false);
-  std::vector<data::data_equation> equations;
-  for (auto i: p.data().equations())
+  data::data_equation_vector equations;
+  for (auto i: p.data().user_defined_equations())
   {
     if (used_selector(i))
     {
-      if (std::find(p.data().user_defined_equations().begin(), p.data().user_defined_equations().end(), i)
-          != p.data().user_defined_equations().end())
-      {
-        equations.push_back(i);
-      }
+      equations.push_back(i);
     }
+  }
+
+  data::function_symbol_vector mappings;
+  for (auto i: p.data().user_defined_mappings()) {
+      if (used_selector(i)) {
+          mappings.emplace_back(i);
+      }
   }
 
   data::data_specification data_spec = data::data_specification(p.data().user_defined_sorts(),
       p.data().user_defined_aliases(),
       p.data().user_defined_constructors(),
-      p.data().user_defined_mappings(),
+      mappings,
       equations);
 
   return pbes(data_spec, p.global_variables(), p.equations(), p.initial_state());
@@ -60,7 +64,7 @@ inline void pbessortfilter(const std::string& input_filename,
     const std::string& output_filename,
     const utilities::file_format& input_format,
     const utilities::file_format& output_format,
-    pbessortfilter_options  )
+    pbessortfilter_options)
 {
   pbes p;
   load_pbes(p, input_filename, input_format);
@@ -68,6 +72,6 @@ inline void pbessortfilter(const std::string& input_filename,
   save_pbes(p, output_filename, output_format);
 }
 
-}
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_TOOLS_PBESSORTFILTER_H
