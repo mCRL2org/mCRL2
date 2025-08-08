@@ -53,10 +53,10 @@ class symbolic_pbessolve_algorithm
       // Compute the partitioning of V for players 0 (in V[0]) and 1 (in V[1]).
       std::array<const ldd, 2> Vplayer = m_G.players(V);
 
-      ldd W[2];
-      ldd strategy[2];
-      ldd W_1[2];
-      ldd strategy_1[2];
+      std::array<ldd, 2> W;
+      std::array<ldd, 2> strategy;
+      std::array<ldd, 2> W_1;
+      std::array<ldd, 2> strategy_1;
 
       const auto [A, A_strategy] = m_G.safe_attractor(U, alpha, V, Vplayer);
       mCRL2log(log::trace) << "A = attractor(" << m_G.print_nodes(U) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(A) << std::endl;
@@ -101,13 +101,15 @@ class symbolic_pbessolve_algorithm
         const ldd& V,
         const ldd& Vsinks = sylvan::ldds::empty_set(),
         const ldd& W0 = sylvan::ldds::empty_set(),
-        const ldd& W1 = sylvan::ldds::empty_set())
+        const ldd& W1 = sylvan::ldds::empty_set(),
+        const ldd& S0 = sylvan::ldds::empty_set(),
+        const ldd& S1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
       stopwatch timer;
-      
+
       std::array<ldd, 2> winning = { W0, W1 };
-      std::array<ldd, 2> strategy;
+      std::array<ldd, 2> strategy = { S0, S1 };
 
       ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning, strategy);
 
@@ -131,7 +133,7 @@ class symbolic_pbessolve_algorithm
       }
 
       // If the initial vertex has not yet been won then run the zielonka solver as well.
-      mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(Vtotal) << std::endl;
       auto [solved0, solved1, strategy0, strategy1] = zielonka(Vtotal);
 
       // Ensure that previously solved sets are included.
@@ -150,7 +152,7 @@ class symbolic_pbessolve_algorithm
       {
         if (m_check_strategy)
         {
-          check_strategy(initial_vertex, V, Vsinks, solved0, solved1, false, strategy0);
+          check_strategy(initial_vertex, V, solved0, solved1, false, strategy0);
         }
         return std::make_tuple(true, solved0, solved1, strategy0, strategy1);
       }
@@ -158,7 +160,7 @@ class symbolic_pbessolve_algorithm
       {
         if (m_check_strategy)
         {
-          check_strategy(initial_vertex, V, Vsinks, solved0, solved1, true, strategy1);
+          check_strategy(initial_vertex, V, solved0, solved1, true, strategy1);
         }
         return std::make_tuple(false, solved0, solved1, strategy0, strategy1);
       }
@@ -171,55 +173,68 @@ class symbolic_pbessolve_algorithm
     /// \brief Solve the given incomplete parity game (m_G, I) restricted to V.
     ///        The remaining parameters are sinks, vertices won by even and odd respectively.
     ///        Terminates early when initial_vertex has been solved.
-    std::pair<const ldd, const ldd> partial_solve(const ldd& initial_vertex,
-      const ldd& V,
-      const ldd& I,
-      const ldd& Vsinks = sylvan::ldds::empty_set(),
-      const ldd& W0 = sylvan::ldds::empty_set(),
-      const ldd& W1 = sylvan::ldds::empty_set())
+    std::tuple<const ldd, const ldd, const ldd, const ldd> partial_solve(const ldd& initial_vertex,
+        const ldd& V,
+        const ldd& I,
+        const ldd& Vsinks = sylvan::ldds::empty_set(),
+        const ldd& W0 = sylvan::ldds::empty_set(),
+        const ldd& W1 = sylvan::ldds::empty_set(),
+        const ldd& S0 = sylvan::ldds::empty_set(),
+        const ldd& S1 = sylvan::ldds::empty_set())
     {
       // Make the game total.
       using namespace sylvan::ldds;
       std::array<ldd, 2> winning = { W0, W1 };
-      std::array<ldd, 2> strategy;
+      std::array<ldd, 2> strategy = { S0, S1 };
       ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
-        return { winning[0], winning[1] };
+        return { winning[0], winning[1], strategy[0], strategy[1] };
       }
 
       // Solve with zielonka twice for the safe sets.
-      ldd solved0 = union_(std::get<0>(zielonka(m_G.compute_safe_vertices(0, Vtotal, I))), winning[0]);
-      if (includes(solved0, initial_vertex))
+      std::array<ldd, 2> solved0;
+      std::array<ldd, 2> strategy0;
+      std::tie(solved0[0], solved0[1], strategy0[0], strategy0[1]) = zielonka(m_G.compute_safe_vertices(0, Vtotal, I));
+      solved0[0] = union_(solved0[0], winning[0]);
+      strategy0[0] = union_(strategy0[0], strategy[0]);
+      if (includes(solved0[0], initial_vertex))
       {
-        return { solved0, winning[1] };
+        return { solved0[0], winning[1], strategy0[0], strategy[1] };
       }
-      ldd solved1 = union_(std::get<1>(zielonka(m_G.compute_safe_vertices(1, Vtotal, I))), winning[1]);
-      return { solved0, solved1 };
+
+      std::array<ldd, 2> solved1;
+      std::array<ldd, 2> strategy1;
+      std::tie(solved1[0], solved1[1], strategy1[0], strategy1[1]) = zielonka(m_G.compute_safe_vertices(1, Vtotal, I));
+      solved1[1] = union_(solved1[1], winning[1]);
+      strategy1[1] = union_(strategy1[1], strategy[1]);
+      return { solved0[0], solved1[1], strategy0[0], strategy1[1] };
     }
 
     /// \brief Detect solitair winning cycles for the given incomplete parity game (m_G, I) restricted to V.
     ///        The remaining parameters are sinks, vertices won by even and odd respectively.
     ///        Terminates early when initial_vertex has been solved.
     /// \param safe Whether to use the safe attractor variant (as opposed to computing safe vertices first).
-    std::pair<ldd, ldd> detect_solitair_cycles(const ldd& initial_vertex,
-      const ldd& V,
-      const ldd& I,
-      bool safe_variant,
-      const ldd& Vsinks,
-      const ldd& W0 = sylvan::ldds::empty_set(),
-      const ldd& W1 = sylvan::ldds::empty_set())
+    std::tuple<ldd, ldd, ldd, ldd> detect_solitair_cycles(const ldd& initial_vertex,
+        const ldd& V,
+        const ldd& I,
+        bool safe_variant,
+        const ldd& Vsinks,
+        const ldd& W0 = sylvan::ldds::empty_set(),
+        const ldd& W1 = sylvan::ldds::empty_set(),
+        const ldd& S0 = sylvan::ldds::empty_set(),
+        const ldd& S1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
 
       // Make the game total and removed winning sets.
       std::array<ldd, 2> winning = { W0, W1 };
-      std::array<ldd, 2> strategy;
+      std::array<ldd, 2> strategy = { S0, S1 };
 
       ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
-        return { winning[0], winning[1] };
+        return { winning[0], winning[1], strategy[0], strategy[1] };
       }
 
       mCRL2log(log::trace) << "\n--- apply solitair winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
@@ -261,47 +276,59 @@ class symbolic_pbessolve_algorithm
 
           ++iter;
         }
+        // At this point, all vertices in U have an edge to another vertex in U, and
+        // are thus winning for player alpha. We can set the strategy to U x U.
 
         mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
 
+        strategy[alpha] = union_(strategy[alpha], merge(U, U));
+
         if (safe_variant)
         {
-          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I).first);
+          std::pair<ldd, ldd> attr = m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I);
+          winning[alpha] = union_(winning[alpha], attr.first);
+          strategy[alpha] = union_(strategy[alpha], attr.second);
         }
         else
         {
-          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer).first);
+          std::pair<ldd, ldd> attr = m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer);
+          winning[alpha] = union_(winning[alpha], attr.first);
+          strategy[alpha] = union_(strategy[alpha], attr.second);
         }
       }
 
       mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
+      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
 
-      return { winning[0], winning[1] };
+      return { winning[0], winning[1], strategy[0], strategy[1] };
     }
 
     /// \brief Detect forced winning cycles for the given incomplete parity game (m_G, I) restricted to V.
     ///        The remaining parameters are sinks, vertices won by even and odd respectively.
     ///        Terminates early when initial_vertex has been solved.
     /// \param safe Whether to use the safe attractor variant (as opposed to computing safe vertices first).
-    std::pair<ldd, ldd> detect_forced_cycles(const ldd& initial_vertex,
-      const ldd& V,
-      const ldd& I,
-      bool safe_variant,
-      const ldd& Vsinks,
-      const ldd& W0 = sylvan::ldds::empty_set(),
-      const ldd& W1 = sylvan::ldds::empty_set())
+    std::tuple<ldd, ldd, ldd, ldd> detect_forced_cycles(const ldd& initial_vertex,
+        const ldd& V,
+        const ldd& I,
+        bool safe_variant,
+        const ldd& Vsinks,
+        const ldd& W0 = sylvan::ldds::empty_set(),
+        const ldd& W1 = sylvan::ldds::empty_set(),
+        const ldd& S0 = sylvan::ldds::empty_set(),
+        const ldd& S1 = sylvan::ldds::empty_set())
     {
       using namespace sylvan::ldds;
 
       // Make the game total and removed winning sets.
       std::array<ldd, 2> winning = { W0, W1 };
-      std::array<ldd, 2> strategy;
+      std::array<ldd, 2> strategy = { S0, S1 };
 
       ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, winning, strategy);
       if (includes(winning[0], initial_vertex) || includes(winning[1], initial_vertex))
       {
-        return { winning[0], winning[1] };
+        return { winning[0], winning[1], strategy[0], strategy[1] };
       }
 
       mCRL2log(log::trace) << "\n--- apply forced winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
@@ -353,20 +380,29 @@ class symbolic_pbessolve_algorithm
 
         mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
 
+        // Overapproximate strategy for the forced winning cycles
+        strategy[alpha] = union_(strategy[alpha], merge(U, U));
+
         if (safe_variant)
         {
-          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I).first);
+          std::pair<ldd, ldd> attr = m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I);
+          winning[alpha] = union_(winning[alpha], attr.first);
+          strategy[alpha] = union_(strategy[alpha], attr.second);
         }
         else
         {
-          winning[alpha] = union_(winning[alpha], m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer).first);
+          std::pair<ldd, ldd> attr = m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer);
+          winning[alpha] = union_(winning[alpha], attr.first);
+          strategy[alpha] = union_(strategy[alpha], attr.second);
         }
       }
 
       mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
       mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
+      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
 
-      return { winning[0], winning[1] };
+      return { winning[0], winning[1], strategy[0], strategy[1] };
     }
 
     /// \returns Partial solve using the fatal attractors.
@@ -443,25 +479,35 @@ class symbolic_pbessolve_algorithm
       return { winning[0], winning[1] };
     }
 
+    /// Computes an LDD that has the deadlock states in a given set of vertices V in parity game G
+    /// The deadlocks are those states that are not the predecessor of another state in V.
+    ldd compute_deadlocks(const ldd& V, const symbolic_parity_game& G)
+    {
+      ldd predecessors = G.predecessors(V, V);
+      ldd deadlocks = sylvan::ldds::minus(V, predecessors);
+      return deadlocks;
+    }
+
     /// Checks whether the computed strategy is indeed a correct certificate for the winning partition.
     ///
     /// Throws an exception when the strategy is invalid.
     void check_strategy(const ldd& initial_vertex,
       const ldd& V,
-      const ldd& Vsinks,
-      const ldd& W0, 
-      const ldd& W1, 
-      bool alpha, 
+      const ldd& W0,
+      const ldd& W1,
+      bool alpha,
       const ldd& strategy)
     {
       mCRL2log(log::debug) << "Checking the strategy of the solved parity game..." << std::endl;
       symbolic_parity_game new_G = m_G.apply_strategy(alpha, strategy);
       mCRL2log(log::trace) << "Minimal parity game G = " << new_G.print_graph(V) << std::endl;
-      
+      // there may be new sinks due to vertices whose strategy is not defined.
+      ldd new_Vsinks = compute_deadlocks(V, new_G);
+
 
       symbolic_pbessolve_algorithm check(new_G);
 
-      auto[result, W0_prime, W1_prime, S0, S1] = check.solve(initial_vertex, V, Vsinks);      
+      auto [result, W0_prime, W1_prime, S0, S1] = check.solve(initial_vertex, V, new_Vsinks);
       if (!(W0 == W0_prime && W1 == W1_prime && result != alpha))
       {
         throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
