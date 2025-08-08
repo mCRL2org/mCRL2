@@ -133,7 +133,7 @@ class symbolic_pbessolve_algorithm
       }
 
       // If the initial vertex has not yet been won then run the zielonka solver as well.
-      mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(Vtotal) << std::endl;
       auto [solved0, solved1, strategy0, strategy1] = zielonka(Vtotal);
 
       // Ensure that previously solved sets are included.
@@ -479,6 +479,15 @@ class symbolic_pbessolve_algorithm
       return { winning[0], winning[1] };
     }
 
+    /// Computes an LDD that has the deadlock states in a given set of vertices V in parity game G
+    /// The deadlocks are those states that are not the predecessor of another state in V.
+    ldd compute_deadlocks(const ldd& V, const symbolic_parity_game& G)
+    {
+      ldd predecessors = G.predecessors(V, V);
+      ldd deadlocks = sylvan::ldds::minus(V, predecessors);
+      return deadlocks;
+    }
+
     /// Checks whether the computed strategy is indeed a correct certificate for the winning partition.
     ///
     /// Throws an exception when the strategy is invalid.
@@ -493,11 +502,13 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::debug) << "Checking the strategy of the solved parity game..." << std::endl;
       symbolic_parity_game new_G = m_G.apply_strategy(alpha, strategy);
       mCRL2log(log::trace) << "Minimal parity game G = " << new_G.print_graph(V) << std::endl;
+      // there may be new sinks due to vertices whose strategy is not defined.
+      ldd new_Vsinks = compute_deadlocks(V, new_G);
 
 
       symbolic_pbessolve_algorithm check(new_G);
 
-      auto[result, W0_prime, W1_prime, S0, S1] = check.solve(initial_vertex, V, Vsinks);
+      auto [result, W0_prime, W1_prime, S0, S1] = check.solve(initial_vertex, V, new_Vsinks);
       if (!(W0 == W0_prime && W1 == W1_prime && result != alpha))
       {
         throw mcrl2::runtime_error("Computed strategy does not match the winning partition");

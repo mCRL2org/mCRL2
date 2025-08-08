@@ -749,7 +749,7 @@ private:
       return P;
     }
 
-    /// \brief Compute the safe control attractor set for U where chaining is restricted to W and V are vertices consider as control predecessors (can be different from outside).
+    /// \brief Compute the safe control attractor set for U where chaining is restricted to W and V are vertices considered as control predecessors (can be different from outside).
     ///        The set outside should be minus(V, U)
     std::pair<ldd, ldd> safe_control_predecessors_impl(std::size_t alpha,
       const ldd& U,
