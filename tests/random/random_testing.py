@@ -34,7 +34,7 @@ def mcrl2file(file):
 
 class RandomTest(YmlTest):
     def __init__(self, name, _ymlfile, settings):
-        super(RandomTest, self).__init__(name, _ymlfile, [], settings)
+        super().__init__(name, _ymlfile, [], settings)
 
     # create input files for the random test, and add the filenames to self.inputfiles
     def create_inputfiles(self, runpath = '.'):
@@ -48,12 +48,12 @@ class RandomTest(YmlTest):
 
     def execute(self, runpath = '.'):
         self.create_inputfiles(runpath)
-        super(RandomTest, self).execute()
+        super().execute()
         self.remove_inputfiles(runpath)
 
 class ProcessTest(RandomTest):
     def __init__(self, name, _ymlfile, settings):
-        super(ProcessTest, self).__init__(name, _ymlfile, settings)
+        super().__init__(name, _ymlfile, settings)
         self.actions = ['a', 'b', 'c', 'd']
         self.process_identifiers = ['P', 'Q', 'R']
         self.process_size = 13
@@ -71,7 +71,7 @@ class ProcessTest(RandomTest):
 # generates stochastic random processes
 class StochasticProcessTest(ProcessTest):
     def __init__(self, name, _ymlfile, settings):
-        super(StochasticProcessTest, self).__init__(name, _ymlfile, settings)
+        super().__init__(name, _ymlfile, settings)
         self.process_expression_generators = {
             random_process_expression.ActionGenerator(): 8,
             random_process_expression.DeltaGenerator(): 1,
@@ -89,7 +89,7 @@ class StochasticProcessTest(ProcessTest):
 # generates random process with higher probability of tau transitions
 class ProcessTauTest(ProcessTest):
     def __init__(self, name, testfile, settings):
-        super(ProcessTauTest, self).__init__(name, testfile, settings)
+        super().__init__(name, testfile, settings)
         self.actions = ['a', 'b', 'c']
         self.init = Literal(r'hide({a}, allow({a, b, c}, P || Q || R))')
         self.process_expression_generators = {
@@ -108,25 +108,25 @@ class ProcessTauTest(ProcessTest):
 
 class AlphabetReduceTest(ProcessTest):
     def __init__(self, name, settings):
-        super(AlphabetReduceTest, self).__init__(name, ymlfile('alphabet-reduce'), settings)
+        super().__init__(name, ymlfile('alphabet-reduce'), settings)
         self.actions = ['a', 'b', 'c', 'd', 'e']
 
 class LpsSuminstTest(ProcessTest):
     def __init__(self, name, settings):
-        super(LpsSuminstTest, self).__init__(name, ymlfile('lpssuminst'), settings)
+        super().__init__(name, ymlfile('lpssuminst'), settings)
 
 class LpsSumelmTest(ProcessTest):
     def __init__(self, name, settings):
-        super(LpsSumelmTest, self).__init__(name, ymlfile('lpssumelm'), settings)
+        super().__init__(name, ymlfile('lpssumelm'), settings)
 
 class LpsParelmTest(ProcessTest):
     def __init__(self, name, settings):
-        super(LpsParelmTest, self).__init__(name, ymlfile('lpsparelm'), settings)
+        super().__init__(name, ymlfile('lpsparelm'), settings)
         self.generate_process_parameters = True
 
 class LpsOnePointRuleRewriteTest(ProcessTest):
     def __init__(self, name, settings):
-        super(LpsOnePointRuleRewriteTest, self).__init__(name, ymlfile('lpstransform'), settings)
+        super().__init__(name, ymlfile('lpstransform'), settings)
         self.add_command_line_options('t2', ['-alps-one-point-rule-rewriter'])
 
 class LpsConfcheckTest(ProcessTauTest):
@@ -138,26 +138,26 @@ class LpsConfcheckTest(ProcessTauTest):
                             'trivial' : 'Z'
                           }
         assert confluence_type in self.option_map
-        super(LpsConfcheckTest, self).__init__(name, ymlfile('lpsconfcheck'), settings)
+        super().__init__(name, ymlfile('lpsconfcheck'), settings)
         self.add_command_line_options('t2', ['-x' + self.option_map[confluence_type]])
 
 class LtscompareTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings):
         assert equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'bisim-gj', 'branching-bisim', 'branching-bisim-gv', 'branching-bisim-gjkw', 'branching-bisim-gj', 'dpbranching-bisim', 'dpbranching-bisim-gv', 'dpbranching-bisim-gjkw', 'dpbranching-bisim-gj', 'weak-bisim', 'dpweak-bisim', 'sim', 'ready-sim' , 'trace', 'weak-trace']
-        super(LtscompareTest, self).__init__(name, ymlfile('ltscompare'), settings)
+        super().__init__(name, ymlfile('ltscompare'), settings)
         self.add_command_line_options('t3', ['-e' + equivalence_type])
         self.add_command_line_options('t4', ['-e' + equivalence_type])
 
 class LtsCombineTest(ProcessTest):
     def __init__(self, name, parallel, settings):
-        super(LtsCombineTest, self).__init__(name, ymlfile('ltscombine'), settings)
+        super().__init__(name, ymlfile('ltscombine'), settings)
 
         if parallel:
             self.add_command_line_options('t5', ['--threads=8'])
 
 
     def create_inputfiles(self, runpath = '.'):
-        super(LtsCombineTest, self).create_inputfiles(runpath)
+        super().create_inputfiles(runpath)
 
         # Create a second mCRL2 specification to combine
         filename = f'{self.name}2.mcrl2'
@@ -168,7 +168,7 @@ class LtsCombineTest(ProcessTest):
 class LtscompareCounterexampleTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, hide_actions, settings):
         assert equivalence_type in ['bisim', 'branching-bisim', 'trace', 'impossible-futures']
-        super(LtscompareCounterexampleTest, self).__init__(name, ymlfile('ltscompare-counter-example'), settings)
+        super().__init__(name, ymlfile('ltscompare-counter-example'), settings)
 
         if equivalence_type == 'impossible-futures':
             self.add_command_line_options('t4', ['-p' + equivalence_type])
@@ -184,19 +184,19 @@ class LtscompareCounterexampleTest(ProcessTauTest):
             self.add_command_line_options('t7', ['--tau=b'])
 
     def create_inputfiles(self, runpath = '.'):
-        super(LtscompareCounterexampleTest, self).create_inputfiles(runpath)
+        super().create_inputfiles(runpath)
         # This is a hack to ensure that the counter example formula always exists for the further steps.
         filename = runpath + '/l7.mcf'
         write_text(filename, "true")
 
 class StochasticLtscompareTest(StochasticProcessTest):
     def __init__(self, name, settings):
-        super(StochasticLtscompareTest, self).__init__(name, ymlfile('stochastic-ltscompare'), settings)
+        super().__init__(name, ymlfile('stochastic-ltscompare'), settings)
 
 class BisimulationTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings):
         assert equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'bisim-gj', 'branching-bisim', 'branching-bisim-gv', 'branching-bisim-gjkw', 'branching-bisim-gj', 'weak-bisim']
-        super(BisimulationTest, self).__init__(name, ymlfile('bisimulation'), settings)
+        super().__init__(name, ymlfile('bisimulation'), settings)
         self.add_command_line_options('t3', ['-e' + equivalence_type])
         self.add_command_line_options('t4', ['-e' + equivalence_type])
         if equivalence_type in ['branching-bisim-gv', 'branching-bisim-gjkw', 'branching-bisim-gj']:
@@ -208,11 +208,11 @@ class BisimulationTest(ProcessTauTest):
 
 class Lps2ltsParallelTest(ProcessTauTest):
     def __init__(self, name, settings):
-        super(Lps2ltsParallelTest, self).__init__(name, ymlfile('lps2lts_parallel'), settings)
+        super().__init__(name, ymlfile('lps2lts_parallel'), settings)
 
 class Lps2ltsAlgorithmsTest(ProcessTauTest):
     def __init__(self, name, settings):
-        super(Lps2ltsAlgorithmsTest, self).__init__(name, ymlfile('lps2lts-algorithms'), settings)
+        super().__init__(name, ymlfile('lps2lts-algorithms'), settings)
         # randomly choose an algorithm
         actions = random.choice(['a', 'a,b', 'a,b,c'])
         options = [random.choice(['--deadlock', '--divergence', '--nondeterminism', f'--action={actions}'])]
@@ -227,51 +227,55 @@ class Lps2ltsAlgorithmsTest(ProcessTauTest):
 
 class LpsConstelmTest(ProcessTest):
     def __init__(self, name, settings):
-        super(LpsConstelmTest, self).__init__(name, ymlfile('lpsconstelm'), settings)
+        super().__init__(name, ymlfile('lpsconstelm'), settings)
         self.generate_process_parameters = True
 
 class LpsBinaryTest(ProcessTest):
     def __init__(self, name, settings):
-        super(LpsBinaryTest, self).__init__(name, ymlfile('lpsbinary'), settings)
+        super().__init__(name, ymlfile('lpsbinary'), settings)
         self.generate_process_parameters = True
 
 class LpsstategraphTest(ProcessTest):
     def __init__(self, name, settings):
-        super(LpsstategraphTest, self).__init__(name, ymlfile('lpsstategraph'), settings)
+        super().__init__(name, ymlfile('lpsstategraph'), settings)
         self.generate_process_parameters = True
 
 class Lps2pbesTest(ProcessTest):
     def __init__(self, name, settings):
-        super(Lps2pbesTest, self).__init__(name, ymlfile('lps2pbes'), settings)
+        super().__init__(name, ymlfile('lps2pbes'), settings)
 
     def create_inputfiles(self, runpath = '.'):
-        super(Lps2pbesTest, self).create_inputfiles(runpath)
+        super().create_inputfiles(runpath)
         self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
 
 class Lps2presTest(ProcessTest):
     def __init__(self, name, settings):
-        super(Lps2presTest, self).__init__(name, ymlfile('lps2pres'), settings)
+        super().__init__(name, ymlfile('lps2pres'), settings)
 
     def create_inputfiles(self, runpath = '.'):
-        super(Lps2presTest, self).create_inputfiles(runpath)
+        super().create_inputfiles(runpath)
         self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
 
 class Lts2pbesTest(ProcessTest):
     def __init__(self, name, settings):
-        super(Lts2pbesTest, self).__init__(name, ymlfile('lts2pbes'), settings)
+        super().__init__(name, ymlfile('lts2pbes'), settings)
 
     def create_inputfiles(self, runpath = '.'):
-        super(Lts2pbesTest, self).create_inputfiles(runpath)
+        super().create_inputfiles(runpath)
         # Use the nodeadlock property to generate the PBES.
         self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
 
 class LtsconvertsymbolicTest(ProcessTest):
-    def __init__(self, name, settings):
-        super(LtsconvertsymbolicTest, self).__init__(name, ymlfile('ltsconvertsymbolic'), settings)
+    def __init__(self, name, arguments, settings):
+        super().__init__(name, ymlfile('ltsconvertsymbolic'), settings)
+
+        if arguments:
+            self.add_command_line_options('t4', arguments)
+            
 
 class PbesTest(RandomTest):
     def __init__(self, name, ymlfile, settings):
-        super(PbesTest, self).__init__(name, ymlfile, settings)
+        super().__init__(name, ymlfile, settings)
         self.equation_count = 4
         self.atom_count = 4
         self.propvar_count = 3
@@ -287,43 +291,43 @@ class PbesTest(RandomTest):
 # N.B. does not work yet due to unusable abstraction map
 class PbesabsintheTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbesabsintheTest, self).__init__(name, ymlfile('pbesabsinthe'), settings)
+        super().__init__(name, ymlfile('pbesabsinthe'), settings)
 
 # N.B. This test has been disabled, since the tool has been deprecated.
 class PbesabstractTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbesabstractTest, self).__init__(name, ymlfile('pbesabstract'), settings)
+        super().__init__(name, ymlfile('pbesabstract'), settings)
 
 class PbesconstelmTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbesconstelmTest, self).__init__(name, ymlfile('pbesconstelm'), settings)
+        super().__init__(name, ymlfile('pbesconstelm'), settings)
 
 class PbesfixpointsolveTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbesfixpointsolveTest, self).__init__(name, ymlfile('pbesfixpointsolve'), settings)
+        super().__init__(name, ymlfile('pbesfixpointsolve'), settings)
 
 class PbesparelmTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbesparelmTest, self).__init__(name, ymlfile('pbesparelm'), settings)
+        super().__init__(name, ymlfile('pbesparelm'), settings)
 
 class PbespareqelmTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbespareqelmTest, self).__init__(name, ymlfile('pbespareqelm'), settings)
+        super().__init__(name, ymlfile('pbespareqelm'), settings)
 
 class PbeschainTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbeschainTest, self).__init__(name, ymlfile('pbeschain'), settings)
+        super().__init__(name, ymlfile('pbeschain'), settings)
 
 class Pbespor1Test(PbesTest):
     def __init__(self, name, settings):
-        super(Pbespor1Test, self).__init__(name, ymlfile('pbespor1'), settings)
+        super().__init__(name, ymlfile('pbespor1'), settings)
 
 class Pbespor2Test(ProcessTest):
     def __init__(self, name, settings):
-        super(Pbespor2Test, self).__init__(name, ymlfile('pbespor2'), settings)
+        super().__init__(name, ymlfile('pbespor2'), settings)
 
     def create_inputfiles(self, runpath = '.'):
-        super(Pbespor2Test, self).create_inputfiles(runpath)
+        super().create_inputfiles(runpath)
         filename = f'{self.name}.mcf'
         formula = random_state_formula_generator.make_modal_formula()
         write_text(filename, str(formula))
@@ -331,47 +335,47 @@ class Pbespor2Test(ProcessTest):
 
 class PbesrewrTest(PbesTest):
     def __init__(self, name, rewriter, settings):
-        super(PbesrewrTest, self).__init__(name, ymlfile('pbesrewr'), settings)
+        super().__init__(name, ymlfile('pbesrewr'), settings)
         self.add_command_line_options('t2', ['-p' + rewriter])
 
 class PbestransformTest(PbesTest):
     def __init__(self, name, rewriter, settings):
-        super(PbestransformTest, self).__init__(name, ymlfile('pbestransform'), settings)
+        super().__init__(name, ymlfile('pbestransform'), settings)
         self.add_command_line_options('t2', ['-a' + rewriter])
 
 class PbesinstTest(PbesTest):
     def __init__(self, name, options, settings):
-        super(PbesinstTest, self).__init__(name, ymlfile('pbesinst'), settings)
+        super().__init__(name, ymlfile('pbesinst'), settings)
         self.add_command_line_options('t2', options)
 
 class PbespgsolveTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbespgsolveTest, self).__init__(name, ymlfile('pbespgsolve'), settings)
+        super().__init__(name, ymlfile('pbespgsolve'), settings)
 
 class PbesstategraphTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbesstategraphTest, self).__init__(name, ymlfile('pbesstategraph'), settings)
+        super().__init__(name, ymlfile('pbesstategraph'), settings)
 
 class PbessymbolicbisimTest(PbesTest):
     def __init__(self, name, settings):
-        super(PbessymbolicbisimTest, self).__init__(name, ymlfile('pbessymbolicbisim'), settings)
+        super().__init__(name, ymlfile('pbessymbolicbisim'), settings)
 
 class PbessolvesymbolicTest(PbesTest):
     def __init__(self, name, arguments, settings):
-        super(PbessolvesymbolicTest, self).__init__(name, ymlfile('pbessolvesymbolic'), settings)
+        super().__init__(name, ymlfile('pbessolvesymbolic'), settings)
 
         if arguments:
             self.add_command_line_options('t3', arguments)
 
 class PbessolvesymbolicCounterexampleTest(ProcessTest):
     def __init__(self, name, arguments, settings):
-        super(PbessolvesymbolicCounterexampleTest, self).__init__(name, ymlfile('pbessolvesymbolic-counter-example'), settings)
+        super().__init__(name, ymlfile('pbessolvesymbolic-counter-example'), settings)
 
         if arguments:
             self.add_command_line_options('t3', arguments)
             
     def create_inputfiles(self, runpath = '.'):
-        super(PbessolvesymbolicCounterexampleTest, self).create_inputfiles(runpath)
+        super().create_inputfiles(runpath)
         filename = f'{self.name}.mcf'
         formula = random_state_formula_generator.make_modal_formula()
         write_text(filename, str(formula))
@@ -379,7 +383,7 @@ class PbessolvesymbolicCounterexampleTest(ProcessTest):
         
 class Pbes2boolTest(PbesTest):
     def __init__(self, name, parallel, settings):
-        super(Pbes2boolTest, self).__init__(name, ymlfile('pbessolve'), settings)
+        super().__init__(name, ymlfile('pbessolve'), settings)
 
         if parallel:            
             self.add_command_line_options('t2', ["--threads=4"])
@@ -392,10 +396,10 @@ class Pbes2boolTest(PbesTest):
 
 class Pres2boolTest(ProcessTest):
     def __init__(self, name, settings):
-        super(Pres2boolTest, self).__init__(name, ymlfile('pressolve'), settings)
+        super().__init__(name, ymlfile('pressolve'), settings)
 
     def create_inputfiles(self, runpath = '.'):
-        super(Pres2boolTest, self).create_inputfiles(runpath)
+        super().create_inputfiles(runpath)
         filename = f'{self.name}.mcf'
         formula = random_state_formula_generator.make_modal_formula()
         write_text(filename, str(formula))
@@ -403,7 +407,7 @@ class Pres2boolTest(ProcessTest):
 
 class Pbes2boolDepthFirstTest(PbesTest):
     def __init__(self, name, settings):
-        super(Pbes2boolDepthFirstTest, self).__init__(name, ymlfile('pbessolve'), settings)
+        super().__init__(name, ymlfile('pbessolve'), settings)
         self.add_command_line_options('t2', ['-zdepth-first'])
         self.add_command_line_options('t3', ['-zdepth-first'])
         self.add_command_line_options('t4', ['-zdepth-first'])
@@ -414,14 +418,14 @@ class Pbes2boolDepthFirstTest(PbesTest):
 
 class Pbes2bool_counter_exampleTest(ProcessTest):
     def __init__(self, name, optimization, settings):
-        super(Pbes2bool_counter_exampleTest, self).__init__(name, ymlfile('pbessolve-counter-example'), settings)
+        super().__init__(name, ymlfile('pbessolve-counter-example'), settings)
         if optimization in [4, 5]:
             self.add_command_line_options('t3', [f'-l{optimization}', '--aggressive', '--prune-todo-list'])
         else:
             self.add_command_line_options('t3', [f'-l{optimization}', '--prune-todo-list'])
 
     def create_inputfiles(self, runpath = '.'):
-        super(Pbes2bool_counter_exampleTest, self).create_inputfiles(runpath)
+        super().create_inputfiles(runpath)
         filename = f'{self.name}.mcf'
         formula = random_state_formula_generator.make_modal_formula()
         write_text(filename, str(formula))
@@ -429,20 +433,20 @@ class Pbes2bool_counter_exampleTest(ProcessTest):
 
 class Pbes_unify_parametersTest(PbesTest):
     def __init__(self, name, settings):
-        super(Pbes_unify_parametersTest, self).__init__(name, ymlfile('pbes-unify-parameters'), settings)
+        super().__init__(name, ymlfile('pbes-unify-parameters'), settings)
 
 class Pbes_srfTest(PbesTest):
     def __init__(self, name, settings):
-        super(Pbes_srfTest, self).__init__(name, ymlfile('pbes-srf'), settings)
+        super().__init__(name, ymlfile('pbes-srf'), settings)
 
 # N.B does not work due to unknown expressions (F_or)
 class SymbolicExplorationTest(PbesTest):
     def __init__(self, name, settings):
-        super(SymbolicExplorationTest, self).__init__(name, ymlfile('symbolic_exploration'), settings)
+        super().__init__(name, ymlfile('symbolic_exploration'), settings)
 
 class BesTest(RandomTest):
     def __init__(self, name, ymlfile, settings):
-        super(BesTest, self).__init__(name, ymlfile, settings)
+        super().__init__(name, ymlfile, settings)
         self.equation_count = 4
         self.term_size = 3
 
@@ -454,7 +458,7 @@ class BesTest(RandomTest):
 
 class BessolveTest(BesTest):
     def __init__(self, name, settings):
-        super(BessolveTest, self).__init__(name, ymlfile('bessolve'), settings)
+        super().__init__(name, ymlfile('bessolve'), settings)
 
 available_tests = {
     'alphabet-reduce'                             : lambda name, settings: AlphabetReduceTest(name, settings)                                          ,
@@ -509,7 +513,7 @@ available_tests = {
     'bisimulation-branching-bisim-gjkw'           : lambda name, settings: BisimulationTest(name, 'branching-bisim-gjkw', settings)                    ,
     'bisimulation-branching-bisim-gj'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj', settings)                    ,
     'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                              ,
-    'pbeschain'                           : lambda name, settings: PbeschainTest(name, settings)                                            ,
+    'pbeschain'                                   : lambda name, settings: PbeschainTest(name, settings)                                            ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
     'pbesfixpointsolve'                           : lambda name, settings: PbesfixpointsolveTest(name, settings)                                              ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
@@ -560,6 +564,7 @@ if shutil.which("z3") is not None:
 # These test do not work on Windows due to dependencies.
 if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic' : lambda name, settings: PbessolvesymbolicTest(name, [], settings) })
+    available_tests.update({'pbessolvesymbolic-parallel' : lambda name, settings: PbessolvesymbolicTest(name, ['--threads=8'], settings) })
     available_tests.update({'pbessolvesymbolic-total' : lambda name, settings: PbessolvesymbolicTest(name, ['--total'], settings) })
     available_tests.update({'pbessolvesymbolic-chaining' : lambda name, settings: PbessolvesymbolicTest(name, ['--chaining'], settings) })
     available_tests.update({'pbessolvesymbolic-total-chaining' : lambda name, settings: PbessolvesymbolicTest(name, ['--total', '--chaining'], settings) })
@@ -575,7 +580,8 @@ if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic-partial-s7' : lambda name, settings: PbessolvesymbolicTest(name, ['-s7', '--aggressive'], settings) })
 
     available_tests.update({'pbessolvesymbolic-counter-example' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, [], settings) })
-    # available_tests.update({'ltsconvertsymbolic' : lambda name, settings: LtsconvertsymbolicTest(name, settings) })
+    available_tests.update({'ltsconvertsymbolic' : LtsconvertsymbolicTest})
+    available_tests.update({'ltsconvertsymbolic-parallel' : lambda name, settings: LtsconvertsymbolicTest(name, ['--threads=8'], settings) })
 
 def print_names(tests):
     for name in sorted(tests):
