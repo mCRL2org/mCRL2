@@ -513,10 +513,7 @@ available_tests = {
     'bisimulation-branching-bisim-gjkw'           : lambda name, settings: BisimulationTest(name, 'branching-bisim-gjkw', settings)                    ,
     'bisimulation-branching-bisim-gj'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj', settings)                    ,
     'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                              ,
-    'pbeschain'                                   : lambda name, settings: PbeschainTest(name, settings)                                            ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
-    'pbesfixpointsolve'                           : lambda name, settings: PbesfixpointsolveTest(name, settings)                                              ,
-    'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                            ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
     'pbesrewr-pfnf'                               : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                                        ,
     'pbesrewr-quantifier-all'                     : lambda name, settings: PbesrewrTest(name, 'quantifier-all', settings)                              ,
@@ -555,7 +552,10 @@ available_experimental_tests = {
     'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
     'pressolve'                                   : lambda name, settings: Pres2boolTest(name, settings)                                               ,
     'pbespor2'                                    : lambda name, settings: Pbespor2Test(name, settings)                                                ,
-    'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                
+    'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                                ,
+    'pbeschain'                                   : lambda name, settings: PbeschainTest(name, settings)                                               ,
+    'pbesfixpointsolve'                           : lambda name, settings: PbesfixpointsolveTest(name, settings)                                       ,
+    'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)
 }
 
 if shutil.which("z3") is not None:
@@ -580,7 +580,7 @@ if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic-partial-s7' : lambda name, settings: PbessolvesymbolicTest(name, ['-s7', '--aggressive'], settings) })
 
     available_tests.update({'pbessolvesymbolic-counter-example' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, [], settings) })
-    available_tests.update({'ltsconvertsymbolic' : LtsconvertsymbolicTest})
+    available_tests.update({'ltsconvertsymbolic' :  lambda name, settings: LtsconvertsymbolicTest(name, [], settings)})
     available_tests.update({'ltsconvertsymbolic-parallel' : lambda name, settings: LtsconvertsymbolicTest(name, ['--threads=8'], settings) })
 
 def print_names(tests):
