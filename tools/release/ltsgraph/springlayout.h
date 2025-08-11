@@ -140,19 +140,20 @@ class SpringLayout
    * @param natlength Other scaling constant
    * @return QVector3D Force exerted by all particles on particle @e a
    */
-  template <typename TreeType>
-  QVector3D approxRepulsionForce(const QVector3D& a, TreeType& tree, const float ideal_distance);
+    template<typename TreeType>
+    QVector3D approxRepulsionForce(const QVector3D& a, TreeType& tree, float ideal_distance);
 
-  void forceAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount,
-                         TreeMode treeMode, ThreadingMode threadingMode);
+    void forceAccumulation(bool sel,
+      std::size_t nodeCount,
+      std::size_t edgeCount,
+      TreeMode treeMode,
+      ThreadingMode threadingMode);
 
-  template <TreeMode mode>
-  void repulsionAccumulation(bool sel, std::size_t nodeCount,
-                             std::size_t edgeCount);
+    template<TreeMode mode>
+    void repulsionAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount);
 
-  template <ThreadingMode mode>
-  void attractionAccumulation(bool sel, std::size_t nodeCount,
-                              std::size_t edgeCount);
+    template<ThreadingMode mode>
+    void attractionAccumulation(bool sel, std::size_t nodeCount, std::size_t edgeCount);
 
   public:
   GLWidget& m_glwidget;

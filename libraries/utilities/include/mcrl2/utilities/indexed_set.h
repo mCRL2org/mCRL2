@@ -117,13 +117,13 @@ public:
   /// \details Returns an out_of_range exception if there is no element with the given key.
   /// \param index The position in the indexed set.
   /// \return The value at position index.
-  const key_type& at(const size_type index) const;
+  const key_type& at(size_type index) const;
 
   /// \brief Operator that provides a const reference at the position indicated by index.
   /// \param index The position in the indexed set.
   /// \return The value at position index.
   /// \details threadsafe
-  const key_type& operator[](const size_type index) const;
+  const key_type& operator[](size_type index) const;
 
   /// \brief Forward iterator which runs through the elements from the lowest to the largest number.
   /// \details Complexity is constant per operation.

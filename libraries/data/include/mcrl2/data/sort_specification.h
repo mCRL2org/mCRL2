@@ -314,12 +314,9 @@ class sort_specification
     // of the form A=B; B=A; or more complex A=B->C; B=Set(D); D=List(A); Loops
     // through structured sorts are allowed. If a loop is detected, an exception
     // is thrown.
-    void check_for_alias_loop(
-      const sort_expression& s,
+    void check_for_alias_loop(const sort_expression& s,
       std::set<sort_expression> sorts_already_seen,
-      const bool toplevel=true) const;
-
-
+      bool toplevel = true) const;
 }
 ;
 

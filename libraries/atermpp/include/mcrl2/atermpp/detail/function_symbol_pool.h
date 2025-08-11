@@ -32,8 +32,8 @@ public:
   ///           name equal pn where n is a number. In that case prevent that pn will be generated
   ///           as a fresh function name.
   /// \threadsafe
-  function_symbol create(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
-  function_symbol create(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
+  function_symbol create(const std::string& name, std::size_t arity, bool check_for_registered_functions = false);
+  function_symbol create(std::string&& name, std::size_t arity, bool check_for_registered_functions = false);
 
   /// \brief Restore the index back to index before registering this prefix.
   /// \threadsafe

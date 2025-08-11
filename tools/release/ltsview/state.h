@@ -65,7 +65,7 @@ class State
     void increaseSimulation() { simulationCount++; }
     void decreaseSimulation() { simulationCount--; }
 
-    void setZoomLevel(const int level);
+    void setZoomLevel(int level);
     int getZoomLevel() const;
 
   private:

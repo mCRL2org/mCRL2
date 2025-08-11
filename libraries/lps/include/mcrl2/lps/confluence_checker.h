@@ -213,18 +213,18 @@ private:
 
   /// \brief Checks the confluence of summand a_summand_1 and a_summand_2
   bool check_summands(const data::data_expression& a_invariant,
-      const action_summand_type a_summand_1,
-      const std::size_t a_summand_number_1,
-      const action_summand_type a_summand_2,
-      const std::size_t a_summand_number_2,
-      const char a_condition_type);
+    action_summand_type a_summand_1,
+    std::size_t a_summand_number_1,
+    action_summand_type a_summand_2,
+    std::size_t a_summand_number_2,
+    char a_condition_type);
 
   /// \brief Checks and updates the confluence of summand a_summand concerning all other tau-summands.
   void check_confluence_and_mark_summand(action_summand_type& a_summand,
-      const std::size_t a_summand_number,
-      const data::data_expression& a_invariant,
-      const char a_condition_type,
-      bool& a_is_marked);
+    std::size_t a_summand_number,
+    const data::data_expression& a_invariant,
+    char a_condition_type,
+    bool& a_is_marked);
 
   // Returns a modified instance of a summand in which summation variables are uniquely renamed.
   void uniquely_rename_summutation_variables(action_summand_type& summand);
@@ -253,7 +253,7 @@ public:
   /// precondition: the argument passed as parameter a_summand_number corresponds with a summand of the LPS for which
   /// confluence must be checked (lowest summand has number 1). If this number is 0 confluence for all summands is
   /// checked.
-  void check_confluence_and_mark(const data::data_expression& a_invariant, const std::size_t a_summand_number);
+  void check_confluence_and_mark(const data::data_expression& a_invariant, std::size_t a_summand_number);
 };
 
 // Auxiliary functions ----------------------------------------------------------------------------

@@ -32,7 +32,7 @@ class ArcDiagram : public Visualizer
 
     void getAttrsTree(std::vector< std::size_t > &idcs);
 
-    void setAttrsTree(const std::vector< std::size_t > idcs);
+    void setAttrsTree(std::vector<std::size_t> idcs);
 
     void setDiagram(Diagram* dgrm);
     void hideAllDiagrams();

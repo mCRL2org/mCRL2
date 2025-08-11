@@ -153,11 +153,11 @@ public:
                         bool proper,
                         EdgeDirection edge_dir = EDGE_NONE );
 
-    void make_subgraph_threads( const StaticGraph &graph,
-                                const verti *verts,
-                                const verti nvert,
-                                bool proper,
-                                EdgeDirection edge_dir = EDGE_NONE );
+    void make_subgraph_threads(const StaticGraph& graph,
+      const verti* verts,
+      verti nvert,
+      bool proper,
+      EdgeDirection edge_dir = EDGE_NONE);
 
     /*! Removes the given edges from the graph. The contents of the edge list
         may be reordered by this function! */

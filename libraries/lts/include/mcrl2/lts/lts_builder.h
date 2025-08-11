@@ -50,7 +50,9 @@ struct lts_builder
   }
 
   // Add a transition to the LTS
-  virtual void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to, const std::size_t number_of_threads = 0) = 0;
+  virtual void
+  add_transition(std::size_t from, const lps::multi_action& a, std::size_t to, std::size_t number_of_threads = 0)
+    = 0;
 
   // Add actions and states to the LTS
   virtual void finalize(const indexed_set_for_states_type& state_map, bool timed) = 0;

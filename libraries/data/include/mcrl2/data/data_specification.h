@@ -555,13 +555,12 @@ class data_specification: public sort_specification
 
     ///\brief Adds the system defined sorts to the sets with constructors, mappings, and equations for
     //        a given sort. If the boolean skip_equations is true, no equations are added.
-    void find_associated_system_defined_data_types_for_a_sort(
-                       const sort_expression& sort,
-                       std::set < function_symbol >& constructors,
-                       std::set < function_symbol >& mappings,
-                       std::set < data_equation >& equations,
-                       implementation_map& cpp_implemented_functions,
-                       const bool skip_equations=false) const;
+    void find_associated_system_defined_data_types_for_a_sort(const sort_expression& sort,
+      std::set<function_symbol>& constructors,
+      std::set<function_symbol>& mappings,
+      std::set<data_equation>& equations,
+      implementation_map& cpp_implemented_functions,
+      bool skip_equations = false) const;
 
     ///\brief Adds the system defined sorts in a sequence.
     ///       The second argument is used to check which sorts are added, to prevent

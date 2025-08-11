@@ -274,16 +274,17 @@ class RewriterCompilingJitty: public Rewriter
     void BuildRewriteSystem();
     void generate_code(const std::string& filename);
     void generate_rewr_functions(std::ostream& s, const data::function_symbol& func, const data_equation_list& eqs);
-    bool lift_rewrite_rule_to_right_arity(data_equation& e, const std::size_t requested_arity);
-    sort_list_vector get_residual_sorts(const sort_expression& s, const std::size_t actual_arity, const std::size_t requested_arity);
-    match_tree_list create_strategy(const data_equation_list& rules, const std::size_t arity);
-    void term2seq(const data_expression& t, match_tree_list& s, std::size_t *var_cnt, const bool omit_head);
+    bool lift_rewrite_rule_to_right_arity(data_equation& e, std::size_t requested_arity);
+    sort_list_vector
+    get_residual_sorts(const sort_expression& s, std::size_t actual_arity, std::size_t requested_arity);
+    match_tree_list create_strategy(const data_equation_list& rules, std::size_t arity);
+    void term2seq(const data_expression& t, match_tree_list& s, std::size_t* var_cnt, bool omit_head);
     match_tree_list create_sequence(const data_equation& rule, std::size_t* var_cnt);
     match_tree_list subst_var(const match_tree_list& l,
-                                 const variable& old,
-                                 const variable& new_val,
-                                 const std::size_t num,
-                                 const mutable_map_substitution<>& substs);
+      const variable& old,
+      const variable& new_val,
+      std::size_t num,
+      const mutable_map_substitution<>& substs);
     match_tree build_tree(build_pars pars, std::size_t i);
     match_tree create_tree(const data_equation_list& rules);
 

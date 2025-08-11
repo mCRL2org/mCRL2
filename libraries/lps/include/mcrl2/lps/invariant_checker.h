@@ -84,8 +84,8 @@ private:
   void save_dot_file(std::size_t a_summand_number);
   bool check_init(const data::data_expression& a_invariant);
   bool check_summand(const data::data_expression& a_invariant,
-      const action_summand_type& a_summand,
-      const std::size_t a_summand_number);
+    const action_summand_type& a_summand,
+    std::size_t a_summand_number);
   bool check_summands(const data::data_expression& a_invariant);
 public:
 

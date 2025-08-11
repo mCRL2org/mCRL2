@@ -8,9 +8,6 @@
 //
 /// \file ltscompare.cpp
 
-#define NAME "ltscompare"
-#define AUTHOR "Muck van Weerdenburg"
-
 #include "mcrl2/utilities/input_tool.h"
 
 #include "mcrl2/lts/lts_algorithm.h"
@@ -67,19 +64,21 @@ class ltscompare_tool : public ltscompare_base
     }
 
   public:
-    ltscompare_tool() :
-      ltscompare_base(NAME,AUTHOR,
-                      "compare two LTSs",
-                      "Determine whether or not the labelled transition systems (LTSs) in INFILE1 and INFILE2 are related by some equivalence or preorder. "
-                      "If INFILE1 is not supplied, stdin is used. "
-                      "If INFILE1 and/or INFILE2 is '-', stdin is used. "
-                      "Reading two LTSs via stdin is only supported for the 'aut' format, these LTSs must be separated by an EOT character (\\x04).\n"
-                      "\n"
-                      "The input formats are determined by the contents of INFILE1 and INFILE2. "
-                      "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
-                      "The supported formats are:\n"
-                      + mcrl2::lts::detail::supported_lts_formats_text()
-                     )
+    ltscompare_tool()
+      : ltscompare_base("ltscompare",
+          "Muck van Weerdenburg",
+          "compare two LTSs",
+          "Determine whether or not the labelled transition systems (LTSs) in INFILE1 and INFILE2 are related by some "
+          "equivalence or preorder. "
+          "If INFILE1 is not supplied, stdin is used. "
+          "If INFILE1 and/or INFILE2 is '-', stdin is used. "
+          "Reading two LTSs via stdin is only supported for the 'aut' format, these LTSs must be separated by an EOT "
+          "character (\\x04).\n"
+          "\n"
+          "The input formats are determined by the contents of INFILE1 and INFILE2. "
+          "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
+          "The supported formats are:\n"
+            + mcrl2::lts::detail::supported_lts_formats_text())
     {
     }
 
@@ -218,7 +217,7 @@ class ltscompare_tool : public ltscompare_base
                  "use FORMAT as the format for INFILE2", 'j').
       add_option("equivalence", make_enum_argument<lts_equivalence>("NAME)")
                  .add_value(lts_eq_none, true)
-                 .add_value(lts_eq_bisim)
+                 .add_hidden_value(lts_eq_bisim)
                  .add_value(lts_eq_bisim_gv)
                  .add_value(lts_eq_bisim_gjkw)
                  .add_value(lts_eq_bisim_jgkw)

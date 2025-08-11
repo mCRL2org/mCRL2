@@ -261,13 +261,13 @@ bool destructive_compare(LTS_TYPE& l1,
  * \retval true if the LTSs are found to be equivalent.
  * \retval false otherwise.
  */
-template <class LTS_TYPE>
+template<class LTS_TYPE>
 bool compare(const LTS_TYPE& l1,
-             const LTS_TYPE& l2,
-             const lts_equivalence eq,
-             const bool generate_counter_examples = false,
-             const std::string& counter_example_file = "",
-             const bool structured_output = false);
+  const LTS_TYPE& l2,
+  lts_equivalence eq,
+  bool generate_counter_examples = false,
+  const std::string& counter_example_file = "",
+  bool structured_output = false);
 
 /** \brief Checks whether this LTS is smaller than another LTS according
  * to a preorder.
@@ -290,15 +290,15 @@ bool compare(const LTS_TYPE& l1,
  * induced by the preorder \a pre (i.e. \f$eq = pre \cap
  * pre^{-1}\f$).
  */
-template <class LTS_TYPE >
+template<class LTS_TYPE>
 bool destructive_compare(LTS_TYPE& l1,
-                         LTS_TYPE& l2,
-                         const lts_preorder pre,
-                         const bool generate_counter_example,
-                         const std::string& counter_example_file = "",
-                         const bool structured_output = false,
-                         const lps::exploration_strategy strategy = lps::es_breadth,
-                         const bool preprocess = true);
+  LTS_TYPE& l2,
+  lts_preorder pre,
+  bool generate_counter_example,
+  const std::string& counter_example_file = "",
+  bool structured_output = false,
+  lps::exploration_strategy strategy = lps::es_breadth,
+  bool preprocess = true);
 
 /** \brief Checks whether this LTS is smaller than another LTS according
  * to a preorder.
@@ -314,15 +314,15 @@ bool destructive_compare(LTS_TYPE& l1,
  * preorder \a pre.
  * \retval false otherwise.
  */
-template <class  LTS_TYPE >
-bool compare(const LTS_TYPE&  l1,
-             const  LTS_TYPE& l2,
-             const lts_preorder pre,
-             const bool generate_counter_example,
-             const std::string& counter_example_file = "",
-             const bool structured_output = false,
-             const lps::exploration_strategy strategy = lps::es_breadth,
-             const bool preprocess = true);
+template<class LTS_TYPE>
+bool compare(const LTS_TYPE& l1,
+  const LTS_TYPE& l2,
+  lts_preorder pre,
+  bool generate_counter_example,
+  const std::string& counter_example_file = "",
+  bool structured_output = false,
+  lps::exploration_strategy strategy = lps::es_breadth,
+  bool preprocess = true);
 
 /** \brief Determinises this LTS. */
 template <class LTS_TYPE>

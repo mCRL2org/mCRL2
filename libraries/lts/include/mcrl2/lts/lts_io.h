@@ -47,7 +47,7 @@ namespace detail
  * \return The LTS format based on the extension of \a s.
  * If no supported format can be determined from the extension then \a
  * lts_none is returned.  */
-lts_type guess_format(std::string const& s, const bool be_verbose=true);
+lts_type guess_format(std::string const& s, bool be_verbose = true);
 
 /** \brief Determines the LTS format from a format specification string.
  * \details This can be any of the following strings:
@@ -65,19 +65,19 @@ lts_type parse_format(std::string const& s);
  * \details This is the "inverse" of \ref parse_format.
  * \param[in] type The LTS format.
  * \return The name of the LTS format specified by \a type. */
-std::string string_for_type(const lts_type type);
+std::string string_for_type(lts_type type);
 
 /** \brief Gives the filename extension associated with an LTS format.
  * \param[in] type The LTS format.
  * \return The filename extension of the LTS format specified by \a type.
  */
-std::string extension_for_type(const lts_type type);
+std::string extension_for_type(lts_type type);
 
 /** \brief Gives the MIME type associated with an LTS format.
  * \param[in] type The LTS format.
  * \return The MIME type of the LTS format specified by \a type.
  */
-std::string mime_type_for_type(const lts_type type);
+std::string mime_type_for_type(lts_type type);
 
 /** \brief Gives the set of all supported LTS formats.
  * \return The set of all supported LTS formats. */

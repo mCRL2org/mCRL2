@@ -21,11 +21,11 @@ namespace mcrl2::data
 namespace detail {
 
 // applies the enumerator substitution defined by variables and expressions to x
-template <typename T>
-data_expression enumerator_replace(const T& x, 
-                                   const variable_list::const_iterator variables_begin, 
-                                   const variable_list::const_iterator variables_end,  
-                                   const data_expression_list::const_iterator expressions_begin);
+template<typename T>
+data_expression enumerator_replace(const T& x,
+  variable_list::const_iterator variables_begin,
+  variable_list::const_iterator variables_end,
+  data_expression_list::const_iterator expressions_begin);
 
 struct enumerator_replace_builder: public data_expression_builder<enumerator_replace_builder>
 {

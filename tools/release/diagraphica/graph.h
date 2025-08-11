@@ -72,7 +72,7 @@ class Graph : public QObject
     std::size_t getSizeEdges();
     Edge* getEdge(const std::size_t& idx);
     Cluster* getRoot();
-    Cluster* getCluster(const std::vector< std::size_t > coord);
+    Cluster* getCluster(std::vector<std::size_t> coord);
     Cluster* getLeaf(const std::size_t& idx);
     std::size_t getSizeLeaves();
     Bundle* getBundle(const std::size_t& idx);
@@ -155,9 +155,7 @@ class Graph : public QObject
       Cluster* clust,
       std::vector< std::size_t > attrIdcs,
       std::size_t& progress);
-    void clustClusterOnAttr(
-      const std::vector< std::size_t > coord,
-      const std::size_t& attrIdx);
+    void clustClusterOnAttr(std::vector<std::size_t> coord, const std::size_t& attrIdx);
     void clustClusterOnAttr(
       Cluster* clust,
       const std::size_t& attrIdx);

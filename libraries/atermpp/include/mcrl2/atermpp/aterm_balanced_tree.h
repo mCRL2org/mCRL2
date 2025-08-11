@@ -28,11 +28,11 @@ namespace
 template <typename Term>
 class term_balanced_tree;
 
-template <class Term, class ForwardTraversalIterator, class Transformer>
+template<class Term, class ForwardTraversalIterator, class Transformer>
 void make_term_balanced_tree(term_balanced_tree<Term>& result,
-                             ForwardTraversalIterator p,
-                             const std::size_t size,
-                             Transformer transformer);
+  ForwardTraversalIterator p,
+  std::size_t size,
+  Transformer transformer);
 
 /// \brief Read-only balanced binary tree of terms.
 template <typename Term>
@@ -40,12 +40,11 @@ class term_balanced_tree : public aterm
 {
   protected:
 
-    template <class Term1, class ForwardTraversalIterator, class Transformer>
+    template<class Term1, class ForwardTraversalIterator, class Transformer>
     friend void make_term_balanced_tree(term_balanced_tree<Term1>& result,
-                                        ForwardTraversalIterator p,
-                                        const std::size_t size,
-                                        Transformer transformer);
-   
+      ForwardTraversalIterator p,
+      std::size_t size,
+      Transformer transformer);
 
     static const function_symbol& tree_empty_function() { return g_empty; }
     static const function_symbol& tree_single_node_function() { return g_single_tree_node; }

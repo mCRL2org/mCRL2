@@ -125,10 +125,8 @@ class Shape : public QObject
     using Mode = Visualizer::Mode;
 
     template <Mode> void draw(double pixelSize);
-    template <Mode> void draw(double pixelSize,
-        const std::vector< Attribute* > attrs,
-        const std::vector< double > attrValIdcs,
-        const double& opacity);
+    template<Mode>
+    void draw(double pixelSize, std::vector<Attribute*> attrs, std::vector<double> attrValIdcs, const double& opacity);
 
     void setTransf();
     void clrTransf();

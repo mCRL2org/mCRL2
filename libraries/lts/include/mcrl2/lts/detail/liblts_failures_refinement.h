@@ -141,26 +141,25 @@ public:
   const action_label_set& action_labels(const state_type s) const { return m_enabled_actions[s]; }
 };
 
-template <class LTS_TYPE>
-set_of_states collect_reachable_states_via_taus(const state_type s,
-    const lts_cache<LTS_TYPE>& weak_property_cache,
-    const bool weak_reduction);
+template<class LTS_TYPE>
+set_of_states
+collect_reachable_states_via_taus(state_type s, const lts_cache<LTS_TYPE>& weak_property_cache, bool weak_reduction);
 
-template <class LTS_TYPE>
-set_of_states collect_reachable_states_via_an_action(const state_type s,
-    const label_type e,
-    const lts_cache<LTS_TYPE>& weak_property_cache,
-    const bool weak_reduction,
-    const LTS_TYPE& l);
+template<class LTS_TYPE>
+set_of_states collect_reachable_states_via_an_action(state_type s,
+  label_type e,
+  const lts_cache<LTS_TYPE>& weak_property_cache,
+  bool weak_reduction,
+  const LTS_TYPE& l);
 
-template <class LTS_TYPE>
-bool refusals_contained_in(const state_type impl,
-    const set_of_states& spec,
-    const lts_cache<LTS_TYPE>& weak_property_cache,
-    label_type& culprit,
-    const LTS_TYPE& l,
-    const bool provide_a_counter_example,
-    const bool structured_output);
+template<class LTS_TYPE>
+bool refusals_contained_in(state_type impl,
+  const set_of_states& spec,
+  const lts_cache<LTS_TYPE>& weak_property_cache,
+  label_type& culprit,
+  const LTS_TYPE& l,
+  bool provide_a_counter_example,
+  bool structured_output);
 
 } // namespace detail
 

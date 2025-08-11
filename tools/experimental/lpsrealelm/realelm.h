@@ -20,14 +20,13 @@
 namespace mcrl2::data
 {
 
-mcrl2::lps::stochastic_specification realelm(mcrl2::lps::stochastic_specification s, 
-                                             const std::size_t max_iterations = 5,
-                                             const rewrite_strategy strat=jitty);
+mcrl2::lps::stochastic_specification
+realelm(mcrl2::lps::stochastic_specification s, std::size_t max_iterations = 5, rewrite_strategy strat = jitty);
 
 template <typename Term, typename MapContainer>
 Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements);
 
-void normalize_pair(data_expression&,data_expression&,const rewriter&, const bool);
+void normalize_pair(data_expression&, data_expression&, const rewriter&, bool);
 
 class real_representing_variable
 {

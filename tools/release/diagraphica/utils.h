@@ -82,9 +82,9 @@ class Utils
       const double& value);
 
     // -- statistics functions --------------------------------------
-    static double mean(const std::vector< double > vals);
-    static double variance(const std::vector< double > vals);
-    static double stdDev(const std::vector< double > vals);
+    static double mean(std::vector<double> vals);
+    static double variance(std::vector<double> vals);
+    static double stdDev(std::vector<double> vals);
 };
 
 #endif

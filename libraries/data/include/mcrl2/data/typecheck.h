@@ -177,26 +177,24 @@ class data_type_checker: public sort_type_checker
       return atermpp::term_list<T>(result.begin(),result.end());
     }
 
-    sort_expression TraverseVarConsTypeD(
-                        const detail::variable_context& DeclaredVars,
-                        data_expression& DataTerm,
-                        const sort_expression& PosType,
-                        const bool strictly_ambiguous=true,
-                        const bool warn_upcasting=false,
-                        const bool print_cast_error=true) const;
+    sort_expression TraverseVarConsTypeD(const detail::variable_context& DeclaredVars,
+      data_expression& DataTerm,
+      const sort_expression& PosType,
+      bool strictly_ambiguous = true,
+      bool warn_upcasting = false,
+      bool print_cast_error = true) const;
 
     /* sort_expression TraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression>& DeclaredVars,
                                          data_expression& t1,
                                          const sort_expression& t2); */
 
-    sort_expression TraverseVarConsTypeDN(
-                           const detail::variable_context& DeclaredVars,
-                           data_expression& DataTerm,
-                           sort_expression PosType,
-                           const bool strictly_ambiguous=true,
-                           const std::size_t nFactPars=std::string::npos,
-                           const bool warn_upcasting=false,
-                           const bool print_cast_error=true) const;
+    sort_expression TraverseVarConsTypeDN(const detail::variable_context& DeclaredVars,
+      data_expression& DataTerm,
+      sort_expression PosType,
+      bool strictly_ambiguous = true,
+      std::size_t nFactPars = std::string::npos,
+      bool warn_upcasting = false,
+      bool print_cast_error = true) const;
 
     bool InTypesA(const sort_expression& Type, sort_expression_list Types) const;
     bool EqTypesA(const sort_expression& Type1, const sort_expression& Type2) const;
@@ -236,14 +234,13 @@ class data_type_checker: public sort_type_checker
     bool UnFBag(sort_expression PosType, sort_expression& result) const;
     bool UnList(sort_expression PosType, sort_expression& result) const;
     void ErrorMsgCannotCast(sort_expression CandidateType, data_expression_list Arguments, sort_expression_list ArgumentTypes,std::string previous_reason) const;
-    sort_expression UpCastNumericType(
-                    sort_expression NeededType,
-                    sort_expression Type,
-                    data_expression& Par,
-                    const detail::variable_context& DeclaredVars,
-                    const bool strictly_ambiguous,
-                    bool warn_upcasting=false,
-                    const bool print_cast_error=false) const;
+    sort_expression UpCastNumericType(sort_expression NeededType,
+      sort_expression Type,
+      data_expression& Par,
+      const detail::variable_context& DeclaredVars,
+      bool strictly_ambiguous,
+      bool warn_upcasting = false,
+      bool print_cast_error = false) const;
     void TransformVarConsTypeData(data_specification& data_spec);
     sort_expression_list GetNotInferredList(const atermpp::term_list<sort_expression_list>& TypeListList) const;
     sort_expression_list InsertType(const sort_expression_list& TypeList, const sort_expression& Type) const;

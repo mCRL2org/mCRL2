@@ -102,7 +102,7 @@ class LTS
     bool readFromFile(const std::string& filename);
 
     int getZoomLevel() const;
-    void setZoomLevel(const int level);
+    void setZoomLevel(int level);
     // Zooms into the structure starting from the initial cluster/state and upto target.
     LTS* zoomIntoAbove(Cluster *target);
     // Zooms into the structure starting from the target, upto the end of the structure.

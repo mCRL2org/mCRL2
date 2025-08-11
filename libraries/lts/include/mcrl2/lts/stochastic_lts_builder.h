@@ -43,7 +43,12 @@ struct stochastic_lts_builder
   virtual void set_initial_state(const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities) = 0;
 
   // Add a transition to the LTS
-  virtual void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities, const std::size_t number_of_threads = 1) = 0;
+  virtual void add_transition(std::size_t from,
+    const lps::multi_action& a,
+    const std::list<std::size_t>& targets,
+    const std::vector<data::data_expression>& probabilities,
+    std::size_t number_of_threads = 1)
+    = 0;
 
   // Add actions and states to the LTS
   virtual void finalize(const indexed_set_for_states_type& state_map, bool timed) = 0;

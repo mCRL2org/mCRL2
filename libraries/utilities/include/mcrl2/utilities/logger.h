@@ -113,7 +113,7 @@ class output_policy
     /// \param[in] print_time_information An indication whether the time must be printed.
     ///  \details Any implementation must assure that output is written using an atomic action, to prevent
     /// mixing of different lines into one line in the output.
-    virtual void output(const log_level_t level, const time_t timestamp, const std::string& msg, const bool print_time_information) = 0;
+    virtual void output(log_level_t level, time_t timestamp, const std::string& msg, bool print_time_information) = 0;
 };
 
 std::set<output_policy*> initialise_output_policies();
@@ -307,7 +307,7 @@ public:
   /// - current time
   /// - log level
   /// - indentation
-  static std::string format(const log_level_t level, const time_t timestamp, const std::string& msg, const bool print_time_information);
+  static std::string format(log_level_t level, time_t timestamp, const std::string& msg, bool print_time_information);
 };
 
 /// \brief File output class.

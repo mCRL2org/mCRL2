@@ -135,9 +135,9 @@ inline std::size_t times_with_carry_word(const std::size_t n1, const std::size_t
   return n1*n2+n3;
 }
 
-std::size_t times_overflow_word(const std::size_t n1, const std::size_t n2);
+std::size_t times_overflow_word(std::size_t n1, std::size_t n2);
 
-std::size_t times_with_carry_overflow_word(const std::size_t n1, const std::size_t n2, std::size_t n3);
+std::size_t times_with_carry_overflow_word(std::size_t n1, std::size_t n2, std::size_t n3);
 
 /// Performs minus modulo the largest std::size_t.
 inline std::size_t minus_word(const std::size_t n1, const std::size_t n2)
@@ -165,30 +165,30 @@ inline std::size_t mod_word(const std::size_t n1, const std::size_t n2)
   return n1 % n2;
 }
 
-std::size_t div_doubleword(const std::size_t n1, const std::size_t n2, const std::size_t n3);
+std::size_t div_doubleword(std::size_t n1, std::size_t n2, std::size_t n3);
 
-std::size_t mod_doubleword(const std::size_t n1, const std::size_t n2, const std::size_t n3);
+std::size_t mod_doubleword(std::size_t n1, std::size_t n2, std::size_t n3);
 
-std::size_t div_double_doubleword(const std::size_t n1, const std::size_t n2, const std::size_t n3, const std::size_t n4);
+std::size_t div_double_doubleword(std::size_t n1, std::size_t n2, std::size_t n3, std::size_t n4);
 
-std::size_t mod_double_doubleword(const std::size_t n1, const std::size_t n2, const std::size_t n3, const std::size_t n4);
+std::size_t mod_double_doubleword(std::size_t n1, std::size_t n2, std::size_t n3, std::size_t n4);
 
-std::size_t div_triple_doubleword(const std::size_t n1, const std::size_t n2, const std::size_t n3, const std::size_t n4, const std::size_t n5);
+std::size_t div_triple_doubleword(std::size_t n1, std::size_t n2, std::size_t n3, std::size_t n4, std::size_t n5);
 
 inline std::size_t sqrt_word(const std::size_t n)
 {
   return sqrt(n);
 }
 
-std::size_t sqrt_doubleword(const std::size_t n1, const std::size_t n2);
+std::size_t sqrt_doubleword(std::size_t n1, std::size_t n2);
 
-std::size_t sqrt_tripleword(const std::size_t n1, const std::size_t n2, const std::size_t n3);
+std::size_t sqrt_tripleword(std::size_t n1, std::size_t n2, std::size_t n3);
 
-std::size_t sqrt_tripleword_overflow(const std::size_t n1, const std::size_t n2, const std::size_t n3);
+std::size_t sqrt_tripleword_overflow(std::size_t n1, std::size_t n2, std::size_t n3);
 
-std::size_t sqrt_quadrupleword(const std::size_t n1, const std::size_t n2, const std::size_t n3, const std::size_t n4);
+std::size_t sqrt_quadrupleword(std::size_t n1, std::size_t n2, std::size_t n3, std::size_t n4);
 
-std::size_t sqrt_quadrupleword_overflow(const std::size_t n1, const std::size_t n2, const std::size_t n3, const std::size_t n4);
+std::size_t sqrt_quadrupleword_overflow(std::size_t n1, std::size_t n2, std::size_t n3, std::size_t n4);
 
 inline std::size_t pred_word(const std::size_t n)
 {

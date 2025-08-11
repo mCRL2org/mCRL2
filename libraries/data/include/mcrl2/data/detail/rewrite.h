@@ -115,26 +115,24 @@ class Rewriter
          data_expression& result,
          const abstraction& t,
          substitution_type& sigma);
-    void existential_quantifier_enumeration(
-         data_expression& result,
-         const variable_list& vl,
-         const data_expression& t1,
-         const bool t1_is_normal_form,
-         substitution_type& sigma);
+    void existential_quantifier_enumeration(data_expression& result,
+      const variable_list& vl,
+      const data_expression& t1,
+      bool t1_is_normal_form,
+      substitution_type& sigma);
 
     void universal_quantifier_enumeration(
          data_expression& result,
          const abstraction& t,
          substitution_type& sigma);
-    void universal_quantifier_enumeration(
-         data_expression& result,
-         const variable_list& vl,
-         const data_expression& t1,
-         const bool t1_is_normal_form,
-         substitution_type& sigma);
+    void universal_quantifier_enumeration(data_expression& result,
+      const variable_list& vl,
+      const data_expression& t1,
+      bool t1_is_normal_form,
+      substitution_type& sigma);
 
-  /* The functions below exist temporarily in the transformation of the jittyc rewriter to a rewrite_stack */
-  /* They ought to be removed. */
+    /* The functions below exist temporarily in the transformation of the jittyc rewriter to a rewrite_stack */
+    /* They ought to be removed. */
     data_expression existential_quantifier_enumeration(     // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
          const abstraction& t,
          substitution_type& sigma)
@@ -187,12 +185,11 @@ class Rewriter
     // Bound variables are replaced by new variables to avoid a clash with variables in the right hand sides
     // of sigma.
 
-    void rewrite_single_lambda(
-                      data_expression& result,
-                      const variable_list& vl,
-                      const data_expression& body,
-                      const bool body_in_normal_form,
-                      substitution_type& sigma);
+    void rewrite_single_lambda(data_expression& result,
+      const variable_list& vl,
+      const data_expression& body,
+      bool body_in_normal_form,
+      substitution_type& sigma);
 
     data_expression rewrite_single_lambda(                    // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
                       const variable_list& vl,
@@ -229,17 +226,15 @@ class Rewriter
 
     mcrl2::data::data_specification m_data_specification_for_enumeration;
 
-    void quantifier_enumeration(
-          data_expression& result,
-          const variable_list& vl,
-          const data_expression& t1,
-          const bool t1_is_normal_form,
-          substitution_type& sigma,
-          const binder_type& binder,
-          data_expression (*lazy_op)(const data_expression&, const data_expression&),
-          const data_expression& identity_element,
-          const data_expression& absorbing_element);
-
+    void quantifier_enumeration(data_expression& result,
+      const variable_list& vl,
+      const data_expression& t1,
+      bool t1_is_normal_form,
+      substitution_type& sigma,
+      const binder_type& binder,
+      data_expression (*lazy_op)(const data_expression&, const data_expression&),
+      const data_expression& identity_element,
+      const data_expression& absorbing_element);
 };
 
 /**
@@ -249,10 +244,9 @@ class Rewriter
  * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-std::shared_ptr<detail::Rewriter> createRewriter(
-             const data_specification& DataSpec,
-             const used_data_equation_selector& equations_selector,
-             const rewrite_strategy Strategy = jitty);
+std::shared_ptr<detail::Rewriter> createRewriter(const data_specification& DataSpec,
+  const used_data_equation_selector& equations_selector,
+  rewrite_strategy Strategy = jitty);
 
 /**
  * \brief Check that an mCRL2 data equation is a valid rewrite rule. If not, an runtime_error is thrown indicating the problem.

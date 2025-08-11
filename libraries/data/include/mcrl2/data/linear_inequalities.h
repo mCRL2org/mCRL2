@@ -1037,11 +1037,7 @@ inline std::string pp_vector(const TYPE& inequalities)
   return s;
 }
 
-bool is_inconsistent(
-  const std::vector < linear_inequality >& inequalities_in,
-  const rewriter& r,
-  const bool use_cache=true);
-
+bool is_inconsistent(const std::vector<linear_inequality>& inequalities_in, const rewriter& r, bool use_cache = true);
 
 // Count the occurrences of variables that occur in inequalities.
 inline

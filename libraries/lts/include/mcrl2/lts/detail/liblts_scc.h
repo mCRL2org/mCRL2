@@ -158,7 +158,7 @@ class scc_partitioner
      * \param[in] preserve_divergence_loops If true preserve a tau loop on states that
      *     were part of a larger tau loop in the input transition system. Otherwise idle
      *     tau loops are removed. */
-    void replace_transition_system(const bool preserve_divergence_loops);
+    void replace_transition_system(bool preserve_divergence_loops);
 
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
      *  \return The number of bisimulation equivalence classes of the LTS.
@@ -171,7 +171,7 @@ class scc_partitioner
      *  \param[in] s A state number.
      *  \return The number of the equivalence class to which \e s
      *    belongs. */
-    std::size_t get_eq_class(const std::size_t s) const;
+    std::size_t get_eq_class(std::size_t s) const;
 
     /** \brief Returns whether two states are in the same bisimulation
      *     equivalence class.
@@ -180,7 +180,7 @@ class scc_partitioner
      * \retval true if \e s and \e t are in the same bisimulation
      *    equivalence class;
      * \retval false otherwise. */
-    bool in_same_class(const std::size_t s, const std::size_t t) const;
+    bool in_same_class(std::size_t s, std::size_t t) const;
 
   private:
 
@@ -193,14 +193,13 @@ class scc_partitioner
     std::vector < state_type > dfsn2state;
     state_type equivalence_class_index = 0;
 
-    void group_components(const state_type t,
-                          const state_type equivalence_class_index,
-                          const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt_src,
-                          std::vector < bool >& visited);
-    void dfs_numbering(const state_type t,
-                       const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt,
-                       std::vector < bool >& visited);
-
+    void group_components(state_type t,
+      state_type equivalence_class_index,
+      const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt_src,
+      std::vector<bool>& visited);
+    void dfs_numbering(state_type t,
+      const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt,
+      std::vector<bool>& visited);
 };
 
 

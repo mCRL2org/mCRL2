@@ -90,15 +90,13 @@ class RewriterJitty: public Rewriter
     atermpp::detail::thread_aterm_pool* m_thread_aterm_pool
         = nullptr; // Store an explicit reference to the thread aterm pool.
 
-    template <class ITERATOR>
-    void apply_cpp_code_to_higher_order_term(
-                  data_expression& result,
-                  const application& t,
-                  const std::function<void(data_expression&, const data_expression&)> rewrite_cpp_code,
-                  ITERATOR begin,
-                  ITERATOR end,
-                  substitution_type& sigma);
-
+    template<class ITERATOR>
+    void apply_cpp_code_to_higher_order_term(data_expression& result,
+      const application& t,
+      std::function<void(data_expression&, const data_expression&)> rewrite_cpp_code,
+      ITERATOR begin,
+      ITERATOR end,
+      substitution_type& sigma);
 
     void rewrite_aux(data_expression& result, const data_expression& term, substitution_type& sigma);
 
@@ -115,7 +113,7 @@ class RewriterJitty: public Rewriter
 
     /// \brief Auxiliary function to take care that the array jitty_strat is sufficiently large
     ///        to access element i.
-    void make_jitty_strat_sufficiently_larger(const std::size_t i);
+    void make_jitty_strat_sufficiently_larger(std::size_t i);
 
     strategy create_a_cpp_function_based_strategy(const function_symbol& f, const data_specification& data_spec);
     strategy create_a_rewriting_based_strategy(const function_symbol& f, const data_equation_list& rules1);

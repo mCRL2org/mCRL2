@@ -236,11 +236,9 @@ namespace detail
 
     /** \brief Create distribution rules for distribution_functions over case_functions
     **/
-    void create_distribution_law_over_case(
-      const data::sort_expression& sort,
+    void create_distribution_law_over_case(const data::sort_expression& sort,
       const data::function_symbol& function_for_distribution,
-      const data::function_symbol case_function);
-
+      data::function_symbol case_function);
 
     /** \brief Create the data equations for case functions */
     void generate_case_function_equations(
@@ -600,7 +598,7 @@ public:
    *  \param[in] parameter_at_index An integer value that represents the index value of an process parameter.
    *  \post   The process parameter at index parameter_at_index is unfolded in the mCRL2 process specification.
    **/
-  void algorithm(const std::size_t parameter_at_index);
+  void algorithm(std::size_t parameter_at_index);
 
 private:
   /// \brief set to true when the algorithm has been run once; as the algorithm should
@@ -632,7 +630,7 @@ private:
    * \param  index The index of the parameter which must be obtained.
    * \return the process parameter at given index.
    **/
-  mcrl2::data::variable process_parameter_at(const std::size_t index);
+  mcrl2::data::variable process_parameter_at(std::size_t index);
 
   /** \brief  substitute function for replacing process parameters with unfolded process parameters functions.
    * \return substitute function for replacing process parameters with unfolded process parameters functions.

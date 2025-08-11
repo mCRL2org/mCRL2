@@ -132,10 +132,10 @@ private:
   {}
 
   /// \brief Constructor for internal use only
-  function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions);
+  function_symbol(const std::string& name, std::size_t arity, bool check_for_registered_functions);
 
   /// \brief Constructor for internal use only
-  function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions);
+  function_symbol(std::string&& name, std::size_t arity, bool check_for_registered_functions);
 
   /// \brief Calls the function symbol pool to free our used memory.
   void destroy();
@@ -149,7 +149,7 @@ class global_function_symbol : public function_symbol
 public:
   /// \brief Defines a function symbol from a name and arity combination.
   /// \details This constructor should be used by global function symbols.
-  global_function_symbol(const std::string& name, const std::size_t arity);
+  global_function_symbol(const std::string& name, std::size_t arity);
 };
 
 namespace detail

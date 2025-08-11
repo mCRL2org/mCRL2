@@ -87,11 +87,13 @@ public:
 
   /// \brief Creates a function symbol pair (name, arity).
   /// \see function_symbol_pool.
-  inline function_symbol create_function_symbol(const std::string& name, const std::size_t arity, const bool check_for_registered_functions = false);
+  inline 
+  function_symbol create_function_symbol(const std::string& name, std::size_t arity, bool check_for_registered_functions = false);
 
   /// \brief Creates a function symbol pair (name, arity).
   /// \see function_symbol_pool.
-  inline function_symbol create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions = false);
+  inline 
+  function_symbol create_function_symbol(std::string&& name, std::size_t arity, bool check_for_registered_functions = false);
 
   /// \brief Register a thread specific aterm pool.
   /// \details threadsafe

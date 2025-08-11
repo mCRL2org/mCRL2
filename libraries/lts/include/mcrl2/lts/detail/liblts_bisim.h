@@ -187,7 +187,7 @@ class bisim_partitioner
      *  \param[in] s The state number for which the resulting formula should be true
      *  \param[in] t The state number for which the resulting formula should be false
      *  \return A distinguishing state formula. */
-    mcrl2::state_formulas::state_formula counter_formula(const std::size_t s, const std::size_t t);
+    mcrl2::state_formulas::state_formula counter_formula(std::size_t s, std::size_t t);
 
   private:
 
@@ -1112,12 +1112,8 @@ class bisim_partitioner
  * \param[in] branching If true branching bisimulation is applied, otherwise strong bisimulation.
  * \param[in] preserve_divergences Indicates whether loops of internal actions on states must be preserved. If false
  *            these are removed. If true these are preserved.  */
-template < class LTS_TYPE>
-void bisimulation_reduce(
-  LTS_TYPE& l,
-  const bool branching = false,
-  const bool preserve_divergences = false);
-
+template<class LTS_TYPE>
+void bisimulation_reduce(LTS_TYPE& l, bool branching = false, bool preserve_divergences = false);
 
 /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
  * \details This lts and the lts l2 are not usable anymore after this call.
@@ -1131,16 +1127,14 @@ void bisimulation_reduce(
  * \param[in] counter_example_file The file to store the counter example in
  * \param[in] structured_output
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
-template < class LTS_TYPE>
-bool destructive_bisimulation_compare(
-  LTS_TYPE& l1,
+template<class LTS_TYPE>
+bool destructive_bisimulation_compare(LTS_TYPE& l1,
   LTS_TYPE& l2,
-  const bool branching = false,
-  const bool preserve_divergences = false,
-  const bool generate_counter_examples = false,
+  bool branching = false,
+  bool preserve_divergences = false,
+  bool generate_counter_examples = false,
   const std::string& counter_example_file = "",
-  const bool structured_output = false);
-
+  bool structured_output = false);
 
 /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
  * \details The current transitions system and the lts l2 are first duplicated and subsequently
@@ -1156,19 +1150,14 @@ bool destructive_bisimulation_compare(
  * \param[in] counter_example_file The file to store the counter example in
  * \param[in] structured_output
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
-template < class LTS_TYPE>
-bool bisimulation_compare(
-  const LTS_TYPE& l1,
+template<class LTS_TYPE>
+bool bisimulation_compare(const LTS_TYPE& l1,
   const LTS_TYPE& l2,
-  const bool branching = false,
-  const bool preserve_divergences = false,
-  const bool generate_counter_examples = false,
+  bool branching = false,
+  bool preserve_divergences = false,
+  bool generate_counter_examples = false,
   const std::string& counter_example_file = "",
-  const bool structured_output = false);
-
-
-
-
+  bool structured_output = false);
 
 template < class LTS_TYPE>
 mcrl2::state_formulas::state_formula bisim_partitioner<LTS_TYPE>::counter_formula(

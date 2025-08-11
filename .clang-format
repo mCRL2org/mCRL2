@@ -3,6 +3,7 @@ AlignAfterOpenBracket: DontAlign
 AlignArrayOfStructures: None
 AlignEscapedNewlines: Left
 AlignOperands: Align
+AlignTrailingComments: Never
 BreakBeforeBinaryOperators: All
 AllowAllArgumentsOnNextLine: false
 PackConstructorInitializers: Never
@@ -25,6 +26,8 @@ BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
 BreakStringLiterals: true
+ConstructorInitializerIndentWidth: 2
+ContinuationIndentWidth: 2
 ColumnLimit: 120
 CompactNamespaces: false
 IncludeBlocks: Preserve

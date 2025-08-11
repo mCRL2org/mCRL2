@@ -26,7 +26,7 @@ namespace detail
 {
 
 class _aterm;
-inline void debug_print(std::ostream& o, const _aterm* t, const std::size_t d = 3);
+inline void debug_print(std::ostream& o, const _aterm* t, std::size_t d = 3);
 
 /// Can be used to check whether all elements in the parameter pack are derived from aterms.
 template<typename ...Terms>

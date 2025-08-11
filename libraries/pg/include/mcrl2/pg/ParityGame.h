@@ -153,12 +153,11 @@ public:
       StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_NONE);
 
 #ifdef MCRL2_ENABLE_MULTITHREADING
-    void make_subgame_threads( const ParityGame &game,
-                               const verti *verts,
-                               const verti nvert,
-                               bool proper,
-                               StaticGraph::EdgeDirection edge_dir
-                                    = StaticGraph::EDGE_NONE );
+  void make_subgame_threads(const ParityGame& game,
+    const verti* verts,
+    verti nvert,
+    bool proper,
+    StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_NONE);
 #endif // MCRL2_ENABLE_MULTITHREADING
 
     //!@}
