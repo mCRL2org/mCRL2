@@ -12,14 +12,16 @@ RUN dnf install -y \
  mesa-libGLU-devel \
  qt6-qtbase-devel \
  which \
-# Packages needed for packaging
+ # Packages needed for testing 
+ python3 \
+ python3-pip \
+ # Packages needed for packaging
  rpm-build \
  # Packages needed for documentation
  doxygen \
- python3 \
- python3-pip \
  swig \
- texlive-scheme-full
+ texlive-scheme-full \ 
+ dvisvgm
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt
