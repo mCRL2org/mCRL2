@@ -8,6 +8,9 @@ import argparse
 import os
 import sys
 import concurrent.futures
+from typeguard import typechecked
+
+from typing import List, Dict, Any, Optional
 
 # Makes sure that the script can find the modules when ran directly.
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
@@ -26,13 +29,14 @@ class LtsFile:
 
 
 class ToolTest:
-    def __init__(self, toolname: str, file_input: str, options: list[str]):
-        self.toolname = toolname
-        self.file_input = file_input
-        self.options = options
+    @typechecked
+    def __init__(self, toolname: str, file_input: str, options: List[str]):
+        self.toolname: str = toolname
+        self.file_input: str = file_input
+        self.options: List[str] = options
 
 
-available_tests = [
+available_tests: List[ToolTest] = [
     ToolTest(
         "mcrl22lps",
         "[mcrl2file]",
@@ -331,11 +335,12 @@ available_tests = [
 ]
 
 
-def run_test(toolpath, arguments):
+@typechecked
+def run_test(toolpath: str, arguments: List[str]) -> Any:
     return RunProcess(toolpath, arguments, 1000, 600)
 
-
-def main(tests):
+@typechecked
+def main(tests: List[ToolTest]) -> Optional[int]:
     # Parse the input arguments.
     cmdline_parser = argparse.ArgumentParser()
     cmdline_parser.add_argument(
@@ -372,8 +377,9 @@ def main(tests):
         help="Enables tests using the -zcvc flag, requires CVC3",
     )
 
-    args = cmdline_parser.parse_args()
+    args: argparse.Namespace = cmdline_parser.parse_args()
 
+    output: str
     if args.output:
         output = os.path.join(os.getcwd(), args.output)
     else:
@@ -381,6 +387,7 @@ def main(tests):
 
     if args.names:
         # Generate a name per line for a test
+        names: str
         names = ""
         for test in tests:
             names += test.toolname + "\n"
@@ -396,17 +403,18 @@ def main(tests):
         # ("dice", "act renamed;\n var x:Bool;\n rename b1(x) => renamed;", os.path.join(MCRL2_ROOT, "examples/probabilistic/coins_simulate_dice/dice.mcrl2"))
     ]:
         print(f"Write intermediate files into {output}", flush=True)
+        name: str
         name, _ = os.path.splitext(os.path.basename(mcrl2_file))
-        lps_file = os.path.join(output, f"{name}.lps")
-        lts_file = os.path.join(output, f"{name}.lts")
+        lps_file: str = os.path.join(output, f"{name}.lps")
+        lts_file: str = os.path.join(output, f"{name}.lts")
 
         # Generate textual versions from the lps and pbes
-        txtlps_file = os.path.join(output, f"{name}.txtlps")
-        txtpbes_file = os.path.join(output, f"{name}.txtpbes")
+        txtlps_file: str = os.path.join(output, f"{name}.txtlps")
+        txtpbes_file: str = os.path.join(output, f"{name}.txtpbes")
 
         # Create input files for lpsconfcheck and lpsinvelm
-        true_file = os.path.join(output, "true.inv")
-        false_file = os.path.join(output, "false.inv")
+        true_file: str = os.path.join(output, "true.inv")
+        false_file: str = os.path.join(output, "false.inv")
 
         with open(true_file, "w", encoding="utf-8") as f:
             f.write("true")
@@ -414,16 +422,16 @@ def main(tests):
             f.write("false")
 
         # Create input files for lpsactionrename
-        rename_file = os.path.join(output, f"{example}.rename")
+        rename_file: str = os.path.join(output, f"{example}.rename")
         with open(rename_file, "w", encoding="utf-8") as f:
             f.write(rename_spec)
 
         # Create a generic nodeadlock formula
-        mcf_file = os.path.join(output, "nodeadlock.mcf")
+        mcf_file: str = os.path.join(output, "nodeadlock.mcf")
         with open(mcf_file, "w", encoding="utf-8") as f:
             f.write("[true*]<true>true")
-        pbes_file = os.path.join(output, f"{example}.nodeadlock.pbes")
-        bes_file = os.path.join(output, f"{example}.nodeadlock.bes")
+        pbes_file: str = os.path.join(output, f"{example}.nodeadlock.pbes")
+        bes_file: str = os.path.join(output, f"{example}.nodeadlock.bes")
 
         # Generate the input files for all tests beforehand
         run_test(os.path.join(args.toolpath, "mcrl22lps"), ["-D", mcrl2_file, lps_file])
@@ -442,31 +450,33 @@ def main(tests):
                 max_workers=args.max_workers
             ) as executor:
                 # Start the test cases
-                futures = {}
+                futures: Dict[Any, str] = {}
                 for test in tests:
                     for argument in test.options:
-                        toolpath = os.path.join(args.toolpath, test.toolname)
+                        toolpath: str = os.path.join(args.toolpath, test.toolname)
 
                         # Replace placeholders by actual filenames
-                        arguments = argument + " " + test.file_input
-                        arguments = arguments.replace("[mcrl2file]", mcrl2_file)
-                        arguments = arguments.replace("[lpsfile]", lps_file)
-                        arguments = arguments.replace("[ltsfile]", lts_file)
-                        arguments = arguments.replace("[trueinv]", true_file)
-                        arguments = arguments.replace("[falseinv]", false_file)
-                        arguments = arguments.replace("[rename]", rename_file)
-                        arguments = arguments.replace("[mcffile]", mcf_file)
-                        arguments = arguments.replace("[pbesfile]", pbes_file)
-                        arguments = arguments.replace("[besfile]", bes_file)
-                        arguments = arguments.replace("[txtlpsfile]", txtlps_file)
-                        arguments = arguments.replace("[txtpbesfile]", txtpbes_file)
-                        arguments = arguments.replace("[actions]", "r1")
+                        final_arguments: List[str] = []
+                        for arg in argument.split(" ") + test.file_input.split(" "):
+                            arg = arg.replace("[mcrl2file]", mcrl2_file)
+                            arg = arg.replace("[lpsfile]", lps_file)
+                            arg = arg.replace("[ltsfile]", lts_file)
+                            arg = arg.replace("[trueinv]", true_file)
+                            arg = arg.replace("[falseinv]", false_file)
+                            arg = arg.replace("[rename]", rename_file)
+                            arg = arg.replace("[mcffile]", mcf_file)
+                            arg = arg.replace("[pbesfile]", pbes_file)
+                            arg = arg.replace("[besfile]", bes_file)
+                            arg = arg.replace("[txtlpsfile]", txtlps_file)
+                            arg = arg.replace("[txtpbesfile]", txtpbes_file)
+                            arg = arg.replace("[actions]", "r1")
+                            final_arguments.append(arg)
 
                         if not args.jittyc and "-rjittyc" in argument:
-                            print(f"Skipped jittyc test {test.toolname} {arguments}")
+                            print(f"Skipped jittyc test {test.toolname} {' '.join(final_arguments)}")
                             continue
                         if not args.cvc3 and "-zcvc" in argument:
-                            print(f"Skipped cvc test {test.toolname} {arguments}")
+                            print(f"Skipped cvc test {test.toolname} {' '.join(final_arguments)}")
                             continue
                         if args.pattern not in test.toolname:
                             print(
@@ -482,15 +492,15 @@ def main(tests):
                             continue
 
                         if args.verbose:
-                            print(f"Executing {test.toolname} {arguments}", flush=True)
+                            print(f"Executing {test.toolname} {final_arguments}", flush=True)
                         futures[
-                            executor.submit(run_test, toolpath, arguments.split(" "))
-                        ] = f"{test.toolname} {arguments}"
+                            executor.submit(run_test, toolpath, final_arguments)
+                        ] = f"{test.toolname} {argument}"
 
                 # Wait for the results and keep track of failed tests.
-                failed = []
+                failed: List[str] = []
                 for future in concurrent.futures.as_completed(futures):
-                    name = futures[future]
+                    name: str = futures[future]
 
                     try:
                         future.result()
