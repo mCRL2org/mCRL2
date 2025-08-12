@@ -111,7 +111,7 @@ static std::string word_wrap(const std::string& input, const std::size_t width, 
  * \return formatted string that represents the option description
  **/
 std::string interface_description::option_descriptor::textual_description(
-  const std::size_t left_width, const std::size_t right_width) const
+  const std::size_t left_width, const std::size_t right_width, bool show_hidden) const
 {
   std::ostringstream s;
   std::string        options;
@@ -156,6 +156,12 @@ std::string interface_description::option_descriptor::textual_description(
     std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
     for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
     {
+      if (!show_hidden && i->is_hidden())
+      {
+        // If we are not showing all help and the argument is hidden, skip it
+        continue;
+      }
+
       std::string arg;
       if(i->get_short() != std::string())
       {
@@ -444,7 +450,7 @@ std::string interface_description::textual_description(bool show_hidden) const
           && option->get_long() != "help-all" && option->get_long() != "version")
           || option->m_show)
       {
-        s << option->textual_description(27, 53);
+        s << option->textual_description(27, 53, show_hidden);
       }
     }
 
@@ -452,13 +458,13 @@ std::string interface_description::textual_description(bool show_hidden) const
   }
 
   s << "Standard options:" << std::endl
-    << m_options.find("quiet")->second.textual_description(27, 53)
-    << m_options.find("verbose")->second.textual_description(27, 53)
-    << m_options.find("debug")->second.textual_description(27, 53)
-    << m_options.find("log-level")->second.textual_description(27, 53)
-    << m_options.find("help")->second.textual_description(27, 53)
-    << m_options.find("version")->second.textual_description(27, 53)
-    << m_options.find("help-all")->second.textual_description(27, 53)
+    << m_options.find("quiet")->second.textual_description(27, 53, show_hidden)
+    << m_options.find("verbose")->second.textual_description(27, 53, show_hidden)
+    << m_options.find("debug")->second.textual_description(27, 53, show_hidden)
+    << m_options.find("log-level")->second.textual_description(27, 53, show_hidden)
+    << m_options.find("help")->second.textual_description(27, 53, show_hidden)
+    << m_options.find("version")->second.textual_description(27, 53, show_hidden)
+    << m_options.find("help-all")->second.textual_description(27, 53, show_hidden)
     << std::endl;
 
   if (!m_known_issues.empty())

@@ -159,11 +159,15 @@ public:
       std::string m_short;
       std::string m_description;
 
+      /// Indicates that the argument is hidden by default.
+      bool m_is_hidden = false;
+
     public:
-      argument_description(std::string  long_, std::string  short_, std::string  description)
+      argument_description(std::string  long_, std::string  short_, std::string  description, bool is_hidden = false)
         : m_long(std::move(long_)),
           m_short(std::move(short_)),
-          m_description(std::move(description))
+          m_description(std::move(description)),
+          m_is_hidden(is_hidden)
       {}
 
       argument_description(std::string  long_, std::string  description)
@@ -176,6 +180,8 @@ public:
       const std::string& get_short() const { return m_short; }
 
       const std::string& get_description() const { return m_description; }
+
+      bool is_hidden() const { return m_is_hidden; }
     };
 
     /// returns a copy of the object
@@ -265,7 +271,7 @@ private:
   protected:
 
     /// Returns a textual description of the option
-    std::string textual_description(std::size_t left_width, std::size_t right_width) const;
+    std::string textual_description(std::size_t left_width, std::size_t right_width, bool show_hidden) const;
 
     /// Returns a man page description for the option
     std::string man_page_description() const;
@@ -298,8 +304,6 @@ private:
         m_argument(o.m_argument),
         m_short(o.m_short)
     {}
-
-    option_descriptor operator=(option_descriptor const& o) { return option_descriptor(o); }
 
     basic_argument const& argument() const { return *m_argument; }
 
@@ -1122,9 +1126,6 @@ protected:
   std::string m_default;
   bool m_has_default = false;
 
-  /// Indicates that the argument is hidden by default.
-  bool m_is_hidden = false;
-
   /// \brief Implementation that adds the value of an enum type
   enum_argument& add_value_with_short(const std::string& long_arg,
     const std::string& short_arg,
@@ -1132,7 +1133,7 @@ protected:
     bool is_default = false,
     bool is_hidden = false)
   {
-    m_enum.emplace_back(long_arg, short_arg, description);
+    m_enum.emplace_back(long_arg, short_arg, description, is_hidden);
 
     if (is_default)
     {
@@ -1145,7 +1146,6 @@ protected:
       m_has_default = true;
     }
 
-    m_is_hidden = is_hidden;
     return (*this);
   }
 
