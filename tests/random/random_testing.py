@@ -270,7 +270,7 @@ class LtsconvertsymbolicTest(ProcessTest):
         super().__init__(name, ymlfile('ltsconvertsymbolic'), settings)
 
         if arguments:
-            self.add_command_line_options('t4', arguments)
+            self.add_command_line_options('t3', arguments)
             
 
 class PbesTest(RandomTest):
