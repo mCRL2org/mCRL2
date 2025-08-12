@@ -80,9 +80,11 @@ endif()
 # Enable the new JFG branching bisimulation algorithm.
 add_compile_definitions(BRANCH_BIS_EXPERIMENT_JFG)
 
+# Only show deprecation warnings for our minimal Qt version.
+add_compile_definitions(QT_DEPRECATED_WARNINGS_SINCE=0x060200)
+
 # Enable all macros defined in the code used for debugging purposes.
 add_debug_compile_definitions(MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
-
 
 # Enable all macros defined in the code used for debugging purposes.
 add_debug_compile_definitions(MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
