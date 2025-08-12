@@ -17,24 +17,17 @@ provided websites to acquire them individually.
 
 .. note::
 
-    Qt version 5.12.0 does not work properly and results in non functioning graphical
-    tools. Qt version 5.12.1 appears to work fine. Qt 5.13.0 appears to support dark mode on MacOs Mojave
-    properly, whereas earlier versions of Qt do not properly adapt the color schemes
-    leading to unreadable (white on white) text in some tools.
-
-.. note::
-
     If Qt cannot be found automatically, for example when it is installed using the official installer, then the cmake variable ``Qt6_DIR`` must be set to the install directory followed by ``/lib/cmake/Qt6``.
 
 A user-friendly command-line interface is provided by the ``ccmake``
 executable. Example usage is as follows (from the directory
-``mCRL2-build``)::
+``build``)::
 
   ccmake ../mCRL2
 
 From the interface you are presented with, you can choose the options
-explained on the :ref:`instructions <build-instructions>`. Then prcessing `c`
-will configuration the project, and pressing `g` will generate the Makefile.
+explained on the :ref:`instructions <build-instructions>`. Then pressing `c`
+will configuration the project, and pressing `g` will generate the `Makefile`.
 For compilation using multiple cores, use the ``-j`` flag; *e.g.*, to compile
 using 4 cores, use::
 
@@ -47,11 +40,16 @@ using 4 cores, use::
 
     make mcrl22lps
 
+.. note::
+
+  Many vscode extensions rely on the `compile_commands.json`, which can be
+  produced by setting the `CMAKE_EXPORT_COMPILE_COMMANDS` to true in `ccmake`.
+
 .. warning::
 
   On newer macOS versions it might be that the compiled GUI tools fail to
   launch. This is due to them being killed with an error related to running
   unsigned code. This issue can be resolved by manually signing the resulting
-  mCRL2app using the following command::
+  `build/stage/mCRL2.app` using the following command::
 
     sudo codesign --force --deep -s - mCRL2.app

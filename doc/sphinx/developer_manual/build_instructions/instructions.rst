@@ -20,8 +20,9 @@ obtained using the following command:
   git clone https://github.com/mCRL2org/mCRL2.git
 
 In the remainder of this manual, we assume that you have the source code on your
-system in a folder called ``mCRL2``. We will set up an out-of-source build
-in ``mCRL2-build``.
+system in a folder called ``mCRL2``. We will set up an in-source build in
+``build``, this is especially useful for vscode plugins that rely on the
+``compile_commands.json``.
 
 .. note::
 

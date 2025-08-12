@@ -17,12 +17,12 @@ dependencies.
 
 A user-friendly command-line interface is provided by the ``ccmake``
 executable. Example usage is as follows (from the directory
-``mCRL2-build``)::
+``build``)::
 
   ccmake ../mCRL2
 
 From the interface you are presented with, you can choose the options
-explained on the :ref:`instructions <build-instructions>`. Then prcessing `c`
+explained on the :ref:`instructions <build-instructions>`. Then pressing `c`
 will configuration the project, and pressing `g` will generate the Makefile.
 For compilation using multiple cores, use the ``-j`` flag; *e.g.*, to compile
 using 4 cores, use::
@@ -35,3 +35,8 @@ using 4 cores, use::
   ``mcrl22lps``, for instance, use::
 
     make mcrl22lps
+
+.. note::
+
+  Many vscode extensions rely on the `compile_commands.json`, which can be
+  produced by setting the `CMAKE_EXPORT_COMPILE_COMMANDS` to true in `ccmake`.
