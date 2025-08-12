@@ -191,7 +191,7 @@ void MainWindow::setupMenuBar()
   {
     QAction* saveFileAction = saveIntermediateFilesMenu->addAction(item.second, this, SLOT(nothingSlot()));
     saveFileAction->setCheckable(true);
-    saveFileAction->setProperty("filetype", item.first);
+    saveFileAction->setProperty("filetype", static_cast<int>(item.first));
     saveFileAction->setToolTip("Changing this will only have effect on "
                                "processes that have not started yet");
     connect(saveFileAction, SIGNAL(toggled(bool)), fileSystem,

@@ -10,25 +10,25 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
-#include "mcrl2/lps/linearisation_method.h"
 #include "mcrl2/gui/codeeditor.h"
+#include "mcrl2/lps/linearisation_method.h"
 #include "utilities.h"
 
-#include <QObject>
+#include <QDateTime>
 #include <QDir>
+#include <QDomDocument>
 #include <QFileDialog>
+#include <QObject>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QTemporaryDir>
-#include <QSettings>
-#include <QDateTime>
-#include <QDomDocument>
 
 /**
  * @brief SpecType Defines the possible types of specification files: the main
  *   specification file and the specifications that correspond to the first
  *   respectively second initial process of an equivalence property
  */
-enum SpecType
+enum class SpecType
 {
   Main,
   First,
@@ -39,16 +39,14 @@ enum SpecType
  * @brief SPECTYPEEXTENSION Defines the extension needed for the file name
  *   depending on the specification type
  */
-const std::map<SpecType, QString> SPECTYPEEXTENSION = {
-    {SpecType::Main, ""},
-    {SpecType::First, "_first"},
-    {SpecType::Second, "_second"}};
+const std::map<SpecType, QString> SPECTYPEEXTENSION
+  = {{SpecType::Main, ""}, {SpecType::First, "_first"}, {SpecType::Second, "_second"}};
 
 /**
  * @brief IntermediateFileType Defines the type of files that can result
  * from tools
  */
-enum IntermediateFileType
+enum class IntermediateFileType
 {
   Lps = 0,
   Lts = 1,
@@ -59,10 +57,10 @@ enum IntermediateFileType
  * @brief INTERMEDIATEFILETYPENAMES Defines the names for all intermediate file
  *   types
  */
-const std::map<IntermediateFileType, QString> INTERMEDIATEFILETYPENAMES = {
-    {IntermediateFileType::Lps, "LPS"},
-    {IntermediateFileType::Lts, "LTS"},
-    {IntermediateFileType::Pbes, "PBES"}};
+const std::map<IntermediateFileType, QString> INTERMEDIATEFILETYPENAMES = {{IntermediateFileType::Lps, "LPS"},
+  {IntermediateFileType::Lts, "LTS"},
+  {IntermediateFileType::Pbes, "PBES"}
+};
 
 /**
  * @brief The Property class defines a property, which can be a mu-calculus
@@ -70,7 +68,7 @@ const std::map<IntermediateFileType, QString> INTERMEDIATEFILETYPENAMES = {
  */
 class Property
 {
-  public:
+public:
   QString name;
   QString text;
   bool mucalculus;
@@ -94,9 +92,11 @@ class Property
    * @param text2 The second initial process expression in case of an
    *   equivalence property
    */
-  Property(QString name, QString text, bool mucalculus = true,
-           mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
-           QString text2 = "");
+  Property(QString name,
+    QString text,
+    bool mucalculus = true,
+    mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
+    QString text2 = "");
 
   /**
    * @brief operator== Defines equality on two properties
@@ -104,13 +104,6 @@ class Property
    * @return Whether this property and the given property are equal
    */
   bool operator==(const Property& property) const;
-
-  /**
-   * @brief operator!= Defines inequality on two properties
-   * @param property The property to compare to
-   * @return Whether this property and the given property are not equal
-   */
-  bool operator!=(const Property& property) const;
 };
 
 /**
@@ -120,15 +113,14 @@ class FileSystem : public QObject
 {
   Q_OBJECT
 
-  public:
+public:
   /**
    * @brief FileSystem Constructor
    * @param specificationEditor The specification editor in the main window
    * @param settings The application settings
    * @param parent The main widget (main window)
    */
-  FileSystem(mcrl2::gui::qt::CodeEditor* specificationEditor,
-             QSettings* settings, QWidget* parent);
+  FileSystem(mcrl2::gui::qt::CodeEditor* specificationEditor, QSettings* settings, QWidget* parent);
 
   /**
    * @brief projectFilePath Defines the file path for the project file,
@@ -177,8 +169,7 @@ class FileSystem : public QObject
    *   specification to compare against
    * @return The file path of the specification
    */
-  QString specificationFilePath(SpecType specType = SpecType::Main,
-                                const QString& propertyName = "");
+  QString specificationFilePath(SpecType specType = SpecType::Main, const QString& propertyName = "");
 
   /**
    * @brief lpsFilePath Defines the file path of a lps
@@ -187,8 +178,13 @@ class FileSystem : public QObject
    * @param evidence Whether this is an evidence lps
    * @return The file path of the lps
    */
-  QString lpsFilePath(SpecType specType = SpecType::Main,
-                      const QString& propertyName = "", bool evidence = false);
+  QString lpsFilePath(SpecType specType = SpecType::Main, const QString& propertyName = "", bool evidence = false);
+
+  /// \brief Returns the temporary folder path.
+  QString temporaryFolderPath() const
+  {
+    return temporaryFolder.path();
+  }
 
   /**
    * @brief ltsFilePath Defines the file path of a lts
@@ -198,10 +194,10 @@ class FileSystem : public QObject
    * @param evidence Whether this is an evidence lts
    * @return The file path of the lts
    */
-  QString
-  ltsFilePath(mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
-              SpecType specType = SpecType::Main,
-              const QString& propertyName = "", bool evidence = false);
+  QString ltsFilePath(mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
+    SpecType specType = SpecType::Main,
+    const QString& propertyName = "",
+    bool evidence = false);
 
   /**
    * @brief propertyFilePath Defines the file path of a property
@@ -336,9 +332,7 @@ class FileSystem : public QObject
    * @param inputFile2 An optional second input file
    * @return Whether there already exists an up to date output file
    */
-  bool upToDateOutputFileExists(const QString& inputFile,
-                                const QString& outputFile,
-                                const QString& inputFile2 = "");
+  bool upToDateOutputFileExists(const QString& inputFile, const QString& outputFile, const QString& inputFile2 = "");
 
   /**
    * @brief setSpecificationEditorCursor Puts the cursor in the specification
@@ -447,8 +441,7 @@ class FileSystem : public QObject
    *   needs to be created
    * @param specType The specificationType
    */
-  void createReinitialisedSpecification(const Property& property,
-                                        SpecType specType);
+  void createReinitialisedSpecification(const Property& property, SpecType specType);
 
   /**
    * @brief openProjectFolderInExplorer Allows the user to open the project
@@ -479,8 +472,7 @@ class FileSystem : public QObject
   int enumerationLimit() const { return m_enumerationLimit; }
   void setEnumerationLimit(int value) { m_enumerationLimit = value; }
 
-
-  public slots:
+public slots:
   /**
    * @brief setSaveIntermediateFilesOptions Sets the options on whether
    *   intermediate files need to be saved
@@ -488,7 +480,7 @@ class FileSystem : public QObject
    */
   void setSaveIntermediateFilesOptions(bool checked);
 
-  signals:
+signals:
   /**
    * @brief enterSpecificationOnlyMode Is emitted whenever the IDE is opened
    *   with a specification as argument
@@ -511,10 +503,9 @@ class FileSystem : public QObject
    * @param oldPropertyName The name of the old property that was edited
    * @param newProperty The new property after being edited
    */
-  void propertyEdited(const QString& oldPropertyName,
-                      const Property& newProperty);
+  void propertyEdited(const QString& oldPropertyName, const Property& newProperty);
 
-  private:
+private:
   QString projectFileExtension = ".mcrl2proj";
   QString projectFolderPath;
   QString specFilePath;
@@ -544,7 +535,6 @@ class FileSystem : public QObject
   mcrl2::lps::t_lin_method m_linearisationMethod = mcrl2::lps::lmRegular;
   int m_enumerationLimit = 0;
 
-
   /**
    * @brief makeSureProjectFolderExists Checks whether the properties folder
    *   exists, if not creates it
@@ -573,8 +563,7 @@ class FileSystem : public QObject
    * @param evidence Whether this file is used for evidence
    * @return A prefix used for names of intermediate files
    */
-  QString intermediateFilePrefix(const QString& propertyName, SpecType specType,
-                                 bool evidence);
+  QString intermediateFilePrefix(const QString& propertyName, SpecType specType, bool evidence);
 
   /**
    * @brief createFileDialog Creates a file dialog that can be used to ask the
@@ -621,8 +610,7 @@ class FileSystem : public QObject
    * @param context For what purpose the propertyFile is read
    * @return The property read from the file
    */
-  Property readPropertyFromFile(const QString& propertyFilePath,
-                                const QString& context);
+  Property readPropertyFromFile(const QString& propertyFilePath, const QString& context);
 
   /**
    * @brief removePropertyFromProjectFile Removes a property from the project

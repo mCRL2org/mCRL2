@@ -9,52 +9,49 @@
 
 #include "filesystem.h"
 
+#include <QCoreApplication>
+#include <QCryptographicHash>
+#include <QDesktopServices>
+#include <QDirIterator>
+#include <QDomElement>
+#include <QDomNode>
+#include <QDomNodeList>
 #include <QFile>
 #include <QFileInfo>
-#include <QTextStream>
-#include <QDirIterator>
 #include <QInputDialog>
-#include <QDesktopServices>
-#include <QCoreApplication>
-#include <QDomNode>
-#include <QDomElement>
-#include <QDomNodeList>
-#include <QCryptographicHash>
+#include <QTextStream>
 
 Property::Property()
-    : name(""), text(""), mucalculus(true),
-      equivalence(mcrl2::lts::lts_eq_none), text2("")
-{
-}
+  : name(""),
+    text(""),
+    mucalculus(true),
+    equivalence(mcrl2::lts::lts_eq_none),
+    text2("")
+{}
 
-Property::Property(QString name, QString text, bool mucalculus,
-                   mcrl2::lts::lts_equivalence equivalence, QString text2)
-    : name(name), text(text), mucalculus(mucalculus), equivalence(equivalence),
-      text2(text2)
-{
-}
+Property::Property(QString name, QString text, bool mucalculus, mcrl2::lts::lts_equivalence equivalence, QString text2)
+  : name(name),
+    text(text),
+    mucalculus(mucalculus),
+    equivalence(equivalence),
+    text2(text2)
+{}
 
 bool Property::operator==(const Property& property) const
 {
-  return name == property.name && text == property.text &&
-         mucalculus == property.mucalculus &&
-         (mucalculus ||
-          (equivalence == property.equivalence && text2 == property.text2));
+  return name == property.name && text == property.text && mucalculus == property.mucalculus
+         && (mucalculus || (equivalence == property.equivalence && text2 == property.text2));
 }
 
-bool Property::operator!=(const Property& property) const
+FileSystem::FileSystem(mcrl2::gui::qt::CodeEditor* specificationEditor, QSettings* settings, QWidget* parent)
+  : parent(parent),
+    specificationEditor(specificationEditor),
+    settings(settings),
+    projectOpen(false),
+    properties({}),
+    specificationOnlyMode(false)
 {
-  return !operator==(property);
-}
-
-FileSystem::FileSystem(mcrl2::gui::qt::CodeEditor* specificationEditor,
-                       QSettings* settings, QWidget* parent)
-    : parent(parent), specificationEditor(specificationEditor),
-      settings(settings), projectOpen(false), properties({}),
-      specificationOnlyMode(false)
-{
-  for (std::pair<IntermediateFileType, QString> item :
-       INTERMEDIATEFILETYPENAMES)
+  for (std::pair<IntermediateFileType, QString> item: INTERMEDIATEFILETYPENAMES)
   {
     saveIntermediateFilesOptions[item.first] = false;
   }
@@ -83,8 +80,7 @@ void FileSystem::makeSureArtefactsFolderExists()
 
 QString FileSystem::projectFilePath()
 {
-  return projectFolderPath + QDir::separator() + projectName +
-         projectFileExtension;
+  return projectFolderPath + QDir::separator() + projectName + projectFileExtension;
 }
 
 QString FileSystem::propertiesFolderPath()
@@ -113,9 +109,7 @@ QString FileSystem::intermediateFilesFolderPath(IntermediateFileType fileType)
 QString FileSystem::projectHash()
 {
   return QString("%1").arg(
-      QString(QCryptographicHash::hash(projectFolderPath.toUtf8(),
-                                       QCryptographicHash::Md4)
-                  .toHex()));
+    QString(QCryptographicHash::hash(projectFolderPath.toUtf8(), QCryptographicHash::Md4).toHex()));
 }
 
 QString FileSystem::defaultSpecificationFilePath()
@@ -123,16 +117,13 @@ QString FileSystem::defaultSpecificationFilePath()
   return projectFolderPath + QDir::separator() + projectName + "_spec.mcrl2";
 }
 
-QString FileSystem::intermediateFilePrefix(const QString& propertyName,
-                                           SpecType specType, bool evidence)
+QString FileSystem::intermediateFilePrefix(const QString& propertyName, SpecType specType, bool evidence)
 {
-  return projectHash() + "_" + projectName +
-         (propertyName.isEmpty() ? "" : "_" + propertyName) +
-         SPECTYPEEXTENSION.at(specType) + (evidence ? "_evidence" : "");
+  return projectHash() + "_" + projectName + (propertyName.isEmpty() ? "" : "_" + propertyName)
+         + SPECTYPEEXTENSION.at(specType) + (evidence ? "_evidence" : "");
 }
 
-QString FileSystem::specificationFilePath(SpecType specType,
-                                          const QString& propertyName)
+QString FileSystem::specificationFilePath(SpecType specType, const QString& propertyName)
 {
   if (specType == SpecType::Main)
   {
@@ -147,42 +138,36 @@ QString FileSystem::specificationFilePath(SpecType specType,
   }
   else
   {
-    return temporaryFolder.path() + QDir::separator() +
-           intermediateFilePrefix(propertyName, specType, false) +
-           "_spec.mcrl2";
+    return temporaryFolder.path() + QDir::separator() + intermediateFilePrefix(propertyName, specType, false)
+           + "_spec.mcrl2";
   }
 }
 
-QString FileSystem::lpsFilePath(SpecType specType, const QString& propertyName,
-                                bool evidence)
+QString FileSystem::lpsFilePath(SpecType specType, const QString& propertyName, bool evidence)
 {
-  return intermediateFilesFolderPath(IntermediateFileType::Lps) +
-         QDir::separator() +
-         intermediateFilePrefix(propertyName, specType, evidence) + "_lps.lps";
+  return intermediateFilesFolderPath(IntermediateFileType::Lps) + QDir::separator()
+         + intermediateFilePrefix(propertyName, specType, evidence) + "_lps.lps";
 }
 
 QString FileSystem::ltsFilePath(mcrl2::lts::lts_equivalence equivalence,
-                                SpecType specType, const QString& propertyName,
-                                bool evidence)
+  SpecType specType,
+  const QString& propertyName,
+  bool evidence)
 {
-  return intermediateFilesFolderPath(IntermediateFileType::Lts) +
-         QDir::separator() +
-         intermediateFilePrefix(propertyName, specType, evidence) + "_lts_" +
-         getEquivalenceName(equivalence, true) + ".lts";
+  return intermediateFilesFolderPath(IntermediateFileType::Lts) + QDir::separator()
+         + intermediateFilePrefix(propertyName, specType, evidence) + "_lts_" + getEquivalenceName(equivalence, true)
+         + ".lts";
 }
 
 QString FileSystem::propertyFilePath(const Property& property)
 {
-  return propertiesFolderPath() + QDir::separator() + property.name +
-         (property.mucalculus ? ".mcf" : ".equ");
+  return propertiesFolderPath() + QDir::separator() + property.name + (property.mucalculus ? ".mcf" : ".equ");
 }
 
 QString FileSystem::pbesFilePath(const QString& propertyName, bool evidence)
 {
-  return intermediateFilesFolderPath(IntermediateFileType::Pbes) +
-         QDir::separator() +
-         intermediateFilePrefix(propertyName, SpecType::Main, evidence) +
-         "_pbes.pbes";
+  return intermediateFilesFolderPath(IntermediateFileType::Pbes) + QDir::separator()
+         + intermediateFilePrefix(propertyName, SpecType::Main, evidence) + "_pbes.pbes";
 }
 
 QString FileSystem::toolPath(const QString& tool)
@@ -244,10 +229,8 @@ bool FileSystem::isSpecificationModified()
 
 bool FileSystem::isSpecificationNewlyModifiedFromOutside()
 {
-  QDateTime newestModificationTime =
-      QFileInfo(specificationFilePath()).lastModified();
-  bool newlyModified =
-      lastKnownSpecificationModificationTime != newestModificationTime;
+  QDateTime newestModificationTime = QFileInfo(specificationFilePath()).lastModified();
+  bool newlyModified = lastKnownSpecificationModificationTime != newestModificationTime;
   lastKnownSpecificationModificationTime = newestModificationTime;
   return newlyModified;
 }
@@ -262,10 +245,8 @@ bool FileSystem::isPropertyNewlyModifiedFromOutside(const Property& property)
   QFileInfo propertyFileInfo(propertyFilePath(property));
   if (propertyFileInfo.exists())
   {
-    QDateTime newestModificationTime =
-        QFileInfo(propertyFilePath(property)).lastModified();
-    bool newlyModified = lastKnownPropertyModificationTime.at(property.name) !=
-                         newestModificationTime;
+    QDateTime newestModificationTime = QFileInfo(propertyFilePath(property)).lastModified();
+    bool newlyModified = lastKnownPropertyModificationTime.at(property.name) != newestModificationTime;
     lastKnownPropertyModificationTime[property.name] = newestModificationTime;
     return newlyModified;
   }
@@ -278,7 +259,7 @@ bool FileSystem::isPropertyNewlyModifiedFromOutside(const Property& property)
 void FileSystem::setProjectModified()
 {
   specificationEditor->document()->setModified(true);
-  for (Property& property : properties)
+  for (Property& property: properties)
   {
     propertyModified[property.name] = true;
   }
@@ -286,24 +267,21 @@ void FileSystem::setProjectModified()
 
 bool FileSystem::isProjectFileNewlyModifiedFromOutside()
 {
-  QDateTime newestModificationTime =
-      QFileInfo(projectFilePath()).lastModified();
-  bool newlyModified =
-      lastKnownProjectFileModificationTime != newestModificationTime;
+  QDateTime newestModificationTime = QFileInfo(projectFilePath()).lastModified();
+  bool newlyModified = lastKnownProjectFileModificationTime != newestModificationTime;
   lastKnownProjectFileModificationTime = newestModificationTime;
   return newlyModified;
 }
 
 bool FileSystem::isProjectNewlyModifiedFromOutside()
 {
-  if (isSpecificationNewlyModifiedFromOutside() ||
-      isProjectFileNewlyModifiedFromOutside())
+  if (isSpecificationNewlyModifiedFromOutside() || isProjectFileNewlyModifiedFromOutside())
   {
     return true;
   }
   else
   {
-    for (Property& property : properties)
+    for (Property& property: properties)
     {
       if (isPropertyNewlyModifiedFromOutside(property))
       {
@@ -317,7 +295,7 @@ bool FileSystem::isProjectNewlyModifiedFromOutside()
 bool FileSystem::propertyNameExists(const QString& propertyName)
 {
   QString propertyNameLower = propertyName.toLower();
-  for (Property property : properties)
+  for (Property property: properties)
   {
     if (property.name.toLower() == propertyNameLower)
     {
@@ -329,23 +307,19 @@ bool FileSystem::propertyNameExists(const QString& propertyName)
 
 void FileSystem::setSaveIntermediateFilesOptions(bool checked)
 {
-  IntermediateFileType fileType =
-      static_cast<IntermediateFileType>(sender()->property("filetype").toInt());
+  IntermediateFileType fileType = static_cast<IntermediateFileType>(sender()->property("filetype").toInt());
   saveIntermediateFilesOptions[fileType] = checked;
 }
 
 bool FileSystem::upToDateOutputFileExists(const QString& inputFile,
-                                          const QString& outputFile,
-                                          const QString& inputFile2)
+  const QString& outputFile,
+  const QString& inputFile2)
 {
   /* An output file is up to date if it exists and if its modification time is
    *   larger than the modification time of the input file(s) */
   QFileInfo outFileInfo(outputFile);
-  return outFileInfo.exists() &&
-         QFileInfo(inputFile).lastModified() <= outFileInfo.lastModified() &&
-         (inputFile2.isEmpty() ? true
-                               : QFileInfo(inputFile2).lastModified() <=
-                                     outFileInfo.lastModified());
+  return outFileInfo.exists() && QFileInfo(inputFile).lastModified() <= outFileInfo.lastModified()
+         && (inputFile2.isEmpty() ? true : QFileInfo(inputFile2).lastModified() <= outFileInfo.lastModified());
 }
 
 void FileSystem::setSpecificationEditorCursor(int row, int column)
@@ -359,11 +333,9 @@ void FileSystem::setSpecificationEditorCursor(int row, int column)
 
 QFileDialog* FileSystem::createFileDialog(int type)
 {
-  QString fileDialogLocation =
-      settings
-          ->value("fileDialogLocation", QStandardPaths::writableLocation(
-                                            QStandardPaths::DocumentsLocation))
-          .toString();
+  QString fileDialogLocation
+    = settings->value("fileDialogLocation", QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation))
+        .toString();
   QFileDialog* fileDialog = new QFileDialog(parent, Qt::WindowCloseButtonHint);
   fileDialog->setDirectory(fileDialogLocation);
 
@@ -415,10 +387,10 @@ QDomDocument FileSystem::createNewProjectOptions()
 
   QDomElement propertiesElement = newProjectOptions.createElement("properties");
   rootElement.appendChild(propertiesElement);
-  
+
   QDomNode jittycNode = newProjectOptions.createElement("jittyc");
   rootElement.appendChild(jittycNode);
-        
+
   QDomNode linearisationNode = newProjectOptions.createElement("linearisation_method");
   rootElement.appendChild(linearisationNode);
 
@@ -457,28 +429,25 @@ bool FileSystem::newProject(bool forNewProject)
     {
       /* if successful, set the current projectFolder and create the project
        *   file and properties folder */
-      settings->setValue("fileDialogLocation",
-                         parentFolderPath(newProjectFolderPath));
+      settings->setValue("fileDialogLocation", parentFolderPath(newProjectFolderPath));
       projectFolderPath = newProjectFolderPath;
       projectName = newProjectName;
       specFilePath = defaultSpecificationFilePath();
 
       /* in case of creating a new project we create new project options, in
        *   case of save as we change the project options */
-      QDomText specPathNode =
-          projectOptions.createTextNode(QFileInfo(specFilePath).fileName());
+      QDomText specPathNode = projectOptions.createTextNode(QFileInfo(specFilePath).fileName());
       if (forNewProject)
       {
         projectOptions = createNewProjectOptions();
-        projectOptions.elementsByTagName("spec").at(0).appendChild(
-            specPathNode);
+        projectOptions.elementsByTagName("spec").at(0).appendChild(specPathNode);
       }
       else
       {
         QDomNode specNode = projectOptions.elementsByTagName("spec").at(0);
         specNode.replaceChild(specPathNode, specNode.firstChild());
       }
-      
+
       updateProjectFile();
 
       QDir(projectFolderPath).mkdir(propertiesFolderName);
@@ -547,8 +516,7 @@ bool FileSystem::loadSpecification(QString specPath)
     }
 
     specificationEditor->document()->setModified(false);
-    lastKnownSpecificationModificationTime =
-        QFileInfo(specificationFilePath()).lastModified();
+    lastKnownSpecificationModificationTime = QFileInfo(specificationFilePath()).lastModified();
     return true;
   }
   else
@@ -562,8 +530,7 @@ void FileSystem::openFromArgument(const QString& inputFilePath)
   QFileInfo inputFileInfo(inputFilePath);
   if (!inputFileInfo.exists())
   {
-    executeInformationBox(parent, "Open project",
-                          "Could not find the provided input " + inputFilePath);
+    executeInformationBox(parent, "Open project", "Could not find the provided input " + inputFilePath);
     return;
   }
 
@@ -579,9 +546,10 @@ void FileSystem::openFromArgument(const QString& inputFilePath)
   }
   else
   {
-    executeInformationBox(parent, "Open project",
-                          "The provided input argument should be a project "
-                          "folder or an mCRL2 specification (.mcrl2)");
+    executeInformationBox(parent,
+      "Open project",
+      "The provided input argument should be a project "
+      "folder or an mCRL2 specification (.mcrl2)");
   }
 }
 
@@ -590,12 +558,11 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   QString context = "Open Project";
   QDir projectFolder(newProjectFolderPath);
 
-  settings->setValue("fileDialogLocation",
-                     parentFolderPath(newProjectFolderPath));
+  settings->setValue("fileDialogLocation", parentFolderPath(newProjectFolderPath));
 
   /* find the project file */
   QStringList projectFiles;
-  for (QString fileName : projectFolder.entryList())
+  for (QString fileName: projectFolder.entryList())
   {
     if (fileName.endsWith(projectFileExtension))
     {
@@ -606,22 +573,19 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   /* check if there is exactly one project file */
   if (projectFiles.length() == 0)
   {
-    executeInformationBox(
-        parent, context,
-        "Provided folder does not contain a project file (ending with '" +
-            projectFileExtension + "')");
+    executeInformationBox(parent,
+      context,
+      "Provided folder does not contain a project file (ending with '" + projectFileExtension + "')");
     return;
   }
   if (projectFiles.length() > 1)
   {
-    executeInformationBox(
-        parent, context, "Provided folder contains more than one project file");
+    executeInformationBox(parent, context, "Provided folder contains more than one project file");
     return;
   }
 
   /* read the project file to get the specification path */
-  QString newProjectFilePath =
-      newProjectFolderPath + QDir::separator() + projectFiles.first();
+  QString newProjectFilePath = newProjectFolderPath + QDir::separator() + projectFiles.first();
   QFile projectFile(newProjectFilePath);
   projectFile.open(QIODevice::ReadOnly);
   QTextStream projectOpenStream(&projectFile);
@@ -633,33 +597,31 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   int parseErrorRow = 0;
   int parseErrorColumn = 0;
   QDomDocument newProjectOptions;
-  successfullyParsed = newProjectOptions.setContent(
-      newProjectFileContents, &parseError, &parseErrorRow, &parseErrorColumn);
+  successfullyParsed
+    = newProjectOptions.setContent(newProjectFileContents, &parseError, &parseErrorRow, &parseErrorColumn);
 
   if (!successfullyParsed)
   {
-    executeInformationBox(
-        parent, context,
-        "Project file could not be parsed correctly: " + parseError +
-            " on line " + QString::number(parseErrorRow) + " and column " +
-            QString::number(parseErrorColumn));
+    executeInformationBox(parent,
+      context,
+      "Project file could not be parsed correctly: " + parseError + " on line " + QString::number(parseErrorRow)
+        + " and column " + QString::number(parseErrorColumn));
     return;
   }
 
   /* check if the project info contains a path to the specification */
-  QDomElement specElement =
-      newProjectOptions.elementsByTagName("spec").at(0).toElement();
+  QDomElement specElement = newProjectOptions.elementsByTagName("spec").at(0).toElement();
   if (specElement.isNull())
   {
-    executeInformationBox(
-        parent, context,
-        "Project file in provided project folder does not contain a "
-        "specification (should contain a \"spec\" element with the path to the "
-        "specification as value).");
+    executeInformationBox(parent,
+      context,
+      "Project file in provided project folder does not contain a "
+      "specification (should contain a \"spec\" element with the path to the "
+      "specification as value).");
     projectFile.close();
     return;
   }
-  
+
   /** Read the tool options from the file */
   QDomElement jittycElement = newProjectOptions.elementsByTagName("jittyc").at(0).toElement();
   if (!jittycElement.isNull())
@@ -688,7 +650,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   {
     try
     {
-    m_enumerationLimit = std::stoi(jittycElement.text().toStdString());
+      m_enumerationLimit = std::stoi(jittycElement.text().toStdString());
     }
     catch (std::exception& ex)
     {
@@ -700,16 +662,16 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
   QString newSpecFilePath = specElement.text();
   if (QFileInfo(newSpecFilePath).isRelative())
   {
-    newSpecFilePath =
-        newProjectFolderPath + QDir::separator() + newSpecFilePath;
+    newSpecFilePath = newProjectFolderPath + QDir::separator() + newSpecFilePath;
   }
 
   /* read the specification and put it in the specification editor */
   if (!loadSpecification(newSpecFilePath))
   {
-    executeInformationBox(parent, context,
-                          "Specification file given in the project file in the "
-                          "provided project folder does not exist");
+    executeInformationBox(parent,
+      context,
+      "Specification file given in the project file in the "
+      "provided project folder does not exist");
     return;
   }
 
@@ -731,10 +693,10 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
     QString propFilePath = findPropertyFilePath(propertyName);
     if (propFilePath.isEmpty())
     {
-      if (executeBinaryQuestionBox(
-              parent, context,
-              "Could not find a property file with basename '" + propertyName +
-                  "', do you want to remove it from the project file?"))
+      if (executeBinaryQuestionBox(parent,
+            context,
+            "Could not find a property file with basename '" + propertyName
+              + "', do you want to remove it from the project file?"))
       {
         removePropertyFromProjectFile(propertyName);
         i--;
@@ -748,8 +710,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
     {
       properties.push_back(readProperty);
       propertyModified[readProperty.name] = false;
-      lastKnownPropertyModificationTime[readProperty.name] =
-          QFileInfo(propFilePath).lastModified();
+      lastKnownPropertyModificationTime[readProperty.name] = QFileInfo(propFilePath).lastModified();
     }
   }
 
@@ -777,9 +738,8 @@ void FileSystem::reloadProject()
 QString FileSystem::findPropertyFilePath(const QString& propertyName)
 {
   QDir propertiesFolder = QDir(propertiesFolderPath());
-  QStringList fileNames =
-      propertiesFolder.entryList(QStringList({"*.mcf", "*.equ"}));
-  for (QString fileName : fileNames)
+  QStringList fileNames = propertiesFolder.entryList(QStringList({"*.mcf", "*.equ"}));
+  for (QString fileName: fileNames)
   {
     if (propertyName == fileName.left(fileName.length() - 4))
     {
@@ -789,8 +749,7 @@ QString FileSystem::findPropertyFilePath(const QString& propertyName)
   return "";
 }
 
-Property FileSystem::readPropertyFromFile(const QString& propertyFilePath,
-                                          const QString& context)
+Property FileSystem::readPropertyFromFile(const QString& propertyFilePath, const QString& context)
 {
   QFile propertyFile(propertyFilePath);
   QString fileName = QFileInfo(propertyFile).fileName();
@@ -813,27 +772,24 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath,
       QStringList propertyParts = propertyText.split(equivalenceFileSeparator);
       if (propertyParts.size() == 3)
       {
-        mcrl2::lts::lts_equivalence equivalence =
-            getEquivalenceFromName(propertyParts.at(1));
+        mcrl2::lts::lts_equivalence equivalence = getEquivalenceFromName(propertyParts.at(1));
         if (equivalence != mcrl2::lts::lts_eq_none)
         {
-          return Property(propertyName, propertyParts.at(0), false, equivalence,
-                          propertyParts.at(2));
+          return Property(propertyName, propertyParts.at(0), false, equivalence, propertyParts.at(2));
         }
       }
-      executeInformationBox(
-          parent, context,
-          "Could not read the file '" + propertyFilePath +
-              "': an equivalence property file should contain a process "
-              "expression, the name of an equivalence and another process "
-              "expression, all three separated by '" +
-              equivalenceFileSeparator + "'");
+      executeInformationBox(parent,
+        context,
+        "Could not read the file '" + propertyFilePath
+          + "': an equivalence property file should contain a process "
+            "expression, the name of an equivalence and another process "
+            "expression, all three separated by '"
+          + equivalenceFileSeparator + "'");
     }
   }
   else
   {
-    executeInformationBox(parent, context,
-                          "Could not read the file '" + propertyFilePath + "'");
+    executeInformationBox(parent, context, "Could not read the file '" + propertyFilePath + "'");
   }
 
   return Property();
@@ -846,8 +802,7 @@ void FileSystem::newProperty(const Property& property)
   saveProperty(property);
 
   /* edit the project options and save it */
-  QDomNode propertiesNode =
-      projectOptions.elementsByTagName("properties").at(0);
+  QDomNode propertiesNode = projectOptions.elementsByTagName("properties").at(0);
 
   /* make sure that no duplicates can be added to the project file */
   QDomNodeList propertyNodes = propertiesNode.childNodes();
@@ -877,19 +832,16 @@ std::list<Property> FileSystem::importProperties()
   if (importPropertyDialog->exec() == QDialog::Accepted)
   {
     /* if successful, extract the property and save it if it is a .mcf file */
-    for (QString propertyFilePath : importPropertyDialog->selectedFiles())
+    for (QString propertyFilePath: importPropertyDialog->selectedFiles())
     {
-      if (propertyFilePath.endsWith(".mcf") ||
-          propertyFilePath.endsWith(".equ"))
+      if (propertyFilePath.endsWith(".mcf") || propertyFilePath.endsWith(".equ"))
       {
-        Property importedProperty =
-            readPropertyFromFile(propertyFilePath, "Import Properties");
+        Property importedProperty = readPropertyFromFile(propertyFilePath, "Import Properties");
         if (propertyNameExists(importedProperty.name))
         {
-          executeInformationBox(parent, "Import properties",
-                                "A property with name '" +
-                                    importedProperty.name +
-                                    "' already exists in this project");
+          executeInformationBox(parent,
+            "Import properties",
+            "A property with name '" + importedProperty.name + "' already exists in this project");
         }
         else
         {
@@ -905,8 +857,7 @@ std::list<Property> FileSystem::importProperties()
   return importedProperties;
 }
 
-void FileSystem::editProperty(const Property& oldProperty,
-                              const Property& newProperty)
+void FileSystem::editProperty(const Property& oldProperty, const Property& newProperty)
 {
   /* remove the file of the old property */
   deletePropertyFile(oldProperty);
@@ -924,10 +875,8 @@ void FileSystem::editProperty(const Property& oldProperty,
       QDomElement propertyElement = propertyNodes.at(i).toElement();
       if (propertyElement.text() == oldProperty.name)
       {
-        QDomText newPropertyNameNode =
-            projectOptions.createTextNode(newProperty.name);
-        propertyElement.replaceChild(newPropertyNameNode,
-                                     propertyElement.firstChild());
+        QDomText newPropertyNameNode = projectOptions.createTextNode(newProperty.name);
+        propertyElement.replaceChild(newPropertyNameNode, propertyElement.firstChild());
       }
     }
 
@@ -978,12 +927,11 @@ bool FileSystem::save(bool forceSave)
       QTextStream saveStream(&specificationFile);
       saveStream << specificationEditor->toPlainText();
       specificationFile.close();
-      lastKnownSpecificationModificationTime =
-          QFileInfo(specificationFile).lastModified();
+      lastKnownSpecificationModificationTime = QFileInfo(specificationFile).lastModified();
     }
 
     /* save all properties */
-    for (Property& property : properties)
+    for (Property& property: properties)
     {
       if (propertyModified.at(property.name) || forceSave)
       {
@@ -993,9 +941,10 @@ bool FileSystem::save(bool forceSave)
 
     /* save the tool options */
     QDomText jittycValue = projectOptions.createTextNode(m_enableJittyc ? "true" : "false");
-    QDomText linearisationValue = projectOptions.createTextNode(QString::fromStdString(mcrl2::lps::print_lin_method(m_linearisationMethod)));
-    QDomText enumerationLimitValue = projectOptions.createTextNode(QString::fromStdString(std::to_string(m_enumerationLimit)));
-
+    QDomText linearisationValue
+      = projectOptions.createTextNode(QString::fromStdString(mcrl2::lps::print_lin_method(m_linearisationMethod)));
+    QDomText enumerationLimitValue
+      = projectOptions.createTextNode(QString::fromStdString(std::to_string(m_enumerationLimit)));
 
     QDomNode jittycNode = projectOptions.elementsByTagName("jittyc").at(0).toElement();
     if (jittycNode.isNull())
@@ -1003,7 +952,7 @@ bool FileSystem::save(bool forceSave)
       // Append the jittyc node
       QDomNode rootNode = projectOptions.elementsByTagName("root").at(0);
       jittycNode = rootNode.appendChild(projectOptions.createElement("jittyc"));
-    }   
+    }
 
     if (jittycNode.firstChild().isNull())
     {
@@ -1013,7 +962,7 @@ bool FileSystem::save(bool forceSave)
     {
       jittycNode.replaceChild(jittycValue, jittycNode.firstChild());
     }
-            
+
     QDomNode linearisationNode = projectOptions.elementsByTagName("linearisation_method").at(0);
     if (linearisationNode.isNull())
     {
@@ -1022,13 +971,13 @@ bool FileSystem::save(bool forceSave)
     }
 
     if (linearisationNode.firstChild().isNull())
-    {      
+    {
       linearisationNode.appendChild(linearisationValue);
     }
     else
     {
       linearisationNode.replaceChild(linearisationValue, linearisationNode.firstChild());
-    }  
+    }
 
     QDomNode enumerationnNode = projectOptions.elementsByTagName("enumeration_limit").at(0);
     if (enumerationnNode.isNull())
@@ -1038,14 +987,13 @@ bool FileSystem::save(bool forceSave)
     }
 
     if (enumerationnNode.firstChild().isNull())
-    {      
+    {
       enumerationnNode.appendChild(enumerationLimitValue);
     }
     else
     {
       enumerationnNode.replaceChild(enumerationLimitValue, enumerationnNode.firstChild());
     }
-
 
     updateProjectFile();
 
@@ -1080,8 +1028,7 @@ bool FileSystem::saveAs()
       else
       {
         /* if failed, tell the user */
-        executeInformationBox(parent, "Save Specification As",
-                              "Could not create specification");
+        executeInformationBox(parent, "Save Specification As", "Could not create specification");
       }
     }
     return false;
@@ -1108,38 +1055,30 @@ void FileSystem::saveProperty(const Property& property)
   }
   else
   {
-    saveStream << property.text << equivalenceFileSeparator
-               << getEquivalenceName(property.equivalence)
+    saveStream << property.text << equivalenceFileSeparator << getEquivalenceName(property.equivalence)
                << equivalenceFileSeparator << property.text2;
   }
 
   propertyFile.close();
   propertyModified[property.name] = false;
-  lastKnownPropertyModificationTime[property.name] =
-      QFileInfo(propertyFile).lastModified();
+  lastKnownPropertyModificationTime[property.name] = QFileInfo(propertyFile).lastModified();
 }
 
-void FileSystem::createReinitialisedSpecification(const Property& property,
-                                                  SpecType specType)
+void FileSystem::createReinitialisedSpecification(const Property& property, SpecType specType)
 {
   /* only create a reinitialised specification if there does not already exist
    *   one that is up to date compared to the main specification and the
    *   corresponding property */
-  if (!upToDateOutputFileExists(
-          specificationFilePath(),
-          specificationFilePath(specType, property.name)) ||
-      !upToDateOutputFileExists(propertyFilePath(property),
-                                specificationFilePath(specType, property.name)))
+  if (!upToDateOutputFileExists(specificationFilePath(), specificationFilePath(specType, property.name))
+      || !upToDateOutputFileExists(propertyFilePath(property), specificationFilePath(specType, property.name)))
   {
     QString spec;
     readSpecification(spec);
     QString alternateSpec = spec;
-    QString procExp =
-        (specType == SpecType::First ? property.text : property.text2);
+    QString procExp = (specType == SpecType::First ? property.text : property.text2);
 
     /* find the init keyword */
-    QRegularExpressionMatch initKeywordMatch =
-        QRegularExpression("(^|\\n)([^%]*[; \\t])?init[ \\t\\n%]").match(spec);
+    QRegularExpressionMatch initKeywordMatch = QRegularExpression("(^|\\n)([^%]*[; \\t])?init[ \\t\\n%]").match(spec);
     /* if there is no init block in the main spec, add an init block */
     if (!initKeywordMatch.hasMatch())
     {
@@ -1149,8 +1088,7 @@ void FileSystem::createReinitialisedSpecification(const Property& property,
     {
       int initIndex = initKeywordMatch.capturedEnd();
       /* else find the size of the contents of the init block */
-      QRegularExpressionMatch initBlockMatch =
-          QRegularExpression("([^;%]|%[^\\n]*\\n)*;").match(spec, initIndex);
+      QRegularExpressionMatch initBlockMatch = QRegularExpression("([^;%]|%[^\\n]*\\n)*;").match(spec, initIndex);
       int initSize = initBlockMatch.capturedEnd() - initIndex - 1;
       /* and replace them with the given process expression */
       alternateSpec.replace(initIndex, initSize, " " + procExp);
@@ -1166,8 +1104,7 @@ void FileSystem::createReinitialisedSpecification(const Property& property,
 
 void FileSystem::openProjectFolderInExplorer()
 {
-  QDesktopServices::openUrl(
-      QUrl(QString("file:///") + projectFolderPath, QUrl::TolerantMode));
+  QDesktopServices::openUrl(QUrl(QString("file:///") + projectFolderPath, QUrl::TolerantMode));
 }
 
 void FileSystem::removeTemporaryFolder()

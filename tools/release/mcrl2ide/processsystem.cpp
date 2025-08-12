@@ -208,6 +208,8 @@ QProcess* ProcessSystem::createSubprocess(
 {
   // TODO: This function combines all parameters for the different processes, which is confusing.
   QProcess* subprocess = new QProcess();
+  subprocess->setWorkingDirectory(fileSystem->temporaryFolderPath());
+
   ProcessType processType = processTypes[processid];
 
   /* connect to logger */
