@@ -676,7 +676,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           //pbessolve_options.optimization = std::min(partial_solve_strategy::remove_self_loops, options_.solve_strategy);
           pbessolve_options.rewrite_strategy = options_.rewrite_strategy;
           pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
-          pbessolve_options.number_of_threads = options_.max_workers;
+          pbessolve_options.number_of_threads = 1; // If we spawn multiple threads here, the threads of Sylvan and the explicit exploration will interfere
 
           PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1, reach.rewriter());
 
