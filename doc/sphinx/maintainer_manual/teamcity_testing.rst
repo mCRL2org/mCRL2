@@ -8,7 +8,7 @@ This documentation concerns the setup of the continuous integration service. For
 information about the tests themselves see :ref:`build-testing`. The quality of the
 mCRL2 toolset is continuously monitored through regression tests, which are run
 automatically in a TeamCity setup. The results of the regression tests can be
-found at `<http://mcrl2build1.win.tue.nl:8111>`_. (You will need an account to
+found at `<https://mcrl2build1.win.tue.nl>`_. (You will need an account to
 access it)
 
 In TeamCity there are two top-level projects that are of importance:
@@ -34,9 +34,10 @@ The TeamCity build system runs on 4 different machines:
 - ``mcrl2build2`` (Ubuntu Linux)
 - ``mcrl2build3`` (Mac OS X, Mac Mini)
 - ``mcrl2build5`` (Ubuntu Linux)
+- ``mcrl2build6`` (Windows)
+- ``mcrl2build7`` (Mac OS X, Mac Studio)
   
-On ``mcrl2build3``, we only run MacOSX and the corresponding builds.
-On each of the other machines, a number of virtual machines is run
+On some of the Linux machines, a number of virtual machines is run
 using KVM. A nice overview of how to configure virtual machines on
 Ubuntu using KVM can be found
 on http://www.howtogeek.com/117635/how-to-install-kvm-and-create-virtual-machines-on-ubuntu/.
