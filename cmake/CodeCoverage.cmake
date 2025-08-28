@@ -87,7 +87,7 @@ if(NOT MCRL2_ENABLE_TESTS)
 endif()
 
 # The try_add_cxx_flag function is not really working.. For now just set flag manually.
-set(COVERAGE_COMPILER_FLAGS "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
+set(COVERAGE_COMPILER_FLAGS "-g -O0 --coverage -fprofile-arcs -fprofile-update=atomic -ftest-coverage"
   CACHE INTERNAL "")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_COMPILER_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COVERAGE_COMPILER_FLAGS}")
@@ -111,8 +111,7 @@ add_custom_target(${coverage_target}
   # Cleanup lcov
   COMMAND ${LCOV_PATH} --directory . --zerocounters
   # Create baseline to make sure untouched files show up in the report
-  COMMAND ${LCOV_PATH} --capture --initial --directory . 
-    --exclude *.g --exclude */3rd-party/* --exclude *toolset_version_const.h --exclude *jittyc_*.cpp
+  COMMAND ${LCOV_PATH} --capture --initial --directory .
     --ignore-errors mismatch,unused
     --output ${coverage_target}.base
 
@@ -122,14 +121,13 @@ add_custom_target(${coverage_target}
   COMMAND ctest --output-on-failure ${PROCESSOR_ARG} -L librarytest || true
 
   # Capturing lcov counters and generating report
-  COMMAND ${LCOV_PATH} --capture --directory . 
-    --exclude *.g --exclude */3rd-party/* --exclude *toolset_version_const.h --exclude *jittyc_*.cpp
+  COMMAND ${LCOV_PATH} --capture --directory .
     --ignore-errors mismatch,unused
     --output-file ${coverage_target}.info
 
   # add baseline counters
   COMMAND ${LCOV_PATH} -a ${coverage_target}.base -a ${coverage_target}.info --output-file ${coverage_target}.total
-  COMMAND ${LCOV_PATH} --remove ${coverage_target}.total --output-file ${PROJECT_BINARY_DIR}/${coverage_target}.info.cleaned
+  COMMAND ${LCOV_PATH} --remove "*.g" --remove "*/3rd-party/*" --remove "*toolset_version_const.h" --remove "*jittyc_*.cpp" --remove ${coverage_target}.total --output-file ${PROJECT_BINARY_DIR}/${coverage_target}.info.cleaned
   COMMAND ${GENHTML_PATH} --legend -o ${coverage_target} ${PROJECT_BINARY_DIR}/${coverage_target}.info.cleaned
   # COMMAND ${CMAKE_COMMAND} -E remove ${coverage_target}.base ${coverage_target}.total ${PROJECT_BINARY_DIR}/${coverage_target}.info.cleaned
 
