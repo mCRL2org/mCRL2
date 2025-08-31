@@ -98,6 +98,9 @@ static bool reduce_lts_in_various_ways(const std::string& test_description,
   reduce(l,lts::lts_eq_bisim_gj);
   if (!test_lts(test_description + " (bisimulation [Groote/Jansen 2025])",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
   l=l_in;
+  reduce(l,lts::lts_eq_bisim_gj_lazy_BLC);
+  if (!test_lts(test_description + " (bisimulation [Groote/Jansen 2025] lazy BLC)",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation)) return false;
+  l=l_in;
   reduce(l,lts::lts_eq_bisim_gv);
   if (!test_lts(test_description + " (bisimulation [Groote/Vaandrager 1990])",
           l,
@@ -133,6 +136,9 @@ static bool reduce_lts_in_various_ways(const std::string& test_description,
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gj);
   if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen 2025)",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
+  l=l_in;
+  reduce(l,lts::lts_eq_branching_bisim_gj_lazy_BLC);
+  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen 2025) lazy BLC",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gv);
   if (!test_lts(test_description + " (branching bisimulation [Groote/Vaandrager 1990])",
@@ -172,6 +178,12 @@ static bool reduce_lts_in_various_ways(const std::string& test_description,
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gj);
   if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Jansen 2025])",l,
+                                      expected.labels_divergence_preserving_branching_bisimulation,
+                                      expected.states_divergence_preserving_branching_bisimulation,
+                                      expected.transitions_divergence_preserving_branching_bisimulation)) return false;
+  l=l_in;
+  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC);
+  if (!test_lts(test_description + " (divergence-preserving branching bisimulation [Groote/Jansen 2025] lazy BLC)",l,
                                       expected.labels_divergence_preserving_branching_bisimulation,
                                       expected.states_divergence_preserving_branching_bisimulation,
                                       expected.transitions_divergence_preserving_branching_bisimulation)) return false;

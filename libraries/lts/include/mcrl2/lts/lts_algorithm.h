@@ -23,6 +23,7 @@
 #include "mcrl2/lts/detail/liblts_bisim_minimal_depth.h"
 #include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
 #include "mcrl2/lts/detail/liblts_bisim_gj.h"
+#include "mcrl2/lts/detail/liblts_bisim_gj_lazy_BLC.h"
 #include "mcrl2/lts/detail/liblts_branching_bisim_minimal_depth.h"
 #include "mcrl2/lts/detail/liblts_weak_bisim.h"
 #include "mcrl2/lts/detail/liblts_add_an_action_loop.h"
@@ -103,6 +104,10 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       return detail::destructive_bisimulation_compare_gj(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
+    case lts_eq_bisim_gj_lazy_BLC:
+    {
+      return detail::destructive_bisimulation_compare_gj_lazy_BLC(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
+    }
     case lts_eq_branching_bisim_jgkw:
     {
       return detail::destructive_bisimulation_compare_dnj(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
@@ -128,6 +133,10 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       return detail::destructive_bisimulation_compare_gj(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
     }
+    case lts_eq_branching_bisim_gj_lazy_BLC:
+    {
+      return detail::destructive_bisimulation_compare_gj_lazy_BLC(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
+    }
     case lts_eq_divergence_preserving_branching_bisim_jgkw:
     {
       return detail::destructive_bisimulation_compare_dnj(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
@@ -152,6 +161,10 @@ bool destructive_compare(LTS_TYPE& l1,
     case lts_eq_divergence_preserving_branching_bisim_gj:
     {
       return detail::destructive_bisimulation_compare_gj(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
+    }
+    case lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC:
+    {
+      return detail::destructive_bisimulation_compare_gj_lazy_BLC(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
     }
     case lts_eq_weak_bisim:
     {
@@ -660,6 +673,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce_gj(l,false,false);
       return;
     }
+    case lts_eq_bisim_gj_lazy_BLC:
+    {
+      detail::bisimulation_reduce_gj_lazy_BLC(l,false,false);
+      return;
+    }
     case lts_eq_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s(l);
@@ -691,6 +709,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce_gj(l,true,false);
       return;
     }
+    case lts_eq_branching_bisim_gj_lazy_BLC:
+    {
+      detail::bisimulation_reduce_gj_lazy_BLC(l,true,false);
+      return;
+    }
     case lts_eq_branching_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_branching_bisim<LTS_TYPE> > s(l);
@@ -720,6 +743,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     case lts_eq_divergence_preserving_branching_bisim_gj:
     {
       detail::bisimulation_reduce_gj(l,true,true);
+      return;
+    }
+    case lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC:
+    {
+      detail::bisimulation_reduce_gj_lazy_BLC(l,true,true);
       return;
     }
     case lts_eq_divergence_preserving_branching_bisim_sigref:
