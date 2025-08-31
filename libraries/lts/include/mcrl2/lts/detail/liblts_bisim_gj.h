@@ -5894,7 +5894,7 @@ class bisim_partitioner_gj
           // already stored
         }                                                                       assert(m_outgoing_transitions.end()==current_outgoing_transitions);
 
-        mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
+        // mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
 
         for (BLC_list_iterator ti=m_BLC_transitions.data();
                                          ti<m_BLC_transitions.data_end(); ++ti)
