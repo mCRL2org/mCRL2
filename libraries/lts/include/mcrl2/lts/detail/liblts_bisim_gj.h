@@ -5757,8 +5757,8 @@ class bisim_partitioner_gj
       group_transitions_on_tgt_label(m_aut);
 
       /* Count the number of occurring action labels.                        */ assert((unsigned) m_preserve_divergence <= 1);
-      mCRL2log(log::verbose) << "Start initialisation of the BLC list in the "
-                                            "initialisation, after sorting.\n";
+      // mCRL2log(log::verbose) << "Start initialisation of the BLC list in the "
+      //                                    "initialisation, after sorting.\n";
       constellation_type* const initial_constellation=
                 #ifdef USE_POOL_ALLOCATOR
                     simple_list<BLC_indicators>::get_pool().
@@ -5849,7 +5849,7 @@ class bisim_partitioner_gj
       }
 
       // Group transitions per outgoing state.
-      mCRL2log(log::verbose) << "Start setting outgoing transitions\n";
+      // mCRL2log(log::verbose) << "Start setting outgoing transitions\n";
       {
         fixed_vector<transition_index> count_outgoing_transitions_per_state
                                                        (m_aut.num_states(), 0);
@@ -6011,7 +6011,7 @@ class bisim_partitioner_gj
       }                                                                         assert(lower_i == upper_i);
       initial_block->sta.rt_non_bottom_states = lower_i;
 #ifndef INIT_WITHOUT_BLC_SETS
-      mCRL2log(log::verbose) << "Start refining in the initialisation WITH BLC sets\n";
+      // mCRL2log(log::verbose) << "Start refining in the initialisation WITH BLC sets\n";
       for (linked_list<BLC_indicators>::iterator
                                     blc_it=temporary_BLC_list.begin();
                                     temporary_BLC_list.end()!=blc_it; ++blc_it)
@@ -6038,7 +6038,7 @@ class bisim_partitioner_gj
       /* Everything except `m_BLC_transitions` is now completely initialized.*/ //print_data_structures("After initial reading before splitting in the initialisation", true);
                                                                                 assert(check_data_structures("After initial reading before splitting in the initialisation", true, false));
       // The initial partition has been constructed. Continue with the initialisation.
-      mCRL2log(log::verbose) << "Start refining in the initialisation WITHOUT BLC sets\n";
+      // mCRL2log(log::verbose) << "Start refining in the initialisation WITHOUT BLC sets\n";
 
       // We have not yet fully instantiated the BLC sets.
       // Therefore, we run a kind of simplified stabilisation: we do not need
@@ -6156,7 +6156,8 @@ class bisim_partitioner_gj
 #endif
       /* Algorithm 1, line 1.3                                               */ //print_data_structures("End initialisation");
                                                                                 assert(check_stability("End initialisation"));
-      mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";    assert(check_data_structures("End initialisation", false, false));
+      // mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";    
+                                                                                assert(check_data_structures("End initialisation", false, false));
       #ifdef INIT_WITHOUT_BLC_SETS
         stabilizeB();
       #else
@@ -6698,7 +6699,7 @@ class bisim_partitioner_gj
           m_branching(branching),
           m_preserve_divergence(preserve_divergence)
     {                                                                           assert(m_branching || !m_preserve_divergence);
-      mCRL2log(log::debug) << "Start initialisation.\n";
+      // mCRL2log(log::debug) << "Start initialisation.\n";
       // Apply the hidden labels explicitly as the information about hidden labels is not used.
       aut.rename_hidden_labels_to_tau(); 
       create_initial_partition();
@@ -6749,7 +6750,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
     // Algorithm 1, Line 1.1: Find tau-SCCs and contract each of them to a
     // single state
     const std::clock_t start_SCC=std::clock();
-    mCRL2log(log::verbose) << "Start SCC\n";
+    // mCRL2log(log::verbose) << "Start SCC\n";
     if (branching)
     {
         scc_reduce(l, preserve_divergence);
@@ -6758,12 +6759,12 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
     // Now apply the branching bisimulation reduction algorithm.  If there
     // are no taus, this will automatically yield strong bisimulation.
     const std::clock_t start_part=std::clock();
-    mCRL2log(log::debug) << "Start Partitioning\n";
+    // mCRL2log(log::debug) << "Start Partitioning\n";
     bisim_partitioner_gj<LTS_TYPE> bisim_part(l,branching,preserve_divergence);
 
     // Assign the reduced LTS
     const std::clock_t end_part=std::clock();
-    mCRL2log(log::debug) << "Start finalizing\n";
+    // mCRL2log(log::debug) << "Start finalizing\n";
     bisim_part.finalize_minimized_LTS();
 
     if (mCRL2logEnabled(log::debug))

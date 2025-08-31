@@ -2954,11 +2954,11 @@ class bisim_partitioner_dnj
         preserve_divergence(new_preserve_divergence)
     {                                                                           assert(branching || !preserve_divergence);
 
-        mCRL2log(log::verbose) << "Start initialisation.\n";
+        // mCRL2log(log::verbose) << "Start initialisation.\n";
         create_initial_partition();                                             ONLY_IF_DEBUG( part_tr.action_block_orig_inert_begin =
                                                                                                                        part_tr.action_block_inert_begin; )
         end_initial_part = std::clock();
-        mCRL2log(log::verbose) << "Start refining\n";
+        // mCRL2log(log::verbose) << "Start refining\n";
         refine_partition_until_it_becomes_stable();
     }
 
@@ -4948,7 +4948,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
     }
     // Line 2.1: Find tau-SCCs and contract each of them to a single state
     const std::clock_t start_SCC=std::clock();
-    mCRL2log(log::verbose) << "Start SCC\n";
+    // mCRL2log(log::verbose) << "Start SCC\n";
     if (branching)
     {
         scc_reduce(l, preserve_divergence);
@@ -4962,13 +4962,13 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
     // Now apply the branching bisimulation reduction algorithm.  If there
     // are no taus, this will automatically yield strong bisimulation.
     const std::clock_t start_part=std::clock();
-    mCRL2log(log::verbose) << "Start Partitioning\n";
+    // mCRL2log(log::verbose) << "Start Partitioning\n";
     bisim_partitioner_dnj<LTS_TYPE> bisim_part(l, branching,
                                                           preserve_divergence);
 
     // Assign the reduced LTS
     const std::clock_t end_part=std::clock();
-    mCRL2log(log::verbose) << "Start finalizing\n";
+    // mCRL2log(log::verbose) << "Start finalizing\n";
     bisim_part.finalize_minimized_LTS();
 
     if (mCRL2logEnabled(log::verbose))
