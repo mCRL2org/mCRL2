@@ -349,20 +349,20 @@ class ltsconvert_tool : public input_output_tool
       desc.add_option("equivalence",make_enum_argument<lts_equivalence>("NAME")
                       .add_value(lts_eq_none, true)
                       .add_value(lts_eq_bisim)
-                      .add_value(lts_eq_bisim_gv)
-                      .add_value(lts_eq_bisim_gjkw)
-                      .add_value(lts_eq_bisim_gj)
-                      .add_value(lts_eq_bisim_sigref)
+                      .add_hidden_value(lts_eq_bisim_gv)
+                      .add_hidden_value(lts_eq_bisim_gjkw)
+                      .add_hidden_value(lts_eq_bisim_gj)
+                      .add_hidden_value(lts_eq_bisim_sigref)
                       .add_value(lts_eq_branching_bisim)
-                      .add_value(lts_eq_branching_bisim_gv)
-                      .add_value(lts_eq_branching_bisim_gjkw)
-                      .add_value(lts_eq_branching_bisim_gj)
-                      .add_value(lts_eq_branching_bisim_sigref)
+                      .add_hidden_value(lts_eq_branching_bisim_gv)
+                      .add_hidden_value(lts_eq_branching_bisim_gjkw)
+                      .add_hidden_value(lts_eq_branching_bisim_gj)
+                      .add_hidden_value(lts_eq_branching_bisim_sigref)
                       .add_value(lts_eq_divergence_preserving_branching_bisim)
-                      .add_value(lts_eq_divergence_preserving_branching_bisim_gv)
-                      .add_value(lts_eq_divergence_preserving_branching_bisim_gjkw)
-                      .add_value(lts_eq_divergence_preserving_branching_bisim_gj)
-                      .add_value(lts_eq_divergence_preserving_branching_bisim_sigref)
+                      .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gv)
+                      .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gjkw)
+                      .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gj)
+                      .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_sigref)
                       .add_value(lts_eq_weak_bisim)
                       .add_value(lts_eq_divergence_preserving_weak_bisim)
                       .add_value(lts_eq_sim)
@@ -371,7 +371,7 @@ class ltsconvert_tool : public input_output_tool
                       .add_value(lts_eq_trace)
                       .add_value(lts_eq_weak_trace)
                       .add_value(lts_red_tau_star),
-                      "generate an equivalent LTS, preserving equivalence NAME:"
+                      "generate an equivalent LTS, preserving equivalence NAME (use --help-all for all possible arguments): "
                       , 'e');
       desc.add_option("tau", make_mandatory_argument("ACTNAMES"),
                       "consider actions with a name in the comma separated list ACTNAMES to "
