@@ -331,7 +331,9 @@ inline pbes_expression simplify_expr(pbes_expression& phi,
     }
     else
     {
+        mCRL2log(log::verbose) << " -  -  -  -  -  -  - Simplifying the entire expression \n";
       pbes_expression res = pbes_rewrite(phi, pbes_rewriter);
+      mCRL2log(log::verbose) << " -  -  -  -  -  -  - If substituter \n";
       if_substituter.apply(res, res);
       return res;
     }
@@ -357,6 +359,7 @@ inline void self_substitute(pbes_equation& equation,
     std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
     std::vector<propositional_variable_instantiation> set
         = get_propositional_variable_instantiations(equation.formula());
+    std::size_t previous_size = set.size();
     for (const propositional_variable_instantiation& x: set)
     {
       if (equation.variable().name() != x.name())
@@ -509,11 +512,14 @@ inline void self_substitute(pbes_equation& equation,
       std::vector<propositional_variable_instantiation> set
           = get_propositional_variable_instantiations(equation.formula());
 
-      mCRL2log(log::verbose) << "New number of pvi: " << set.size() << "\n";
+      std::size_t current_size = set.size();
+      mCRL2log(log::verbose) << "New number of pvi: " << current_size << "\n";
 
       // Simplify
-      if (!options.use_bdd_simplifier)
+      if (!options.use_bdd_simplifier && (current_size == 0 || (previous_size >= current_size + 10)))
       {
+        mCRL2log(log::verbose) << "Simplifying entire equation: " << set.size() << "\n";
+        previous_size = current_size;
         equation.formula() = simplify_expr(equation.formula(),
             options,
             if_substituter,
