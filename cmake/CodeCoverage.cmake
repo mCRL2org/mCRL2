@@ -122,7 +122,7 @@ add_custom_target(${coverage_target}
 
   # Capturing lcov counters and generating report
   COMMAND ${LCOV_PATH} --capture --directory .
-    --ignore-errors mismatch,unused
+    --ignore-errors mismatch,unused,source
     --output-file ${coverage_target}.info
 
   # add baseline counters
