@@ -332,18 +332,18 @@ class pbessolve_tool
         pbes_system::pbes custom_pbes = pbes_system::detail::load_pbes(custom_pbes_file);
         std::set<std::string> custom_vars;
         std::set<std::string> pbesspec_vars;
-        for (const pbes_equation& e: pbesspec.equations())
+        for (pbes_equation e: pbesspec.equations())
         {
           pbesspec_vars.insert(e.variable().name());
         }
-        for (const pbes_equation& e: custom_pbes.equations())
+        for (pbes_equation e: custom_pbes.equations())
         {
           custom_vars.insert(e.variable().name());
         }
         bool param_check = true;
-        for (const pbes_equation& e: custom_pbes.equations())
+        for (pbes_equation e: custom_pbes.equations())
         {
-          for (const pbes_equation& f: pbesspec.equations())
+          for (pbes_equation f: pbesspec.equations())
           {
             if (e.variable().name() == f.variable().name() and e.variable().parameters().size() < f.variable().parameters().size())
             {
@@ -351,18 +351,14 @@ class pbessolve_tool
             }
           }
         }
-        if (custom_vars != pbesspec_vars)
+        if (custom_vars == pbesspec_vars && param_check)
         {
-          mCRL2log(log::debug) << "The equation names of custom PBES do not match those of original PBES. Using original PBES." << std::endl;
-        }
-        else if (!param_check)
-        {
-          mCRL2log(log::debug) << "The custom PBES has fewer equation parameters than original PBES. Using original PBES." << std::endl;
+          mCRL2log(log::verbose) << "Using provided custom PBES for the second round of solving." << std::endl;
+          second_pbes = custom_pbes;
         }
         else
         {
-          mCRL2log(log::debug) << "Using provided custom PBES for the second round of solving." << std::endl;
-          second_pbes = custom_pbes;
+           mCRL2log(log::verbose) << "The custom PBES does not match the original PBES. Using original PBES." << std::endl;
         }
       }
       pbesspec = detail::remove_counterexample_info(second_pbes, !result, result);
