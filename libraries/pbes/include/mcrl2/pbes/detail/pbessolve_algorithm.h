@@ -112,6 +112,7 @@ class pbessolve_tool
     std::string lpsfile;
     std::string ltsfile;
     std::string evidence_file;
+    std::string custom_pbes_file;
 
     void add_options(utilities::interface_description& desc) override
     {
@@ -178,6 +179,13 @@ class pbessolve_tool
           "Do not move constant expressions to a substitution.");
       desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
       desc.add_hidden_option("prune-todo-alternative", "Use a variation of todo list pruning.");
+      desc.add_hidden_option("custom-pbes-file",
+        utilities::make_file_argument("NAME"),
+        "In the second round of solving, use a different PBES than in the first round. "
+        "Use case: solve a reduced PBES in the first round and obtain a solution that "
+        "corresponds to the solution of the PBES in --custom-pbes-file. "
+        "N.B. This has no effect when using --naive-counter-example-instantiation."
+      );
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -230,6 +238,11 @@ class pbessolve_tool
     else
     {
       m_short_strategy = parser.option_argument_as<int>("solve-strategy");
+    }
+
+    if (parser.has_option("custom-pbes-file"))
+    {
+      custom_pbes_file = parser.option_argument("custom-pbes-file");
     }
   }
 
@@ -312,7 +325,47 @@ class pbessolve_tool
 
       // Based on the result remove the unnecessary equations related to counter example information. 
       mCRL2log(log::verbose) << "Removing unnecessary example information for other player." << std::endl;
-      pbesspec = detail::remove_counterexample_info(pbesspec, !result, result); 
+      pbes_system::pbes second_pbes = pbesspec;
+      if (!custom_pbes_file.empty())
+      {
+        // Check if custom PBES can be used.
+        pbes_system::pbes custom_pbes = pbes_system::detail::load_pbes(custom_pbes_file);
+        std::set<std::string> custom_vars;
+        std::set<std::string> pbesspec_vars;
+        for (const pbes_equation& e: pbesspec.equations())
+        {
+          pbesspec_vars.insert(e.variable().name());
+        }
+        for (const pbes_equation& e: custom_pbes.equations())
+        {
+          custom_vars.insert(e.variable().name());
+        }
+        bool param_check = true;
+        for (const pbes_equation& e: custom_pbes.equations())
+        {
+          for (const pbes_equation& f: pbesspec.equations())
+          {
+            if (e.variable().name() == f.variable().name() and e.variable().parameters().size() < f.variable().parameters().size())
+            {
+              param_check = false;
+            }
+          }
+        }
+        if (custom_vars != pbesspec_vars)
+        {
+          mCRL2log(log::debug) << "The equation names of custom PBES do not match those of original PBES. Using original PBES." << std::endl;
+        }
+        else if (!param_check)
+        {
+          mCRL2log(log::debug) << "The custom PBES has fewer equation parameters than original PBES. Using original PBES." << std::endl;
+        }
+        else
+        {
+          mCRL2log(log::debug) << "Using provided custom PBES for the second round of solving." << std::endl;
+          second_pbes = custom_pbes;
+        }
+      }
+      pbesspec = detail::remove_counterexample_info(second_pbes, !result, result);
       mCRL2log(log::trace) << pbesspec << std::endl;
       
       structure_graph G;
