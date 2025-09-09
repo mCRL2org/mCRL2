@@ -519,9 +519,9 @@ inline void self_substitute(pbes_equation& equation,
           stable_set.insert(x);
           stable_set.insert(cur_x);
           pvi_done = true;
-          pvi_substituter.set_pvi(cur_x);
-          pvi_substituter.set_replacement(x);
-          pvi_substituter.apply(equation.formula(), equation.formula());
+          // pvi_substituter.set_pvi(cur_x);
+          // pvi_substituter.set_replacement(x);
+          // pvi_substituter.apply(equation.formula(), equation.formula());
           break;
         }
       }
