@@ -59,9 +59,9 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
                   "of predicate variable instances in the equation is zero. "
                   "In some cases, this makes solving the equation faster. However, "
                   "less paths can be reduced.", 's');
-      desc.add_option("max-depth", utilities::make_optional_argument("DEPTH", "15"),
+      desc.add_option("max-depth", utilities::make_optional_argument("DEPTH", "12"),
                   "The maximum depth a single predicate variable instances "
-                  "gets unfolded.", 'm');
+                  "gets unfolded. Default is 12.", 'm');
       desc.add_option("count-unique-pvi",
                   "An unfolding is considered less complex if the number of "
                   "*unique* predicate variable instances is no more than one.",

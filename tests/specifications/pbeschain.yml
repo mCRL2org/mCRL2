@@ -17,7 +17,7 @@ tools:
   t2:
     input: [l2]
     output: [l3]
-    args: []
+    args: [-m8]
     name: pbeschain
   t3:
     input: [l2]
@@ -32,7 +32,7 @@ tools:
   t5:
     input: [l2]
     output: [l4]
-    args: [-b]
+    args: [-b -m8]
     name: pbeschain
   t6:
     input: [l4]
