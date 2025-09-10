@@ -38,7 +38,7 @@ struct pbeschain_options
   bool use_bdd_simplifier = false;
   double bdd_timeout = 0.25;
   bool back_substitution = true;
-  int max_depth = 15;
+  int max_depth = 12;
   bool count_unique_pvi = false;
   bool fill_pvi = false;
   double timeout = 0.0; // timeout in seconds, 0 = no timeout
