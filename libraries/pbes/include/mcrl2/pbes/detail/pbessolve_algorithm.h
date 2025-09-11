@@ -364,8 +364,12 @@ class pbessolve_tool
       pbesspec = detail::remove_counterexample_info(second_pbes, !result, result);
       mCRL2log(log::trace) << pbesspec << std::endl;
       
+      std::unordered_map<std::string, std::set<int>> R;
+      R["X0"] = {1,3,5};
+      R["Z"] = {1,3,5};
+
       structure_graph G;
-      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, mapping, G, first_instantiate.data_rewriter());
+      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, mapping, G, first_instantiate.data_rewriter(), R);
       
       // Perform the second instantiation given the proof graph.      
       timer().start("second-instantiation");
