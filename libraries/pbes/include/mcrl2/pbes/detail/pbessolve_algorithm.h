@@ -354,6 +354,7 @@ class pbessolve_tool
         if (custom_vars == pbesspec_vars && param_check)
         {
           mCRL2log(log::verbose) << "Using provided custom PBES for the second round of solving." << std::endl;
+          pbes_system::detail::replace_global_variables(custom_pbes, sigma);
           second_pbes = custom_pbes;
         }
         else
@@ -364,10 +365,12 @@ class pbessolve_tool
       pbesspec = detail::remove_counterexample_info(second_pbes, !result, result);
       mCRL2log(log::trace) << pbesspec << std::endl;
       
-      std::unordered_map<std::string, std::set<int>> R;
-      R["X0"] = {1,3,5};
-      R["Z"] = {1,3,5};
-
+      std::unordered_map<std::string, std::set<int>> R = {};
+      if (!custom_pbes_file.empty())
+      {
+        R["X0"] = {1,3,5};
+        R["Z"] = {1,3,5};
+      }      
       structure_graph G;
       PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, mapping, G, first_instantiate.data_rewriter(), R);
       
