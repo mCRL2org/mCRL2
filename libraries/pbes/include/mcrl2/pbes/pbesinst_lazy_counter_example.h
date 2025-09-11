@@ -27,23 +27,30 @@ namespace mcrl2::pbes_system
 // Removes redundant parameters from e, for a given X(e) and set of redundant params R.
 propositional_variable_instantiation rewrite_PVI(
   const propositional_variable_instantiation PVI,
-  const std::set<int> R)
+  const std::unordered_map<std::string, std::set<int>> R)
 {
-  data::data_expression_vector params(PVI.parameters().begin(), PVI.parameters().end());
-  data::data_expression_vector params_r;
-  for (std::vector<data::data_expression>::size_type i = 0; i < params.size(); i ++)
-  {
-    if (R.find(i) != R.end())
+  if (R.find(PVI.name()) != R.end()) {
+    const std::set<int> Rx = R.at(PVI.name());
+    data::data_expression_vector params(PVI.parameters().begin(), PVI.parameters().end());
+    data::data_expression_vector params_r;
+    for (std::vector<data::data_expression>::size_type i = 0; i < params.size(); i ++)
     {
-      continue; // parameter is redundant
+      if (Rx.find(i) != Rx.end())
+      {
+        continue; // parameter is redundant
+      }
+      else
+      {
+        params_r.push_back(params[i]);
+      }
     }
-    else
-    {
-      params_r.push_back(params[i]);
-    }
+    return propositional_variable_instantiation(PVI.name(),
+      data::data_expression_list(params_r.begin(), params_r.end()));
   }
-  return propositional_variable_instantiation(PVI.name(),
-    data::data_expression_list(params_r.begin(), params_r.end()));
+  else
+  {
+    return PVI;
+  }
 }
 
 /// Replaces propositional variables in the expression psi that are irrelevant for the given proof_graph.
@@ -53,15 +60,12 @@ static void rewrite_star(pbes_expression& result,
     const pbes_expression& psi,
     const structure_graph& G,
     bool alpha,
-    const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping)
+    const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping,
+    std::unordered_map<std::string, std::set<int>> Q)
 {
   bool changed = false;
   std::smatch match;
 
-  // Redundant parameters for each predicate variable.
-  std::unordered_map<std::string, std::set<int>> R;
-  R["X0"] = {1,3,5};
-  R["Z"] = {1,3,5};
 
   // Now we need to find all reachable X --> Y, following vertices that are not ranked.
   mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
@@ -69,7 +73,7 @@ static void rewrite_star(pbes_expression& result,
   std::unordered_set<pbes_expression> Ys;
 
   // If X is won by player alpha, i.e. in the winning set W.
-  auto it = mapping.find(rewrite_PVI(X,R[X.name()]));
+  auto it = mapping.find(rewrite_PVI(X, Q));
   if (it != mapping.end())
   {
     structure_graph::index_type index = it->second;
@@ -165,12 +169,12 @@ static void rewrite_star(pbes_expression& result,
         }
         else
         {
-          if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y,R[Y.name()])))
+          if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y,Q)))
           {
-            mCRL2log(log::debug) << "rewrite_star " << Y << "( " << rewrite_PVI(Y,R[Y.name()]) << ") is reachable" << std::endl;
-            if (mapping.count(rewrite_PVI(Y,R[Y.name()])) == 0)
+            mCRL2log(log::debug) << "rewrite_star " << Y << "( " << rewrite_PVI(Y, Q) << ") is reachable" << std::endl;
+            if (mapping.count(rewrite_PVI(Y, Q)) == 0)
             {
-              mCRL2log(log::warning) << "Cannot find vertex " << rewrite_PVI(Y,R[Y.name()]) << " in the first structure graph.\n";
+              mCRL2log(log::warning) << "Cannot find vertex " << rewrite_PVI(Y, Q) << " in the first structure graph.\n";
               throw mcrl2::runtime_error("The specification cannot be consistently instantiated twice. Most likely "
                                          "this is an issue with the tool.");
             }
@@ -182,13 +186,13 @@ static void rewrite_star(pbes_expression& result,
             if (alpha == 0)
             {
               // If Y is not reachable, replace it by false
-              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,R[Y.name()]) << " is not reachable, becomes false" << std::endl;
+              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,Q) << " is not reachable, becomes false" << std::endl;
               return false_();
             }
             else
             {
               // If Y is not reachable, replace it by true
-              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,R[Y.name()]) << " is not reachable, becomes true" << std::endl;
+              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,Q) << " is not reachable, becomes true" << std::endl;
               return true_();
             }
           }
@@ -214,11 +218,13 @@ public:
       bool _alpha,
       const std::unordered_map<pbes_expression, structure_graph::index_type>& _mapping,
       structure_graph& G,
-      std::optional<data::rewriter> rewriter = std::nullopt)
+      std::optional<data::rewriter> rewriter = std::nullopt,
+      const std::unordered_map<std::string, std::set<int>> _R = {})
       : pbesinst_structure_graph_algorithm(options, p, G, rewriter),
         G(SG),
         alpha(_alpha),
-        mapping(_mapping)
+        mapping(_mapping),
+        R(_R)
   {}
 
   void rewrite_psi(const std::size_t thread_index,
@@ -228,13 +234,14 @@ public:
       const pbes_expression& psi) override
   {
     pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, psi);
-    rewrite_star(result, symbol, X, psi, G, alpha, mapping);
+    rewrite_star(result, symbol, X, psi, G, alpha, mapping, R);
   }
 
 private:
   const structure_graph& G;
   bool alpha;
   const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping;
+  const std::unordered_map<std::string, std::set<int>> R;
 };
 
 class pbesinst_counter_example_structure_graph_algorithm2 : public pbesinst_structure_graph_algorithm2
@@ -246,11 +253,13 @@ public:
       bool _alpha,
       const std::unordered_map<pbes_expression, structure_graph::index_type>& _mapping,
       structure_graph& G,
-      std::optional<data::rewriter> rewriter = std::nullopt)
+      std::optional<data::rewriter> rewriter = std::nullopt,
+      const std::unordered_map<std::string, std::set<int>> _R = {})
       : pbesinst_structure_graph_algorithm2(options, p, G, rewriter),
         G(SG),
         alpha(_alpha),
-        mapping(_mapping)
+        mapping(_mapping),
+        R(_R)
   {}
 
   void rewrite_psi(const std::size_t thread_index,
@@ -259,7 +268,7 @@ public:
       const propositional_variable_instantiation& X,
       const pbes_expression& psi) override
   {
-    rewrite_star(result, symbol, X, psi, G, alpha, mapping);
+    rewrite_star(result, symbol, X, psi, G, alpha, mapping, R);
     pbesinst_structure_graph_algorithm2::rewrite_psi(thread_index, result, symbol, X, psi);
   }
 
@@ -267,6 +276,7 @@ private:
   const structure_graph& G;
   bool alpha;
   const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping;
+  const std::unordered_map<std::string, std::set<int>> R;
 };
 
 } // namespace mcrl2::pbes_system
