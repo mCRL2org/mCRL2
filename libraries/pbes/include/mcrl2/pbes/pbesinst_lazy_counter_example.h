@@ -61,7 +61,7 @@ static void rewrite_star(pbes_expression& result,
     const structure_graph& G,
     bool alpha,
     const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping,
-    std::unordered_map<std::string, std::set<int>> Q)
+    std::unordered_map<std::string, std::set<int>> R)
 {
   bool changed = false;
   std::smatch match;
@@ -73,7 +73,7 @@ static void rewrite_star(pbes_expression& result,
   std::unordered_set<pbes_expression> Ys;
 
   // If X is won by player alpha, i.e. in the winning set W.
-  auto it = mapping.find(rewrite_PVI(X, Q));
+  auto it = mapping.find(rewrite_PVI(X, R));
   if (it != mapping.end())
   {
     structure_graph::index_type index = it->second;
@@ -169,12 +169,12 @@ static void rewrite_star(pbes_expression& result,
         }
         else
         {
-          if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y,Q)))
+          if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y,R)))
           {
-            mCRL2log(log::debug) << "rewrite_star " << Y << "( " << rewrite_PVI(Y, Q) << ") is reachable" << std::endl;
-            if (mapping.count(rewrite_PVI(Y, Q)) == 0)
+            mCRL2log(log::debug) << "rewrite_star " << Y << "( " << rewrite_PVI(Y, R) << ") is reachable" << std::endl;
+            if (mapping.count(rewrite_PVI(Y, R)) == 0)
             {
-              mCRL2log(log::warning) << "Cannot find vertex " << rewrite_PVI(Y, Q) << " in the first structure graph.\n";
+              mCRL2log(log::warning) << "Cannot find vertex " << rewrite_PVI(Y, R) << " in the first structure graph.\n";
               throw mcrl2::runtime_error("The specification cannot be consistently instantiated twice. Most likely "
                                          "this is an issue with the tool.");
             }
@@ -186,13 +186,13 @@ static void rewrite_star(pbes_expression& result,
             if (alpha == 0)
             {
               // If Y is not reachable, replace it by false
-              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,Q) << " is not reachable, becomes false" << std::endl;
+              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,R) << " is not reachable, becomes false" << std::endl;
               return false_();
             }
             else
             {
               // If Y is not reachable, replace it by true
-              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,Q) << " is not reachable, becomes true" << std::endl;
+              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,R) << " is not reachable, becomes true" << std::endl;
               return true_();
             }
           }
@@ -226,6 +226,8 @@ public:
         mapping(_mapping),
         R(_R)
   {}
+  // TODO ensure that the PVIs in mapping match the shape of the 
+  // vertices in G after they are rewritten with R.
 
   void rewrite_psi(const std::size_t thread_index,
       pbes_expression& result,
