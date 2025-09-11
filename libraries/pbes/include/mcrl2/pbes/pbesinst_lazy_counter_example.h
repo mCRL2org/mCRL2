@@ -24,6 +24,27 @@
 
 namespace mcrl2::pbes_system
 {
+// Removes redundant parameters from e, for a given X(e) and set of redundant params R.
+propositional_variable_instantiation rewrite_PVI(
+  const propositional_variable_instantiation PVI,
+  const std::set<int> R)
+{
+  data::data_expression_vector params(PVI.parameters().begin(), PVI.parameters().end());
+  data::data_expression_vector params_r;
+  for (std::vector<data::data_expression>::size_type i = 0; i < params.size(); i ++)
+  {
+    if (R.find(i) != R.end())
+    {
+      continue; // parameter is redundant
+    }
+    else
+    {
+      params_r.push_back(params[i]);
+    }
+  }
+  return propositional_variable_instantiation(PVI.name(),
+    data::data_expression_list(params_r.begin(), params_r.end()));
+}
 
 /// Replaces propositional variables in the expression psi that are irrelevant for the given proof_graph.
 static void rewrite_star(pbes_expression& result,
@@ -37,13 +58,18 @@ static void rewrite_star(pbes_expression& result,
   bool changed = false;
   std::smatch match;
 
+  // Redundant parameters for each predicate variable.
+  std::unordered_map<std::string, std::set<int>> R;
+  R["X0"] = {1,3,5};
+  R["Z"] = {1,3,5};
+
   // Now we need to find all reachable X --> Y, following vertices that are not ranked.
   mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
 
   std::unordered_set<pbes_expression> Ys;
 
   // If X is won by player alpha, i.e. in the winning set W.
-  auto it = mapping.find(X);
+  auto it = mapping.find(rewrite_PVI(X,R[X.name()]));
   if (it != mapping.end())
   {
     structure_graph::index_type index = it->second;
@@ -139,12 +165,12 @@ static void rewrite_star(pbes_expression& result,
         }
         else
         {
-          if (mcrl2::utilities::detail::contains(Ys, Y))
+          if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y,R[Y.name()])))
           {
-            mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
-            if (mapping.count(Y) == 0)
+            mCRL2log(log::debug) << "rewrite_star " << Y << "( " << rewrite_PVI(Y,R[Y.name()]) << ") is reachable" << std::endl;
+            if (mapping.count(rewrite_PVI(Y,R[Y.name()])) == 0)
             {
-              mCRL2log(log::warning) << "Cannot find vertex " << Y << " in the first structure graph.\n";
+              mCRL2log(log::warning) << "Cannot find vertex " << rewrite_PVI(Y,R[Y.name()]) << " in the first structure graph.\n";
               throw mcrl2::runtime_error("The specification cannot be consistently instantiated twice. Most likely "
                                          "this is an issue with the tool.");
             }
@@ -156,13 +182,13 @@ static void rewrite_star(pbes_expression& result,
             if (alpha == 0)
             {
               // If Y is not reachable, replace it by false
-              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
+              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,R[Y.name()]) << " is not reachable, becomes false" << std::endl;
               return false_();
             }
             else
             {
               // If Y is not reachable, replace it by true
-              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
+              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,R[Y.name()]) << " is not reachable, becomes true" << std::endl;
               return true_();
             }
           }
