@@ -49,7 +49,7 @@ void function_symbol_pool::create_helper(const std::string& name)
         std::size_t number = std::stoul(potential_number);
         *prefix_it->second = std::max(*prefix_it->second, number + 1); // Set the index belonging to the found prefix to at least a safe number+1.
       }
-      catch (std::exception&)
+      catch (std::exception&) // NOLINT(bugprone-empty-catch)
       {
         // Can be std::invalid_argument or an out_of_range exception.
         // In both cases nothing needs to be done, and the exception can be ignored.
@@ -74,7 +74,7 @@ function_symbol function_symbol_pool::create(std::string&& name, const std::size
   {
     if constexpr (EnableCreationMetrics) { m_function_symbol_metrics.miss(); }
 
-    const _function_symbol& symbol = *m_symbol_set.emplace(std::forward<std::string>(name), arity).first;
+    const _function_symbol& symbol = *m_symbol_set.emplace(std::move(name), arity).first;
     if (check_for_registered_functions)
     {
       create_helper(symbol.name());
@@ -159,7 +159,7 @@ std::size_t function_symbol_pool::get_sufficiently_large_postfix_index(const std
           }
         }
       }
-      catch (std::exception&)
+      catch (std::exception&) // NOLINT(bugprone-empty-catch)
       {
         // Can be std::invalid_argument or an out_of_range exception.
         // In both cases nothing needs to be done, and the exception can be ignored.
@@ -219,7 +219,10 @@ void function_symbol_pool::sweep()
     mCRL2log(mcrl2::log::info) << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
   }
 }
+
 void function_symbol_pool::resize_if_needed()
 {
+  m_mutex.lock();
   m_symbol_set.rehash_if_needed();
+  m_mutex.unlock();
 }
