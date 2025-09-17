@@ -25,15 +25,15 @@
 namespace mcrl2::pbes_system
 {
 // For a given X(e) and set of redundant params R, returns a copy of X(e) without redundancy.
-propositional_variable_instantiation rewrite_PVI(
-  const propositional_variable_instantiation PVI,
+propositional_variable_instantiation rewrite_PVI(const propositional_variable_instantiation PVI,
   const std::unordered_map<std::string, std::set<int>> R)
 {
-  if (R.find(PVI.name()) != R.end()) {
+  if (R.find(PVI.name()) != R.end())
+  {
     const std::set<int> Rx = R.at(PVI.name());
     data::data_expression_vector params(PVI.parameters().begin(), PVI.parameters().end());
     data::data_expression_vector params_r;
-    for (std::vector<data::data_expression>::size_type i = 0; i < params.size(); i ++)
+    for (std::vector<data::data_expression>::size_type i = 0; i < params.size(); i++)
     {
       if (Rx.find(i) != Rx.end())
       {
@@ -169,9 +169,9 @@ static void rewrite_star(pbes_expression& result,
         }
         else
         {
-          if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y,R)))
+        if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y, R)))
           {
-            mCRL2log(log::debug) << "rewrite_star " << Y << "( " << rewrite_PVI(Y, R) << ") is reachable" << std::endl;
+            mCRL2log(log::debug) << "rewrite_star " << Y << " ( " << rewrite_PVI(Y, R) << ") is reachable" << std::endl;
             if (mapping.count(rewrite_PVI(Y, R)) == 0)
             {
               mCRL2log(log::warning) << "Cannot find vertex " << rewrite_PVI(Y, R) << " in the first structure graph.\n";
