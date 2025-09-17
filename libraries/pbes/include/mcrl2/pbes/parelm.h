@@ -252,7 +252,6 @@ class pbes_parelm_algorithm
         {
           std::vector<std::size_t> w(sfirst, slast);
           std::transform(w.begin(), w.end(), w.begin(), [&](std::size_t i) { return i - index; });
-          if (pbes_system::detail::is_counter_example_equation(eqn))
           removals[eqn.variable().name()] = w;
         }
         index = maxindex;
