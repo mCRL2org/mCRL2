@@ -175,8 +175,7 @@ class pbessolve_tool
           "use strategy STRATEGY (N.B. This is a developer option that overrides "
           "--strategy)",
           'l');
-      desc.add_hidden_option("no-replace-constants-by-variables",
-          "Do not move constant expressions to a substitution.");
+    desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
       desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
       desc.add_hidden_option("prune-todo-alternative", "Use a variation of todo list pruning.");
       desc.add_hidden_option("custom-pbes-file",
@@ -184,8 +183,7 @@ class pbessolve_tool
         "In the second round of solving, use a different PBES than in the first round. "
         "Use case: First solve a PBES reduced by the pbesparelm tool, and then use "
         "the original PBES (provided as --custom-pbes-file) to obtain the final solution. "
-        "N.B. This has no effect when using --naive-counter-example-instantiation."
-      );
+      "N.B. This has no effect when using --naive-counter-example-instantiation.");
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -264,15 +262,13 @@ class pbessolve_tool
   {
   }
 
-  void check_param_match(const mcrl2::data::variable_list Xparams,
-    const mcrl2::data::variable_list X_hatparams
-  )
+  void check_param_match(const mcrl2::data::variable_list Xparams, const mcrl2::data::variable_list X_hatparams)
   {
     if (Xparams.size() < X_hatparams.size())
     {
       throw mcrl2::runtime_error("An equation from the custom PBES has fewer parameters than the first PBES.");
     }
-    for (mcrl2::data::variable p : X_hatparams)
+    for (mcrl2::data::variable p: X_hatparams)
     {
       auto it = std::find(Xparams.begin(), Xparams.end(), p);
       if (it == Xparams.end())
@@ -290,7 +286,7 @@ class pbessolve_tool
     data::data_expression_vector params_hat(X_hatparams.begin(), X_hatparams.end());
     check_param_match(Xparams, X_hatparams);
 
-    for (std::vector<mcrl2::data::data_expression>::size_type i = 0; i < params.size(); i ++)
+    for (std::vector<mcrl2::data::data_expression>::size_type i = 0; i < params.size(); i++)
     {
       auto it = std::find(X_hatparams.begin(), X_hatparams.end(), params[i]);
       if (it == X_hatparams.end())
@@ -315,7 +311,8 @@ class pbessolve_tool
           found = true;
           pbes_system::propositional_variable X = e.variable();
           pbes_system::propositional_variable X_hat = e_hat.variable();
-          mCRL2log(log::debug) << "found " << X.name() << " from " << custom_pbes_file << " as " << X_hat.name() << std::endl;
+          mCRL2log(log::debug) << "found " << X.name() << " from " << custom_pbes_file << " as " << X_hat.name()
+                               << std::endl;
           R[X.name()] = get_param_difference(X.parameters(), X_hat.parameters());
         }
       }
