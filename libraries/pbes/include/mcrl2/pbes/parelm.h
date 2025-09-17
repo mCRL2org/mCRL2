@@ -201,6 +201,20 @@ class pbes_parelm_algorithm
       std::set<std::size_t> significant_variables;
       offset = 0;
       for (pbes_equation& eqn: p.equations())
+    {
+      if (detail::is_counter_example_equation(eqn))
+      {
+        for (const data::variable& w: eqn.variable().parameters())
+        {
+          int k = detail::variable_index(eqn.variable().parameters(), w);
+          if (k < 0)
+          {
+            throw mcrl2::runtime_error("<variable error>" + data::pp(w));
+          }
+          significant_variables.insert(offset + k);
+        }
+      }
+      else
       {
         for (const data::variable& w: unbound_variables(eqn.formula(), global_variables))
         {
@@ -211,6 +225,7 @@ class pbes_parelm_algorithm
           }
           significant_variables.insert(offset + k);
         }
+      }
         offset += eqn.variable().parameters().size();
       }
 
@@ -238,14 +253,7 @@ class pbes_parelm_algorithm
           std::vector<std::size_t> w(sfirst, slast);
           std::transform(w.begin(), w.end(), w.begin(), [&](std::size_t i) { return i - index; });
           if (pbes_system::detail::is_counter_example_equation(eqn))
-          {
-            std::vector<std::size_t> dummy;
-            removals[eqn.variable().name()] = dummy;
-          }
-          else
-          {
-            removals[eqn.variable().name()] = w;
-          }
+          removals[eqn.variable().name()] = w;
         }
         index = maxindex;
         sfirst = slast;
