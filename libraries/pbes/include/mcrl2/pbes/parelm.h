@@ -181,7 +181,8 @@ class pbes_parelm_algorithm
   public:
     /// \brief Runs the parelm algorithm. The pbes \p is modified by the algorithm
     /// \param p A pbes
-    void run(pbes& p)
+    /// \param ignore_cex Ignore counter example equations if present
+    void run(pbes& p, bool ignore_cex)
     {
       data::variable_list global_variables(p.global_variables().begin(), p.global_variables().end());
       std::vector<data::variable> predicate_variables;
@@ -202,7 +203,8 @@ class pbes_parelm_algorithm
       offset = 0;
       for (pbes_equation& eqn: p.equations())
     {
-      if (detail::is_counter_example_equation(eqn))
+      // Consider all parameters of counter example equations to be significant
+      if (ignore_cex && detail::is_counter_example_equation(eqn))
       {
         for (const data::variable& w: eqn.variable().parameters())
         {
@@ -322,7 +324,7 @@ class pbes_parelm_algorithm
 /// \brief Apply the parelm algorithm
 /// \param p A PBES to which the algorithm is applied
 inline
-void parelm(pbes& p)
+void parelm(pbes& p, bool ignore_cex)
 {
   const bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
   if (has_counter_example)
@@ -330,7 +332,7 @@ void parelm(pbes& p)
     mCRL2log(log::warning) << "Warning: the PBES has counter example information, which may not be preserved by parameter elimination." << std::endl;
   }
   pbes_parelm_algorithm algorithm;
-  algorithm.run(p);
+  algorithm.run(p, ignore_cex);
 }
 
 } // namespace mcrl2::pbes_system

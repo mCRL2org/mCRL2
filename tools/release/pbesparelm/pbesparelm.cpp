@@ -29,6 +29,7 @@ using pbes_system::tools::pbes_output_tool;
 class pbes_parelm_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {
   using super = pbes_input_tool<pbes_output_tool<input_output_tool>>;
+  bool ignore_cex;
 
 public:
   pbes_parelm_tool()
@@ -38,6 +39,19 @@ public:
             "Reads a file containing a PBES, and applies parameter elimination to it. If OUTFILE "
             "is not present, standard output is used. If INFILE is not present, standard input is used.")
   {}
+
+  void add_options(utilities::interface_description& desc) override
+  {
+    super::add_options(desc);
+    desc.add_hidden_option("ignore-cex", "Ignores the counter example equations if present.");
+  }
+
+  void parse_options(const utilities::command_line_parser& parser) override
+  {
+    super::parse_options(parser);
+
+    ignore_cex = parser.has_option("ignore-cex");
+  }
 
   bool run() override /*< The virtual function `run` executes the tool.
                  The user has to override this function to add behavior. >*/
@@ -50,7 +64,7 @@ public:
     pbes p;
     load_pbes(p, input_filename(), pbes_input_format());
 
-    parelm(p);
+    parelm(p, ignore_cex);
 
     // save the result
     save_pbes(p, output_filename(), pbes_output_format());
