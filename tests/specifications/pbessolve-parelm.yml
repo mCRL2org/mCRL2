@@ -39,7 +39,7 @@ tools:
   t4:
     input: [l4]
     output: [l9]
-    args: [--algorithm=pbes-core] # add to testing.py that the arg should be --algorithm=pbes-core
+    args: [--algorithm=pbes-core]
     name: pbestransform
   t5:
     input: [l9]
@@ -47,7 +47,7 @@ tools:
     args: [--ignore-cex]
     name: pbesparelm
   t6:
-    input: [l10, l3, l4] # add to testing.py that the third arg is --custom-pbes-file
+    input: [l10, l3, l4]
     output: [l11]
     args: []
     name: pbessolve
