@@ -415,7 +415,8 @@ inline void self_substitute(pbes_equation& equation,
           }
           sigma[v] = par;
         }
-        pbes_expression phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
+        
+        pbes_expression phi = mcrl2::pbes_system::replace_variables_capture_avoiding(equation.formula(), sigma);
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
@@ -439,7 +440,6 @@ inline void self_substitute(pbes_equation& equation,
 
         // Simplify
 
-        
         phi = simplify_expr(phi, options, if_substituter, replace_substituter, pbes_rewriter, f_bdd_prover);
         phi_vector = get_propositional_variable_instantiations(phi);
         int size = phi_vector.size();
@@ -514,7 +514,7 @@ inline void self_substitute(pbes_equation& equation,
           mCRL2log(log::debug) << "Nothing further to do\n";
           break;
         }
-        else if (depth > options.max_depth)
+        else if (depth >= options.max_depth)
         {
           stable_set.insert(x);
           stable_set.insert(cur_x);
@@ -621,6 +621,9 @@ struct pbeschain_pbes_backward_substituter
     detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>
         replace_substituter(pbes_rewriter2);
     
+    if (options.max_depth <= 0){
+       return;
+    }
     for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
     {
       mCRL2log(log::verbose) << "Investigating the equation for " << i->variable().name() << "\n";

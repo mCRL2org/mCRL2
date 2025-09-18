@@ -106,8 +106,8 @@ BOOST_AUTO_TEST_CASE(test_linearisation)
     "\n"
     "proc P(b1_X: Bool) =\n"
     "       a(b1_X) .\n"
-    "         dist b1_X1: Bool[1 / 2] .\n"
-    "         P(b1_X = b1_X1);\n"
+    "         dist b_X: Bool[1 / 2] .\n"
+    "         P(b1_X = b_X);\n"
     "\n"
     "init dist b1: Bool[1 / 2] . P(b1);\n"
     ;
@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE(test_multiple_stochastic_parameters)
     "\n"
     "proc P(b3_X,b4_X: Bool) =\n"
     "       a(b3_X, b4_X) .\n"
-    "         dist b3_X1,b4_X1: Bool[if(b3_X1, 1 / 8, 3 / 8)] .\n"
-    "         P(b3_X = b3_X1, b4_X = b4_X1);\n"
+    "         dist b_X,b1_X: Bool[if(b_X, 1 / 8, 3 / 8)] .\n"
+    "         P(b3_X = b_X, b4_X = b1_X);\n"
     "\n"
     "init dist b3,b4: Bool[if(b3, 1 / 8, 3 / 8)] . P(b3, b4);\n"
     ;
@@ -171,11 +171,11 @@ BOOST_AUTO_TEST_CASE(test_properly_change_bound_variables)
     "     dc1: Nat;\n"
     "\n"
     "proc P(s4_Play,s1_Play: Pos, round__Play: Nat) =\n"
-    "       sum b1_Play: Bool.\n"
+    "       sum b_Play: Bool.\n"
     "         (s4_Play == 2 && !(round__Play == 1)) ->\n"
-    "         hold(b1_Play) .\n"
-    "         dist s2_Play: Pos[distribution(b1_Play, s1_Play, s2_Play)] .\n"
-    "         P(s4_Play = 2, s1_Play = s2_Play, round__Play = round__Play + 1)\n"
+    "         hold(b_Play) .\n"
+    "         dist s_Play: Pos[distribution(b_Play, s1_Play, s_Play)] .\n"
+    "         P(s4_Play = 2, s1_Play = s_Play, round__Play = round__Play + 1)\n"
     "     + (s4_Play == 2 && round__Play == 1) ->\n"
     "         lose .\n"
     "         P(s4_Play = 1, s1_Play = dc, round__Play = dc1)\n"
@@ -194,11 +194,11 @@ BOOST_AUTO_TEST_CASE(test_properly_change_bound_variables)
     "     dc1: Nat;\n"
     "\n"
     "proc P(s4_Play,s1_Play: Pos, round__Play: Nat) =\n"
-    "       sum b1_Play: Bool.\n"
+    "       sum b_Play: Bool.\n"
     "         (s4_Play == 1 && !(round__Play == 1)) ->\n"
-    "         hold(b1_Play) .\n"
-    "         dist s2_Play: Pos[distribution(b1_Play, s1_Play, s2_Play)] .\n"
-    "         P(s4_Play = 1, s1_Play = s2_Play, round__Play = round__Play + 1)\n"
+    "         hold(b_Play) .\n"
+    "         dist s_Play: Pos[distribution(b_Play, s1_Play, s_Play)] .\n"
+    "         P(s4_Play = 1, s1_Play = s_Play, round__Play = round__Play + 1)\n"
     "     + (s4_Play == 1 && round__Play == 1) ->\n"
     "         lose .\n"
     "         P(s4_Play = 2, s1_Play = dc, round__Play = dc1)\n"
@@ -208,6 +208,7 @@ BOOST_AUTO_TEST_CASE(test_properly_change_bound_variables)
     ;
 
   stochastic_specification spec=linearise(text);
+std::cerr << "RESULT " << spec << "\n";
   BOOST_CHECK(lps::pp(spec)==result1 ||   // The lineariser can up with multiple results, depending on how terms are stored internally. 
               lps::pp(spec)==result2);
 }  

@@ -5305,8 +5305,9 @@ class specification_basic_type
         add_summands(procId,
                      action_summands,
                      deadlock_summands,
-                     process::replace_variables(body,parameter_renaming), // This renaming renames variables with the same name but 
-                                                                          // conflicting types, e.g., x:Bool and x:Nat. 
+                     process::replace_variables_capture_avoiding(body,parameter_renaming), // This renaming renames variables 
+                                                                                           // with the same name but conflicting 
+                                                                                           // types, e.g., x:Bool and x:Nat. 
                      pCRLprocs,
                      stack,
                      regular,
@@ -8312,7 +8313,7 @@ class specification_basic_type
 
           if (!options.ignore_time)
           {
-            ultimate_delay_condition.constraint()=data::replace_variables(ultimate_delay_condition.constraint(),sigma);
+            ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma);
           }
 
           // Reconstruct the variables from the temporary specification

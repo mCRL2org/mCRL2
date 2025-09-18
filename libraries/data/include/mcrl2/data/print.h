@@ -1731,7 +1731,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
     }
 #endif
-    // TODO: handle @pospred
+    else if (sort_pos::is_pos_predecessor_application(x))
+    {
+      derived().print("max(1,");
+      derived().apply(sort_pos::arg(x));
+      derived().print(" - 1)");
+    }
     else if (sort_pos::is_plus_application(x))
     {
       print_binary_data_operation(x, " + ");
@@ -1855,18 +1860,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       derived().apply(sort_nat::arg(x));
     }
+    // TODO: handle @dub
+    // TODO: handle @dubsucc
+    // TODO: handle @gtesubtb
+    // TODO: handle @sqrt_nat
 #endif
     else if (sort_nat::is_pos2nat_application(x))
     {
       derived().apply(*x.begin());
     }
-    // TODO: handle @dub
-    // TODO: handle @dubsucc
     else if (sort_nat::is_plus_application(x))
     {
       print_binary_data_operation(x, " + ");
     }
-    // TODO: handle @gtesubtb
     else if (sort_nat::is_times_application(x))
     {
       print_binary_data_operation(x, " * ");
@@ -1879,9 +1885,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_binary_data_operation(x, sort_nat::left(x), sort_nat::right(x), " mod ");
     }
-    // TODO: handle @monus
+    else if (sort_nat::is_natpred_application(x))
+    {
+      derived().print("max(0,");
+      derived().apply(sort_nat::arg(x));
+      derived().print(" - 1)");
+    }
+    else if (sort_nat::is_monus_application(x))
+    {
+      derived().print("max(0,");
+      print_binary_data_operation(x, " - ");
+      derived().print(")");
+    }
+
     // TODO: handle @swap_zero*
-    // TODO: handle @sqrt_nat
 
     //-------------------------------------------------------------------//
     //                            int
