@@ -262,7 +262,11 @@ class PbesSolveTool(Tool):
         if len(self.input_nodes) > 1:
             args[1] = '--file={}'.format(args[1])
         if len(self.output_nodes) > 0:
-            args[2] = '--evidence-file={}'.format(args[2])
+            if len(self.input_nodes) == 3:
+                args[2] = '--custom-pbes-file={}'.format(args[2])
+                args[3] = '--evidence-file={}'.format(args[3])
+            else:
+                args[2] = '--evidence-file={}'.format(args[2])
         return args
 
     def assign_outputs(self):
