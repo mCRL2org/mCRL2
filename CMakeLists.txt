@@ -104,13 +104,19 @@ else()
   set(MCRL2_MIN_BOOST_VERSION 1.71.0)
 endif()
 
+if(APPLE)
+  set(Qt6_VERSION 6.9.2)
+else()
+  set(Qt6_VERSION 6.2.4)
+endif()
+
 if(MCRL2_ENABLE_GUI_TOOLS)
   find_package(OpenGL     QUIET REQUIRED)
   find_package(CVC3       QUIET)
-  find_package(Qt6 6.2.4 COMPONENTS Core OpenGL OpenGLWidgets Widgets Xml Gui QUIET)
+  find_package(Qt6 ${Qt6_VERSION} COMPONENTS Core OpenGL OpenGLWidgets Widgets Xml Gui QUIET)
 
   if (NOT Qt6_FOUND)
-    message(FATAL_ERROR "Qt6 can not be found, or its version is below version 6.2.4. If you do not wish to build the GUI tools, set MCRL2_ENABLE_GUI_TOOLS to OFF. Otherwise, see the build instructions on the mCRL2 website on how to set up Qt6.")
+    message(FATAL_ERROR "Qt6 can not be found, or its version is below version ${Qt6_VERSION}. If you do not wish to build the GUI tools, set MCRL2_ENABLE_GUI_TOOLS to OFF. Otherwise, see the build instructions on the mCRL2 website on how to set up Qt6.")
   endif()
 	
   # The directories for components are derived from Qt6_DIR, as such they can be marked as advanced.
