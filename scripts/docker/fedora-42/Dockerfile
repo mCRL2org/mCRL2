@@ -1,3 +1,4 @@
+ARG DNF_EXTRA_ARGUMENTS=""
 FROM fedora:42
 
 # Install packages needed for compiling and testing the tools
@@ -21,7 +22,8 @@ RUN dnf install -y \
  doxygen \
  swig \
  texlive-scheme-full \ 
- dvisvgm
+ dvisvgm \
+ ${DNF_EXTRA_ARGUMENTS}
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt
