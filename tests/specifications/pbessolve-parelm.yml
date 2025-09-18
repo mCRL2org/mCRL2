@@ -1,0 +1,71 @@
+nodes:
+  l1:
+    type: mcrl2
+  l2:
+    type: mcf
+  l3:
+    type: lps
+  l4:
+    type: pbes
+  l5:
+    type: lps
+  l7:
+    type: lts
+  l8:
+    type: lts
+  l9:
+    type: pbes # extracted pbes-core from l4
+  l10:
+    type: pbes # applied parelm to l9
+  l11:
+    type: lps # evidence file for l3 + l4 + l10
+
+tools:
+  t1:
+    input: [l1]
+    output: [l3]
+    args: [-n]
+    name: mcrl22lps
+  t2:
+    input: [l3, l2]
+    output: [l4]
+    args: [-c]
+    name: lps2pbes
+  t3:
+    input: [l4, l3]
+    output: [l5]
+    args: []
+    name: pbessolve
+  t4:
+    input: [l4]
+    output: [l9]
+    args: [--algorithm=pbes-core] # add to testing.py that the arg should be --algorithm=pbes-core
+    name: pbestransform
+  t5:
+    input: [l9]
+    output: [l10]
+    args: [--ignore-cex]
+    name: pbesparelm
+  t6:
+    input: [l10, l3, l4] # add to testing.py that the third arg is --custom-pbes-file
+    output: [l11]
+    args: []
+    name: pbessolve
+  t7:
+    input: [l5]
+    output: [l7]
+    args: []
+    name: lps2lts
+  t8:
+    input: [l11]
+    output: [l8]
+    args: []
+    name: lps2lts
+  t9:
+    input: [l7, l8]
+    output: []
+    args: [--equivalence=bisim]
+    name: ltscompare
+  
+result: |
+  result = t3.value['solution'] == t6.value['solution'] and t9.value['result']

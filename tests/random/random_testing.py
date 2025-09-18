@@ -436,6 +436,18 @@ class Pbes2bool_counter_exampleTest(ProcessTest):
         write_text(filename, str(formula))
         self.inputfiles += [filename]
 
+class Pbes2bool_counter_example_parelmTest(ProcessTest):
+    def __init__(self, name, settings):
+        super().__init__(name, ymlfile('pbessolve-parelm'), settings)
+        
+
+    def create_inputfiles(self, runpath = '.'):
+        super().create_inputfiles(runpath)
+        filename = f'{self.name}.mcf'
+        formula = random_state_formula_generator.make_modal_formula()
+        write_text(filename, str(formula))
+        self.inputfiles += [filename]
+
 class Pbes_unify_parametersTest(PbesTest):
     def __init__(self, name, settings):
         super().__init__(name, ymlfile('pbes-unify-parameters'), settings)
@@ -551,6 +563,7 @@ available_tests = {
     'pbessolve-counter-example-optimization-5'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 5, settings)                            ,
     'pbessolve-counter-example-optimization-6'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 6, settings)                            ,
     'pbessolve-counter-example-optimization-7'    : lambda name, settings: Pbes2bool_counter_exampleTest(name, 7, settings)                            ,
+    'pbessolve-parelm'                            : lambda name, settings: Pbes2bool_counter_example_parelmTest(name, settings)                        ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
     'pbes-unify-parameters'                       : lambda name, settings: Pbes_unify_parametersTest(name, settings)                                   ,
     'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
