@@ -189,54 +189,34 @@ class scc_partitioner
 
     LTS_TYPE& aut;
 
-    std::vector < state_type > block_index_of_a_state;
-    std::vector < state_type > dfsn2state;
     state_type equivalence_class_index = 0;
+    std::vector< std::size_t > block_index_of_a_state;
 
-    void group_components(state_type t,
-      state_type equivalence_class_index,
-      const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt_src,
-      std::vector<bool>& visited);
-    void dfs_numbering(state_type t,
-      const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt,
-      std::vector<bool>& visited);
+    // The function below assigns for each state in block_index_of_a_state the number of the SCC it belongs to.
+    // Concretely, two states have the same number in this array iff they are on the same SCC.
+    // This function is not recursive, in the sense that it does not use the stack. 
+    void number_sccs();
 };
 
 
+/*******************************************************************/
+/*                                                                 */
+/* Below the methods of the scc_partitioner class are implemented. */
+/*                                                                 */
+/*******************************************************************/
+
 template < class LTS_TYPE>
 scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
-  :aut(l),
+  : aut(l),
     block_index_of_a_state(aut.num_states(),0)
 {
-  mCRL2log(log::debug) << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
-              l.num_transitions() << " transitions" << std::endl;
+  mCRL2log(log::debug) << "A tau-loop (SCC) partitioner is created for " << l.num_states() << " states and " <<
+              l.num_transitions() << " transitions." << std::endl;
 
-  dfsn2state.reserve(aut.num_states());
+  // Give all sccs a number in block index of a state, where the deepest sccs get the lowest number.
+  number_sccs();
 
-  // Initialise the data structures used in the recursive DFS procedure.
-  std::vector<bool> visited(aut.num_states(),false); 
-  indexed_sorted_vector_for_tau_transitions<LTS_TYPE> src_tgt(aut,true); // Group the tau transitions ordered per outgoing states. 
-
-  // Number the states via a depth first search
-  for (state_type i=0; i<aut.num_states(); ++i)
-  {
-    dfs_numbering(i,src_tgt,visited);
-  }
-  src_tgt.clear();
-
-  indexed_sorted_vector_for_tau_transitions<LTS_TYPE> tgt_src(aut,false);
-  for (std::vector < state_type >::reverse_iterator i=dfsn2state.rbegin();
-       i!=dfsn2state.rend(); ++i)
-  {
-    if (visited[*i])  // Visited is used inversely here.
-    {
-      group_components(*i,equivalence_class_index,tgt_src,visited);
-      equivalence_class_index++;
-    }
-  }
-  mCRL2log(log::debug) << "Tau loop (SCC) partitioner reduces lts to " << equivalence_class_index << " states." << std::endl;
-
-  dfsn2state.clear();
+  mCRL2log(log::debug) << "The tau-loop (SCC) partitioner reduces the LTS to " << equivalence_class_index << " states." << std::endl;
 }
 
 
@@ -246,28 +226,6 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
   // Put all the non inert transitions in a set. Add the transitions that form a self
   // loop. Such transitions only exist in case divergence preserving branching bisimulation is
   // used. A set is used to remove double occurrences of transitions.
-  /* std::unordered_set < transition > resulting_transitions;
-  for (const transition& t: aut.get_transitions())
-  {
-    if (!aut.is_tau(aut.apply_hidden_label_map(t.label())) ||
-        preserve_divergence_loops ||
-        block_index_of_a_state[t.from()]!=block_index_of_a_state[t.to()])
-    {
-      resulting_transitions.insert(    // insert is faster than emplace. 
-        transition(
-          block_index_of_a_state[t.from()],
-          aut.apply_hidden_label_map(t.label()),
-          block_index_of_a_state[t.to()])); 
-    }
-  }
-
-  aut.clear_transitions(resulting_transitions.size());
-  // Copy the transitions from the set into the transition system.
-
-  for (const transition& t: resulting_transitions)
-  {
-    aut.add_transition(t);
-  } */
   
   for (transition& t: aut.get_transitions())
   { 
@@ -344,44 +302,90 @@ bool scc_partitioner<LTS_TYPE>::in_same_class(const std::size_t s, const std::si
 }
 
 // Private methods of scc_partitioner
-
+// Iterative algorithm, inspired by the algorithm written in the master thesis of WOUTER SCHOLS. 
+// The latex documentation in lps's also describes this algorithm. 
 template < class LTS_TYPE>
-void scc_partitioner<LTS_TYPE>::group_components(
-  const state_type s,
-  const state_type equivalence_class_index,
-  const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& tgt_src,
-  std::vector < bool >& visited)
+void scc_partitioner<LTS_TYPE>::number_sccs()
 {
-  if (!visited[s])
-  {
-    return;
-  }
-  visited[s] = false;
-  const size_t u=tgt_src.upperbound(s);  // only calculate the upperbound once. 
-  for(state_type i=tgt_src.lowerbound(s); i<u; ++i)
-  {
-    group_components(tgt_src.get_transitions()[i],equivalence_class_index,tgt_src,visited);
-  }
-  block_index_of_a_state[s]=equivalence_class_index;
-}
+  const std::size_t uninitialised=-1;
+  const std::size_t in_stack_indicator=-1;
 
-template < class LTS_TYPE>
-void scc_partitioner<LTS_TYPE>::dfs_numbering(
-  const state_type s,
-  const indexed_sorted_vector_for_tau_transitions<LTS_TYPE>& src_tgt,
-  std::vector < bool >& visited)
-{
-  if (visited[s])
+  indexed_sorted_vector_for_tau_transitions<LTS_TYPE> src_tgt(aut,true); // Group the tau transitions ordered per outgoing states. 
+
+  std::vector< std::size_t > low(aut.num_states(),uninitialised);
+  std::vector < std::size_t > disc(aut.num_states(),uninitialised);
+  std::vector<state_type> stack;
+  std::size_t discovery_time=0;
+
+  std::vector<std::pair<state_type, std::size_t>> work;
+
+  for (state_type s0=0; s0<aut.num_states(); ++s0)
   {
-    return;
+    if (low[s0]==uninitialised)
+    {
+      work.emplace_back(std::make_pair(s0, src_tgt.lowerbound(s0)));
+
+      while (!work.empty())
+      {
+        state_type s = work.back().first;
+        std::size_t transition_index = work.back().second;
+        work.pop_back();
+
+        if (low[s] == uninitialised)
+        {
+          disc[s] = discovery_time;
+          low[s] = discovery_time;
+          discovery_time++;
+          stack.push_back(s);
+          assert(block_index_of_a_state[s]==0);
+          block_index_of_a_state[s]=in_stack_indicator;
+        }
+
+        bool recurse = false;
+        const size_t upper=src_tgt.upperbound(s);
+        for(std::size_t i=transition_index; i<upper; ++i)
+        {
+          const state_type v = src_tgt.get_transitions()[i];
+          if (disc[v] == uninitialised)
+          {
+            work.emplace_back(std::make_pair(s, i + 1));
+            work.emplace_back(std::make_pair(v, src_tgt.lowerbound(v)));
+            disc[v]=0;
+            recurse = true;
+            break;
+          }
+          else if (block_index_of_a_state[v]==in_stack_indicator) // stack contains v. 
+          {
+            low[s] = std::min(low[s], disc[v]);
+          }
+        }
+        if (!recurse)
+        {
+          if (disc[s] == low[s])
+          {
+            // an SCC has been found; 
+            state_type u=0;
+            do
+            {
+              u=stack.back();
+              assert(block_index_of_a_state[s]==in_stack_indicator);
+              block_index_of_a_state[u]=equivalence_class_index;
+              stack.pop_back();
+            }
+            while (u!=s);
+
+            equivalence_class_index++;
+           }
+           if (!work.empty())
+           {
+             state_type v = s;
+             s = work.back().first;
+             low[s] = std::min(low[s], low[v]);
+           }
+         }
+       }
+    }
   }
-  visited[s] = true;
-  const size_t u=src_tgt.upperbound(s);  // only calculate the upperbound once. 
-  for(state_type i=src_tgt.lowerbound(s); i<u; ++i)
-  {
-    dfs_numbering(src_tgt.get_transitions()[i],src_tgt,visited);
-  }
-  dfsn2state.push_back(s);
 }
 
 } // namespace detail

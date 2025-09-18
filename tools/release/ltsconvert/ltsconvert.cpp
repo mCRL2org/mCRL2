@@ -373,7 +373,9 @@ class ltsconvert_tool : public input_output_tool
                       .add_value(lts_eq_coupled_sim)
                       .add_value(lts_eq_trace)
                       .add_value(lts_eq_weak_trace)
-                      .add_value(lts_red_tau_star),
+                      .add_value(lts_red_tau_star)
+                      .add_value(lts_red_determinisation)
+                      .add_value(lts_red_tau_scc),
                       "generate an equivalent LTS, preserving equivalence NAME (use --help-all for all possible arguments): "
                       , 'e');
       desc.add_option("tau", make_mandatory_argument("ACTNAMES"),

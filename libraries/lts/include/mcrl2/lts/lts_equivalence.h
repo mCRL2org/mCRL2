@@ -56,9 +56,10 @@ enum lts_equivalence
   lts_eq_ready_sim,        /**< Strong ready-simulation equivalence */  
   lts_eq_trace,            /**< Strong trace equivalence*/
   lts_eq_weak_trace,       /**< Weak trace equivalence */
-  lts_eq_coupled_sim,      /** Coupled Similarity */
+  lts_eq_coupled_sim,      /**< Coupled Similarity */
   lts_red_tau_star,        /**< Tau star reduction */
-  lts_red_determinisation  /**< Used for a determinisation reduction */
+  lts_red_determinisation, /**< Used for a determinisation reduction */
+  lts_red_tau_scc          /**< Used to compress tau-loops */
 };
 
 /** \brief Determines the equivalence from a string.
@@ -87,7 +88,8 @@ enum lts_equivalence
  * \li "sim" for strong simulation equivalence;
  * \li "trace" for strong trace equivalence;
  * \li "weak-trace" for weak trace equivalence;
- * \li "determinisation" for a determinisation reduction.
+ * \li "determinisation" for a determinisation reduction;
+ * \li "tau-scc" for removing tau loops.
  *
  * \param[in] s The string specifying the equivalence.
  * \return The equivalence type specified by \a s.
@@ -219,6 +221,10 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_red_determinisation;
   }
+  else if (s == "tau-scc")
+  {
+    return lts_red_tau_scc;
+  }
   else
   {
     throw mcrl2::runtime_error("Unknown equivalence " + s + ".");
@@ -313,8 +319,10 @@ inline std::string print_equivalence(const lts_equivalence eq)
       return "tau-star";
     case lts_red_determinisation:
       return "determinisation";
-    default:
-      throw mcrl2::runtime_error("Unknown equivalence.");
+    case lts_red_tau_scc:
+      return "tau-scc";
+    // default:
+    //  throw mcrl2::runtime_error("Unknown equivalence.");
   }
 }
 
@@ -393,11 +401,13 @@ inline std::string description(const lts_equivalence eq)
     case lts_eq_coupled_sim:
       return "coupled simulation equivalence";
     case lts_red_tau_star:
-      return "tau star reduction";
+      return "tau star equivalence";
     case lts_red_determinisation:
-      return "determinisation reduction";
-    default:
-      throw mcrl2::runtime_error("Unknown equivalence.");
+      return "determinisation";
+    case lts_red_tau_scc:
+      return "contraction of tau-loops";
+    // default:
+    //  throw mcrl2::runtime_error("Unknown equivalence.");
   }
 }
 

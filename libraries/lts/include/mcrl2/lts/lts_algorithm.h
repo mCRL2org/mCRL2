@@ -785,16 +785,16 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     /*
     case lts_eq_divergence_preserving_weak_bisim_sigref:
     {
-     {
-      sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s1(l);
-      s1.run();
-     }
-      std::size_t divergence_label=detail::mark_explicit_divergence_transitions(l);
-      detail::reflexive_transitive_tau_closure(l);
-     {
-      sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s2(l);
-      s2.run();
-     }
+      {
+       sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s1(l);
+       s1.run();
+      }
+       std::size_t divergence_label=detail::mark_explicit_divergence_transitions(l);
+       detail::reflexive_transitive_tau_closure(l);
+      {
+       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s2(l);
+       s2.run();
+      }
       scc_reduce(l); // Remove tau loops
       detail::unmark_explicit_divergence_transitions(l,divergence_label);
       return;
@@ -880,8 +880,13 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       determinise(l);
       return;
     }
-    default:
-      throw mcrl2::runtime_error("Unknown reduction method.");
+    case lts_red_tau_scc:
+    {
+      scc_reduce(l);
+      return;
+    }
+    // default:
+    //  throw mcrl2::runtime_error("Unknown reduction method.");
   }
 }
 
