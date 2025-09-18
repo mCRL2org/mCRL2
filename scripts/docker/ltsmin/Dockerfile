@@ -1,6 +1,8 @@
-FROM fedora:42
+FROM fedora:41
 
 # Install packages needed for compiling and testing the tools.
+ARG DNF_EXTRA_ARG0=""
+ARG DNF_EXTRA_ARG1=""
 RUN dnf install -y \
  boost-devel \
  cmake \
@@ -26,7 +28,9 @@ RUN dnf install -y \
  libtool-ltdl-devel \
  pkgconf \
  popt-devel \
- zlib-devel
+ zlib-devel \
+ ${DNF_EXTRA_ARG0} \
+ ${DNF_EXTRA_ARG1}
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt
@@ -60,7 +64,7 @@ RUN cd ~/sylvan && cmake -DCMAKE_C_FLAGS="-Wno-error=array-parameter -Wno-error=
 
 # Clone ltsmin git repository at a specific version.
 RUN cd ~/ && git clone https://github.com/utwente-fmt/ltsmin.git ltsmin
-RUN cd ~/ltsmin && git checkout 2c008e111f6a1050099fd59cedd7ca98433d7575
+RUN cd ~/ltsmin && git checkout 07f9bf8aa8957cab4f8a47c1a943bf7fef968288
 
 # This step is necessary according to the 'Building from a Git Repository' section of the readme.
 RUN cd ~/ltsmin && git submodule update --init \

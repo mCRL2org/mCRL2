@@ -1,7 +1,8 @@
-ARG DNF_EXTRA_ARGUMENTS=""
-FROM fedora:42
+FROM fedora:41
 
 # Install packages needed for compiling and testing the tools
+ARG DNF_EXTRA_ARG0=""
+ARG DNF_EXTRA_ARG1=""
 RUN dnf install -y \
  boost-devel \
  cmake \
@@ -23,7 +24,8 @@ RUN dnf install -y \
  swig \
  texlive-scheme-full \ 
  dvisvgm \
- ${DNF_EXTRA_ARGUMENTS}
+ ${DNF_EXTRA_ARG0} \
+ ${DNF_EXTRA_ARG1}
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt
