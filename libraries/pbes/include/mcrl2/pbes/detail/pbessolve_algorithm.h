@@ -112,7 +112,7 @@ class pbessolve_tool
     std::string lpsfile;
     std::string ltsfile;
     std::string evidence_file;
-    std::string custom_pbes_file;
+    std::string original_pbes_file;
 
     void add_options(utilities::interface_description& desc) override
     {
@@ -178,11 +178,13 @@ class pbessolve_tool
       desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
       desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
       desc.add_hidden_option("prune-todo-alternative", "Use a variation of todo list pruning.");
-      desc.add_hidden_option("custom-pbes-file",
+      desc.add_hidden_option("original-pbes",
         utilities::make_file_argument("NAME"),
         "In the second round of solving, use a different PBES than in the first round. "
         "Use case: First solve a PBES reduced by the pbesparelm tool, and then use "
-        "the original PBES (provided as --custom-pbes-file) to obtain the final solution. "
+        "the original PBES (provided as --original-pbes) to obtain the final solution. "
+        "The original PBES MUST be provided in order to get the right result when "
+        "transformations have been applied."
         "N.B. This has no effect when using --naive-counter-example-instantiation.");
   }
 
@@ -238,9 +240,9 @@ class pbessolve_tool
       m_short_strategy = parser.option_argument_as<int>("solve-strategy");
     }
 
-    if (parser.has_option("custom-pbes-file"))
+    if (parser.has_option("original-pbes"))
     {
-      custom_pbes_file = parser.option_argument("custom-pbes-file");
+      original_pbes_file = parser.option_argument("original-pbes");
     }
   }
 
@@ -311,7 +313,7 @@ class pbessolve_tool
           found = true;
           pbes_system::propositional_variable X = e.variable();
           pbes_system::propositional_variable X_hat = e_hat.variable();
-          mCRL2log(log::debug) << "found " << X.name() << " from " << custom_pbes_file << " as " << X_hat.name()
+          mCRL2log(log::debug) << "found " << X.name() << " from " << original_pbes_file << " as " << X_hat.name()
                                << std::endl;
           R[X.name()] = get_param_difference(X.parameters(), X_hat.parameters());
         }
@@ -386,13 +388,13 @@ class pbessolve_tool
       // Use custom PBES for the second round of solving if provided.
       pbes_system::pbes second_pbes = pbesspec;
       std::unordered_map<std::string, std::set<int>> R = {};
-      if (!custom_pbes_file.empty())
+      if (!original_pbes_file.empty())
       {
-        pbes_system::pbes custom_pbes = pbes_system::detail::load_pbes(custom_pbes_file);
-        R = construct_R(pbesspec, custom_pbes);
+        pbes_system::pbes original_pbes = pbes_system::detail::load_pbes(original_pbes_file);
+        R = construct_R(pbesspec, original_pbes);
         mCRL2log(log::verbose) << "Using provided custom PBES for the second round of solving." << std::endl;
-        pbes_system::detail::replace_global_variables(custom_pbes, sigma);
-        second_pbes = custom_pbes;
+        pbes_system::detail::replace_global_variables(original_pbes, sigma);
+        second_pbes = original_pbes;
       }
       // Based on the result remove the unnecessary equations related to counter example information. 
       mCRL2log(log::verbose) << "Removing unnecessary example information for other player." << std::endl;
