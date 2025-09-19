@@ -116,7 +116,7 @@ struct subsitute_counterexample: public pbes_expression_builder<subsitute_counte
 
 /// Removes all equations and expressions related to counter examples from the input PBES.
 inline 
-mcrl2::pbes_system::pbes remove_counterexample_info(const pbes_system::pbes& pbes, bool remove_Lplus = true, bool remove_Lminus = true)
+mcrl2::pbes_system::pbes remove_counterexample_info(const pbes_system::pbes& pbes, bool remove_Lplus = true, bool remove_Lminus = true, bool remove_Lequations = true)
 {
   // Remove all equations related to the countexamples
   std::vector<mcrl2::pbes_system::pbes_equation> equations;
@@ -139,14 +139,21 @@ mcrl2::pbes_system::pbes remove_counterexample_info(const pbes_system::pbes& pbe
       equations.emplace_back(equation.symbol(), equation.variable(), simplify(expression));
     }
 
-    if (Lplus && !remove_Lplus)
+    if (!remove_Lequations && is_counter_example_equation(equation))
     {
       equations.emplace_back(equation);
     }
+    else
+    {
+      if (Lplus && !remove_Lplus)
+      {
+        equations.emplace_back(equation);
+      }
 
-    if (Lminus && !remove_Lminus)
-    {      
-      equations.emplace_back(equation);
+      if (Lminus && !remove_Lminus)
+      {      
+        equations.emplace_back(equation);
+      }
     }
   }
 
