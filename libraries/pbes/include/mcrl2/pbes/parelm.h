@@ -182,7 +182,7 @@ class pbes_parelm_algorithm
     /// \brief Runs the parelm algorithm. The pbes \p is modified by the algorithm
     /// \param p A pbes
     /// \param ignore_cex Ignore counter example equations if present
-    void run(pbes& p, bool ignore_cex)
+    void run(pbes& p, bool ignore_cex = false)
     {
       data::variable_list global_variables(p.global_variables().begin(), p.global_variables().end());
       std::vector<data::variable> predicate_variables;
