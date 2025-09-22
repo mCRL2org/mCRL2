@@ -24,7 +24,10 @@
 
 namespace mcrl2::pbes_system
 {
-// For a given X(e) and set of redundant params R, returns a copy of X(e) without redundancy.
+/// \brief For a given X(e) and set of redundant params R, returns a copy of X(e) without redundancy.
+/// \param PVI A propositional variable instantiation X(e).
+/// \param R A set of indices of parameters that are redundant in X(e).
+/// \return A copy of X(e) without redundancy.
 propositional_variable_instantiation rewrite_PVI(const propositional_variable_instantiation PVI,
   const std::unordered_map<std::string, std::set<int>> R)
 {
