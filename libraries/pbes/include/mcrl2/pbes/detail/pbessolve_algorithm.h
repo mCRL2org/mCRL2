@@ -264,22 +264,30 @@ class pbessolve_tool
   {
   }
 
-  void check_param_match(const mcrl2::data::variable_list Xparams, const mcrl2::data::variable_list X_hatparams)
+  /// \brief Sanity checks for guessing the redundant parameters between two PBESs.
+  /// \param Xparams A list of parameters of a pbes equation X.
+  /// \param X_hatparams A list of parameters of a pbes equation X_hat.
+  void check_param_match(const mcrl2::data::variable_list Xparams,
+    const mcrl2::data::variable_list X_hatparams)
   {
     if (Xparams.size() < X_hatparams.size())
     {
-      throw mcrl2::runtime_error("An equation from the custom PBES has fewer parameters than the first PBES.");
+      throw mcrl2::runtime_error("An equation from the original PBES has fewer parameters than the first PBES.");
     }
     for (mcrl2::data::variable p: X_hatparams)
     {
       auto it = std::find(Xparams.begin(), Xparams.end(), p);
       if (it == Xparams.end())
       {
-        throw mcrl2::runtime_error("An equation parameter from the first PBES was not found in the custom PBES.");
+        throw mcrl2::runtime_error("An equation parameter from the first PBES was not found in the original PBES.");
       }
     }
   }
 
+  /// \brief Returns the difference between two lists of pbes equation parameters.
+  /// \param Xparams A list of parameters of a pbes equation X.
+  /// \param X_hatparams A list of parameters of a pbes equation X_hat.
+  /// \return A set R of positions of parameters that occur in X, but not in X_hat. 
   std::set<int> get_param_difference(const mcrl2::data::variable_list Xparams,
     const mcrl2::data::variable_list X_hatparams)
   {
@@ -300,6 +308,11 @@ class pbessolve_tool
     return R;
   }
 
+  /// \brief Compares two PBESs to guess, for each equation `sigma X(d: D) = ...`, which parameters in `d: D` are redundant in X.
+  /// Records the position of a parameter `d` in R[X] when `d` is a param of X in the second pbes, but not in the first one.
+  /// \param first A pbes.
+  /// \param second The version of the first pbes before pbesparelm.
+  /// \return A mapping R of equation variables X from pbes `second` to positions of parameters that are redundant in X.
   std::unordered_map<std::string, std::set<int>> construct_R(pbes_system::pbes first, pbes_system::pbes second)
   {
     std::unordered_map<std::string, std::set<int>> R = {};
@@ -320,7 +333,7 @@ class pbessolve_tool
       }
       if (!found)
       {
-        throw mcrl2::runtime_error("An equation from the custom PBES was not found in the first PBES.");
+        throw mcrl2::runtime_error("An equation from the original PBES was not found in the first PBES.");
       }
     }
     return R;
