@@ -15,8 +15,6 @@
 #include "mcrl2/utilities/exception.h"
 #include <string>
 
-
-
 namespace mcrl2::pbes_system
 {
 
@@ -33,6 +31,7 @@ enum class pbes_rewriter_type
   ppg,
   srf,
   pre_srf,
+  dataspec,
   bqnf_quantifier
 };
 
@@ -79,7 +78,10 @@ inline pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
   {
     return pbes_rewriter_type::pre_srf;
   }
-
+  if (type == "dataspec")
+  {
+    return pbes_rewriter_type::dataspec;
+  }
   if (type == "bqnf-quantifier")
   {
     return pbes_rewriter_type::bqnf_quantifier;
@@ -114,6 +116,8 @@ inline std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
     return "srf";
   case pbes_rewriter_type::pre_srf:
     return "pre-srf";    
+  case pbes_rewriter_type::dataspec:
+    return "dataspec";    
   }
 
   return "unknown pbes rewriter";
@@ -144,6 +148,8 @@ inline std::string description(const pbes_rewriter_type type)
     return "for rewriting into SRF normal form";
   case pbes_rewriter_type::pre_srf:
     return "for rewriting into pre-SRF normal form";
+  case pbes_rewriter_type::dataspec:
+    return "for removing unused data specifications";
   case pbes_rewriter_type::bqnf_quantifier:
     return "for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";
   }
