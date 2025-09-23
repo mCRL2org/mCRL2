@@ -20,6 +20,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/bqnf_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/dataspec_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
@@ -167,6 +168,12 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
           save_pbes(result.to_pbes(), output_filename(), m_pbes_output_format);  
           return true;
           break;    
+        }
+        case pbes_rewriter_type::dataspec:
+        {
+          dataspec_rewriter rewr;
+          p = rewr(p);
+          break;
         }
         case pbes_rewriter_type::bqnf_quantifier:
         {
