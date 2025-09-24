@@ -16,6 +16,7 @@
 #include "mcrl2/pres/pres_rewriter_tool.h"
 #include "mcrl2/pres/pres_rewriter_type.h"
 #include "mcrl2/pres/rewrite.h"
+#include "mcrl2/pres/rewriters/dataspec_prune_rewriter.h"
 #include "mcrl2/pres/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pres/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pres/rewriters/quantifiers_inside_rewriter.h"
@@ -113,6 +114,12 @@ class pres_rewriter : public pres_input_tool<pres_output_tool<pres_rewriter_tool
           // post processing: apply the simplifying rewriter
           simplify_data_rewriter<data::rewriter> simp(p.data(), datar);
           pres_rewrite(p, simp);
+          break;
+        }
+        case pres_rewriter_type::dataspec_prune:
+        {
+          dataspec_prune_rewriter rewr;
+          p = rewr(p);
           break;
         }
       }
