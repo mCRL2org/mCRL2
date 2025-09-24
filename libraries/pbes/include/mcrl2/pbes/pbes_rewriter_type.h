@@ -31,7 +31,7 @@ enum class pbes_rewriter_type
   ppg,
   srf,
   pre_srf,
-  dataspec,
+  dataspec_prune,
   bqnf_quantifier
 };
 
@@ -78,9 +78,9 @@ inline pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
   {
     return pbes_rewriter_type::pre_srf;
   }
-  if (type == "dataspec")
+  if (type == "dataspec-prune")
   {
-    return pbes_rewriter_type::dataspec;
+    return pbes_rewriter_type::dataspec_prune;
   }
   if (type == "bqnf-quantifier")
   {
@@ -116,8 +116,8 @@ inline std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
     return "srf";
   case pbes_rewriter_type::pre_srf:
     return "pre-srf";    
-  case pbes_rewriter_type::dataspec:
-    return "dataspec";    
+  case pbes_rewriter_type::dataspec_prune:
+    return "dataspec-prune";    
   }
 
   return "unknown pbes rewriter";
@@ -148,7 +148,7 @@ inline std::string description(const pbes_rewriter_type type)
     return "for rewriting into SRF normal form";
   case pbes_rewriter_type::pre_srf:
     return "for rewriting into pre-SRF normal form";
-  case pbes_rewriter_type::dataspec:
+  case pbes_rewriter_type::dataspec_prune:
     return "for removing unused data specifications";
   case pbes_rewriter_type::bqnf_quantifier:
     return "for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";

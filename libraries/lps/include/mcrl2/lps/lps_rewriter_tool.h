@@ -36,7 +36,7 @@ class lps_rewriter_tool: public Tool
       result.insert(lps::simplify);
       result.insert(lps::quantifier_one_point);
       result.insert(lps::condition_one_point);
-      result.insert(lps::dataspec);
+      result.insert(lps::dataspec_prune);
       return result;
     }
 

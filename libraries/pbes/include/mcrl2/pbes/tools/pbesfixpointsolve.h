@@ -29,6 +29,8 @@
 #include <map>
 #include <optional>
 
+
+
 namespace mcrl2::pbes_system
 {
 
@@ -136,7 +138,7 @@ inline InvResult global_invariant_check(pbes_equation& equation,
     // Calculate CC_i
     data::mutable_indexed_substitution sigma;
     data::data_expression_list pars = pvi.parameters();
-    for (const data::variable& v: equation.variable().parameters())
+    for (const data::variable& v : equation.variable().parameters())
     {
       data::data_expression par = pars.front();
       pars.pop_front();
@@ -175,7 +177,7 @@ inline InvResult global_invariant_check(pbes_equation& equation,
     // Check CC and C_i implies CC_i
     data::data_expression bdd_expr = data::imp(c_i_data, cc_i_data);
     // Add exists
-    for (const data::variable& v: global_variables)
+    for (const data::variable& v : global_variables)
     {
       bdd_expr = make_exists_(data::variable_list({v}), bdd_expr);
     }
@@ -279,7 +281,7 @@ inline void perform_iteration(pbes_equation& equation,
     if (options.smt)
     {
       data::variable_list var_list = p_eq.variable().parameters();
-      for (const auto& x: as_set(replace_substituter.get_variable_list()))
+      for (const auto& x : as_set(replace_substituter.get_variable_list()))
       {
         var_list.push_front(x);
       }
@@ -407,5 +409,7 @@ struct pbesfixpointsolve_pbes_fixpoint_iterator
 };
 
 } // namespace mcrl2::pbes_system
+
+
 
 #endif // MCRL2_PBES_TOOLS_PBESFIXPOINTSOLVE_H

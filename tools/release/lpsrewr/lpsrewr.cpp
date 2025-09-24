@@ -15,7 +15,7 @@
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/rewriters/dataspec_rewriter.h"
+#include "mcrl2/lps/rewriters/dataspec_prune_rewriter.h"
 #include "mcrl2/lps/rewriters/one_point_condition_rewrite.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -75,9 +75,9 @@ class lps_rewriter : public lps_rewriter_tool<rewriter_tool< input_output_tool >
           lps::one_point_condition_rewrite(spec, R);
           break;
         }
-        case dataspec:
+        case dataspec_prune:
         {
-          dataspec_rewriter rewr;
+          dataspec_prune_rewriter<stochastic_specification> rewr;
           spec = rewr(spec);
           break;
         }
