@@ -1,27 +1,29 @@
-#ifndef MCRL2_LPS_REWRITERS_DATASPEC_REWRITER_H
-#define MCRL2_LPS_REWRITERS_DATASPEC_REWRITER_H
+#ifndef MCRL2_PBES_REWRITERS_DATASPEC_REWRITER_H
+#define MCRL2_PBES_REWRITERS_DATASPEC_REWRITER_H
 
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/selection.h"
-#include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/utilities/logger.h"
+#include "mcrl2/pbes/pbes.h"
 
 
-namespace mcrl2::lps {
+namespace mcrl2::pbes_system {
 
-/// \brief A rewriter that pushes removed unused data specifications.
-class dataspec_rewriter
+/// \brief A rewriter that removes unused data specifications.
+class dataspec_prune_rewriter
 {
   public:
-    /// \brief Rewrites a pbes expression.
+    /// \brief The term type
+    using term_type = pbes;
+
+    /// \brief Rewrites a pres specification.
     /// \param x A term
     /// \return The rewrite result.
-    stochastic_specification operator()(const stochastic_specification& p) const
+    pbes operator()(const pbes& p) const
     {
         data::used_data_equation_selector used_selector(p.data(),
-            lps::find_function_symbols(p),
+            pbes_system::find_function_symbols(p),
             p.global_variables(),
             false);
         data::data_equation_vector equations;
@@ -46,12 +48,10 @@ class dataspec_rewriter
             mappings,
             equations);
       
-        return stochastic_specification(data_spec, p.action_labels(), p.global_variables(), 
-            stochastic_linear_process(p.process()),
-            stochastic_process_initializer(p.initial_process().expressions(),stochastic_distribution()));
+        return pbes(data_spec, p.global_variables(), p.equations(), p.initial_state());
     }
 };
 
-} // namespace mcrl2::lps
+} // namespace mcrl2::pbes_system
 
-#endif // MCRL2_LPS_REWRITERS_DATASPEC_REWRITER_H
+#endif // MCRL2_PBES_REWRITERS_DATASPEC_REWRITER_H

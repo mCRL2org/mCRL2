@@ -20,7 +20,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/bqnf_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/dataspec_rewriter.h"
+#include "mcrl2/pbes/rewriters/dataspec_prune_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
@@ -169,9 +169,9 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
           return true;
           break;    
         }
-        case pbes_rewriter_type::dataspec:
+        case pbes_rewriter_type::dataspec_prune:
         {
-          dataspec_rewriter rewr;
+          dataspec_prune_rewriter rewr;
           p = rewr(p);
           break;
         }

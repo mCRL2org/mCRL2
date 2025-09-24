@@ -42,7 +42,7 @@ class pbes_rewriter_tool: public Tool
       result.insert(pbes_system::pbes_rewriter_type::ppg);
       result.insert(pbes_system::pbes_rewriter_type::srf);
       result.insert(pbes_system::pbes_rewriter_type::pre_srf);
-      result.insert(pbes_system::pbes_rewriter_type::dataspec);
+      result.insert(pbes_system::pbes_rewriter_type::dataspec_prune);
       result.insert(pbes_system::pbes_rewriter_type::bqnf_quantifier);
       return result;
     }
