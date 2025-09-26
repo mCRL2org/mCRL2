@@ -1,8 +1,6 @@
 FROM fedora:41
 
 # Install packages needed for compiling and testing the tools.
-ARG DNF_EXTRA_ARG0=""
-ARG DNF_EXTRA_ARG1=""
 RUN dnf install -y \
  boost-devel \
  cmake \
@@ -28,9 +26,7 @@ RUN dnf install -y \
  libtool-ltdl-devel \
  pkgconf \
  popt-devel \
- zlib-devel \
- ${DNF_EXTRA_ARG0} \
- ${DNF_EXTRA_ARG1}
+ zlib-devel
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt
