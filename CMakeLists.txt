@@ -120,7 +120,10 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   endif()
 	
   # The directories for components are derived from Qt6_DIR, as such they can be marked as advanced.
-  mark_as_advanced(Qt6_DIR Qt6Core_DIR Qt6OpenGL_DIR Qt6OpenGLWidgets_DIR Qt6Widgets_DIR Qt6Xml_DIR Qt6Gui_DIR)
+  mark_as_advanced(Qt6Core_DIR Qt6OpenGL_DIR Qt6OpenGLWidgets_DIR Qt6Widgets_DIR Qt6Xml_DIR Qt6Gui_DIR Qt6CoreTools_DIR 
+                   Qt6CorePrivate_DIR  Qt6DBusPrivate_DIR Qt6GuiPrivate_DIR Qt6OpenGLPrivate_DIR Qt6OpenGLWidgetsPrivate_DIR Qt6WidgetsPrivate_DIR Qt6XmlPrivate_DIR  
+                   Qt6DBusTools_DIR Qt6DBus_DIR Qt6GuiTools_DIR Qt6WidgetsTools_DIR WrapOpenGL_AGL QT_ADDITIONAL_HOST_PACKAGES_PREFIX_PATH 
+                   QT_ADDITIONAL_PACKAGES_PREFIX_PATH  MACDEPLOYQT_EXECUTABLE)
 endif()
 
 find_package(Boost ${MCRL2_MIN_BOOST_VERSION} QUIET REQUIRED)
