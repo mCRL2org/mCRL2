@@ -19,6 +19,15 @@ nodes:
     type: pbes # applied parelm to l9
   l11:
     type: lps # evidence file for l3 + l4 + l10
+  l12:
+    type: pbes # lts7 -> pbes
+  l13:
+    type: pbes # lts8 -> pbes
+  l14:
+    type: lps
+  l15:
+    type: lps
+
 
 tools:
   t1:
@@ -62,10 +71,25 @@ tools:
     args: []
     name: lps2lts
   t9:
-    input: [l7, l8]
-    output: []
-    args: [--equivalence=bisim]
-    name: ltscompare
+    input: [l7, l2]
+    output: [l12]
+    args: []
+    name: lts2pbes
+  t10:
+    input: [l8, l2]
+    output: [l13]
+    args: []
+    name: lts2pbes
+  t11:
+    input: [l12, l3]
+    output: [l14]
+    args: []
+    name: pbessolve
+  t12:
+    input: [l13, l3]
+    output: [l15]
+    args: []
+    name: pbessolve
   
 result: |
-  result = t3.value['solution'] == t6.value['solution'] and t9.value['result']
+  result = t3.value['solution'] == t6.value['solution'] and t11.value['solution'] == t12.value['solution']
