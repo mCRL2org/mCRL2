@@ -25,10 +25,6 @@ can be enabled with the `--solve-strategy` option.
 Limitations
 -----------
 
-Currently, `pbessolvesymbolic` can not provide counter examples when the property
-does not hold, and solving PBESs with counter example information is extremely
-slow.
-
 This tool is only available on macOS and Linux since the Sylvan dependency
 cannot be compiled by Visual Studio.
 

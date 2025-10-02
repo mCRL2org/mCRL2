@@ -245,7 +245,7 @@ This script calls the ``vcvarsall.bat`` script supplied by Visual Studio. It con
 .. _TeamCity CMake plugin: https://confluence.jetbrains.com/display/TW/CMake+Plugin
 
 ltsmin
-^^^^^^
+------
 
 Furthermore, integration with LTSmin is tested using a Docker scripts. On Linux
 use the following command from the mCRL2 root directory::
