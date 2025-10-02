@@ -105,7 +105,7 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_eq_bisim;
   }
-  else if (s == "bisim_jgkw")
+  else if (s == "bisim-jgkw")
   {
     return lts_eq_bisim_jgkw;
   }
@@ -133,7 +133,7 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_eq_branching_bisim;
   }
-  else if (s == "branching-bisim_jgkw")
+  else if (s == "branching-bisim-jgkw")
   {
     return lts_eq_branching_bisim_jgkw;
   }
@@ -161,7 +161,7 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_eq_divergence_preserving_branching_bisim;
   }
-  else if (s == "dpbranching-bisim_jgkw")
+  else if (s == "dpbranching-bisim-jgkw")
   {
     return lts_eq_divergence_preserving_branching_bisim_jgkw;
   }

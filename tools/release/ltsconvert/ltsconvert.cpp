@@ -8,6 +8,7 @@
 //
 /// \file ltsconvert.cpp
 
+#include "mcrl2/lts/lts_equivalence.h"
 #define NAME "ltsconvert"
 #define AUTHOR "Muck van Weerdenburg, Jan Friso Groote"
 
@@ -351,18 +352,21 @@ class ltsconvert_tool : public input_output_tool
                       .add_value(lts_eq_bisim)
                       .add_hidden_value(lts_eq_bisim_gv)
                       .add_hidden_value(lts_eq_bisim_gjkw)
+                      .add_hidden_value(lts_eq_bisim_jgkw)
                       .add_hidden_value(lts_eq_bisim_gj)
                       .add_hidden_value(lts_eq_bisim_gj_lazy_BLC)
                       .add_hidden_value(lts_eq_bisim_sigref)
                       .add_value(lts_eq_branching_bisim)
                       .add_hidden_value(lts_eq_branching_bisim_gv)
                       .add_hidden_value(lts_eq_branching_bisim_gjkw)
+                      .add_hidden_value(lts_eq_branching_bisim_jgkw)
                       .add_hidden_value(lts_eq_branching_bisim_gj)
                       .add_hidden_value(lts_eq_branching_bisim_gj_lazy_BLC)
                       .add_hidden_value(lts_eq_branching_bisim_sigref)
                       .add_value(lts_eq_divergence_preserving_branching_bisim)
                       .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gv)
                       .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gjkw)
+                      .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_jgkw)
                       .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gj)
                       .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC)
                       .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_sigref)
