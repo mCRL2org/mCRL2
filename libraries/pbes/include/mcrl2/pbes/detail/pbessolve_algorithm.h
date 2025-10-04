@@ -112,6 +112,7 @@ class pbessolve_tool
     std::string lpsfile;
     std::string ltsfile;
     std::string evidence_file;
+    std::string original_pbes_file;
 
     void add_options(utilities::interface_description& desc) override
     {
@@ -174,10 +175,17 @@ class pbessolve_tool
           "use strategy STRATEGY (N.B. This is a developer option that overrides "
           "--strategy)",
           'l');
-      desc.add_hidden_option("no-replace-constants-by-variables",
-          "Do not move constant expressions to a substitution.");
+      desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
       desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
       desc.add_hidden_option("prune-todo-alternative", "Use a variation of todo list pruning.");
+      desc.add_hidden_option("original-pbes",
+        utilities::make_file_argument("NAME"),
+        "In the second round of solving, use a different PBES than in the first round. "
+        "Use case: First solve a PBES reduced by the pbesparelm tool, and then use "
+        "the original PBES (provided as --original-pbes) to obtain the final solution. "
+        "The original PBES MUST be provided in order to get the right result when "
+        "transformations have been applied."
+        "N.B. This has no effect when using --naive-counter-example-instantiation.");
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -231,6 +239,11 @@ class pbessolve_tool
     {
       m_short_strategy = parser.option_argument_as<int>("solve-strategy");
     }
+
+    if (parser.has_option("original-pbes"))
+    {
+      original_pbes_file = parser.option_argument("original-pbes");
+    }
   }
 
   std::set<utilities::file_format> available_input_formats() const override
@@ -249,6 +262,81 @@ class pbessolve_tool
               "It supports the generation of a witness or counter "
               "example for the property encoded by the PBES.")
   {
+  }
+
+  /// \brief Sanity checks for guessing the redundant parameters between two PBESs.
+  /// \param Xparams A list of parameters of a pbes equation X.
+  /// \param X_hatparams A list of parameters of a pbes equation X_hat.
+  void check_param_match(const mcrl2::data::variable_list Xparams,
+    const mcrl2::data::variable_list X_hatparams)
+  {
+    if (Xparams.size() < X_hatparams.size())
+    {
+      throw mcrl2::runtime_error("An equation from the original PBES has fewer parameters than the first PBES.");
+    }
+    for (mcrl2::data::variable p: X_hatparams)
+    {
+      auto it = std::find(Xparams.begin(), Xparams.end(), p);
+      if (it == Xparams.end())
+      {
+        throw mcrl2::runtime_error("An equation parameter from the first PBES was not found in the original PBES.");
+      }
+    }
+  }
+
+  /// \brief Returns the difference between two lists of pbes equation parameters.
+  /// \param Xparams A list of parameters of a pbes equation X.
+  /// \param X_hatparams A list of parameters of a pbes equation X_hat.
+  /// \return A set R of positions of parameters that occur in X, but not in X_hat. 
+  std::set<int> get_param_difference(const mcrl2::data::variable_list Xparams,
+    const mcrl2::data::variable_list X_hatparams)
+  {
+    std::set<int> R = {};
+    data::data_expression_vector params(Xparams.begin(), Xparams.end());
+    data::data_expression_vector params_hat(X_hatparams.begin(), X_hatparams.end());
+    check_param_match(Xparams, X_hatparams);
+
+    for (std::vector<mcrl2::data::data_expression>::size_type i = 0; i < params.size(); i++)
+    {
+      auto it = std::find(X_hatparams.begin(), X_hatparams.end(), params[i]);
+      if (it == X_hatparams.end())
+      {
+        mCRL2log(log::debug) << params[i] << " is redundant" << std::endl;
+        R.insert(i);
+      }
+    }
+    return R;
+  }
+
+  /// \brief Compares two PBESs to guess, for each equation `sigma X(d: D) = ...`, which parameters in `d: D` are redundant in X.
+  /// Records the position of a parameter `d` in R[X] when `d` is a param of X in the second pbes, but not in the first one.
+  /// \param first A pbes.
+  /// \param second The version of the first pbes before pbesparelm.
+  /// \return A mapping R of equation variables X from pbes `second` to positions of parameters that are redundant in X.
+  std::unordered_map<std::string, std::set<int>> construct_R(pbes_system::pbes first, pbes_system::pbes second)
+  {
+    std::unordered_map<std::string, std::set<int>> R = {};
+    for (pbes_equation e: second.equations())
+    {
+      bool found = false;
+      for (pbes_equation e_hat: first.equations())
+      {
+        if (e.variable().name() == e_hat.variable().name())
+        {
+          found = true;
+          pbes_system::propositional_variable X = e.variable();
+          pbes_system::propositional_variable X_hat = e_hat.variable();
+          mCRL2log(log::debug) << "found " << X.name() << " from " << original_pbes_file << " as " << X_hat.name()
+                               << std::endl;
+          R[X.name()] = get_param_difference(X.parameters(), X_hat.parameters());
+        }
+      }
+      if (!found)
+      {
+        throw mcrl2::runtime_error("An equation from the original PBES was not found in the first PBES.");
+      }
+    }
+    return R;
   }
 
   template <typename PbesInstAlgorithm, typename PbesInstAlgorithmCE>
@@ -310,13 +398,24 @@ class pbessolve_tool
       timer().finish("first-solving");
       mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
 
+      // Use custom PBES for the second round of solving if provided.
+      pbes_system::pbes second_pbes = pbesspec;
+      std::unordered_map<std::string, std::set<int>> R = {};
+      if (!original_pbes_file.empty())
+      {
+        pbes_system::pbes original_pbes = pbes_system::detail::load_pbes(original_pbes_file);
+        R = construct_R(pbesspec, original_pbes);
+        mCRL2log(log::verbose) << "Using provided custom PBES for the second round of solving." << std::endl;
+        pbes_system::detail::replace_global_variables(original_pbes, sigma);
+        second_pbes = original_pbes;
+      }
       // Based on the result remove the unnecessary equations related to counter example information. 
       mCRL2log(log::verbose) << "Removing unnecessary example information for other player." << std::endl;
-      pbesspec = detail::remove_counterexample_info(pbesspec, !result, result); 
+      pbesspec = detail::remove_counterexample_info(second_pbes, !result, result);
       mCRL2log(log::trace) << pbesspec << std::endl;
-      
+
       structure_graph G;
-      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, mapping, G, first_instantiate.data_rewriter());
+      PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, mapping, G, first_instantiate.data_rewriter(), R);
       
       // Perform the second instantiation given the proof graph.      
       timer().start("second-instantiation");
