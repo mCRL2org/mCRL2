@@ -34,7 +34,8 @@ std::pair<bool, trace> check_trace_inclusion(LTS_TYPE& l1,
     detail::state_type init_l1,
     detail::state_type init_l2,
     bool weak_reduction,
-    const lps::exploration_strategy strategy)
+    const lps::exploration_strategy strategy,
+    bool enable_counter_example = false)
 {
   detail::counter_example_constructor generate_counter_example("trace", "unused", false);
 
@@ -63,7 +64,7 @@ std::pair<bool, trace> check_trace_inclusion(LTS_TYPE& l1,
                          // Small scale experiments show that this is a little bit more expensive than doing the
                          // explicit check below.
 
-    if (detail::antichain_include_inverse(anti_chain_negative, impl_spec.state(), impl_spec.states()))
+    if (!enable_counter_example && detail::antichain_include_inverse(anti_chain_negative, impl_spec.state(), impl_spec.states()))
     {
       return std::make_pair(false,
           generate_counter_example.get_trace(l1, impl_spec.counter_example_index())); //    return false;
@@ -285,7 +286,8 @@ bool destructive_impossible_futures(LTS& l1,
                   t,
                   impl,
                   true,
-                  strategy);
+                  strategy,
+                  generate_counter_example);
 
               if (!result)
               {

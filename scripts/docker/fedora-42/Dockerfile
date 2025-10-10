@@ -21,7 +21,7 @@ RUN dnf install -y \
  doxygen \
  swig \
  texlive-scheme-full \ 
- dvisvgm
+ dvisvgm 
 
 # Copy the current source files into the root home directory
 COPY requirements.txt /root/requirements.txt

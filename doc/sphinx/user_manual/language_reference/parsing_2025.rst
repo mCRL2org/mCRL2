@@ -35,10 +35,10 @@ This might not be what the user intended, but it is the way that our parser
 generator deals with the precedence of operators, and it is one way to do so.
 However, in the previous releases, it was the case that this binding was not
 applied consistently. For example adding more modal operators could cause the
-subformula to suddently be parsed differently (for example combing the
-conjunctive operands). That issue has been amended in this release, in such a
+subformula to suddently be parsed differently, in some cases combining the
+conjunctive operands. That issue has been amended in this release, in such a
 way that the precendence rules are applied consistently. However, it does mean
-that such cases that relied on this inconsistent parsing will now parse
+that such cases that relied on the previous (inconsistent) parsing will now parse
 differently.
 
 A separate tool `Parse Checker <https://github.com/mlaveaux/parse-checker>`_ can

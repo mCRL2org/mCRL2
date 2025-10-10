@@ -359,18 +359,6 @@ inline void self_substitute(pbes_equation& equation,
 
   while (!stable)
   {
-    // Check timeout
-    if (options.timeout > 0.0)
-    {
-      auto current_time = std::chrono::high_resolution_clock::now();
-      auto elapsed = std::chrono::duration<double>(current_time - start_time).count();
-      if (elapsed >= options.timeout)
-      {
-        mCRL2log(log::verbose) << "Timeout reached (" << options.timeout << "s) for equation " 
-                               << equation.variable().name() << " after " << elapsed << "s, stopping substitution" << std::endl;
-        break;
-      }
-    }
     stable = true;
     std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
     std::vector<propositional_variable_instantiation> set
@@ -378,6 +366,19 @@ inline void self_substitute(pbes_equation& equation,
     std::size_t previous_size = set.size();
     for (const propositional_variable_instantiation& x: set)
     {
+      // Check timeout
+      if (options.timeout > 0.0)
+      {
+        auto current_time = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration<double>(current_time - start_time).count();
+        if (elapsed >= options.timeout)
+        {
+          stable = true;
+          mCRL2log(log::verbose) << "Timeout reached (" << options.timeout << "s) for equation " 
+                                 << equation.variable().name() << " after " << elapsed << "s, stopping substitution" << std::endl;
+          break;
+        }
+      }
       if (equation.variable().name() != x.name())
       {
         continue;
