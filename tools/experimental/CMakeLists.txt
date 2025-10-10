@@ -1,37 +1,16 @@
-set(MCRL2_TOOLS
-  besconvert  
-  lps2pres
-  lpscleave
-  lpscombine
-  lpsrealelm
-  lpssymbolicbisim
-  lts2pres
-  ltscombine
-  pbes2cvc4
-  pbes2yices
-  pbesabsinthe
-  pbesbackelm
-  pbeschain
-  pbesfixpointsolve
-  pbespareqelm
-  pbespor
-  pbessymbolicbisim
-  presconstelm
-  presinfo
-  presinst
-  presparelm
-  prespp
-  presrewr
-  pressolve
-  symbolic_exploration
-  respp
-  resinfo
-  txt2pres
-  txt2res
-)
-
-if(MCRL2_ENABLE_EXPERIMENTAL)
-  foreach(TOOL ${MCRL2_TOOLS})
-    add_subdirectory(${TOOL})
-  endforeach()
-endif()
+add_subdirectory(besconvert)
+add_subdirectory(lpscleave)
+add_subdirectory(lpscombine)
+add_subdirectory(lpsrealelm)
+add_subdirectory(lpssymbolicbisim)
+add_subdirectory(ltscombine)
+add_subdirectory(pbes2cvc4)
+add_subdirectory(pbes2yices)
+add_subdirectory(pbesabsinthe)
+add_subdirectory(pbesbackelm)
+add_subdirectory(pbeschain)
+add_subdirectory(pbesfixpointsolve)
+add_subdirectory(pbespareqelm)
+add_subdirectory(pbespor)
+add_subdirectory(pbessymbolicbisim)
+add_subdirectory(symbolic_exploration)
