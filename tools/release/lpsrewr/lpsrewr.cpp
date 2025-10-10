@@ -75,7 +75,7 @@ class lps_rewriter : public lps_rewriter_tool<rewriter_tool< input_output_tool >
           lps::one_point_condition_rewrite(spec, R);
           break;
         }
-        case dataspec_prune:
+        case prune_dataspec:
         {
           dataspec_prune_rewriter<stochastic_specification> rewr;
           spec = rewr(spec);

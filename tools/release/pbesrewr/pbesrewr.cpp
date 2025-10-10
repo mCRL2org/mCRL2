@@ -169,7 +169,7 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
           return true;
           break;    
         }
-        case pbes_rewriter_type::dataspec_prune:
+        case pbes_rewriter_type::prune_dataspec:
         {
           dataspec_prune_rewriter rewr;
           p = rewr(p);

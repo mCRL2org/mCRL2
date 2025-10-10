@@ -116,7 +116,7 @@ class pres_rewriter : public pres_input_tool<pres_output_tool<pres_rewriter_tool
           pres_rewrite(p, simp);
           break;
         }
-        case pres_rewriter_type::dataspec_prune:
+        case pres_rewriter_type::prune_dataspec:
         {
           dataspec_prune_rewriter rewr;
           p = rewr(p);
