@@ -24,7 +24,7 @@ enum lps_rewriter_type
   simplify,
   quantifier_one_point,
   condition_one_point,
-  dataspec_prune,
+  prune_dataspec,
 };
 
 /// \brief Parses a lps rewriter type
@@ -43,9 +43,9 @@ lps_rewriter_type parse_lps_rewriter_type(const std::string& type)
   {
     return condition_one_point;
   }
-  if (type == "dataspec-prune")
+  if (type == "prune-dataspec")
   {
-    return dataspec_prune;
+    return prune_dataspec;
   }
   throw mcrl2::runtime_error("unknown lps rewriter option " + type);
 }
@@ -62,8 +62,8 @@ std::string print_lps_rewriter_type(const lps_rewriter_type type)
       return "quantifier-one-point";
     case condition_one_point:
       return "condition-one-point";
-    case dataspec_prune:
-      return "dataspec-prune";
+    case prune_dataspec:
+      return "prune-dataspec";
     default:
       return "unknown lps rewriter";
   }
@@ -81,7 +81,7 @@ std::string description(const lps_rewriter_type type)
       return "for one point rule quantifier elimination";
     case condition_one_point :
       return "simplify summands using equalities appearing in condition";
-    case dataspec_prune:
+    case prune_dataspec:
       return "for removing unused data equations and mappings";
   }
   throw mcrl2::runtime_error("unknown lps rewriter");
