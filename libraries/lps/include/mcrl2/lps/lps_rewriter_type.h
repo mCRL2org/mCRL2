@@ -82,7 +82,7 @@ std::string description(const lps_rewriter_type type)
     case condition_one_point :
       return "simplify summands using equalities appearing in condition";
     case dataspec_prune:
-      return "for removing unused data specifications";
+      return "for removing unused data equations and mappings";
   }
   throw mcrl2::runtime_error("unknown lps rewriter");
 }
