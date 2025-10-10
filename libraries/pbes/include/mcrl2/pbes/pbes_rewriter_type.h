@@ -149,7 +149,7 @@ inline std::string description(const pbes_rewriter_type type)
   case pbes_rewriter_type::pre_srf:
     return "for rewriting into pre-SRF normal form";
   case pbes_rewriter_type::dataspec_prune:
-    return "for removing unused data specifications";
+    return "for removing unused data equations and mappings";
   case pbes_rewriter_type::bqnf_quantifier:
     return "for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";
   }

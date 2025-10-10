@@ -100,7 +100,7 @@ std::string description(const pres_rewriter_type type)
     case quantifier_one_point :
       return "for one point rule quantifier elimination";
     case dataspec_prune:
-      return "for removing unused data specifications";
+      return "for removing unused data equations and mappings";
   }
   throw mcrl2::runtime_error("unknown pres rewriter");
 }

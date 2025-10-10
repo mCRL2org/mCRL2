@@ -27,7 +27,7 @@ class dataspec_prune_rewriter
             p.global_variables(),
             false);
         data::data_equation_vector equations;
-        for (auto i: p.data().user_defined_equations())
+        for (data::data_equation i: p.data().user_defined_equations())
         {
           if (used_selector(i))
           {
@@ -36,7 +36,7 @@ class dataspec_prune_rewriter
         }
       
         data::function_symbol_vector mappings;
-        for (auto i: p.data().user_defined_mappings()) {
+        for (data::function_symbol i: p.data().user_defined_mappings()) {
             if (used_selector(i)) {
                 mappings.emplace_back(i);
             }
