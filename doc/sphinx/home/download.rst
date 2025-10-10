@@ -41,6 +41,11 @@ latest release of the toolset.
 Stable releases for Arch Linux are available via the `Arch User Repository <https://aur.archlinux.org/packages/mcrl2/>`_.
 This package is currently maintained by Kevin Jilissen.
 
+.. warning::
+
+   On Windows, mCRL2 tools occasionally get stuck trying to read .aut files. This has been resolved in later Nightly builds.
+   
+
 Nightly build
 --------------
 
