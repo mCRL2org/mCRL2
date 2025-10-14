@@ -45,7 +45,7 @@ protected:
         "all actions in the final LPS are clustered. "
         "Clustering means that summands with the same action labels are "
         "grouped together. For instance, a(f1) . P(g1) + a(f2) . P(g2) "
-        "is replaced by sum b: Bool . a(if(b, f1, f2)) . P(if(b, f2, g2)). "
+        "is replaced by sum b: Bool . a(if(b, f1, f2)) . P(if(b, g1, g2)). "
         "The advantage is that the number of summands can be reduced "
         "subtantially in this way. The disadvantage is that sum operators "
         "are introduced and new data sorts with auxiliary functions are generated. "
