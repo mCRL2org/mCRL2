@@ -2829,7 +2829,7 @@ class bisim_partitioner_gj_lazy_BLC
 //std::cerr << "current_block == " << current_block.debug_id(*this);
 //if (nullptr != current_block.refinement_info) { std::cerr << " (which is unstable";
 //if (nullptr != old_large_splitter)
-//{  << ", large splitter == " << old_large_splitter->debug_id(*this) << ". Transitions that start in the current block are";
+//{ std::cerr << ", large splitter == " << old_large_splitter->debug_id(*this) << ". Transitions that start in the current block are";
 //for (BLC_list_const_iterator it = old_large_splitter->start_same_BLC; it != old_large_splitter->end_same_BLC; ++it)
 //{ if (m_states[m_aut.get_transitions()[*it].from()].block == &current_block) { std::cerr << "  " << m_transitions[*it].debug_id_short(*this); } }
 //}
@@ -2845,7 +2845,7 @@ class bisim_partitioner_gj_lazy_BLC
 
           // The new BLC sets will be placed immediately before the old BLC
           // sets in m_BLC_transitions.
-
+//std::cerr << "   Now visiting outgoing transitions of " << it->ref_state->debug_id(*this) << '\n';
           outgoing_transitions_it_lb out_it =
                                      it->ref_state->start_outgoing_transitions;
           outgoing_transitions_const_it_lb const
@@ -2975,7 +2975,7 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                   new_BLC_set->work_counter = old_BLC_set->work_counter;
                                                                                 #endif
               if (nullptr != current_block.refinement_info &&
-                  current_block.refinement_info->large_splitter==old_BLC_set)
+                  current_block.refinement_info->large_splitter==&*old_BLC_set)
               {
                 current_block.refinement_info->large_splitter = &*new_BLC_set;
               }
