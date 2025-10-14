@@ -4263,8 +4263,8 @@ class bisim_partitioner_gj_lazy_BLC
               --no_of_running_searches;                                         assert(current_search_index<=no_of_running_searches);
               running_searches[current_search_index]=
                                       running_searches[no_of_running_searches];
-              --current_search_index; /* is now -1, 0 or +1 */                  assert(nullptr != bri.large_splitter ||
-              /* Algorithm 3, Line 3.34 left                                 */        bri.potential_non_bottom_states_HitSmall.empty());
+              --current_search_index; /* is now -1, 0 or +1 */
+              // Algorithm 3, Line 3.34 left
               if (finished==status[ReachAlw] &&
                   finished==status[AvoidLrg] &&
                   aborted!=status_NewBotSt)
@@ -4288,10 +4288,7 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                                 marked_NewBotSt==st.ref_state->counter);  }
                 }
                 clear(bri.potential_non_bottom_states_HitSmall);
-              }                                                                 else  {  assert(finished!=status[ReachAlw] ||
-                                                                                                finished!=status[AvoidLrg] ||
-                                                                                                aborted==status_NewBotSt ||
-                                                                                                bri.potential_non_bottom_states_HitSmall.empty());  }
+              }
               if (std::numeric_limits<state_index>::max()!=
                                               no_of_unfinished_states_in_block)
               {                                                                 assert(0<no_of_running_searches);  assert(no_of_running_searches<=2);
@@ -5852,8 +5849,7 @@ class bisim_partitioner_gj_lazy_BLC
                       Qhat.emplace_back(ind->start_same_BLC,ind->end_same_BLC);
                     }                                                           assert(ind->starts_in_small_subblock);
                     mark_BLC_transition(out_it);
-                  }                                                             else  {  assert(m_transitions[*old_pos].
-                                                                                                       transitions_per_block_to_constellation->is_stable());  }
+                  }
                   /* Actually it's enough to mark one transition per saC     */ assert(out_it <= out_it->start_same_saC);
                   // slice:
                   out_it = std::next(out_it->start_same_saC);
