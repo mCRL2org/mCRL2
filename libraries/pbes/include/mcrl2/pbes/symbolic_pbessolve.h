@@ -10,8 +10,8 @@
 #ifndef MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 #define MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 
-#include "sylvan_ldd.hpp"
 #ifdef MCRL2_ENABLE_SYLVAN
+#include "sylvan_ldd.hpp"
 
 #include "symbolic_parity_game.h"
 #include "mcrl2/utilities/exception.h"
