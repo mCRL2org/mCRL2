@@ -256,6 +256,11 @@ class Lps2presTest(ProcessTest):
         super().create_inputfiles(runpath)
         self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
 
+class LpsrewrTest(ProcessTest):
+    def __init__(self, name, settings):
+        super().__init__(name, ymlfile('lpsrewr'), settings)
+        self.add_command_line_options('t2', ['-p' + 'prune-dataspec'])
+
 class Lts2pbesTest(ProcessTest):
     def __init__(self, name, settings):
         super().__init__(name, ymlfile('lts2pbes'), settings)
@@ -479,6 +484,7 @@ available_tests = {
     'lps2pres'                                    : lambda name, settings: Lps2presTest(name, settings)                                                ,
     'lpsstategraph'                               : lambda name, settings: LpsstategraphTest(name, settings)                                           ,
     'lts2pbes'                                    : lambda name, settings: Lts2pbesTest(name, settings)                                                ,
+    'lpsrewr'                                     : lambda name, settings: LpsrewrTest(name, settings)                                                ,
     'ltscompare-bisim'                            : lambda name, settings: LtscompareTest(name, 'bisim', settings)                                     ,
     'ltscompare-bisim-counter-example'            : lambda name, settings: LtscompareCounterexampleTest(name, 'bisim', False, settings)                ,
     'ltscompare-bisim-counter-example-hidden'     : lambda name, settings: LtscompareCounterexampleTest(name, 'bisim', True, settings)                 ,
