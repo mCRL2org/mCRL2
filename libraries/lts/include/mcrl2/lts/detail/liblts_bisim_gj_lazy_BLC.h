@@ -5878,7 +5878,9 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                 assert(stabilize_work_to_assign_later.empty());
             return;
           }
-          /* Algorithm 5, line 5.22                                          */ print_data_structures("New bottom state loop");
+                                                                                #ifndef NDEBUG
+          /* Algorithm 5, line 5.22                                          */   print_data_structures("New bottom state loop");
+                                                                                #endif
                                                                                 assert(check_data_structures("New bottom state loop", false));
           std::pair<BLC_list_iterator,BLC_list_iterator>& Qhat_elt=Qhat.back(); assert(check_stability("New bottom state loop", &Qhat));
                                                                                 assert(Qhat_elt.first<Qhat_elt.second);
@@ -6706,7 +6708,7 @@ class bisim_partitioner_gj_lazy_BLC
         }
         while (it!=blc_it->end_same_BLC);
       }
-print_data_structures("Just before the first refinements");
+//print_data_structures("Just before the first refinements");
       // Algorithm 1, Line 1.3
       for (simple_list<BLC_indicators_lb>::iterator
              blc_it=initial_BLC_source.block_to_constellation.begin();
@@ -6720,7 +6722,9 @@ print_data_structures("Just before the first refinements");
         }
       }
                                                                                 assert(check_data_structures("After initial reading before splitting in the initialisation", false));
-      /* Algorithm 1, line 1.5                                               */ print_data_structures("End initialisation");
+                                                                                #ifndef NDEBUG
+      /* Algorithm 1, line 1.5                                               */   print_data_structures("End initialisation");
+                                                                                #endif
                                                                                 assert(check_stability("End initialisation"));
       mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";
                                                                                 assert(check_data_structures("End initialisation", false));
@@ -6787,7 +6791,10 @@ print_data_structures("Just before the first refinements");
       clock_t next_print_time = clock();
       const clock_t rounded_start_time = next_print_time - CLOCKS_PER_SEC/2;
       while (true)
-      {                                                                         print_data_structures("MAIN LOOP");
+      {
+                                                                                #ifndef NDEBUG
+                                                                                  print_data_structures("MAIN LOOP");
+                                                                                #endif
                                                                                 assert(check_data_structures("MAIN LOOP"));
                                                                                 assert(check_stability("MAIN LOOP"));
         if (mCRL2logEnabled(log::verbose))
@@ -7189,7 +7196,9 @@ print_data_structures("Just before the first refinements");
         for (std::pair<BLC_list_iterator, BLC_list_iterator> calM_elt: calM)
         {                                                                       // mCRL2complexity(..., add_work(..., max_C), *this);
                                                                                     // not needed as the inner loop is always executed at least once.
-                                                                                print_data_structures("Main loop");
+                                                                                #ifndef NDEBUG
+                                                                                  print_data_structures("Main loop");
+                                                                                #endif
                                                                                 assert(check_stability("Main loop", &calM, &calM_elt, &old_constellation, &new_constellation));
                                                                                 assert(check_data_structures("Main loop", false));
           /* Algorithm 1, Line 1.19: Pick some super-BLC set SmallSp in calM */ assert(calM_elt.first < calM_elt.second);
@@ -7248,7 +7257,10 @@ print_data_structures("Just before the first refinements");
             }
           }
           while (calM_elt.first < calM_elt.second);
-        }                                                                       print_data_structures("Before stabilize");
+        }
+                                                                                #ifndef NDEBUG
+                                                                                  print_data_structures("Before stabilize");
+                                                                                #endif
                                                                                 assert(check_data_structures("Before stabilize", false));
         /* Algorithm 1, Line 1.19                                            */ assert(check_stability("Before stabilize"));
         stabilizeB();
@@ -7354,6 +7366,7 @@ void bisimulation_reduce_gj_lazy_BLC(LTS_TYPE& l, const bool branching = false,
     mCRL2log(log::debug) << "Start finalizing\n";
     bisim_part.finalize_minimized_LTS();
 
+//log::logger::set_reporting_level(log::debug);
     if (mCRL2logEnabled(log::debug))
     {
         const std::clock_t end_finalizing=std::clock();
