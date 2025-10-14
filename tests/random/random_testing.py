@@ -143,7 +143,7 @@ class LpsConfcheckTest(ProcessTauTest):
 
 class LtscompareTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings):
-        assert equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'bisim-gj', 'branching-bisim', 'branching-bisim-gv', 'branching-bisim-gjkw', 'branching-bisim-gj', 'dpbranching-bisim', 'dpbranching-bisim-gv', 'dpbranching-bisim-gjkw', 'dpbranching-bisim-gj', 'weak-bisim', 'dpweak-bisim', 'sim', 'ready-sim' , 'trace', 'weak-trace']
+        assert equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'bisim-gj', 'bisim-gj-lazy-BLC', 'branching-bisim', 'branching-bisim-gv', 'branching-bisim-gjkw', 'branching-bisim-gj', 'branching-bisim-gj-lazy-BLC', 'dpbranching-bisim', 'dpbranching-bisim-gv', 'dpbranching-bisim-gjkw', 'dpbranching-bisim-gj', 'dpbranching-bisim-gj-lazy-BLC', 'weak-bisim', 'dpweak-bisim', 'sim', 'ready-sim' , 'trace', 'weak-trace']
         super().__init__(name, ymlfile('ltscompare'), settings)
         self.add_command_line_options('t3', ['-e' + equivalence_type])
         self.add_command_line_options('t4', ['-e' + equivalence_type])
@@ -195,13 +195,13 @@ class StochasticLtscompareTest(StochasticProcessTest):
 
 class BisimulationTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings):
-        assert equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'bisim-gj', 'branching-bisim', 'branching-bisim-gv', 'branching-bisim-gjkw', 'branching-bisim-gj', 'weak-bisim']
+        assert equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'bisim-gj', 'bisim-gj-lazy-BLC', 'branching-bisim', 'branching-bisim-gv', 'branching-bisim-gjkw', 'branching-bisim-gj', 'branching-bisim-gj-lazy-BLC', 'weak-bisim']
         super().__init__(name, ymlfile('bisimulation'), settings)
         self.add_command_line_options('t3', ['-e' + equivalence_type])
         self.add_command_line_options('t4', ['-e' + equivalence_type])
-        if equivalence_type in ['branching-bisim-gv', 'branching-bisim-gjkw', 'branching-bisim-gj']:
+        if equivalence_type in ['branching-bisim-gv', 'branching-bisim-gjkw', 'branching-bisim-gj', 'branching-bisim-gj-lazy-BLC']:
             self.add_command_line_options('t7', ['-bbranching-bisim'])
-        elif equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'bisim-gj']:
+        elif equivalence_type in ['bisim', 'bisim-gv', 'bisim-gjkw', 'bisim-gj', 'bisim-gj-lazy-BLC']:
             self.add_command_line_options('t7', ['-bstrong-bisim'])
         else:
             self.add_command_line_options('t7', ['-b' + equivalence_type])
@@ -484,17 +484,20 @@ available_tests = {
     'ltscompare-bisim-counter-example-hidden'     : lambda name, settings: LtscompareCounterexampleTest(name, 'bisim', True, settings)                 ,
     'ltscompare-bisim-gv'                         : lambda name, settings: LtscompareTest(name, 'bisim-gv', settings)                                  ,
     'ltscompare-bisim-gjkw'                       : lambda name, settings: LtscompareTest(name, 'bisim-gjkw', settings)                                ,
-    'ltscompare-bisim-gj'                         : lambda name, settings: LtscompareTest(name, 'bisim-gj', settings)                                ,
+    'ltscompare-bisim-gj'                         : lambda name, settings: LtscompareTest(name, 'bisim-gj', settings)                                  ,
+    'ltscompare-bisim-gj-lazy-BLC'                : lambda name, settings: LtscompareTest(name, 'bisim-gj-lazy-BLC', settings)                         ,
     'ltscompare-branching-bisim'                  : lambda name, settings: LtscompareTest(name, 'branching-bisim', settings)                           ,
     'ltscompare-branching-bisim-counter-example'  : lambda name, settings: LtscompareCounterexampleTest(name, 'branching-bisim', False, settings)      ,
     'ltscompare-branching-bisim-counter-example-hidden' : lambda name, settings: LtscompareCounterexampleTest(name, 'branching-bisim', True, settings) ,
     'ltscompare-branching-bisim-gv'               : lambda name, settings: LtscompareTest(name, 'branching-bisim-gv', settings)                        ,
     'ltscompare-branching-bisim-gjkw'             : lambda name, settings: LtscompareTest(name, 'branching-bisim-gjkw', settings)                      ,
-    'ltscompare-branching-bisim-gj'               : lambda name, settings: LtscompareTest(name, 'branching-bisim-gj', settings)                      ,
+    'ltscompare-branching-bisim-gj'               : lambda name, settings: LtscompareTest(name, 'branching-bisim-gj', settings)                        ,
+    'ltscompare-branching-bisim-gj-lazy-BLC'      : lambda name, settings: LtscompareTest(name, 'branching-bisim-gj-lazy-BLC', settings)               ,
     'ltscompare-dpbranching-bisim'                : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim', settings)                         ,
     'ltscompare-dpbranching-bisim-gv'             : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim-gv', settings)                      ,
     'ltscompare-dpbranching-bisim-gjkw'           : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim-gjkw', settings)                    ,
-    'ltscompare-dpbranching-bisim-gj'             : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim-gj', settings)                    ,
+    'ltscompare-dpbranching-bisim-gj'             : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim-gj', settings)                      ,
+    'ltscompare-dpbranching-bisim-gj-lazy-BLC'    : lambda name, settings: LtscompareTest(name, 'dpbranching-bisim-gj-lazy-BLC', settings)             ,
     'ltscompare-weak-bisim'                       : lambda name, settings: LtscompareTest(name, 'weak-bisim', settings)                                ,
     'ltscompare-dpweak-bisim'                     : lambda name, settings: LtscompareTest(name, 'dpweak-bisim', settings)                              ,
     'ltscompare-sim'                              : lambda name, settings: LtscompareTest(name, 'sim', settings)                                       ,
@@ -502,16 +505,18 @@ available_tests = {
     'ltscompare-trace'                            : lambda name, settings: LtscompareTest(name, 'trace', settings)                                     ,
     'ltscompare-trace-counter-example'            : lambda name, settings: LtscompareCounterexampleTest(name, 'trace', False, settings)                ,
     'ltscompare-trace-counter-example-hidden'     : lambda name, settings: LtscompareCounterexampleTest(name, 'trace', True, settings)                 ,
-    'ltscompare-impossible-futures-counter-example' : lambda name, settings: LtscompareCounterexampleTest(name, 'impossible-futures', True, settings)                ,
+    'ltscompare-impossible-futures-counter-example' : lambda name, settings: LtscompareCounterexampleTest(name, 'impossible-futures', True, settings)  ,
     'ltscompare-weak-trace'                       : lambda name, settings: LtscompareTest(name, 'weak-trace', settings)                                ,
     'bisimulation-bisim'                          : lambda name, settings: BisimulationTest(name, 'bisim', settings)                                   ,
     'bisimulation-bisim-gv'                       : lambda name, settings: BisimulationTest(name, 'bisim-gv', settings)                                ,
     'bisimulation-bisim-gjkw'                     : lambda name, settings: BisimulationTest(name, 'bisim-gjkw', settings)                              ,
-    'bisimulation-bisim-gj'                       : lambda name, settings: BisimulationTest(name, 'bisim-gj', settings)                              ,
+    'bisimulation-bisim-gj'                       : lambda name, settings: BisimulationTest(name, 'bisim-gj', settings)                                ,
+    'bisimulation-bisim-gj-lazy-BLC'              : lambda name, settings: BisimulationTest(name, 'bisim-gj-lazy-BLC', settings)                       ,
     'bisimulation-branching-bisim'                : lambda name, settings: BisimulationTest(name, 'branching-bisim', settings)                         ,
     'bisimulation-branching-bisim-gv'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gv', settings)                      ,
     'bisimulation-branching-bisim-gjkw'           : lambda name, settings: BisimulationTest(name, 'branching-bisim-gjkw', settings)                    ,
-    'bisimulation-branching-bisim-gj'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj', settings)                    ,
+    'bisimulation-branching-bisim-gj'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj', settings)                      ,
+    'bisimulation-branching-bisim-gj-lazy-BLC'    : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj-lazy-BLC', settings)             ,
     'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                              ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,

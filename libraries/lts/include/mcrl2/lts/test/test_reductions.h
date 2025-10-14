@@ -135,10 +135,10 @@ static bool reduce_lts_in_various_ways(const std::string& test_description,
   if (!test_lts(test_description + " (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gj);
-  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen 2025)",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen 2025])",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gj_lazy_BLC);
-  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen 2025) lazy BLC",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
+  if (!test_lts(test_description + " (branching bisimulation [Groote/Jansen 2025]) lazy BLC",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation)) return false;
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gv);
   if (!test_lts(test_description + " (branching bisimulation [Groote/Vaandrager 1990])",

@@ -4835,10 +4835,7 @@ class bisim_partitioner_gj_lazy_BLC
                           (bri.potential_non_bottom_states_HitSmall.begin(),
                            bri.potential_non_bottom_states_HitSmall.end(), bi);
             }
-            if (nullptr != bri.large_splitter)
-            {
-              clear(bri.potential_non_bottom_states_HitSmall);
-            }                                                                   else  {  assert(bri.potential_non_bottom_states_HitSmall.empty());  }
+            clear(bri.potential_non_bottom_states_HitSmall);
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                   // Finish the accounting.
                                                                                   // (We have already called `check_complexity::check_waiting_cycles()`, so we
