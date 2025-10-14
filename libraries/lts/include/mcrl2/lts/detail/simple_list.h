@@ -356,28 +356,48 @@ namespace mcrl2::lts::detail
             const_iterator() = default;
             const_iterator(const const_iterator& other) = default;
             const_iterator& operator=(const const_iterator& other) = default;
+
             const_iterator& operator++()
             {                                                                   assert(nullptr != ptr);
                 ptr = ptr->next;
                 return *this;
             }
+
             const_iterator& operator--()
             {                                                                   assert(nullptr != ptr);
                 ptr = ptr->prev;                                                assert(nullptr != ptr->next);
                 return *this;
             }
+
+            const_iterator operator++(int)
+            {                                                                   assert(nullptr != ptr);
+                const_iterator temp(*this);
+                ptr = ptr->next;
+                return temp;
+            }
+
+            const_iterator operator--(int)
+            {                                                                   assert(nullptr != ptr);
+                const_iterator temp(*this);
+                ptr = ptr->prev;                                                assert(nullptr != ptr->next);
+                return temp;
+            }
+
             const T& operator*() const
             {                                                                   assert(nullptr != ptr);
                 return  ptr->data;
             }
+
             const T* operator->() const
             {                                                                   assert(nullptr != ptr);
                 return &ptr->data;
             }
+
             bool operator==(const const_iterator& other) const
             {
                 return ptr == other.ptr;
             }
+
             bool operator==(const T* const other) const
             {                                                                   assert(nullptr != other);
                 // It is allowed to call this even if is_null().
@@ -409,6 +429,20 @@ namespace mcrl2::lts::detail
             iterator& operator++(){const_iterator::operator++(); return *this;}
 
             iterator& operator--(){const_iterator::operator--(); return *this;}
+
+            iterator operator++(int)
+            {
+                iterator temp(*this);
+                const_iterator::operator++();
+                return temp;
+            }
+
+            iterator operator--(int)
+            {
+                iterator temp(*this);
+                const_iterator::operator--();
+                return temp;
+            }
 
             T& operator*() const
             {
@@ -540,7 +574,7 @@ namespace mcrl2::lts::detail
         /// \details If pos==end(), construct a new list entry at the end
         template<class... Args>
         iterator emplace(iterator pos, Args&&... args)
-        {                                                                       assert(end()==pos || !empty()); assert(end()==pos || nullptr==pos.ptr->prev);
+        {                                                                       assert(end()==pos || !empty()); assert(end()==pos || nullptr!=pos.ptr->prev);
                                                                                 #ifndef NDEBUG
                                                                                     assert(check_linked_list());
                                                                                     if (end() != pos)

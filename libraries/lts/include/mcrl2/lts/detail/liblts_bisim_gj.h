@@ -2627,17 +2627,10 @@ class bisim_partitioner_gj
                                                                                                        check_complexity::ilog2(new_block_bottom_size+R.size());
                                                                                 #endif
       for (const state_in_block_pointer& st: R)
-      {
-        mCRL2complexity(st.ref_state,
-            add_work(
-                check_complexity::
-                    split_block_B_into_R_and_BminR__carry_out_split,
-                max_B),
-            *this);
-        swap_states_in_states_in_block(
-            to_pos++,
-            st.ref_state
-                ->ref_states_in_blocks);
+      {                                                                         mCRL2complexity(st.ref_state, add_work(check_complexity::
+                                                                                               split_block_B_into_R_and_BminR__carry_out_split, max_B), *this);
+        swap_states_in_states_in_block(to_pos++,
+                                       st.ref_state->ref_states_in_blocks);
       }
       return;
     }
