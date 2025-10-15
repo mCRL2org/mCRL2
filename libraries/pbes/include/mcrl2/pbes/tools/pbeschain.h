@@ -26,8 +26,12 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
+#include "mcrl2/utilities/logger.h"
 #include <cstddef>
 #include <chrono>
+#include <iostream>
+#include <thread>
+#include <future>
 
 namespace mcrl2::pbes_system
 {
@@ -331,7 +335,16 @@ inline pbes_expression simplify_expr(pbes_expression& phi,
     }
     else
     {
-      pbes_expression res = pbes_rewrite(phi, pbes_rewriter);
+      pbes_expression res = phi;
+      auto c1 = std::async(std::launch::async, [phi,pbes_rewriter]() {
+        return pbes_rewrite(phi, pbes_rewriter);
+      });
+      if (c1.wait_for(std::chrono::milliseconds(200)) == std::future_status::ready) {
+        res = c1.get();
+      } 
+      // else {
+      //   res = phi;
+      // }
       if_substituter.apply(res, res);
       return res;
     }
