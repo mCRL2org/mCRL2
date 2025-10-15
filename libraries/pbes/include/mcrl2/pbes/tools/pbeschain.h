@@ -290,29 +290,8 @@ inline pbes_expression simplify_expr(pbes_expression& phi,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
     simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter)
 {
-  std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
-    if (options.use_bdd_simplifier)
-    {
-      data::data_expression expr = pbestodata(phi, replace_substituter);
-      f_bdd_prover.set_formula(expr);
-      expr = f_bdd_prover.get_bdd();
-      return datatopbes(expr, if_substituter, replace_substituter);
-    }
-    else
-    {
-      pbes_expression res = phi;
-      auto c1 = std::async(std::launch::async, [phi,pbes_rewriter]() {
-        return pbes_rewrite(phi, pbes_rewriter);
-      });
-      if (c1.wait_for(std::chrono::milliseconds(200)) == std::future_status::ready) {
-        res = c1.get();
-      } 
-      // else {
-      //   res = phi;
-      // }
-      if_substituter.apply(res, res);
-      return res;
-    }
+  pbes_expression res = pbes_rewrite(phi, pbes_rewriter);
+  if_substituter.apply(res, res);
   return phi;
 }
 
