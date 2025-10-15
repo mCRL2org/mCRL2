@@ -9,10 +9,13 @@
 
 /// \file lts/detail/liblts_bisim_gj.h
 ///
-/// \brief O(m log n)-time branching bisimulation algorithm similar to liblts_bisim_dnj.h
-///        which does not use bunches, i.e., partitions of transitions. This algorithm
-///        should be slightly faster, but in particular use less memory than liblts_bisim_dnj.h.
-///        Otherwise the functionality is exactly the same.
+/// \brief O(m log n)-time branching bisimulation algorithm published at CONCUR 2025
+/// \details This algorithm is similar to liblts_bisim_dnj.h but it does not
+/// use bunches (i.e., partitions of transitions) to register which work has
+/// already been done.  Instead, it uses a normal partition of states, similar
+/// to the first O(m log n) algorithm published in 2016/17.  This algorithm
+/// should be slightly faster, but in particular use less memory than
+/// liblts_bisim_dnj.h.  Otherwise the functionality is exactly the same.
 
 #ifndef LIBLTS_BISIM_GJ_H
 #define LIBLTS_BISIM_GJ_H
