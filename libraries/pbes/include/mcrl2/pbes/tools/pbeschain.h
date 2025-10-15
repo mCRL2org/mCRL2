@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <chrono>
 #include <iostream>
+#include <thread>
 #include <future>
 
 namespace mcrl2::pbes_system
@@ -290,9 +291,29 @@ inline pbes_expression simplify_expr(pbes_expression& phi,
     simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter)
 {
   std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
-  pbes_expression res = pbes_rewrite(phi, pbes_rewriter);
-  if_substituter.apply(res, res);
-  return res;
+    if (options.use_bdd_simplifier)
+    {
+      data::data_expression expr = pbestodata(phi, replace_substituter);
+      f_bdd_prover.set_formula(expr);
+      expr = f_bdd_prover.get_bdd();
+      return datatopbes(expr, if_substituter, replace_substituter);
+    }
+    else
+    {
+      pbes_expression res = phi;
+      auto c1 = std::async(std::launch::async, [phi,pbes_rewriter]() {
+        return pbes_rewrite(phi, pbes_rewriter);
+      });
+      if (c1.wait_for(std::chrono::milliseconds(200)) == std::future_status::ready) {
+        res = c1.get();
+      } 
+      // else {
+      //   res = phi;
+      // }
+      if_substituter.apply(res, res);
+      return res;
+    }
+  return phi;
 }
 
 inline void self_substitute(pbes_equation& equation,
