@@ -1,16 +1,7 @@
 diff --git a/m4/acx_mcrl2.m4 b/m4/acx_mcrl2.m4
-index 0aeb7c02..29eaf9ec 100644
+index ba880d61..29eaf9ec 100644
 --- a/m4/acx_mcrl2.m4
 +++ b/m4/acx_mcrl2.m4
-@@ -38,7 +38,7 @@ AS_IF([test "x$acx_mcrl2" = "xyes"], [
-         AC_SUBST(MCRL2_PINS_CPPFLAGS, ["$MCRL2_PINS_CPPFLAGS -DDISABLE_JITTYC"])
-         AC_MSG_NOTICE([disabling mCRL2 jittyc rewriter])
-     ], [
--      AC_SUBST(MCRL2_PINS_CPPFLAGS, ["$MCRL2_PINS_CPPFLAGS -DMCRL2_JITTYC_AVAILABLE"])
-+      AC_SUBST(MCRL2_PINS_CPPFLAGS, ["$MCRL2_PINS_CPPFLAGS -DMCRL2_ENABLE_JITTYC"])
-         AC_MSG_NOTICE([enabling mCRL2 jittyc rewriter])
-     ])
- 
 @@ -49,7 +49,6 @@ AS_IF([test "x$acx_mcrl2" = "xyes"], [
          mcrl2_lib_dir="${with_mcrl2}/lib"
      fi
@@ -264,27 +255,85 @@ index 9413da62..d8059570 100644
 +#endif  // (defined _MSVC_LANG ? _MSVC_LANG : __cplusplus) < 202302L
  
  ]])
-diff --git a/src/pins-lib/modules/mcrl2-pins.cpp b/src/pins-lib/modules/mcrl2-pins.cpp
-index 0be99f0f..2603fda9 100644
---- a/src/pins-lib/modules/mcrl2-pins.cpp
-+++ b/src/pins-lib/modules/mcrl2-pins.cpp
-@@ -32,7 +32,7 @@ extern "C" {
- #include <ltsmin-lib/ltsmin-standard.h>
- }
+diff --git a/m4/ltargz.m4 b/m4/ltargz.m4
+index 0908d90b..c5440825 100644
+--- a/m4/ltargz.m4
++++ b/m4/ltargz.m4
+@@ -1,15 +1,18 @@
+ # Portability macros for glibc argz.                    -*- Autoconf -*-
+ #
+-#   Copyright (C) 2004-2007, 2011-2015 Free Software Foundation, Inc.
++#   Copyright (C) 2004-2007, 2011-2019, 2021-2022 Free Software
++#   Foundation, Inc.
+ #   Written by Gary V. Vaughan <gary@gnu.org>
+ #
+ # This file is free software; the Free Software Foundation gives
+ # unlimited permission to copy and/or distribute it, with or without
+ # modifications, as long as this notice is preserved.
  
--#if defined(MCRL2_JITTYC_AVAILABLE) && !defined(DISABLE_JITTYC)
-+#if defined(MCRL2_ENABLE_JITTYC) && !defined(DISABLE_JITTYC)
- static const char* mcrl2_rewriter = "jittyc";
- #else
- static const char* mcrl2_rewriter = "jitty";
-@@ -361,8 +361,8 @@ mcrl2_popt (poptContext con, enum poptCallbackReason reason,
-         GBregisterLoader("txt", MCRL2CompileGreyboxModel);
-         if (mcrl2_verbosity > 0) {
-             Warning(info, "increasing mcrl2 verbosity level by %d", mcrl2_verbosity);
--            mcrl2_log_level_t level = static_cast<mcrl2_log_level_t>(static_cast<size_t>(mcrl2_logger::get_reporting_level()) + mcrl2_verbosity);
--            mcrl2_logger::set_reporting_level(level);
-+            mcrl2_log_level_t level = static_cast<mcrl2_log_level_t>(static_cast<size_t>(logger::get_reporting_level()) + mcrl2_verbosity);
-+            logger::set_reporting_level(level);
-         }
- #ifdef DISABLE_JITTYC
-         if (strcmp(mcrl2_rewriter, "jittyc") == 0) {
+-# serial 1 ltargz.m4
++# serial 2 ltargz.m4
+ 
+ AC_DEFUN([LT_FUNC_ARGZ], [
++dnl Required for use of '$SED' in Cygwin configuration.
++AC_REQUIRE([AC_PROG_SED])dnl
+ AC_CHECK_HEADERS([argz.h], [], [], [AC_INCLUDES_DEFAULT])
+ 
+ AC_CHECK_TYPES([error_t],
+@@ -48,7 +51,7 @@ AS_IF([test -z "$LT_ARGZ_H"],
+ 	     lt_sed_extract_leading_digits='s/^\([0-9\.]*\).*/\1/'
+ 	     save_IFS=$IFS
+ 	     IFS=-.
+-	     set x `uname -r | sed -e "$lt_sed_extract_leading_digits"`
++	     set x `uname -r | $SED -e "$lt_sed_extract_leading_digits"`
+ 	     IFS=$save_IFS
+ 	     lt_os_major=${2-0}
+ 	     lt_os_minor=${3-0}
+diff --git a/m4/ltdl.m4 b/m4/ltdl.m4
+index 560522a1..772c1502 100644
+--- a/m4/ltdl.m4
++++ b/m4/ltdl.m4
+@@ -1,13 +1,14 @@
+ # ltdl.m4 - Configure ltdl for the target system. -*-Autoconf-*-
+ #
+-#   Copyright (C) 1999-2008, 2011-2015 Free Software Foundation, Inc.
++#   Copyright (C) 1999-2008, 2011-2019, 2021-2022 Free Software
++#   Foundation, Inc.
+ #   Written by Thomas Tanner, 1999
+ #
+ # This file is free software; the Free Software Foundation gives
+ # unlimited permission to copy and/or distribute it, with or without
+ # modifications, as long as this notice is preserved.
+ 
+-# serial 20 LTDL_INIT
++# serial 21 LTDL_INIT
+ 
+ # LT_CONFIG_LTDL_DIR(DIRECTORY, [LTDL-MODE])
+ # ------------------------------------------
+@@ -335,7 +336,7 @@ AC_CONFIG_COMMANDS_PRE([
+     if test -n "$_LT_LIBOBJS"; then
+       # Remove the extension.
+       _lt_sed_drop_objext='s/\.o$//;s/\.obj$//'
+-      for i in `for i in $_LT_LIBOBJS; do echo "$i"; done | sed "$_lt_sed_drop_objext" | sort -u`; do
++      for i in `for i in $_LT_LIBOBJS; do echo "$i"; done | $SED "$_lt_sed_drop_objext" | sort -u`; do
+         _ltdl_libobjs="$_ltdl_libobjs $lt_libobj_prefix$i.$ac_objext"
+         _ltdl_ltlibobjs="$_ltdl_ltlibobjs $lt_libobj_prefix$i.lo"
+       done
+@@ -473,7 +474,7 @@ AC_CACHE_CHECK([whether deplibs are loaded by dlopen],
+     # If you are looking for one http://www.opendarwin.org/projects/dlcompat
+     lt_cv_sys_dlopen_deplibs=yes
+     ;;
+-  freebsd* | dragonfly*)
++  freebsd* | dragonfly* | midnightbsd*)
+     lt_cv_sys_dlopen_deplibs=yes
+     ;;
+   gnu* | linux* | k*bsd*-gnu | kopensolaris*-gnu)
+@@ -496,7 +497,7 @@ AC_CACHE_CHECK([whether deplibs are loaded by dlopen],
+     # at 6.2 and later dlopen does load deplibs.
+     lt_cv_sys_dlopen_deplibs=yes
+     ;;
+-  netbsd* | netbsdelf*-gnu)
++  netbsd*)
+     lt_cv_sys_dlopen_deplibs=yes
+     ;;
+   openbsd*)
