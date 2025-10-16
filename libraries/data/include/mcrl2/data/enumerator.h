@@ -29,7 +29,7 @@ inline
 data_expression make_set_(std::size_t function_index, const sort_expression& element_sort, const data_expression_vector& set_elements)
 {
   data_expression result = sort_fset::empty(element_sort);
-  for (const auto & set_element : set_elements)
+  for (const data_expression& set_element: set_elements)
   {
     if (function_index % 2 == 1)
     {
@@ -56,7 +56,7 @@ data_expression make_if_expression_(std::size_t& function_index,
 
   data_expression result;
   const data_expression_vector& current_enumerated_elements = data_domain_expressions[argument_index];
-  for (auto i = current_enumerated_elements.rbegin(); i != current_enumerated_elements.rend(); ++i)
+  for (data_expression_vector::const_reverse_iterator i = current_enumerated_elements.rbegin(); i != current_enumerated_elements.rend(); ++i)
   {
     if (i == current_enumerated_elements.rbegin())
     {
@@ -464,8 +464,8 @@ template <typename Expression>
 std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expression>& p)
 {
   out << "{ [";
-  const auto& variables = p.variables();
-  for (auto i = variables.begin(); i != variables.end(); ++i)
+  const variable_list& variables = p.variables();
+  for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     if (i != variables.begin())
     {
@@ -480,8 +480,8 @@ template <typename Expression>
 std::ostream& operator<<(std::ostream& out, const enumerator_list_element_with_substitution<Expression>& p)
 {
   out << "{ [";
-  const auto& variables = p.variables();
-  for (auto i = variables.begin(); i != variables.end(); ++i)
+  const variable_list& variables = p.variables();
+  for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     if (i != variables.begin())
     {
@@ -724,8 +724,6 @@ class enumerator_algorithm
                               }
                               if ((accept(P.scratch_expression) && m_accept_solutions_with_variables) || variables.empty())
                               {
-                                // EnumeratorListElement q(variables, phi1, p, v, e);
-                                // return report_solution(q);
                                 return report_solution(P.enumerator_element_cache(variables, P.scratch_expression, p, v, e));
                               }
                               P.emplace_back(variables, P.scratch_expression, p, v, e);
@@ -736,7 +734,8 @@ class enumerator_algorithm
                                             const data::variable_list& added_variables,
                                             const typename EnumeratorListElement::expression_type& phi,
                                             const data::variable& v,
-                                            const data::data_expression& e
+                                            const data::data_expression& e,
+const bool print=false
                                            ) -> bool
                                            {
                                              rewrite(P.scratch_expression, phi, sigma);
@@ -744,10 +743,10 @@ class enumerator_algorithm
                                              {
                                                return false;
                                              }
+// if (print) std::cerr << "G: " << P.scratch_expression << "\n";;
                                              bool added_variables_empty = added_variables.empty() || (P.scratch_expression == phi && m_accept_solutions_with_variables);
                                              if ((accept(P.scratch_expression) && m_accept_solutions_with_variables) || (variables.empty() && added_variables_empty))
                                              {
-                                               // EnumeratorListElement q(variables + added_variables, phi1, p, v, e);
                                                return report_solution(P.enumerator_element_cache(variables + added_variables, P.scratch_expression, p, v, e));
                                              }
                                              if (added_variables_empty)
@@ -761,8 +760,8 @@ class enumerator_algorithm
                                              return false;
                                            };
 
-      const data::variable_list& v = p.variables();
-      const auto& phi = p.expression();
+      const variable_list& v = p.variables();
+      const typename EnumeratorListElement::expression_type& phi = p.expression();
 
       if (v.empty())
       {
@@ -771,13 +770,12 @@ class enumerator_algorithm
         {
           return false;
         }
-        // EnumeratorListElement q(v, phi1, p);
         return report_solution(P.enumerator_element_cache(v, P.scratch_expression, p));
       }
 
-      const auto& v1 = v.front();
-      const auto& v_tail = v.tail();
-      const auto& v1_sort = v1.sort();
+      const variable& v1 = v.front();
+      const variable_list& v_tail = v.tail();
+      const sort_expression& v1_sort = v1.sort();
 
       if (reject(phi))
       {
@@ -820,7 +818,7 @@ class enumerator_algorithm
           const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
           data_expression e = sort_set::constructor(element_sort, lambda_term, fset_variable);
           sigma[v1] = e;
-          if (add_element_with_variables(v_tail, { fset_variable }, phi, v1, e))
+          if (add_element_with_variables(v_tail, { fset_variable }, phi, v1, e, true))
           {
             sigma[v1] = v1;
             return true;
@@ -833,7 +831,7 @@ class enumerator_algorithm
       }
       else if (sort_fset::is_fset(v1_sort))
       {
-        const auto& fset = atermpp::down_cast<container_sort>(v1_sort);
+        const container_sort& fset = atermpp::down_cast<container_sort>(v1_sort);
         if (dataspec.is_certainly_finite(fset.element_sort()))
         {
           data_expression_vector set_elements;
@@ -934,8 +932,7 @@ class enumerator_algorithm
                               MutableSubstitution& sigma,
                               ReportSolution report_solution,
                               Reject reject = Reject(),
-                              Accept accept = Accept()
-    ) const
+                              Accept accept = Accept()) const
     {
       std::size_t count = 0;
       while (!P.empty())
