@@ -814,9 +814,10 @@ const bool print=false
         const sort_expression& element_sort = atermpp::down_cast<container_sort>(v1_sort).element_sort();
         if (dataspec.is_certainly_finite(element_sort))
         {
-          const data_expression lambda_term = abstraction(lambda_binder(), { variable(id_generator(), element_sort) }, sort_bool::false_());
+          const data_expression false_term = sort_set::false_function(element_sort);
+          // const data_expression lambda_term = abstraction(lambda_binder(), { variable(id_generator(), element_sort) }, sort_bool::false_());
           const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
-          data_expression e = sort_set::constructor(element_sort, lambda_term, fset_variable);
+          data_expression e = sort_set::constructor(element_sort, false_term, fset_variable);
           sigma[v1] = e;
           if (add_element_with_variables(v_tail, { fset_variable }, phi, v1, e, true))
           {
