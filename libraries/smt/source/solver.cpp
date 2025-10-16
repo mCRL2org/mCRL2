@@ -133,7 +133,9 @@ native_translations initialise_native_translation(const data::data_specification
   nt.sorts[sort_nat::nat()] = "Int";
   nt.sorts[sort_int::int_()] = "Int";
   nt.sorts[sort_real::real_()] = "Real";
-nt.sorts[sort_machine_word::machine_word()] = "Int";
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
+  nt.sorts[sort_machine_word::machine_word()] = "Int";
+#endif // MCRL2_ENABLE_MACHINENUMBERS
 
   std::vector<sort_expression> number_sorts({ sort_pos::pos(), sort_nat::nat(), sort_int::int_(), sort_real::real_() });
   std::set<sort_expression> sorts = dataspec.sorts();
