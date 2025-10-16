@@ -1855,6 +1855,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print(") + ");
       derived().apply(sort_nat::arg2(x));
     } 
+    else if (sort_nat::is_natpred_application(x))
+    {
+      derived().print("max(0,");
+      derived().apply(sort_nat::arg(x));
+      derived().print(" - 1)");
+    }
 #else
     else if (sort_nat::is_cnat_application(x))
     {
@@ -1884,12 +1890,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else if (sort_nat::is_mod_application(x))
     {
       print_binary_data_operation(x, sort_nat::left(x), sort_nat::right(x), " mod ");
-    }
-    else if (sort_nat::is_natpred_application(x))
-    {
-      derived().print("max(0,");
-      derived().apply(sort_nat::arg(x));
-      derived().print(" - 1)");
     }
     else if (sort_nat::is_monus_application(x))
     {
