@@ -94,7 +94,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
 
     void add_options(interface_description& desc) override
     {
-      input_output_tool::add_options(desc);
+      super::add_options(desc);
       desc.add_option("format", make_enum_argument<core::print_format_type>("FORMAT")
                       .add_value_desc(core::print_default, "a PBES specification", true)
                       .add_value_desc(core::print_internal, "a textual ATerm representation of the internal format"),
