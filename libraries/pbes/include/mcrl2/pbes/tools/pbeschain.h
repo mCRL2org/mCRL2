@@ -370,13 +370,18 @@ inline void self_substitute(pbes_equation& equation,
                            << " with timeout " << options.timeout << "s" << std::endl;
   }
 
+  std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
+  
+  data::set_identifier_generator id_generator;
+  std::set<core::identifier_string> ids = pbes_system::find_identifiers(equation.formula());
+  
   while (!stable)
   {
     stable = true;
-    std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
     std::vector<propositional_variable_instantiation> set
         = get_propositional_variable_instantiations(equation.formula());
     std::size_t previous_size = set.size();
+
     for (const propositional_variable_instantiation& x: set)
     {
       // Check timeout
@@ -430,7 +435,13 @@ inline void self_substitute(pbes_equation& equation,
           sigma[v] = par;
         }
         
-        pbes_expression phi = mcrl2::pbes_system::replace_variables_capture_avoiding(equation.formula(), sigma);
+        id_generator.add_identifiers(ids);
+         for (const data::variable& v: substitution_variables(sigma))
+         {
+           id_generator.add_identifier(v.name());
+         }
+        pbes_expression phi = mcrl2::pbes_system::replace_variables_capture_avoiding(equation.formula(), sigma, id_generator);
+        phi = pbes_rewrite(phi, pbes_default_rewriter, sigma);
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
