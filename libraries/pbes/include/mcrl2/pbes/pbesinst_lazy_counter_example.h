@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/structure_graph.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 
 #include <regex>
 
@@ -138,6 +139,12 @@ static void rewrite_star(pbes_expression& result,
         }
         else
         {
+          if (mapping.count(Y) == 0)
+          {
+            mCRL2log(log::warning) << "Cannot find vertex " << Y << " in the first structure graph.\n";
+            throw mcrl2::runtime_error("The specification cannot be consistently instantiated twice. Most likely this is an issue with the tool.");
+          }
+
           if (mcrl2::utilities::detail::contains(Ys, Y))
           {
             mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
