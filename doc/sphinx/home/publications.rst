@@ -71,6 +71,7 @@ Research
 Applications
 ------------
 
+.. [BBGvdBB25] A\. Beers, J. Booy, J. F. Groote, J. Van Den Bogaard, M. Bouwman. A Complete Formal Specification and Verification of the BESW Software Control System of the Maeslant Storm Surge Barrier. Formal Methods for Industrial Critical Systems, vol. 16040, pp. 225–240. `(DOI) <https://doi.org/10.1007/978-3-032-00942-5_12>`__
 .. [vDKW24] D\. van Dortmont, J. J. A. Keiren, T. A. C. Willemse. Modelling and Analysing a Mechanical Lung Ventilator in mCRL2. In: Rigorous State-Based Methods., pp. 341--359. Springer Nature Switzerland, Cham. 2024. `(DOI) <https://doi.org/10.1007/978-3-031-63790-2_27>`__
 .. [HKG24] Y\. Hafidi, J. J. A. Keiren, J. F. Groote. Fair Mutual Exclusion for N Processes. In: Tools and Methods of Program Analysis. Communications in Computer and Information Science, pp. 149--160. Springer Nature Switzerland, Cham. 2024. Also appeared on `arXiv <https://arxiv.org/abs/2111.02251>`__. `(DOI) <https://doi.org/10.1007/978-3-031-50423-5_14>`__
 .. [SK23] A\. Stramaglia, J. J. A. Keiren. Formal Verification of an Industrial UML-like Model Using mCRL2. In: Formal Methods for Industrial Critical Systems. Lecture Notes in Computer Science, pp. 86--102. Springer International Publishing, Cham. 2022. Also appeared on `arXiv <https://arxiv.org/abs/2205.08146>`__. `(DOI) <http://doi.org/10.1007/978-3-031-15008-1_7>`__
