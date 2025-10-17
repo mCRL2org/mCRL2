@@ -14,6 +14,8 @@
 
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/traverser.h"
 #include "mcrl2/process/print.h"
 
@@ -214,7 +216,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     // Generate a unique process name with P as prefix
     data::set_identifier_generator generator;
     generator.add_identifiers(find_identifiers(x));
-    m_process_name = generator("P");
+    m_process_name = generator(m_process_name);
 
     derived().enter(x);
     derived().print("proc ");
@@ -310,24 +312,6 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   {
     print_specification(x);
   }
-
-  /* void apply(const lps::state &x)
-  {
-    derived().enter(x);
-    derived().print("state(");
-    bool first = true;
-    for (lps::state::const_iterator i = x.begin(); i != x.end(); i++)
-    {
-      if (!first)
-      {
-        derived().print(", ");
-      }
-      first = false;
-      print_expression(*i);
-    }
-    derived().print(")");
-    derived().leave(x);
-  } */
 };
 
 } // namespace detail

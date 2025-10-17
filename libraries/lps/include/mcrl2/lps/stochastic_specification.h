@@ -93,7 +93,7 @@ bool operator!=(const stochastic_specification& spec1, const stochastic_specific
   return !(spec1 == spec2);
 }
 
-std::string pp_with_summand_numbers(const stochastic_specification& x);
+std::string pp_extended(const stochastic_specification& x, const std::string& process_name, bool precedence_aware, bool summand_numbers);
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param spec A linear process specification

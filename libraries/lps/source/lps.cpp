@@ -15,6 +15,7 @@
 #include "mcrl2/lps/parse_impl.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/translate_user_notation.h"
 
 #include <ranges>
@@ -75,20 +76,31 @@ data::data_expression_list action_summand::next_state(const data::variable_list&
       data::assignment_sequence_substitution(assignments()));
 }
 
-std::string pp_with_summand_numbers(const specification& x)
+std::string pp_extended(const lps::stochastic_specification& x,  const std::string& process_name, bool precedence_aware = true)
 {
   std::ostringstream out;
-  core::detail::apply_printer<lps::detail::printer> printer(out, true);
-  printer.print_summand_numbers() = true;
+  core::detail::apply_printer<lps::detail::printer> printer(out, precedence_aware);
+  printer.process_name() = process_name;
   printer.apply(x);
   return out.str();
 }
 
-std::string pp_with_summand_numbers(const stochastic_specification& x)
+std::string pp_extended(const specification& x, const std::string& process_name, bool precedence_aware, bool summand_numbers)
 {
   std::ostringstream out;
-  core::detail::apply_printer<lps::detail::printer> printer(out, true);
-  printer.print_summand_numbers() = true;
+  core::detail::apply_printer<lps::detail::printer> printer(out, precedence_aware);
+  printer.print_summand_numbers() = summand_numbers;
+  printer.process_name() = process_name;
+  printer.apply(x);
+  return out.str();
+}
+
+std::string pp_extended(const stochastic_specification& x, const std::string& process_name, bool precedence_aware, bool summand_numbers)
+{
+  std::ostringstream out;
+  core::detail::apply_printer<lps::detail::printer> printer(out, precedence_aware);
+  printer.print_summand_numbers() = summand_numbers;
+  printer.process_name() = process_name;
   printer.apply(x);
   return out.str();
 }

@@ -208,7 +208,7 @@ std::ostream& operator<<(std::ostream& out, const specification& x)
 }
 //--- end generated class specification ---//
 
-std::string pp_with_summand_numbers(const specification& x);
+std::string pp_extended(const specification& x, const std::string& process_name, bool precedence_aware, bool summand_numbers);
 
 // template function overloads
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x);
