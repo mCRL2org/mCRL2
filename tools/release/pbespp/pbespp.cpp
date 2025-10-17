@@ -8,9 +8,6 @@
 //
 /// \file pbespp.cpp
 
-#define NAME "pbespp"
-#define AUTHOR "Aad Mathijssen and Jeroen Keiren"
-
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/pfnf_print.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
@@ -31,7 +28,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
 
   public:
     pbespp_tool()
-      : super(NAME, AUTHOR,
+      : super("pbespp", "Aad Mathijssen and Jeroen Keiren",
               "pretty print a PBES",
               "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
@@ -56,11 +53,11 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
         }
         else if(use_pfnf_printer && mcrl2::pbes_system::detail::is_pfnf(p))
         {
-          std::cout << pfnf_pp(p);
+          std::cout << pfnf_pp(p, m_precedence_aware);
         }
         else
         {
-          std::cout << pp(p);
+          std::cout << pp(p, m_precedence_aware);
         }
       }
       else
@@ -93,6 +90,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
   protected:
     core::print_format_type format = core::print_default;
     bool use_pfnf_printer = false;
+    bool m_precedence_aware = true;
 
     void add_options(interface_description& desc) override
     {
@@ -104,12 +102,14 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
       desc.add_option("pfnf-printer",
                       "format the output according to the structure of PFNF (only has an effect when printing a PBES in PFNF to text)", 
                       'p');
+      desc.add_option("no-precedence-aware", "disable printing with precedence aware enabled", 'x');
     }
 
     void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       format = parser.option_argument_as<core::print_format_type>("format");
+      m_precedence_aware = parser.options.count("no-precedence-aware") == 0;
       if (parser.options.count("pfnf-printer")>0)
       {
         use_pfnf_printer = true;

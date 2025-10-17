@@ -87,7 +87,7 @@ class lpspp_tool: public input_output_tool
                       .add_value_desc(print_internal, "for a textual ATerm representation of the internal format"),
                       "print the LPS in the specified FORMAT:", 'f');
       desc.add_option("print-summand_numbers", "print numbers in front of summands", 'n');
-      desc.add_option("no-precedence-aware", "disable printing with precedence aware enabled", 'p');
+      desc.add_option("no-precedence-aware", "disable printing with precedence aware enabled", 'x');
       desc.add_option("process-name", make_mandatory_argument("NAME"), "the name used for the pretty printed process name (default='P')", 'm');
     }
 
