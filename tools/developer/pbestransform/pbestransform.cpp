@@ -311,10 +311,10 @@ struct normalize_command: public pbes_system::detail::pbes_command
   }
 };
 
-struct remove_counterexample_info_command: public pbes_system::detail::pbes_command
+struct remove_cex_variables_command: public pbes_system::detail::pbes_command
 {
-  remove_counterexample_info_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-      : pbes_system::detail::pbes_command("pbes-core", input_filename, output_filename, options)
+  remove_cex_variables_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+      : pbes_system::detail::pbes_command("pbes-remove-cex-variables", input_filename, output_filename, options)
   {}
 
   void execute() override
@@ -377,7 +377,7 @@ public:
     add_command(std::make_shared<stategraph_global_command>(input_filename(), output_filename(), options));
     add_command(std::make_shared<stategraph_local_command>(input_filename(), output_filename(), options));
     add_command(std::make_shared<unify_parameters_command>(input_filename(), output_filename(), options));
-    add_command(std::make_shared<remove_counterexample_info_command>(input_filename(), output_filename(), options));
+    add_command(std::make_shared<remove_cex_variables_command>(input_filename(), output_filename(), options));
     }
 };
 
