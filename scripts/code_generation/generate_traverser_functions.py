@@ -4,14 +4,17 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-import os
+#pylint: disable=line-too-long
+#pylint: disable=missing-function-docstring
 import re
 import sys
-from mcrl2_utility import *
+from typeguard import typechecked
 
-MCRL2_ROOT = '../../'
+from mcrl2_utility import insert_text_in_file
 
-REWRITE_TEXT = '''/// \\\\brief Rewrites all embedded expressions in an object x
+MCRL2_ROOT: str = '../../'
+
+REWRITE_TEXT: str = '''/// \\\\brief Rewrites all embedded expressions in an object x
 /// \\\\param x an object containing expressions
 /// \\\\param R a rewriter
 template <typename T, typename Rewriter>
@@ -70,7 +73,7 @@ T rewrite(const T& x,
 }
 '''
 
-SUBSTITUTE_FUNCTION_TEXT = '''template <typename T, typename Substitution>
+SUBSTITUTE_FUNCTION_TEXT: str = '''template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
                               const Substitution& sigma,
                               bool innermost
@@ -210,7 +213,7 @@ T replace_free_variables(const T& x,
 }
 '''
 
-REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT = '''/// \\\\brief Applies sigma as a capture avoiding substitution to x.
+REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT: str = '''/// \\\\brief Applies sigma as a capture avoiding substitution to x.
 /// \\\\param x The object to which the subsitution is applied.
 /// \\\\param sigma A substitution.
 /// \\\\param id_generator An identifier generator that generates names that do not appear in x and sigma
@@ -279,7 +282,7 @@ T replace_variables_capture_avoiding(const T& x,
 }
 '''
 
-REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT = ''' /// \\\\brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
+REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT: str = ''' /// \\\\brief Applies sigma as a capture avoiding substitution to x using an identifier generator.
 /// \\\\details This substitution function is much faster than replace_variables_capture_avoiding, but
 ///          it requires an identifier generator that generates strings for fresh variables. These
 ///          strings must be unique in the sense that they have not been used for other variables.
@@ -320,7 +323,7 @@ T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
 }
 '''
 
-FIND_VARIABLES_FUNCTION_TEXT = '''/// \\\\brief Returns all variables that occur in an object
+FIND_VARIABLES_FUNCTION_TEXT: str = '''/// \\\\brief Returns all variables that occur in an object
 /// \\\\param[in] x an object containing variables
 /// \\\\param[in,out] o an output iterator to which all variables occurring in x are written.
 /// \\\\return All variables that occur in the term x
@@ -449,12 +452,14 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 }
 '''
 
-def generate_code(filename, namespace, label, text):
+@typechecked
+def generate_code(filename: str, namespace: str, label: str, text: str) -> bool:
     text = re.sub('NAMESPACE', namespace, text)
-    return insert_text_in_file(filename, text, 'generated {} {} code'.format(namespace, label))
+    return insert_text_in_file(filename, text, f'generated {namespace} {label} code')
 
-def generate_rewrite_functions():
-    result = True
+@typechecked
+def generate_rewrite_functions() -> bool:
+    result: bool = True
     result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/rewrite.h'                  , 'data'            , 'rewrite', REWRITE_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/rewrite.h'                    , 'lps'             , 'rewrite', REWRITE_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/rewrite.h', 'action_formulas' , 'rewrite', REWRITE_TEXT) and result
@@ -465,8 +470,9 @@ def generate_rewrite_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/rewrite.h'            , 'process'         , 'rewrite', REWRITE_TEXT) and result
     return result
 
-def generate_replace_functions():
-    result = True
+@typechecked
+def generate_replace_functions() -> bool:
+    result: bool = True
     result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/replace.h'                  , 'data'            , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/replace.h'                    , 'lps'             , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace.h', 'action_formulas' , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
@@ -477,8 +483,9 @@ def generate_replace_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace.h'            , 'process'         , 'replace', SUBSTITUTE_FUNCTION_TEXT) and result
     return result
 
-def generate_replace_capture_avoiding_functions():
-    result = True
+@typechecked
+def generate_replace_capture_avoiding_functions() -> bool:
+    result: bool = True
     result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/replace_capture_avoiding.h'                  , 'data'            , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/replace_capture_avoiding.h'                    , 'lps'             , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding.h', 'action_formulas' , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
@@ -489,8 +496,9 @@ def generate_replace_capture_avoiding_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace_capture_avoiding.h'            , 'process'         , 'replace_capture_avoiding', REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT) and result
     return result
 
-def generate_replace_capture_avoiding_with_identifier_generator_functions():
-    result = True
+@typechecked
+def generate_replace_capture_avoiding_with_identifier_generator_functions() -> bool:
+    result: bool = True
     result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/replace_capture_avoiding_with_an_identifier_generator.h'                  , 'data'            , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h'                    , 'lps'             , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/replace_capture_avoiding_with_an_identifier_generator.h', 'action_formulas' , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
@@ -501,8 +509,9 @@ def generate_replace_capture_avoiding_with_identifier_generator_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/replace_capture_avoiding_with_an_identifier_generator.h'            , 'process'         , 'replace_capture_avoiding_with_identifier_generator', REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT) and result
     return result
 
-def generate_find_functions():
-    result = True
+@typechecked
+def generate_find_functions() -> bool:
+    result: bool = True
     result = generate_code(MCRL2_ROOT + 'libraries/data/include/mcrl2/data/find.h'                  , 'data'            , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/find.h'                    , 'lps'             , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
     result = generate_code(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/find.h', 'action_formulas' , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
@@ -513,11 +522,16 @@ def generate_find_functions():
     result = generate_code(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/find.h'            , 'process'         , 'find', FIND_VARIABLES_FUNCTION_TEXT) and result
     return result
 
-if __name__ == "__main__":
-    result = True
+@typechecked
+def main() -> int:
+    result: bool = True
     result = generate_rewrite_functions() and result
     result = generate_replace_functions() and result
     result = generate_replace_capture_avoiding_functions() and result
     result = generate_replace_capture_avoiding_with_identifier_generator_functions() and result
     result = generate_find_functions() and result
-    sys.exit(not result) # 0 result indicates successful execution
+    return int(not result) # 0 result indicates successful execution
+
+if __name__ == "__main__":
+    sys.exit(main())
+

@@ -8,26 +8,36 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 import os
-import pathlib
 import subprocess
 import sys
+
+from pathlib import Path
 from argparse import ArgumentParser
+from typing import List
+from typeguard import typechecked
 
-SCRIPT_DIR = pathlib.Path(__file__).parent.resolve()
+SCRIPT_DIR: Path = Path(__file__).parent.resolve()
 
-# Obtain the names of all files with the extension .spec in
-# the current directory
-def get_specifications(p: pathlib.Path):
-    assert(p.is_dir())
-    files = list(p.glob('*.spec'))
-    specs = [str(spec.stem) for spec in files]
+
+@typechecked
+def get_specifications(p: Path) -> List[str]:
+    """
+    Obtain the names of all files with the extension .spec in
+    the current directory.
+    """
+    assert p.is_dir()
+    files: List[Path] = list(p.glob("*.spec"))
+    specs: List[str] = [str(spec.stem) for spec in files]
     return specs
 
 
-# For all files in the current directory with the extension .spec, generated
-# the code. For the file a.spec code is generated into
-#  ../include/mcrl2/data/a.h
-def main():
+@typechecked
+def main() -> None:
+    """
+    For all files in the current directory with the extension .spec, generate
+    the code. For the file a.spec code is generated into
+     ../include/mcrl2/data/a.h
+    """
     option_parser = ArgumentParser()
     option_parser.add_argument(
         "-v", "--verbose", action="store_true", help="give verbose output"
@@ -37,21 +47,25 @@ def main():
     )
     options = option_parser.parse_args()
 
-    arguments = []
+    arguments: List[str] = []
     if options.verbose:
         arguments.append("-v")
     if options.debug:
         arguments.append("-d")
 
     # N.B. The script only works if the .spec files are in the current directory!
-    data_types_dir = SCRIPT_DIR.joinpath("data_types")
+    data_types_dir: Path = SCRIPT_DIR.joinpath("data_types")
     os.chdir(data_types_dir)
-    specs = get_specifications(data_types_dir)
+    specs: List[str] = get_specifications(data_types_dir)
     for spec in specs:
         print(f"Generating code for {spec}")
-        cmd = [f"{sys.executable}", data_types_dir.joinpath("codegen.py")] + arguments + [f"{spec}.spec", f"../../../libraries/data/include/mcrl2/data/{spec}.h"]
+        cmd: List[str] = (
+            [f"{sys.executable}", str(data_types_dir.joinpath("codegen.py"))]
+            + arguments
+            + [f"{spec}.spec", f"../../../libraries/data/include/mcrl2/data/{spec}.h"]
+        )
 
-        completed_process = subprocess.run(cmd)
+        completed_process: subprocess.CompletedProcess = subprocess.run(cmd, check=False)
         if completed_process.returncode != 0:
             raise RuntimeError(
                 f"Failed to generate code for {spec}. Aborting... (while executing command {cmd})"

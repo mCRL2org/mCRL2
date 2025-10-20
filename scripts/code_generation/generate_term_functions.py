@@ -1,34 +1,44 @@
 #!/usr/bin/env python3
 
-#~ Copyright 2007 Wieger Wesselink.
-#~ Distributed under the Boost Software License, Version 1.0.
-#~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+# ~ Copyright 2007 Wieger Wesselink.
+# ~ Distributed under the Boost Software License, Version 1.0.
+# ~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+
+#pylint: disable=line-too-long
+#pylint: disable=missing-function-docstring
+#pylint: disable=invalid-name
 
 import re
 import sys
-from mcrl2_parser import *
-from mcrl2_utility import *
+from typing import List, Any
 
-MCRL2_ROOT = '../../'
+import tpg
+from typeguard import typechecked
 
-#---------------------------------------------------------------#
-#            generate_function_symbol_constructors
-#---------------------------------------------------------------#
-#
-def generate_function_symbol_constructors(rules, declaration_filename, definition_filename, skip_list):
-    CODE = '''// %(name)s
+from mcrl2_parser import EBNFParser, Mcrl2Actions, read_paragraphs
+from mcrl2_utility import insert_text_in_file
+
+MCRL2_ROOT: str = "../../"
+
+@typechecked
+def generate_function_symbol_constructors(
+    rules: List[Any], declaration_filename: str, definition_filename: str, skip_list: List[str]
+) -> bool:
+    """Generate function symbol constructors."""
+
+    CODE = """// {name}
 inline
-const atermpp::function_symbol& function_symbol_%(name)s()
-{
-  static const atermpp::global_function_symbol function_symbol_%(name)s("%(name)s", %(arity)d);
-  return function_symbol_%(name)s;
-}
+const atermpp::function_symbol& function_symbol_{name}()
+{{
+  static const atermpp::global_function_symbol function_symbol_{name}("{name}", {arity});
+  return function_symbol_{name};
+}}
 
-'''
+"""
 
-    ctext = '' # constructors
-    dtext = '' # definitions
-    vtext = '' # variables
+    ctext = ""  # constructors
+    dtext = ""  # definitions
+    vtext = ""  # variables
     names = {}
     calls = {}
     decls = {}
@@ -43,8 +53,11 @@ const atermpp::function_symbol& function_symbol_%(name)s()
         calls[name] = f.default_call()
         decls[name] = f.default_declaration()
 
-        dtext = dtext + '  const atermpp::function_symbol core::detail::function_symbols::%s = core::detail::function_symbol_%s();\n' % (name, name)
-        vtext = vtext + '  static const atermpp::function_symbol %s;\n' % name
+        dtext = (
+            dtext
+            + f"  const atermpp::function_symbol core::detail::function_symbols::{name} = core::detail::function_symbol_{name}();\n"
+        )
+        vtext = vtext + f"  static const atermpp::function_symbol {name};\n"
 
     name_keys = list(names.keys())
     name_keys = sorted(name_keys)
@@ -52,105 +65,121 @@ const atermpp::function_symbol& function_symbol_%(name)s()
         if name in skip_list:
             continue
         arity = names[name]
-        ctext = ctext + CODE % {
-            'name'  : name,
-            'arity' : arity,
-        }
-        comma = ''
-        if calls[name] != "":
-            comma = ', '
+        ctext = ctext + CODE.format(name=name, arity=arity)
 
-    result = insert_text_in_file(declaration_filename, ctext, 'generated constructors')
-    result = result and insert_text_in_file(definition_filename, dtext, 'generated function symbol definitions')
-    result = result and insert_text_in_file(declaration_filename, vtext, 'generated variables')
+    result = insert_text_in_file(declaration_filename, ctext, "generated constructors")
+    result = result and insert_text_in_file(
+        definition_filename, dtext, "generated function symbol definitions"
+    )
+    result = result and insert_text_in_file(
+        declaration_filename, vtext, "generated variables"
+    )
     return result
 
-#---------------------------------------------------------------#
-#                      generate_default_values
-#---------------------------------------------------------------#
-#
-def generate_default_values(rules, declaration_filename, definition_filename, skip_list):
-    TERM_FUNCTION = '''// %(name)s
+
+@typechecked
+def generate_default_values(
+    rules: List[Any], declaration_filename: str, definition_filename: str, skip_list: List[str]
+) -> bool:
+    """Generate default values."""
+
+    TERM_FUNCTION = """// {name}
 inline
-const atermpp::aterm& default_value_%(name)s()
-{
-  static const atermpp::aterm t = atermpp::aterm(function_symbol_%(name)s()%(arguments)s);
+const atermpp::aterm& default_value_{name}()
+{{
+  static const atermpp::aterm t = atermpp::aterm(function_symbol_{name}(){arguments});
   return t;
-}
+}}
 
-'''
+"""
 
-    RULE_FUNCTION = '''// %(name)s
+    RULE_FUNCTION = """// {name}
 inline
-const atermpp::aterm& default_value_%(name)s()
-{
-  return default_value_%(fname)s();
-}
+const atermpp::aterm& default_value_{name}()
+{{
+  return default_value_{fname}();
+}}
 
-'''
-    ptext = '' # constructor prototypes
-    ctext = '' # constructors
-    dtext = '' # definitions
-    vtext = '' # variables
+"""
+    ptext = ""  # constructor prototypes
+    ctext = ""  # constructors
+    dtext = ""  # definitions
+    vtext = ""  # variables
 
     functions = find_functions(rules)
 
     for f in functions:
-        name  = f.name()
+        name = f.name()
         if name in skip_list:
             continue
-        ptext = ptext + 'const atermpp::aterm& default_value_%s();\n' % f.name()
+        ptext = ptext + f"const atermpp::aterm& default_value_{f.name()}();\n"
         arity = f.arity()
         args = []
         for x in f.arguments:
-            if x.repetitions == '':
-                args.append('default_value_%s()' % x.name())
-            elif x.repetitions == '*':
-                args.append('default_value_List()')
+            if x.repetitions == "":
+                args.append(f"default_value_{x.name()}()")
+            elif x.repetitions == "*":
+                args.append("default_value_List()")
             else:
-                args.append('default_value_List(default_value_%s())' % x.name())
+                args.append(f"default_value_List(default_value_{x.name()}())")
 
         if len(args) > 0:
-            arguments = ', ' + ', '.join(args)
+            arguments = ", " + ", ".join(args)
         else:
-            arguments = ''
-        ctext = ctext + TERM_FUNCTION % {
-            'name'       : name,
-            'arity'      : arity,
-            'arguments'  : arguments,
-        }
-        dtext = dtext + '  const atermpp::aterm core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
-        vtext = vtext + '  static const atermpp::aterm %s;\n' % name
+            arguments = ""
+        ctext = ctext + TERM_FUNCTION.format(
+            name=name,
+            arity=arity,
+            arguments=arguments,
+        )
+        dtext = (
+            dtext
+            + f"  const atermpp::aterm core::detail::default_values::{name} = core::detail::default_value_{name}();\n"
+        )
+        vtext = vtext + f"  static const atermpp::aterm {name};\n"
 
     function_names = [x.name() for x in functions]
     for rule in rules:
-        if not rule.name() in function_names:
+        if rule.name() not in function_names:
             name = rule.name()
+            fname = ""
             if name in skip_list:
                 continue
             for f in rule.rhs:
-                if f.phase == None or not f.phase.startswith('-') or not f.phase.startswith('.'):
+                if (
+                    f.phase is None
+                    or not f.phase.startswith("-")
+                    or not f.phase.startswith(".")
+                ):
                     fname = f.name()
                     break
-            ptext = ptext + 'const atermpp::aterm& default_value_%s();\n' % name
-            ctext = ctext + RULE_FUNCTION % {
-                'name'       : name,
-                'fname'      : fname
-            }
-            dtext = dtext + '  const atermpp::aterm core::detail::default_values::%s = core::detail::default_value_%s();\n' % (name, name)
-            vtext = vtext + '  static const atermpp::aterm %s;\n' % name
+            ptext = ptext + f"const atermpp::aterm& default_value_{name}();\n"
+            ctext = ctext + RULE_FUNCTION.format(name=name, fname=fname)
+            dtext = (
+                dtext
+                + f"  const atermpp::aterm core::detail::default_values::{name} = core::detail::default_value_{name}();\n"
+            )
+            vtext = vtext + f"  static const atermpp::aterm {name};\n"
 
-    ctext = ptext + '\n' + ctext
-    result = insert_text_in_file(declaration_filename, ctext, 'generated constructors')
-    result = result and insert_text_in_file(definition_filename, dtext, 'generated default value definitions')
-    result = result and insert_text_in_file(declaration_filename, vtext, 'generated variables')
+    ctext = ptext + "\n" + ctext
+    result = insert_text_in_file(declaration_filename, ctext, "generated constructors")
+    result = result and insert_text_in_file(
+        definition_filename, dtext, "generated default value definitions"
+    )
+    result = result and insert_text_in_file(
+        declaration_filename, vtext, "generated variables"
+    )
     return result
 
-#---------------------------------------------------------------#
+
+# ---------------------------------------------------------------#
 #                          find_functions
-#---------------------------------------------------------------#
+# ---------------------------------------------------------------#
 # find all functions that appear in the rhs of a rule
-def find_functions(rules):
+@typechecked
+def find_functions(rules: List[Any]) -> List[Any]:
+    """Find all functions that appear in the rhs of a rule."""
+
     function_map = {}
     for rule in rules:
         for f in rule.functions():
@@ -167,57 +196,63 @@ def find_functions(rules):
 
     return [function_map[x] for x in list(function_map.keys())]
 
-#---------------------------------------------------------------#
+
+# ---------------------------------------------------------------#
 #                      generate_soundness_check_functions
-#---------------------------------------------------------------#
+# ---------------------------------------------------------------#
 # generates C++ code for checking if terms are in the right format
 #
-def generate_soundness_check_functions(rules, filename, skip_list):
-    CHECK_RULE = '''template <atermpp::IsATerm Term>
-bool check_rule_%(name)s([[maybe_unused]] const Term& t)
-{
+@typechecked
+def generate_soundness_check_functions(rules: List[Any], filename: str, skip_list: List[str]) -> bool:
+    """
+    Generate C++ code for checking if terms are in the right format.
+    """
+
+    CHECK_RULE = """template <atermpp::IsATerm Term>
+bool check_rule_{name}([[maybe_unused]] const Term& t)
+{{
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-%(body)s
+{body}
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
-}
+}}
 
-'''
+"""
 
-    CHECK_TERM = '''// %(name)s(%(arguments)s)
+    CHECK_TERM = """// {name}({arguments})
 template <atermpp::IsATerm Term>
-bool %(check_name)s([[maybe_unused]] const Term& t)
-{
+bool {check_name}([[maybe_unused]] const Term& t)
+{{
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-%(body)s
+{body}
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
-}
+}}
 
-'''
-    CHECK_TERM_TYPE = '''  // check the type of the term
+"""
+    CHECK_TERM_TYPE = """  // check the type of the term
   const atermpp::aterm& term(t);
   if (!term.type_is_appl())
-  {
+  {{
     return false;
-  }
-  if (term.function() != core::detail::function_symbols::%(name)s)
-  {
+  }}
+  if (term.function() != core::detail::function_symbols::{name})
+  {{
     return false;
-  }
+  }}
 
-'''
+"""
 
-    CHECK_TERM_CHILDREN = '''  // check the children
-  if (term.size() != %(arity)d)
-  {
+    CHECK_TERM_CHILDREN = """  // check the children
+  if (term.size() != {arity})
+  {{
     return false;
-  }
-'''
+  }}
+"""
 
-    text  = '' # function definitions
-    ptext = '' # function declarations (prototypes)
+    text = ""  # function definitions
+    ptext = ""  # function declarations (prototypes)
 
     functions = find_functions(rules)
 
@@ -226,120 +261,161 @@ bool %(check_name)s([[maybe_unused]] const Term& t)
         if name in skip_list:
             continue
         rhs_functions = rule.functions()
-        body = '  return ' + '\n         || '.join([x.check_name() + '(t)' for x in rhs_functions]) + ';'
-        text = text + CHECK_RULE % {
-            'name'      : name,
-            'body'      : body
-        }
-        ptext = ptext + 'template <atermpp::IsATerm Term> bool check_rule_%s(const Term& t);\n' % rule.name()
+        body = (
+            "  return "
+            + "\n         || ".join([x.check_name() + "(t)" for x in rhs_functions])
+            + ";"
+        )
+        text = text + CHECK_RULE.format(name=name, body=body)
+        ptext = (
+            ptext
+            + f"template <atermpp::IsATerm Term> bool check_rule_{rule.name()}(const Term& t);\n"
+        )
 
     for f in functions:
         name = f.name()
         if name in skip_list:
             continue
-        arguments = ', '.join([x.full_name() for x in f.arguments])
+        arguments = ", ".join([x.full_name() for x in f.arguments])
         arity = len(f.arguments)
 
-        body = CHECK_TERM_TYPE % {
-            'name' : name
-        }
-        body = body + CHECK_TERM_CHILDREN % {
-            'arity' : len(f.arguments)
-        }
+        body = CHECK_TERM_TYPE.format(name=name)
+        body = body + CHECK_TERM_CHILDREN.format(arity=len(f.arguments))
         if arity > 0:
-            body = body + '#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS\n'
+            body = body + "#ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS\n"
             for i in range(arity):
                 arg = f.arguments[i]
-                if arg.repetitions == '':
-                    body = body + '  if (!check_term_argument(term[%d], %s<atermpp::aterm>))\n'    % (i, arg.check_name())
-                elif arg.repetitions == '*':
-                    body = body + '  if (!check_list_argument(term[%d], %s<atermpp::aterm>, 0))\n' % (i, arg.check_name())
-                elif arg.repetitions == '+':
-                    body = body + '  if (!check_list_argument(term[%d], %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
-                body = body + '  {\n'
-                body = body + '    mCRL2log(log::debug) << "%s" << std::endl;\n'                % (arg.check_name())
-                body = body + '    return false;\n'
-                body = body + '  }\n'
-            body = body + '#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS\n'
+                if arg.repetitions == "":
+                    body = (
+                        body
+                        + f"  if (!check_term_argument(term[{i}], {arg.check_name()}<atermpp::aterm>))\n"
+                    )
+                elif arg.repetitions == "*":
+                    body = (
+                        body
+                        + f"  if (!check_list_argument(term[{i}], {arg.check_name()}<atermpp::aterm>, 0))\n"
+                    )
+                elif arg.repetitions == "+":
+                    body = (
+                        body
+                        + f"  if (!check_list_argument(term[{i}], {arg.check_name()}<atermpp::aterm>, 1))\n"
+                    )
+                body = body + "  {\n"
+                body = body + f'    mCRL2log(log::debug) << "{arg.check_name()}" << std::endl;\n'
+                body = body + "    return false;\n"
+                body = body + "  }\n"
+            body = body + "#endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS\n"
 
-        text = text + CHECK_TERM % {
-            'name'       : name,
-            'arguments'  : arguments,
-            'check_name' : f.check_name(),
-            'body'       : body
-        }
-        ptext = ptext + 'template <atermpp::IsATerm Term> bool %s(const Term& t);\n' % f.check_name()
+        text = text + CHECK_TERM.format(
+            name=name,
+            arguments=arguments,
+            check_name=f.check_name(),
+            body=body,
+        )
+        ptext = (
+            ptext
+            + f"template <atermpp::IsATerm Term> bool {f.check_name()}(const Term& t);\n"
+        )
 
-    text = ptext + '\n' + text.strip()
-    text = text + '\n'
-    return insert_text_in_file(filename, text, 'generated code')
+    text = ptext + "\n" + text.strip()
+    text = text + "\n"
+    return insert_text_in_file(filename, text, "generated code")
 
-#---------------------------------------------------------------#
+
+# ---------------------------------------------------------------#
 #                          parse_ebnf
-#---------------------------------------------------------------#
-def parse_ebnf(filename):
-    rules = []
+# ---------------------------------------------------------------#
+@typechecked
+def parse_ebnf(filename: str) -> List[Any]:
+    """Parse EBNF grammar file."""
 
-    paragraphs = read_paragraphs(filename)
+    rules: List[Any] = []
+
+    paragraphs: List[str] = read_paragraphs(filename)
     for paragraph in paragraphs:
-        #--- skip special paragraphs
-        if re.match('// Date', paragraph):
+        # --- skip special paragraphs
+        if re.match("// Date", paragraph):
             continue
-        if re.match('//Specification', paragraph):
+        if re.match("//Specification", paragraph):
             continue
-        if re.match('//Expressions', paragraph):
+        if re.match("//Expressions", paragraph):
             continue
 
-        #--- handle other paragraphs
-        lines  = paragraph.split('\n')
-        clines = [] # comment lines
-        glines = [] # grammar lines
+        # --- handle other paragraphs
+        lines: List[str] = paragraph.split("\n")
+        clines: List[str] = []  # comment lines
+        glines: List[str] = []  # grammar lines
         for line in lines:
-            if re.match(r'\s*//.*', line):
+            if re.match(r"\s*//.*", line):
                 clines.append(line)
             else:
                 glines.append(line)
-        comment = '\n'.join(clines)
+        comment: str = "\n".join(clines)
 
-        parser = EBNFParser(Mcrl2Actions())
+        parser: EBNFParser = EBNFParser(Mcrl2Actions())
         try:
-            newrules = parser('\n'.join(glines))
+            newrules: List[Any] = parser("\n".join(glines))
             for rule in newrules:
                 rule.comment = comment
             rules = rules + newrules
         except tpg.SyntacticError as e:
             print("------------------------------------------------------")
-            print(('grammar: ', '\n'.join(glines)))
+            print(("grammar: ", "\n".join(glines)))
             print(e)
         except tpg.LexicalError as e:
             print("------------------------------------------------------")
-            print(('grammar: ', '\n'.join(glines)))
+            print(("grammar: ", "\n".join(glines)))
             print(e)
     return rules
 
-#---------------------------------------------------------------#
+
+# ---------------------------------------------------------------#
 #                          main
-#---------------------------------------------------------------#
-def main():
-    result = True
-    filename = MCRL2_ROOT + 'scripts/code_generation/mcrl2.internal.txt'
-    rules = parse_ebnf(filename)
+# ---------------------------------------------------------------#
+@typechecked
+def main() -> int:
+    """Main function to generate term functions."""
+
+    result: bool = True
+    filename: str = MCRL2_ROOT + "scripts/code_generation/mcrl2.internal.txt"
+    rules: List[Any] = parse_ebnf(filename)
 
     # elements in this list are skipped during generation
-    skip_list = ['DataAppl']
+    skip_list: List[str] = ["DataAppl"]
 
-    result = generate_soundness_check_functions(rules, MCRL2_ROOT + 'libraries/core/include/mcrl2/core/detail/soundness_checks.h', skip_list) and result
+    result = (
+        generate_soundness_check_functions(
+            rules,
+            MCRL2_ROOT + "libraries/core/include/mcrl2/core/detail/soundness_checks.h",
+            skip_list,
+        )
+        and result
+    )
 
-    declaration_filename = MCRL2_ROOT + 'libraries/core/include/mcrl2/core/detail/function_symbols.h'
-    definition_filename = MCRL2_ROOT + 'libraries/core/source/core.cpp'
-    result = generate_function_symbol_constructors(rules, declaration_filename, definition_filename, skip_list) and result
+    declaration_filename = (
+        MCRL2_ROOT + "libraries/core/include/mcrl2/core/detail/function_symbols.h"
+    )
+    definition_filename = MCRL2_ROOT + "libraries/core/source/core.cpp"
+    result = (
+        generate_function_symbol_constructors(
+            rules, declaration_filename, definition_filename, skip_list
+        )
+        and result
+    )
 
-    declaration_filename = MCRL2_ROOT + 'libraries/core/include/mcrl2/core/detail/default_values.h'
-    definition_filename = MCRL2_ROOT + 'libraries/core/source/core.cpp'
-    result = generate_default_values(rules, declaration_filename, definition_filename, skip_list) and result
+    declaration_filename = (
+        MCRL2_ROOT + "libraries/core/include/mcrl2/core/detail/default_values.h"
+    )
+    definition_filename = MCRL2_ROOT + "libraries/core/source/core.cpp"
+    result = (
+        generate_default_values(
+            rules, declaration_filename, definition_filename, skip_list
+        )
+        and result
+    )
 
-    return result
+    return int(not result) # 0 result indicates successful execution
+
 
 if __name__ == "__main__":
-    result = main()
-    sys.exit(not result) # 0 result indicates successful execution
+    sys.exit(main())

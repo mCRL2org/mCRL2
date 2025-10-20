@@ -5,43 +5,71 @@
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
 import os.path
-import re
 import sys
-from mcrl2_classes import *
-from mcrl2_utility import *
+from typing import Any, Dict, List
+from typeguard import typechecked
+from mcrl2_classes import (
+    mcrl2_class_map, parse_class_map, make_modifiability_map, parse_classes,
+    CORE_CLASSES, ASSIGNMENT_EXPRESSION_CLASSES, BINDER_TYPES, CONTAINER_TYPES,
+    STATE_FORMULA_CLASSES, REGULAR_FORMULA_CLASSES, ACTION_FORMULA_CLASSES,
+    MODAL_FORMULA_CLASSES, PBES_EXPRESSION_CLASSES, PBES_CLASSES,
+    PRES_EXPRESSION_CLASSES, PRES_CLASSES, PROCESS_EXPRESSION_CLASSES,
+    DATA_EXPRESSION_CLASSES, ABSTRACTION_EXPRESSION_CLASSES, SORT_EXPRESSION_CLASSES,
+    STRUCTURED_SORT_ELEMENTS, DATA_CLASSES, LPS_CLASSES, PROCESS_CLASSES
+)
+from mcrl2_utility import insert_text_in_file
 
-MCRL2_ROOT = '../../'
+MCRL2_ROOT: str = '../../'
 
-# Generates classes from class_text and inserts them in the file
-# filename. If filename is a directory, then each of the classes is
-# inserted in a separate file.
-def make_classes(all_classes, filename, class_text, namespace, add_constructor_overloads = False):
-    classes = parse_classes(class_text, namespace = namespace)
+@typechecked
+def make_classes(
+    all_classes: Dict[str, Any], filename: str, class_text: str, namespace: str
+) -> bool:
+    """
+    Generates classes from class_text and inserts them in the file filename.
+    If filename is a directory, then each of the classes is inserted in a separate file.
+    """
+    classes: List[Any] = parse_classes(class_text, namespace)
 
     # skip the classes with a namespace qualifier (they are defined elsewhere)
-    classes = [c for c in classes if c.qualifier() == '']
+    classes = [c for c in classes if c.qualifier() == ""]
 
     # N.B. use the classes defined in all_classes
     classes = [all_classes[c.classname(True)] for c in classes]
 
-    result = True
+    result: bool = True
     if os.path.isdir(filename):
         for c in classes:
-            fname = os.path.join(os.path.normcase(filename), ('{}.h'.format(c.name())))
-            text = c.class_inline_definition(all_classes)
-            result = insert_text_in_file(fname, text, 'generated class {}'.format(c.name()), handle_user_sections = True) and result
+            fname: str = os.path.join(os.path.normcase(filename), f"{c.name()}.h")
+            text: str = c.class_inline_definition(all_classes)
+            result = (
+                insert_text_in_file(
+                    fname,
+                    text,
+                    f"generated class {c.name()}",
+                    handle_user_sections=True,
+                )
+                and result
+            )
     else:
-        class_definitions = [c.class_inline_definition(all_classes) for c in classes]
-        ctext = '\n'.join(class_definitions)
-        result = insert_text_in_file(filename, ctext, 'generated classes', handle_user_sections = True) and result
+        class_definitions: List[str] = [c.class_inline_definition(all_classes) for c in classes]
+        ctext: str = "\n".join(class_definitions)
+        result = (
+            insert_text_in_file(
+                filename, ctext, "generated classes", handle_user_sections=True
+            )
+            and result
+        )
     return result
 
-if __name__ == "__main__":
-    class_map = mcrl2_class_map()
-    all_classes = parse_class_map(class_map)
-    modifiability_map = make_modifiability_map(all_classes)
+@typechecked
+def main() -> None:
+    class_map: Dict[str, str] = mcrl2_class_map()
+    all_classes: Dict[str, Any] = parse_class_map(class_map)
+    modifiability_map: Dict[str, Any] = make_modifiability_map(all_classes)
 
-    result = True
+    #pylint: disable=line-too-long
+    result: bool = True
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/core/include/mcrl2/core',                                      CORE_CLASSES                     , namespace = 'core'            ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data/assignment.h',                         ASSIGNMENT_EXPRESSION_CLASSES    , namespace = 'data'            ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/data/include/mcrl2/data/binder_type.h',                        BINDER_TYPES                     , namespace = 'data'            ) and result
@@ -63,3 +91,6 @@ if __name__ == "__main__":
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps',                                        LPS_CLASSES                      , namespace = 'lps'             ) and result
     result = make_classes(all_classes, MCRL2_ROOT + 'libraries/process/include/mcrl2/process',                                PROCESS_CLASSES                  , namespace = 'process'         ) and result
     sys.exit(not result) # 0 result indicates successful execution
+
+if __name__ == "__main__":
+    main()
