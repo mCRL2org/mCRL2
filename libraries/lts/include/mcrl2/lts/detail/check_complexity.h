@@ -118,8 +118,6 @@ using trans_type = std::size_t;
 #define TRANS_TYPE_MIN (std::numeric_limits<trans_type>::min())
 #define TRANS_TYPE_MAX (std::numeric_limits<trans_type>::max())
 
-#if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
-
 /// \brief type used to store differences between transition counters
 using signed_trans_type = std::make_signed_t<trans_type>;
 
@@ -132,6 +130,43 @@ using signed_trans_type = std::make_signed_t<trans_type>;
 class check_complexity
 {
   public:
+    /// \brief calculate the base-2 logarithm, rounded down
+    /// \details The function cannot be constexpr because std::log2() may have
+    /// the side effect of setting `errno`.
+    static int ilog2(state_type size)
+    {                                                                           assert(0<size);
+        #ifdef __GNUC__
+            if constexpr (sizeof(unsigned) == sizeof(size))
+            {
+                return sizeof(size) * CHAR_BIT - 1 - __builtin_clz(size);
+            }
+            else if constexpr (sizeof(unsigned long) == sizeof(size))
+            {
+                return sizeof(size) * CHAR_BIT - 1 - __builtin_clzl(size);
+            }
+            else if constexpr(sizeof(unsigned long long) == sizeof(size))
+            {
+                return sizeof(size) * CHAR_BIT - 1 - __builtin_clzll(size);
+            }
+        //#elif defined(_MSC_VER)
+        //    if constexpr (sizeof(long) == sizeof(size))
+        //    {
+        //        long result;
+        //        _BitScanReverse(result, size);
+        //        return result - 1;
+        //    }
+        //    else if constexpr(sizeof(__int64) == sizeof(size))
+        //    {
+        //        long result;
+        //        _BitScanReverse64(result, size);
+        //        return result - 1;
+        //    }
+        #endif
+        return (int) std::log2(size);
+    }
+
+#if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+
     /// \brief Type for complexity budget counters
     /// \details The enumeration constants defined by this type are used to
     /// distinguish the many counters that the time budget check uses.
@@ -467,41 +502,6 @@ class check_complexity
     /// \details This variable has to be set by `init()` before counting work
     /// can begin.
     static unsigned char log_n;
-
-    /// \brief calculate the base-2 logarithm, rounded down
-    /// \details The function cannot be constexpr because std::log2() may have
-    /// the side effect of setting `errno`.
-    static int ilog2(state_type size)
-    {                                                                           assert(0<size);
-        #ifdef __GNUC__
-            if constexpr (sizeof(unsigned) == sizeof(size))
-            {
-                return sizeof(size) * CHAR_BIT - 1 - __builtin_clz(size);
-            }
-            else if constexpr (sizeof(unsigned long) == sizeof(size))
-            {
-                return sizeof(size) * CHAR_BIT - 1 - __builtin_clzl(size);
-            }
-            else if constexpr(sizeof(unsigned long long) == sizeof(size))
-            {
-                return sizeof(size) * CHAR_BIT - 1 - __builtin_clzll(size);
-            }
-        //#elif defined(_MSC_VER)
-        //    if constexpr (sizeof(long) == sizeof(size))
-        //    {
-        //        long result;
-        //        _BitScanReverse(result, size);
-        //        return result - 1;
-        //    }
-        //    else if constexpr(sizeof(__int64) == sizeof(size))
-        //    {
-        //        long result;
-        //        _BitScanReverse64(result, size);
-        //        return result - 1;
-        //    }
-        #endif
-        return (int) std::log2(size);
-    }
 
   private:
 #ifndef NDEBUG
@@ -1974,16 +1974,16 @@ class check_complexity
             while (0)
 #endif
 
-};
-
 #else // ifndef NDEBUG
 
     #define mCRL2complexity(unit, call, info_for_debug)  do {} while (0)
 
 #endif // ifndef NDEBUG
 
+};
+
 } // end namespace detail
 // end namespace lts
 // end namespace mcrl2
 
-#endif // ifndef _COUNT_ITERATIONS_H
+#endif
