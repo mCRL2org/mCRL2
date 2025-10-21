@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_PRINT_H
 #define MCRL2_DATA_PRINT_H
 
-#include "mcrl2/data/consistency.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/is_untyped.h"
 #include "mcrl2/data/detail/print_utility.h"
@@ -429,7 +427,7 @@ inline int precedence(const data_expression& x)
 inline
 bool is_left_associative(const data_expression& x)
 {
-  return !sort_bool::is_implies_application(x) && !sort_list::is_cons_application(x) && !is_and(x) && !is_or(x);
+  return !sort_bool::is_implies_application(x) && !sort_list::is_cons_application(x) && !sort_bool::is_and_application(x) && !sort_bool::is_or_application(x);
 }
 
 inline
