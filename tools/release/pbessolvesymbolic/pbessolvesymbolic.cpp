@@ -194,12 +194,14 @@ public:
     const std::unordered_map<core::identifier_string, data::data_expression>& _propvar_map,
     const std::vector<symbolic::data_expression_index>& _data_index,
     const sylvan::ldds::ldd& Valpha_,
+    const sylvan::ldds::ldd& Vother_,
     const sylvan::ldds::ldd& S,
     std::optional<data::rewriter> rewriter = std::nullopt)
     : pbesinst_structure_graph_algorithm(options, p, G, rewriter),
       alpha(_alpha),
       strategy(S),
       Valpha(Valpha_),
+      Vother(Vother_),
       data_index(_data_index),
       propvar_map(_propvar_map)
   {}
@@ -289,8 +291,14 @@ public:
             }
             else
             {
-                mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
-                return Y;
+              if (!sylvan::ldds::member_cube(Vother, singleton))
+              {                
+                mCRL2log(log::warning) << "Cannot find vertex " << Y << " in the symbolic parity game.\n";
+                throw mcrl2::runtime_error("The specification cannot be consistently instantiated twice. Most likely this is an issue with the tool.");
+              }
+
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+              return Y;
             }
           }
         );
@@ -313,6 +321,7 @@ private:
   bool alpha;
   sylvan::ldds::ldd strategy;
   sylvan::ldds::ldd Valpha;
+  sylvan::ldds::ldd Vother;
   const std::vector<symbolic::data_expression_index>& data_index;
   const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map;
 };
@@ -678,7 +687,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
           pbessolve_options.number_of_threads = 1; // If we spawn multiple threads here, the threads of Sylvan and the explicit exploration will interfere
 
-          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1, reach.rewriter());
+          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], result ? S0 : S1, result ? S1 : S0, reach.rewriter());
 
           // Perform the second instantiation given the proof graph.
           timer().start("second-instantiation");
