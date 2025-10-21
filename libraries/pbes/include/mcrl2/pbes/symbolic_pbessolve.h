@@ -113,56 +113,42 @@ class symbolic_pbessolve_algorithm
 
       ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, winning, strategy);
 
-      if (includes(winning[0], initial_vertex))
+      if (!includes(winning[0], initial_vertex) && !includes(winning[1], initial_vertex))
       {
+        // If the initial vertex has not yet been won then run the zielonka solver as well.
+        mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(Vtotal) << std::endl;
+        auto [solved0, solved1, strategy0, strategy1] = zielonka(Vtotal);
+
+        // Ensure that previously solved sets are included.
+        winning[0] = union_(solved0, winning[0]);
+        winning[1] = union_(solved1, winning[1]);
+        strategy[0] = union_(strategy0, strategy[0]);
+        strategy[1] = union_(strategy1, strategy[1]);
+      }
+
+
         mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
         mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
         mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
         mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
         mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
+
+
+      if (includes(winning[0], initial_vertex))
+      {        
+        if (m_check_strategy)
+        {
+          check_strategy(initial_vertex, V, winning[0], winning[1], false, strategy[0]);
+        }
         return std::make_tuple(true, winning[0], winning[1], strategy[0], strategy[1]);
       }
       else if (includes(winning[1], initial_vertex))
-      {
-        mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-        mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
-        mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
-        mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
-        mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
+      {        
+        if (m_check_strategy)
+        {
+          check_strategy(initial_vertex, V, winning[0], winning[1], true, strategy[1]);
+        }
         return std::make_tuple(false, winning[0], winning[1], strategy[0], strategy[1]);
-      }
-
-      // If the initial vertex has not yet been won then run the zielonka solver as well.
-      mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(Vtotal) << std::endl;
-      auto [solved0, solved1, strategy0, strategy1] = zielonka(Vtotal);
-
-      // Ensure that previously solved sets are included.
-      solved0 = union_(solved0, winning[0]);
-      solved1 = union_(solved1, winning[1]);
-      strategy0 = union_(strategy0, strategy[0]);
-      strategy1 = union_(strategy1, strategy[1]);
-
-      mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solved0) << std::endl;
-      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solved1) << std::endl;
-      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy0) << std::endl;
-      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy1) << std::endl;
-
-      if (includes(solved0, initial_vertex))
-      {
-        if (m_check_strategy)
-        {
-          check_strategy(initial_vertex, V, solved0, solved1, false, strategy0);
-        }
-        return std::make_tuple(true, solved0, solved1, strategy0, strategy1);
-      }
-      else if (includes(solved1, initial_vertex))
-      {
-        if (m_check_strategy)
-        {
-          check_strategy(initial_vertex, V, solved0, solved1, true, strategy1);
-        }
-        return std::make_tuple(false, solved0, solved1, strategy0, strategy1);
       }
       else
       {
