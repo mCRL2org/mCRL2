@@ -6283,8 +6283,8 @@ class bisim_partitioner_gj
       // calM will contain the m_BLC_transitions slices that need stabilization:
       std::vector<std::pair<BLC_list_iterator, BLC_list_iterator> > calM;
       // Algorithm 1, line 1.4
-      clock_t next_print_time = clock();
-      const clock_t rounded_start_time = next_print_time - CLOCKS_PER_SEC/2;
+      std::clock_t next_print_time = std::clock();
+      const std::clock_t rounded_start_time = next_print_time-CLOCKS_PER_SEC/2;
       while (true)
       {                                                                         //print_data_structures("MAIN LOOP");
                                                                                 assert(check_data_structures("MAIN LOOP"));
