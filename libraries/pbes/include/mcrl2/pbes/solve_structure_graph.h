@@ -607,13 +607,13 @@ std::pair<bool, std::unordered_map<pbes_expression, structure_graph::index_type>
     is_disjunctive = false;
   }
 
-  // Sorting is necessary for the set intersection computed below.
-  auto& W_alpha = is_disjunctive ? W.first : W.second;
-
   // Make a mapping from the formula to the index it belongs to.
   std::unordered_map<pbes_expression, structure_graph::index_type> mapping;
+  for (structure_graph::index_type index : W.first.vertices()) {
+    mapping.insert(std::make_pair(G.find_vertex(index).formula(), index));
+  }
 
-  for (structure_graph::index_type index : W_alpha.vertices()) {
+  for (structure_graph::index_type index : W.second.vertices()) {
     mapping.insert(std::make_pair(G.find_vertex(index).formula(), index));
   }
 
