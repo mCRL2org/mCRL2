@@ -126,13 +126,11 @@ class symbolic_pbessolve_algorithm
         strategy[1] = union_(strategy1, strategy[1]);
       }
 
-
-        mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-        mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
-        mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
-        mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
-        mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
-
+      mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(strategy[0]) << std::endl;
+      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
 
       if (includes(winning[0], initial_vertex))
       {        
