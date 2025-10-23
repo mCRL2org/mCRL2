@@ -538,8 +538,8 @@ class check_complexity
     static void check_waiting_cycles()
     {
         #ifndef NDEBUG
-            assert(0 <= sensible_work &&
-                   no_of_waiting_cycles <= (trans_type) sensible_work);
+            assert(0 <= sensible_work);
+            assert(no_of_waiting_cycles <= (trans_type) sensible_work);
             no_of_waiting_cycles = 0;
             cannot_wait_before_reset = true;
         #endif
