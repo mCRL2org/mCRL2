@@ -5565,7 +5565,7 @@ class bisim_partitioner_gj_lazy_BLC
           const simple_list<BLC_indicators_lb>::iterator
                     splitter = m_transitions[*std::prev(Qhat_elt.second)].
                                         transitions_per_block_to_constellation; assert(splitter->end_same_BLC==Qhat_elt.second);
-\//std::cerr << "Now stabilizing under " << splitter->debug_id(*this) << '\n';
+//std::cerr << "Now stabilizing under " << splitter->debug_id(*this) << '\n';
           // Algorithm 5, Line 5.23
           Qhat_elt.second=splitter->start_same_BLC;                             assert(splitter->start_same_BLC<splitter->end_same_BLC);
           const transition& first_t=
