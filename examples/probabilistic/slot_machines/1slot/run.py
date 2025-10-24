@@ -19,5 +19,5 @@ if lps2pres is not None and pressolve is not None:
     subprocess.run([lps2pres, '-f', 'expected_gain_long_run.mcf', '1slot_spec.lps', 'expected_gain_long_run.pres'], check=True)
     subprocess.run([pressolve, '-am', '-v', '-p10', 'expected_gain_long_run.pres'], check=True)
 
-    subprocess.run([lps2pres, '-f', 'expected_gain_long_run.mcf', '1slot_spec.lps', 'expected_time_to_star.pres'], check=True)
+    subprocess.run([lps2pres, '-f', 'expected_time_to_star.mcf', '1slot_spec.lps', 'expected_time_to_star.pres'], check=True)
     subprocess.run([pressolve, '-ag', '-v', 'expected_time_to_star.pres'], check=True)
