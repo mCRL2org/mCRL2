@@ -342,9 +342,9 @@ inline pbes_expression simplify_expr(pbes_expression& phi,
       if (c1.wait_for(std::chrono::milliseconds(200)) == std::future_status::ready) {
         res = c1.get();
       } 
-      // else {
-      //   res = phi;
-      // }
+      else {
+        res = phi;
+      }
       if_substituter.apply(res, res);
       return res;
     }
@@ -374,6 +374,7 @@ inline void self_substitute(pbes_equation& equation,
   
   data::set_identifier_generator id_generator;
   std::set<core::identifier_string> ids = pbes_system::find_identifiers(equation.formula());
+  id_generator.add_identifiers(ids);
   
   while (!stable)
   {
@@ -382,6 +383,11 @@ inline void self_substitute(pbes_equation& equation,
         = get_propositional_variable_instantiations(equation.formula());
     std::size_t previous_size = set.size();
 
+    std::set<std::string> parameterNames = {};
+    for (auto a: equation.variable().parameters())
+    {
+        parameterNames.insert(a.name());
+    }
     for (const propositional_variable_instantiation& x: set)
     {
       // Check timeout
@@ -434,14 +440,32 @@ inline void self_substitute(pbes_equation& equation,
           }
           sigma[v] = par;
         }
-        
-        id_generator.add_identifiers(ids);
-         for (const data::variable& v: substitution_variables(sigma))
-         {
-           id_generator.add_identifier(v.name());
-         }
-        pbes_expression phi = mcrl2::pbes_system::replace_variables_capture_avoiding(equation.formula(), sigma, id_generator);
-        phi = pbes_rewrite(phi, pbes_default_rewriter, sigma);
+
+        std::set<data::variable> all_free_vars = find_free_variables(cur_x);
+        std::set<std::string> free_vars = {};
+        for (const data::variable& v: all_free_vars)
+        {
+          if (!parameterNames.contains(v.name()))
+          {
+            free_vars.insert(v.name());
+          }
+        }
+
+        pbes_expression phi;
+        mCRL2log(log::debug) << "\n Contains free vars? " << (free_vars.size() > 0) << "\n";
+        if (free_vars.size() == 0)
+        {
+          phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
+        }
+        else
+        {
+          for (const std::string& v: free_vars)
+          {
+            id_generator.add_identifier(v);
+          }
+          phi = mcrl2::pbes_system::replace_variables_capture_avoiding(equation.formula(), sigma, id_generator);
+          phi = pbes_rewrite(phi, pbes_default_rewriter);
+        }
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
@@ -627,6 +651,9 @@ struct pbeschain_pbes_backward_substituter
   {
     data::rewriter data_rewriter(p.data(), options.rewrite_strategy);
     data::rewriter data_default_rewriter(p.data());
+    if (options.rewrite_strategy == data::rewriter::strategy::jitty_compiling || options.rewrite_strategy == data::rewriter::strategy::jitty_compiling_prover) {
+        data_default_rewriter = data_rewriter;
+    }
     simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
     simplify_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
     simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
