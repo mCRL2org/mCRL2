@@ -1672,7 +1672,7 @@ class explorer: public abortable
 
       if (m_options.number_of_threads>0)
       {
-        mcrl2::runtime_error("DFS exploration cannot be performend with multiple threads.");
+        throw mcrl2::runtime_error("DFS exploration cannot be performed with multiple threads.");
       }
       todo.emplace_back(s0, out_edges(s0, regular_summands, confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator));
       discovered.insert(s0);
