@@ -33,7 +33,8 @@ enum class pbes_rewriter_type
   ppg,
   srf,
   pre_srf,
-  bqnf_quantifier
+  bqnf_quantifier,
+  remove_cex_variables
 };
 
 /// \brief Parses a pbes rewriter type
@@ -84,6 +85,10 @@ inline pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
   {
     return pbes_rewriter_type::bqnf_quantifier;
   }
+  if (type == "remove-cex-variables")
+  {
+    return pbes_rewriter_type::remove_cex_variables;
+  }
   throw mcrl2::runtime_error("unknown pbes rewriter option " + type);
 }
 
@@ -113,7 +118,9 @@ inline std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
   case pbes_rewriter_type::srf:
     return "srf";
   case pbes_rewriter_type::pre_srf:
-    return "pre-srf";    
+    return "pre-srf";
+  case pbes_rewriter_type::remove_cex_variables:
+    return "remove-cex-variables";    
   }
 
   return "unknown pbes rewriter";
@@ -146,6 +153,8 @@ inline std::string description(const pbes_rewriter_type type)
     return "for rewriting into pre-SRF normal form";
   case pbes_rewriter_type::bqnf_quantifier:
     return "for rewriting quantifiers over conjuncts to conjuncts of quantifiers (experimental)";
+  case pbes_rewriter_type::remove_cex_variables:
+    return "for removing counterexample variables from the right-hand side of each equation, i.e., obtaining the core of a pbes";
   }
 
   throw mcrl2::runtime_error("unknown pbes rewriter");

@@ -43,6 +43,7 @@ class pbes_rewriter_tool: public Tool
       result.insert(pbes_system::pbes_rewriter_type::srf);
       result.insert(pbes_system::pbes_rewriter_type::pre_srf);
       result.insert(pbes_system::pbes_rewriter_type::bqnf_quantifier);
+      result.insert(pbes_system::pbes_rewriter_type::remove_cex_variables);
       return result;
     }
 
