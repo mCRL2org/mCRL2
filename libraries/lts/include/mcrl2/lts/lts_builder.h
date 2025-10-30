@@ -83,7 +83,20 @@ class lts_aut_builder: public lts_builder
     std::mutex m_exclusive_transition_access;
 
   public:
-    lts_aut_builder() = default;
+    lts_aut_builder()
+    {
+      m_lts.set_initial_state(0);
+    }
+
+    const lts_aut_t& lts() const
+    {
+      return m_lts;
+    }
+
+    lts_aut_t& lts()
+    {
+      return m_lts;
+    }
 
     void add_transition(std::size_t from, const lps::multi_action& a, std::size_t to, const std::size_t number_of_threads) override
     {
