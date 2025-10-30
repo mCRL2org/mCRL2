@@ -23,7 +23,6 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/pbes/unify_parameters.h"
-#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -311,20 +310,6 @@ struct normalize_command: public pbes_system::detail::pbes_command
   }
 };
 
-struct remove_cex_variables_command: public pbes_system::detail::pbes_command
-{
-  remove_cex_variables_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-      : pbes_system::detail::pbes_command("pbes-remove-cex-variables", input_filename, output_filename, options)
-  {}
-
-  void execute() override
-  {
-    pbes_system::detail::pbes_command::execute();
-    pbesspec = pbes_system::detail::remove_counterexample_info(pbesspec, true, true, false);
-    pbes_system::detail::save_pbes(pbesspec, output_filename);
-  }
-};
-
 class pbestransform_tool: public transform_tool<rewriter_tool<input_output_tool>>
 {
   using super = transform_tool<rewriter_tool<input_output_tool>>;
@@ -377,7 +362,6 @@ public:
     add_command(std::make_shared<stategraph_global_command>(input_filename(), output_filename(), options));
     add_command(std::make_shared<stategraph_local_command>(input_filename(), output_filename(), options));
     add_command(std::make_shared<unify_parameters_command>(input_filename(), output_filename(), options));
-    add_command(std::make_shared<remove_cex_variables_command>(input_filename(), output_filename(), options));
     }
 };
 
