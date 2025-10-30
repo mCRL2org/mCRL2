@@ -48,8 +48,8 @@ tools:
   t4:
     input: [l4]
     output: [l9]
-    args: [--algorithm=pbes-remove-cex-variables]
-    name: pbestransform
+    args: [--pbes-rewriter=remove-cex-variables]
+    name: pbesrewr
   t5:
     input: [l9]
     output: [l10]
