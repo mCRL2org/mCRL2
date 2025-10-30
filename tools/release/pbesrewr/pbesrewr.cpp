@@ -27,6 +27,7 @@
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
