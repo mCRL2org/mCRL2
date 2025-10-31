@@ -83,10 +83,7 @@ class lts_aut_builder: public lts_builder
     std::mutex m_exclusive_transition_access;
 
   public:
-    lts_aut_builder()
-    {
-      m_lts.set_initial_state(0);
-    }
+    lts_aut_builder() = default;
 
     const lts_aut_t& lts() const
     {
@@ -123,6 +120,11 @@ class lts_aut_builder: public lts_builder
       }
 
       m_lts.set_num_states(state_map.size());
+
+      if (state_map.size() > 0)
+      {
+        m_lts.set_initial_state(0);
+      }
     }
 
     void save(const std::string& filename) override
