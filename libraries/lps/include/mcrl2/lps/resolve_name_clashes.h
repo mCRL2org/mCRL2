@@ -63,7 +63,11 @@ void resolve_summand_variable_name_clashes(action_summand& summand,
         sigma[v] = data::variable(generator(v.name()), v.sort());
       }
     }
-    lps::replace_all_variables(summand, sigma);
+    if (!sigma.empty())
+    {
+      summand.summation_variables()=data::replace_variables(summand.summation_variables(),sigma);
+      lps::replace_variables(summand, sigma);
+    }
   }
 }
 
@@ -107,7 +111,8 @@ void resolve_summand_variable_name_clashes(stochastic_action_summand& summand,
   }
   if (!sigma.empty())
   {
-    lps::replace_all_variables(summand, sigma);
+    lps::replace_variables(summand, sigma);
+    summand.summation_variables()=lps::replace_variables(summand.summation_variables(),sigma);
   }
 
   // handle the distribution variables
@@ -124,7 +129,7 @@ void resolve_summand_variable_name_clashes(stochastic_action_summand& summand,
   if (!sigma.empty())
   {
     summand.distribution() = lps::replace_all_variables(summand.distribution(), sigma);
-    summand.assignments() = lps::replace_all_variables(summand.assignments(), sigma);
+    summand.assignments() = lps::replace_variables(summand.assignments(), sigma);
   }
 }
 

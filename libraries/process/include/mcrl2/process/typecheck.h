@@ -200,7 +200,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
   }
 
-  static std::map<core::identifier_string, data::data_expression> make_assignment_map(const data::untyped_identifier_assignment_list& assignments)
+  void check_duplicates_in_assignments(const data::untyped_identifier_assignment_list& assignments)
   {
     std::map<core::identifier_string, data::data_expression> result;
     for (const data::untyped_identifier_assignment& a: assignments)
@@ -212,7 +212,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
       result[a.lhs()]=a.rhs();
     }
-    return result;
   }
 
   bool is_action_name(const core::identifier_string& name)
@@ -286,7 +285,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     const data::variable_list& formal_parameters = P.variables();
 
     // This checks for duplicate left hand sides.
-    std::map<core::identifier_string, data::data_expression> assignment_map = make_assignment_map(x.assignments());
+    check_duplicates_in_assignments(x.assignments());
 
     std::map<core::identifier_string, data::variable> formal_parameter_map;
     for (const data::variable& v: formal_parameters)
@@ -326,11 +325,29 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
       catch (const mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\nIn implicitly stated assignment " + pp(var) + "=" + pp(var) + " in process " + pp(P) + "(" + data::pp(assignments) + ")\n");
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nIn implicitly stated assignment " + pp(var) + "=" + pp(var) + 
+                                   " in process " + pp(P) + "(" + data::pp(assignments) + ")\n");
+      }
+    }
+    // Take care that the assignments occur in the same order as the variables in the process identifier.
+    std::map<data::variable, data::data_expression> assignment_map;
+    for(const data::assignment& a: assignments)
+    {
+      assignment_map[a.lhs()]=a.rhs();
+    }
+
+    std::vector<data::assignment> sorted_assignments;
+    for(const data::variable& v: formal_parameters)
+    {
+      const  std::map<data::variable, data::data_expression>::const_iterator i=assignment_map.find(v);
+      if (i!=assignment_map.end())
+      {
+        assert(v.sort()==i->second.sort());
+        sorted_assignments.emplace_back(v,i->second);
       }
     }
 
-    make_process_instance_assignment(result, P, data::assignment_list(assignments.begin(), assignments.end()));
+    make_process_instance_assignment(result, P, data::assignment_list(sorted_assignments.begin(), sorted_assignments.end()));
   }
 
   template <class T>
@@ -346,7 +363,8 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
     else
     {
-      throw mcrl2::runtime_error("Could not find a matching declaration for action or process expression " + core::pp(x.name()) + core::detail::print_arguments(x.arguments()) + ".");
+      throw mcrl2::runtime_error("Could not find a matching declaration for action or process expression " + 
+                                 core::pp(x.name()) + core::detail::print_arguments(x.arguments()) + ".");
     }
   }
 

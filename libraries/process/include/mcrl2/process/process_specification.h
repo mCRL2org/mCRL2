@@ -84,7 +84,7 @@ class process_specification
 
     /// \brief Constructor.
     /// \param t A term containing an aterm representation of a process specification.
-    process_specification(atermpp::aterm t)
+    explicit process_specification(atermpp::aterm t)
     {
       assert(core::detail::check_term_ProcSpec(t));
       construct_from_aterm(t);

@@ -427,9 +427,10 @@ BOOST_AUTO_TEST_CASE(bug_978)
 BOOST_AUTO_TEST_CASE(not_properly_ordered_assignments)
 {
   const std::string spec =
+     "act  c:Bool;\n"
      "proc R(a,b : Bool) = \n"
-     "        tau . R(a=true,b=false) +\n"
-     "        tau . R(b=false,a=false); \n"
+     "        c(a) . R(a=true,b=false) +\n"
+     "        c(b) . R(b=false,a=false); \n"
      "init R(true,true);\n";
   run_linearisation_test_case(spec);
 }

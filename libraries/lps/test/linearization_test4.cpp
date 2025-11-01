@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(various_case_26)
 }
 
 // The following testcase tests whether two parameters with the same name
-// but different type is handled properly. Added Juli 20, 2025. 
+// but different type is handled properly. Added July 20, 2025. 
 BOOST_AUTO_TEST_CASE(various_case_27)
 {
   const std::string various_case_27=
@@ -288,6 +288,40 @@ BOOST_AUTO_TEST_CASE(various_case_27)
     "     Y(n:Bool)=a(n).X(7);\n"
     "init X(1);\n";
   run_linearisation_test_case(various_case_27);
+}
+
+// The following testcase tests whether variables with different types
+// but different names are handled properly. Added October 24, 2025. 
+BOOST_AUTO_TEST_CASE(variable_clash)
+{
+  const std::string variable_clash=
+    "act a1,b1,c1,a2,b2,c2:Bool;\n"
+    "    a1,b1,c1,a2,b2,c2:Nat;\n"
+    "\n"
+    "proc P1 = sum x:Bool.a1(x).b1(x).c1(x).P1+\n"
+    "          sum x:Nat. a1(x).b1(x).c1(x).P1;\n"
+    "     P2 = sum x:Bool.a2(x).b2(x).c2(x).P2+\n"
+    "          sum x:Nat. a2(x).b2(x).c2(x).P2;\n"
+    "\n"
+    "init allow({a1,b1,c1,a2,b2,c2},P1||P2);\n";
+  run_linearisation_test_case(variable_clash);
+}
+
+// The following testcase tests whether variables with different types
+// but different names are handled properly. Added October 24, 2025. 
+BOOST_AUTO_TEST_CASE(variable_clash_with_sharing_proces_body)
+{
+  const std::string variable_clash=
+    "act a1,b1,c1,a2,b2,c2:Bool;\n"
+    "    a1,b1,c1,a2,b2,c2:Nat;\n"
+    "\n"
+    "proc P1 = sum x:Bool.a1(x).b1(x).c1(x).P1+\n"
+    "          sum x:Nat. a1(x).b1(x).c1(x).P2;\n"
+    "     P2 = sum x:Bool.a2(x).b2(x).c2(x).P2+\n" 
+    "          sum x:Nat. a2(x).b2(x).c2(x).P1;\n"
+    "\n"
+    "init allow({a1,b1,c1,a2,b2,c2},P1||P2);\n";
+  run_linearisation_test_case(variable_clash);
 }
 
 

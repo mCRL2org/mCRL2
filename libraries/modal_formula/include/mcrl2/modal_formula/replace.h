@@ -87,13 +87,14 @@ T replace_variables(const T& x,
   return result;
 }
 
+/* Replace all variables, including those in binders and the left hand side of assignments */
 template <typename T, typename Substitution>
 void replace_all_variables(T& x,
                            const Substitution& sigma
                           )
   requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
-  core::make_update_apply_builder<action_formulas::variable_builder>(sigma).update(x);
+  core::make_update_apply_builder<action_formulas::sort_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -103,7 +104,7 @@ T replace_all_variables(const T& x,
   requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
-  core::make_update_apply_builder<action_formulas::variable_builder>(sigma).apply(result, x);
+  core::make_update_apply_builder<action_formulas::sort_expression_builder>(sigma).apply(result, x);
   return result;
 }
 
@@ -233,13 +234,14 @@ T replace_variables(const T& x,
   return result;
 }
 
+/* Replace all variables, including those in binders and the left hand side of assignments */
 template <typename T, typename Substitution>
 void replace_all_variables(T& x,
                            const Substitution& sigma
                           )
   requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
-  core::make_update_apply_builder<regular_formulas::variable_builder>(sigma).update(x);
+  core::make_update_apply_builder<regular_formulas::sort_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -249,7 +251,7 @@ T replace_all_variables(const T& x,
   requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
-  core::make_update_apply_builder<regular_formulas::variable_builder>(sigma).apply(result, x);
+  core::make_update_apply_builder<regular_formulas::sort_expression_builder>(sigma).apply(result, x);
   return result;
 }
 
@@ -379,13 +381,14 @@ T replace_variables(const T& x,
   return result;
 }
 
+/* Replace all variables, including those in binders and the left hand side of assignments */
 template <typename T, typename Substitution>
 void replace_all_variables(T& x,
                            const Substitution& sigma
                           )
   requires (!std::is_base_of_v<atermpp::aterm, T>)
 {
-  core::make_update_apply_builder<state_formulas::variable_builder>(sigma).update(x);
+  core::make_update_apply_builder<state_formulas::sort_expression_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
@@ -395,7 +398,7 @@ T replace_all_variables(const T& x,
   requires std::is_base_of_v<atermpp::aterm, T>
 {
   T result;
-  core::make_update_apply_builder<state_formulas::variable_builder>(sigma).apply(result, x);
+  core::make_update_apply_builder<state_formulas::sort_expression_builder>(sigma).apply(result, x);
   return result;
 }
 

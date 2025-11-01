@@ -102,21 +102,22 @@ class objectdatatype
 {
   public:
     identifier_string objectname;
+    variable_list parameters;
     process::action_label_list multi_action_names;
     bool constructor=false;
     process_expression representedprocess;
     process_identifier process_representing_action; /* for actions target sort is used to
                                                        indicate the process representing this action. */
     process_expression processbody;
-    std::set <variable> free_variables;
-    bool free_variables_defined=false;
-    variable_list parameters;
-    variable_list old_parameters;
     processstatustype processstatus=unknown;
     objecttype object=none;
     bool canterminate=false;
     bool containstime=false;
 
+    const std::set <variable> get_free_variables() const
+    {
+      return process::find_free_variables(processbody);
+    }
     objectdatatype()=default;
     objectdatatype(const objectdatatype& o)=default;
     objectdatatype& operator=(const objectdatatype& o)=default;
@@ -278,7 +279,7 @@ class specification_basic_type
     {
       if (objectdata.count(o)==0)
       {
-        throw mcrl2::runtime_error("Fail to recognize " + process::pp(process_identifier(o)) + 
+        throw mcrl2::runtime_error("Fail to recognize " + process::pp(o) + 
                                    ". Most likely due to unguarded recursion in a process equation. ");
       }
     }
@@ -286,13 +287,23 @@ class specification_basic_type
     objectdatatype& objectIndex(const process_identifier& o)
     {
       detail_check_objectdata(o);
+      assert(objectdata.find(o)->second.objectname==o.name());
       assert(objectdata.find(o)->second.parameters==o.variables());
-      return objectdata.find(o)->second;
+      objectdatatype& result=objectdata.find(o)->second;
+#ifndef NDEBUG
+      for(const variable& v: result.get_free_variables())
+      {
+        assert(std::find(result.parameters.begin(), result.parameters.end(), v)!=result.parameters.end()||
+               std::find(global_variables.begin(), global_variables.end(), v)!=global_variables.end());
+      }
+#endif
+      return result;
     }
 
     const objectdatatype& objectIndex(const process_identifier& o) const
     {
       detail_check_objectdata(o);
+      assert(objectdata.find(o)->second.objectname==o.name());
       assert(objectdata.find(o)->second.parameters==o.variables());
       return objectdata.find(o)->second;
     }
@@ -455,22 +466,10 @@ class specification_basic_type
         // multiaction.
         const action_list tempvar=makemultiaction(actionnames, variable_list_to_data_expression_list(object.parameters));
         object.processbody=action_list_to_process(tempvar);
-        object.free_variables=std::set<variable>(object.parameters.begin(), object.parameters.end());
-        object.free_variables_defined=true;
 
         objectdata[actionnames]=object;
       }
       return objectdata.find(actionnames)->second;
-    }
-
-    const std::set<variable>& get_free_variables(objectdatatype& object)
-    {
-      if (!object.free_variables_defined)
-      {
-        object.free_variables=process::find_free_variables(object.processbody);
-        object.free_variables_defined=true;
-      }
-      return object.free_variables;
     }
 
     void insertvariable(const variable& var, const bool mustbenew)
@@ -704,7 +703,6 @@ class specification_basic_type
       object.objectname=procId.name();
       object.object=proc;
       object.processbody=body;
-      object.free_variables_defined=false;
       object.canterminate=canterminate;
       object.containstime=containstime;
       object.processstatus=s;
@@ -4008,10 +4006,19 @@ class specification_basic_type
           }
           else 
           {
-            const variable new_var(fresh_identifier_generator(var.name()),var.sort());
-            parameter_renaming[var]=new_var;
-            var=new_var;
-            return false; // variable var is renamed, as name clashed with a variable with a different sort. Not present.
+            if (parameter_renaming(v)==v)
+            {
+              const variable new_var(fresh_identifier_generator(var.name()),var.sort());
+              parameter_renaming[var]=new_var;
+              var=new_var;
+              return false; // variable var is renamed, as name clashed with a variable with a different sort. Not present.
+            }
+            else
+            {
+              // The variable var is renamed, and the renaming was already present. 
+              var=atermpp::down_cast<variable>(parameter_renaming(v)); 
+              return true;
+            }
           }
         }
       }
@@ -4040,15 +4047,30 @@ class specification_basic_type
       return result;
     }
 
-    variable_list collectparameterlist(const std::set< process_identifier >& pCRLprocs, 
-                                       mutable_indexed_substitution<>& parameter_renaming)
+    // While collecting the parameter list the process parameters that are part of the process identifiers may change. 
+    // This means the list pCRLprocs may change. 
+    variable_list collectparameterlist(std::set<process_identifier>& pCRLprocs) 
+                                       // mutable_indexed_substitution<>& parameter_renaming)
     {
+      mutable_indexed_substitution<> parameter_renaming;  // Used to rename variables with the same name but different sorts.
       variable_list parameters;
       for (const process_identifier& p: pCRLprocs)
       {
         const objectdatatype& object=objectIndex(p);
         parameters=joinparameters(parameters,object.parameters, parameter_renaming);
       }
+      // Apply the parameter renaming. 
+      std::set<process_identifier> new_pCRLprocs;
+      for (const process_identifier& p: pCRLprocs)
+      {
+        objectdatatype object=objectIndex(p);
+        object.processbody=process::replace_all_variables(object.processbody,parameter_renaming);
+        object.parameters=process::replace_all_variables(object.parameters,parameter_renaming);
+        process_identifier p_new=process::replace_all_variables(p,parameter_renaming);
+        objectdata[p_new]=object;
+        new_pCRLprocs.insert(p_new);
+      }
+      pCRLprocs=new_pCRLprocs;
       return parameters;
     }
 
@@ -4642,11 +4664,9 @@ class specification_basic_type
         }
         else if (free_variables_in_body.find(v)==free_variables_in_body.end())
         {
-          {
-            // The variable *i must get a default value.
-            const data_expression rhs=representative_generator_internal(v.sort());
-            result.emplace_back(v, rhs);
-          }
+          // The variable *i must get a default value.
+          const data_expression rhs=representative_generator_internal(v.sort());
+          result.emplace_back(v, rhs);
         }
         else
         {
@@ -4673,7 +4693,7 @@ class specification_basic_type
       const variable_list& stochastic_variables)
     {
       objectdatatype& object=objectIndex(procId);
-      const assignment_list t=find_dummy_arguments(stack.parameters,args,get_free_variables(object),stochastic_variables);
+      const assignment_list t=find_dummy_arguments(stack.parameters,args,object.get_free_variables(),stochastic_variables);
 
       if (singlestate)
       {
@@ -4735,7 +4755,7 @@ class specification_basic_type
       const data_expression_list t=findarguments(object.parameters,
                                                  stack.parameters,
                                                  args,t2,stack,vars,
-                                                 get_free_variables(object),
+                                                 object.get_free_variables(),
                                                  stochastic_variables);
 
       std::size_t i=1;
@@ -5278,8 +5298,7 @@ class specification_basic_type
       const stacklisttype& stack,
       const bool regular,
       const bool singlestate,
-      const std::set < process_identifier >& pCRLprocs,
-      mutable_indexed_substitution<>& parameter_renaming)
+      const std::set < process_identifier >& pCRLprocs)
     {
       if (is_choice(body))
       {
@@ -5287,9 +5306,9 @@ class specification_basic_type
         const process_expression& t2=down_cast<choice>(body).right();
 
         collectsumlistterm(procId,action_summands,deadlock_summands,t1,pars,stack,
-                           regular,singlestate,pCRLprocs,parameter_renaming);
+                           regular,singlestate,pCRLprocs);
         collectsumlistterm(procId,action_summands,deadlock_summands,t2,pars,stack,
-                           regular,singlestate,pCRLprocs,parameter_renaming);
+                           regular,singlestate,pCRLprocs);
         return;
       }
       if (is_stochastic_operator(body))
@@ -5298,16 +5317,14 @@ class specification_basic_type
            part of this summand */
         const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(body);
         collectsumlistterm(procId,action_summands,deadlock_summands,sto.operand(),pars,stack,
-                           regular,singlestate,pCRLprocs,parameter_renaming);
+                           regular,singlestate,pCRLprocs);
       }
       else
       {
         add_summands(procId,
                      action_summands,
                      deadlock_summands,
-                     process::replace_variables_capture_avoiding(body,parameter_renaming), // This renaming renames variables 
-                                                                                           // with the same name but conflicting 
-                                                                                           // types, e.g., x:Bool and x:Nat. 
+                     body,
                      pCRLprocs,
                      stack,
                      regular,
@@ -5323,8 +5340,7 @@ class specification_basic_type
       const variable_list& pars,
       const stacklisttype& stack,
       bool regular,
-      bool singlestate,
-      mutable_indexed_substitution<>& parameter_renaming)
+      bool singlestate)
     {
       for (const process_identifier& p: pCRLprocs)
       {
@@ -5339,8 +5355,7 @@ class specification_basic_type
           stack,
           regular,
           singlestate,
-          pCRLprocs,
-          parameter_renaming);
+          pCRLprocs);
       }
     }
 
@@ -6964,7 +6979,7 @@ class specification_basic_type
          ids of processes occur in stochastic_normalized_process_identifiers. */
 
       process_identifier initial_proc_id=procId;  // the initial process id may be renamed.
-      const std::set< process_identifier > stochastic_normalized_process_identifiers =
+      std::set< process_identifier > stochastic_normalized_process_identifiers =
                   remove_stochastic_operators_from_front(reduced_set_of_process_identifiers, initial_proc_id, initial_stochastic_distribution);
 
       /* collect the parameters, but assume that variables
@@ -6973,8 +6988,7 @@ class specification_basic_type
       {
         singlecontrolstate=true;
       }
-      mutable_indexed_substitution<> parameter_renaming;
-      parameters=collectparameterlist(stochastic_normalized_process_identifiers,parameter_renaming);
+      parameters=collectparameterlist(stochastic_normalized_process_identifiers);
 
       if ((!regular)||((!singlecontrolstate) && (options.newstate) && (!options.binary)))
       {
@@ -7006,7 +7020,7 @@ class specification_basic_type
       }
       init=make_initialstate(initial_proc_id,stack,stochastic_normalized_process_identifiers,regular,singlecontrolstate,initial_stochastic_distribution);
       assert(init.size()==parameters.size());
-      collectsumlist(action_summands,deadlock_summands,stochastic_normalized_process_identifiers,parameters,stack,regular,singlecontrolstate,parameter_renaming);
+      collectsumlist(action_summands,deadlock_summands,stochastic_normalized_process_identifiers,parameters,stack,regular,singlecontrolstate);
 
       if (!options.no_intermediate_cluster)
       {
@@ -8482,7 +8496,6 @@ class specification_basic_type
 
       if (is_stochastic_operator(t))
       {
-        /* YYYYYYYYYY */
         const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(t);
         generateLPEmCRLterm(action_summands,deadlock_summands,sto.operand(),
                               regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
