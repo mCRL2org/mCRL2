@@ -55,6 +55,8 @@ public:
   /// \pre The prefix may not be empty, and it may not have trailing digits
   function_symbol_generator(const std::string& prefix)
   {
+    assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
+
     if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
     {
       function_symbol_generator_mutex().lock();
@@ -63,7 +65,6 @@ public:
     m_prefix=prefix + (generator_sequence_number()>0?std::to_string(generator_sequence_number()) + "_":"");
     generator_sequence_number()++;
     m_string_buffer=m_prefix;
-    assert(!prefix.empty() && !(std::isdigit(*prefix.rbegin())));
 
     // Obtain a reference to the first index possible.
     m_central_index = detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
