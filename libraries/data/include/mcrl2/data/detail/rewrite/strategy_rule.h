@@ -75,7 +75,7 @@ class strategy_rule
       return m_rewrite_index;
     }
 
-    const std::function<void(data_expression&, const data_expression&)> rewrite_cpp_code() const
+    std::function<void(data_expression&, const data_expression&)> rewrite_cpp_code() const
     {
       assert(is_cpp_code());
       return m_cpp_function;

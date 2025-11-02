@@ -96,10 +96,10 @@ BOOST_AUTO_TEST_CASE(mod_and_div_test)
   specification.add_context_sort(sort_nat::nat());
 
   rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
-  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (const mcrl2::data::rewrite_strategy& strategy: strategies)
   {
-    std::cerr << "Mod and div test: " << *strat << std::endl;
-    data::rewriter R(specification, *strat);
+    std::cerr << "Mod and div test: " << strategy << std::endl;
+    data::rewriter R(specification, strategy);
 
     data::data_expression x = sort_nat::nat(235);
     data::data_expression y = sort_pos::pos(78);
@@ -122,10 +122,10 @@ BOOST_AUTO_TEST_CASE(square_root_test)
   specification.add_context_sort(sort_nat::nat());
 
   rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
-  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (const mcrl2::data::rewrite_strategy& strategy: strategies)
   {
-    std::cerr << "Square root test: " << *strat << std::endl;
-    data::rewriter R(specification, *strat);
+    std::cerr << "Square root test: " << strategy << std::endl;
+    data::rewriter R(specification, strategy);
 
     data::data_expression x = sort_nat::nat(831);
     for (std::size_t i=0; i<number_of_tests; ++i)

@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_STRUCTURED_SORT_H
 #define MCRL2_DATA_STRUCTURED_SORT_H
 
+#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/standard_numbers_utility.h"
 #include "mcrl2/data/structured_sort_constructor.h"
@@ -156,9 +157,9 @@ class structured_sort: public sort_expression
       {
         function_symbol_vector projections(i.projection_functions(s));
 
-        for (function_symbol_vector::const_iterator j = projections.begin(); j != projections.end(); ++j)
+        for (const function_symbol& projection : projections)
         {
-          result.push_back(*j);
+          result.push_back(projection);
         }
       }
       return result;

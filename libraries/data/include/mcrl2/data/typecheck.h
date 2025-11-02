@@ -61,7 +61,7 @@ class data_type_checker: public sort_type_checker
      *             If not successful an exception is thrown.
      *  \return    a data specification where all untyped identifiers have been replace by typed ones.
      **/
-    const data_specification operator()() const;
+    data_specification operator()() const;
 
     /** \brief     Yields a type checked equation list, and sets the types in the equations right.
      *             If not successful an exception is thrown.

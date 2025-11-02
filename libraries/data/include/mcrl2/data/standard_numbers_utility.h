@@ -12,6 +12,8 @@
 #ifndef MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
 #define MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
 
+#include <ranges>
+
 #include "mcrl2/data/standard_utility.h"
 
 namespace mcrl2::data
@@ -97,17 +99,17 @@ inline void decimal_number_increment(std::vector< char >& number)
 {
   assert(0 < number.size());
 
-  for (std::vector< char >::reverse_iterator i = number.rbegin(); i != number.rend(); ++i)
+  for (char& i : std::ranges::reverse_view(number))
   {
-    if (*i < 9)
+    if (i < 9)
     {
-      ++(*i);
+      ++i;
 
       return;
     }
     else
     {
-      *i = 0;
+      i = 0;
     }
   }
 

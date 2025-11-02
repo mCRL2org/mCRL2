@@ -147,7 +147,7 @@ struct term_traits<data::data_expression>
   static inline
   void make_forall(term_type& result, const variable_sequence_type& d, const term_type& p)
   {
-    return data::make_forall(result, d, p);
+    data::make_forall(result, d, p);
   }
 
   /// \brief Operator exists
@@ -167,7 +167,7 @@ struct term_traits<data::data_expression>
   static inline
   void make_exists(term_type& result, const variable_sequence_type& d, const term_type& p)
   {
-    return data::make_exists(result, d, p);
+    data::make_exists(result, d, p);
   }
 
   /// \brief Test for value true

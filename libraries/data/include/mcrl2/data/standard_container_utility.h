@@ -12,6 +12,8 @@
 #ifndef MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 #define MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 
+#include <ranges>
+
 #include "mcrl2/utilities/detail/join.h"
 
 #include "mcrl2/data/bag.h"
@@ -37,9 +39,9 @@ application list(const sort_expression& s,
   data_expression                list_expression(empty(s));
   std::vector< data_expression > elements(range.begin(), range.end());
 
-  for (std::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i)
+  for (data_expression& element: std::ranges::reverse_view(elements))
   {
-    list_expression = sort_list::cons_(s, *i, list_expression);
+    list_expression = sort_list::cons_(s, element, list_expression);
   }
 
   return static_cast< application >(list_expression);

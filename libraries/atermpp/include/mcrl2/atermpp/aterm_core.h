@@ -11,7 +11,7 @@
 #define MCRL2_ATERMPP_ATERM_H
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <compare>
 #include <sstream>
 #include <type_traits>

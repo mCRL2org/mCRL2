@@ -12,6 +12,8 @@
 #ifndef MCRL2_DATA_DATA_SPECIFICATION_H
 #define MCRL2_DATA_DATA_SPECIFICATION_H
 
+#include <ranges>
+
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/sort_specification.h"
 
@@ -889,9 +891,9 @@ inline variable_list order_variables_to_optimise_enumeration(const variable_list
 
   // Accumulate the result in rest_vars
   rest_vars=vars_of_finite_type + rest_vars;
-  for(std::map <std::size_t,variable_list>::const_reverse_iterator k=vars_of_enumerated_type.rbegin(); k!=vars_of_enumerated_type.rend(); ++k)
+  for(const auto& [_, vars] : std::ranges::reverse_view(vars_of_enumerated_type))
   {
-    rest_vars = k->second + rest_vars;
+    rest_vars = vars + rest_vars;
   }
   return rest_vars;
 }

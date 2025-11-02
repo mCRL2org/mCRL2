@@ -187,9 +187,9 @@ class data_property_map
     unsigned int max_key_length() const
     {
       unsigned int result = 0;
-      for (auto i = m_data.begin(); i != m_data.end(); ++i)
+      for (const std::pair<const std::basic_string<char>, std::basic_string<char>>& i: m_data)
       {
-        result = (std::max)(static_cast< std::size_t >(result), i->first.size());
+        result = (std::max)(static_cast< std::size_t >(result), i.first.size());
       }
       return result;
     }
@@ -247,9 +247,9 @@ class data_property_map
     {
       unsigned int n = max_key_length();
       std::vector<std::string> lines;
-      for (auto i = m_data.begin(); i != m_data.end(); ++i)
+      for (const auto & i : m_data)
       {
-        lines.push_back(align(i->first, n) + " = " + i->second);
+        lines.push_back(align(i.first, n) + " = " + i.second);
       }
       return utilities::string_join(lines, "\n");
     }
@@ -279,12 +279,12 @@ class data_property_map
     std::string compare(const data_property_map& other) const
     {
       std::ostringstream out;
-      for (auto i = m_data.begin(); i != m_data.end(); ++i)
+      for (const auto & i : m_data)
       {
-        auto j = other.data().find(i->first);
+        auto j = other.data().find(i.first);
         if (j != other.data().end())
         {
-          out << static_cast< Derived const& >(*this).compare_property(i->first, i->second, j->second);
+          out << static_cast< Derived const& >(*this).compare_property(i.first, i.second, j->second);
         }
       }
       return out.str();

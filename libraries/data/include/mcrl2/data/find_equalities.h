@@ -115,11 +115,11 @@ struct equality_set_with_top
   // for each entry b = b', b' = b is added too
   void close()
   {
-    for (auto i = assignments.begin(); i != assignments.end(); ++i)
+    for (auto & assignment : assignments)
     {
-      const variable& v = i->first;
+      const variable& v = assignment.first;
       std::vector<variable> W;
-      for (const data_expression& e: i->second)
+      for (const data_expression& e: assignment.second)
       {
         if (is_variable(e))
         {

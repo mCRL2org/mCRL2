@@ -15,6 +15,7 @@
 #define MCRL2_DATA_FOURIER_MOTZKIN_H
 
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/linear_inequalities.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/detail/linear_inequalities_utilities.h"
 
@@ -63,10 +64,10 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
     bool found=false;
     std::size_t best_choice=0;
     variable best_variable;
-    for (std::set < variable >::const_iterator k = vars.begin(); k != vars.end(); ++k)
+    for (const variable& var : vars)
     {
-      const std::size_t p=nr_positive_occurrences[*k];
-      const std::size_t n=nr_negative_occurrences[*k];
+      const std::size_t p=nr_positive_occurrences[var];
+      const std::size_t n=nr_negative_occurrences[var];
       if ((p!=0) || (n!=0))
       {
         if (found)
@@ -74,14 +75,14 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
           if (n*p<best_choice)
           {
             best_choice=n*p;
-            best_variable=*k;
+            best_variable=var;
           }
         }
         else
         {
           // found is false
           best_choice=n*p;
-          best_variable=*k;
+          best_variable=var;
           found=true;
         }
       }
@@ -173,13 +174,12 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
 
   resulting_inequalities.swap(inequalities);
   // Add the equalities to the inequalities and return the result
-  for (std::vector < linear_inequality > :: const_iterator i=equalities.begin();
-       i!=equalities.end(); ++i)
+  for (const linear_inequality& equality: equalities)
   {
     assert(!i->is_false(r));
-    if (!i->is_true(r))
+    if (!equality.is_true(r))
     {
-      resulting_inequalities.push_back(*i);
+      resulting_inequalities.push_back(equality);
     }
   }
   mCRL2log(log::trace) << "Fourier-Motzkin elimination yields " << pp_vector(resulting_inequalities) << std::endl;
@@ -317,7 +317,7 @@ struct fourier_motzkin_sigma
   protected:
     rewriter rewr;
 
-    const data_expression apply(const abstraction& d, bool negate) const
+    data_expression apply(const abstraction& d, bool negate) const
     {
       const variable_list& variables = d.variables();
       const data_expression body = rewr(negate ? sort_bool::not_(d.body()) : d.body());
@@ -342,7 +342,7 @@ struct fourier_motzkin_sigma
     :  rewr(rewr_)
     {}
 
-    const data_expression operator()(const data_expression& d) const
+    data_expression operator()(const data_expression& d) const
     {
       return is_forall(d) || is_exists(d) ? apply(atermpp::down_cast<abstraction>(d), is_forall(d)) : d;
     }

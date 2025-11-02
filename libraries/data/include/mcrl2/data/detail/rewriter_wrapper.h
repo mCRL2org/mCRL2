@@ -11,8 +11,8 @@
 
 
 
-#ifndef _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
-#define _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
+#ifndef MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
+#define MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
 
 #include "mcrl2/data/rewriter.h"
 
@@ -37,7 +37,7 @@ struct rewriter_wrapper
 
     void operator()(data_expression& result, const data_expression& t, Rewriter::substitution_type& sigma) const
     {
-      return m_rewriter->rewrite(result, t, sigma);
+      m_rewriter->rewrite(result, t, sigma);
     }
 
     data_expression operator()(const data_expression& t) const
@@ -58,4 +58,4 @@ struct rewriter_wrapper
 
 } // namespace mcrl2::data::detail
 
-#endif // _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
+#endif // MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H

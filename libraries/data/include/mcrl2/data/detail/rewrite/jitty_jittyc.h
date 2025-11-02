@@ -182,7 +182,7 @@ inline const data_expression& get_nested_head(const data_expression& t)
 }
 
 // Replace the recursively nested head symbol in t by head.
-inline const data_expression replace_nested_head(const data_expression& t, const data_expression& head)
+inline data_expression replace_nested_head(const data_expression& t, const data_expression& head)
 {
   if (is_application(t))
   {

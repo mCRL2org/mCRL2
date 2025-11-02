@@ -52,18 +52,18 @@ aterm create_nested_function(const std::string& function_name,  const std::strin
 
   // Initialize a wide function application.
   std::vector<aterm> arguments(f.arity());
-  for (std::size_t i = 0; i < arguments.size(); ++i)
+  for (aterm& argument: arguments)
   {
-    arguments[i] = c_term;
+    argument = c_term;
   }
   aterm f_term(f, arguments.begin(), arguments.end());
 
   for (std::size_t j = 0; j < depth; ++j)
   {
     // Create a very wide nested function application
-    for (std::size_t k = 0; k < arguments.size(); ++k)
+    for (aterm& argument: arguments)
     {
-      arguments[k] = f_term;
+      argument = f_term;
     }
 
     if (with_converter)

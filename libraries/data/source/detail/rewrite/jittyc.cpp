@@ -852,10 +852,10 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
     {
       // Supplement the lhs and rhs with requested_arity-actual_arity extra variables.
       sort_list_vector requested_sorts=get_residual_sorts(f.sort(),actual_arity,requested_arity);
-      for(sort_list_vector::const_iterator sl=requested_sorts.begin(); sl!=requested_sorts.end(); ++sl)
+      for (const atermpp::term_list<sort_expression>& requested_sort: requested_sorts)
       {
         variable_vector var_vec;
-        for (const sort_expression& s : *sl)
+        for (const sort_expression& s : requested_sort)
         {
           variable v = variable(jitty_rewriter.identifier_generator()(),
               s); // Find a new name for a variable that is temporarily in use.
@@ -947,9 +947,9 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
       assert(!rule_deps.empty());
       arg_use_count[maxidx] = 0;
       strat.push_front(match_tree_A(maxidx));
-      for (std::list<std::pair<data_equation, dep_list_t> >::iterator it = rule_deps.begin(); it != rule_deps.end(); ++it)
+      for (std::pair<data_equation, std::list<std::size_t>>& rule_dep: rule_deps)
       {
-        it->second.remove(maxidx);
+        rule_dep.second.remove(maxidx);
       }
     }
   }
@@ -1087,7 +1087,7 @@ class RewriterCompilingJitty::ImplementTree
   ///         'application' or 'make_term_with_many_arguments').
   ///
   static inline
-  const std::string appl_function(std::size_t arity)
+  std::string appl_function(std::size_t arity)
   {
     if (arity == 0)
     {
@@ -1097,7 +1097,7 @@ class RewriterCompilingJitty::ImplementTree
   }
 
   inline
-  const std::string rewr_function_name(const function_symbol& f, std::size_t arity)
+  std::string rewr_function_name(const function_symbol& f, std::size_t arity)
   {
     rewr_function_spec spec(f, arity, false);
     if (m_rewr_functions_implemented.insert(spec).second)
@@ -1108,7 +1108,7 @@ class RewriterCompilingJitty::ImplementTree
   }
 
   inline
-  const std::string delayed_rewr_function_name(const function_symbol& f, std::size_t arity)
+  std::string delayed_rewr_function_name(const function_symbol& f, std::size_t arity)
   {
     rewr_function_spec spec(f, arity, true);
     if (m_rewr_functions_implemented.insert(spec).second)
@@ -2227,15 +2227,15 @@ public:
   ImplementTree(RewriterCompilingJitty& rewr, function_symbol_vector& function_symbols)
     : m_rewriter(rewr), m_padding(2)
   {
-    for (function_symbol_vector::const_iterator it = function_symbols.begin(); it != function_symbols.end(); ++it)
+    for (const function_symbol& function_symbol: function_symbols)
     {
-      const std::size_t max_arity = getArity(*it);
+      const std::size_t max_arity = getArity(function_symbol);
       for (std::size_t arity = 0; arity <= max_arity; ++arity)
       {
-        if (arity_is_allowed(it->sort(), arity))
+        if (arity_is_allowed(function_symbol.sort(), arity))
         {
           // Register this <symbol, arity, nfs> tuple as a function that needs to be generated
-          static_cast<void>(rewr_function_name(*it, arity));
+          static_cast<void>(rewr_function_name(function_symbol, arity));
         }
       }
     }
@@ -2901,11 +2901,11 @@ static std::string generate_cpp_filename(std::size_t unique)
 template <class Filter>
 void filter_function_symbols(const function_symbol_vector& source, function_symbol_vector& dest, Filter filter)
 {
-  for (function_symbol_vector::const_iterator it = source.begin(); it != source.end(); ++it)
+  for (const auto & it : source)
   {
-    if (filter(*it))
+    if (filter(it))
     {
-      dest.push_back(*it);
+      dest.push_back(it);
     }
   }
 }
@@ -3066,9 +3066,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   stopwatch time;
 
   jittyc_eqns.clear();
-  for(std::set < data_equation >::const_iterator it = rewrite_rules.begin(); it != rewrite_rules.end(); ++it)
+  for (const data_equation& rewrite_rule: rewrite_rules)
   {
-    jittyc_eqns[down_cast<function_symbol>(get_nested_head(it->lhs()))].push_front(*it);
+    jittyc_eqns[down_cast<function_symbol>(get_nested_head(rewrite_rule.lhs()))].push_front(rewrite_rule);
   }
 
   std::string cpp_file = generate_cpp_filename(reinterpret_cast<std::size_t>(this));

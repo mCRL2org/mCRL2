@@ -71,9 +71,9 @@ BOOST_AUTO_TEST_CASE(test_for_each)
   aterm t (read_appl_from_string("h(g(x),f(y))"));
   std::set<std::string> names;
   atermpp::for_each(t, for_each_proc(names));
-  for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
+  for (const std::string& name : names)
   {
-    std::cout << *i << " ";
+    std::cout << name << " ";
   }
   BOOST_CHECK(names.find("h") != names.end());
   BOOST_CHECK(names.find("g") != names.end());

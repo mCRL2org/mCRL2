@@ -132,9 +132,9 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
         assert(sort_list::is_list(s));
         const sort_expression s1=container_sort(s).element_sort();
 
-        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (const data_expression& i: appl)
         {
-          strict_type_check(*i);
+          strict_type_check(i);
           assert(i->sort()==s1);
 
         }
@@ -146,9 +146,9 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
         assert(sort_fset::is_fset(s));
         const sort_expression s1=container_sort(s).element_sort();
 
-        for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
+        for (const auto & i : appl)
         {
-          strict_type_check(*i);
+          strict_type_check(i);
           assert(i->sort()==s1);
 
         }
@@ -4126,7 +4126,8 @@ void mcrl2::data::data_type_checker::read_sort(const sort_expression& sort_expr)
 
   if (is_container_sort(sort_expr))
   {
-    return read_sort(down_cast<container_sort>(sort_expr).element_sort());
+    read_sort(down_cast<container_sort>(sort_expr).element_sort()); 
+    return;
   }
 
   if (is_function_sort(sort_expr))
@@ -4630,7 +4631,7 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
   data_spec=new_specification;
 }
 
-const data_specification mcrl2::data::data_type_checker::operator()() const
+data_specification mcrl2::data::data_type_checker::operator()() const
 {
   return type_checked_data_spec;
 }

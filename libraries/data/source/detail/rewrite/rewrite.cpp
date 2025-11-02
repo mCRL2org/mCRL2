@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <ranges>
+
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #include "mcrl2/data/detail/rewrite/jitty_jittyc.h"
 #include "mcrl2/data/detail/enumerator_iteration_limit.h"
@@ -421,9 +423,8 @@ void Rewriter::quantifier_enumeration(
   variable_list vl_new_l_other;
 
   bool sorts_are_finite=true;
-  for(variable_vector::const_reverse_iterator i=vl_new_v.rbegin(); i!=vl_new_v.rend(); ++i)
+  for (const variable& v: std::ranges::reverse_view(vl_new_v))
   {
-    const variable v = *i;
     if (free_variables.count(v)>0)
     {
       if (is_enumerable(m_data_specification_for_enumeration, rewriter_wrapper(this), v.sort()))

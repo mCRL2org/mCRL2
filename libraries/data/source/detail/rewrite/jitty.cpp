@@ -121,7 +121,7 @@ class dependencies_rewrite_rule_pair
       return m_dependencies;
     }
 
-    const data_equation equation() const
+    data_equation equation() const
     {
       return m_equation;
     }

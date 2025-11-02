@@ -16,6 +16,8 @@
 #ifndef MCRL2_DATA_LINEAR_INEQUALITY_H
 #define MCRL2_DATA_LINEAR_INEQUALITY_H
 
+#include <ranges>
+
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/map_substitution.h"
 
@@ -330,23 +332,23 @@ namespace detail
     return lhs_t(result.begin(),result.end());
   }
 
-  inline const lhs_t map_to_lhs_type(const map_based_lhs_t& lhs)
+  inline lhs_t map_to_lhs_type(const map_based_lhs_t& lhs)
   {
     lhs_t result;
-    for(map_based_lhs_t::const_reverse_iterator i=lhs.rbegin(); i!=lhs.rend(); ++i)
+    for (const std::pair<const variable, data_expression>& expr: std::ranges::reverse_view(lhs))
     {
-        result.push_front(variable_with_a_rational_factor(i->first,i->second));
+        result.push_front(variable_with_a_rational_factor(expr.first,expr.second));
     }
     return result;
   }
 
-  inline const lhs_t map_to_lhs_type(const map_based_lhs_t& lhs, const data_expression& factor, const rewriter& r)
+  inline lhs_t map_to_lhs_type(const map_based_lhs_t& lhs, const data_expression& factor, const rewriter& r)
   {
     assert(factor!=real_one() && factor!=real_minus_one());
     lhs_t result;
-    for(map_based_lhs_t::const_reverse_iterator i=lhs.rbegin(); i!=lhs.rend(); ++i)
+    for (const std::pair<const variable, data_expression>& expr: std::ranges::reverse_view(lhs))
     {
-      result.push_front(variable_with_a_rational_factor(i->first, rewrite_with_memory(real_divides(i->second,factor), r)));
+      result.push_front(variable_with_a_rational_factor(expr.first, rewrite_with_memory(real_divides(expr.second,factor), r)));
     }
     return result;
   }
@@ -378,7 +380,7 @@ namespace detail
     return true;
   }
 
-  inline const lhs_t remove_variable_and_divide(const lhs_t& lhs, const variable& v, const data_expression& f, const rewriter& r)
+  inline lhs_t remove_variable_and_divide(const lhs_t& lhs, const variable& v, const data_expression& f, const rewriter& r)
   {
     std::vector <variable_with_a_rational_factor> result;
     for(const variable_with_a_rational_factor& p: lhs)
@@ -401,7 +403,7 @@ namespace detail
 
 
   template < application Operation(const data_expression&, const data_expression&) >
-  inline const lhs_t meta_operation_constant(const lhs_t& argument, const data_expression& v, const rewriter& r)
+  inline lhs_t meta_operation_constant(const lhs_t& argument, const data_expression& v, const rewriter& r)
   {
     std::vector<detail::variable_with_a_rational_factor> result;
     result.reserve(argument.size());
@@ -466,27 +468,27 @@ namespace detail
     return lhs_t(result.begin(),result.end());
   }
 
-  inline const lhs_t add(const data_expression& v, const lhs_t& argument, const rewriter& r)
+  inline lhs_t add(const data_expression& v, const lhs_t& argument, const rewriter& r)
   {
     return meta_operation_constant<real_plus>(argument,v,r);
   }
 
-  inline const lhs_t subtract(const lhs_t& argument, const data_expression& v, const rewriter& r)
+  inline lhs_t subtract(const lhs_t& argument, const data_expression& v, const rewriter& r)
   {
     return meta_operation_constant<real_minus>(argument, v, r);
   }
 
-  inline const lhs_t multiply(const lhs_t& argument, const data_expression& v, const rewriter& r)
+  inline lhs_t multiply(const lhs_t& argument, const data_expression& v, const rewriter& r)
   {
     return meta_operation_constant<real_times>(argument, v, r);
   }
 
-  inline const lhs_t divide(const lhs_t& argument, const data_expression& v, const rewriter& r)
+  inline lhs_t divide(const lhs_t& argument, const data_expression& v, const rewriter& r)
   {
     return meta_operation_constant<real_divides>(argument, v, r);
   }
 
-  inline const lhs_t add(const lhs_t& argument, const lhs_t& e, const rewriter& r)
+  inline lhs_t add(const lhs_t& argument, const lhs_t& e, const rewriter& r)
   {
     return meta_operation_lhs(argument,
                               e,
@@ -495,7 +497,7 @@ namespace detail
                               r);
   }
 
-  inline const lhs_t subtract(const lhs_t& argument, const lhs_t& e, const rewriter& r)
+  inline lhs_t subtract(const lhs_t& argument, const lhs_t& e, const rewriter& r)
   {
     return meta_operation_lhs(argument,
                               e,
@@ -1047,10 +1049,9 @@ void count_occurrences(
   std::map < variable, std::size_t>& nr_negative_occurrences,
   const rewriter& r)
 {
-  for (std::vector < linear_inequality >::const_iterator i=inequalities.begin();
-       i!=inequalities.end(); ++i)
+  for (const auto & inequalitie : inequalities)
   {
-    for (detail::lhs_t::const_iterator j=i->lhs_begin(); j!=i->lhs_end(); ++j)
+    for (detail::lhs_t::const_iterator j=inequalitie.lhs_begin(); j!=inequalitie.lhs_end(); ++j)
     {
       if (is_positive(j->factor(),r))
       {
@@ -1227,15 +1228,14 @@ static void pivot_and_update(
   beta_delta_correction[xj]=rewrite_with_memory(real_plus(beta_delta_correction[xj],theta_delta_correction),r);
 
   mCRL2log(log::trace) << "Pivoting phase 0\n";
-  for (std::set < variable >::const_iterator k=basic_variables.begin();
-       k!=basic_variables.end(); ++k)
+  for (const variable& basic_variable: basic_variables)
   {
-    mCRL2log(log::trace) << "Working equalities " << *k << ":  " << pp(working_equalities[*k]) << "\n";
-    if ((*k!=xi) && (working_equalities[*k].count(xj)>0))
+    mCRL2log(log::trace) << "Working equalities " << basic_variable << ":  " << pp(working_equalities[basic_variable]) << "\n";
+    if ((basic_variable!=xi) && (working_equalities[basic_variable].count(xj)>0))
     {
-      const data_expression akj=working_equalities[*k][xj];
-      beta[*k]=rewrite_with_memory(real_plus(beta[*k],real_times(akj ,theta)),r);
-      beta_delta_correction[*k]=rewrite_with_memory(real_plus(beta_delta_correction[*k],real_times(akj ,theta_delta_correction)),r);
+      const data_expression akj=working_equalities[basic_variable][xj];
+      beta[basic_variable]=rewrite_with_memory(real_plus(beta[basic_variable],real_times(akj ,theta)),r);
+      beta_delta_correction[basic_variable]=rewrite_with_memory(real_plus(beta_delta_correction[basic_variable],real_times(akj ,theta_delta_correction)),r);
     }
   }
   // Apply pivoting on variables xi and xj;
@@ -1251,18 +1251,17 @@ static void pivot_and_update(
   mCRL2log(log::trace) << "Pivoting phase 2\n";
   working_equalities.erase(xi);
 
-  for (std::map < variable, detail::lhs_t >::iterator j=working_equalities.begin();
-       j!=working_equalities.end(); ++j)
+  for (auto & working_equalitie : working_equalities)
   {
-    if (j->second.count(xj)>0)
+    if (working_equalitie.second.count(xj)>0)
     {
-      const data_expression factor=j->second[xj];
-      mCRL2log(log::trace) << "VAR: " << pp(j->first) << " Factor " << pp(factor) << "\n";
-      j->second=j->second.erase(xj);
+      const data_expression factor=working_equalitie.second[xj];
+      mCRL2log(log::trace) << "VAR: " << pp(working_equalitie.first) << " Factor " << pp(factor) << "\n";
+      working_equalitie.second=working_equalitie.second.erase(xj);
       // We need a temporary copy of expression_for_xj as otherwise the multiply
       // below will change this expression.
       //detail::lhs_t temporary_expression_for_xj(expression_for_xj);
-      j->second=add(j->second,multiply(expression_for_xj,factor,r),r);
+      working_equalitie.second=add(working_equalitie.second,multiply(expression_for_xj,factor,r),r);
     }
   }
 
@@ -1652,11 +1651,10 @@ inline bool is_inconsistent(
 
   // First set lower and upperbounds, and introduce slack variables
   // if required.
-  for (std::vector < linear_inequality >::iterator i=inequalities.begin();
-       i!=inequalities.end(); ++i)
+  for (linear_inequality& inequality: inequalities)
   {
-    mCRL2log(log::trace) << "Investigate inequality: " << ":=" << pp(*i) << " ||  " << pp(i->lhs()) << "\n";
-    if (i->is_false(r))
+    mCRL2log(log::trace) << "Investigate inequality: " << ":=" << pp(inequality) << " ||  " << pp(inequality.lhs()) << "\n";
+    if (inequality.is_false(r))
     {
       mCRL2log(log::trace) << "Inconsistent, because linear inequalities contains an inconsistent inequality after Gauss elimination\n";
       if (use_cache)
@@ -1666,18 +1664,18 @@ inline bool is_inconsistent(
       }
       return true;
     }
-    if (!i->is_true(r))  // This inequality is redundant and can be skipped.
+    if (!inequality.is_true(r))  // This inequality is redundant and can be skipped.
     {
       assert(i->comparison()!=detail::equal);
       assert(i->lhs().size()>0); // this signals a redundant or an inconsistent inequality.
-      i->add_variables(non_basic_variables);
+      inequality.add_variables(non_basic_variables);
 
-      if (i->lhs().size()==1)  // the left hand side consists of a single variable.
+      if (inequality.lhs().size()==1)  // the left hand side consists of a single variable.
       {
-        variable v=i->lhs_begin()->variable_name();
-        data_expression factor=i->lhs_begin()->factor();
+        variable v=inequality.lhs_begin()->variable_name();
+        data_expression factor=inequality.lhs_begin()->factor();
         assert(factor!=real_zero());
-        data_expression bound=rewrite_with_memory(real_divides(i->rhs(),factor),r);
+        data_expression bound=rewrite_with_memory(real_divides(inequality.rhs(),factor),r);
         if (is_positive(factor,r))
         {
           // The inequality has the shape factor*v<=c or factor*v<c with factor positive
@@ -1686,7 +1684,7 @@ inline bool is_inconsistent(
           {
             upperbounds[v]=bound;
             upperbounds_delta_correction[v]=
-              ((i->comparison()==detail::less)?real_minus_one():real_zero());
+              ((inequality.comparison()==detail::less)?real_minus_one():real_zero());
 
           }
           else
@@ -1695,7 +1693,7 @@ inline bool is_inconsistent(
             {
               upperbounds_delta_correction[v]=
                 min(upperbounds_delta_correction[v],
-                    ((i->comparison()==detail::less)?real_minus_one():real_zero()),r);
+                    ((inequality.comparison()==detail::less)?real_minus_one():real_zero()),r);
             }
           }
         }
@@ -1707,7 +1705,7 @@ inline bool is_inconsistent(
           {
             lowerbounds[v]=bound;
             lowerbounds_delta_correction[v]=
-              ((i->comparison()==detail::less)?real_one():real_zero());
+              ((inequality.comparison()==detail::less)?real_one():real_zero());
           }
           else
           {
@@ -1715,7 +1713,7 @@ inline bool is_inconsistent(
             {
               lowerbounds_delta_correction[v]=
                 max(lowerbounds_delta_correction[v],
-                    ((i->comparison()==detail::less)?real_one():real_zero()),r);
+                    ((inequality.comparison()==detail::less)?real_one():real_zero()),r);
             }
           }
         }
@@ -1726,28 +1724,27 @@ inline bool is_inconsistent(
         // We transform it into an equation with a new slack variable.
         variable new_basic_variable(fresh_variable_name("slack_var"), sort_real::real_());
         basic_variables.insert(new_basic_variable);
-        upperbounds[new_basic_variable]=i->rhs();
+        upperbounds[new_basic_variable]=inequality.rhs();
         upperbounds_delta_correction[new_basic_variable]=
-          ((i->comparison()==detail::less)?real_minus_one():real_zero());
-        working_equalities[new_basic_variable]=i->lhs();
-        mCRL2log(log::trace) << "New slack variable: " << pp(new_basic_variable) << ":=" << pp(*i) << "   " << pp(i->lhs()) << "\n";
+          ((inequality.comparison()==detail::less)?real_minus_one():real_zero());
+        working_equalities[new_basic_variable]=inequality.lhs();
+        mCRL2log(log::trace) << "New slack variable: " << pp(new_basic_variable) << ":=" << pp(inequality) << "   " << pp(inequality.lhs()) << "\n";
       }
     }
   }
   // Now set the values for beta:
   // The beta values for the non basic variables must satisfy the lower and
   // upperbounds.
-  for (std::set < variable >::const_iterator i=non_basic_variables.begin();
-       i!=non_basic_variables.end(); ++i)
+  for (const auto & non_basic_variable : non_basic_variables)
   {
-    if (lowerbounds.count(*i)>0)
+    if (lowerbounds.count(non_basic_variable)>0)
     {
-      if ((upperbounds.count(*i)>0) &&
-          ((rewrite_with_memory(less(upperbounds[*i],lowerbounds[*i]),r)==sort_bool::true_()) ||
-           ((upperbounds[*i]==lowerbounds[*i]) &&
-            (rewrite_with_memory(less(upperbounds_delta_correction[*i],lowerbounds_delta_correction[*i]),r)==sort_bool::true_()))))
+      if ((upperbounds.count(non_basic_variable)>0) &&
+          ((rewrite_with_memory(less(upperbounds[non_basic_variable],lowerbounds[non_basic_variable]),r)==sort_bool::true_()) ||
+           ((upperbounds[non_basic_variable]==lowerbounds[non_basic_variable]) &&
+            (rewrite_with_memory(less(upperbounds_delta_correction[non_basic_variable],lowerbounds_delta_correction[non_basic_variable]),r)==sort_bool::true_()))))
       {
-        mCRL2log(log::trace) << "Inconsistent, preprocessing " << pp(*i) << "\n";
+        mCRL2log(log::trace) << "Inconsistent, preprocessing " << pp(non_basic_variable) << "\n";
         if (use_cache)
         {
           inconsistency_cache.add_inconsistent_inequality_set(inequalities_in);
@@ -1755,30 +1752,29 @@ inline bool is_inconsistent(
         }
         return true; // Inconsistent.
       }
-      beta[*i]=lowerbounds[*i];
-      beta_delta_correction[*i]=lowerbounds_delta_correction[*i];
+      beta[non_basic_variable]=lowerbounds[non_basic_variable];
+      beta_delta_correction[non_basic_variable]=lowerbounds_delta_correction[non_basic_variable];
     }
-    else if (upperbounds.count(*i)>0)
+    else if (upperbounds.count(non_basic_variable)>0)
     {
-      beta[*i]=upperbounds[*i];
-      beta_delta_correction[*i]=upperbounds_delta_correction[*i];
+      beta[non_basic_variable]=upperbounds[non_basic_variable];
+      beta_delta_correction[non_basic_variable]=upperbounds_delta_correction[non_basic_variable];
     }
     else // *i has neither a lower or an upperbound
     {
-      beta[*i]=real_zero();
-      beta_delta_correction[*i]=real_zero();
+      beta[non_basic_variable]=real_zero();
+      beta_delta_correction[non_basic_variable]=real_zero();
     }
-    mCRL2log(log::trace) << "(2) beta[" << pp(*i) << "]=" << pp(beta[*i])<< "+delta*" << pp(beta_delta_correction[*i]) <<"\n";
+    mCRL2log(log::trace) << "(2) beta[" << pp(non_basic_variable) << "]=" << pp(beta[non_basic_variable])<< "+delta*" << pp(beta_delta_correction[non_basic_variable]) <<"\n";
   }
 
   // Subsequently set the values for the basic variables
-  for (std::set < variable >::const_iterator i=basic_variables.begin();
-       i!=basic_variables.end(); ++i)
+  for (const auto & basic_variable : basic_variables)
   {
-    beta[*i]=working_equalities[*i].evaluate(make_map_substitution(beta),r);
-    beta_delta_correction[*i]=working_equalities[*i].
+    beta[basic_variable]=working_equalities[basic_variable].evaluate(make_map_substitution(beta),r);
+    beta_delta_correction[basic_variable]=working_equalities[basic_variable].
                               evaluate(make_map_substitution(beta_delta_correction),r);
-    mCRL2log(log::trace) << "(3) beta[" << pp(*i) << "]=" << pp(beta[*i])<< "+delta*" << pp(beta_delta_correction[*i]) <<"\n";
+    mCRL2log(log::trace) << "(3) beta[" << pp(basic_variable) << "]=" << pp(beta[basic_variable])<< "+delta*" << pp(beta_delta_correction[basic_variable]) <<"\n";
   }
 
   // Now the basic data structure has been set up.
@@ -1792,37 +1788,36 @@ inline bool is_inconsistent(
     bool found=false;
     bool lowerbound_violation = false;
     variable xi;
-    for (std::set < variable > :: const_iterator i=basic_variables.begin() ;
-         i!=basic_variables.end() ; ++i)
+    for (const auto & basic_variable : basic_variables)
     {
       mCRL2log(log::trace) << "Evaluate start\n";
       assert(!found);
-      data_expression value=beta[*i]; // working_equalities[*i].evaluate(beta,r);
-      data_expression value_delta_correction=beta_delta_correction[*i]; // working_equalities[*i].evaluate(beta_delta_correction,r);
+      data_expression value=beta[basic_variable]; // working_equalities[*i].evaluate(beta,r);
+      data_expression value_delta_correction=beta_delta_correction[basic_variable]; // working_equalities[*i].evaluate(beta_delta_correction,r);
       mCRL2log(log::trace) << "Evaluate end\n";
-      if ((upperbounds.count(*i)>0) &&
-          ((rewrite_with_memory(less(upperbounds[*i],value),r)==sort_bool::true_()) ||
-           ((upperbounds[*i]==value) &&
-            (rewrite_with_memory(less(upperbounds_delta_correction[*i],value_delta_correction),r)==sort_bool::true_()))))
+      if ((upperbounds.count(basic_variable)>0) &&
+          ((rewrite_with_memory(less(upperbounds[basic_variable],value),r)==sort_bool::true_()) ||
+           ((upperbounds[basic_variable]==value) &&
+            (rewrite_with_memory(less(upperbounds_delta_correction[basic_variable],value_delta_correction),r)==sort_bool::true_()))))
       {
         // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
-        mCRL2log(log::trace) << "Upperbound violation " << pp(*i) << "  bound: " << pp(upperbounds[*i]) << "\n";
+        mCRL2log(log::trace) << "Upperbound violation " << pp(basic_variable) << "  bound: " << pp(upperbounds[basic_variable]) << "\n";
         found=true;
-        xi=*i;
+        xi=basic_variable;
         lowerbound_violation=false;
         break;
       }
-      else if ((lowerbounds.count(*i)>0) &&
-               ((rewrite_with_memory(less(value,lowerbounds[*i]),r)==sort_bool::true_()) ||
-                ((lowerbounds[*i]==value) &&
-                 (rewrite_with_memory(less(value_delta_correction,lowerbounds_delta_correction[*i]),r)==sort_bool::true_()))))
+      else if ((lowerbounds.count(basic_variable)>0) &&
+               ((rewrite_with_memory(less(value,lowerbounds[basic_variable]),r)==sort_bool::true_()) ||
+                ((lowerbounds[basic_variable]==value) &&
+                 (rewrite_with_memory(less(value_delta_correction,lowerbounds_delta_correction[basic_variable]),r)==sort_bool::true_()))))
       {
         // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
-        mCRL2log(log::trace) << "Lowerbound violation " << pp(*i) << "  bound: " << pp(lowerbounds[*i]) << "\n";
+        mCRL2log(log::trace) << "Lowerbound violation " << pp(basic_variable) << "  bound: " << pp(lowerbounds[basic_variable]) << "\n";
         found=true;
-        xi=*i;
+        xi=basic_variable;
         lowerbound_violation=true;
         break;
       }
@@ -1960,9 +1955,9 @@ std::set < variable >  gauss_elimination(
   std::set < variable >  remaining_variables;
 
   // First copy equalities to the resulting_equalities and the inequalites to resulting_inequalities.
-  for (std::vector < linear_inequality > ::const_iterator j = inequalities.begin(); j != inequalities.end(); ++j)
+  for (const linear_inequality& inequality: inequalities)
   {
-    if (j->is_false(r))
+    if (inequality.is_false(r))
     {
       // The input contains false. Return false and stop.
       resulting_equalities.clear();
@@ -1970,15 +1965,15 @@ std::set < variable >  gauss_elimination(
       resulting_inequalities.emplace_back();
       return remaining_variables;
     }
-    else if (!j->is_true(r)) // Do not consider redundant equations.
+    else if (!inequality.is_true(r)) // Do not consider redundant equations.
     {
-      if (j->comparison()==detail::equal)
+      if (inequality.comparison()==detail::equal)
       {
-        resulting_equalities.push_back(*j);
+        resulting_equalities.push_back(inequality);
       }
       else
       {
-        resulting_inequalities.push_back(*j);
+        resulting_inequalities.push_back(inequality);
       }
     }
   }
