@@ -29,7 +29,6 @@
 #include <cstddef>
 #include <chrono>
 #include <iostream>
-#include <thread>
 #include <future>
 
 namespace mcrl2::pbes_system
@@ -38,8 +37,6 @@ namespace mcrl2::pbes_system
 struct pbeschain_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
-  bool use_bdd_simplifier = false;
-  double bdd_timeout = 0.25;
   bool back_substitution = true;
   int max_depth = 12;
   bool count_unique_pvi = false;
@@ -317,48 +314,29 @@ inline pbes_expression datatopbes(data::data_expression& data_expr,
 }
 
 inline pbes_expression simplify_expr(pbes_expression& phi,
-    pbeschain_options options,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
-        replace_substituter,
-    simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter
-    // mcrl2::data::detail::BDD_Prover& f_bdd_prover)
-    )
+    simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter)
 {
   std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
-    if (options.use_bdd_simplifier)
-    {
-      data::data_expression expr = pbestodata(phi, replace_substituter);
-      // f_bdd_prover.set_formula(expr);
-      // expr = f_bdd_prover.get_bdd();
-      return datatopbes(expr, if_substituter, replace_substituter);
-    }
-    else
-    {
-      pbes_expression res = phi;
-      auto c1 = std::async(std::launch::async, [phi,pbes_rewriter]() {
-        return pbes_rewrite(phi, pbes_rewriter);
-      });
-      if (c1.wait_for(std::chrono::milliseconds(200)) == std::future_status::ready) {
-        res = c1.get();
-      } 
-      else {
-        res = phi;
-      }
-      if_substituter.apply(res, res);
-      return res;
-    }
-  return phi;
+  pbes_expression res = phi;
+  std::future<mcrl2::pbes_system::pbes_expression> c1 = std::async(std::launch::async, [phi,pbes_rewriter]() {
+    return pbes_rewrite(phi, pbes_rewriter);
+  });
+  if (c1.wait_for(std::chrono::milliseconds(200)) == std::future_status::ready) {
+    res = c1.get();
+  } 
+  else {
+    res = phi;
+  }
+  if_substituter.apply(res, res);
+  return res;
 }
 
 inline void self_substitute(pbes_equation& equation,
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
-        replace_substituter,
     simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter,
     simplify_data_rewriter<data::rewriter>& pbes_default_rewriter,
-    // mcrl2::data::detail::BDD_Prover& f_bdd_prover,
     pbeschain_options options)
 {
   bool stable = false;
@@ -489,8 +467,7 @@ inline void self_substitute(pbes_equation& equation,
 
         // Simplify
 
-        phi = simplify_expr(phi, options, if_substituter, replace_substituter, pbes_rewriter 
-            );
+        phi = simplify_expr(phi, if_substituter, pbes_rewriter);
         phi_vector = get_propositional_variable_instantiations(phi);
         int size = phi_vector.size();
         if (options.count_unique_pvi)
@@ -583,15 +560,12 @@ inline void self_substitute(pbes_equation& equation,
       mCRL2log(log::verbose) << "\rNew number of pvi: " << current_size << "";
 
       // Simplify
-      if (!options.use_bdd_simplifier && (current_size == 0 || (previous_size >= current_size + 10)))
+      if (current_size == 0 || (previous_size >= current_size + 10))
       {
         previous_size = current_size;
         equation.formula() = simplify_expr(equation.formula(),
-            options,
             if_substituter,
-            replace_substituter,
-            pbes_rewriter
-            );
+            pbes_rewriter);
       }
     }
   }
@@ -666,13 +640,6 @@ struct pbeschain_pbes_backward_substituter
     {
       p = fill_pvi(p, data_rewriter);
     }
-
-    // mcrl2::data::detail::BDD_Prover f_bdd_prover(p.data(),
-    //     data::used_data_equation_selector(p.data()),
-    //     mcrl2::data::jitty,
-    //     options.bdd_timeout);
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>
-        replace_substituter(pbes_rewriter2);
     
     if (options.max_depth <= 0){
        return;
@@ -683,10 +650,8 @@ struct pbeschain_pbes_backward_substituter
       self_substitute(*i,
           pvi_substituter,
           if_rewriter,
-          replace_substituter,
           pbes_rewriter,
           pbes_default_rewriter,
-          // f_bdd_prover,
           options);
 
       std::set<propositional_variable_instantiation> pvi_set
