@@ -280,7 +280,7 @@ namespace detail
     std::map<data::function_symbol, data::data_equation> m_new_eqns;
 
     /// @brief Finds all rewriting equations for f
-    const data::data_equation_vector find_equations(const data::function_symbol& f)
+    data::data_equation_vector find_equations(const data::function_symbol& f)
     {
       data::data_equation_vector result;
       for (const data::data_equation& eqn: m_datamgr.dataspec().equations())

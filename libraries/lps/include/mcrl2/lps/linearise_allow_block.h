@@ -70,7 +70,8 @@ inline std::string log_allow_block_application(const lps_statistics_t& lps_stati
 /// \returns n == m and ai == bi for 1 <= i <= n
 inline bool allow_(const process::action_name_multiset& allow_action,
     const process::action_list& multi_action,
-    const process::action& termination_action)
+    [[maybe_unused]]
+    const process::action&  termination_action)
 {
   /* The special cases where multiaction==tau and multiaction=={ Terminated } must have been
      dealt with separately. */

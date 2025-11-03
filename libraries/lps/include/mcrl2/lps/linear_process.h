@@ -183,9 +183,9 @@ class linear_process_base
           return true;
         }
       }
-      for (auto i = m_deadlock_summands.begin(); i != m_deadlock_summands.end(); ++i)
+      for (const deadlock_summand& m_deadlock_summand: m_deadlock_summands)
       {
-        if (i->deadlock().has_time())
+        if (m_deadlock_summand.deadlock().has_time())
         {
           return true;
         }

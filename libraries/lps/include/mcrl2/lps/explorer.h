@@ -546,7 +546,7 @@ class explorer: public abortable
       lps::make_state(result, 
                       v.begin(), 
                       m_n, 
-                      [&](data::data_expression& result, const data::data_expression& x) { return rewr(result, x, sigma); });
+                      [&](data::data_expression& result, const data::data_expression& x) { rewr(result, x, sigma); return; });
     }
 
     template <typename DataExpressionSequence>
@@ -603,13 +603,13 @@ class explorer: public abortable
             [&](process::action& result, const process::action& a)
             {
               const data::data_expression_list& args = a.arguments();
-              return process::make_action(result, 
+              process::make_action(result, 
                                           a.label(), 
                                           data::data_expression_list(args.begin(), 
                                                                      args.end(), 
                                                                      [&](data::data_expression& result, 
                                                                          const data::data_expression& x) -> void
-                                                                                 { rewr(result, x, sigma); }));     
+                                                                                 { rewr(result, x, sigma); })); return;     
             }
           ),
           a.has_time() ? rewr(time, sigma) : time
@@ -1016,7 +1016,7 @@ class explorer: public abortable
       }
     }
 
-    virtual ~explorer() = default;
+    ~explorer() override = default;
 
     // Get the initial state of the specification. 
     const data::data_expression_list& initial_state() const

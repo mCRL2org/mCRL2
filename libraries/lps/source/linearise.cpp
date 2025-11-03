@@ -33,6 +33,8 @@
 //#define MCRL2_LOG_LPS_LINEARISE_STATISTICS 1
 
 //mCRL2 data
+#include <ranges>
+
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
@@ -7091,14 +7093,14 @@ class specification_basic_type
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
       lps_statistics_t lps_statistics_before = get_statistics(action_summands);
 #endif
-      for (stochastic_action_summand_vector::iterator i=action_summands.begin(); i!=action_summands.end() ; ++i)
+      for (auto & action_summand : action_summands)
       {
-        const action_list acts=hide_(hidelist,i->multi_action().actions());
-        *i=stochastic_action_summand(i->summation_variables(),
-                          i->condition(),
-                          i->has_time()?multi_action(acts,i->multi_action().time()):multi_action(acts),
-                          i->assignments(),
-                          i->distribution());
+        const action_list acts=hide_(hidelist,action_summand.multi_action().actions());
+        action_summand=stochastic_action_summand(action_summand.summation_variables(),
+                          action_summand.condition(),
+                          action_summand.has_time()?multi_action(acts,action_summand.multi_action().time()):multi_action(acts),
+                          action_summand.assignments(),
+                          action_summand.distribution());
       }
 
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
@@ -10005,10 +10007,9 @@ class specification_basic_type
         filter_vars_by_term(smd.distribution().distribution(),vars_set,vars_result_set);
       }
       variable_list result;
-      for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();
-           i!=vars_result_set.rend() ; ++i)
+      for (const mcrl2::data::variable& i: std::ranges::reverse_view(vars_result_set))
       {
-        result.push_front(*i);
+        result.push_front(i);
       }
 
       return result;
@@ -10029,10 +10030,9 @@ class specification_basic_type
                               vars_result_set);
 
       variable_list result;
-      for (std::set < variable >::reverse_iterator i=vars_result_set.rbegin();
-           i!=vars_result_set.rend() ; ++i)
+      for (const mcrl2::data::variable& i: std::ranges::reverse_view(vars_result_set))
       {
-        result.push_front(*i);
+        result.push_front(i);
       }
 
       return result;

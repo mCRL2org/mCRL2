@@ -641,7 +641,7 @@ protected:
   }
 
   /// Static initialization function to ensure m_allowed_actions can be const.
-  static const std::vector<core::identifier_string> init_allowed_actions(bool is_allow,
+  static std::vector<core::identifier_string> init_allowed_actions(bool is_allow,
       const process::action_name_multiset_list& allow_list,
       const process::action& termination_action)
   {
@@ -913,7 +913,7 @@ inline void communicationcomposition(const process::communication_expression_lis
     const std::function<data::data_expression(const data::data_expression&)>& RewriteTerm)
 
 {
-  return detail::apply_communication_algorithm(terminationAction,
+  detail::apply_communication_algorithm(terminationAction,
       RewriteTerm,
       communications,
       allowlist,

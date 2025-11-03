@@ -39,12 +39,12 @@ void run_linearisation_test_case(const std::string& spec, const bool expect_succ
   // Set various rewrite strategies
   rewrite_strategy_vector rewrite_strategies = data::detail::get_test_rewrite_strategies(false);
 
-  for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
+  for (mcrl2::data::rewrite_strategy rewrite_strategy: rewrite_strategies)
   {
-    std::clog << std::endl << "Testing with rewrite strategy " << *i << std::endl;
+    std::clog << std::endl << "Testing with rewrite strategy " << rewrite_strategy << std::endl;
 
     t_lin_options options;
-    options.rewrite_strategy=*i;
+    options.rewrite_strategy=rewrite_strategy;
 
     std::clog << "  Default options" << std::endl;
     run_linearisation_instance(spec, options, expect_success);
