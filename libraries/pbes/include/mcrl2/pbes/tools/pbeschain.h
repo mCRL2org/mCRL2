@@ -29,7 +29,6 @@
 #include <cstddef>
 #include <chrono>
 #include <iostream>
-#include <thread>
 #include <future>
 
 namespace mcrl2::pbes_system
