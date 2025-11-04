@@ -176,7 +176,7 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
   // Add the equalities to the inequalities and return the result
   for (const linear_inequality& equality: equalities)
   {
-    assert(!i->is_false(r));
+    assert(!equality.is_false(r));
     if (!equality.is_true(r))
     {
       resulting_inequalities.push_back(equality);

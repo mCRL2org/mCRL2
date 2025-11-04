@@ -1666,8 +1666,8 @@ inline bool is_inconsistent(
     }
     if (!inequality.is_true(r))  // This inequality is redundant and can be skipped.
     {
-      assert(i->comparison()!=detail::equal);
-      assert(i->lhs().size()>0); // this signals a redundant or an inconsistent inequality.
+      assert(inequality.comparison()!=detail::equal);
+      assert(inequality.lhs().size()>0); // this signals a redundant or an inconsistent inequality.
       inequality.add_variables(non_basic_variables);
 
       if (inequality.lhs().size()==1)  // the left hand side consists of a single variable.

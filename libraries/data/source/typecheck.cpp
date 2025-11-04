@@ -135,7 +135,7 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
         for (const data_expression& i: appl)
         {
           strict_type_check(i);
-          assert(i->sort()==s1);
+          assert(i.sort()==s1);
 
         }
         return true;
@@ -146,10 +146,10 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
         assert(sort_fset::is_fset(s));
         const sort_expression s1=container_sort(s).element_sort();
 
-        for (const auto & i : appl)
+        for (const data_expression& i: appl)
         {
           strict_type_check(i);
-          assert(i->sort()==s1);
+          assert(i.sort()==s1);
 
         }
         return true;
