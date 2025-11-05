@@ -58,7 +58,7 @@ In the first step we obtain the core of the PBES as defined in [SKLW25]_. The re
    \nu Zpos_{a}(n, v, n'{:}\mathbb{B}) = \mathit{true}\\
    \mu Zneg_{a}(n, v, n'{:}\mathbb{B}) = \mathit{false}\\
    ~\\
-   \mathbf{init}\ Y(\mathit{true})
+   \mathbf{init}\ Y
    \end{array}
 
 We can now provide the two equation systems to :ref:`tool-pbessolve` and save some computation effort while preserving the solution and the counter example of the original PBES. As usual, we must also provide the LPS from which the original PBES was constructed. The command is as follows::
