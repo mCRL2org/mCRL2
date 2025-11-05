@@ -66,7 +66,7 @@ Research
 .. [GW05a] J.F. Groote and T.A.C. Willemse. Model-checking processes with data. Science of Computer Programming, 56:251-273, 2005. Also appeared as a `technical report <http://alexandria.tue.nl/extra1/wskrap/publichtml/200216.pdf>`__ and a `short version at FMCO 2003 <http://dx.doi.org/10.1007/978-3-540-30101-1_10>`_. `(DOI) <http://dx.doi.org/10.1016/j.scico.2004.08.002>`__
 .. [GK04] J.F. Groote and M.K. Keinänen. Solving Disjunctive/Conjunctive Boolean Equation Systems with Alternating Fixed Points. In K. Jensen and A. Podelski, editors, Proc. 10th International Conference on Tools and Algorithms for the Construction and Analysis of Systems (TACAS'2004), LNCS 2988, pages 436-450. Springer, 2004. Also appeared as a `technical report <https://ir.cwi.nl/pub/4074/04074D.pdf>`__. `(DOI) <http://dx.doi.org/10.1007/b96393>`__
 .. [GP00] J.F. Groote and J.C. van de Pol. Equational Binary Decision Diagrams. Logic for Programming and Automated Reasoning, 1955:161-178. Springer Berlin Heidelberg, 2000. `(DOI) <http://doi.org/10.1007/3-540-44404-1_11>`__
-
+.. [SKLW25] A\. Stramaglia, J.J.A. Keiren, M\. Laveaux and T.A.C. Willemse. Efficient Evidence Generation for Modal μ-Calculus Model Checking. International Conference on Tools and Algorithms for the Construction and Analysis of Systems (TACAS'2025), LNCS 15696, pages 191-210. `(DOI) <https://doi.org/10.1007/978-3-031-90643-5_10>`__
 
 Applications
 ------------
