@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_PFNF_PBES_H
 #define MCRL2_PBES_DETAIL_PFNF_PBES_H
 
+#include <ranges>
+
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
@@ -245,9 +247,9 @@ class pfnf_equation
       phi = and_(m_h, phi);
 
       // apply quantifiers
-      for (auto i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
+      for (const pfnf_quantifier& m_quantifier: std::ranges::reverse_view(m_quantifiers))
       {
-        phi = i->apply_(phi);
+        phi = m_quantifier.apply_(phi);
       }
       return pbes_equation(m_symbol, m_X, phi);
     }

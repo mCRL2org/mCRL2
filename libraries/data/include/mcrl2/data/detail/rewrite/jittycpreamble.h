@@ -285,7 +285,7 @@ void rewrite_appl_aux(data_expression& result, const application& t, RewriterCom
   }
 
   // Reconstruct term t.
-  const application t1((head0 == head) ? t : replace_nested_head(t, head));
+  const application t1((head0 == head) ? static_cast<const data_expression&>(t) : replace_nested_head(t, head));
 
   const data_expression head1(get_nested_head(t1));
   // Here head1 has the shape
