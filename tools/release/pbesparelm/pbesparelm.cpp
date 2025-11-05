@@ -43,7 +43,7 @@ public:
   void add_options(utilities::interface_description& desc) override
   {
     super::add_options(desc);
-    desc.add_hidden_option("ignore-cex", "Ignores the counter example equations if present.");
+    desc.add_option("ignore-cex", "Ignores the counter example equations if present.");
   }
 
   void parse_options(const utilities::command_line_parser& parser) override

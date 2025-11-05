@@ -178,7 +178,7 @@ class pbessolve_tool
       desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
       desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
       desc.add_hidden_option("prune-todo-alternative", "Use a variation of todo list pruning.");
-      desc.add_hidden_option("original-pbes",
+      desc.add_option("original-pbes",
         utilities::make_file_argument("NAME"),
         "In the second round of solving, use a different PBES than in the first round. "
         "Use case: First solve a PBES reduced by the pbesparelm tool, and then use "
