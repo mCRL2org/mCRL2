@@ -42,6 +42,16 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
 .. note::
 
+   The Coursera lectures are now freely available on Youtube, divided in four parts. It is intended
+   that the full course including exercises will soon be available on openlearnity.com. 
+
+   - `Automata and behavioural equivalences <https://www.youtube.com/watch?v=1brp80vNSy4&list=PLTlBz41EgXBTRm4jcsRwKWoTazWxiieNi>`_.
+   - `Model process behaviour <https://www.youtube.com/watch?v=1yP9kMpkv38&list=PLTlBz41EgXBTmbFWpxMsZRT2vcnxxC6fF>`_.
+   - `Requirements by modal formulas <https://www.youtube.com/watch?v=-vmhNqO16MA&list=PLTlBz41EgXBQ_vIWcFcGJa8_-a8-o19_F>`_.
+   - `Modelling software, protocols, and other behaviour <https://www.youtube.com/watch?v=JV2djZV_dls&list=PLTlBz41EgXBSZPXTzP_MuvbO6MnmTOly6>`_.
+
+.. note::
+
    Listen to the `Parallel Rhapsody <https://suno.com/song/e90327be-a900-4fc3-82b2-8365cc837cfc>`_
    (thanks to Frederik Gosewehr and Gert Veltink).
 
@@ -78,7 +88,7 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
    On Coursera four consecutive courses consisting of approximately 60 lectures provide an introduction into the theory and practical
    use of the mCRL2 toolset. It is based on the book 'Modeling and Analysis of Communicating
-   Systems' shown above. The courses are:
+   Systems' shown above. Unfortunately, these are now behind a pay wall. The courses are:
 
    - `Automata and behavioural equivalences <https://www.coursera.org/learn/automata-system-validation>`_.
    - `Model process behaviour <https://www.coursera.org/learn/system-validation-behavior>`_.
