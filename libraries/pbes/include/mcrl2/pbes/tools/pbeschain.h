@@ -318,18 +318,29 @@ inline pbes_expression simplify_expr(pbes_expression& phi,
     simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter)
 {
   std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
-  pbes_expression res = phi;
-  std::future<mcrl2::pbes_system::pbes_expression> c1 = std::async(std::launch::async, [phi,pbes_rewriter]() {
-    return pbes_rewrite(phi, pbes_rewriter);
-  });
-  if (c1.wait_for(std::chrono::milliseconds(200)) == std::future_status::ready) {
-    res = c1.get();
-  } 
-  else {
-    res = phi;
-  }
+  pbes_expression res = pbes_rewrite(phi, pbes_rewriter);
   if_substituter.apply(res, res);
   return res;
+  // TODO: Figure out segfault
+  // mCRL2log(log::verbose) << "Starting" << std::endl;
+  // std::promise<mcrl2::pbes_system::pbes_expression> promise;
+  //     std::future<mcrl2::pbes_system::pbes_expression> f_times_out = promise.get_future();
+  //     std::thread([phi, pbes_rewriter](std::promise<mcrl2::pbes_system::pbes_expression> promise)
+  //                 { 
+  //                     promise.set_value_at_thread_exit(pbes_rewrite(phi, pbes_rewriter)); 
+  //                 }, 
+  //                 std::move(promise)
+  //     ).detach();
+  // if (f_times_out.wait_until(std::chrono::system_clock::now() + std::chrono::milliseconds(200)) == std::future_status::ready) {
+  //     mCRL2log(log::verbose) << "finish" << std::endl;
+  //     res = f_times_out.get();
+  //   if_substituter.apply(res, res);
+  //   return res;
+  // } 
+  // else {
+  //     mCRL2log(log::verbose) << "Timeout occurred" << std::endl;
+  //   return res;
+  // }
 }
 
 inline void self_substitute(pbes_equation& equation,
