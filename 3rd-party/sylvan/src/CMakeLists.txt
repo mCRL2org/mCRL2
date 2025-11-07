@@ -40,8 +40,8 @@ target_sources(sylvan
 
 set_target_properties(sylvan PROPERTIES VERSION ${sylvan_VERSION} SOVERSION ${sylvan_VERSION_MAJOR})
 
-option(SYLVAN_ENABLE_PIC "Build Sylvan with -fPIC (e.g. for linking into shared libs)" OFF)
-set_target_properties(sylvan PROPERTIES POSITION_INDEPENDENT_CODE ${SYLVAN_ENABLE_PIC})
+# For mCRL2 this is necessary since Sylvan is linked into a dynamic library.
+set_target_properties(sylvan PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_compile_features(sylvan PUBLIC c_std_11 cxx_std_11)
 
