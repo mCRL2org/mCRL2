@@ -24,6 +24,11 @@
 #define SYLVAN_STATS 0
 #endif
 
+/* Enable/disable using mmap to allocate large amounts of memory */
+#ifndef SYLVAN_USE_MMAP
+#define SYLVAN_USE_MMAP 0
+#endif
+
 /* Aggressive or conservative resizing strategy */
 #ifndef SYLVAN_AGGRESSIVE_RESIZE
 #define SYLVAN_AGGRESSIVE_RESIZE 1
