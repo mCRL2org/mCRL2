@@ -291,7 +291,7 @@ inline pbes_expression simplify_expr(pbes_expression& phi,
 {
   pbes_expression res = pbes_rewrite(phi, pbes_rewriter);
   if_substituter.apply(res, res);
-  return phi;
+  return res;
 }
 
 inline void self_substitute(pbes_equation& equation,
