@@ -16,18 +16,10 @@
  */
 
 #include <sylvan_int.h>
+#include <sylvan_align.h>
 
 #include <errno.h>  // for errno
 #include <string.h> // memset
-#include <sys/mman.h> // for mmap
-
-#ifndef MAP_ANONYMOUS
-#define MAP_ANONYMOUS MAP_ANON
-#endif
-
-#ifndef cas
-#define cas(ptr, old, new) (__sync_bool_compare_and_swap((ptr),(old),(new)))
-#endif
 
 DECLARE_THREAD_LOCAL(my_region, uint64_t);
 
@@ -46,10 +38,10 @@ claim_data_bucket(const llmsset_t dbs)
     for (;;) {
         if (my_region != (uint64_t)-1) {
             // find empty bucket in region <my_region>
-            uint64_t *ptr = dbs->bitmap2 + (my_region*8);
+            _Atomic(uint64_t)* ptr = dbs->bitmap2 + (my_region*8);
             int i=0;
             for (;i<8;) {
-                uint64_t v = *ptr;
+                uint64_t v = atomic_load_explicit(ptr, memory_order_relaxed);
                 if (v != 0xffffffffffffffffLL) {
                     int j = __builtin_clzll(~v);
                     *ptr |= (0x8000000000000000LL>>j);
@@ -71,13 +63,13 @@ claim_data_bucket(const llmsset_t dbs)
             if (my_region >= (dbs->table_size/(64*8))) my_region = 0;
 
             // try to claim it
-            uint64_t *ptr = dbs->bitmap1 + (my_region/64);
+            _Atomic(uint64_t)* ptr = dbs->bitmap1 + (my_region/64);
             uint64_t mask = 0x8000000000000000LL >> (my_region&63);
             uint64_t v;
 restart:
-            v = *ptr;
+            v = atomic_load_explicit(ptr, memory_order_relaxed);
             if (v & mask) continue; // taken
-            if (cas(ptr, v, v|mask)) break;
+            if (atomic_compare_exchange_weak(ptr, &v, v|mask)) break;
             else goto restart;
         }
         SET_THREAD_LOCAL(my_region, my_region);
@@ -87,9 +79,9 @@ restart:
 static void
 release_data_bucket(const llmsset_t dbs, uint64_t index)
 {
-    uint64_t *ptr = dbs->bitmap2 + (index/64);
+    _Atomic(uint64_t)* ptr = dbs->bitmap2 + (index/64);
     uint64_t mask = 0x8000000000000000LL >> (index&63);
-    *ptr &= ~mask;
+    atomic_fetch_and(ptr, ~mask);
 }
 
 static void
@@ -140,8 +132,8 @@ llmsset_lookup2(const llmsset_t dbs, uint64_t a, uint64_t b, int* created, const
 #endif
 
     for (;;) {
-        volatile uint64_t *bucket = dbs->table + idx;
-        uint64_t v = *bucket;
+        _Atomic(uint64_t)* bucket = dbs->table + idx;
+        uint64_t v = atomic_load_explicit(bucket, memory_order_acquire);
 
         if (v == 0) {
             if (cidx == 0) {
@@ -153,12 +145,10 @@ llmsset_lookup2(const llmsset_t dbs, uint64_t a, uint64_t b, int* created, const
                 d_ptr[0] = a;
                 d_ptr[1] = b;
             }
-            if (cas(bucket, 0, hash | cidx)) {
+            if (atomic_compare_exchange_strong(bucket, &v, hash | cidx)) {
                 if (custom) set_custom_bucket(dbs, cidx, custom);
                 *created = 1;
                 return cidx;
-            } else {
-                v = *bucket;
             }
         }
 
@@ -237,16 +227,17 @@ llmsset_rehash_bucket(const llmsset_t dbs, uint64_t d_idx)
 #endif
 
     for (;;) {
-        volatile uint64_t *bucket = &dbs->table[idx];
-        if (*bucket == 0 && cas(bucket, 0, new_v)) return 1;
+        _Atomic(uint64_t)* bucket = &dbs->table[idx];
+        uint64_t v = atomic_load_explicit(bucket, memory_order_acquire);
+        if (v == 0 && atomic_compare_exchange_strong(bucket, &v, new_v)) return 1;
 
         // find next idx on probe sequence
         idx = (idx & CL_MASK) | ((idx+1) & CL_MASK_R);
         if (idx == last) {
-            if (++i == *(volatile int16_t*)&dbs->threshold) {
+            if (++i == atomic_load_explicit(&dbs->threshold, memory_order_relaxed)) {
                 // failed to find empty spot in probe sequence
                 // solution: increase probe sequence length...
-                __sync_fetch_and_add(&dbs->threshold, 1);
+                atomic_fetch_add(&dbs->threshold, 1);
             }
 
             // go to next cache line in probe sequence
@@ -264,9 +255,9 @@ llmsset_rehash_bucket(const llmsset_t dbs, uint64_t d_idx)
 llmsset_t
 llmsset_create(size_t initial_size, size_t max_size)
 {
-    llmsset_t dbs = NULL;
-    if (posix_memalign((void**)&dbs, LINE_SIZE, sizeof(struct llmsset)) != 0) {
-        fprintf(stderr, "llmsset_create: Unable to allocate memory!\n");
+    llmsset_t dbs = alloc_aligned(sizeof(struct llmsset));
+    if (dbs == 0) {
+        fprintf(stderr, "llmsset_create: Unable to allocate memory: %s!\n", strerror(errno));
         exit(1);
     }
 
@@ -301,19 +292,19 @@ llmsset_create(size_t initial_size, size_t max_size)
     /* This implementation of "resizable hash table" allocates the max_size table in virtual memory,
        but only uses the "actual size" part in real memory */
 
-    dbs->table = (uint64_t*)mmap(0, dbs->max_size * 8, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    dbs->data = (uint8_t*)mmap(0, dbs->max_size * 16, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    dbs->table = (_Atomic(uint64_t)*) alloc_aligned(dbs->max_size * 8);
+    dbs->data = (uint8_t*) alloc_aligned(dbs->max_size * 16);
 
     /* Also allocate bitmaps. Each region is 64*8 = 512 buckets.
        Overhead of bitmap1: 1 bit per 4096 bucket.
        Overhead of bitmap2: 1 bit per bucket.
        Overhead of bitmapc: 1 bit per bucket. */
 
-    dbs->bitmap1 = (uint64_t*)mmap(0, dbs->max_size / (512*8), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    dbs->bitmap2 = (uint64_t*)mmap(0, dbs->max_size / 8, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    dbs->bitmapc = (uint64_t*)mmap(0, dbs->max_size / 8, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    dbs->bitmap1 = (_Atomic(uint64_t)*)alloc_aligned(dbs->max_size / (512*8));
+    dbs->bitmap2 = (_Atomic(uint64_t)*)alloc_aligned(dbs->max_size / 8);
+    dbs->bitmapc = (uint64_t*)alloc_aligned(dbs->max_size / 8);
 
-    if (dbs->table == (uint64_t*)-1 || dbs->data == (uint8_t*)-1 || dbs->bitmap1 == (uint64_t*)-1 || dbs->bitmap2 == (uint64_t*)-1 || dbs->bitmapc == (uint64_t*)-1) {
+    if (dbs->table == 0 || dbs->data == 0 || dbs->bitmap1 == 0 || dbs->bitmap2 == 0 || dbs->bitmapc == 0) {
         fprintf(stderr, "llmsset_create: Unable to allocate memory: %s!\n", strerror(errno));
         exit(1);
     }
@@ -334,7 +325,6 @@ llmsset_create(size_t initial_size, size_t max_size)
     // that is a problem with multiple tables.
     // so, for now, do NOT use multiple tables!!
 
-    LACE_ME;
     INIT_THREAD_LOCAL(my_region);
     TOGETHER(llmsset_reset_region);
 
@@ -347,12 +337,12 @@ llmsset_create(size_t initial_size, size_t max_size)
 void
 llmsset_free(llmsset_t dbs)
 {
-    munmap(dbs->table, dbs->max_size * 8);
-    munmap(dbs->data, dbs->max_size * 16);
-    munmap(dbs->bitmap1, dbs->max_size / (512*8));
-    munmap(dbs->bitmap2, dbs->max_size / 8);
-    munmap(dbs->bitmapc, dbs->max_size / 8);
-    free(dbs);
+    free_aligned(dbs->table, dbs->max_size * 8);
+    free_aligned(dbs->data, dbs->max_size * 16);
+    free_aligned(dbs->bitmap1, dbs->max_size / (512*8));
+    free_aligned(dbs->bitmap2, dbs->max_size / 8);
+    free_aligned(dbs->bitmapc, dbs->max_size / 8);
+    free_aligned(dbs, sizeof(struct llmsset));
 }
 
 VOID_TASK_IMPL_1(llmsset_clear, llmsset_t, dbs)
@@ -363,15 +353,8 @@ VOID_TASK_IMPL_1(llmsset_clear, llmsset_t, dbs)
 
 VOID_TASK_IMPL_1(llmsset_clear_data, llmsset_t, dbs)
 {
-    if (mmap(dbs->bitmap1, dbs->max_size / (512*8), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0) != (void*)-1) {
-    } else {
-        memset(dbs->bitmap1, 0, dbs->max_size / (512*8));
-    }
-
-    if (mmap(dbs->bitmap2, dbs->max_size / 8, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0) != (void*)-1) {
-    } else {
-        memset(dbs->bitmap2, 0, dbs->max_size / 8);
-    }
+    clear_aligned(dbs->bitmap1, dbs->max_size / (512*8));
+    clear_aligned(dbs->bitmap2, dbs->max_size / 8);
 
     // forbid first two positions (index 0 and 1)
     dbs->bitmap2[0] = 0xc000000000000000LL;
@@ -381,34 +364,26 @@ VOID_TASK_IMPL_1(llmsset_clear_data, llmsset_t, dbs)
 
 VOID_TASK_IMPL_1(llmsset_clear_hashes, llmsset_t, dbs)
 {
-    // just reallocate...
-    if (mmap(dbs->table, dbs->max_size * 8, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0) != (void*)-1) {
-#if defined(madvise) && defined(MADV_RANDOM)
-        madvise(dbs->table, sizeof(uint64_t[dbs->max_size]), MADV_RANDOM);
-#endif
-    } else {
-        // reallocate failed... expensive fallback
-        memset(dbs->table, 0, dbs->max_size * 8);
-    }
+    clear_aligned(dbs->table, dbs->max_size * 8);
 }
 
 int
 llmsset_is_marked(const llmsset_t dbs, uint64_t index)
 {
-    volatile uint64_t *ptr = dbs->bitmap2 + (index/64);
+    _Atomic(uint64_t)* ptr = dbs->bitmap2 + (index/64);
     uint64_t mask = 0x8000000000000000LL >> (index&63);
-    return (*ptr & mask) ? 1 : 0;
+    return (atomic_load_explicit(ptr, memory_order_relaxed) & mask) ? 1 : 0;
 }
 
 int
 llmsset_mark(const llmsset_t dbs, uint64_t index)
 {
-    volatile uint64_t *ptr = dbs->bitmap2 + (index/64);
+    _Atomic(uint64_t)* ptr = dbs->bitmap2 + (index/64);
     uint64_t mask = 0x8000000000000000LL >> (index&63);
     for (;;) {
         uint64_t v = *ptr;
         if (v & mask) return 0;
-        if (cas(ptr, v, v|mask)) return 1;
+        if (atomic_compare_exchange_weak(ptr, &v, v|mask)) return 1;
     }
 }
 
@@ -420,10 +395,10 @@ TASK_3(int, llmsset_rehash_par, llmsset_t, dbs, size_t, first, size_t, count)
         return bad + SYNC(llmsset_rehash_par);
     } else {
         int bad = 0;
-        uint64_t *ptr = dbs->bitmap2 + (first / 64);
+        _Atomic(uint64_t)* ptr = dbs->bitmap2 + (first / 64);
         uint64_t mask = 0x8000000000000000LL >> (first & 63);
         for (size_t k=0; k<count; k++) {
-            if (*ptr & mask) {
+            if (atomic_load_explicit(ptr, memory_order_relaxed) & mask) {
                 if (llmsset_rehash_bucket(dbs, first+k) == 0) bad++;
             }
             mask >>= 1;
@@ -451,20 +426,20 @@ TASK_3(size_t, llmsset_count_marked_par, llmsset_t, dbs, size_t, first, size_t, 
         return left + right;
     } else {
         size_t result = 0;
-        uint64_t *ptr = dbs->bitmap2 + (first / 64);
+        _Atomic(uint64_t)* ptr = dbs->bitmap2 + (first / 64);
         if (count == 512) {
-            result += __builtin_popcountll(ptr[0]);
-            result += __builtin_popcountll(ptr[1]);
-            result += __builtin_popcountll(ptr[2]);
-            result += __builtin_popcountll(ptr[3]);
-            result += __builtin_popcountll(ptr[4]);
-            result += __builtin_popcountll(ptr[5]);
-            result += __builtin_popcountll(ptr[6]);
-            result += __builtin_popcountll(ptr[7]);
+            result += __builtin_popcountll(atomic_load_explicit(ptr+0, memory_order_relaxed));
+            result += __builtin_popcountll(atomic_load_explicit(ptr+1, memory_order_relaxed));
+            result += __builtin_popcountll(atomic_load_explicit(ptr+2, memory_order_relaxed));
+            result += __builtin_popcountll(atomic_load_explicit(ptr+3, memory_order_relaxed));
+            result += __builtin_popcountll(atomic_load_explicit(ptr+4, memory_order_relaxed));
+            result += __builtin_popcountll(atomic_load_explicit(ptr+5, memory_order_relaxed));
+            result += __builtin_popcountll(atomic_load_explicit(ptr+6, memory_order_relaxed));
+            result += __builtin_popcountll(atomic_load_explicit(ptr+7, memory_order_relaxed));
         } else {
             uint64_t mask = 0x8000000000000000LL >> (first & 63);
             for (size_t k=0; k<count; k++) {
-                if (*ptr & mask) result += 1;
+                if (atomic_load_explicit(ptr, memory_order_relaxed) & mask) result += 1;
                 mask >>= 1;
                 if (mask == 0) {
                     ptr++;
@@ -490,8 +465,8 @@ VOID_TASK_3(llmsset_destroy_par, llmsset_t, dbs, size_t, first, size_t, count)
         SYNC(llmsset_destroy_par);
     } else {
         for (size_t k=first; k<first+count; k++) {
-            volatile uint64_t *ptr2 = dbs->bitmap2 + (k/64);
-            volatile uint64_t *ptrc = dbs->bitmapc + (k/64);
+            _Atomic(uint64_t)* ptr2 = dbs->bitmap2 + (k/64);
+            uint64_t *ptrc = dbs->bitmapc + (k/64);
             uint64_t mask = 0x8000000000000000LL >> (k&63);
 
             // if not marked but is custom
