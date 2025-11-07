@@ -285,34 +285,6 @@ inline bool pvi_in_set(const propositional_variable_instantiation needle,
       });
 }
 
-inline data::data_expression pbestodata(pbes_expression& expr,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
-        replace_substituter)
-{
-  pbes_expression asdf;
-  replace_substituter.reset_variable_list();
-  replace_substituter.set_forward(true);
-  replace_substituter.apply(asdf, expr);
-
-  data::data_expression data_expr = detail::pbes2data(asdf);
-
-  return data_expr;
-}
-
-inline pbes_expression datatopbes(data::data_expression& data_expr,
-    rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
-    detail::replace_other_propositional_variables_with_functions_builder<pbes_system::pbes_expression_builder>&
-        replace_substituter)
-{
-  pbes_expression expr;
-  pbes_expression res;
-  replace_substituter.set_forward(false);
-  if_substituter.apply(expr, data_expr);
-  replace_substituter.apply(res, detail::data2pbes<pbes_expression>(expr));
-  replace_substituter.reset_variable_list();
-  return res;
-}
-
 inline pbes_expression simplify_expr(pbes_expression& phi,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
     simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter)
