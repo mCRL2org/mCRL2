@@ -1,0 +1,6 @@
+#cmakedefine01 LACE_PIE_TIMES
+#cmakedefine01 LACE_COUNT_TASKS
+#cmakedefine01 LACE_COUNT_STEALS
+#cmakedefine01 LACE_COUNT_SPLITS
+#cmakedefine01 LACE_USE_HWLOC
+#cmakedefine01 LACE_USE_MMAP
