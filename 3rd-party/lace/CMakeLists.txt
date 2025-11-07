@@ -57,6 +57,11 @@ target_include_directories(lace14
 target_link_libraries(lace PUBLIC pthread)
 target_link_libraries(lace14 PUBLIC pthread)
 
+
+# For mCRL2 this is necessary since lace is linked into a dynamic library.
+set_target_properties(lace PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(lace14 PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 if(LACE_USE_HWLOC)
     find_package(HWLOC REQUIRED)
     target_link_libraries(lace PUBLIC ${HWLOC_LIBRARIES})
