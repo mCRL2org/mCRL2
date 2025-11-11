@@ -14,6 +14,7 @@
 
 #include "mcrl2/lps/explorer.h"
 #include "mcrl2/lts/trace.h"
+#include <memory>
 
 namespace mcrl2::lts 
 {
@@ -646,14 +647,17 @@ class progress_monitor
 
 } // namespace detail
 
-template <bool Stochastic, bool Timed, typename Specification>
-struct state_space_generator
+template <typename Explorer>
+struct state_space_generator_base
 {
-  using explorer_type = lps::explorer<Stochastic, Timed, Specification>;
-  using state_type = typename explorer_type::state_type;
+  using explorer_type = Explorer;
+  using state_type = Explorer::state_type;
+  using specification_type = Explorer::specification_type;
+  static constexpr bool is_stochastic = Explorer::is_stochastic;
+  static constexpr bool is_timed = Explorer::is_timed;
 
   const lps::explorer_options& options;
-  lps::explorer<Stochastic, Timed, Specification> explorer;
+  Explorer& explorer;
   detail::trace_constructor<explorer_type> m_trace_constructor;
 
   detail::action_detector<explorer_type> m_action_detector;
@@ -662,9 +666,9 @@ struct state_space_generator
   std::unique_ptr<detail::divergence_detector<explorer_type>> m_divergence_detector;
   detail::progress_monitor m_progress_monitor;
 
-  state_space_generator(const Specification& lpsspec, const lps::explorer_options& options_)
+  state_space_generator_base(const specification_type& lpsspec, const lps::explorer_options& options_, Explorer& explorer_)
     : options(options_),
-      explorer(lpsspec, options_),
+      explorer(explorer_),
       m_trace_constructor(explorer),
       m_action_detector(lpsspec, m_trace_constructor, options.trace_actions, options.trace_multiactions, options.trace_prefix, options.max_traces),
       m_deadlock_detector(m_trace_constructor, options.trace_prefix, options.max_traces),
@@ -714,7 +718,7 @@ struct state_space_generator
           if (options.detect_divergence)
           {
             // TODO: support divergence checks for stochastic specifications
-            if constexpr (!Stochastic)
+            if constexpr (!is_stochastic)
             {
               m_divergence_detector->detect_divergence(s, s_index, m_trace_constructor, options.dfs_recursive);
             }
@@ -740,7 +744,7 @@ struct state_space_generator
             const lps::state& s0, std::size_t s0_index, const lps::multi_action& a, 
             const auto& s1, const auto& s1_index, std::size_t summand_index)
         {
-          if constexpr (Stochastic)
+          if constexpr (is_stochastic)
           {
             builder.add_transition(s0_index, a, s1_index, s1.probabilities, number_of_threads);
           }
@@ -797,14 +801,14 @@ struct state_space_generator
         // discover_initial_state
         [&](const lps::stochastic_state& s, const std::list<std::size_t>& s_index)
         {
-          if constexpr (Stochastic)
+          if constexpr (is_stochastic)
           {
             builder.set_initial_state(s_index, s.probabilities);
           }
         }
       );
       m_progress_monitor.finish_exploration(explorer.state_map().size(), options.number_of_threads);
-      builder.finalize(explorer.state_map(), Timed);
+      builder.finalize(explorer.state_map(), is_timed);
     }
     catch (const data::enumerator_error& e)
     {
@@ -821,6 +825,35 @@ struct state_space_generator
 
     return true;
   }
+  ~state_space_generator_base() = default;
+};
+
+template <bool Stochastic, bool Timed, typename Specification>
+struct state_space_generator_explorer_holder
+{
+  using explorer_type = lps::explorer<Stochastic, Timed, Specification>;
+  explorer_type explorer;
+  state_space_generator_explorer_holder(const Specification& lpsspec, const lps::explorer_options& options)
+    : explorer(lpsspec, options)
+  {}
+};
+
+template <bool Stochastic, bool Timed, typename Specification>
+struct state_space_generator: public state_space_generator_explorer_holder<Stochastic, Timed, Specification>, public state_space_generator_base<lps::explorer<Stochastic, Timed, Specification>>
+{
+  using holder_type = state_space_generator_explorer_holder<Stochastic, Timed, Specification>;
+  using base_type = state_space_generator_base<lps::explorer<Stochastic, Timed, Specification>>;
+  using explorer_type = typename base_type::explorer_type;
+
+  explorer_type& explorer;
+
+  state_space_generator(const Specification& lpsspec, const lps::explorer_options& options)
+    : holder_type(lpsspec, options)
+    , base_type(lpsspec, options, holder_type::explorer)
+    , explorer(holder_type::explorer)
+  {}
+
+  ~state_space_generator() = default;
 };
 
 } // namespace mcrl2::lts

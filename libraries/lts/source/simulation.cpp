@@ -36,7 +36,7 @@ simulation::simulation(const stochastic_specification& specification, data::rewr
     m_distrib(0,std::numeric_limits<std::size_t>::max())
 {
   state_type initial_state;
-  compute_stochastic_state(initial_state, m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+  compute_stochastic_state(initial_state, m_initial_distribution, m_initial_state, m_global_sigma, get_rewriter(), m_global_enumerator);
   simulator_state_t state;
   state.source_state = initial_state;
   state.state_number=initial_state.size();  // This indicates that no state is selected yet.
@@ -78,7 +78,7 @@ void simulation::environment(std::vector<std::string> values)
   }
 
   simulator_state_t result_state;
-  compute_stochastic_state(result_state.source_state, stochastic_distribution(), data_values, m_global_sigma, m_global_rewr, m_global_enumerator);
+  compute_stochastic_state(result_state.source_state, stochastic_distribution(), data_values, m_global_sigma, get_rewriter(), m_global_enumerator);
   result_state.transitions = transitions(result_state.source_state.states[0]);
   result_state.state_number = 0;
   result_state.transition_number = 0;
@@ -173,7 +173,7 @@ void simulation::load(const std::string& filename)
   m_full_trace.clear();
 
   state_type initial_state;
-  compute_stochastic_state(initial_state, m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+  compute_stochastic_state(initial_state, m_initial_distribution, m_initial_state, m_global_sigma, get_rewriter(), m_global_enumerator);
 
   add_new_state(initial_state);
   // Check that the first state (if given) matches one of the probabilistic states of the specification.

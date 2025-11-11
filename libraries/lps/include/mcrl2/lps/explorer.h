@@ -438,12 +438,38 @@ struct abortable
   virtual void abort() = 0;
 };
 
-template <bool Stochastic, bool Timed, typename Specification>
-class explorer: public abortable
+// Add operations on reals that are needed for the exploration.
+inline std::set<data::function_symbol> add_real_operators(std::set<data::function_symbol> s)
+{
+  std::set<data::function_symbol> result = std::move(s);
+  result.insert(data::less_equal(data::sort_real::real_()));
+  result.insert(data::greater_equal(data::sort_real::real_()));
+  result.insert(data::sort_real::plus(data::sort_real::real_(), data::sort_real::real_()));
+  return result;
+}
+
+template <typename Specification>
+data::rewriter construct_rewriter(const Specification& lpsspec, data::rewrite_strategy rewrite_strategy, bool remove_unused_rewrite_rules)
+{
+  if (remove_unused_rewrite_rules)
+  {
+    return data::rewriter(lpsspec.data(),
+      data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables(), false),
+      rewrite_strategy);
+  }
+  else
+  {
+    return data::rewriter(lpsspec.data(), rewrite_strategy);
+  }
+}
+
+template <bool Stochastic = false, bool Timed = false, typename Specification = specification>
+class explorer_base: public abortable
 {
   public:
     using state_type = std::conditional_t<Stochastic, stochastic_state, state>;
     using state_index_type = std::conditional_t<Stochastic, std::list<std::size_t>, std::size_t>;
+    using specification_type = Specification;
     static constexpr bool is_stochastic = Stochastic;
     static constexpr bool is_timed = Timed;
 
@@ -465,7 +491,7 @@ class explorer: public abortable
 
     // The four data structures that must be separate per thread.
     mutable data::mutable_indexed_substitution<> m_global_sigma;
-    data::rewriter m_global_rewr;
+    data::rewriter& m_global_rewr;
     data::enumerator_algorithm<> m_global_enumerator;
     data::enumerator_identifier_generator m_global_id_generator;
 
@@ -924,16 +950,6 @@ class explorer: public abortable
       return result;
     }
 
-    // Add operations on reals that are needed for the exploration.
-    std::set<data::function_symbol> add_real_operators(std::set<data::function_symbol> s) const
-    {
-      std::set<data::function_symbol> result = std::move(s);
-      result.insert(data::less_equal(data::sort_real::real_()));
-      result.insert(data::greater_equal(data::sort_real::real_()));
-      result.insert(data::sort_real::plus(data::sort_real::real_(), data::sort_real::real_()));
-      return result;
-    }
-
     std::unique_ptr<todo_set> make_todo_set(const state& init)
     {
       switch (m_options.search_strategy)
@@ -957,20 +973,7 @@ class explorer: public abortable
       }
     }
 
-    data::rewriter construct_rewriter(const Specification& lpsspec, bool remove_unused_rewrite_rules)
-    {
-      if (remove_unused_rewrite_rules)
-      {
-        return data::rewriter(lpsspec.data(),
-          data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables(), false),
-          m_options.rewrite_strategy);
-      }
-      else
-      {
-        return data::rewriter(lpsspec.data(), m_options.rewrite_strategy);
-      }
-    }
-
+public:
     bool is_confluent_tau(const multi_action& a)
     {
       if (a.actions().empty())
@@ -985,9 +988,9 @@ class explorer: public abortable
     }
 
   public:
-    explorer(const Specification& lpsspec, const explorer_options& options_)
+    explorer_base(const Specification& lpsspec, const explorer_options& options_, data::rewriter& rewriter)
       : m_options(options_),
-        m_global_rewr(construct_rewriter(lpsspec, m_options.remove_unused_rewrite_rules)),
+        m_global_rewr(rewriter),
         m_global_enumerator(m_global_rewr, lpsspec.data(), m_global_rewr, m_global_id_generator, false),
         m_global_lpsspec(preprocess(lpsspec)),
         m_discovered(m_options.number_of_threads)
@@ -1016,7 +1019,7 @@ class explorer: public abortable
       }
     }
 
-    ~explorer() override = default;
+    ~explorer_base() override = default;
 
     // Get the initial state of the specification. 
     const data::data_expression_list& initial_state() const
@@ -1025,6 +1028,11 @@ class explorer: public abortable
     }
 
     // Make the rewriter available to be used in a class that uses this explorer class.
+    data::rewriter& get_rewriter()
+    {
+      return m_global_rewr;
+    }
+
     const data::rewriter& get_rewriter() const
     {
       return m_global_rewr;
@@ -1813,6 +1821,40 @@ class explorer: public abortable
        set_process_parameter_values(values, m_global_sigma);
     }
 };
+
+
+  template <typename Specification>
+  class explorer_rewriter_holder
+  {
+    public:
+      data::rewriter m_global_rewr;
+      explorer_rewriter_holder(const Specification& lpsspec, const explorer_options& options)
+        : m_global_rewr(construct_rewriter(lpsspec, options.rewrite_strategy, options.remove_unused_rewrite_rules))
+      {}
+  };
+
+  // Use multiple inheritance to make sure that the rewriter is constructed first.
+  template <bool Stochastic = false, bool Timed = false, typename Specification = specification>
+  class explorer: public explorer_rewriter_holder<Specification>, public explorer_base<Stochastic, Timed, Specification>
+  {
+    public:
+      using base_type = explorer_base<Stochastic, Timed, Specification>;
+      using holder_type = explorer_rewriter_holder<Specification>;
+      using specification_type = Specification;
+      using typename base_type::state_type;
+      using typename base_type::state_index_type;
+      using typename base_type::indexed_set_for_states_type;
+      static constexpr bool is_stochastic = Stochastic;
+      static constexpr bool is_timed = Timed;
+
+      explorer(const Specification& lpsspec, const explorer_options& options)
+        : holder_type(lpsspec, options)
+        , base_type(lpsspec, options, holder_type::m_global_rewr)
+      {}
+
+      ~explorer() override = default;
+  };
+
 
 } // namespace mcrl2::lps
 
