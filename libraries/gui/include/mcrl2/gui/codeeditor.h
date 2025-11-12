@@ -213,6 +213,7 @@ class CodeEditor : public QPlainTextEdit
   QFont lineNumberFont;
   LineNumberArea* lineNumberArea = nullptr;
   CodeHighlighter* highlighter = nullptr;
+  int lastCursor;
 
   QAction* zoomInAction = nullptr;
   QAction* zoomOutAction = nullptr;

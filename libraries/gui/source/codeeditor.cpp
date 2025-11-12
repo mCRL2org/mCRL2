@@ -390,12 +390,13 @@ bool CodeEditor::characterIsCommentedOut(const QString& text, int pos)
 
 void CodeEditor::paintEvent(QPaintEvent* event)
 {
-  /* highlight the line the cursor is on when in focus */
-  if (this->hasFocus())
+  // Only update the highlighting when the cursor has changed to avoid excessive updates.
+  if (lastCursor != this->textCursor().position())
   {
     setExtraSelections({});
     highlightCurrentLine();
     highlightParentheses();
+    lastCursor = this->textCursor().position();
   }
   QPlainTextEdit::paintEvent(event);
 }
