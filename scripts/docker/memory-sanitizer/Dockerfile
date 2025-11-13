@@ -1,4 +1,4 @@
-FROM fedora:42
+FROM fedora:43
 
 # Install packages needed for compiling and testing the tools
 RUN dnf install -y \
@@ -10,7 +10,10 @@ RUN dnf install -y \
  which \
  # Packages needed for testing
  python3 \
- python3-pip
+ python3-pip \
+ python3-devel \
+ libxml2-devel \
+ libxslt-devel
 
 RUN cd /root/ && git clone --depth=1 --branch=llvmorg-21-init https://github.com/llvm/llvm-project
 

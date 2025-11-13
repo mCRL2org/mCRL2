@@ -1,4 +1,4 @@
-FROM fedora:42
+FROM fedora:43
 
 # Install packages needed for compiling and testing the tools
 RUN dnf install -y \
@@ -15,6 +15,9 @@ RUN dnf install -y \
  # Packages needed for testing 
  python3 \
  python3-pip \
+ python3-devel \
+ libxml2-devel \
+ libxslt-devel \
  # Packages needed for packaging
  rpm-build \
  # Packages needed for documentation
