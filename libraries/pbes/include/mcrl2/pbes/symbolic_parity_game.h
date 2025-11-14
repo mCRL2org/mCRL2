@@ -127,17 +127,18 @@ std::string print_graph(
   return utilities::string_join(text, "\n");
 }
 
-// print the indices of U (subset of V)
+/// print the indices of U (must be a subset of V)
 inline std::string print_nodes(const ldd& U, const ldd& V)
 {
   using namespace sylvan::ldds;
+  assert(includes(V, U));
 
   auto index = [](const std::vector<ldd>& v, const ldd& x)
   {
     auto i = std::find(v.begin(), v.end(), x);
     if (i == v.end())
     {
-      throw mcrl2::runtime_error("print_graph: index error");
+      throw mcrl2::runtime_error("print_nodes: index error");
     }
     return i - v.begin();
   };
@@ -174,7 +175,7 @@ inline std::string print_strategy(const ldd& S, const ldd& V)
     auto i = std::find(v.begin(), v.end(), x);
     if (i == v.end())
     {
-      throw mcrl2::runtime_error("print_graph: index error");
+      throw mcrl2::runtime_error("print_strategy: index error");
     }
     return i - v.begin();
   };

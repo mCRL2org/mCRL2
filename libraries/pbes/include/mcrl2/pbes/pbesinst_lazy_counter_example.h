@@ -172,15 +172,9 @@ static void rewrite_star(pbes_expression& result,
         }
         else
         {
-        if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y, R)))
+          if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y, R)))
           {
             mCRL2log(log::debug) << "rewrite_star " << Y << " ( " << rewrite_PVI(Y, R) << ") is reachable" << std::endl;
-            if (mapping.count(rewrite_PVI(Y, R)) == 0)
-            {
-              mCRL2log(log::warning) << "Cannot find vertex " << rewrite_PVI(Y, R) << " in the first structure graph.\n";
-              throw mcrl2::runtime_error("The specification cannot be consistently instantiated twice. Most likely "
-                                         "this is an issue with the tool.");
-            }
             return Y;
           }
           else
@@ -229,7 +223,7 @@ public:
         mapping(_mapping),
         R(_R)
   {}
-  // TODO ensure that the PVIs in mapping match the shape of the 
+  // TODO ensure that the PVIs in mapping match the shape of the
   // vertices in G after they are rewritten with R.
 
   void rewrite_psi(const std::size_t thread_index,
