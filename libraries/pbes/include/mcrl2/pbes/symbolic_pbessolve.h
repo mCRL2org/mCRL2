@@ -133,7 +133,7 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(strategy[1]) << std::endl;
 
       if (includes(winning[0], initial_vertex))
-      {        
+      {
         if (m_check_strategy)
         {
           check_strategy(initial_vertex, V, winning[0], winning[1], false, strategy[0]);
@@ -141,7 +141,7 @@ class symbolic_pbessolve_algorithm
         return std::make_tuple(true, winning[0], winning[1], strategy[0], strategy[1]);
       }
       else if (includes(winning[1], initial_vertex))
-      {        
+      {
         if (m_check_strategy)
         {
           check_strategy(initial_vertex, V, winning[0], winning[1], true, strategy[1]);

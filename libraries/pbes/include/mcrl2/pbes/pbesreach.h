@@ -565,19 +565,41 @@ class pbesreach_algorithm
       return false;
     }
 
+    /// \returns LDD containing the vertices that were visited during reachability
+    virtual sylvan::ldds::ldd V() const
+    {
+      return m_visited;
+    }
+
+    /// \returns LDD containing the vertices that were seen but not visited upon completion of reachability.
+    ///          Note that these are (potentially) incomplete vertices
+    virtual sylvan::ldds::ldd I() const
+    {
+      return m_todo;
+    }
+
+    /// \returns LDD containing the vertices known to be won by player 0.
     virtual sylvan::ldds::ldd W0() const
     {
       return sylvan::ldds::empty_set();
     }
 
+    /// \returns LDD containing the vertices known to be won by player 1.
     virtual sylvan::ldds::ldd W1() const
     {
       return sylvan::ldds::empty_set();
     }
 
-    virtual sylvan::ldds::ldd S0() const { return sylvan::ldds::empty_set(); }
+    /// \returns LDD containing the winning strategy for player 0 on W0
+    virtual sylvan::ldds::ldd S0() const
+    {
+      return sylvan::ldds::empty_set();
+    }
 
-    virtual sylvan::ldds::ldd S1() const { return sylvan::ldds::empty_set(); }
+    /// \returns LDD containing the winning strategy for player 1 on W2
+    virtual sylvan::ldds::ldd S1() const {
+      return sylvan::ldds::empty_set();
+    }
 
     std::vector<symbolic::summand_group> summand_groups() const
     {

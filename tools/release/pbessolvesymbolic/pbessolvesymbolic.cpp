@@ -100,39 +100,41 @@ public:
       else if (m_options.solve_strategy == 3)
       {
         std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_forced_cycles(m_initial_vertex,
-            V,
-            m_todo,
-            false,
-            m_deadlocks,
-            m_Vwon[0],
-            m_Vwon[1],
-            m_S[0],
-            m_S[1]);
+          V,
+          m_todo,
+          false,
+          m_deadlocks,
+          m_Vwon[0],
+          m_Vwon[1],
+          m_S[0],
+          m_S[1]);
       }
       else if (m_options.solve_strategy == 4)
       {
         std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_forced_cycles(m_initial_vertex,
-            V,
-            m_todo,
-            true,
-            m_deadlocks,
-            m_Vwon[0],
-            m_Vwon[1],
-            m_S[0],
-            m_S[1]);
+          V,
+          m_todo,
+          true,
+          m_deadlocks,
+          m_Vwon[0],
+          m_Vwon[1],
+          m_S[0],
+          m_S[1]);
       }
       else if (m_options.solve_strategy == 5)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1])
+          = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
       else if (m_options.solve_strategy == 6)
       {
-        std::tie(m_Vwon[0], m_Vwon[1]) = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
+        std::tie(m_Vwon[0], m_Vwon[1])
+          = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
       }
       else if (m_options.solve_strategy == 7)
       {
         std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1])
-            = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]);
+          = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]);
       }
 
       mCRL2log(log::verbose) << "found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;
@@ -291,12 +293,6 @@ public:
             }
             else
             {
-              if (!sylvan::ldds::member_cube(Vall, singleton))
-              {                
-                mCRL2log(log::warning) << "Cannot find vertex " << X << " in the symbolic parity game.\n";
-                throw mcrl2::runtime_error("The specification cannot be consistently instantiated twice. Most likely this is an issue with the tool.");
-              }
-
               mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
               return Y;
             }
@@ -606,11 +602,11 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
         if ((!has_counter_example && lpsfile.empty() && ltsfile.empty()) || options_.naive_counter_example_instantiation)
         {
           timer().start("instantiation");
-          ldd V = reach.run();
+          reach.run();
           timer().finish("instantiation");
           if (!options.dot_file.empty())
           {
-            print_dot(options.dot_file, V);
+            print_dot(options.dot_file, reach.V());
           }
 
           if (reach.solution_found())
@@ -628,13 +624,13 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
                 chaining = false;
               }
 
-              pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, chaining, options.check_strategy);
+              pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), reach.V(), options.no_relprod, chaining, options.check_strategy);
               G.print_information();
               pbes_system::symbolic_pbessolve_algorithm solver(G);
 
               mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
               timer().start("solving");
-              auto [result, _a, _b, _c, _d] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1());
+              auto [result, _a, _b, _c, _d] = solver.solve(reach.initial_state(), reach.V(), reach.deadlocks(), reach.W0(), reach.W1());
               timer().finish("solving");
 
               std::cout << (result ? "true" : "false") << std::endl;
@@ -649,8 +645,14 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
         else
         {
           timer().start("first-instantiation");
-          ldd V = reach.run();
+          reach.run();
           timer().finish("first-instantiation");
+
+          // Instantiation may lead to a partially explored parity game;
+          // V represents all seen vertices, reach.V() are the explored, and reach.I() the unexplored
+          // vertices
+          ldd V = union_(reach.V(), reach.I());
+
           if (!options.dot_file.empty())
           {
             print_dot(options.dot_file, V);
@@ -667,40 +669,83 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
           timer().start("first-solving");
           // Solve the remainder of the partially solved game.
-          auto [result, W0, W1, S0, S1] = solver.solve(reach.initial_state(), V, reach.deadlocks(), reach.W0(), reach.W1(), reach.S0(), reach.S1());
+          bool solution_found = false;
+          bool result;
+          ldd W0;
+          ldd W1;
+          ldd S0;
+          ldd S1;
+          if(reach.I() == empty_set())
+          {
+            std::tie(result, W0, W1, S0, S1) = solver.solve(reach.initial_state(),
+              V,
+              reach.deadlocks(),
+               reach.W0(),
+               reach.W1(),
+               reach.S0(),
+               reach.S1());
+            solution_found = true;
+          } else {
+            std::tie(W0, W1, S0, S1) = solver.partial_solve(reach.initial_state(),
+              V,
+              reach.I(),
+              reach.deadlocks(),
+              reach.W0(),
+              reach.W1(),
+              reach.S0(),
+              reach.S1());
+
+            if(includes(W0, reach.initial_state()))
+            {
+              solution_found = true;
+              result = true;
+            }
+            else if (includes(W1, reach.initial_state()))
+            {
+              solution_found = true;
+              result = false;
+            }
+          }
           timer().finish("first-solving");
 
-          mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
-
-          // Based on the result remove the unnecessary equations related to counter example information.
-          mCRL2log(log::verbose) << "Removing unnecessary counter example information for other player." << std::endl;
-          auto pbesspec_simplified = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
-          mCRL2log(log::trace) << pbesspec_simplified << std::endl;
-
-          structure_graph SG;
-
-          // Set some options for the second instantiation.
-          pbessolve_options pbessolve_options;
-          // only remove self-loops. The other optimizations are disabled for the second run.
-          //pbessolve_options.optimization = std::min(partial_solve_strategy::remove_self_loops, options_.solve_strategy);
-          pbessolve_options.rewrite_strategy = options_.rewrite_strategy;
-          pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
-          pbessolve_options.number_of_threads = 1; // If we spawn multiple threads here, the threads of Sylvan and the explicit exploration will interfere
-
-          PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], V, result ? S0 : S1, reach.rewriter());
-
-          // Perform the second instantiation given the proof graph.
-          timer().start("second-instantiation");
-          second_instantiate.run();
-          timer().finish("second-instantiation");
-
-          mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
-                                << SG.all_vertices().size() << std::endl;
-          [[maybe_unused]]
-          bool final_result = pbes_system::detail::run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
-          if (result != final_result)
+          if(!solution_found)
           {
-            throw mcrl2::runtime_error("The result of the first and second instantiations do not match, this is a bug in the tool!");
+            std::cout << "Exploration was limited to max-iterations, and the partially explored parity game does not contain enough information to compute the solution." << std::endl;
+          }
+          else
+          {
+            mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
+
+            // Based on the result remove the unnecessary equations related to counter example information.
+            mCRL2log(log::verbose) << "Removing unnecessary counter example information for other player." << std::endl;
+            auto pbesspec_simplified = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
+            mCRL2log(log::trace) << pbesspec_simplified << std::endl;
+
+            structure_graph SG;
+
+            // Set some options for the second instantiation.
+            pbessolve_options pbessolve_options;
+            // only remove self-loops. The other optimizations are disabled for the second run.
+            //pbessolve_options.optimization = std::min(partial_solve_strategy::remove_self_loops, options_.solve_strategy);
+            pbessolve_options.rewrite_strategy = options_.rewrite_strategy;
+            pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
+            pbessolve_options.number_of_threads = 1; // If we spawn multiple threads here, the threads of Sylvan and the explicit exploration will interfere
+
+            PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], V, result ? S0 : S1, reach.rewriter());
+
+            // Perform the second instantiation given the proof graph.
+            timer().start("second-instantiation");
+            second_instantiate.run();
+            timer().finish("second-instantiation");
+
+            mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
+                                  << SG.all_vertices().size() << std::endl;
+            [[maybe_unused]]
+            bool final_result = pbes_system::detail::run_solve(pbesspec, sigma, SG, second_instantiate.equation_index(), pbessolve_options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
+            if (result != final_result)
+            {
+              throw mcrl2::runtime_error("The result of the first and second instantiations do not match, this is a bug in the tool!");
+            }
           }
         }
       }
