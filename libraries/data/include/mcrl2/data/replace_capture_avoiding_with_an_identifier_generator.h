@@ -13,6 +13,7 @@
 #define MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H
 
 #include "mcrl2/atermpp/aterm.h"
+// #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
 
@@ -26,10 +27,11 @@ namespace detail {
 template <typename Substitution, typename IdentifierGenerator>
 class substitution_updater_with_an_identifier_generator
 {
+  using saved_assignment=std::pair<variable,data_expression>;
   protected:
     Substitution& m_sigma;
     IdentifierGenerator& m_id_generator;
-    std::vector<data::assignment> m_undo; // why not a stack datatype?
+    std::vector<saved_assignment> m_undo;               // TODO: shouldn't this be an atermpp vector. 
 
   public:
     substitution_updater_with_an_identifier_generator(Substitution& sigma, IdentifierGenerator& id_generator)
@@ -43,17 +45,17 @@ class substitution_updater_with_an_identifier_generator
 
     data::variable bind(const data::variable& v)
     {
-      m_undo.push_back(data::assignment(v, m_sigma(v))); // save the old assignment of m_sigma.
-      if (m_sigma.variable_occurs_in_a_rhs(v))                    // v notin FV(m_sigma).
-      {
-        m_sigma[v] = v;                                  // Clear sigma[v].
-        return v;
-      }
-      else
+      m_undo.emplace_back(v, m_sigma(v));                // save the old assignment of m_sigma.
+      if (m_sigma.variable_occurs_in_a_rhs(v))           // v notin FV(m_sigma).
       {
         data::variable w(m_id_generator(v.name()), v.sort());
         m_sigma[v] = w;
         return w;
+      }
+      else
+      {
+        m_sigma[v] = v;                                  // Clear sigma[v].
+        return v;
       }
     }
 
@@ -64,8 +66,8 @@ class substitution_updater_with_an_identifier_generator
 
     void pop(const data::variable& )
     {
-      const data::assignment& a = m_undo.back();
-      m_sigma[a.lhs()] = a.rhs();
+      const saved_assignment& a = m_undo.back();
+      m_sigma[a.first] = a.second;
       m_undo.pop_back();
     }
 
