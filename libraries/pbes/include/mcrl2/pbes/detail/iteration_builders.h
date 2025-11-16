@@ -43,12 +43,25 @@ struct replace_other_propositional_variables_with_functions_builder
       : m_pbes_rewriter(r)
   {}
 
-  void set_name(const core::identifier_string& s) { name = s; }
+  void set_name(const core::identifier_string& s) 
+  { 
+    name = s; 
+  }
 
-  void set_forward(bool b) { forward = b; }
+  void set_forward(bool b) 
+  { 
+    forward = b; 
+  }
 
-  void reset_variable_list() { var_list = data::variable_list({}); }
-  data::variable_list get_variable_list() { return var_list; }
+  void reset_variable_list() 
+  { 
+    var_list = data::variable_list({}); 
+  }
+
+  data::variable_list get_variable_list() 
+  { 
+    return var_list; 
+  }
 
   template <class T>
   void apply(T& result, const pbes_expression& d)
@@ -196,13 +209,25 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
       : m_pbes_rewriter(r)
   {}
 
-  void set_stable(bool b) { m_stable = b; }
+  void set_stable(bool b) 
+  { 
+    m_stable = b; 
+  }
 
-  bool stable() const { return m_stable; }
+  bool stable() const 
+  { 
+    return m_stable; 
+  }
 
-  void set_equation(const pbes_equation& eq) { m_eq = eq; }
+  void set_equation(const pbes_equation& eq) 
+  { 
+    m_eq = eq; 
+  }
 
-  void set_name(const core::identifier_string& s) { name = s; }
+  void set_name(const core::identifier_string& s) 
+  { 
+    name = s; 
+  }
 
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
