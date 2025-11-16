@@ -27,7 +27,7 @@ namespace mcrl2::data::detail
  * This is the interface class for the rewriters. To create a specific
  * rewriter, use createRewriter.
  *
- * Simple use of the rewriter would be as follow (with t a term in the mCRL2
+ * Simple use of the rewriter would be as follows (with t a term in the mCRL2
  * internal format):
  *
  * \code
