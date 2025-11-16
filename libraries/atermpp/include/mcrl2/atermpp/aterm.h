@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm.h
-/// \brief The term_appl class represents function application.
+/// \brief The aterm class contains terms which essentially are function applications. 
 
 #ifndef MCRL2_ATERMPP_ATERM_APPL_H
 #define MCRL2_ATERMPP_ATERM_APPL_H
