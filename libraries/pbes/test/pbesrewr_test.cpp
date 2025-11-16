@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/pbes/tools/pbeschain.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -52,3 +53,52 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr2)
   pbes_rewrite(p, pbesr);
   BOOST_CHECK(p.is_well_typed());
 }
+
+/* The test below checks whether the simplify_data_rewriter substitutes in a capture avoiding way. */
+BOOST_AUTO_TEST_CASE(test_pbeschain2)
+{
+  std::string pbes_text = "pbes nu X(m:Nat)=forall n:Nat.(X(m)); \n"
+                          "init X(0);                                           \n";
+  pbes p = txt2pbes(pbes_text);
+
+  data::rewriter data_rewriter(p.data());
+  simplify_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
+
+  pbes_equation eq = p.equations()[0];
+
+  data::mutable_indexed_substitution sigma;
+  propositional_variable_instantiation x = get_propositional_variable_instantiations(eq.formula())[0];
+
+  data::data_expression_list pars = x.parameters();
+
+  std::cerr << "Original PBES:\n" << p << std::endl;
+  std::cerr << "Going to substitute in rhs of equation: " << eq.formula() << std::endl;
+
+  std::cerr << "Free variables in expression to be substituted:\n " ;
+  for (const data::variable& var: find_free_variables(eq.formula()))
+  {
+    std::cerr <<  var << " " << std::endl;
+  }
+  std::cerr << "--- --- --- \n";
+
+  const data::variable& v = eq.variable().parameters().front();
+  data::data_expression par = pars.front();
+  core::identifier_string name("n");
+  sigma[v] = data::variable(name, par.sort());
+  std::cerr << " Substitution: " << v << " := " << name << std::endl;
+
+  pbes_expression p2 = pbes_rewrite(eq.formula(), pbes_rewriter, sigma);
+
+  std::cerr << "Rewritten pbes expression:\n" << p2 << std::endl;
+
+  std::cerr << "Free variables in expression:\n " ;
+  const std::set<data::variable> free_variables = find_free_variables(p2);
+  for (const data::variable& var: free_variables)
+  {
+    std::cerr << var << " " << std::endl;
+  }
+  std::cerr << "--- --- --- \n";
+
+  BOOST_CHECK(free_variables.size()==1);
+}
+
