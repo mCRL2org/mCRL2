@@ -12,11 +12,12 @@
 #ifndef MCRL2_DATA_DETAIL_BDD_PROVER_H
 #define MCRL2_DATA_DETAIL_BDD_PROVER_H
 
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/induction.h"
+#include "mcrl2/data/find.h"
 #include <chrono>
 #include <memory>
-#include <ratio>
 
 namespace mcrl2::data::detail
 {
@@ -128,6 +129,9 @@ class BDD_Prover: protected rewriter
 
     /// \brief A data specification.
     // const data_specification& f_data_spec;
+  
+    /// \brief The variables in the expression in order
+    std::vector<variable> f_variables;
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
@@ -390,7 +394,7 @@ class BDD_Prover: protected rewriter
         {
           if (result_is_defined)
           {
-            if (f_info.compare_guard(v_small, result) == compare_result_smaller)
+            if (f_info.compare_guard(v_small, result, f_variables) == compare_result_smaller)
             {
               result = v_small;
             }
@@ -630,6 +634,7 @@ class BDD_Prover: protected rewriter
     {
       f_formula = formula;
       f_processed = false;
+      f_variables = find_free_variables_in_order(f_formula);
       mCRL2log(log::debug) << "The formula has been set." << std::endl;
     }
 

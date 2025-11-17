@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2::data::detail
 {
@@ -63,7 +64,7 @@ class Info
     }
 
         /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c guard.
-    int get_guard_structure(const data_expression& guard) const
+    double get_guard_structure(const data_expression& guard,const std::vector<variable>& f_variables) const
     {
       if (is_variable(guard))
       {
@@ -76,25 +77,31 @@ class Info
         const data_expression& v_term2 = guard_appl[1]; 
         if (find_free_variables(v_term1).empty() && is_variable(v_term2))
         {
-          return 1;
+          auto res = std::find(f_variables.begin(), f_variables.end(), v_term2);
+          int index = res - f_variables.begin();
+          if (index < f_variables.size())
+          {
+            return 1 + (index / ((double)f_variables.size()));
+          }
+          return 2;
         }
         if (is_variable(v_term1) && is_variable(v_term2))
         {
-          return 2;
+          return 3;
         }
-        return 3;
+        return 4;
       }
-      return 4;
+      return 5;
     }
 
     /// \brief Compares the structure of two guards.
-    Compare_Result compare_guard_structure(const data_expression& guard1, const data_expression& guard2) const
+    Compare_Result compare_guard_structure(const data_expression& guard1, const data_expression& guard2, const std::vector<variable>& f_variables) const
     {
-      if (get_guard_structure(guard1) < get_guard_structure(guard2))
+      if (get_guard_structure(guard1,f_variables) < get_guard_structure(guard2,f_variables))
       {
         return compare_result_smaller;
       }
-      if (get_guard_structure(guard1) > get_guard_structure(guard2))
+      if (get_guard_structure(guard1,f_variables) > get_guard_structure(guard2,f_variables))
       {
         return compare_result_bigger;
       }
@@ -172,7 +179,9 @@ class Info
     constexpr Info(bool a_full, bool a_reverse)
     : f_full(a_full)
     , f_reverse(a_reverse)
-    {}
+    {
+        
+    }
 
     // Perform an occur check of expression t2 in expression t1.
     static bool occurs(const data_expression& t1, const data_expression& t2)
@@ -181,11 +190,11 @@ class Info
     }
 
     /// \brief Compares two guards.
-    Compare_Result compare_guard(const data_expression& guard1, const data_expression& guard2) const
+    Compare_Result compare_guard(const data_expression& guard1, const data_expression& guard2, const std::vector<variable>& f_variables) const
     {
       return lexico(
                lexico(
-                 compare_guard_structure(guard1, guard2),
+                 compare_guard_structure(guard1, guard2, f_variables),
                  compare_guard_equality(guard1, guard2)
                ),
                compare_address(guard1, guard2)

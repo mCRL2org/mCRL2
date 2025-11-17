@@ -15,6 +15,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESCHAIN_H
 #define MCRL2_PBES_TOOLS_PBESCHAIN_H
 
+#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/iteration_builders.h"
@@ -84,9 +85,9 @@ struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
   using super = Builder<rewrite_if_builder<Builder>>;
   using super::apply;
 
-  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
 
-  explicit rewrite_if_builder(simplify_data_rewriter<data::rewriter>& r)
+  explicit rewrite_if_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
       : m_pbes_rewriter(r)
   {}
 
@@ -125,10 +126,10 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
 
   pbes_equation m_eq;
   core::identifier_string name;
-  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
   bool m_stable = false;
 
-  explicit substitute_propositional_variables_builder(simplify_data_rewriter<data::rewriter>& r)
+  explicit substitute_propositional_variables_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
       : m_pbes_rewriter(r)
   {}
 
@@ -186,11 +187,11 @@ struct substitute_propositional_variables_i_builder
   typedef Builder<substitute_propositional_variables_i_builder<Builder>> super;
   using super::apply;
 
-  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
   std::vector<detail::predicate_variable> predvars;
   int i = 0;
 
-  explicit substitute_propositional_variables_i_builder(simplify_data_rewriter<data::rewriter>& r,
+  explicit substitute_propositional_variables_i_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r,
       std::vector<detail::predicate_variable> predvars)
       : m_pbes_rewriter(r),
         predvars(predvars)
@@ -298,7 +299,7 @@ inline void self_substitute(pbes_equation& equation,
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
     simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter,
-    simplify_data_rewriter<data::rewriter>& pbes_default_rewriter,
+    simplify_quantifiers_data_rewriter<data::rewriter>& pbes_default_rewriter,
     pbeschain_options options)
 {
   bool stable = false;
@@ -549,7 +550,7 @@ inline void substitute(pbes_equation& into,
 inline pbes fill_pvi(pbes& p, data::rewriter data_rewriter)
 {
   detail::stategraph_pbes stategraph(p, data_rewriter);
-  simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_rewriter);
+  simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(data_rewriter);
 
   // Preparation
   for (detail::stategraph_equation& equation: stategraph.equations())
@@ -593,8 +594,8 @@ struct pbeschain_pbes_backward_substituter
     }
 #endif // MCRL2_ENABLE_JITTYC
     simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
-    simplify_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
-    simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
+    simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
+    simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_default_rewriter);
     rewrite_if_builder<pbes_system::pbes_expression_builder> if_rewriter(pbes_default_rewriter);
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder> pvi_substituter(
@@ -617,7 +618,7 @@ struct pbeschain_pbes_backward_substituter
           pbes_rewriter,
           pbes_default_rewriter,
           options);
-
+      
       std::set<propositional_variable_instantiation> pvi_set
           = find_propositional_variable_instantiations((*i).formula());
       mCRL2log(log::verbose) << "How many are left? " << pvi_set.size() << "\n";

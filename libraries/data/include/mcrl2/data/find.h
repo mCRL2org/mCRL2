@@ -348,6 +348,29 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
   return result;
 }
 
+/// \\brief Returns all variables that occur in an object
+/// \\param[in] x an object containing variables
+/// \\return All free variables that occur in the object x
+template <typename T>
+std::vector<data::variable> find_free_variables_in_order(const T& x)
+{
+  std::vector<data::variable> result;
+  data::find_free_variables(x, std::inserter(result, result.end()));
+  return result;
+}
+
+/// \\brief Returns all variables that occur in an object
+/// \\param[in] x an object containing variables
+/// \\param[in] bound a bound a container of variables
+/// \\return All free variables that occur in the object x
+template <typename T, typename VariableContainer>
+std::vector<data::variable> find_free_variables_with_bound_in_order(const T& x, VariableContainer const& bound)
+{
+  std::vector<data::variable> result;
+  data::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
+  return result;
+}
+
 /// \\brief Returns all identifiers that occur in an object
 /// \\param[in] x an object containing identifiers
 /// \\param[in,out] o an output iterator to which all identifiers occurring in x are written.
