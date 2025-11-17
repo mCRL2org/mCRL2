@@ -18,18 +18,19 @@ namespace mcrl2::lps  // TODO: This should become lts. We should not declare obj
 /// \brief Simulation process.
 // A simulation is effectively a trace annotated with outgoing transition information
 // and an operation to extend the trace with an outgoing transition from the last state.
-class simulation : protected explorer<true, false, stochastic_specification>
+class simulation
 {
   public:
-
-    using transition_t = transition;
+    using explorer_type = explorer<true, false, stochastic_specification>;
+    using transition_type = explorer_type::transition;
+    using state_type = explorer_type::state_type;
 
     struct simulator_state_t
     {
       lps::stochastic_state source_state;
       std::size_t state_number = 0UL; // This represents the number of the selected probabilistic state, or a number out
                                       // of range if not source state is chosen.
-      std::vector<transition_t> transitions;
+      std::vector<transition_type> transitions;
       std::size_t transition_number
           = 0UL; // This indicates the chosen transition, or a number out of range if no transition is chosen.
     };
@@ -79,7 +80,7 @@ class simulation : protected explorer<true, false, stochastic_specification>
 
   protected:
     stochastic_specification m_specification;
-
+    explorer_type m_explorer;
     bool m_auto_select_probabilistic_state=false;
     std::mt19937 m_gen; // mersenne_twister_engine seeded with rd().
     std::uniform_int_distribution<std::size_t> m_distrib; // A random generator with a uniform distribution. 
@@ -87,7 +88,7 @@ class simulation : protected explorer<true, false, stochastic_specification>
     // The complete trace.
     std::deque<simulator_state_t> m_full_trace;
 
-    std::vector<transition_t> transitions(const lps::state& source_state);
+    std::vector<transition_type> transitions(const lps::state& source_state);
 
     bool match_trace_probabilistic_state(lts::trace& trace);
     bool match_trace_transition(lts::trace& trace);

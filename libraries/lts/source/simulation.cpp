@@ -14,29 +14,30 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-std::vector<simulation::transition_t> simulation::transitions(const state& source_state)
+std::vector<simulation::transition_type> simulation::transitions(const state& source_state)
 {
   try
   {
-    std::list<transition> outgoing_transitions = out_edges(source_state);
-    std::vector<simulation::transition_t> output(outgoing_transitions.begin(), outgoing_transitions.end());
+    std::list<transition_type> outgoing_transitions = m_explorer.out_edges(source_state);
+    std::vector<simulation::transition_type> output(outgoing_transitions.begin(), outgoing_transitions.end());
     return output;
   }
   catch (mcrl2::runtime_error& e)
   {
     mCRL2log(mcrl2::log::error) << "an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
-    return std::vector<simulation::transition_t>();
+    return std::vector<simulation::transition_type>();
   }
 }
 
 simulation::simulation(const stochastic_specification& specification, data::rewrite_strategy strategy)
-  : explorer(specification, explorer_options(strategy)),
+  :
     m_specification(specification),
+    m_explorer(specification, explorer_options(strategy)),
     m_gen(),
     m_distrib(0,std::numeric_limits<std::size_t>::max())
 {
-  state_type initial_state;
-  compute_stochastic_state(initial_state, m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+  stochastic_state initial_state;
+  m_explorer.compute_initial_stochastic_state(initial_state);
   simulator_state_t state;
   state.source_state = initial_state;
   state.state_number=initial_state.size();  // This indicates that no state is selected yet.
@@ -78,7 +79,7 @@ void simulation::environment(std::vector<std::string> values)
   }
 
   simulator_state_t result_state;
-  compute_stochastic_state(result_state.source_state, stochastic_distribution(), data_values, m_global_sigma, m_global_rewr, m_global_enumerator);
+  m_explorer.compute_stochastic_state(result_state.source_state, stochastic_distribution(), data_values);
   result_state.transitions = transitions(result_state.source_state.states[0]);
   result_state.state_number = 0;
   result_state.transition_number = 0;
@@ -172,8 +173,8 @@ void simulation::load(const std::string& filename)
   // Get the first state from the generator
   m_full_trace.clear();
 
-  state_type initial_state;
-  compute_stochastic_state(initial_state, m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+  stochastic_state initial_state;
+  m_explorer.compute_initial_stochastic_state(initial_state);
 
   add_new_state(initial_state);
   // Check that the first state (if given) matches one of the probabilistic states of the specification.

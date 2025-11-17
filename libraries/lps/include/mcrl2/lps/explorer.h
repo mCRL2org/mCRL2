@@ -541,7 +541,7 @@ class explorer: public abortable
     void compute_state(state& result,
                        const DataExpressionSequence& v,
                        data::mutable_indexed_substitution<>& sigma,
-                       data::rewriter& rewr) const
+                       const data::rewriter& rewr) const
     {
       lps::make_state(result, 
                       v.begin(), 
@@ -554,8 +554,8 @@ class explorer: public abortable
                                   const stochastic_distribution& distribution, 
                                   const DataExpressionSequence& next_state,
                                   data::mutable_indexed_substitution<>& sigma,
-                                  data::rewriter& rewr, 
-                                  data::enumerator_algorithm<>& enumerator) const
+                                  const data::rewriter& rewr,
+                                  const data::enumerator_algorithm<>& enumerator) const
     {                                              
       result.clear();
       if (distribution.is_defined())
@@ -588,7 +588,7 @@ class explorer: public abortable
       }
     }
 
-    /// Rewrite action a, and put it back in place. 
+    /// Rewrite action a, and put it back in place.
     lps::multi_action rewrite_action(
                              const lps::multi_action& a,
                              data::mutable_indexed_substitution<>& sigma,
@@ -1030,6 +1030,21 @@ class explorer: public abortable
       return m_global_rewr;
     }
 
+    // Compute the initial stochastic state
+    void compute_initial_stochastic_state(stochastic_state& result) const
+    {
+      compute_stochastic_state(result, m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+    }
+
+    // Convenience overload: use internal sigma/rewriter/enumerator
+    template <typename DataExpressionSequence>
+    void compute_stochastic_state(stochastic_state& result,
+                                  const stochastic_distribution& distribution,
+                                  const DataExpressionSequence& next_state) const
+    {
+      compute_stochastic_state(result, distribution, next_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+    }
+
     // Utility function to obtain the outgoing transitions of the current state.
     // Should not be used concurrently. 
     std::list<transition> out_edges(const state& s)
@@ -1410,7 +1425,7 @@ class explorer: public abortable
       state_type s0;
       if constexpr (Stochastic)
       {
-        compute_stochastic_state(s0, m_initial_distribution, m_initial_state, m_global_sigma, m_global_rewr, m_global_enumerator);
+        compute_initial_stochastic_state(s0);
       }
       else
       {
