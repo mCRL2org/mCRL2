@@ -162,7 +162,7 @@ example, clicking on the top ``fill`` transition yields a new
 list of transitions and an update current state. Now, besides a
 ``fill`` action also the actions ``empty``, ``pour(1)``
 to ``pour(5)`` are possible. The state now holds, e.g., the
-value``8`` for the contents ``m_Can11`` for the bigger
+value ``8`` for the contents ``m_Can11`` for the bigger
 can, as a result of the ``fill`` action.
 
 The simulator reveals that we have made a mistake. Given a full can of

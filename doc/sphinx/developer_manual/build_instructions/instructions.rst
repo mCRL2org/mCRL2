@@ -15,9 +15,9 @@ The mCRL2 source code can be obtained in two ways. The source code for releases
 of the toolset are available as a source tarball, see :ref:`download`. The source
 code for the development version of the toolset is available in our `Git <https://git-scm.com/>`_
 repository hosted at `Github <https://github.com/mCRL2org/mCRL2>`_. It can be
-obtained using the following command:
+obtained using the following command::
 
-  git clone https://github.com/mCRL2org/mCRL2.git
+  $ git clone https://github.com/mCRL2org/mCRL2.git
 
 In the remainder of this manual, we assume that you have the source code on your
 system in a folder called ``mCRL2``. We will set up an in-source build in
@@ -38,19 +38,19 @@ Python dependencies
 --------------------
 
 If you don't want to install Python libraries system wide, you can set up a
-Python virtual environment (needs to be done only once) in the build directory.
+Python virtual environment (needs to be done only once) in the build directory::
 
     $ python3 -m venv sphinx-venv
 
-Activate it.
+Activate it::
 
     $ source sphinx-venv/bin/activate
 
-Afterwards dependencies can be installed using `pip` as follows:
+Afterwards dependencies can be installed using `pip` as follows::
 
     $ pip install -r <mCRL2>/requirements.txt
 
-When using a virtual environment ensure that CMake uses the right Python binary.
+When using a virtual environment ensure that CMake uses the right Python binary::
 
     $ cmake [other options] \
           -DPython_EXECUTABLE=absolute/path/to/sphinx-venv/bin/python \

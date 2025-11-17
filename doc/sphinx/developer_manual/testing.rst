@@ -5,9 +5,9 @@ Testing
 
 For tests can be run the python packages listed in `requirements.txt` need to be installed. 
 
-* This can be done using pip as follows:
+* This can be done using pip as follows::
 
-   pip install -r requirements.txt
+   $ pip install -r requirements.txt
 
 Before executing tests, make sure that your build has been configured
 with the value of ``MCRL2_ENABLE_TESTS`` set to ``YES`` and that
@@ -15,25 +15,25 @@ the toolset has been compiled.
 
 To conduct the tests specified in the build tree execute::
 
-  ctest
+  $ ctest
 
 Specific tests can be run by using ``ctest``. Below some examples are given. 
 
 * To displays the list of tests, without running them, execute::
 
-    ctest -N .
+    $ ctest -N .
 
 * To execute the 2nd up until the 5th test targets, execute::
 
-    ctest -I2,5 .
+    $ ctest -I2,5 .
 
 * To execute tests targets that match the description "FOO", execute::
 
-    ctest -R FOO .
+    $ ctest -R FOO .
 
 For additional help, run::
 
-  ctest --help
+  $ ctest --help
 
 Regression tests
 ------------------

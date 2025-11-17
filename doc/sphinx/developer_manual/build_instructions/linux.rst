@@ -38,5 +38,5 @@ using 4 cores, use::
 
 .. note::
 
-  Many vscode extensions rely on the `compile_commands.json`, which can be
-  produced by setting the `CMAKE_EXPORT_COMPILE_COMMANDS` to true in `ccmake`.
+  Many vscode extensions rely on the ``compile_commands.json``, which can be
+  produced by setting the ``CMAKE_EXPORT_COMPILE_COMMANDS`` to true in ``ccmake``.
