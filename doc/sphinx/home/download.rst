@@ -44,6 +44,15 @@ This package is currently maintained by Kevin Jilissen.
 .. warning::
 
    On Windows, mCRL2 tools occasionally get stuck trying to read .aut files. This has been resolved in later Nightly builds.
+
+.. warning::
+
+   On macOS, it might be necessary to manually sign the mCRL2.app bundle after
+   installation. Otherwise, tools might immediately get killed when trying to
+   launch them. The signing can be done using the following command (assuming
+   that it is installed in `/Applications`)::
+      
+     sudo codesign --force --deep -s - /Applications/mCRL2.app
    
 
 Nightly build
