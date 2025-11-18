@@ -143,14 +143,6 @@ public:
 
   symbolic_solution_t partial_solution() const override { return m_partial_solution; }
 
-  ldd W0() const override { return m_partial_solution.winning[0]; }
-
-  ldd W1() const override { return m_partial_solution.winning[1]; }
-
-  ldd S0() const override { return m_partial_solution.strategy[0]; }
-
-  ldd S1() const override { return m_partial_solution.strategy[1]; }
-
 private:
   /// Partial solution that has already been computed.
   symbolic_solution_t m_partial_solution;
