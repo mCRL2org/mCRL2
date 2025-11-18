@@ -356,6 +356,14 @@ std::vector<data::variable> find_free_variables_in_order(const T& x)
 {
   std::vector<data::variable> result;
   data::find_free_variables(x, std::inserter(result, result.end()));
+  
+  std::unordered_set<data::variable> seen(result.begin(), result.end());
+  result.clear();
+  for (const auto& var : seen)
+  {
+    result.push_back(var);
+  }
+  reverse(result.begin(), result.end()); 
   return result;
 }
 

@@ -130,7 +130,7 @@ class BDD_Prover: protected rewriter
     /// \brief A data specification.
     // const data_specification& f_data_spec;
   
-    /// \brief The variables in the expression in order
+    /// \brief The variables in the expression in order.
     std::vector<variable> f_variables;
 
     /// \brief A hashtable that maps formulas to BDDs.
@@ -394,6 +394,9 @@ class BDD_Prover: protected rewriter
         {
           if (result_is_defined)
           {
+            // By default, the ordering of selecting the guard to pivot changes based on how
+            // the brackets of the expression are placed. Choose the ordering of the variables
+            // based on the order in which they appear in the formula.
             if (f_info.compare_guard(v_small, result, f_variables) == compare_result_smaller)
             {
               result = v_small;

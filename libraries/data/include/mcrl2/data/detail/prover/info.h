@@ -63,7 +63,8 @@ class Info
       return compare_result_equal;
     }
 
-        /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c guard.
+    /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c guard.
+    /// \brief Uses the ordering provided by f_variables.
     double get_guard_structure(const data_expression& guard,const std::vector<variable>& f_variables) const
     {
       if (is_variable(guard))
@@ -77,6 +78,7 @@ class Info
         const data_expression& v_term2 = guard_appl[1]; 
         if (find_free_variables(v_term1).empty() && is_variable(v_term2))
         {
+          // Use the ordering provided by f_variables.
           auto res = std::find(f_variables.begin(), f_variables.end(), v_term2);
           int index = res - f_variables.begin();
           if (index < f_variables.size())
