@@ -13,7 +13,6 @@
 #define MCRL2_DATA_FIND_H
 
 #include "mcrl2/data/add_binding.h"
-#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/traverser.h"
 
 namespace mcrl2::data
@@ -357,6 +356,7 @@ std::vector<data::variable> find_free_variables_in_order(const T& x)
   std::vector<data::variable> result;
   data::find_free_variables(x, std::inserter(result, result.end()));
   
+  // Filter duplicates 
   std::unordered_set<data::variable> seen(result.begin(), result.end());
   result.clear();
   for (const auto& var : seen)
@@ -376,6 +376,15 @@ std::vector<data::variable> find_free_variables_with_bound_in_order(const T& x, 
 {
   std::vector<data::variable> result;
   data::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
+  
+  // Filter duplicates
+  std::unordered_set<data::variable> seen(result.begin(), result.end());
+  result.clear();
+  for (const auto& var : seen)
+  {
+    result.push_back(var);
+  }
+  reverse(result.begin(), result.end()); 
   return result;
 }
 
