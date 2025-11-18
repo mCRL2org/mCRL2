@@ -74,25 +74,29 @@ class symbolic_pbessolve_algorithm
 
       stopwatch timer;
       mCRL2log(log::debug) << "start zielonka recursion\n";
-      auto [m, U] = m_G.get_min_rank(V);
 
-      std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
+      symbolic_solution_t solution;
 
       // Compute the partitioning of V for players 0 (in V[0]) and 1 (in V[1]).
       std::array<const ldd, 2> Vplayer = m_G.players(V);
-      symbolic_solution_t solution;
+
+      auto [m, U] = m_G.get_min_rank(V);
+      std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
       const auto [A, A_strategy] = m_G.safe_attractor(U, alpha, V, Vplayer);
       mCRL2log(log::trace) << "A = attractor(" << m_G.print_nodes(U) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(A) << std::endl;
-      symbolic_solution_t solution_V_minus_A = zielonka(minus(V, A));
 
       // Original Zielonka version
+      symbolic_solution_t solution_V_minus_A = zielonka(minus(V, A));
       if (solution_V_minus_A.winning[1 - alpha] == empty_set())
       {
         solution.winning[alpha] = union_(A, solution_V_minus_A.winning[alpha]);
         solution.winning[1 - alpha] = empty_set();
-        solution.winning[alpha] = union_(union_(A_strategy, solution_V_minus_A.winning[alpha]), merge(intersect(U, Vplayer[alpha]), V));
-        solution.winning[1 - alpha] = empty_set();
+        solution.strategy[alpha]
+          = union_(union_(A_strategy, solution_V_minus_A.strategy[alpha]), merge(intersect(U, Vplayer[alpha]), V));
+        solution.strategy[1 - alpha] = empty_set();
+
+        assert(union_(solution.winning[0], solution.winning[1]) == V);
       }
       else
       {
@@ -101,6 +105,7 @@ class symbolic_pbessolve_algorithm
         solution = zielonka(minus(V, B));
         solution.winning[1 - alpha] = union_(solution.winning[1 - alpha], B);
         solution.strategy[1 - alpha] = union_(union_(solution_V_minus_A.strategy[1 - alpha], B_strategy), solution.strategy[1 - alpha]);
+        assert(union_(solution.winning[0], solution.winning[1]) == V);
       }
 
       mCRL2log(log::debug) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
