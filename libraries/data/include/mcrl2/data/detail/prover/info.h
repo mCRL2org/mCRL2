@@ -181,9 +181,7 @@ class Info
     constexpr Info(bool a_full, bool a_reverse)
     : f_full(a_full)
     , f_reverse(a_reverse)
-    {
-        
-    }
+    {}
 
     // Perform an occur check of expression t2 in expression t1.
     static bool occurs(const data_expression& t1, const data_expression& t2)
