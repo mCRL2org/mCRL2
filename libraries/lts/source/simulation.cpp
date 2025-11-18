@@ -32,7 +32,8 @@ std::vector<simulation::transition_type> simulation::transitions(const state& so
 simulation::simulation(const stochastic_specification& specification, data::rewrite_strategy strategy)
   :
     m_specification(specification),
-    m_explorer(specification, explorer_options(strategy)),
+    m_rewriter(construct_rewriter(specification, strategy, false)),
+    m_explorer(specification, explorer_options(strategy), m_rewriter),
     m_gen(),
     m_distrib(0,std::numeric_limits<std::size_t>::max())
 {

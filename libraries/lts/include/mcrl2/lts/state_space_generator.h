@@ -653,7 +653,7 @@ struct state_space_generator
   using state_type = typename explorer_type::state_type;
 
   const lps::explorer_options& options;
-  lps::explorer<Stochastic, Timed, Specification> explorer;
+  explorer_type& explorer;
   detail::trace_constructor<explorer_type> m_trace_constructor;
 
   detail::action_detector<explorer_type> m_action_detector;
@@ -662,9 +662,9 @@ struct state_space_generator
   std::unique_ptr<detail::divergence_detector<explorer_type>> m_divergence_detector;
   detail::progress_monitor m_progress_monitor;
 
-  state_space_generator(const Specification& lpsspec, const lps::explorer_options& options_)
+  state_space_generator(const Specification& lpsspec, const lps::explorer_options& options_, explorer_type& explorer_)
     : options(options_),
-      explorer(lpsspec, options_),
+      explorer(explorer_),
       m_trace_constructor(explorer),
       m_action_detector(lpsspec, m_trace_constructor, options.trace_actions, options.trace_multiactions, options.trace_prefix, options.max_traces),
       m_deadlock_detector(m_trace_constructor, options.trace_prefix, options.max_traces),

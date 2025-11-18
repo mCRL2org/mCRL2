@@ -28,7 +28,9 @@ using namespace mcrl2::lps;
 template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
 void generate_state_space(const Specification& lpsspec, LTSBuilder& builder, const std::string& output_filename, const lps::explorer_options& options)
 {
-  lts::state_space_generator<Stochastic, Timed, Specification> generator(lpsspec, options);
+  data::rewriter rewr = lps::construct_rewriter(lpsspec, options.rewrite_strategy, options.remove_unused_rewrite_rules);
+  lps::explorer<Stochastic, Timed, Specification> explorer(lpsspec, options, rewr);
+  lts::state_space_generator<Stochastic, Timed, Specification> generator(lpsspec, options, explorer);
   generator.explore(builder);
   builder.save(output_filename);
 }

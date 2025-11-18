@@ -329,6 +329,7 @@ class pins
     std::vector<std::vector<std::size_t> > m_update_group;
     lps::specification m_specification;
     using generator_type = lps::explorer<false, false, lps::specification>;
+    data::rewriter m_rewriter;
     generator_type m_generator;
     
     std::vector<data::variable> m_parameters_list;
@@ -342,6 +343,7 @@ class pins
     // For guard-splitting we use a different generator with a different spec.
     // This second spec has guards removed from the conditions.
     lps::specification m_specification_reduced;
+    data::rewriter m_rewriter_reduced;
     generator_type m_generator_reduced;
 
     // The type mappings
@@ -664,10 +666,12 @@ class pins
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     pins(const std::string& filename, const std::string& rewriter_strategy)
       : m_specification(load_specification(filename)),
-        m_generator(m_specification, data::parse_rewrite_strategy(rewriter_strategy)),
+        m_rewriter(lps::construct_rewriter(m_specification, data::parse_rewrite_strategy(rewriter_strategy), false)),
+        m_generator(m_specification, lps::explorer_options(data::parse_rewrite_strategy(rewriter_strategy)), m_rewriter),
         m_parameters_list(process().process_parameters().begin(), process().process_parameters().end()),
         m_specification_reduced(reduce_specification(m_specification)),
-        m_generator_reduced(m_specification_reduced, data::parse_rewrite_strategy(rewriter_strategy))
+        m_rewriter_reduced(lps::construct_rewriter(m_specification_reduced, data::parse_rewrite_strategy(rewriter_strategy), false)),
+        m_generator_reduced(m_specification_reduced, lps::explorer_options(data::parse_rewrite_strategy(rewriter_strategy)), m_rewriter_reduced)
     {
       initialize_read_write_groups();
 
