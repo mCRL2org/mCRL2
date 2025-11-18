@@ -80,6 +80,7 @@ class simulation
 
   protected:
     stochastic_specification m_specification;
+    data::rewriter m_rewriter;
     explorer_type m_explorer;
     bool m_auto_select_probabilistic_state=false;
     std::mt19937 m_gen; // mersenne_twister_engine seeded with rd().

@@ -37,6 +37,30 @@
 
 namespace mcrl2::lps {
 
+// Global helpers to construct a rewriter and add real operators for explorer
+inline std::set<data::function_symbol> add_real_operators(std::set<data::function_symbol> s)
+{
+  s.insert(data::less_equal(data::sort_real::real_()));
+  s.insert(data::greater_equal(data::sort_real::real_()));
+  s.insert(data::sort_real::plus(data::sort_real::real_(), data::sort_real::real_()));
+  return s;
+}
+
+template <typename Specification>
+data::rewriter construct_rewriter(const Specification& lpsspec, data::rewrite_strategy rewrite_strategy, bool remove_unused_rewrite_rules)
+{
+  if (remove_unused_rewrite_rules)
+  {
+    return data::rewriter(lpsspec.data(),
+      data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables(), false),
+      rewrite_strategy);
+  }
+  else
+  {
+    return data::rewriter(lpsspec.data(), rewrite_strategy);
+  }
+}
+
 enum class caching { none, local, global };
 
 inline
@@ -957,20 +981,7 @@ class explorer: public abortable
       }
     }
 
-    data::rewriter construct_rewriter(const Specification& lpsspec, bool remove_unused_rewrite_rules)
-    {
-      if (remove_unused_rewrite_rules)
-      {
-        return data::rewriter(lpsspec.data(),
-          data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables(), false),
-          m_options.rewrite_strategy);
-      }
-      else
-      {
-        return data::rewriter(lpsspec.data(), m_options.rewrite_strategy);
-      }
-    }
-
+private:
     bool is_confluent_tau(const multi_action& a)
     {
       if (a.actions().empty())
@@ -985,9 +996,9 @@ class explorer: public abortable
     }
 
   public:
-    explorer(const Specification& lpsspec, const explorer_options& options_)
+    explorer(const Specification& lpsspec, const explorer_options& options_, const data::rewriter& rewr)
       : m_options(options_),
-        m_global_rewr(construct_rewriter(lpsspec, m_options.remove_unused_rewrite_rules)),
+        m_global_rewr(rewr),
         m_global_enumerator(m_global_rewr, lpsspec.data(), m_global_rewr, m_global_id_generator, false),
         m_global_lpsspec(preprocess(lpsspec)),
         m_discovered(m_options.number_of_threads)

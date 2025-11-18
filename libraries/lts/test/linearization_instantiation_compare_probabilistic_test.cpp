@@ -39,7 +39,9 @@ LTS_TYPE translate_lps_to_lts(const lps::stochastic_specification& specification
   const std::string& output_filename = utilities::temporary_filename("linearization_instantiation_probabilistic_compare_test_file");
 
   LTS_TYPE result;
-  lts::state_space_generator<true, false, lps::stochastic_specification> generator(specification, options);
+  data::rewriter rewr = lps::construct_rewriter(specification, options.rewrite_strategy, options.remove_unused_rewrite_rules);
+  lps::explorer<true, false, lps::stochastic_specification> explorer(specification, options, rewr);
+  lts::state_space_generator<true, false, lps::stochastic_specification> generator(specification, options, explorer);
   auto builder = create_stochastic_lts_builder(specification, options, result.type());
   generator.explore(*builder);
   builder->save(output_filename);

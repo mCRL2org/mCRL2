@@ -343,7 +343,9 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
     template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
     bool generate_state_space(const Specification& lpsspec, LTSBuilder& builder)
     {
-      lts::state_space_generator<Stochastic, Timed, Specification> generator(lpsspec, options);
+      data::rewriter rewr = lps::construct_rewriter(lpsspec, options.rewrite_strategy, options.remove_unused_rewrite_rules);
+      lps::explorer<Stochastic, Timed, Specification> explorer(lpsspec, options, rewr);
+      lts::state_space_generator<Stochastic, Timed, Specification> generator(lpsspec, options, explorer);
       current_explorer = &generator.explorer;
       
       bool result = generator.explore(builder);
