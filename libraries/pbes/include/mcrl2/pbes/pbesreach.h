@@ -10,6 +10,7 @@
 #ifndef MCRL2_PBES_PBESREACH_H
 #define MCRL2_PBES_PBESREACH_H
 
+#include "mcrl2/pbes/symbolic_pbessolve.h"
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -578,6 +579,12 @@ class pbesreach_algorithm
       return m_todo;
     }
 
+    /// \returns Partial solution that has been computed during reachability
+    virtual symbolic_solution_t partial_solution() const
+    {
+      return symbolic_solution_t();
+    }
+
     /// \returns LDD containing the vertices known to be won by player 0.
     virtual sylvan::ldds::ldd W0() const
     {
@@ -653,6 +660,8 @@ class pbesreach_algorithm
       return m_group_patterns;
     }
 };
+
+
 
 } // namespace mcrl2::pbes_system
 

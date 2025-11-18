@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesreach.h"
+#include "mcrl2/pbes/pbesreach_partial.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/symbolic_pbessolve.h"
@@ -41,150 +42,7 @@ using utilities::tools::parallel_tool;
 
 namespace mcrl2::pbes_system {
 
-class pbesreach_algorithm_partial : public pbes_system::pbesreach_algorithm
-{
-public:
 
-  pbesreach_algorithm_partial(const pbes_system::srf_pbes& pbesspec, const symbolic_reachability_options& options_) :
-    pbes_system::pbesreach_algorithm(pbesspec, options_)
-  {
-    m_Vwon[0] = sylvan::ldds::empty_set();
-    m_Vwon[1] = sylvan::ldds::empty_set();
-    m_S[0] = sylvan::ldds::empty_set();
-    m_S[1] = sylvan::ldds::empty_set();
-  }
-
-  void on_end_while_loop() override
-  {
-    time_exploring += explore_timer.seconds();
-    ++iteration_count;
-
-    //if (iteration_count % 10 == 0 || m_options.aggressive)
-    if (time_solving * 10 < (time_solving + time_exploring) || m_options.aggressive)
-    {
-      mCRL2log(log::verbose) << "start partial solving\n";
-      stopwatch timer;
-
-      // Store the set of won states to keep track of whether new states have been solved.
-      std::array<sylvan::ldds::ldd, 2> Vwon = m_Vwon;
-
-      ldd V = union_(m_visited, m_todo);
-      pbes_system::symbolic_parity_game G(pbes(), summand_groups(), data_index(), V, m_options.no_relprod, m_options.chaining, m_options.check_strategy);
-      G.print_information();
-      pbes_system::symbolic_pbessolve_algorithm solver(G);
-
-      if (m_options.solve_strategy == 1)
-      {
-        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_solitair_cycles(m_initial_vertex,
-            V,
-            m_todo,
-            false,
-            m_deadlocks,
-            m_Vwon[0],
-            m_Vwon[1],
-            m_S[0],
-            m_S[1]);
-      }
-      else if (m_options.solve_strategy == 2)
-      {
-        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_solitair_cycles(m_initial_vertex,
-            V,
-            m_todo,
-            true,
-            m_deadlocks,
-            m_Vwon[0],
-            m_Vwon[1],
-            m_S[0],
-            m_S[1]);
-      }
-      else if (m_options.solve_strategy == 3)
-      {
-        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_forced_cycles(m_initial_vertex,
-          V,
-          m_todo,
-          false,
-          m_deadlocks,
-          m_Vwon[0],
-          m_Vwon[1],
-          m_S[0],
-          m_S[1]);
-      }
-      else if (m_options.solve_strategy == 4)
-      {
-        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]) = solver.detect_forced_cycles(m_initial_vertex,
-          V,
-          m_todo,
-          true,
-          m_deadlocks,
-          m_Vwon[0],
-          m_Vwon[1],
-          m_S[0],
-          m_S[1]);
-      }
-      else if (m_options.solve_strategy == 5)
-      {
-        std::tie(m_Vwon[0], m_Vwon[1])
-          = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, false, m_deadlocks, m_Vwon[0], m_Vwon[1]);
-      }
-      else if (m_options.solve_strategy == 6)
-      {
-        std::tie(m_Vwon[0], m_Vwon[1])
-          = solver.detect_fatal_attractors(m_initial_vertex, V, m_todo, true, m_deadlocks, m_Vwon[0], m_Vwon[1]);
-      }
-      else if (m_options.solve_strategy == 7)
-      {
-        std::tie(m_Vwon[0], m_Vwon[1], m_S[0], m_S[1])
-          = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_Vwon[0], m_Vwon[1], m_S[0], m_S[1]);
-      }
-
-      mCRL2log(log::verbose) << "found solution for" << std::setw(12) << satcount(m_Vwon[0]) + satcount(m_Vwon[1]) << " BES equations" << std::endl;
-      mCRL2log(log::verbose) << "finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-
-      time_solving += timer.seconds();
-    }
-
-    explore_timer.reset();
-  }
-
-  bool solution_found() const override
-  {
-    if (includes(m_Vwon[0], m_initial_vertex))
-    {
-      return true;
-    }
-    else if (includes(m_Vwon[1], m_initial_vertex))
-    {
-      return true;
-    }
-
-    return false;
-  }
-
-  ldd W0() const override
-  {
-    return m_Vwon[0];
-  }
-
-  ldd W1() const override
-  {
-    return m_Vwon[1];
-  }
-
-  ldd S0() const override { return m_S[0]; }
-
-  ldd S1() const override { return m_S[1]; }
-
-private:
-  // States for which winners have already been determined.
-  std::array<sylvan::ldds::ldd, 2> m_Vwon;
-  // Strategies for both players for the states for which winners have been determined
-  std::array<sylvan::ldds::ldd, 2> m_S;
-  std::size_t iteration_count = 0;
-
-  double time_solving = 0.0;
-  double time_exploring = 0.0;
-  stopwatch explore_timer;
-};
 
 class pbesinst_symbolic_counter_example_structure_graph_algorithm: public pbesinst_structure_graph_algorithm
 {
@@ -611,7 +469,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
           if (reach.solution_found())
           {
-            std::cout << (includes(reach.W0(), (reach.initial_state())) ? "true" : "false") << std::endl;
+            std::cout << (includes(reach.partial_solution().winning[0], (reach.initial_state())) ? "true" : "false") << std::endl;
           }
           else
           {
@@ -630,7 +488,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
               mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
               timer().start("solving");
-              auto [result, _a, _b, _c, _d] = solver.solve(reach.initial_state(), reach.V(), reach.deadlocks(), reach.W0(), reach.W1());
+              auto [result, solution] = solver.solve(reach.initial_state(), reach.V(), reach.deadlocks(), reach.partial_solution());
               timer().finish("solving");
 
               std::cout << (result ? "true" : "false") << std::endl;
@@ -671,36 +529,24 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           // Solve the remainder of the partially solved game.
           bool solution_found = false;
           bool result;
-          ldd W0;
-          ldd W1;
-          ldd S0;
-          ldd S1;
+          symbolic_solution_t solution;
           if(reach.I() == empty_set())
           {
-            std::tie(result, W0, W1, S0, S1) = solver.solve(reach.initial_state(),
+            std::tie(result,solution) = solver.solve(reach.initial_state(),
               V,
               reach.deadlocks(),
-               reach.W0(),
-               reach.W1(),
-               reach.S0(),
-               reach.S1());
+              reach.partial_solution());
             solution_found = true;
           } else {
-            std::tie(W0, W1, S0, S1) = solver.partial_solve(reach.initial_state(),
-              V,
-              reach.I(),
-              reach.deadlocks(),
-              reach.W0(),
-              reach.W1(),
-              reach.S0(),
-              reach.S1());
+            solution
+              = solver.partial_solve(reach.initial_state(), V, reach.I(), reach.deadlocks(), reach.partial_solution());
 
-            if(includes(W0, reach.initial_state()))
+            if(includes(solution.winning[0], reach.initial_state()))
             {
               solution_found = true;
               result = true;
             }
-            else if (includes(W1, reach.initial_state()))
+            else if (includes(solution.winning[1], reach.initial_state()))
             {
               solution_found = true;
               result = false;
@@ -731,7 +577,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
             pbessolve_options.number_of_threads = 1; // If we spawn multiple threads here, the threads of Sylvan and the explicit exploration will interfere
 
-            PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], V, result ? S0 : S1, reach.rewriter());
+            PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], V, result ? solution.strategy[0] : solution.strategy[1], reach.rewriter());
 
             // Perform the second instantiation given the proof graph.
             timer().start("second-instantiation");
