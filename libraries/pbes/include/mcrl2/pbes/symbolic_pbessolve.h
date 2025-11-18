@@ -39,6 +39,18 @@ struct symbolic_solution_t
   {}
 };
 
+/// Print solution to string
+inline
+std::string print_solution(const symbolic_parity_game& G, const symbolic_solution_t& solution)
+{
+  std::ostringstream os;
+  os << "W0 = " << G.print_nodes(solution.winning[0]) << std::endl;
+  os << "W1 = " << G.print_nodes(solution.winning[1]) << std::endl;
+  os << "S0 = " << G.print_strategy(solution.strategy[0]) << std::endl;
+  os << "S1 = " << G.print_strategy(solution.strategy[1]);
+  return os.str();
+}
+
 class symbolic_pbessolve_algorithm
 {
   private:
@@ -94,10 +106,7 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::debug) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
       mCRL2log(log::trace) << "\n  --- zielonka solution for ---\n" << m_G.print_graph(V) << std::endl;
-      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << std::endl;
-      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << std::endl;
-      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(solution.strategy[0]) << std::endl;
-      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(solution.strategy[1]) << std::endl;
+      mCRL2log(log::trace) << print_solution(m_G, solution) << std::endl;
 
       assert(union_(solution.winning[0], solution.winning[1]) == V);
       return solution;
@@ -135,10 +144,7 @@ class symbolic_pbessolve_algorithm
       }
 
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << std::endl;
-      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << std::endl;
-      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(solution.strategy[0]) << std::endl;
-      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(solution.strategy[1]) << std::endl;
+      mCRL2log(log::trace) << print_solution(m_G, solution) << std::endl;
 
       if (includes(solution.winning[0], initial_vertex))
       {
@@ -284,10 +290,7 @@ class symbolic_pbessolve_algorithm
         }
       }
 
-      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << std::endl;
-      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << std::endl;
-      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(solution.strategy[0]) << std::endl;
-      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(solution.strategy[1]) << std::endl;
+      mCRL2log(log::trace) << print_solution(m_G, solution) << std::endl;
 
       return solution;
     }
@@ -381,10 +384,7 @@ class symbolic_pbessolve_algorithm
         }
       }
 
-      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << std::endl;
-      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << std::endl;
-      mCRL2log(log::trace) << "S0 = " << m_G.print_strategy(solution.strategy[0]) << std::endl;
-      mCRL2log(log::trace) << "S1 = " << m_G.print_strategy(solution.strategy[1]) << std::endl;
+      mCRL2log(log::trace) << print_solution(m_G, solution) << std::endl;
 
       return solution;
     }
