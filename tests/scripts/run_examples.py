@@ -53,8 +53,10 @@ def main():
         # Change the working directory to the script path
         os.chdir(os.path.dirname(path))
 
-        # Strip the extension since the Runprocess adds it again
-        python, _ = os.path.splitext(sys.executable)
+        # Remove the .exe suffix on Windows systems since RunProcess adds it automatically.
+        python = sys.executable
+        if python.endswith("exe"):
+            python = python[:-4]
 
         process = RunProcess(python, arguments, 2000, args.timeout)
         return process.stdout
