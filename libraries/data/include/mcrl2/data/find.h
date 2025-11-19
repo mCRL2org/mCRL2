@@ -353,18 +353,18 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 template <typename T>
 std::vector<data::variable> find_free_variables_in_order(const T& x)
 {
-  std::vector<data::variable> result;
-  data::find_free_variables(x, std::inserter(result, result.end()));
+    std::vector<data::variable> seen;
+    data::find_free_variables(x, std::inserter(seen, seen.end()));
   
-  // Filter duplicates 
-  std::unordered_set<data::variable> seen(result.begin(), result.end());
-  result.clear();
-  for (const auto& var : seen)
-  {
-    result.push_back(var);
-  }
-  reverse(result.begin(), result.end()); 
-  return result;
+    // Filter duplicates
+    std::vector<data::variable> result;
+    for (const auto& var : seen)
+    {
+        if (std::find(result.begin(), result.end(), var) == result.end()) {
+            result.push_back(var);
+        }
+    }
+    return result;
 }
 
 /// \\brief Returns all variables that occur in an object
@@ -374,17 +374,17 @@ std::vector<data::variable> find_free_variables_in_order(const T& x)
 template <typename T, typename VariableContainer>
 std::vector<data::variable> find_free_variables_with_bound_in_order(const T& x, VariableContainer const& bound)
 {
-  std::vector<data::variable> result;
-  data::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
+  std::vector<data::variable> seen;
+  data::find_free_variables_with_bound(x, std::inserter(seen, seen.end()), bound);
   
-  // Filter duplicates
-  std::unordered_set<data::variable> seen(result.begin(), result.end());
-  result.clear();
+    // Filter duplicates
+  std::vector<data::variable> result;
   for (const auto& var : seen)
   {
-    result.push_back(var);
+      if (std::find(result.begin(), result.end(), var) == result.end()) {
+          result.push_back(var);
+      }
   }
-  reverse(result.begin(), result.end()); 
   return result;
 }
 
