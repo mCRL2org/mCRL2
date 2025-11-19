@@ -588,9 +588,11 @@ struct pbeschain_pbes_backward_substituter
   {
     data::rewriter data_rewriter(p.data(), options.rewrite_strategy);
     data::rewriter data_default_rewriter(p.data());
+#ifdef MCRL2_ENABLE_JITTYC
     if (options.rewrite_strategy == data::rewriter::strategy::jitty_compiling || options.rewrite_strategy == data::rewriter::strategy::jitty_compiling_prover) {
         data_default_rewriter = data_rewriter;
     }
+#endif // MCRL2_ENABLE_JITTYC
     simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
     simplify_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
     simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
