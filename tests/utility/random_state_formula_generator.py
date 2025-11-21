@@ -388,7 +388,8 @@ nu X. (([!a]X && [b]false))
 [true*]mu X.[a]X
 [!a*.b]false && [!c*.b]false && [!d*.b]false && [true*.c.!a*.b]false
 [true*] [a.(!a && !b)*.b.(!a)*.b]false
-[true*](<a>true => <b>true)"""
+[true*](<a>true => <b>true)
+[true*.a] mu X . ([!b]X && (nu Y . <true>true))"""
 
 
 def make_modal_formula() -> str:
