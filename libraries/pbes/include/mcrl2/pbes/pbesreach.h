@@ -474,7 +474,8 @@ class pbesreach_algorithm
       return std::make_tuple(union_(visited, todo), minus(todo1, visited), potential_deadlocks);
     }
 
-    ldd run(bool report_states = false)
+    // post: m_visited contains the visited vertices in the parity game.
+    void run(bool report_states = false)
     {
       using namespace sylvan::ldds;
       auto& R = m_summand_groups;
@@ -552,8 +553,6 @@ class pbesreach_algorithm
 
         ++i;
       }
-
-      return m_visited;
     }
 
     /// \brief This function is called right after the while loop is finished.

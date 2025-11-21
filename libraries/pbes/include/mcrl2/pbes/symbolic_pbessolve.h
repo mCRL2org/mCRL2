@@ -37,6 +37,12 @@ struct symbolic_solution_t
     : winning({sylvan::ldds::empty_set(), sylvan::ldds::empty_set()}),
       strategy({sylvan::ldds::empty_set(), sylvan::ldds::empty_set()})
   {}
+
+  /// Determine if vertex is part of the solution.
+  bool solution_found(const ldd& vertex) const
+  {
+    return includes(winning[0], vertex) || includes(winning[1], vertex);
+  }
 };
 
 /// Print solution to string
@@ -135,7 +141,7 @@ class symbolic_pbessolve_algorithm
 
       ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, solution.winning, solution.strategy);
 
-      if (!includes(solution.winning[0], initial_vertex) && !includes(solution.winning[1], initial_vertex))
+      if (!solution.solution_found(initial_vertex))
       {
         // If the initial vertex has not yet been won then run the zielonka solver as well.
         mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(Vtotal) << std::endl;
@@ -151,21 +157,15 @@ class symbolic_pbessolve_algorithm
       mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
       mCRL2log(log::trace) << print_solution(m_G, solution) << std::endl;
 
-      if (includes(solution.winning[0], initial_vertex))
+      if (solution.solution_found(initial_vertex))
       {
+        bool result = includes(solution.winning[0], initial_vertex);
+        assert(result || includes(solution.winning[1], initial_vertex)); // if result is false, initial_vertex must be won by player 1.
         if (m_check_strategy)
         {
-          check_strategy(initial_vertex, V, solution.winning[0], solution.winning[1], false, solution.strategy[0]);
+          check_strategy(initial_vertex, V, solution, !result);
         }
-        return std::make_tuple(true, solution);
-      }
-      else if (includes(solution.winning[1], initial_vertex))
-      {
-        if (m_check_strategy)
-        {
-          check_strategy(initial_vertex, V, solution.winning[0], solution.winning[1], true, solution.strategy[1]);
-        }
-        return std::make_tuple(false, solution);
+        return {result, solution};
       }
       else
       {
@@ -482,13 +482,13 @@ class symbolic_pbessolve_algorithm
     /// Throws an exception when the strategy is invalid.
     void check_strategy(const ldd& initial_vertex,
       const ldd& V,
-      const ldd& W0,
-      const ldd& W1,
-      bool alpha,
-      const ldd& strategy)
+      const symbolic_solution_t& solution,
+      bool alpha)
     {
+      using namespace sylvan::ldds;
+
       mCRL2log(log::debug) << "Checking the strategy of the solved parity game..." << std::endl;
-      symbolic_parity_game new_G = m_G.apply_strategy(alpha, strategy);
+      symbolic_parity_game new_G = m_G.apply_strategy(alpha, alpha?solution.strategy[1]:solution.strategy[0]);
       mCRL2log(log::trace) << "Minimal parity game G = " << new_G.print_graph(V) << std::endl;
       // there may be new sinks due to vertices whose strategy is not defined.
       ldd new_Vsinks = compute_deadlocks(V, new_G);
@@ -497,10 +497,31 @@ class symbolic_pbessolve_algorithm
       symbolic_pbessolve_algorithm check(new_G);
 
       auto [result, solution_prime] = check.solve(initial_vertex, V, new_Vsinks);
-      if (!(W0 == solution_prime.winning[0] && W1 == solution_prime.winning[1] && result != alpha))
+
+      if (includes(union_(solution.winning[0], solution.winning[1]), V))
       {
-        throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
+        // Full solution for V was computed, after applying the strategy, the winning sets
+        // must stay identical.
+        if (!(solution.winning[0] == solution_prime.winning[0]
+              && solution.winning[1] == solution_prime.winning[1]
+              && result != alpha))
+        {
+          throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
+        }
       }
+      else
+      {
+        // The game was not fully solved. After applying the strategy, we may find
+        // the solution to more vertices, so we can only check inclusion.
+        // The winner should not change.
+        if (!(includes(solution_prime.winning[0], solution.winning[0])
+              && includes(solution_prime.winning[1], solution.winning[1])
+              && result != alpha))
+        {
+          throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
+        }
+      }
+
     }
 };
 

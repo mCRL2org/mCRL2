@@ -129,19 +129,12 @@ public:
 
   bool solution_found() const override
   {
-    if (includes(m_partial_solution.winning[0], m_initial_vertex))
-    {
-      return true;
-    }
-    else if (includes(m_partial_solution.winning[1], m_initial_vertex))
-    {
-      return true;
-    }
-
-    return false;
+    return m_partial_solution.solution_found(m_initial_vertex);
   }
 
-  symbolic_solution_t partial_solution() const override { return m_partial_solution; }
+  symbolic_solution_t partial_solution() const override {
+    return m_partial_solution;
+  }
 
 private:
   /// Partial solution that has already been computed.
