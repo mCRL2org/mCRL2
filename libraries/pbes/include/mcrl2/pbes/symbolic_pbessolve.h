@@ -132,7 +132,8 @@ class symbolic_pbessolve_algorithm
     std::tuple<bool, symbolic_solution_t> solve(const ldd& initial_vertex,
         const ldd& V,
         const ldd& Vsinks = sylvan::ldds::empty_set(),
-        const symbolic_solution_t& partial_solution = symbolic_solution_t())
+        const symbolic_solution_t& partial_solution = symbolic_solution_t(),
+        bool allow_early_termination = true)
     {
       using namespace sylvan::ldds;
       stopwatch timer;
@@ -141,7 +142,7 @@ class symbolic_pbessolve_algorithm
 
       ldd Vtotal = m_G.compute_total_graph(V, empty_set(), Vsinks, solution.winning, solution.strategy);
 
-      if (!solution.solution_found(initial_vertex))
+      if (!solution.solution_found(initial_vertex) || !allow_early_termination)
       {
         // If the initial vertex has not yet been won then run the zielonka solver as well.
         mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(Vtotal) << std::endl;
@@ -496,16 +497,24 @@ class symbolic_pbessolve_algorithm
 
       symbolic_pbessolve_algorithm check(new_G);
 
-      auto [result, solution_prime] = check.solve(initial_vertex, V, new_Vsinks);
+      auto [result, solution_prime] = check.solve(initial_vertex, V, new_Vsinks, symbolic_solution_t(), false);
 
       if (includes(union_(solution.winning[0], solution.winning[1]), V))
       {
+        // new solution should also cover all vertices
+        assert(includes(union_(solution_prime.winning[0],solution_prime.winning[1]), V));
+
         // Full solution for V was computed, after applying the strategy, the winning sets
         // must stay identical.
         if (!(solution.winning[0] == solution_prime.winning[0]
               && solution.winning[1] == solution_prime.winning[1]
               && result != alpha))
         {
+          //mCRL2log(log::trace) << "V = " << m_G.print_nodes(V) << "\n";
+          mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << "\n";
+          mCRL2log(log::trace) << "W0' = " << m_G.print_nodes(solution_prime.winning[0]) << "\n";
+          mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << "\n";
+          mCRL2log(log::trace) << "W1' = " << m_G.print_nodes(solution.winning[1]) << "\n";
           throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
         }
       }
@@ -518,7 +527,12 @@ class symbolic_pbessolve_algorithm
               && includes(solution_prime.winning[1], solution.winning[1])
               && result != alpha))
         {
-          throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
+          //mCRL2log(log::trace) << "V = " << m_G.print_nodes(V) << "\n";
+          mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << "\n";
+          mCRL2log(log::trace) << "W0' = " << m_G.print_nodes(solution_prime.winning[0]) << "\n";
+          mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << "\n";
+          mCRL2log(log::trace) << "W1' = " << m_G.print_nodes(solution.winning[1]) << "\n";
+          throw mcrl2::runtime_error("Computed strategy of partially solved game does not match the winning partition");
         }
       }
 
