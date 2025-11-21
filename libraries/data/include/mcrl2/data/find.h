@@ -358,7 +358,7 @@ std::vector<data::variable> find_free_variables_in_order(const T& x)
   
     // Filter duplicates
     std::vector<data::variable> result;
-    for (const auto& var : seen)
+    for (const variable& var: seen)
     {
         if (std::find(result.begin(), result.end(), var) == result.end()) {
             result.push_back(var);
@@ -379,7 +379,7 @@ std::vector<data::variable> find_free_variables_with_bound_in_order(const T& x, 
   
     // Filter duplicates
   std::vector<data::variable> result;
-  for (const auto& var : seen)
+  for (const variable& var: seen)
   {
       if (std::find(result.begin(), result.end(), var) == result.end()) {
           result.push_back(var);
