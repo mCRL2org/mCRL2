@@ -78,10 +78,12 @@ struct add_simplify: public Builder<Derived>
     }
     if (data::is_data_expression(result) && data::is_data_expression(right)) 
     {
-      data::sort_bool::make_and_(atermpp::down_cast<data::data_expression>(result), atermpp::down_cast<data::data_expression>(result), atermpp::down_cast<data::data_expression>(right));
+      data::sort_bool::make_and_(atermpp::assign_cast<data::data_expression>(result), 
+                                     atermpp::down_cast<data::data_expression>(result), 
+                                     atermpp::down_cast<data::data_expression>(right));
       return;
     }
-    make_and_(result,result, right);
+    make_and_(result, result, right);
   }
 
   template <class T>
@@ -112,10 +114,12 @@ struct add_simplify: public Builder<Derived>
     }
     if (data::is_data_expression(result) && data::is_data_expression(right)) 
     {
-      data::sort_bool::make_or_(atermpp::down_cast<data::data_expression>(result), atermpp::down_cast<data::data_expression>(result), atermpp::down_cast<data::data_expression>(right));
+      data::sort_bool::make_or_(atermpp::assign_cast<data::data_expression>(result), 
+                                    atermpp::down_cast<data::data_expression>(result), 
+                                    atermpp::down_cast<data::data_expression>(right));
       return;
     }
-    make_or_(result,result, right);
+    make_or_(result, result, right);
   }
 
   template <class T>

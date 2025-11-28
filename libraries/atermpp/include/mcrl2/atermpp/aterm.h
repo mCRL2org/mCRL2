@@ -284,6 +284,23 @@ const Derived& down_cast(const Base& t)
   return reinterpret_cast<const Derived&>(reinterpret_cast<const detail::_aterm&>(t));
 }
 
+/// \brief A universal cast from an aterm to another non const aterm that is convertible in either direction. The casted term is assignable. 
+/// \param  t A term of a type inheriting from an aterm.
+/// \return  A term of type Derived&.
+template <IsATerm Derived, IsATerm Base>
+  requires std::is_convertible_v<std::remove_reference_t<Base>, std::remove_reference_t<Derived>>
+        || std::is_convertible_v<std::remove_reference_t<Derived>, std::remove_reference_t<Base>>
+        || std::is_constructible_v<std::remove_reference_t<Base>, std::remove_reference_t<Derived>>
+        || std::is_constructible_v<std::remove_reference_t<Derived>, std::remove_reference_t<Base>>
+Derived& assign_cast(Base& t)
+{
+  // Runtime check that the cast is valid.
+  assert(Derived(static_cast<const aterm&>(t)) != aterm());
+
+  // UB: Only allowed when we constructed an actual Derived type
+  return reinterpret_cast<Derived&>(reinterpret_cast<detail::_aterm&>(t));
+}
+
 /// \brief A cast form an aterm derived class to a class that inherits in (possibly multiple steps) from this class.
 /// \details The derived class is not allowed to contain extra fields. This conversion does not require runtime
 /// computation
