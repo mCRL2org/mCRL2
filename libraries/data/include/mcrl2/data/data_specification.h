@@ -15,6 +15,7 @@
 #include <ranges>
 
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/sort_specification.h"
 
 
@@ -811,7 +812,7 @@ sort_expression find_sort(data_specification const& data, std::string const& s)
 /// \return All equations with d as head in one of its sides.
 
 inline
-data_equation_vector find_equations(data_specification const& specification, const data_expression& d)
+data_equation_vector find_equations(const data_specification& specification, const data_expression& d)
 {
   data_equation_vector result;
   for (const data_equation& eq: specification.equations())
@@ -838,7 +839,15 @@ data_equation_vector find_equations(data_specification const& specification, con
   return result;
 }
 
-
+inline
+std::set<core::identifier_string> find_identifiers(const data_specification& specification)
+{
+  std::set<core::identifier_string> result;
+  find_identifiers(specification.sorts(),std::inserter(result, result.end()));
+  find_identifiers(specification.constructors(),std::inserter(result, result.end()));
+  find_identifiers(specification.mappings(),std::inserter(result, result.end()));
+  return result;
+}
 
 /// \brief Order the variables in a variable list such that enumeration over these variables becomes more efficient.
 //  \detail This routine is experimental, and may benefit from further investigation. The rule of thumb that is

@@ -242,8 +242,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
 template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
 struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>
 {
-  using super
-      = Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>;
+  using super = Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>;
   using super::enter;
   using super::leave;
 

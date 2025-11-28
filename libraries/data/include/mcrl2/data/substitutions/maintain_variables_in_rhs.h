@@ -36,6 +36,7 @@ class maintain_variables_in_rhs: public Substitution
     using super = Substitution;
     using variable_type = typename super::variable_type;
     using expression_type = typename super::expression_type;
+    using super::is_trivial;
 
   protected:
     std::multiset<variable_type> m_variables_in_rhs;
@@ -44,8 +45,8 @@ class maintain_variables_in_rhs: public Substitution
   public:
     /// \brief Default constructor
     maintain_variables_in_rhs() = default;
-
-    /// \brief Wrapper class for internal storage and substitution updates using operator()
+ 
+    /// \brief Wrapper clas s for internal storage and substitution updates using operator()
     class assignment
     {
       protected: 

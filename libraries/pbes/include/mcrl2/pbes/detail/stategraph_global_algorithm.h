@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
 
-#include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_global_graph.h"
@@ -110,7 +109,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
         auto const& d = eq_X.control_flow_parameters();
         auto const& e = u.values();
         assert(d.size() == e.size());
-        data::sequence_sequence_substitution<data::variable_vector, data::data_expression_list> sigma(d, e);
+        data::mutable_indexed_substitution<> sigma(d, e);
         u.set_significant_variables(pbes_system::algorithms::significant_variables(pbesr(eq_X.formula(), sigma)));
       }
     }

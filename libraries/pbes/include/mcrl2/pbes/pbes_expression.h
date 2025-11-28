@@ -43,11 +43,6 @@ class pbes_expression: public atermpp::aterm
     {}
 
     /// \\brief Constructor Z6.
-    pbes_expression(const data::variable& x)
-      : atermpp::aterm(x)
-    {}
-
-    /// \\brief Constructor Z6.
     pbes_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
@@ -81,7 +76,6 @@ inline
 bool is_pbes_expression(const atermpp::aterm& x)
 {
   return data::is_data_expression(x) ||
-         data::is_variable(x) ||
          data::is_untyped_data_parameter(x) ||
          pbes_system::is_propositional_variable_instantiation(x) ||
          pbes_system::is_not(x) ||
@@ -819,13 +813,13 @@ const pbes_expression& arg(const pbes_expression& t)
 /// \param t A PBES expression or a data expression
 /// \return The pbes expression argument of expressions of type not, exists and forall.
 inline
-pbes_expression data_arg(const pbes_expression& t)
+const pbes_expression& data_arg(const pbes_expression& t)
 {
   if (data::is_data_expression(t))
   {
     assert(data::is_application(t));
-    const auto& a = atermpp::down_cast<const data::application>(t);
-    return *(a.begin());
+    const data::application& a = atermpp::down_cast<const data::application>(t);
+    return atermpp::down_cast<pbes_expression>(*(a.begin()));
   }
   else
   {
@@ -847,11 +841,11 @@ const pbes_expression& left(const pbes_expression& t)
 /// \param x A PBES expression or a data expression
 /// \return The left hand side of an expression of type and, or or imp.
 inline
-pbes_expression data_left(const pbes_expression& x)
+const pbes_expression& data_left(const pbes_expression& x)
 {
   if (data::is_data_expression(x))
   {
-    return data::binary_left(atermpp::down_cast<data::application>(x));
+    return atermpp::down_cast<pbes_expression>(data::binary_left(atermpp::down_cast<data::application>(x)));
   }
   else
   {
@@ -872,11 +866,11 @@ const pbes_expression& right(const pbes_expression& t)
 /// \param x A PBES expression or a data expression
 /// \return The left hand side of an expression of type and, or or imp.
 inline
-pbes_expression data_right(const pbes_expression& x)
+const pbes_expression& data_right(const pbes_expression& x)
 {
   if (data::is_data_expression(x))
   {
-    return data::binary_right(atermpp::down_cast<data::application>(x));
+    return atermpp::down_cast<pbes_expression>(data::binary_right(atermpp::down_cast<data::application>(x)));
   }
   else
   {
@@ -1000,7 +994,7 @@ void optimized_forall(pbes_expression& result, const data::variable_list& l, con
   if (is_false(p))
   {
     // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = data::sort_bool::false_();
+    result = atermpp::down_cast<pbes_expression>(data::sort_bool::false_());
     return;
   }
   if (is_true(p))
@@ -1027,13 +1021,13 @@ void optimized_exists(pbes_expression& result, const data::variable_list& l, con
   }
   if (is_false(p))
   {
-    result = data::sort_bool::false_();
+    result = atermpp::down_cast<pbes_expression>(data::sort_bool::false_());
     return;
   }
   if (is_true(p))
   {
     // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = data::sort_bool::true_();
+    result = atermpp::down_cast<pbes_expression>(data::sort_bool::true_());
     return;
   }
   pbes_system::make_exists(result, l, p);

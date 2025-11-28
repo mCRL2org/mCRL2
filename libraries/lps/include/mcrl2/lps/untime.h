@@ -147,7 +147,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
         s.multi_action() = multi_action(s.multi_action().actions());
 
         // Try to apply Fourier-Motzkin elimination to simplify
-        std::set< variable > variables_in_action = process::find_all_variables(s.multi_action());
+        std::set< variable > variables_in_action = lps::find_all_variables(s.multi_action());
         std::set< variable > variables_in_assignments = process::find_all_variables(s.assignments());
         // Split the variables that do/do not occur in actions and assignments.
         variable_list do_occur;

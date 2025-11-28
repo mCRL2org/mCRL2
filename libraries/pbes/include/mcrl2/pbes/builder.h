@@ -31,7 +31,12 @@ struct pbes_expression_builder_base: public core::builder<Derived>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = x;
+    result = atermpp::down_cast<T>(x);
+  }
+  template <class T>
+  void apply(T& result, const data::untyped_data_parameter& x)
+  {
+    result = atermpp::down_cast<T>(x);
   }
 };
 
@@ -149,10 +154,6 @@ struct add_sort_expressions: public Builder<Derived>
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
@@ -299,10 +300,6 @@ struct add_data_expressions: public Builder<Derived>
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
@@ -462,10 +459,6 @@ struct add_variables: public Builder<Derived>
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::variable>(x));
-    }
     else if (data::is_untyped_data_parameter(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::untyped_data_parameter>(x));
@@ -610,10 +603,6 @@ struct add_pbes_expressions: public Builder<Derived>
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(result, atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {

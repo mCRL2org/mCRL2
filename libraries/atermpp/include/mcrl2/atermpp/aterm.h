@@ -273,6 +273,8 @@ void make_term_appl_with_index(aterm& target, const function_symbol& symbol, con
 template <IsATerm Derived, IsATerm Base>
   requires std::is_convertible_v<std::remove_reference_t<Base>, std::remove_reference_t<Derived>>
         || std::is_convertible_v<std::remove_reference_t<Derived>, std::remove_reference_t<Base>>
+        || std::is_constructible_v<std::remove_reference_t<Base>, std::remove_reference_t<Derived>>
+        || std::is_constructible_v<std::remove_reference_t<Derived>, std::remove_reference_t<Base>>
 const Derived& down_cast(const Base& t)
 {
   // Runtime check that the cast is valid.

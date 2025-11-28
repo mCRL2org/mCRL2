@@ -192,18 +192,20 @@ void lts_info::compute_lts_type()
         {
             std::string signature = get_param_signature(varparam);
             bool new_param = true;
-            for (auto & param : params) {
+            for (const std::string& param: params) 
+            {
               if (signature == param)
               {
                 new_param = false;
               }
             }
-            if (new_param) {
+            if (new_param) 
+            {
                 params.push_back(signature);
                 paramtypes[signature] = core::pp(varparam.sort());
                 //std::clog << "paramtypes[" << signature << "] = " << paramtypes[signature] << std::endl;
                 data_expression e(default_expression_generator(varparam.sort()));
-                pbes_expression e1 = pgg->rewrite_and_simplify_expression(e,false);
+                pbes_expression e1 = pgg->rewrite_and_simplify_expression(atermpp::down_cast<pbes_expression>(e),false);
                 this->param_default_values.push_back(atermpp::down_cast<const data::data_expression>(e1));
             }
         }
@@ -983,7 +985,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
           else
           {
             // add free variables in data expression
-            std::set<std::string> l = used(*val, L);
+            std::set<std::string> l = used(atermpp::down_cast<pbes_expression>(*val), L);
             result.insert(l.begin(), l.end());
           }
           if (val != values.end())

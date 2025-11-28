@@ -182,6 +182,27 @@ std::set<process::action_label> find_action_labels(const T& x)
   return result;
 }
 
+/// \brief Returns all variables inside a multi-action.
+/// \param x A multi-action from which variables are.
+/// \param o The output to which the variables are added. 
+template <class OutputIterator>
+void find_all_variables(const multi_action& x, OutputIterator o)
+{
+  for(const process::action& a: x.actions())
+  {
+    process::find_all_variables(a,o);
+  }
+}
+
+/// \brief Returns all variables inside a multi-action.
+/// \param x A multi-action from which variables are.
+std::set<data::variable> find_all_variables(const multi_action& x);
+/* {
+  std::set<data::variable> result;
+  find_all_variables(x, std::inserter(result, result.end())); 
+  return result;
+} */
+
 } // namespace mcrl2::lps
 
 #endif

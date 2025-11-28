@@ -43,6 +43,14 @@ class enumerator_identifier_generator
       return core::identifier_string(f());
     }
     
+    /// \brief Generates a unique constant function symbol with the given prefix followed by a number.
+    /// \details This is not as efficient as iteratively generating a string with a fixed prefix.
+    /// \param prefix The prefix used to generate this function symbol
+    core::identifier_string operator()(const std::string& prefix)
+    {
+      return core::identifier_string(f(prefix));
+    }
+    
     void clear()
     {
       f.clear();

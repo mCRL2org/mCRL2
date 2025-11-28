@@ -48,11 +48,6 @@ class pres_expression: public atermpp::aterm
     {}
 
     /// \\brief Constructor Z6.
-    pres_expression(const data::variable& x)
-      : atermpp::aterm(x)
-    {}
-
-    /// \\brief Constructor Z6.
     pres_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
@@ -94,7 +89,6 @@ inline
 bool is_pres_expression(const atermpp::aterm& x)
 {
   return data::is_data_expression(x) ||
-         data::is_variable(x) ||
          data::is_untyped_data_parameter(x) ||
          pres_system::is_propositional_variable_instantiation(x) ||
          pres_system::is_minus(x) ||

@@ -40,6 +40,12 @@ class basic_rewriter
     /// \brief The rewrite strategies of the rewriter.
     using strategy = rewrite_strategy;
 
+    /// \brief Expose the identifier generator present in m_rewriter.
+    const data::enumerator_identifier_generator& identifier_generator() const
+    {
+      return const_cast<const data::enumerator_identifier_generator&>(m_rewriter->identifier_generator());
+    }
+
   protected:
 
     /// \brief Constructor.

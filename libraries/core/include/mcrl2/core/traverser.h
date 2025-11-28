@@ -27,6 +27,21 @@ namespace mcrl2::core
 template <typename Derived>
 struct traverser
 {
+
+  // The function below may not be uncommented. It applies the function apply when
+  // no other function apply in the traverser framework is applicable. This apply has no effect,
+  // but this is not noted by the compiler, and may not be the intention. If it is the intention 
+  // that the apply has no effect an explicit apply without effect of the appropriate type must 
+  // be added.  
+  /* template <typename T>
+  void apply(const T& x, typename atermpp::disable_if_container<T>::type* = nullptr)
+  {
+    assert(0)
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).leave(x);
+  }
+  DO NOT REMOVE THIS COMMENT */
+
   template <typename Expression>
   void enter(Expression const&)
   {}
@@ -35,16 +50,9 @@ struct traverser
   void leave(Expression const&)
   {}
 
-  template <typename T>
-  void apply(const T& x, typename atermpp::disable_if_container<T>::type* = nullptr)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   // traverse containers
   template <typename Container>
-  void apply(Container const& container, typename atermpp::enable_if_container<Container>::type* = nullptr)
+  void apply(const Container& container, typename atermpp::enable_if_container<Container>::type* = nullptr)
   {
     for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
     {

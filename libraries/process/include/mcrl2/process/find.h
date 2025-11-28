@@ -37,6 +37,21 @@ struct find_action_labels_traverser: public Traverser<find_action_labels_travers
     : out(out_)
   {}
 
+  void apply(const data::data_expression& /* x */)
+  {
+    // Intentionally empty;
+  }
+
+  void apply(const data::untyped_data_parameter& /* x */)
+  {
+    // Intentionally empty;
+  }
+
+  void apply(const process::untyped_multi_action& /* x */)
+  {
+    // Intentionally empty;
+  }
+
   void apply(const process::action_label& x)
   {
     *out = x;
@@ -48,8 +63,7 @@ struct find_action_labels_traverser: public Traverser<find_action_labels_travers
 };
 
 template <template <class> class Traverser, class OutputIterator>
-find_action_labels_traverser<Traverser, OutputIterator>
-make_find_action_labels_traverser(OutputIterator out)
+find_action_labels_traverser<Traverser, OutputIterator> make_find_action_labels_traverser(OutputIterator out)
 {
   return find_action_labels_traverser<Traverser, OutputIterator>(out);
 }

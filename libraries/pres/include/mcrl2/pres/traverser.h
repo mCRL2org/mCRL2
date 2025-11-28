@@ -28,12 +28,18 @@ struct pres_expression_traverser_base: public core::traverser<Derived>
   using super::enter;
   using super::leave;
 
-  void apply(pres_expression& result, const data::data_expression& x)
+  void apply(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    result=x;
+  }
+
+  void apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
   }
 };
 
@@ -186,10 +192,6 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
@@ -413,10 +415,6 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
     else if (data::is_untyped_data_parameter(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
@@ -635,10 +633,6 @@ struct add_traverser_pres_expressions: public Traverser<Derived>
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {
@@ -866,10 +860,6 @@ struct add_traverser_variables: public Traverser<Derived>
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
     }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
-    }
     else if (data::is_untyped_data_parameter(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::untyped_data_parameter>(x));
@@ -1096,10 +1086,6 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     if (data::is_data_expression(x))
     {
       static_cast<Derived&>(*this).apply(atermpp::down_cast<data::data_expression>(x));
-    }
-    else if (data::is_variable(x))
-    {
-      static_cast<Derived&>(*this).apply(atermpp::down_cast<data::variable>(x));
     }
     else if (data::is_untyped_data_parameter(x))
     {

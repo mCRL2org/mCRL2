@@ -142,7 +142,6 @@ inline void swap(multi_action& t1, multi_action& t2) noexcept
 // template function overloads
 lps::multi_action normalize_sorts(const multi_action& x, const data::sort_specification& sortspec);
 lps::multi_action translate_user_notation(const lps::multi_action& x);
-std::set<data::variable> find_all_variables(const lps::multi_action& x);
 std::set<data::variable> find_free_variables(const lps::multi_action& x);
 
 /// \cond INTERNAL_DOCS

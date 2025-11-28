@@ -13,6 +13,7 @@
 #define MCRL2_DATA_SUBSTITUTIONS_NO_SUBSTITUTION_H
 
 #include <iostream>
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2::data
 {
@@ -21,6 +22,15 @@ namespace mcrl2::data
 /// Used for rewriters.
 struct no_substitution
 {
+  static constexpr bool is_trivial()
+  {
+    return true;
+  }
+
+  const variable& operator()(const variable& v)
+  {
+    return v;
+  }
 };
 
 inline

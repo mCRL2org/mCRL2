@@ -311,18 +311,7 @@ class process_instance_assignment: public process_expression
     /// \\brief Constructor Z14.
     process_instance_assignment(const process_identifier& identifier, const data::assignment_list& assignments)
       : process_expression(atermpp::aterm(core::detail::function_symbol_ProcessAssignment(), identifier, assignments))
-    {
-      data::variable_list vl=this->identifier().variables();
-      for(const data::assignment& a: assignments) 
-      {
-        assert(!vl.empty());
-        while (a.lhs()!=vl.front())
-        {
-          vl=vl.tail();
-          assert(!vl.empty());
-        }
-      }
-    }
+    {}
 
     /// Move semantics
     process_instance_assignment(const process_instance_assignment&) noexcept = default;

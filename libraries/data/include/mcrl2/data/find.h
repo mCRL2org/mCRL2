@@ -181,7 +181,8 @@ struct find_free_variables_traverser: public Binder<Traverser, find_free_variabl
 
   explicit find_free_variables_traverser(OutputIterator out_)
     : out(out_)
-  {}
+  {
+  }
 
   template <typename VariableContainer>
   find_free_variables_traverser(OutputIterator out_, const VariableContainer& v)

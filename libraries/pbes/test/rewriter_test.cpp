@@ -12,7 +12,9 @@
 #define BOOST_TEST_MODULE rewriter_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/utilities/detail/test_operation.h"
 #include "mcrl2/data/list.h"
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/detail/parse.h"
 #include "mcrl2/pbes/rewrite.h"
@@ -20,7 +22,6 @@
 #include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/utilities/detail/test_operation.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -407,7 +408,7 @@ BOOST_AUTO_TEST_CASE(test_substitutions1)
   data::rewriter  datar(specification);
   pbes_system::simplify_data_rewriter<data::rewriter> r(datar);
 
-  data::mutable_map_substitution<> sigma;
+  data::maintain_variables_in_rhs<data::mutable_map_substitution<>> sigma;
   sigma[data::parse_variable("m: Pos")] = datar(data::parse_data_expression("3"));
   sigma[data::parse_variable("n: Pos")] = datar(data::parse_data_expression("4"));
 

@@ -45,17 +45,24 @@ class substitution_updater_with_an_identifier_generator
 
     data::variable bind(const data::variable& v)
     {
-      m_undo.emplace_back(v, m_sigma(v));                // save the old assignment of m_sigma.
-      if (m_sigma.variable_occurs_in_a_rhs(v))           // v notin FV(m_sigma).
+      if constexpr (Substitution::is_trivial())
       {
-        data::variable w(m_id_generator(v.name()), v.sort());
-        m_sigma[v] = w;
-        return w;
-      }
-      else
-      {
-        m_sigma[v] = v;                                  // Clear sigma[v].
         return v;
+      }
+      else 
+      {
+        m_undo.emplace_back(v, m_sigma(v));                // save the old assignment of m_sigma.
+        if (m_sigma.variable_occurs_in_a_rhs(v))           // v notin FV(m_sigma).
+        {
+          data::variable w(m_id_generator(v.name()), v.sort());
+          m_sigma[v] = w;
+          return w;
+        }
+        else
+        {
+          m_sigma[v] = v;                                  // Clear sigma[v].
+          return v;
+        }
       }
     }
 
@@ -66,9 +73,12 @@ class substitution_updater_with_an_identifier_generator
 
     void pop(const data::variable& )
     {
-      const saved_assignment& a = m_undo.back();
-      m_sigma[a.first] = a.second;
-      m_undo.pop_back();
+      if constexpr (!Substitution::is_trivial())
+      {
+        const saved_assignment& a = m_undo.back();
+        m_sigma[a.first] = a.second;
+        m_undo.pop_back();
+      }
     }
 
     template <typename VariableContainer>

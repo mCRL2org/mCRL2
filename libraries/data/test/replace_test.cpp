@@ -16,7 +16,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
+// #include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 
 using namespace mcrl2;
 
@@ -123,6 +123,7 @@ BOOST_AUTO_TEST_CASE(test_assignment_list)
   BOOST_CHECK(t0 == t2);
 }
 
+/* DEPRECATED as sequence_sequence_substitution is phased out. 
 BOOST_AUTO_TEST_CASE(test_variable_replace)
 {
   using namespace mcrl2::data::sort_bool;
@@ -149,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test_variable_replace)
   BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(variables, replacements)));
   BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(v, l)));
   BOOST_CHECK(t1 == replace_variables(t, make_mutable_map_substitution(variables, replacements)));
-}
+} */
 
 BOOST_AUTO_TEST_CASE(test_replace_with_binders)
 {

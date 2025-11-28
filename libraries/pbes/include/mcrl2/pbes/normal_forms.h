@@ -152,14 +152,14 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     /// \param x A term
     void enter(const data::data_expression& x)
     {
-      if (is_false(x))
+      if (data::sort_bool::is_false_function_symbol(x))
       {
         m_has_false = true;
         push(m_false, standard_form_both);
       }
       else
       {
-        assert(is_true(x));
+        assert(data::sort_bool::is_true_function_symbol(x));
         m_has_true = true;
         push(m_true, standard_form_both);
       }

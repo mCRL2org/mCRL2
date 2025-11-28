@@ -238,7 +238,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
                     di_copy = data::replace_free_variables(di_copy, sigma_i);
                     data::data_expression c = make_condition(di_copy, d_copy);
                     core::identifier_string Y = m_rename(Xi, di_copy);
-                    result_set.insert(and_(c, propositional_variable_instantiation(Y, e_copy)));
+                    result_set.insert(and_(atermpp::down_cast<pbes_expression>(c), propositional_variable_instantiation(Y, e_copy)));
                     return false;
                 }
     );

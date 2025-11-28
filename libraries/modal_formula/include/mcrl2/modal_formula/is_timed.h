@@ -30,6 +30,21 @@ struct is_timed_traverser: public action_label_traverser<is_timed_traverser>
 
   bool result = false;
 
+  void apply(const data::data_expression& /* x */)  
+  {
+    // Do nothing. 
+  }
+
+  void apply(const data::untyped_data_parameter& /* x */)  
+  {
+    // Do nothing. 
+  }
+
+  void apply(const process::untyped_multi_action& /* x */)  
+  {
+    // Do nothing. 
+  }
+
   void enter(const delay_timed& /* x */)
   {
     result = true;
@@ -44,6 +59,7 @@ struct is_timed_traverser: public action_label_traverser<is_timed_traverser>
   {
     result = true;
   }
+
 };
 
 } // namespace detail

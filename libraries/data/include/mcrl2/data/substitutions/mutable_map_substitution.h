@@ -43,6 +43,11 @@ public:
   using argument_type = variable_type;
   using result_type = expression_type;
 
+  static constexpr bool is_trivial()
+  {
+    return false;
+  }
+
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment
   {

@@ -13,6 +13,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/pbes/detail/parse.h"
@@ -115,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_enumerator_with_substitutions)
   for (auto i = E.begin(sigma, P); i != E.end(); ++i)
   {
     solutions.push_back(i->expression());
-    data::mutable_map_substitution<> sigma;
+    data::maintain_variables_in_rhs<data::mutable_map_substitution<>> sigma;
     i->add_assignments(v, sigma, datar);
     std::clog << "  solutions " << i->expression() << " substitution = " << sigma << std::endl;
     BOOST_CHECK(R(phi, sigma) == i->expression());

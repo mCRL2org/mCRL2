@@ -51,7 +51,7 @@ protected:
   /// for instance when the assignment is already parsed, while the expression to which it
   /// needs to be applied must still be parsed. 
   substitution_type m_substitution;
-  mutable bool m_variables_in_rhs_set_is_defined;
+  mutable bool m_variables_in_rhs_set_is_defined=false;
   mutable std::multiset<variable> m_variables_in_rhs;
 
 public:
@@ -79,6 +79,24 @@ public:
         m_variables_in_rhs(variables_in_rhs)
   {
   }
+
+  template <class VARIABLES, class EXPRESSIONS>
+  // requires requires(std::is_convertible<typename VARIABLES::value_type,variable_type>)
+  mutable_indexed_substitution(const VARIABLES& vars, const EXPRESSIONS& exps)
+  {
+    assert(vars.size()==exps.size());
+    typename EXPRESSIONS::const_iterator i=exps.begin();
+    for(const variable& v: vars)
+    {
+      (*this)[v]=*i;
+      ++i;
+    }
+  }
+
+  static constexpr bool is_trivial()
+  {
+    return false;
+  } 
 
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment

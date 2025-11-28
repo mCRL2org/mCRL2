@@ -18,6 +18,7 @@
 #include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/smt/solver.h"
 
 namespace mcrl2::lps
@@ -85,8 +86,8 @@ std::set<data::variable> used_read_variables(const action_summand& summand)
 {
   std::set<data::variable> result;
   data::find_all_variables(summand.condition(), std::inserter(result, result.end()));
-  data::find_all_variables(summand.multi_action(), std::inserter(result, result.end()));
-  for (const auto& a : summand.assignments())
+  lps::find_all_variables(summand.multi_action(), std::inserter(result, result.end()));
+  for (const data::assignment& a: summand.assignments())
   {
     if (a.lhs() != a.rhs())
     {
