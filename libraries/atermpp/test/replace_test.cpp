@@ -163,22 +163,6 @@ struct replace_f
   }
 };
 
-// DataVarId
-inline
-const atermpp::function_symbol& function_symbol_DataVarId()
-{
-  static atermpp::function_symbol function_symbol_DataVarId = atermpp::function_symbol("DataVarId", 3);
-  return function_symbol_DataVarId;
-}
-
-// DataVarIdNoIndex
-inline
-const atermpp::function_symbol& function_symbol_DataVarIdNoIndex()
-{
-  static atermpp::function_symbol f = atermpp::function_symbol("DataVarIdNoIndex", 2);
-  return f;
-}
-
 // OpId
 inline
 const atermpp::function_symbol& function_symbol_OpId()
@@ -215,11 +199,7 @@ struct index_remover
 {
   atermpp::aterm operator()(const atermpp::aterm& x) const
   {
-    if (x.function() == function_symbol_DataVarId())
-    {
-      return atermpp::aterm(function_symbol_DataVarIdNoIndex(), x.begin(), --x.end());
-    }
-    else if (x.function() == function_symbol_OpId())
+    if (x.function() == function_symbol_OpId())
     {
       return atermpp::aterm(function_symbol_OpIdNoIndex(), x.begin(), --x.end());
     }

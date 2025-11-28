@@ -90,14 +90,6 @@ bool gsIsDataAppl_no_check(const atermpp::aterm& Term)
   }
 }
 
-// DataVarIdNoIndex
-inline
-const atermpp::function_symbol& function_symbol_DataVarIdNoIndex()
-{
-  static atermpp::function_symbol f = atermpp::function_symbol("DataVarIdNoIndex", 2);
-  return f;
-}
-
 // OpIdIndex
 inline
 const atermpp::function_symbol& function_symbol_OpIdNoIndex()

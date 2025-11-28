@@ -19,7 +19,6 @@
 
 namespace mcrl2::data::detail {
 
-// transforms DataVarId to DataVarIdNoIndex
 // transforms OpId to OpIdNoIndex
 inline atermpp::aterm remove_index_impl(const atermpp::aterm& x)
 {
@@ -30,16 +29,10 @@ inline atermpp::aterm remove_index_impl(const atermpp::aterm& x)
   return x;
 }
 
-// transforms DataVarIdNoIndex to DataVarId
 // transforms OpIdNoIndex to OpId
 inline atermpp::aterm add_index_impl(const atermpp::aterm& x)
 {
-  if (x.function() == core::detail::function_symbol_DataVarIdNoIndex())    // Obsolete. Remove in say 2025.
-  {
-    const data::variable& y = reinterpret_cast<const data::variable&>(x);
-    return variable(y.name(), y.sort()); 
-  }
-  else if (x.function() == core::detail::function_symbol_OpIdNoIndex())
+  if (x.function() == core::detail::function_symbol_OpIdNoIndex())
   {
     const data::function_symbol& y = reinterpret_cast<const data::function_symbol&>(x);
     return function_symbol(y.name(), y.sort());
