@@ -633,6 +633,7 @@ def main():
     cmdline_parser.add_argument('-n', '--names', dest='names', action='store_true', help='Print the names of the available tests')
     cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
     cmdline_parser.add_argument('-o', '--output', dest='output', metavar='o', action='store', help='Run the tests in the given directory')
+    cmdline_parser.add_argument('-m', '--timeout', dest='timeout', metavar='t', action='store', help='Set the timeout for each test to t seconds')
     cmdline_parser.add_argument('-e', '--experimental', dest='experimental', action='store_true', help='Run random tests using experimental tools.')
     cmdline_parser.add_argument('-i', '--python', dest='python', action='store', help='Sets the path to the Python interpreter that is used.')
 
@@ -661,6 +662,9 @@ def main():
         sys.exit(-1)
 
     settings = {'toolpath': os.path.abspath(args.toolpath), 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True, 'python_path': python_path}
+
+    if args.timeout:
+        settings['timeout'] = int(args.timeout)
 
     repeats = range(int(args.repetitions))
 
