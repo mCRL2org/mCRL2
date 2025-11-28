@@ -1295,18 +1295,14 @@ pres_system::pres_expression translate_user_notation(const pres_system::pres_exp
 inline
 const pres_expression& true_()
 {
-  /* The dynamic cast is required, to prevent copying the data term true to
-     a local term on the stack. */
-  return reinterpret_cast<const pres_expression&>(data::sort_bool::true_());
+  return atermpp::down_cast<pres_expression>(data::sort_bool::true_());
 }
 
 /// \return Returns the value false
 inline
 const pres_expression& false_()
 {
-  /* The dynamic cast is required, to prevent copying the data term false to
-     a local term on the stack. */
-  return reinterpret_cast<const pres_expression&>(data::sort_bool::false_());
+  return atermpp::down_cast<pres_expression>(data::sort_bool::false_());
 }
 
 /// \brief Test for the value true

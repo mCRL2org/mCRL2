@@ -186,8 +186,7 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
   template <class T>
   void apply(T& result, const data::data_expression& x)
   { 
-    apply_default(reinterpret_cast<pres_expression&>(result), x);
-    // result=data::detail::quantifiers_inside_infimum(V, x)  XXXX
+    apply_default(atermpp::assign_cast<pres_expression>(result), x);
   }
 };
 
@@ -291,7 +290,7 @@ struct quantifiers_inside_supremum_builder: public pres_expression_builder<quant
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    apply_default(reinterpret_cast<pres_expression&>(result), x);
+    apply_default(atermpp::assign_cast<pres_expression>(result), x);
   }
 };
 
