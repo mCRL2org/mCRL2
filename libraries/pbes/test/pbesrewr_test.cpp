@@ -24,7 +24,7 @@
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-/* BOOST_AUTO_TEST_CASE(test_pbesrewr1)
+BOOST_AUTO_TEST_CASE(test_pbesrewr1)
 {
   std::string pbes_text =
     "sort Enum = struct e1 | e2;                           \n"
@@ -52,12 +52,12 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr2)
   enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
   pbes_rewrite(p, pbesr);
   BOOST_CHECK(p.is_well_typed());
-} */
+}
 
 /* The test below checks whether the simplify_data_rewriter substitutes in a capture avoiding way. */
 BOOST_AUTO_TEST_CASE(test_pbeschain2)
 {
-  std::string pbes_text = "pbes nu X(m:Nat)=forall n:Nat.(X(m)); \n"
+  std::string pbes_text = "pbes nu X(m:Nat)=forall n:Nat.X(m); \n"
                           "init X(0);                                           \n";
   pbes p = txt2pbes(pbes_text);
 

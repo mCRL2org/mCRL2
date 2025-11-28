@@ -13,6 +13,8 @@
 #define MCRL2_PRES_REWRITERS_SIMPLIFY_REWRITER_H
 
 #include "mcrl2/data/standard.h"
+#include "mcrl2/data/detail/enumerator_identifier_generator.h"
+#include "mcrl2/data/replace_capture_avoiding_with_an_identifier_generator.h"
 #include "mcrl2/pres/rewriters/data_rewriter.h"
 
 namespace mcrl2::pres_system {
@@ -600,13 +602,19 @@ template <typename Derived>
 struct simplify_builder: public add_simplify<pres_system::pres_expression_builder, Derived>
 { };
 
-template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
-struct simplify_data_rewriter_builder : public mcrl2::pres_system::detail::add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction >
+template <typename Derived, typename DataRewriter, typename Substitution>
+struct simplify_data_rewriter_builder : public add_data_rewriter < pres_system::detail::simplify_builder, Derived, DataRewriter, Substitution >
 {
-  using super = add_data_rewriter<pres_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction>;
+  using super = add_data_rewriter<pres_system::detail::simplify_builder, Derived, DataRewriter, Substitution >;
 
   using super::apply;
   const data::data_specification m_data_spec;
+
+  using substitution_administration_type = data::detail::substitution_updater_with_an_identifier_generator<Substitution,
+                                                                  data::enumerator_identifier_generator>;
+  substitution_administration_type substitution_administration;
+
+
   
 protected:
   template <class T>
@@ -683,19 +691,39 @@ protected:
   }
 
 public:
-  simplify_data_rewriter_builder(const data::data_specification& data_spec, const DataRewriter& R, SubstitutionFunction& sigma)
+  simplify_data_rewriter_builder(const data::data_specification& data_spec, const DataRewriter& R, Substitution& sigma)
     : super(R, sigma),
-      m_data_spec(data_spec)
+      m_data_spec(data_spec),
+      substitution_administration(sigma, const_cast<data::enumerator_identifier_generator&>(R.identifier_generator()))
   {}
+
+  template <class T>
+  void apply(T& result, const infimum& x)
+  { 
+    const data::variable_list vl = substitution_administration.push(x.variables());
+    apply(result, x.body());
+    optimized_infimum(result, vl, result);
+    substitution_administration.pop(vl);
+  }
+
+  template <class T>
+  void apply(T& result, const supremum& x)
+  {
+    const data::variable_list vl = substitution_administration.push(x.variables());
+    apply(result, x.body());
+    optimized_supremum(result, vl, result);
+    substitution_administration.pop(vl);
+  }   
 
   template <class T>
   void apply(T& result, const sum& x)
   {
+    const data::variable_list vl = substitution_administration.push(x.variables());
     pres_expression body;
     apply(body, x.body());
-    optimized_sum(result, x.variables(), body, m_data_spec, super::R);
+    optimized_sum(result, vl, body, m_data_spec, super::R);
+    substitution_administration.pop(vl);
   }
-
 
   template <class T>
   void apply(T& result, const const_multiply& x)
@@ -850,16 +878,16 @@ struct simplify_data_rewriter
     return result;
   }
 
-  template <typename SubstitutionFunction>
-  pres_expression operator()(const pres_expression& x, SubstitutionFunction& sigma) const
+  template <typename Substitution>
+  pres_expression operator()(const pres_expression& x, Substitution& sigma) const
   {
     pres_expression result;
     detail::make_apply_rewriter_builder<pres_system::detail::simplify_data_rewriter_builder>(m_dataspec, R, sigma).apply(result, x);
     return result;
   }
 
-  template <typename SubstitutionFunction>
-  void operator()(pres_expression& result, const pres_expression& x, SubstitutionFunction& sigma) const
+  template <typename Substitution>
+  void operator()(pres_expression& result, const pres_expression& x, Substitution& sigma) const
   {
     detail::make_apply_rewriter_builder<pres_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(result, x);
   }

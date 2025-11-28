@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_REWRITERS_SIMPLIFY_REWRITER_H
 #define MCRL2_PBES_REWRITERS_SIMPLIFY_REWRITER_H
 
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/detail/enumerator_identifier_generator.h"
 #include "mcrl2/data/replace_capture_avoiding_with_an_identifier_generator.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
@@ -191,16 +190,10 @@ template <typename Derived>
 struct simplify_builder: public add_simplify<pbes_system::pbes_expression_builder, Derived>
 { };
 
-// template <typename Derived, typename DataRewriter, typename Substitution>
-// struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, Substitution>
-// template <template <class, class, class> class Builder, typename DataRewriter, typename Substitution>
-// struct simplify_data_rewriter_builder: public Builder<simplify_data_rewriter_builder<Builder, DataRewriter, Substitution>, DataRewriter, Substitution>
-
 template <typename Derived, typename DataRewriter, typename Substitution>
 struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, Substitution>
 { 
   using super = add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, Substitution>;
-  // using super = Builder<simplify_data_rewriter_builder<Builder, DataRewriter, Substitution>, DataRewriter, Substitution>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -218,9 +211,6 @@ struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::de
   {
     substitution_administration.substitution();
   }
-
-  /* add_simplify_with_substitution(const DataRewriter& R, Substitution& sigma)
-  {} */
 
   template <class T>
   void apply(T& result, const forall& x)
@@ -302,16 +292,16 @@ struct simplify_data_rewriter
     return result;
   }
 
-  template <typename SubstitutionFunction>
-  pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
+  template <typename Substitution>
+  pbes_expression operator()(const pbes_expression& x, Substitution& sigma) const
   {
     pbes_expression result;
     detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(result, x);
     return result;
   }
 
-  template <typename SubstitutionFunction>
-  void operator()(pbes_expression& result, const pbes_expression& x, SubstitutionFunction& sigma) const
+  template <typename Substitution>
+  void operator()(pbes_expression& result, const pbes_expression& x, Substitution& sigma) const
   {
     detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(result, x);
   }
