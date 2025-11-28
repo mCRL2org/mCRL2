@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_REWRITERS_SIMPLIFY_REWRITER_H
 #define MCRL2_PBES_REWRITERS_SIMPLIFY_REWRITER_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 
 namespace mcrl2::pbes_system {
@@ -75,7 +76,7 @@ struct add_simplify: public Builder<Derived>
     }
     if (data::is_data_expression(result) && data::is_data_expression(right)) 
     {
-      data::sort_bool::make_and_(reinterpret_cast<data::data_expression&>(result), reinterpret_cast<data::data_expression&>(result), reinterpret_cast<data::data_expression&>(right));
+      data::sort_bool::make_and_(atermpp::down_cast<data::data_expression>(result), atermpp::down_cast<data::data_expression>(result), atermpp::down_cast<data::data_expression>(right));
       return;
     }
     make_and_(result,result, right);
@@ -109,7 +110,7 @@ struct add_simplify: public Builder<Derived>
     }
     if (data::is_data_expression(result) && data::is_data_expression(right)) 
     {
-      data::sort_bool::make_or_(reinterpret_cast<data::data_expression&>(result), reinterpret_cast<data::data_expression&>(result), reinterpret_cast<data::data_expression&>(right));
+      data::sort_bool::make_or_(atermpp::down_cast<data::data_expression>(result), atermpp::down_cast<data::data_expression>(result), atermpp::down_cast<data::data_expression>(right));
       return;
     }
     make_or_(result,result, right);
