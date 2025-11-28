@@ -159,7 +159,6 @@ void load_pres(pres& pres,
 }
 
 // transforms OpId to OpIdNoIndex
-// transforms PropVarInst to PropVarInstNoIndex
 static atermpp::aterm remove_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_OpId())
@@ -170,18 +169,12 @@ static atermpp::aterm remove_index_impl(const atermpp::aterm& x)
 }
 
 // transforms OpIdNoIndex to OpId
-// transforms PropVarInstNoIndex to PropVarInst (obsolete)
 static atermpp::aterm add_index_impl(const atermpp::aterm& x)
 {
   if (x.function() == core::detail::function_symbol_OpIdNoIndex()) 
   {
     const data::function_symbol& y = reinterpret_cast<const data::function_symbol&>(x);
     return data::function_symbol(y.name(), y.sort());
-  }
-  else if (x.function() == core::detail::function_symbol_PropVarInstNoIndex())    // This should be removed in due time. Say 2025. 
-  {
-    const pres_system::propositional_variable_instantiation& y = reinterpret_cast<const pres_system::propositional_variable_instantiation&>(x);
-    return pres_system::propositional_variable_instantiation(y.name(), y.parameters());
   }
   return x;
 }
