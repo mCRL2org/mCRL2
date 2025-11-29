@@ -204,7 +204,7 @@ inline atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pres_e
 
 atermpp::aterm pres_marker()
 {
-  return atermpp::aterm(atermpp::function_symbol("parameterised_boolean_equation_system", 0));
+  return atermpp::aterm(atermpp::function_symbol("parameterised_real_equation_system", 0));
 }
 
 atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const pres& pres)
