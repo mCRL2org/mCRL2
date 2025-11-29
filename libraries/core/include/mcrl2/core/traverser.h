@@ -43,11 +43,11 @@ struct traverser
   DO NOT REMOVE THIS COMMENT */
 
   template <typename Expression>
-  void enter(Expression const&)
+  void enter(const Expression&)
   {}
 
   template <typename Expression>
-  void leave(Expression const&)
+  void leave(const Expression&)
   {}
 
   // traverse containers
@@ -58,13 +58,6 @@ struct traverser
     {
       static_cast<Derived*>(this)->apply(*i);
     }
-  }
-
-  // TODO: This dependency on identifier_string should be moved elsewhere...
-  void apply(const core::identifier_string& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).leave(x);
   }
 };
 
