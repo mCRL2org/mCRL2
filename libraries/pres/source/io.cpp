@@ -232,7 +232,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pres& pres)
 
     if (marker != pres_marker())
     {
-      throw mcrl2::runtime_error("Stream does not contain a parameterised boolean equation system (PRES).");
+      throw mcrl2::runtime_error("Stream does not contain a parameterised real equation system (PRES).");
     }
 
     data::data_specification data;
@@ -256,7 +256,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pres& pres)
   catch (std::exception& ex)
   {
     mCRL2log(log::error) << ex.what() << "\n";
-    throw mcrl2::runtime_error(std::string("Error reading parameterised boolean equation system (PRES)."));
+    throw mcrl2::runtime_error(std::string("Error reading parameterised real equation system (PRES)."));
   }
 
   return stream;
