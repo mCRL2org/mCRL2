@@ -413,7 +413,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  inline aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  inline term_list<Term> make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
     term_list<Term> result_list;
     make_list_backward<Term, Iter, ATermConverter, ATermFilter>(result_list, first, last, convert_to_aterm, aterm_filter);
@@ -434,7 +434,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter>
-  inline aterm make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm)
+  inline term_list<Term> make_list_backward(Iter first, Iter last, ATermConverter convert_to_aterm)
   {
     term_list<Term> result_list;
     make_list_backward<Term, Iter, ATermConverter>(result_list, first, last, convert_to_aterm);
@@ -499,7 +499,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
+  inline term_list<Term> make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm, ATermFilter aterm_filter)
   {
     term_list<Term> result_list;
     make_list_forward<Term, Iter, ATermConverter, ATermFilter>(result_list, first, last, convert_to_aterm, aterm_filter);
@@ -580,7 +580,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter>
-  inline aterm make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm)
+  inline term_list<Term> make_list_forward(Iter first, Iter last, ATermConverter convert_to_aterm)
   {
     term_list<Term> result_list;
     make_list_forward<Term,Iter,ATermConverter>(result_list, first, last, convert_to_aterm);
