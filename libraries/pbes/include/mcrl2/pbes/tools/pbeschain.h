@@ -313,10 +313,6 @@ inline void self_substitute(pbes_equation& equation,
 
   std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
   
-  data::set_identifier_generator id_generator;
-  std::set<core::identifier_string> ids = pbes_system::find_identifiers(equation.formula());
-  id_generator.add_identifiers(ids);
-  
   while (!stable)
   {
     stable = true;
@@ -382,31 +378,7 @@ inline void self_substitute(pbes_equation& equation,
           sigma[v] = par;
         }
 
-        std::set<data::variable> all_free_vars = find_free_variables(cur_x);
-        std::set<std::string> free_vars = {};
-        for (const data::variable& v: all_free_vars)
-        {
-          if (!parameterNames.contains(v.name()))
-          {
-            free_vars.insert(v.name());
-          }
-        }
-
-        pbes_expression phi;
-        mCRL2log(log::debug) << "\n Contains free vars? " << (free_vars.size() > 0) << "\n";
-        if (free_vars.size() == 0)
-        {
-          phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
-        }
-        else
-        {
-          for (const std::string& v: free_vars)
-          {
-            id_generator.add_identifier(v);
-          }
-          phi = mcrl2::pbes_system::replace_variables_capture_avoiding(equation.formula(), sigma, id_generator);
-          phi = pbes_rewrite(phi, pbes_default_rewriter);
-        }
+        pbes_expression phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
