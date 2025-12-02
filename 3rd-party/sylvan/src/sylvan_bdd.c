@@ -131,6 +131,106 @@ TASK_IMPL_3(BDD, sylvan_and, BDD, a, BDD, b, BDDVAR, prev_level)
     return result;
 }
 
+/*
+    sylvan_disjoint could be implemented as "sylvan_and(a,b)==sylvan_false",
+    but this implementation avoids building new nodes and allows more short-circuitry.
+*/
+TASK_IMPL_3(char, sylvan_disjoint, BDD, a, BDD, b, BDDVAR, prev_level)
+{
+    /* Terminal cases */
+    if (a == sylvan_false || b == sylvan_false) return 1; 
+    if (a == sylvan_true || b == sylvan_true) return 0; /* since a,b != sylvan_false */
+    if (a == b) return 0; /* since a,b != sylvan_false */
+    if (a == BDD_TOGGLEMARK(b)) return 1;
+
+    sylvan_gc_test();
+
+    /* Count operation */
+    sylvan_stats_count(BDD_DISJOINT);
+
+    /* Improve for caching */
+    if (BDD_STRIPMARK(a) > BDD_STRIPMARK(b)) {
+        BDD t = b;
+        b = a;
+        a = t;
+    }
+
+    bddnode_t na = MTBDD_GETNODE(a);
+    bddnode_t nb = MTBDD_GETNODE(b);
+
+    BDDVAR va = bddnode_getvariable(na);
+    BDDVAR vb = bddnode_getvariable(nb);
+    BDDVAR level = va < vb ? va : vb;
+
+    int cachenow = granularity < 2 || prev_level == 0 ? 1 : prev_level / granularity != level / granularity;
+    if (cachenow) {
+        BDD result;
+        if (cache_get3(CACHE_BDD_DISJOINT, a, b, sylvan_false, &result)) {
+            sylvan_stats_count(BDD_DISJOINT_CACHED);
+            return (result==sylvan_false ? 0 : 1);
+        }
+    }
+
+    // Get cofactors
+    BDD aLow = a, aHigh = a;
+    BDD bLow = b, bHigh = b;
+    if (level == va) {
+        aLow = node_low(a, na);
+        aHigh = node_high(a, na);
+    }
+    if (level == vb) {
+        bLow = node_low(b, nb);
+        bHigh = node_high(b, nb);
+    }
+
+    int low=-1, high=-1, result;
+
+    // Try to obtain the subresults without recursion (short-circuiting)
+
+    if (aHigh == sylvan_false || bHigh == sylvan_false) {
+        high = 1;
+    } else if (aHigh == sylvan_true || bHigh == sylvan_true) {
+        high = 0; /* since none of them is sylvan_false */
+    } else if (aHigh == bHigh) {
+        high = 0; /* since none of them is sylvan_false */
+    } else if (aHigh == BDD_TOGGLEMARK(bHigh)) {
+        high = 1;
+    }
+
+    if (aLow == sylvan_false || bLow == sylvan_false) {
+        low = 1;
+    } else if (aLow == sylvan_true || bLow == sylvan_true) {
+        low = 0; /* since none of them is sylvan_false */
+    } else if (aLow == bLow) {
+        low = 0; /* since none of them is sylvan_false */
+    } else if (aLow == BDD_TOGGLEMARK(bLow)) {
+        low = 1;
+    }
+     
+    // Compute the result, if necessary, by parallel recursion
+
+    if (high==0 || low==0) {
+        result = 0;
+    }
+    else {
+        if (high==-1) SPAWN(sylvan_disjoint, aHigh, bHigh, level);
+        if (low ==-1) low = CALL(sylvan_disjoint, aLow, bLow, level);
+        if (high==-1) high = SYNC(sylvan_disjoint);
+        result = high && low;
+    }
+
+    // Store result in the cache and then return
+
+    if (cachenow) {
+        BDD to_cache = (result ? sylvan_true : sylvan_false);
+        if (cache_put3(CACHE_BDD_DISJOINT, a, b, sylvan_false, to_cache)) {
+            sylvan_stats_count(BDD_DISJOINT_CACHEDPUT);
+        }
+    }
+
+    return result;
+}
+
 TASK_IMPL_3(BDD, sylvan_xor, BDD, a, BDD, b, BDDVAR, prev_level)
 {
     /* Terminal cases */
