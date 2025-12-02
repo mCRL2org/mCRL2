@@ -387,10 +387,15 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
         evidence_file = parser.option_argument("evidence-file");
       }
 
-      if (options.check_strategy && options.summand_groups.compare("none") != 0)
+      if (options.check_strategy)
       {
-        throw mcrl2::runtime_error("Cannot check strategy for merged summand groups");
+        if (options.summand_groups.compare("none") != 0)
+        {
+          throw mcrl2::runtime_error("Cannot check strategy for merged summand groups");
+        }
+        options.compute_strategy = true;
       }
+
     }
 
   public:
@@ -439,7 +444,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       // This has to be done consistently with the LPS for the counter examples.
       data::mutable_map_substitution<> sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
       pbes_system::detail::replace_global_variables(pbesspec, sigma);
-      pbes_system::srf_pbes_with_ce pre_srf_pbes = preprocess(pbesspec, options);
+      pbes_system::srf_pbes_with_ce pre_srf_pbes = preprocess(pbesspec, options_);
 
       mCRL2log(log::trace) << "============== Pre-SRF PBES ==============" << std::endl;
       mCRL2log(log::trace) << pre_srf_pbes.to_pbes() << std::endl;
@@ -447,24 +452,25 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       pbes_system::srf_pbes srf_pbes = pre_srf2srfpbes(pre_srf_pbes);
 
       pbesspec = pre_srf_pbes.to_pbes();
-      PbesReachAlgorithm reach(srf_pbes,  options_);
-      if (options.info)
+      if (options_.info)
       {
+        PbesReachAlgorithm reach(srf_pbes, options_);
         std::cout << symbolic::print_read_write_patterns(reach.read_write_group_patterns());
       }
       else
       {
-        mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
-
         // If you provide a file, but the PBES has no counter example information, then use the two pass instantiation. This will be useless, but at least the file will be written.
         if ((!has_counter_example && lpsfile.empty() && ltsfile.empty()) || options_.naive_counter_example_instantiation)
         {
+          PbesReachAlgorithm reach(srf_pbes, options_);
+          mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
+
           timer().start("instantiation");
           reach.run();
           timer().finish("instantiation");
-          if (!options.dot_file.empty())
+          if (!options_.dot_file.empty())
           {
-            print_dot(options.dot_file, reach.V());
+            print_dot(options_.dot_file, reach.V());
           }
 
           if (reach.solution_found())
@@ -473,16 +479,21 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           }
           else
           {
-            if (options.max_iterations == 0)
+            if (options_.max_iterations == 0)
             {
-              bool chaining = options.chaining;
-              if (options.check_strategy && options.chaining)
+              if (options_.check_strategy && options_.chaining)
               {
                 mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while checking the strategy" << std::endl;
-                chaining = false;
+                options_.chaining = false;
               }
 
-              pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), reach.V(), options.no_relprod, chaining, options.check_strategy);
+              pbes_system::symbolic_parity_game G(reach.pbes(),
+                reach.summand_groups(),
+                reach.data_index(),
+                reach.V(),
+                options_.no_relprod,
+                options_.chaining,
+                options_.check_strategy);
               G.print_information();
               pbes_system::symbolic_pbessolve_algorithm solver(G);
 
@@ -502,6 +513,18 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
         }
         else
         {
+          // We are generating a counterexample, so the strategy must be computed, irregardless of
+          // whether we check the strategy afterwards.
+          options_.compute_strategy = true;
+
+          if (options_.chaining)
+          {
+            mCRL2log(log::info) << "(Partial) solving will not use chaining since it cannot be used while computing the strategy" << std::endl;
+            options_.chaining = false;
+          }
+
+          PbesReachAlgorithm reach(srf_pbes, options_);
+
           timer().start("first-instantiation");
           reach.run();
           timer().finish("first-instantiation");
@@ -511,19 +534,20 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           // vertices
           ldd V = union_(reach.V(), reach.I());
 
-          if (!options.dot_file.empty())
+          if (!options_.dot_file.empty())
           {
-            print_dot(options.dot_file, V);
+            print_dot(options_.dot_file, V);
           }
 
-          if (options.chaining)
-          {
-            mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while computing the strategy" << std::endl;
-          }
-
-          pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), V, options.no_relprod, false, true);
+          pbes_system::symbolic_parity_game G(reach.pbes(),
+            reach.summand_groups(),
+            reach.data_index(),
+            V,
+            options_.no_relprod,
+            options_.chaining,
+            options_.compute_strategy);
           G.print_information();
-          pbes_system::symbolic_pbessolve_algorithm solver(G, options.check_strategy);
+          pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy);
 
           timer().start("first-solving");
           // Solve the remainder of the partially solved game.

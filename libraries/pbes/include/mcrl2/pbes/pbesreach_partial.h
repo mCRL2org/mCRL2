@@ -48,7 +48,7 @@ public:
         V,
         m_options.no_relprod,
         m_options.chaining,
-        m_options.check_strategy);
+        m_options.compute_strategy);
       G.print_information();
       symbolic_pbessolve_algorithm solver(G);
 

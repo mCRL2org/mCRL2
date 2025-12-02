@@ -215,9 +215,9 @@ class symbolic_pbessolve_algorithm
     }
 
     /// \brief Detect solitair winning cycles for the given incomplete parity game (m_G, I) restricted to V.
-    ///        The remaining parameters are sinks, vertices won by even and odd respectively.
+    ///        The remaining parameters are sinks, and a partial solution, respectively.
     ///        Terminates early when initial_vertex has been solved.
-    /// \param safe Whether to use the safe attractor variant (as opposed to computing safe vertices first).
+    /// \param safe_variant Whether to use the safe attractor variant (as opposed to computing safe vertices first).
     symbolic_solution_t detect_solitair_cycles(const ldd& initial_vertex,
       const ldd& V,
       const ldd& I,
@@ -227,7 +227,13 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
-      symbolic_solution_t solution = partial_solution;
+      mCRL2log(log::trace) << "\n--- apply solitair winning cycle detection to ---\n"
+                           << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::trace) << "detect_solitair_cycles: starting with partial solution\n"
+        << print_solution(m_G, partial_solution) << "\n" ;
+
+      symbolic_solution_t solution
+        = partial_solution;
       // Make the game total and removed winning sets.
 
       ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, solution.winning, solution.strategy);
@@ -236,7 +242,7 @@ class symbolic_pbessolve_algorithm
         return solution;
       }
 
-      mCRL2log(log::trace) << "\n--- apply solitair winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
+
 
       // Computes two vertex sets of all even priority and odd priority nodes respectively.
       std::array<ldd, 2> parity;
@@ -250,10 +256,14 @@ class symbolic_pbessolve_algorithm
       if (!safe_variant)
       {
         Vsafe = { m_G.compute_safe_vertices(0, Vtotal, I), m_G.compute_safe_vertices(1, Vtotal, I) };
+        mCRL2log(log::trace) << "detect_solitair_cycles: computed safe vertices\n"
+                             << "  Vsafe[0] = " << Vsafe[0] << "\n"
+                             << "  Vsafe[1] = " << Vsafe[1] << "\n";
       }
 
       for (std::size_t alpha = 0; alpha <= 1; ++alpha)
       {
+        mCRL2log(log::debug) << "solitair winning cycle detection for player " << alpha << "\n";
         // Determine the cycles for this player.
         ldd U = empty_set();
         ldd Unext = intersect(parity[alpha], Vplayer[alpha]);
@@ -262,11 +272,13 @@ class symbolic_pbessolve_algorithm
           Unext = intersect(Unext, Vsafe[alpha]);
         }
 
-        mCRL2log(log::debug) << "solitair winning cycle detection for player " << alpha << "\n";
-
         std::size_t iter = 0;
         while (U != Unext)
         {
+          mCRL2log(log::trace) << "detect_solitair_cycles: starting iteration " << iter << "\n"
+          << "  U = " << m_G.print_nodes(U)
+          << "  Unext = " << m_G.print_nodes(Unext) << "\n";
+
           stopwatch timer;
           U = Unext;
           Unext = m_G.predecessors(U, U);
@@ -279,8 +291,15 @@ class symbolic_pbessolve_algorithm
         // are thus winning for player alpha. We can set the strategy to U x U.
 
         mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
+        mCRL2log(log::trace) << "detect_solitair_cycles: states in cycles:\n"
+        << "U = " << m_G.print_nodes(U) << "\n";
 
         solution.strategy[alpha] = union_(solution.strategy[alpha], merge(U, U));
+
+        mCRL2log(log::trace) << "detect_solitair_cycles: extended strategy for player " << alpha << " to \n"
+        << "  S[alpha] = " << m_G.print_strategy(solution.strategy[alpha]) << "\n";
+
+        mCRL2log(log::trace) << "detect_solitair_cycles: computing safe attractor for player " << alpha << " into extended winning set\n";
 
         if (safe_variant)
         {
@@ -294,9 +313,14 @@ class symbolic_pbessolve_algorithm
           solution.winning[alpha] = union_(solution.winning[alpha], attr.first);
           solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
         }
+        mCRL2log(log::trace) << "detect_solitair_cycles: extended winning sets and strategy for player " << alpha
+                             << " to \n"
+                             << "  W[alpha] = " << m_G.print_nodes(solution.winning[alpha]) << "\n"
+                             << "  S[alpha] = " << m_G.print_strategy(solution.strategy[alpha]) << "\n";
       }
 
-      mCRL2log(log::trace) << print_solution(m_G, solution) << std::endl;
+      mCRL2log(log::trace) << "detect_solitair_cycles: partial solution after detecting solitair cycles:\n"
+        << print_solution(m_G, solution) << std::endl;
 
       return solution;
     }
