@@ -169,7 +169,7 @@ struct process_actions: public process::detail::action_actions
 
   process::process_expression parse_ProcExpr(const core::parse_node& node) const
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return atermpp::down_cast<process::process_expression>(parse_Action(node.child(0))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return untyped_process_assignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return tau(); }

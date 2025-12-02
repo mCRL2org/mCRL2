@@ -678,6 +678,13 @@ struct add_traverser_process_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const process::action& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1628,6 +1635,13 @@ struct add_traverser_action_labels: public Traverser<Derived>
   using super::enter;
   using super::leave;
   using super::apply;
+
+  void apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
 
   void apply(const process::action_label& x)
   {
