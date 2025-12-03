@@ -125,13 +125,12 @@ public:
   /// \param [prefix] A prefix
   function_symbol operator()(const std::string& prefix)
   {
-
     if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
     {
       function_symbol_generator_mutex().lock();
     }
 
-    std::string function_name = prefix.substr(0,prefix.rfind("0123456789 ")); // Remove trailing digits.
+    std::string function_name = prefix.substr(0,prefix.find_last_not_of("0123456789 ")+1); // Remove trailing digits.
     assert(!function_name.empty() && !(std::isdigit(function_name.back())));
 
     // Obtain a reference to the first index possible.
@@ -140,7 +139,7 @@ public:
 
     m_initial_index = m_index;
 
-    function_symbol f(function_name, 0, false);
+    function_symbol f(function_name, 0);
  
     if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
     {
