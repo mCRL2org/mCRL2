@@ -51,7 +51,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::action_label& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_action_label(result, x.name(), [&](data::sort_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.sorts()); });
     static_cast<Derived&>(*this).leave(x);
@@ -74,7 +73,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_identifier& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_identifier(result, x.name(), [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); });
     static_cast<Derived&>(*this).leave(x);
@@ -83,7 +81,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_equation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_equation(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.formal_parameters()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
@@ -92,7 +89,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::untyped_multi_action& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_untyped_multi_action(result, [&](data::untyped_data_parameter_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); });
     static_cast<Derived&>(*this).leave(x);
@@ -101,7 +97,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::action& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_action(result, [&](action_label& result){ static_cast<Derived&>(*this).apply(result, x.label()); }, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -110,7 +105,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_instance(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.actual_parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -119,7 +113,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_instance_assignment(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -128,7 +121,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::delta& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -138,7 +130,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::tau& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -148,7 +139,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -157,7 +147,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::block& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -166,7 +155,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::hide& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -175,7 +163,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::rename& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -184,7 +171,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::comm& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -193,7 +179,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::allow& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -202,7 +187,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sync& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -211,7 +195,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::at& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
@@ -220,7 +203,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::seq& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -229,7 +211,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -238,7 +219,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then_else& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then_else(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -247,7 +227,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::bounded_init& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -256,7 +235,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -265,7 +243,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::left_merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -274,7 +251,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::choice& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -283,7 +259,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::stochastic_operator& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_stochastic_operator(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -292,7 +267,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::untyped_process_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_untyped_process_assignment(result, x.name(), [&](data::untyped_identifier_assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -301,7 +275,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_untyped_data_parameter(x))
     {
@@ -431,7 +404,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_equation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_equation(result, x.identifier(), x.formal_parameters(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
@@ -440,7 +412,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::untyped_multi_action& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_untyped_multi_action(result, [&](data::untyped_data_parameter_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); });
     static_cast<Derived&>(*this).leave(x);
@@ -449,7 +420,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::action& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_action(result, x.label(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -458,7 +428,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_instance(result, x.identifier(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.actual_parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -467,7 +436,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_instance_assignment(result, x.identifier(), [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -476,7 +444,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::delta& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -486,7 +453,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::tau& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -496,7 +462,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sum(result, x.variables(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -505,7 +470,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::block& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -514,7 +478,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::hide& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -523,7 +486,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::rename& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -532,7 +494,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::comm& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -541,7 +502,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::allow& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -550,7 +510,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sync& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -559,7 +518,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::at& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
@@ -568,7 +526,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::seq& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -577,7 +534,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -586,7 +542,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then_else& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then_else(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -595,7 +550,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::bounded_init& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -604,7 +558,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -613,7 +566,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::left_merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -622,7 +574,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::choice& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -631,7 +582,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::stochastic_operator& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_stochastic_operator(result, x.variables(), [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -640,7 +590,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::untyped_process_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_untyped_process_assignment(result, x.name(), [&](data::untyped_identifier_assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -649,7 +598,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_untyped_data_parameter(x))
     {
@@ -779,7 +727,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_identifier& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_identifier(result, x.name(), [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); });
     static_cast<Derived&>(*this).leave(x);
@@ -788,7 +735,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_equation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_equation(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.formal_parameters()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
@@ -797,7 +743,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::untyped_multi_action& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_untyped_multi_action(result, [&](data::untyped_data_parameter_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); });
     static_cast<Derived&>(*this).leave(x);
@@ -806,7 +751,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::action& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_action(result, x.label(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -815,7 +759,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_instance(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.actual_parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -824,7 +767,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_instance_assignment(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, [&](data::assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -833,7 +775,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::delta& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -843,7 +784,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::tau& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -853,7 +793,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -862,7 +801,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::block& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -871,7 +809,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::hide& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -880,7 +817,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::rename& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -889,7 +825,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::comm& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -898,7 +833,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::allow& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -907,7 +841,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sync& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -916,7 +849,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::at& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time_stamp()); });
     static_cast<Derived&>(*this).leave(x);
@@ -925,7 +857,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::seq& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -934,7 +865,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -943,7 +873,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then_else& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then_else(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -952,7 +881,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::bounded_init& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -961,7 +889,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -970,7 +897,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::left_merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -979,7 +905,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::choice& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -988,7 +913,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::stochastic_operator& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_stochastic_operator(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -997,7 +921,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::untyped_process_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_untyped_process_assignment(result, x.name(), [&](data::untyped_identifier_assignment_list& result){ static_cast<Derived&>(*this).apply(result, x.assignments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1006,7 +929,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_untyped_data_parameter(x))
     {
@@ -1136,7 +1058,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_equation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_equation(result, x.identifier(), x.formal_parameters(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1145,7 +1066,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::action& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1155,7 +1075,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1165,7 +1084,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1175,7 +1093,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::delta& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1185,7 +1102,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::tau& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1195,7 +1111,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sum(result, x.variables(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1204,7 +1119,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::block& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1213,7 +1127,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::hide& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1222,7 +1135,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::rename& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1231,7 +1143,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::comm& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1240,7 +1151,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::allow& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1249,7 +1159,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sync& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1258,7 +1167,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::at& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, x.time_stamp());
     static_cast<Derived&>(*this).leave(x);
@@ -1267,7 +1175,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::seq& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1276,7 +1183,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then(result, x.condition(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1285,7 +1191,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then_else& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then_else(result, x.condition(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1294,7 +1199,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::bounded_init& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1303,7 +1207,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1312,7 +1215,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::left_merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1321,7 +1223,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::choice& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1330,7 +1231,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::stochastic_operator& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_stochastic_operator(result, x.variables(), x.distribution(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1339,7 +1239,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::untyped_process_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1349,7 +1248,6 @@ struct add_process_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_untyped_data_parameter(x))
     {
@@ -1478,7 +1376,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_identifier& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1488,7 +1385,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_equation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_equation(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, x.formal_parameters(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.expression()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1497,7 +1393,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::action& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1507,7 +1402,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_instance(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, x.actual_parameters());
     static_cast<Derived&>(*this).leave(x);
@@ -1516,7 +1410,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_instance_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_process_instance_assignment(result, [&](process_identifier& result){ static_cast<Derived&>(*this).apply(result, x.identifier()); }, x.assignments());
     static_cast<Derived&>(*this).leave(x);
@@ -1525,7 +1418,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::delta& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1535,7 +1427,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::tau& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1545,7 +1436,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sum(result, x.variables(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1554,7 +1444,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::block& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_block(result, x.block_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1563,7 +1452,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::hide& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_hide(result, x.hide_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1572,7 +1460,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::rename& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_rename(result, x.rename_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1581,7 +1468,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::comm& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_comm(result, x.comm_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1590,7 +1476,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::allow& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_allow(result, x.allow_set(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1599,7 +1484,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::sync& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_sync(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1608,7 +1492,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::at& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_at(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); }, x.time_stamp());
     static_cast<Derived&>(*this).leave(x);
@@ -1617,7 +1500,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::seq& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_seq(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1626,7 +1508,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then(result, x.condition(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1635,7 +1516,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::if_then_else& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_if_then_else(result, x.condition(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.then_case()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.else_case()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1644,7 +1524,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::bounded_init& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_bounded_init(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1653,7 +1532,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1662,7 +1540,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::left_merge& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_left_merge(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1671,7 +1548,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::choice& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_choice(result, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1680,7 +1556,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::stochastic_operator& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     process::make_stochastic_operator(result, x.variables(), x.distribution(), [&](process_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -1689,7 +1564,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::untyped_process_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -1699,7 +1573,6 @@ struct add_process_identifiers: public Builder<Derived>
   template <class T>
   void apply(T& result, const process::process_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_untyped_data_parameter(x))
     {

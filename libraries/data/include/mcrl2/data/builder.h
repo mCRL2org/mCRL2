@@ -53,7 +53,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::variable& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_variable(result, x.name(), [&](sort_expression& result){ static_cast<Derived&>(*this).apply(result, x.sort()); });
     static_cast<Derived&>(*this).leave(x);
@@ -62,7 +61,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::function_symbol& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_function_symbol(result, x.name(), [&](sort_expression& result){ static_cast<Derived&>(*this).apply(result, x.sort()); });
     static_cast<Derived&>(*this).leave(x);
@@ -71,7 +69,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::application& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_application(result,
        x.head(),
@@ -84,7 +81,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::where_clause& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_where_clause(result, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); }, [&](assignment_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.declarations()); });
     static_cast<Derived&>(*this).leave(x);
@@ -93,7 +89,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::machine_number& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -103,7 +98,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_identifier& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -113,7 +107,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_assignment(result, [&](variable& result){ static_cast<Derived&>(*this).apply(result, x.lhs()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.rhs()); });
     static_cast<Derived&>(*this).leave(x);
@@ -122,7 +115,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_identifier_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_identifier_assignment(result, x.lhs(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.rhs()); });
     static_cast<Derived&>(*this).leave(x);
@@ -131,7 +123,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::basic_sort& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -141,7 +132,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::container_sort& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_container_sort(result, x.container_name(), [&](sort_expression& result){ static_cast<Derived&>(*this).apply(result, x.element_sort()); });
     static_cast<Derived&>(*this).leave(x);
@@ -150,7 +140,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::structured_sort& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_structured_sort(result, [&](structured_sort_constructor_list& result){ static_cast<Derived&>(*this).apply(result, x.constructors()); });
     static_cast<Derived&>(*this).leave(x);
@@ -159,7 +148,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::function_sort& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_function_sort(result, [&](sort_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.domain()); }, [&](sort_expression& result){ static_cast<Derived&>(*this).apply(result, x.codomain()); });
     static_cast<Derived&>(*this).leave(x);
@@ -168,7 +156,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_sort& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -178,7 +165,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_possible_sorts& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_possible_sorts(result, [&](sort_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.sorts()); });
     static_cast<Derived&>(*this).leave(x);
@@ -187,7 +173,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_sort_variable& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -197,7 +182,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::forall& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_forall(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -206,7 +190,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::exists& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_exists(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -215,7 +198,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::lambda& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_lambda(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -224,7 +206,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::set_comprehension& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_set_comprehension(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -233,7 +214,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::bag_comprehension& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_bag_comprehension(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -242,7 +222,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_set_or_bag_comprehension& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_set_or_bag_comprehension(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -251,7 +230,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::structured_sort_constructor_argument& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_structured_sort_constructor_argument(result, x.name(), [&](sort_expression& result){ static_cast<Derived&>(*this).apply(result, x.sort()); });
     static_cast<Derived&>(*this).leave(x);
@@ -260,7 +238,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::structured_sort_constructor& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_structured_sort_constructor(result, x.name(), [&](structured_sort_constructor_argument_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); }, x.recogniser());
     static_cast<Derived&>(*this).leave(x);
@@ -269,7 +246,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::alias& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_alias(result, x.name(), [&](sort_expression& result){ static_cast<Derived&>(*this).apply(result, x.reference()); });
     static_cast<Derived&>(*this).leave(x);
@@ -278,7 +254,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::data_equation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_data_equation(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.lhs()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.rhs()); });
     static_cast<Derived&>(*this).leave(x);
@@ -287,7 +262,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_data_parameter& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_data_parameter(result, x.name(), [&](data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -296,7 +270,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_abstraction(x))
     {
@@ -332,7 +305,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::assignment_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_assignment(x))
     {
@@ -348,7 +320,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::sort_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_basic_sort(x))
     {
@@ -384,7 +355,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::abstraction& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_forall(x))
     {
@@ -436,7 +406,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::variable& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -446,7 +415,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::function_symbol& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -456,7 +424,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::application& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_application(result,
        x.head(),
@@ -469,7 +436,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::where_clause& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_where_clause(result, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); }, [&](assignment_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.declarations()); });
     static_cast<Derived&>(*this).leave(x);
@@ -478,7 +444,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::machine_number& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -488,7 +453,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_identifier& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -498,7 +462,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_assignment(result, x.lhs(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.rhs()); });
     static_cast<Derived&>(*this).leave(x);
@@ -507,7 +470,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_identifier_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_identifier_assignment(result, x.lhs(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.rhs()); });
     static_cast<Derived&>(*this).leave(x);
@@ -516,7 +478,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::forall& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_forall(result, x.variables(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -525,7 +486,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::exists& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_exists(result, x.variables(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -534,7 +494,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::lambda& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_lambda(result, x.variables(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -543,7 +502,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::set_comprehension& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_set_comprehension(result, x.variables(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -552,7 +510,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::bag_comprehension& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_bag_comprehension(result, x.variables(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -561,7 +518,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_set_or_bag_comprehension& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_set_or_bag_comprehension(result, x.variables(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -570,7 +526,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::data_equation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_data_equation(result, x.variables(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.lhs()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.rhs()); });
     static_cast<Derived&>(*this).leave(x);
@@ -579,7 +534,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_data_parameter& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_data_parameter(result, x.name(), [&](data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -588,7 +542,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_abstraction(x))
     {
@@ -624,7 +577,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::assignment_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_assignment(x))
     {
@@ -640,7 +592,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::abstraction& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_forall(x))
     {
@@ -691,7 +642,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::variable& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -701,7 +651,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::function_symbol& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -711,7 +660,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::application& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_application(result,
        x.head(),
@@ -724,7 +672,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::where_clause& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_where_clause(result, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); }, [&](assignment_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.declarations()); });
     static_cast<Derived&>(*this).leave(x);
@@ -733,7 +680,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::machine_number& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -743,7 +689,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_identifier& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -753,7 +698,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_assignment(result, [&](variable& result){ static_cast<Derived&>(*this).apply(result, x.lhs()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.rhs()); });
     static_cast<Derived&>(*this).leave(x);
@@ -762,7 +706,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_identifier_assignment& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_identifier_assignment(result, x.lhs(), [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.rhs()); });
     static_cast<Derived&>(*this).leave(x);
@@ -771,7 +714,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::forall& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_forall(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -780,7 +722,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::exists& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_exists(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -789,7 +730,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::lambda& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_lambda(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -798,7 +738,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::set_comprehension& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_set_comprehension(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -807,7 +746,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::bag_comprehension& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_bag_comprehension(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -816,7 +754,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_set_or_bag_comprehension& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_set_or_bag_comprehension(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -825,7 +762,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::data_equation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_data_equation(result, [&](variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.condition()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.lhs()); }, [&](data_expression& result){ static_cast<Derived&>(*this).apply(result, x.rhs()); });
     static_cast<Derived&>(*this).leave(x);
@@ -834,7 +770,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::untyped_data_parameter& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     data::make_untyped_data_parameter(result, x.name(), [&](data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.arguments()); });
     static_cast<Derived&>(*this).leave(x);
@@ -843,7 +778,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_abstraction(x))
     {
@@ -879,7 +813,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::assignment_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_assignment(x))
     {
@@ -895,7 +828,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::abstraction& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_forall(x))
     {

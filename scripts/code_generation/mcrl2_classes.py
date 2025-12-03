@@ -1235,7 +1235,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             if 'data::abstraction' in return_type:
                 return_type = 'data::data_expression'
             result = 'T& result, '
-            assertion = '// assert(&result!=&atermpp::down_cast<T>(x));'
+            assertion = ''
 
         if is_modifiable_type(classname, modifiability_map):
             return_statement = ''

@@ -74,7 +74,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::propositional_variable_instantiation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -83,7 +82,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::minus& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_minus(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -92,7 +90,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::and_& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_and_(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -101,7 +98,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::or_& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_or_(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -110,7 +106,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::imp& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_imp(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -119,7 +114,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::plus& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_plus(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -128,7 +122,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::const_multiply& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -137,7 +130,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::const_multiply_alt& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_const_multiply_alt(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -146,7 +138,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::infimum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_infimum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -155,7 +146,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::supremum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_supremum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -164,7 +154,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::sum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_sum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -173,7 +162,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::eqinf& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_eqinf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -182,7 +170,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::eqninf& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_eqninf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -191,7 +178,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::condsm& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_condsm(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
@@ -200,7 +186,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::condeq& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_condeq(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
@@ -209,7 +194,6 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::pres_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
@@ -324,7 +308,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::propositional_variable_instantiation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -333,7 +316,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::minus& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_minus(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -342,7 +324,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::and_& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_and_(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -351,7 +332,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::or_& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_or_(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -360,7 +340,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::imp& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_imp(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -369,7 +348,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::plus& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_plus(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -378,7 +356,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::const_multiply& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -387,7 +364,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::const_multiply_alt& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_const_multiply_alt(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -396,7 +372,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::infimum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_infimum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -405,7 +380,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::supremum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_supremum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -414,7 +388,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::sum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_sum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -423,7 +396,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::eqinf& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_eqinf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -432,7 +404,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::eqninf& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_eqninf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -441,7 +412,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::condsm& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_condsm(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
@@ -450,7 +420,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::condeq& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_condeq(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
@@ -459,7 +428,6 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::pres_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
@@ -574,7 +542,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::propositional_variable_instantiation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_propositional_variable_instantiation(result, x.name(), [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.parameters()); });
     static_cast<Derived&>(*this).leave(x);
@@ -583,7 +550,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::minus& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_minus(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -592,7 +558,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::and_& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_and_(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -601,7 +566,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::or_& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_or_(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -610,7 +574,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::imp& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_imp(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -619,7 +582,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::plus& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_plus(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -628,7 +590,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::const_multiply& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_const_multiply(result, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -637,7 +598,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::const_multiply_alt& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_const_multiply_alt(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -646,7 +606,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::infimum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_infimum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -655,7 +614,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::supremum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_supremum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -664,7 +622,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::sum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_sum(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -673,7 +630,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::eqinf& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_eqinf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -682,7 +638,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::eqninf& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_eqninf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -691,7 +646,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::condsm& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_condsm(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
@@ -700,7 +654,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::condeq& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_condeq(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
@@ -709,7 +662,6 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::pres_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
@@ -821,7 +773,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::propositional_variable_instantiation& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
@@ -831,7 +782,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::minus& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_minus(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -840,7 +790,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::and_& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_and_(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -849,7 +798,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::or_& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_or_(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -858,7 +806,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::imp& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_imp(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -867,7 +814,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::plus& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_plus(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -876,7 +822,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::const_multiply& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_const_multiply(result, x.left(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.right()); });
     static_cast<Derived&>(*this).leave(x);
@@ -885,7 +830,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::const_multiply_alt& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_const_multiply_alt(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.left()); }, x.right());
     static_cast<Derived&>(*this).leave(x);
@@ -894,7 +838,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::infimum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_infimum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -903,7 +846,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::supremum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_supremum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -912,7 +854,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::sum& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_sum(result, x.variables(), [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.body()); });
     static_cast<Derived&>(*this).leave(x);
@@ -921,7 +862,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::eqinf& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_eqinf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -930,7 +870,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::eqninf& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_eqninf(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.operand()); });
     static_cast<Derived&>(*this).leave(x);
@@ -939,7 +878,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::condsm& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_condsm(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
@@ -948,7 +886,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::condeq& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     pres_system::make_condeq(result, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg1()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg2()); }, [&](pres_expression& result){ static_cast<Derived&>(*this).apply(result, x.arg3()); });
     static_cast<Derived&>(*this).leave(x);
@@ -957,7 +894,6 @@ struct add_pres_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const pres_system::pres_expression& x)
   { 
-    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     if (data::is_data_expression(x))
     {
