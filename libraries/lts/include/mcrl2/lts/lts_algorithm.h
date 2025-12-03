@@ -233,7 +233,11 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter examples for weak trace equivalence\n";
+        detail::bisimulation_reduce_gj(l1,true,false); // Branching bisimulation reduction.
+        detail::bisimulation_reduce_gj(l2,true,false);
+        determinise(l1); // This may blow up.
+        determinise(l2);
+        return detail::destructive_branching_bisimulation_compare_minimal_depth(l1, l2, counter_example_file);
       }
 
       // Eliminate silent steps and determinise first LTS
