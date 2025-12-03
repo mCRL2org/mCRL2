@@ -176,7 +176,7 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
     using utilities::detail::contains;
     if (!contains(forbidden_identifiers, x.name()))
     {
-      result = x;
+      result = atermpp::down_cast<T>(x);
       return;
     }
     data::make_variable(result, create_name(x.name()), x.sort());

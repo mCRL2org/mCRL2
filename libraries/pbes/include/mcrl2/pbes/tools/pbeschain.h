@@ -104,7 +104,7 @@ struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
         if (fname.name() == atermpp::aterm_string("if") && (da.head().sort().target_sort() == data::bool_()))
         {
           res = data::or_(data::and_(da[0], simpl_data(da[1])), data::and_(data::not_(da[0]), simpl_data(da[2])));
-          res = atermpp::down_cast<data::data_expression>(m_pbes_rewriter(res));
+          res = atermpp::down_cast<data::data_expression>(m_pbes_rewriter(atermpp::down_cast<pbes_expression>(res)));
         }
       }
     }
@@ -114,7 +114,7 @@ struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
   template<class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = simpl_data(x);
+    result =  atermpp::down_cast<T>(simpl_data(x));
   }
 };
 

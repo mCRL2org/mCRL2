@@ -282,7 +282,7 @@ class enumerator_list_element
     /// \brief Invalidates the element, by giving phi an undefined value
     void invalidate()
     {
-      phi = data::undefined_data_expression();
+      phi = atermpp::down_cast<Expression>(data::undefined_data_expression());
     }
 
     /// \brief Returns true if the element is valid. If it becomes false, this is used to signal that
@@ -743,7 +743,6 @@ const bool print=false
                                              {
                                                return false;
                                              }
-// if (print) std::cerr << "G: " << P.scratch_expression << "\n";;
                                              bool added_variables_empty = added_variables.empty() || (P.scratch_expression == phi && m_accept_solutions_with_variables);
                                              if ((accept(P.scratch_expression) && m_accept_solutions_with_variables) || (variables.empty() && added_variables_empty))
                                              {

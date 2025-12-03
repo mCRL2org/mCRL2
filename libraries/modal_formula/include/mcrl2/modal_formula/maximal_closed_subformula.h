@@ -97,7 +97,7 @@ struct bottom_up_traverser: public Traverser<Derived>
   void leave(const T& x)
   {
     Node result;
-    std::size_t n = child_count(x);
+    std::size_t n = child_count(atermpp::down_cast<state_formula>(x));
     derived().join(x, node_stack.end() - n, node_stack.end(), result);
     node_stack.erase(node_stack.end() - n, node_stack.end());
     push(result);
@@ -219,7 +219,7 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
     update_free_variables(x, result);
     if (result.variables.empty())
     {
-      result.formulas.insert(x);
+      result.formulas.insert(atermpp::down_cast<state_formula>(x));
     }
     else
     {

@@ -38,7 +38,7 @@ struct one_point_rule_rewrite_builder: public pres_system::pres_expression_build
   void apply(T& result, const data::data_expression& x)
   {
     data::one_point_rule_rewriter r;
-    result = r(x);
+    result =  atermpp::down_cast<T>(r(x));
   }
 
   template <class T>

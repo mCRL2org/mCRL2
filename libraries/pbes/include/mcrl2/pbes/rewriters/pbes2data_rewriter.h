@@ -109,7 +109,7 @@ class pbes2data_rewriter
     /// \return The rewrite result.
     pbes_expression operator()(const pbes_expression& x) const
     {
-      return detail::pbes2data(x);
+      return atermpp::down_cast<pbes_expression>(detail::pbes2data(x));
     }
 };
 

@@ -43,7 +43,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = m_data_type_checker.typecheck_data_expression(x, data::bool_(), m_variable_context);
+    result = atermpp::down_cast<T>(m_data_type_checker.typecheck_data_expression(x, data::bool_(), m_variable_context));
   }
 
   template <class T>
@@ -123,7 +123,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
     const core::identifier_string& name = x.name();
     if (!m_pbes_context.is_declared(name))
     {
-      result = data::typecheck_untyped_data_parameter(m_data_type_checker, x.name(), x.arguments(), data::bool_(), m_variable_context);
+      result = atermpp::down_cast<T>(data::typecheck_untyped_data_parameter(m_data_type_checker, x.name(), x.arguments(), data::bool_(), m_variable_context));
       return;
     }
 

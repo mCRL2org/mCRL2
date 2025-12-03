@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_accessors)
   pres_expression y = expressions[1];
   data::variable d(core::identifier_string("d"), data::sort_nat::nat());
   data::variable_list v = { d };
-  pres_expression z = d;
+  pres_expression z = atermpp::down_cast<pres_expression>(d);
   propositional_variable_instantiation X(core::identifier_string("X"), { d });
 
   std::set<pres_expression> q;

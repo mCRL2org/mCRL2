@@ -39,7 +39,7 @@ inline pbes_expression make_not(const pbes_expression& x)
 {
   if (data::is_data_expression(x) && data::sort_bool::is_not_application(x))
   {
-    return data::sort_bool::arg(atermpp::down_cast<data::data_expression>(x));
+    return atermpp::down_cast<pbes_expression>(data::sort_bool::arg(atermpp::down_cast<data::data_expression>(x)));
   }
   else if (is_not(x))
   {
@@ -168,11 +168,11 @@ public:
       // with guards of the form !X, where X is a variable that encodes counterexample
       // information. As other algorithms expect expressions in positive form, we need
       // to push the negation inside.
-      return make_forall_(m_parameters, or_(distribute_not_over_and(m_condition), m_X));
+      return make_forall_(m_parameters, or_(distribute_not_over_and(atermpp::down_cast<pbes_expression>(m_condition)), m_X));
     }
     else
     {
-      return make_exists_(m_parameters, and_(m_condition, m_X));
+      return make_exists_(m_parameters, and_(atermpp::down_cast<pbes_expression>(m_condition), m_X));
     }
   }
 };
@@ -839,7 +839,7 @@ inline detail::pre_srf_pbes<allow_ce> pbes2pre_srf(const pbes& p, bool merge_sim
   core::identifier_string X_true = id_generator("X_true");
   pbes_equation eqn_false(fixpoint_symbol::mu(),
       propositional_variable(X_false, {}),
-      or_(data::sort_bool::false_(), propositional_variable_instantiation(X_false, {})));
+      or_(atermpp::down_cast<pbes_expression>(data::sort_bool::false_()), propositional_variable_instantiation(X_false, {})));
   pbes_equation eqn_true(fixpoint_symbol::nu(),
       propositional_variable(X_true, {}),
       propositional_variable_instantiation(X_true, {}));

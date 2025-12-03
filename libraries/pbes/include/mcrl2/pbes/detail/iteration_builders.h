@@ -143,7 +143,7 @@ struct replace_other_propositional_variables_with_functions_builder
       {
         data::sort_expression sort_expr = data::function_sort(sort_list, data::sort_bool::bool_());
         data::function_symbol fs = data::function_symbol(x.name(), sort_expr);
-        result = data::application(fs, x.parameters());
+        result =  atermpp::down_cast<T>(data::application(fs, x.parameters()));
         data::variable var = data::variable(x.name(), sort_expr);
         var_list.push_front(var);
       }
@@ -151,7 +151,7 @@ struct replace_other_propositional_variables_with_functions_builder
       {
         data::variable var = data::variable(x.name(), data::sort_bool::bool_());
         var_list.push_front(var);
-        result = var;
+        result = atermpp::down_cast<T>(var);
       }
       return;
     }

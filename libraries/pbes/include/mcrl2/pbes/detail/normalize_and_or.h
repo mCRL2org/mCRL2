@@ -75,7 +75,7 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = x;
+    result = atermpp::down_cast<pbes_expression>(x);
   }
 
   template <class T>

@@ -80,22 +80,22 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
       {
         if (x.sort()==data::sort_bool::bool_()) 
         {
-          result = data::sort_bool::not_(x);
+          result = atermpp::down_cast<T>(data::sort_bool::not_(x));
         }
         else
         {
-          result = data::sort_real::negate(x);
+          result = atermpp::down_cast<T>(data::sort_real::negate(x));
         }
       }
       else
       {
-        result = x;
+        result = atermpp::down_cast<T>(x);
       }
     }
     else // x is an ordinary modal formula.
     {
       assert(x.sort()==data::sort_bool::bool_());
-      result = m_negated ? data::sort_bool::not_(x) : x;
+      result = atermpp::down_cast<T>(m_negated ? data::sort_bool::not_(x) : x);
     }
   }
 

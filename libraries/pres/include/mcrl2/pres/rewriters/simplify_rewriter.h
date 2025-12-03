@@ -33,7 +33,7 @@ protected:
   {
     if (data::sort_real::is_zero(f))
     {
-      result=f;
+      result=atermpp::down_cast<T>(f);
       return;
     }
     if (data::sort_real::is_one(f))
@@ -58,7 +58,7 @@ protected:
       if (d.sort()==data::sort_real::real_())
       {
         assert(!data::sort_real::is_one(d));
-        result=data::sort_real::times(f, d);
+        result=atermpp::down_cast<T>(data::sort_real::times(f, d));
         return;
       }
       assert(d.sort()==data::sort_bool::bool_());
@@ -141,7 +141,7 @@ public:
       if (resulta.sort() == data::sort_real::real_() &&
           righta.sort() == data::sort_real::real_())
       {
-        right = data::sort_real::minimum(resulta, righta);
+        right = atermpp::down_cast<pres_expression>(data::sort_real::minimum(resulta, righta));
         apply(result, right);
         return;
       }
@@ -182,7 +182,7 @@ public:
       if (resulta.sort() == data::sort_real::real_() &&
           righta.sort() == data::sort_real::real_())
       {
-        right = data::sort_real::maximum(resulta, righta);
+        right = atermpp::down_cast<pres_expression>(data::sort_real::maximum(resulta, righta));
         apply(result, right);
         return;
       }
@@ -229,7 +229,7 @@ public:
           righta.sort() == data::sort_real::real_())
 
       {
-        right = data::sort_real::plus(resulta, righta);
+        right = atermpp::down_cast<pres_expression>(data::sort_real::plus(resulta, righta));
         apply(result, right);
         return;
       }
@@ -624,7 +624,7 @@ protected:
     apply(data_result, f);
     if (data::sort_real::is_zero(data_result))
     {
-      result=data_result;
+      result=atermpp::down_cast<T>(data_result);
       return;
     }
     apply(result, x);
@@ -657,7 +657,7 @@ protected:
       {
         if (data::sort_real::is_one(d))
         {
-          result=data_result;
+          result=atermpp::down_cast<T>(data_result);
           return;
         }
         if (data::sort_real::is_zero(d))

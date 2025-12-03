@@ -37,17 +37,17 @@ class action_formula: public atermpp::aterm
     }
 
     /// \\brief Constructor Z6.
-    action_formula(const data::data_expression& x)
+    explicit action_formula(const data::data_expression& x)
       : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor Z6.
-    action_formula(const data::untyped_data_parameter& x)
+    explicit action_formula(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor Z6.
-    action_formula(const process::untyped_multi_action& x)
+    explicit action_formula(const process::untyped_multi_action& x)
       : atermpp::aterm(x)
     {}
 

@@ -36,12 +36,12 @@ class regular_formula: public atermpp::aterm
     }
 
     /// \\brief Constructor Z6.
-    regular_formula(const action_formulas::action_formula& x)
+    explicit regular_formula(const action_formulas::action_formula& x)
       : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor Z6.
-    regular_formula(const data::data_expression& x)
+    explicit regular_formula(const data::data_expression& x)
       : atermpp::aterm(x)
     {}
 

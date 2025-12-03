@@ -144,7 +144,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     assert(!v.empty());
     assert(&result!=&phi);
     atermpp::vector<data::data_expression> undo = undo_substitution(v);
-    result = data::sort_real::real_zero();
+    result = atermpp::down_cast<pres_expression>(data::sort_real::real_zero());
 #ifndef NDEBUG
     pres_expression phi_; 
     derived().apply(phi_, phi);

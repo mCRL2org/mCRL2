@@ -204,7 +204,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
 
   void leave(const data::data_expression& x)
   {
-    push(x);
+    push(atermpp::down_cast<pbes_expression>(x));
   }
 
   void leave(const pbes_system::propositional_variable_instantiation& x)

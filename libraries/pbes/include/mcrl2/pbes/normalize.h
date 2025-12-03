@@ -56,7 +56,7 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = negated ? data::not_(x) : x;
+    result = atermpp::down_cast<T>(negated ? data::not_(x) : x);
   }
 
   template <class T>

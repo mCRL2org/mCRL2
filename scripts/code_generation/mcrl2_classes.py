@@ -645,7 +645,7 @@ class AdditionalConstructor(Constructor):
 
     def inline_definition(self):
         text = r'''    /// \\\\brief Constructor Z6.
-    <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
+    explicit <CLASSNAME>(const <ADDITIONAL_CLASSNAME>& x)
       : <SUPERCLASS>(x)
     {}'''
         return self.expand_text(text)
@@ -1235,7 +1235,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             if 'data::abstraction' in return_type:
                 return_type = 'data::data_expression'
             result = 'T& result, '
-            assertion = 'assert(&result!=&x);'
+            assertion = '// assert(&result!=&atermpp::down_cast<T>(x));'
 
         if is_modifiable_type(classname, modifiability_map):
             return_statement = ''
@@ -1316,7 +1316,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     return_statement = ''
                 else:
                     visit_text = '// skip'
-                    return_statement = 'result = x;'
+                    return_statement = 'result = atermpp::down_cast<T>(x);'
 
         # fix the layout
         if template != '':
@@ -1324,7 +1324,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         if return_statement != '':
             return_statement = '\n  ' + return_statement
         if assertion != '':
-            assertion = return_statement +'\n  '
+           assertion = assertion +'\n  '
         if visit_text != '':
             visit_text = '\n' + indent_text(visit_text, '  ')
 

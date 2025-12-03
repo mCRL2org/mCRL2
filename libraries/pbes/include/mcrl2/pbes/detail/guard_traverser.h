@@ -294,8 +294,8 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 
   void leave(const data::data_expression& x)
   {
-    push(guard_expression(x));
-    assert(top().check_guards(x, R));
+    push(guard_expression(atermpp::down_cast<pbes_expression>(x)));
+    assert(top().check_guards(atermpp::down_cast<pbes_expression>(x), R));
   }
 
   void leave(const pbes_system::propositional_variable_instantiation& x)

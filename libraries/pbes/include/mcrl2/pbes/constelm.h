@@ -949,7 +949,7 @@ class pbes_constelm_algorithm
 
           data::rewriter::substitution_type sigma;
           detail::make_constelm_substitution(u.constraints(), sigma);
-          pbes_expression needs_update = m_pbes_rewriter(e.condition(), sigma);
+          pbes_expression needs_update = m_pbes_rewriter(atermpp::down_cast<pbes_expression>(e.condition()), sigma);
           mCRL2log(log::debug) << print_condition(e, u, needs_update);
 
           if (!is_false(needs_update) && !is_true(needs_update))

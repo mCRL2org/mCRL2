@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_free_variables)
   data::variable c = bool_("c");
   data::data_expression phi = data::equal_to(b, c);
   data::variable_list v { b };
-  state_formula f = forall(v, phi);
+  state_formula f = forall(v, atermpp::down_cast<state_formula>(phi));
   std::set<data::variable> free_variables = state_formulas::find_free_variables(f);
   std::cout << "free variables: " << core::detail::print_set(free_variables) << std::endl;
   BOOST_CHECK(free_variables.find(b) == free_variables.end());

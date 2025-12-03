@@ -81,11 +81,11 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
       if (!is_bound(v))
       {
         //std::clog << "Reducing data expression " << data::pp(d) << " to " << data::pp(m_value) << "." << std::endl;
-        result = m_value;
+        result = atermpp::down_cast<pbes_expression>(m_value);
         return;
       }
     }
-    result = d;
+    result = atermpp::down_cast<pbes_expression>(d);
   }
 
   /// \brief Visit forall node

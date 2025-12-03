@@ -43,12 +43,12 @@ class pres_expression: public atermpp::aterm
     }
 
     /// \\brief Constructor Z6.
-    pres_expression(const data::data_expression& x)
+    explicit pres_expression(const data::data_expression& x)
       : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor Z6.
-    pres_expression(const data::untyped_data_parameter& x)
+    explicit pres_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
 
@@ -1426,13 +1426,13 @@ const pres_expression& arg(const pres_expression& t)
 /// \param t A PRES expression or a data expression
 /// \return The pres expression argument of expressions of type not, exists and forall.
 inline
-pres_expression data_arg(const pres_expression& t)
+const pres_expression& data_arg(const pres_expression& t)
 {
   if (data::is_data_expression(t))
   {
     assert(data::is_application(t));
-    const auto& a = atermpp::down_cast<const data::application>(t);
-    return *(a.begin());
+    const data::application& a = atermpp::down_cast<const data::application>(t);
+    return atermpp::down_cast<pres_expression>(*(a.begin()));
   }
   else
   {
@@ -1454,11 +1454,11 @@ const pres_expression& left(const pres_expression& t)
 /// \param x A PRES expression or a data expression
 /// \return The left hand side of an expression of type and, or or imp.
 inline
-pres_expression data_left(const pres_expression& x)
+const pres_expression& data_left(const pres_expression& x)
 {
   if (data::is_data_expression(x))
   {
-    return data::binary_left(atermpp::down_cast<data::application>(x));
+    return atermpp::down_cast<pres_expression>(data::binary_left(atermpp::down_cast<data::application>(x)));
   }
   else
   {
@@ -1479,11 +1479,11 @@ const pres_expression& right(const pres_expression& t)
 /// \param x A PRES expression or a data expression
 /// \return The left hand side of an expression of type and, or or imp.
 inline
-pres_expression data_right(const pres_expression& x)
+const pres_expression& data_right(const pres_expression& x)
 {
   if (data::is_data_expression(x))
   {
-    return data::binary_right(atermpp::down_cast<data::application>(x));
+    return atermpp::down_cast<pres_expression>(data::binary_right(atermpp::down_cast<data::application>(x)));
   }
   else
   {
@@ -1757,12 +1757,12 @@ void optimized_sum(pres_expression& result,
       const data::data_expression& d = atermpp::down_cast<data::data_expression>(p);
       if (d.sort()==data::sort_bool::bool_())
       {
-        result = d;  
+        result = atermpp::down_cast<pres_expression>(d);  
       }
       else
       {
         assert(d.sort()==data::sort_real::real_());
-        result=rewr(data::sort_real::times(d,data::sort_real::real_(factor)));
+        result=atermpp::down_cast<pres_expression>(rewr(data::sort_real::times(d,data::sort_real::real_(factor))));
       }
     }
     else
@@ -1887,7 +1887,7 @@ void optimized_const_multiply(pres_expression& result, const data::data_expressi
 {
   if (data::sort_real::is_zero(d))
   {
-    result = d;
+    result = atermpp::down_cast<pres_expression>(d);
     return;
   }
   if (data::sort_real::is_larger_zero(d) && 
@@ -1908,7 +1908,7 @@ void optimized_const_multiply_alt(pres_expression& result, const data::data_expr
 {
   if (data::sort_real::is_zero(d))
   { 
-    result = d;
+    result = atermpp::down_cast<pres_expression>(d);
     return;
   }
   if (data::sort_real::is_larger_zero(d) && 
@@ -2375,7 +2375,8 @@ struct term_traits<pres_system::pres_expression>
   {
     // Forall and exists are not fully supported by the data library
     assert(!data::is_data_expression(t) || (!data::is_abstraction(t)
-                                        || (!is_infimum(data::abstraction(t)) && !is_supremum(data::abstraction(t)))));
+                                        || (!is_infimum(atermpp::down_cast<pres_system::pres_expression>(data::abstraction(t))) && 
+                                            !is_supremum(atermpp::down_cast<pres_system::pres_expression>(data::abstraction(t))))));
     assert(is_supremum(t) || is_infimum(t));
 
     return atermpp::down_cast<variable_sequence_type>(t[0]);

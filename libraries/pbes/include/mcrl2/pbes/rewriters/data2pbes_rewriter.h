@@ -113,7 +113,7 @@ struct data2pbes_builder: public pbes_expression_builder<Derived>
       data::exists y(x);
       return exists(y.variables(), data2pbes(y.body()));
     }
-    return x;
+    return atermpp::down_cast<pbes_expression>(x);
   }
 
   template <class T>

@@ -97,8 +97,6 @@ std::set<data::variable> find_all_variables(const data::variable& x) { return da
 std::set<data::variable> find_all_variables(const data::variable_list& x) { return data::find_all_variables< data::variable_list >(x); }
 std::set<data::variable> find_free_variables(const data::data_expression& x) { return data::find_free_variables< data::data_expression >(x); }
 std::set<data::variable> find_free_variables(const data::data_expression_list& x) { return data::find_free_variables< data::data_expression_list >(x); }
-std::vector<data::variable> find_free_variables_in_order(const data::data_expression& x) { return data::find_free_variables_in_order< data::data_expression >(x); }
-std::vector<data::variable> find_free_variables_in_order(const data::data_expression_list& x) { return data::find_free_variables_in_order< data::data_expression_list >(x); }
 std::set<data::function_symbol> find_function_symbols(const data::data_equation& x) { return data::find_function_symbols< data::data_equation >(x); }
 std::set<core::identifier_string> find_identifiers(const data::variable_list& x) { return data::find_identifiers< data::variable_list >(x); }
 bool search_variable(const data::data_expression& x, const data::variable& v) { return data::search_variable< data::data_expression >(x, v); }

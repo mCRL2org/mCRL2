@@ -99,7 +99,7 @@ struct printer: public pres_system::add_traverser_sort_expressions<data::detail:
   template <typename T>
   void print_pres_expression(const T& x, bool needs_parentheses = false)
   {
-    bool is_data_expr = is_data(x);
+    bool is_data_expr = is_data(atermpp::down_cast<pres_expression>(x));
     if (is_data_expr)
     {
       derived().print("val");

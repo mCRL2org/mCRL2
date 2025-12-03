@@ -105,11 +105,11 @@ BOOST_AUTO_TEST_CASE(test_complement_method_builder)
 {
   using namespace pbes_system;
 
-  data::variable X("x", data::bool_());
-  data::variable Y("y", data::bool_());
+  pbes_expression X=atermpp::down_cast<pbes_expression>(data::variable("x", data::bool_()));
+  pbes_expression Y=atermpp::down_cast<pbes_expression>(data::variable("y", data::bool_()));
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
-  pbes_expression q = and_(or_(data::not_(X), data::not_(Y)), or_(data::not_(Y), data::not_(X)));
+  pbes_expression q = and_(or_(not_(X), not_(Y)), or_(not_(Y), not_(X)));
   std::cout << "p             = " << mcrl2::pbes_system::pp(p) << std::endl;
   std::cout << "q             = " << mcrl2::pbes_system::pp(q) << std::endl;
   std::cout << "complement(p) = " << mcrl2::pbes_system::pp(complement(p)) << std::endl;
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_complement_method_builder)
 BOOST_AUTO_TEST_CASE(test_pbes_expression)
 {
   data::variable x1("x1", data::basic_sort("X"));
-  pbes_expression e = x1;
+  pbes_expression e = atermpp::down_cast<pbes_expression>(x1);
 }
 
 BOOST_AUTO_TEST_CASE(test_trivial)

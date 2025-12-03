@@ -160,7 +160,7 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
   template <class T>
   void apply(T& result, const variable& v)
   {
-    result = sigma(v);
+    result = atermpp::down_cast<T>(sigma(v));
   }
 
   template <class T>

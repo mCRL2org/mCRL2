@@ -147,7 +147,7 @@ struct map_based_remove_parameters_builder: public pres_expression_builder<Deriv
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = x;
+    result = atermpp::down_cast<T>(x);
   }
 
   template <class T>

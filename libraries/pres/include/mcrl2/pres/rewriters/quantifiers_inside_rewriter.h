@@ -115,7 +115,7 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
   {
     using utilities::detail::set_intersection;
     std::set<data::variable> W = set_intersection(V, find_free_variables(x));
-    make_infimum_(result, data::variable_list(W.begin(), W.end()), x);
+    make_infimum_(result, data::variable_list(W.begin(), W.end()), atermpp::down_cast<pres_expression>(x));
   }
 
   template <class T>
@@ -219,7 +219,7 @@ struct quantifiers_inside_supremum_builder: public pres_expression_builder<quant
   {
     using utilities::detail::set_intersection;
     std::set<data::variable> W = set_intersection(V, find_free_variables(x));
-    make_supremum_(result, data::variable_list(W.begin(), W.end()), x);
+    make_supremum_(result, data::variable_list(W.begin(), W.end()), atermpp::down_cast<pres_expression>(x));
   }
 
   template <class T>

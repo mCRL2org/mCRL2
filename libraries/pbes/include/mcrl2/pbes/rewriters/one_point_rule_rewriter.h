@@ -39,7 +39,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
   void apply(T& result, const data::data_expression& x)
   {
     data::one_point_rule_rewriter r;
-    result = r(x);
+    result = atermpp::down_cast<T>(r(x));
   }
 
   template <class T>
@@ -118,7 +118,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     derived().apply(operand, x.operand());
     if (data::is_data_expression(operand))
     {
-      result = data::not_(atermpp::down_cast<data::data_expression>(operand));
+      result =  atermpp::down_cast<T>(data::not_(atermpp::down_cast<data::data_expression>(operand)));
     }
     else
     {

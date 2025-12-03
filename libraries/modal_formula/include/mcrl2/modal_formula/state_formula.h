@@ -36,12 +36,12 @@ class state_formula: public atermpp::aterm
     }
 
     /// \\brief Constructor Z6.
-    state_formula(const data::data_expression& x)
+    explicit state_formula(const data::data_expression& x)
       : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor Z6.
-    state_formula(const data::untyped_data_parameter& x)
+    explicit state_formula(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
 

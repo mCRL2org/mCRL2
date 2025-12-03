@@ -52,7 +52,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
+    result = atermpp::down_cast<T>(m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context));
   }
 
   template <class T>
@@ -71,7 +71,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       const data::untyped_data_parameter& y = x.actions().front();
       try
       {
-        result = data::typecheck_untyped_data_parameter(m_data_type_checker, y.name(), y.arguments(), data::sort_bool::bool_(), m_variable_context);
+        result = atermpp::down_cast<T>(data::typecheck_untyped_data_parameter(m_data_type_checker, y.name(), y.arguments(), data::sort_bool::bool_(), m_variable_context));
         return;
       }
       catch (mcrl2::runtime_error& )
@@ -86,7 +86,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       new_arguments.push_front(typecheck_action(a.name(), a.arguments()));
     }
     new_arguments = atermpp::reverse(new_arguments);
-    result = action_formulas::multi_action(new_arguments);
+    result = atermpp::down_cast<T>(action_formulas::multi_action(new_arguments));
   }
 
   template <class T>
@@ -99,7 +99,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       action_formula body;
       (*this).apply(body, x.body());
       m_variable_context = m_variable_context_copy;
-      result = forall(x.variables(), body);
+      result = atermpp::down_cast<T>(forall(x.variables(), body));
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -117,7 +117,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       action_formula body;
       (*this).apply(body, x.body());
       m_variable_context = m_variable_context_copy;
-      result = exists(x.variables(), body);
+      result = atermpp::down_cast<T>(exists(x.variables(), body));
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -271,11 +271,11 @@ struct typecheck_builder: public regular_formula_builder<typecheck_builder>
     {
       if (x.name() == core::identifier_string("."))
       {
-        result = make_element_at(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right));
+        result = atermpp::down_cast<T>(make_element_at(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right)));
       }
       else
       {
-        result = make_plus(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right));
+        result = atermpp::down_cast<T>(make_plus(atermpp::down_cast<data::data_expression>(left), atermpp::down_cast<data::data_expression>(right)));
       }
     }
     else
@@ -374,13 +374,13 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     {
       try
       {
-        result = m_data_type_checker.typecheck_data_expression(x, data::sort_real::real_(), m_variable_context);
+        result = atermpp::down_cast<T>(m_data_type_checker.typecheck_data_expression(x, data::sort_real::real_(), m_variable_context));
       }
       catch (mcrl2::runtime_error& e1)
       {
         try 
         {
-          result = m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
+          result = atermpp::down_cast<T>(m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context));
         }
         catch (mcrl2::runtime_error& e2)
         {
@@ -392,7 +392,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     }
     else
     {
-      result = m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
+      result = atermpp::down_cast<T>(m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context));
     }
   }
 

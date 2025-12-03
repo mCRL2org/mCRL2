@@ -32,8 +32,8 @@ struct pres_actions: public data::detail::data_specification_actions
 
   pres_system::pres_expression parse_PresExpr(const core::parse_node& node) const
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataExpr")) { return parse_DataExpr(node.child(0)); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return atermpp::down_cast<pres_expression>(parse_DataValExpr(node.child(0))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataExpr")) { return atermpp::down_cast<pres_expression>(parse_DataExpr(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return pres_system::true_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return pres_system::false_(); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "inf") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "PresExpr")) { return pres_system::infimum(parse_VarsDeclList(node.child(1)), parse_PresExpr(node.child(3))); }
@@ -52,7 +52,7 @@ struct pres_actions: public data::detail::data_specification_actions
     else if ((node.child_count() == 8) && (symbol_name(node.child(0)) == "condeq") && (node.child(1).string() == "(") && (symbol_name(node.child(2)) == "PresExpr") && (node.child(3).string() == ",") && (symbol_name(node.child(4)) == "PresExpr") && (node.child(5).string() == ",") && (symbol_name(node.child(6)) == "PresExpr") && (node.child(7).string() == ")")) { return pres_system::condeq(parse_PresExpr(node.child(2)), parse_PresExpr(node.child(4)), parse_PresExpr(node.child(6))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "PresExpr") && (symbol_name(node.child(2)) == ")")) { return parse_PresExpr(node.child(1)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "PropVarInst")) { return parse_PropVarInst(node.child(0)); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "Id")) { return data::untyped_data_parameter(parse_Id(node.child(0)), parse_DataExprList(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "Id")) { return atermpp::down_cast<pres_expression>(data::untyped_data_parameter(parse_Id(node.child(0)), parse_DataExprList(node.child(1)))); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 

@@ -42,7 +42,7 @@ struct find_subterm_traverser: public pbes_expression_traverser<find_subterm_tra
     counter.increase();
     if (counter.at(xpos, ypos))
     {
-      result = x;
+      result = atermpp::down_cast<pbes_expression>(x);
     }
     super::apply(x);
     counter.decrease();
@@ -108,7 +108,7 @@ struct replace_subterm_builder: public pbes_expression_builder<replace_subterm_b
     pbes_expression result;
     if (counter.y > ypos)
     {
-      result = x;
+      result = atermpp::down_cast<pbes_expression>(x);
     }
     else if (arrived)
     {

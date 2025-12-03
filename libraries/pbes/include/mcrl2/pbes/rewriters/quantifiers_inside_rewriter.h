@@ -180,7 +180,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = data::detail::quantifiers_inside_forall(V, x);
+    result = atermpp::down_cast<T>(data::detail::quantifiers_inside_forall(V, x));
   }
 };
 
@@ -277,7 +277,7 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = data::detail::quantifiers_inside_exists(V, x);
+    result = atermpp::down_cast<T>(data::detail::quantifiers_inside_exists(V, x));
   }
 };
 

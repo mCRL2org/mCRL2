@@ -130,10 +130,10 @@ struct replace_free_variables_builder
   {
     if (is_bound(v))
     {
-      result = v;
+      result = atermpp::down_cast<T>(v);
       return;
     }
-    result = sigma(v);
+    result = atermpp::down_cast<T>(sigma(v));
   }
 };
 

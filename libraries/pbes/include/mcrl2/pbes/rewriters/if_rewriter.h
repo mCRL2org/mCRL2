@@ -33,7 +33,7 @@ struct if_rewrite_builder: public pbes_system::data_expression_builder<if_rewrit
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = r(x);
+    result = atermpp::down_cast<T>(r(x));
   }
 };
 

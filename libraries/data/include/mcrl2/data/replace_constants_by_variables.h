@@ -48,14 +48,14 @@ struct replace_constants_by_variables_builder: public Builder<replace_constants_
     auto i = substitutions.find(x);
     if (i != substitutions.end())
     {
-      result = i->second;
+      result =  atermpp::down_cast<T>(i->second);
     }
     else if (is_constant(x))
     {
       data::variable v(id_generator("@rewr_var"), x.sort());
       substitutions[x] = v;
       sigma[v] = r(x, sigma);
-      result = v;
+      result =  atermpp::down_cast<T>(v);
     }
     else
     {

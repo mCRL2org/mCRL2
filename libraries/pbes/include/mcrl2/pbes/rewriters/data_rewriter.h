@@ -67,7 +67,7 @@ struct add_data_rewriter: public Builder<Derived>
   {
     data::data_expression result_tmp;
     data_rewrite(result_tmp, x, R, sigma);
-    result = result_tmp;
+    result = atermpp::down_cast<T>(result_tmp);
   }
 
   template <class T>

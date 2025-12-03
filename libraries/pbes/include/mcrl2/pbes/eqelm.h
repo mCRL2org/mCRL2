@@ -154,7 +154,7 @@ class pbes_eqelm_algorithm
         {
           std::size_t p = index_of(k, m_parameters[Y]);
           pbes_system::data_rewriter<DataRewriter> rewr(m_data_rewriter);
-          pbes_system::pbes_expression e_p = rewr(e[p], vX);
+          pbes_system::pbes_expression e_p = rewr(atermpp::down_cast<pbes_expression>(e[p]), vX);
           w[atermpp::down_cast<const data::data_expression>(e_p)].insert(k);
         }
         for (auto & i : w)

@@ -267,7 +267,7 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
       }
       action_formulas::action_formula body;
       apply(body, x.body());
-      result = action_formulas::forall(apply_variables(x.variables()), body);
+      result = atermpp::down_cast<T>(action_formulas::forall(apply_variables(x.variables()), body));
       for (const data::variable& v: x.variables())
       {
         erase(v);
@@ -283,7 +283,7 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
       }
       action_formulas::action_formula body;
       apply(body, x.body());
-      result = action_formulas::exists(apply_variables(x.variables()), body);
+      result = atermpp::down_cast<T>(action_formulas::exists(apply_variables(x.variables()), body));
       for (const data::variable& v: x.variables())
       {
         erase(v);
@@ -303,7 +303,7 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
         return i->second.back();
       };
 
-      result=data::replace_free_variables(x, sigma);
+      result=atermpp::down_cast<T>(data::replace_free_variables(x, sigma));
     }
 };
 

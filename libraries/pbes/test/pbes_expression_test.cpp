@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_accessors)
   pbes_expression y = expressions[1];
   data::variable d(core::identifier_string("d"), data::sort_nat::nat());
   data::variable_list v = { d };
-  pbes_expression z = d;
+  pbes_expression z(d);
   propositional_variable_instantiation X(core::identifier_string("X"), { d });
 
   std::set<pbes_expression> q;

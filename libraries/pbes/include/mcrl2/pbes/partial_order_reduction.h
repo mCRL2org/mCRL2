@@ -576,8 +576,8 @@ class partial_order_reduction_algorithm
                                  result.set(k);
                                  return true;
                                },
-                               pbes_system::is_false,
-                               pbes_system::is_true
+                               data::is_false,
+                               data::is_true
         );
         remove_assignments(m_sigma, e_k);
       }
@@ -776,7 +776,7 @@ class partial_order_reduction_algorithm
                                  }
                                  return false;
                                },
-                               pbes_system::is_false
+                               data::is_false
         );
         data::remove_assignments(m_sigma, e_k);
       }

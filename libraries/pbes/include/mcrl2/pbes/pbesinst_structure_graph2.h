@@ -112,6 +112,17 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
          : b(std::move(b_)), f(std::move(f_)), g0(std::move(g0_)), g1(std::move(g1_))
         {}
 
+        template<class E1, class E2>
+        stack_element(
+          E1 b_,
+          E2 f_,
+          pbes_expression g0_,
+          pbes_expression g1_
+        )
+         : b(std::move(atermpp::down_cast<pbes_expression>(b_))), 
+           f(std::move(atermpp::down_cast<pbes_expression>(f_))), g0(std::move(g0_)), g1(std::move(g1_))
+        {}
+
         void mark(atermpp::term_mark_stack& todo) const
         {
           mark_term(b, todo);
@@ -169,7 +180,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
         else
         {
-         throw mcrl2::runtime_error("Fail to evaluate the expression " + pbes_system::pp(x) + " as it should be equal to true or false.");
+         throw mcrl2::runtime_error("Fail to evaluate the expression " + data::pp(x) + " as it should be equal to true or false.");
         }
       }
 

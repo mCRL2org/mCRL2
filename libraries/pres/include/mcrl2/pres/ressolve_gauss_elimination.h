@@ -168,7 +168,7 @@ inline void collect_grouped_constant_multiplies_mininf_terms_and_constant(
     {
       if (!is_true(constant) && !is_false(constant))
       {
-        constant = rewrite(data::sort_real::plus(t, atermpp::down_cast<data::data_expression>(constant)));
+        constant = atermpp::down_cast<pres_expression>(rewrite(data::sort_real::plus(t, atermpp::down_cast<data::data_expression>(constant))));
       }
       return;
     }
@@ -244,7 +244,7 @@ inline pres_expression group_sums_conjuncts_disjuncts(const pres_expression& con
   {
     std::map <pres_expression, data::data_expression> constant_multiply_terms;
     std::set <pres_expression> mininf_terms;
-    pres_expression constant=data::sort_real::real_zero();
+    pres_expression constant=atermpp::down_cast<pres_expression>(data::sort_real::real_zero());
     collect_grouped_constant_multiplies_mininf_terms_and_constant(conjunctive_disjunctive_nf,  constant_multiply_terms, mininf_terms, constant, rewrite);
     pres_expression result = constant;
     pres_expression aux;
@@ -467,7 +467,7 @@ push_constant_inside(pres_expression& result, const data::data_expression& const
     data::sort_real::make_times(tmp,
                                 constant,
                                 atermpp::down_cast<data::data_expression>(t));
-    result=tmp;
+    result=atermpp::down_cast<pres_expression>(tmp);
   }
   else if (is_condsm(t))
   { 
@@ -830,7 +830,7 @@ disjunction_fj_cj(std::vector<linear_fixed_point_equation>& l, const pres_expres
     data::data_expression is_c_j_equal_one = rewriter(data::equal_to(eq.c_j, data::sort_real::real_one()));
     if (is_true(is_c_j_equal_one))
     {
-      disjunct = data::sort_real::real_zero();        
+      disjunct = atermpp::down_cast<pres_expression>(data::sort_real::real_zero());        
     }
     else if (is_false(is_c_j_equal_one))
     {
@@ -873,7 +873,7 @@ conjunction_fj_cj(std::vector<linear_fixed_point_equation>& l, const pres_expres
       data::data_expression is_c_j_equal_one = rewriter(data::equal_to(eq.c_j, data::sort_real::real_one()));
       if (is_true(is_c_j_equal_one))
       {   
-        conjunct = data::sort_real::real_zero();
+        conjunct = atermpp::down_cast<pres_expression>(data::sort_real::real_zero());
       }
       else if (is_false(is_c_j_equal_one))
       { 

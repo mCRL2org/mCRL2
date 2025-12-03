@@ -227,12 +227,12 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
           condition = m_datar(condition);
           if (condition != data::false_())
           {
-            phi.push_back(imp(condition, Yr));
+            phi.push_back(imp(atermpp::down_cast<pbes_expression>(condition), Yr));
           }
         }
         else
         {
-          phi.push_back(imp(condition, Yr));
+          phi.push_back(imp(atermpp::down_cast<pbes_expression>(condition), Yr));
         }
       }
       return join_and(phi.begin(), phi.end());
@@ -334,7 +334,7 @@ struct reset_traverser: public pbes_expression_traverser<reset_traverser>
 
   void leave(const data::data_expression& x)
   {
-    push(x);
+    push(atermpp::down_cast<pbes_expression>(x));
   }
 
   void leave(const pbes_system::propositional_variable_instantiation& x)

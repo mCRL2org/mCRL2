@@ -49,7 +49,7 @@ struct complement_builder: public pbes_expression_builder<Derived>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result = data::not_(x);
+    result = pbes_system::not_(atermpp::down_cast<pbes_expression>(x));
   }
 
   template <class T>

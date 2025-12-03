@@ -41,7 +41,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::multi_action& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     lps::make_multi_action(result, [&](process::action_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time()); });
     static_cast<Derived&>(*this).leave(x);
@@ -81,7 +81,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::process_initializer& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     lps::make_process_initializer(result, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.expressions()); });
     static_cast<Derived&>(*this).leave(x);
@@ -115,7 +115,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::stochastic_distribution& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     result = x; if (x.is_defined()) { lps::make_stochastic_distribution(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); }); }
     static_cast<Derived&>(*this).leave(x);
@@ -170,7 +170,7 @@ struct add_sort_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::stochastic_process_initializer& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     lps::make_stochastic_process_initializer(result, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.expressions()); }, [&](stochastic_distribution& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); });
     static_cast<Derived&>(*this).leave(x);
@@ -208,7 +208,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::multi_action& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     lps::make_multi_action(result, [&](process::action_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time()); });
     static_cast<Derived&>(*this).leave(x);
@@ -242,7 +242,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::process_initializer& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     lps::make_process_initializer(result, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.expressions()); });
     static_cast<Derived&>(*this).leave(x);
@@ -269,7 +269,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::stochastic_distribution& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     result = x; if (x.is_defined()) { lps::make_stochastic_distribution(result, x.variables(), [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); }); }
     static_cast<Derived&>(*this).leave(x);
@@ -314,7 +314,7 @@ struct add_data_expressions: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::stochastic_process_initializer& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     lps::make_stochastic_process_initializer(result, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.expressions()); }, [&](stochastic_distribution& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); });
     static_cast<Derived&>(*this).leave(x);
@@ -351,7 +351,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::multi_action& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     lps::make_multi_action(result, [&](process::action_list& result){ static_cast<Derived&>(*this).apply(result, x.actions()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.time()); });
     static_cast<Derived&>(*this).leave(x);
@@ -391,7 +391,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::process_initializer& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     lps::make_process_initializer(result, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.expressions()); });
     static_cast<Derived&>(*this).leave(x);
@@ -422,7 +422,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::stochastic_distribution& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     result = x; if (x.is_defined()) { lps::make_stochastic_distribution(result, [&](data::variable_list& result){ static_cast<Derived&>(*this).apply(result, x.variables()); }, [&](data::data_expression& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); }); }
     static_cast<Derived&>(*this).leave(x);
@@ -474,7 +474,7 @@ struct add_variables: public Builder<Derived>
   template <class T>
   void apply(T& result, const lps::stochastic_process_initializer& x)
   { 
-    
+    // assert(&result!=&atermpp::down_cast<T>(x));
     static_cast<Derived&>(*this).enter(x);
     lps::make_stochastic_process_initializer(result, [&](data::data_expression_list& result){ static_cast<Derived&>(*this).apply(result, x.expressions()); }, [&](stochastic_distribution& result){ static_cast<Derived&>(*this).apply(result, x.distribution()); });
     static_cast<Derived&>(*this).leave(x);

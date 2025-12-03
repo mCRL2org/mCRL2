@@ -38,12 +38,12 @@ class pbes_expression: public atermpp::aterm
     }
 
     /// \\brief Constructor Z6.
-    pbes_expression(const data::data_expression& x)
+    explicit pbes_expression(const data::data_expression& x)
       : atermpp::aterm(x)
     {}
 
     /// \\brief Constructor Z6.
-    pbes_expression(const data::untyped_data_parameter& x)
+    explicit pbes_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
 

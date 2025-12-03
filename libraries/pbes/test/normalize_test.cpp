@@ -65,15 +65,15 @@ BOOST_AUTO_TEST_CASE(test_normalize1)
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  x = data::variable("x", data::bool_());
-  y = data::variable("y", data::bool_());
-  z = data::variable("z", data::bool_());
+  x = atermpp::down_cast<pbes_expression>(data::variable("x", data::bool_()));
+  y = atermpp::down_cast<pbes_expression>(data::variable("y", data::bool_()));
+  z = atermpp::down_cast<pbes_expression>(data::variable("z", data::bool_()));
   const data::data_expression& x1 = atermpp::down_cast<data::data_expression>(x);
   const data::data_expression& y1 = atermpp::down_cast<data::data_expression>(y);
 
   f  = not_(x);
   f1 = pbes_system::normalize(f);
-  f2 = data::not_(x1);
+  f2 = atermpp::down_cast<pbes_expression>(data::not_(x1));
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_normalize1)
 
   f  = imp(and_(x, y), z);
   f1 = pbes_system::normalize(f);
-  f2 = or_(or_(data::not_(x1), data::not_(y1)), z);
+  f2 = or_(or_(atermpp::down_cast<pbes_expression>(data::not_(x1)), atermpp::down_cast<pbes_expression>(data::not_(y1))), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;

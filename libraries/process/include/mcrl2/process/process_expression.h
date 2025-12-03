@@ -41,7 +41,7 @@ class process_expression: public atermpp::aterm
     }
 
     /// \\brief Constructor Z6.
-    process_expression(const data::untyped_data_parameter& x)
+    explicit process_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm(x)
     {}
 

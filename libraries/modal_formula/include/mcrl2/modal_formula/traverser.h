@@ -36,6 +36,20 @@ struct action_formula_traverser_base: public core::traverser<Derived>
     // skip
     static_cast<Derived&>(*this).leave(x);
   }
+
+  void apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const process::untyped_multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
 };
 
 //--- start generated action_formulas::add_traverser_sort_expressions code ---//
@@ -1527,6 +1541,13 @@ struct state_formula_traverser_base: public core::traverser<Derived>
   using super::leave;
 
   void apply(const data::data_expression& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const data::untyped_data_parameter& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip

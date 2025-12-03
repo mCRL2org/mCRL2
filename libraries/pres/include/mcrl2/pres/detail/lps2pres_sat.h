@@ -73,12 +73,12 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
 
   void leave(const data::data_expression& x)
   {
-    push(x);
+    push(atermpp::down_cast<pres_expression>(x));
   }
 
   void leave(const action_formulas::multi_action& x)
   {
-    push(lps::equal_multi_actions(a, lps::multi_action(x.actions())));
+    push(atermpp::down_cast<pres_expression>(lps::equal_multi_actions(a, lps::multi_action(x.actions()))));
   }
 
   void leave(const action_formulas::true_&)
@@ -144,7 +144,7 @@ struct sat_traverser: public action_formulas::action_formula_traverser<Derived>
     data::data_expression t = a.time();
     const action_formulas::action_formula& alpha = x.operand();
     const data::data_expression& u = x.time_stamp();
-    push(tr::and_(Sat(a, alpha, id_generator, TermTraits()), data::equal_to(t, u)));
+    push(tr::and_(Sat(a, alpha, id_generator, TermTraits()), atermpp::down_cast<pres_expression>(data::equal_to(t, u))));
   }
 };
 

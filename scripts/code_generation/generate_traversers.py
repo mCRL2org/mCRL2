@@ -190,10 +190,10 @@ if __name__ == "__main__":
     result = make_builder(MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres/builder.h', 'pres_expression_builder', 'add_pres_expressions', 'pres_system::pres_expression_builder_base', class_map, all_classes, 'pres_system', 'pres_system::pres_expression', pres_expression_dependencies, modifiability_map) and result
 
     # process_expression_builder
-    result = make_builder(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/builder.h', 'process_expression_builder', 'add_process_expressions', 'core::builder', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies, modifiability_map) and result
+    result = make_builder(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/builder.h', 'process_expression_builder', 'add_process_expressions', 'process::process_builder_base', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies, modifiability_map) and result
 
     # process_identifier_builder
-    result = make_builder(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/builder.h', 'process_identifier_builder', 'add_process_identifiers', 'core::builder', class_map, all_classes, 'process', 'process::process_expression', process_identifier_dependencies, modifiability_map) and result
+    result = make_builder(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/builder.h', 'process_identifier_builder', 'add_process_identifiers', 'process::process_builder_base', class_map, all_classes, 'process', 'process::process_expression', process_identifier_dependencies, modifiability_map) and result
 
     # state_formula_builder
     result = make_builder(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/builder.h', 'state_formula_builder', 'add_state_formula_expressions', 'state_formulas::state_formula_builder_base', class_map, all_classes, 'state_formulas', 'state_formulas::state_formula', state_formula_dependencies, modifiability_map) and result
@@ -239,7 +239,7 @@ if __name__ == "__main__":
     result = make_traverser(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/traverser.h', 'state_variable_traverser', 'add_traverser_state_variables', 'state_formulas::state_formula_traverser_base'         , class_map, all_classes, 'state_formulas' , 'state_formulas::variable', state_variable_dependencies) and result
 
     # action_label_traverser
-    result = make_traverser(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'core::traverser', class_map, all_classes, 'process', 'process::action_label', action_label_dependencies) and result
+    result = make_traverser(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'process::process_traverser_base', class_map, all_classes, 'process', 'process::action_label', action_label_dependencies) and result
     result = make_traverser(MCRL2_ROOT + 'libraries/lps/include/mcrl2/lps/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'process::action_label_traverser', class_map, all_classes, 'lps', 'process::action_label', action_label_dependencies) and result
     result = make_traverser(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'lps::action_label_traverser'             , class_map, all_classes, 'action_formulas' , 'process::action_label', action_label_dependencies) and result
     result = make_traverser(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/traverser.h', 'action_label_traverser', 'add_traverser_action_labels', 'action_formulas::action_label_traverser' , class_map, all_classes, 'regular_formulas', 'process::action_label', action_label_dependencies) and result
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     result = make_traverser(MCRL2_ROOT + 'libraries/pres/include/mcrl2/pres/traverser.h', 'pres_expression_traverser', 'add_traverser_pres_expressions', 'pres_system::pres_expression_traverser_base', class_map, all_classes, 'pres_system', 'pres_system::pres_expression', pres_expression_dependencies) and result
 
     # process_expression_traverser
-    result = make_traverser(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/traverser.h', 'process_expression_traverser', 'add_traverser_process_expressions', 'core::traverser', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies) and result
+    result = make_traverser(MCRL2_ROOT + 'libraries/process/include/mcrl2/process/traverser.h', 'process_expression_traverser', 'add_traverser_process_expressions', 'process::process_traverser_base', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies) and result
 
     # state_formula_traverser
     result = make_traverser(MCRL2_ROOT + 'libraries/modal_formula/include/mcrl2/modal_formula/traverser.h', 'state_formula_traverser', 'add_traverser_state_formula_expressions', 'state_formulas::state_formula_traverser_base', class_map, all_classes, 'state_formulas', 'state_formulas::state_formula', state_formula_dependencies) and result

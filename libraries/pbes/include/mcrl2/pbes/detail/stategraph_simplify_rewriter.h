@@ -28,26 +28,26 @@ pbes_expression stategraph_not(const pbes_expression& x)
 {
   if (is_data(x))
   {
-    auto const& x1 = atermpp::down_cast<data::data_expression>(x);
+    const data::data_expression& x1 = atermpp::down_cast<data::data_expression>(x);
     if (data::is_not(x1))
     {
-      return data::unary_operand1(x1);
+      return atermpp::down_cast<pbes_expression>(data::unary_operand1(x1));
     }
     else if (data::is_not_equal_to(x1))
     {
-      auto const& left  = data::binary_left1(x1);
-      auto const& right = data::binary_right1(x1);
-      return data::equal_to(left, right);
+      const data::data_expression& left  = data::binary_left1(x1);
+      const data::data_expression& right = data::binary_right1(x1);
+      return atermpp::down_cast<pbes_expression>(data::equal_to(left, right));
     }
     else if (data::is_equal_to(x1))
     {
-      auto const& left  = data::binary_left1(x1);
-      auto const& right = data::binary_right1(x1);
-      return data::not_equal_to(left, right);
+      const data::data_expression& left  = data::binary_left1(x1);
+      const data::data_expression& right = data::binary_right1(x1);
+      return atermpp::down_cast<pbes_expression>(data::not_equal_to(left, right));
     }
     else
     {
-      return data::not_(x1);
+      return atermpp::down_cast<pbes_expression>(data::not_(x1));
     }
   }
   return not_(x);
@@ -58,7 +58,7 @@ pbes_expression smart_and(const pbes_expression& x, const pbes_expression& y)
 {
   if (is_data(x) && is_data(y))
   {
-    return data::and_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y));
+    return atermpp::down_cast<pbes_expression>(data::and_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y)));
   }
   return and_(x, y);
 }
@@ -68,7 +68,7 @@ pbes_expression smart_or(const pbes_expression& x, const pbes_expression& y)
 {
   if (is_data(x) && is_data(y))
   {
-    return data::or_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y));
+    return atermpp::down_cast<pbes_expression>(data::or_(atermpp::down_cast<data::data_expression>(x), atermpp::down_cast<data::data_expression>(y)));
   }
   return or_(x, y);
 }

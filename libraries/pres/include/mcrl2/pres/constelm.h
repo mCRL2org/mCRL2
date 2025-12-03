@@ -913,7 +913,7 @@ class pres_constelm_algorithm
 
           data::rewriter::substitution_type sigma;
           detail::make_constelm_substitution(u.constraints(), sigma);
-          pres_expression needs_update = m_pres_rewriter(e.condition(), sigma);
+          pres_expression needs_update = m_pres_rewriter(atermpp::down_cast<pres_expression>(e.condition()), sigma);
           mCRL2log(log::debug) << print_condition(e, u, needs_update);
 
           if (!is_false(needs_update) && !is_true(needs_update))

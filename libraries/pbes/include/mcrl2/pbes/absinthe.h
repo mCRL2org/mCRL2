@@ -326,11 +326,11 @@ struct absinthe_algorithm
       data::data_expression x1 = lift(x);
       if (m_is_over_approximation)
       {
-        result = data::detail::create_set_in(data::true_(), x1);
+        result = atermpp::down_cast<T>(data::detail::create_set_in(data::true_(), x1));
       }
       else
       {
-        result = data::not_(data::detail::create_set_in(data::false_(), x1));
+        result =  atermpp::down_cast<T>(data::not_(data::detail::create_set_in(data::false_(), x1)));
       }
     }
 
@@ -349,12 +349,12 @@ struct absinthe_algorithm
       data::data_expression q = data::lazy::join_and(z.begin(), z.end());
       if (m_is_over_approximation)
       {
-        result = make_exists_(variables, and_(q, 
+        result = make_exists_(variables, and_(atermpp::down_cast<pbes_expression>(q), 
           propositional_variable_instantiation(x.name(), data::data_expression_list(variables))));
       }
       else
       {
-        result = make_forall_(variables, imp(q, propositional_variable_instantiation(x.name(), data::data_expression_list(variables))));
+        result = make_forall_(variables, imp(atermpp::down_cast<pbes_expression>(q), propositional_variable_instantiation(x.name(), data::data_expression_list(variables))));
       }
     }
 

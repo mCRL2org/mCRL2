@@ -139,7 +139,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   void leave(const data::data_expression& x)
   {
-    push(x);
+    push(atermpp::down_cast<pres_expression>(x));
   }
 
   void leave(const state_formulas::true_&)
@@ -298,12 +298,12 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       {
         sigma[a.lhs()] = a.rhs();
       }
-      pres_expression left = tr::and_(sat, ci);
+      pres_expression left = tr::and_(sat, atermpp::down_cast<pres_expression>(ci));
 
       if (timed)
       {
         sigma[parameters.T] = ti;
-        left = tr::and_(left, data::greater(ti, parameters.T));
+        left = tr::and_(left, atermpp::down_cast<pres_expression>(data::greater(ti, parameters.T)));
       }
 
       right = pres_system::replace_variables_capture_avoiding(right, sigma);
@@ -340,7 +340,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& ci = i.condition();
       const data::data_expression& ti = i.multi_action().time();
       const data::variable_list&   yi = i.summation_variables();
-      pres_expression p = tr::infimum(yi, tr::or_(data::not_(ci), data::greater(t, ti)));
+      pres_expression p = tr::infimum(yi, tr::or_(tr::minus(atermpp::down_cast<pres_expression>(ci)), atermpp::down_cast<pres_expression>(data::greater(t, ti))));
       v.push_back(p);
     }
     for (const lps::deadlock_summand& j: parameters.lps.deadlock_summands())
@@ -348,10 +348,10 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& cj = j.condition();
       const data::data_expression& tj = j.deadlock().time();
       const data::variable_list&   yj = j.summation_variables();
-      pres_expression p = tr::infimum(yj, tr::or_(data::not_(cj), data::greater(t, tj)));
+      pres_expression p = tr::infimum(yj, tr::or_(tr::minus(atermpp::down_cast<pres_expression>(cj)), atermpp::down_cast<pres_expression>(data::greater(t, tj))));
       v.push_back(p);
     }
-    push(tr::and_(tr::join_or(v.begin(), v.end()), data::greater(t, parameters.T)));
+    push(tr::and_(tr::join_or(v.begin(), v.end()), atermpp::down_cast<pres_expression>(data::greater(t, parameters.T))));
   }
 
   void leave(const state_formulas::delay&)
@@ -368,7 +368,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& ci = i.condition();
       data::data_expression ti = i.multi_action().time();
       const data::variable_list&   yi = i.summation_variables();
-      pres_expression p = tr::supremum(yi, tr::and_(ci, data::less_equal(t, ti)));
+      pres_expression p = tr::supremum(yi, tr::and_(atermpp::down_cast<pres_expression>(ci), atermpp::down_cast<pres_expression>(data::less_equal(t, ti))));
       v.push_back(p);
     }
     for (const lps::deadlock_summand& j: parameters.lps.deadlock_summands())
@@ -376,10 +376,10 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::data_expression& cj = j.condition();
       data::data_expression tj = j.deadlock().time();
       const data::variable_list&   yj = j.summation_variables();
-      pres_expression p = tr::supremum(yj, tr::and_(cj, data::less_equal(t, tj)));
+      pres_expression p = tr::supremum(yj, tr::and_(atermpp::down_cast<pres_expression>(cj), atermpp::down_cast<pres_expression>(data::less_equal(t, tj))));
       v.push_back(p);
     }
-    push(tr::or_(tr::join_or(v.begin(), v.end()), data::less_equal(t, parameters.T)));
+    push(tr::or_(tr::join_or(v.begin(), v.end()), atermpp::down_cast<pres_expression>(data::less_equal(t, parameters.T))));
   }
 
   void leave(const state_formulas::variable& x)

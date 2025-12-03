@@ -25,6 +25,23 @@
 namespace mcrl2::process
 {
 
+/// \brief Base class for action_formula_traverser.
+template <typename Derived>
+struct process_traverser_base: public core::traverser<Derived>
+{
+  using super = core::traverser<Derived>;
+  using super::apply;
+  using super::enter;
+  using super::leave;
+
+  void apply(const data::untyped_data_parameter& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+  }
+};
+
 //--- start generated add_traverser_sort_expressions code ---//
 template <template <class> class Traverser, class Derived>
 struct add_traverser_sort_expressions: public Traverser<Derived>
@@ -678,13 +695,6 @@ struct add_traverser_process_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void apply(const data::untyped_data_parameter& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void apply(const process::action& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -948,7 +958,7 @@ struct add_traverser_process_expressions: public Traverser<Derived>
 
 /// \\brief Traverser class
 template <typename Derived>
-struct process_expression_traverser: public add_traverser_process_expressions<core::traverser, Derived>
+struct process_expression_traverser: public add_traverser_process_expressions<process::process_traverser_base, Derived>
 {
 };
 //--- end generated add_traverser_process_expressions code ---//
@@ -1636,13 +1646,6 @@ struct add_traverser_action_labels: public Traverser<Derived>
   using super::leave;
   using super::apply;
 
-  void apply(const data::untyped_data_parameter& x)
-  {
-    static_cast<Derived&>(*this).enter(x);
-    // skip
-    static_cast<Derived&>(*this).leave(x);
-  }
-
   void apply(const process::action_label& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1929,7 +1932,7 @@ struct add_traverser_action_labels: public Traverser<Derived>
 
 /// \\brief Traverser class
 template <typename Derived>
-struct action_label_traverser: public add_traverser_action_labels<core::traverser, Derived>
+struct action_label_traverser: public add_traverser_action_labels<process::process_traverser_base, Derived>
 {
 };
 //--- end generated add_traverser_action_labels code ---//
