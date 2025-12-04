@@ -8,6 +8,8 @@
 //
 /// \file binary.h
 /// \brief The binary algorithm.
+///
+/// Work in progress towards unary translation
 
 #ifndef MCRL2_LPS_BINARY_H
 #define MCRL2_LPS_BINARY_H
