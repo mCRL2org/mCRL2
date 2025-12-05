@@ -813,7 +813,7 @@ private:
                              << watch.seconds() << "s)\n";
 
         P = union_(P, todo1);
-        strategy = merge(minus(intersect(todo1, Vplayer[alpha]), todo), todo);
+        strategy = union_(strategy, merge(minus(intersect(todo1, Vplayer[alpha]), todo), todo));
         todo = union_(todo, intersect(todo1, W));
       }
 

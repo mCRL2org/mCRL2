@@ -276,7 +276,7 @@ class LtsconvertsymbolicTest(ProcessTest):
 
         if arguments:
             self.add_command_line_options('t3', arguments)
-            
+
 
 class PbesTest(RandomTest):
     def __init__(self, name, ymlfile, settings):
@@ -439,7 +439,7 @@ class Pbes2bool_counter_exampleTest(ProcessTest):
 class Pbes2bool_counter_example_parelmTest(ProcessTest):
     def __init__(self, name, settings):
         super().__init__(name, ymlfile('pbessolve-parelm'), settings)
-        
+
 
     def create_inputfiles(self, runpath = '.'):
         super().create_inputfiles(runpath)
@@ -609,6 +609,20 @@ if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic-counter-example-s3' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['-s3'], settings) })
     available_tests.update({'pbessolvesymbolic-counter-example-s4' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['-s4'], settings) })
     available_tests.update({'pbessolvesymbolic-counter-example-s7' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['-s7'], settings) })
+
+    available_tests.update({'pbessolvesymbolic-counter-example-saturation' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--saturation'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-saturation-s1' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--saturation', '-s1'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-saturation-s2' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--saturation', '-s2'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-saturation-s3' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--saturation', '-s3'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-saturation-s4' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--saturation', '-s4'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-saturation-s7' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--saturation', '-s7'], settings) })
+
+    available_tests.update({'pbessolvesymbolic-counter-example-chaining' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--chaining'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-chaining-s1' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--chaining', '-s1'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-chaining-s2' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--chaining', '-s2'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-chaining-s3' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--chaining', '-s3'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-chaining-s4' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--chaining', '-s4'], settings) })
+    available_tests.update({'pbessolvesymbolic-counter-example-chaining-s7' : lambda name, settings: PbessolvesymbolicCounterexampleTest(name, ['--chaining', '-s7'], settings) })
     # TODO: These tests fail.
     #available_tests.update({'ltsconvertsymbolic' :  lambda name, settings: LtsconvertsymbolicTest(name, [], settings)})
     #available_tests.update({'ltsconvertsymbolic-parallel' : lambda name, settings: LtsconvertsymbolicTest(name, ['--threads=8'], settings) })
