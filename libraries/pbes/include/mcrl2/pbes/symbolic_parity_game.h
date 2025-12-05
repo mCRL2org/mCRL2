@@ -275,7 +275,7 @@ class symbolic_parity_game
     std::map<std::size_t, ldd> m_rank_map;
     bool m_no_relprod = false;
     bool m_chaining = false;
-    bool m_strategy = false;
+    bool m_compute_strategy = false;
 
     const std::vector<symbolic::data_expression_index>& m_data_index; // for debugging only
     ldd m_all_nodes; // for debugging only
@@ -293,11 +293,10 @@ class symbolic_parity_game
       bool chaining,
       bool strategy
     )
-      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_chaining(chaining), m_strategy(strategy), m_data_index(data_index), m_all_nodes(V)
+      : m_summand_groups(summand_groups), m_no_relprod(no_relprod), m_chaining(chaining), m_compute_strategy(strategy), m_data_index(data_index), m_all_nodes(V)
     {
       using namespace sylvan::ldds;
       using utilities::detail::contains;
-      assert(!(strategy && chaining));
 
       // Determine priority and owner from the given pbes.
       auto equation_info = detail::compute_equation_info(pbes, data_index);
@@ -346,7 +345,7 @@ class symbolic_parity_game
       : m_summand_groups(summand_groups),
         m_no_relprod(no_relprod),
         m_chaining(chaining),
-        m_strategy(strategy),
+        m_compute_strategy(strategy),
         m_data_index(data_index),
         m_all_nodes(V)
     {
@@ -776,7 +775,7 @@ class symbolic_parity_game
         prio,
         m_no_relprod,
         m_chaining,
-        m_strategy
+        m_compute_strategy
       );
     }
 
@@ -787,13 +786,21 @@ private:
       return m_no_relprod ? symbolic::alternative_relprev(V, group, U) : relprev(V, group.L, group.Ir, U);
     }
 
-    /// \returns A set of vertices { u in U | exists v in V: u ->* v } where ->* only visits intermediate vertices in W (without chaining ->* = ->)
+    /// \returns A set of vertices P = { u in U | exists v in V: u ->* v } where ->* only visits intermediate vertices in W (but u may be outside W)
+    /// (without chaining ->* = ->), and a strategy for player alpha on P \setminus U.
+    ///
     /// \pre U,W subseteq V.
-    ldd predecessors_chaining(const ldd& U, const ldd& V, const ldd& W) const
+    std::pair<ldd, ldd> predecessors_chaining(const std::size_t alpha,
+      const ldd& U,
+      const ldd& V,
+      const ldd& W,
+      const std::array<const ldd, 2>& Vplayer) const
     {
       using namespace sylvan::ldds;
 
-      ldd P = empty_set();
+      ldd P(empty_set());
+      ldd strategy(empty_set());
+
       ldd todo = V;
       for (int i = m_summand_groups.size() - 1; i >= 0; --i)
       {
@@ -801,14 +808,16 @@ private:
 
         stopwatch watch;
         ldd todo1 = predecessors(U, todo, group);
-        mCRL2log(log::trace) << "predecessors_chaining: added predecessors for group " << i << " out of " << m_summand_groups.size()
-                               << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
+        mCRL2log(log::trace) << "predecessors_chaining: added predecessors for group " << i << " out of "
+                             << m_summand_groups.size() << " (time = " << std::setprecision(2) << std::fixed
+                             << watch.seconds() << "s)\n";
 
         P = union_(P, todo1);
+        strategy = merge(minus(intersect(todo1, Vplayer[alpha]), todo), todo);
         todo = union_(todo, intersect(todo1, W));
       }
 
-      return P;
+      return {P, strategy};
     }
 
     /// \brief Compute the safe control attractor set for U where chaining is restricted to W and V are vertices considered as control predecessors (can be different from outside).
@@ -830,10 +839,26 @@ private:
         << "  W = " << print_nodes(W) << "\n"
         << "  I = " << print_nodes(I) << "\n";
 
-      ldd P = m_chaining ? predecessors_chaining(V, U, intersect(Vplayer[alpha], W)) : predecessors(V, U);
+      ldd P(empty_set());
+      ldd strategy(empty_set());
+      if(m_chaining)
+      {
+        std::tie(P, strategy) = predecessors_chaining(alpha, V, U, intersect(Vplayer[alpha], W), Vplayer);
+      }
+      else
+      {
+        P = predecessors(V, U);
+      }
+
       ldd Palpha = intersect(P, Vplayer[alpha]);
       ldd Pforced = minus(intersect(P, Vplayer[1-alpha]), I);
-      ldd strategy = m_strategy ? merge(minus(Palpha, U), U) : empty_set();
+
+      // the predecessor computation without chaining does not compute a strategy
+      // so we still need to calculate it.
+      if(!m_chaining)
+      {
+        strategy = merge(minus(Palpha, U), U);
+      }
 
       mCRL2log(log::trace) << "safe_control_predecessors_impl: initialized to\n"
         << "  P = " << print_nodes(P) << "\n"
