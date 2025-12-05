@@ -481,21 +481,15 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           {
             if (options_.max_iterations == 0)
             {
-              if (options_.check_strategy && options_.chaining)
-              {
-                mCRL2log(log::info) << "Solving will not use chaining since it cannot be used while checking the strategy" << std::endl;
-                options_.chaining = false;
-              }
-
               pbes_system::symbolic_parity_game G(reach.pbes(),
                 reach.summand_groups(),
                 reach.data_index(),
                 reach.V(),
                 options_.no_relprod,
                 options_.chaining,
-                options_.check_strategy);
+                options_.compute_strategy);
               G.print_information();
-              pbes_system::symbolic_pbessolve_algorithm solver(G);
+              pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy);
 
               mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
               timer().start("solving");
@@ -516,12 +510,6 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           // We are generating a counterexample, so the strategy must be computed, irregardless of
           // whether we check the strategy afterwards.
           options_.compute_strategy = true;
-
-          if (options_.chaining)
-          {
-            mCRL2log(log::info) << "(Partial) solving will not use chaining since it cannot be used while computing the strategy" << std::endl;
-            options_.chaining = false;
-          }
 
           PbesReachAlgorithm reach(srf_pbes, options_);
 
@@ -599,6 +587,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             //pbessolve_options.optimization = std::min(partial_solve_strategy::remove_self_loops, options_.solve_strategy);
             pbessolve_options.rewrite_strategy = options_.rewrite_strategy;
             pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
+            pbessolve_options.check_strategy = options_.check_strategy;
             pbessolve_options.number_of_threads = 1; // If we spawn multiple threads here, the threads of Sylvan and the explicit exploration will interfere
 
             PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], V, result ? solution.strategy[0] : solution.strategy[1], reach.rewriter());
