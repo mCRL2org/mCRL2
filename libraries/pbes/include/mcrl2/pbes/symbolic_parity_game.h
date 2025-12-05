@@ -833,7 +833,7 @@ private:
       ldd P = m_chaining ? predecessors_chaining(V, U, intersect(Vplayer[alpha], W)) : predecessors(V, U);
       ldd Palpha = intersect(P, Vplayer[alpha]);
       ldd Pforced = minus(intersect(P, Vplayer[1-alpha]), I);
-      ldd strategy = m_strategy ? merge(Palpha, U) : empty_set();
+      ldd strategy = m_strategy ? merge(minus(Palpha, U), U) : empty_set();
 
       mCRL2log(log::trace) << "safe_control_predecessors_impl: initialized to\n"
         << "  P = " << print_nodes(P) << "\n"
