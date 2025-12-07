@@ -317,6 +317,22 @@ data_expression_list right_hand_sides(const assignment_list& x)
   return data_expression_list(x.begin(), x.end(), [](const assignment& a) { return a.rhs(); });
 }
 
+/// \brief Returns the right hand sides of an assignment list
+/// \param v A
+template <class ASSIGNMENT_CONTAINER>
+//  requires std::container<ASSIGNMENT_CONTAINER>
+const data_expression& find_rhs(const variable& v, const ASSIGNMENT_CONTAINER& c)
+{
+  for(const assignment& p: c)
+  { 
+    if (p.lhs()==v)
+    {
+      return p.rhs();
+    }
+  }
+  return v;
+}
+
 // template function overloads
 std::string pp(const assignment_list& x, bool precedence_aware = true);
 std::string pp(const assignment_vector& x, bool precedence_aware = true);
