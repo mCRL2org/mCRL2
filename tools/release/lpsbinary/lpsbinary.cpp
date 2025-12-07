@@ -72,7 +72,7 @@ class binary_tool: public rewriter_tool<input_output_tool>
     {
       stochastic_specification spec;
       load_lps(spec, m_input_filename);
-      data::rewriter r(spec.data());
+      data::rewriter r(spec.data(), rewrite_strategy());
 
       lps::binary_algorithm<data::rewriter, stochastic_specification>(spec, r, m_parameter_selection).run();
       save_lps(spec, m_output_filename);
