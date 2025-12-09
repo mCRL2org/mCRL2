@@ -38,6 +38,7 @@ class lps_explore_domains_tool: public rewriter_tool<input_tool>
         "enumerate the values that the parameters of an LPS can take during state space exploration",
         "Find the values that the parameters of an LPS n INFILE can take during state space exploration. "
         "If enumeration fails, try to use --qlimit=N with N an increasing value. "
+        "It can also help to apply lpssuminst --finite to a linear process first. "
         "If INFILE is not present, stdin is used. "
       )
     {}

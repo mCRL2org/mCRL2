@@ -159,9 +159,9 @@ public:
     std::stringstream output;
     for(const variable_expression_pair_type& elm: m_domains)
     {
-      output << "Parameter " << elm.first << "(" << (elm.second.m_elements_stable.size()+
+      output << "Parameter " << elm.first << " (" << (elm.second.m_elements_stable.size()+
                  elm.second.m_elements_added_in_previous_round.size()+
-                 elm.second.m_elements_added_in_current_round.size()) << ") " << (!joined?"\n  Stable elements: {":": {");
+                 elm.second.m_elements_added_in_current_round.size()) << ")" << (!joined?"\n  Stable elements: {":": {");
       bool first=true;
       for(const data::data_expression& e: elm.second.m_elements_stable)
       {

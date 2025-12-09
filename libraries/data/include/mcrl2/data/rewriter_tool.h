@@ -26,6 +26,8 @@ class rewriter_tool: public Tool
   protected:
     /// The data rewriter strategy
     data::rewrite_strategy m_rewrite_strategy = mcrl2::data::jitty;
+    /// The limit on the number of rewriting steps in quantifiers. By default 10;
+    std::size_t m_qlimit=10;
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
@@ -73,16 +75,13 @@ class rewriter_tool: public Tool
       Tool::parse_options(parser);
       m_rewrite_strategy = parser.option_argument_as< data::rewrite_strategy >("rewriter");
 
+      //Set enumerator limit for quantifier enumeration
       if (parser.options.count("qlimit"))
       {
-        //Set enumerator limit for quantifier enumeration
         std::size_t qlimit = parser.option_argument_as< std::size_t >("qlimit");
-        data::detail::set_enumerator_iteration_limit(qlimit == 0 ? std::numeric_limits<std::size_t>::max() : qlimit);
+        m_qlimit = (qlimit == 0 ? std::numeric_limits<std::size_t>::max() : qlimit);
       }
-      else
-      {
-        data::detail::set_enumerator_iteration_limit(10);
-      }
+      data::detail::set_enumerator_iteration_limit(m_qlimit);
     }
 
   public:
