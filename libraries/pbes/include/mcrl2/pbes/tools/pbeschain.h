@@ -43,6 +43,8 @@ struct pbeschain_options
   bool count_unique_pvi = false;
   bool fill_pvi = false;
   double timeout = 0.0; // timeout in seconds, 0 = no timeout
+  double pvi_pp_factor = 0.0; // factor of the maximum size the chained predicate formula should be after chaining compared to the size of the original PVI.
+  bool quantifier_free = false;
 };
 
 // Substitutor to target specific path, replace our specific pvi with true/false
@@ -295,12 +297,23 @@ inline pbes_expression simplify_expr(pbes_expression& phi,
   return res;
 }
 
+inline bool is_quantifier_free(pbes_expression& phi, pbeschain_options options)
+{
+  return !(options.quantifier_free) || (find_all_variables(phi).size() - find_free_variables(phi).size()) == 0;
+}
+
+inline bool
+is_not_too_big(pbeschain_options& options, propositional_variable_instantiation& cur_x, pbes_expression& phi)
+{
+  return !(options.pvi_pp_factor > 0.0) || ((double)pp(phi).size() <= options.pvi_pp_factor * (double)pp(cur_x).size());
+}
+
 inline void self_substitute(pbes_equation& equation,
-    substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
-    rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
-    simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter,
-    simplify_quantifiers_data_rewriter<data::rewriter>& pbes_default_rewriter,
-    pbeschain_options options)
+  substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
+  rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
+  simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter,
+  simplify_quantifiers_data_rewriter<data::rewriter>& pbes_default_rewriter,
+  pbeschain_options options)
 {
   bool stable = false;
   auto start_time = std::chrono::high_resolution_clock::now();
@@ -313,13 +326,15 @@ inline void self_substitute(pbes_equation& equation,
 
   std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
   
+  std::vector<propositional_variable_instantiation> set
+      = get_propositional_variable_instantiations(equation.formula());
+  std::size_t initial_size = set.size();
+  std::size_t previous_size =initial_size;
   while (!stable)
   {
     stable = true;
-    std::vector<propositional_variable_instantiation> set
-        = get_propositional_variable_instantiations(equation.formula());
-    std::size_t previous_size = set.size();
-
+    set = get_propositional_variable_instantiations(equation.formula());
+    
     std::set<std::string> parameterNames = {};
     for (auto a: equation.variable().parameters())
     {
@@ -411,7 +426,7 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // (3) check if simpler
-        if (size == 1 && (*phi_vector.begin()).name() == equation.variable().name())
+        if (size == 1 && is_not_too_big(options, cur_x, phi) && is_quantifier_free(phi, options))
         {
           propositional_variable_instantiation new_x = *phi_vector.begin();
 
@@ -448,8 +463,13 @@ inline void self_substitute(pbes_equation& equation,
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(phi);
             pvi_substituter.apply(equation.formula(), equation.formula());
-            cur_x = new_x;
-            path.insert(new_x);
+            if (new_x.name() == equation.variable().name()) {
+                cur_x = new_x;
+                path.insert(new_x);
+            } else {
+                stable = false;
+                pvi_done = true;
+            }
           }
         }
         else if (size == 0)
@@ -492,7 +512,7 @@ inline void self_substitute(pbes_equation& equation,
           = get_propositional_variable_instantiations(equation.formula());
 
       std::size_t current_size = set.size();
-      mCRL2log(log::verbose) << "\rNew number of pvi: " << current_size << "";
+      mCRL2log(log::verbose) << "\rNew number of pvi: " << initial_size <<  " --> " << current_size << "";
 
       // Simplify
       if (current_size == 0 || (previous_size >= current_size + 10))
@@ -593,7 +613,7 @@ struct pbeschain_pbes_backward_substituter
       
       std::set<propositional_variable_instantiation> pvi_set
           = find_propositional_variable_instantiations((*i).formula());
-      mCRL2log(log::verbose) << "How many are left? " << pvi_set.size() << "\n";
+      mCRL2log(log::verbose) << "How many unique PVI are left? " << pvi_set.size() << "\n";
 
       if (pvi_set.size() == 0 && options.back_substitution)
       {
