@@ -370,8 +370,6 @@ inline void self_substitute(pbes_equation& equation,
                            << "\n\nStart " << (cur_x) << "\n";
       bool pvi_done = false;
       int depth = 0;
-      
-      // mCRL2log(log::verbose) << "\n\n\n\n -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "<< "\n";
       while (!pvi_done)
       {
         depth = depth + 1;
@@ -388,18 +386,9 @@ inline void self_substitute(pbes_equation& equation,
             throw mcrl2::runtime_error("PBES is not well-typed.");
           }
           sigma[v] = par;
-          
-          if (pp(v) == "vc_TS" && pp(par) != "vc_TS") {
-              sigma = data::mutable_indexed_substitution();
-              sigma[v] = par;
-              mCRL2log(log::verbose) << v.name() << "\n";
-              break;
-          }
         }
-        mCRL2log(log::verbose) << "\n rewr " << sigma  << "\n";
 
         pbes_expression phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
-        // mCRL2log(log::verbose) << "get "  << "\n";
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
@@ -422,7 +411,6 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // Simplify
-        // mCRL2log(log::verbose) << "simplify "  << "\n";
         phi = simplify_expr(phi, if_substituter, pbes_rewriter);
         phi_vector = get_propositional_variable_instantiations(phi);
         int size = phi_vector.size();
@@ -432,10 +420,8 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // (3) check if simpler
-        // mCRL2log(log::verbose) << "check "  << "\n";
         if (size == 1 && is_not_too_big(options, cur_x, phi) && is_quantifier_free(phi, options))
         {
-            mCRL2log(log::verbose) << "just one "  << "\n";
           propositional_variable_instantiation new_x = *phi_vector.begin();
 
           mCRL2log(log::debug) << "Trying loop " << new_x << " in path with \n";
@@ -471,13 +457,10 @@ inline void self_substitute(pbes_equation& equation,
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(phi);
             pvi_substituter.apply(equation.formula(), equation.formula());
-            mCRL2log(log::verbose) << "debug " << new_x << "\n";
             if (new_x.name() == equation.variable().name()) {
-                mCRL2log(log::verbose) << "if "  << "\n";
                 cur_x = new_x;
                 path.insert(new_x);
             } else {
-                mCRL2log(log::verbose) << "else "  << "\n";
                 stable = false;
                 pvi_done = true;
             }
@@ -523,7 +506,7 @@ inline void self_substitute(pbes_equation& equation,
           = get_propositional_variable_instantiations(equation.formula());
 
       std::size_t current_size = set.size();
-      mCRL2log(log::verbose) << "\rNew number of pvi: " << initial_size <<  " --> " << current_size << "";
+      mCRL2log(log::status) << "New number of pvi: " << initial_size <<  " --> " << current_size << "" << std::endl;
 
       // Simplify
       if (current_size == 0 || (previous_size >= current_size + 10))
@@ -535,7 +518,6 @@ inline void self_substitute(pbes_equation& equation,
       }
     }
   }
-  mCRL2log(log::verbose) << "\n" << equation.variable() << "\n is stable! \n\n\n";
 }
 
 inline void substitute(pbes_equation& into,
