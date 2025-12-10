@@ -315,7 +315,7 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
           }
           else 
           {
-            throw mcrl2::runtime_error("Cannot enumerate " + detail::ppsort(sumvars_in_rewritten_or_condition) + " in " + data::pp(rewritten_condition) + "\n");
+            throw mcrl2::runtime_error("Cannot enumerate " + detail::ppsort(sumvars_in_rewritten_or_condition) + " in " + data::pp(rewritten_condition) + ". Using the flag --qlimit with a higher value may help. \n");
           }
         }
 
