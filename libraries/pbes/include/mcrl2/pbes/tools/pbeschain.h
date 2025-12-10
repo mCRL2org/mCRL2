@@ -24,13 +24,10 @@
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
-#include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 #include "mcrl2/utilities/logger.h"
 #include <cstddef>
 #include <chrono>
 #include <iostream>
-#include <future>
 
 namespace mcrl2::pbes_system
 {
@@ -55,12 +52,12 @@ struct substitute_propositional_variables_for_true_false_builder
   using super = Builder<substitute_propositional_variables_for_true_false_builder<Builder>>;
   using super::apply;
 
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
   propositional_variable_instantiation m_pvi;
   pbes_expression m_replacement;
 
   explicit substitute_propositional_variables_for_true_false_builder(
-      simplify_quantifiers_data_rewriter<data::rewriter>& r)
+      simplify_data_rewriter<data::rewriter>& r)
       : m_pbes_rewriter(r)
   {}
 
@@ -87,9 +84,9 @@ struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
   using super = Builder<rewrite_if_builder<Builder>>;
   using super::apply;
 
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
 
-  explicit rewrite_if_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
+  explicit rewrite_if_builder(simplify_data_rewriter<data::rewriter>& r)
       : m_pbes_rewriter(r)
   {}
 
@@ -128,10 +125,10 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
 
   pbes_equation m_eq;
   core::identifier_string name;
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
   bool m_stable = false;
 
-  explicit substitute_propositional_variables_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
+  explicit substitute_propositional_variables_builder(simplify_data_rewriter<data::rewriter>& r)
       : m_pbes_rewriter(r)
   {}
 
@@ -189,11 +186,11 @@ struct substitute_propositional_variables_i_builder
   typedef Builder<substitute_propositional_variables_i_builder<Builder>> super;
   using super::apply;
 
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
   std::vector<detail::predicate_variable> predvars;
   int i = 0;
 
-  explicit substitute_propositional_variables_i_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r,
+  explicit substitute_propositional_variables_i_builder(simplify_data_rewriter<data::rewriter>& r,
       std::vector<detail::predicate_variable> predvars)
       : m_pbes_rewriter(r),
         predvars(predvars)
@@ -290,7 +287,7 @@ inline bool pvi_in_set(const propositional_variable_instantiation needle,
 
 inline pbes_expression simplify_expr(pbes_expression& phi,
     rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
-    simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter)
+    simplify_data_rewriter<data::rewriter>& pbes_rewriter)
 {
   pbes_expression res = pbes_rewrite(phi, pbes_rewriter);
   if_substituter.apply(res, res);
@@ -311,8 +308,8 @@ is_not_too_big(pbeschain_options& options, propositional_variable_instantiation&
 inline void self_substitute(pbes_equation& equation,
   substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
   rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
-  simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter,
-  simplify_quantifiers_data_rewriter<data::rewriter>& pbes_default_rewriter,
+  simplify_data_rewriter<data::rewriter>& pbes_rewriter,
+  simplify_data_rewriter<data::rewriter>& pbes_default_rewriter,
   pbeschain_options options)
 {
   bool stable = false;
@@ -370,9 +367,11 @@ inline void self_substitute(pbes_equation& equation,
       pbes_expression result = x;
 
       mCRL2log(log::debug) << " -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n"
-                           << equation.formula() << "\n\nStart " << (cur_x) << "\n";
+                           << "\n\nStart " << (cur_x) << "\n";
       bool pvi_done = false;
       int depth = 0;
+      
+      // mCRL2log(log::verbose) << "\n\n\n\n -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "<< "\n";
       while (!pvi_done)
       {
         depth = depth + 1;
@@ -386,20 +385,27 @@ inline void self_substitute(pbes_equation& equation,
           pars.pop_front();
           if (par.sort() != v.sort())
           {
-            // Parameters do not match with variables. Ignore this substitution.
-            result = x;
-            break;
+            throw mcrl2::runtime_error("PBES is not well-typed.");
           }
           sigma[v] = par;
+          
+          if (pp(v) == "vc_TS" && pp(par) != "vc_TS") {
+              sigma = data::mutable_indexed_substitution();
+              sigma[v] = par;
+              mCRL2log(log::verbose) << v.name() << "\n";
+              break;
+          }
         }
+        mCRL2log(log::verbose) << "\n rewr " << sigma  << "\n";
 
         pbes_expression phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
+        // mCRL2log(log::verbose) << "get "  << "\n";
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
         // (2) replace all reoccuring with true (nu) and false (mu)
-        auto gauss_set = filter_pvis(cur_x, phi_vector);
-        for (const auto& gauss_pvi: gauss_set)
+        std::set<propositional_variable_instantiation> gauss_set = filter_pvis(cur_x, phi_vector);
+        for (const propositional_variable_instantiation& gauss_pvi: gauss_set)
         {
           mCRL2log(log::debug) << "Need to replace this with true/false " << pp(gauss_pvi) << "\n";
           mCRL2log(log::debug) << phi << "\n";
@@ -416,7 +422,7 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // Simplify
-
+        // mCRL2log(log::verbose) << "simplify "  << "\n";
         phi = simplify_expr(phi, if_substituter, pbes_rewriter);
         phi_vector = get_propositional_variable_instantiations(phi);
         int size = phi_vector.size();
@@ -426,8 +432,10 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // (3) check if simpler
+        // mCRL2log(log::verbose) << "check "  << "\n";
         if (size == 1 && is_not_too_big(options, cur_x, phi) && is_quantifier_free(phi, options))
         {
+            mCRL2log(log::verbose) << "just one "  << "\n";
           propositional_variable_instantiation new_x = *phi_vector.begin();
 
           mCRL2log(log::debug) << "Trying loop " << new_x << " in path with \n";
@@ -463,10 +471,13 @@ inline void self_substitute(pbes_equation& equation,
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(phi);
             pvi_substituter.apply(equation.formula(), equation.formula());
+            mCRL2log(log::verbose) << "debug " << new_x << "\n";
             if (new_x.name() == equation.variable().name()) {
+                mCRL2log(log::verbose) << "if "  << "\n";
                 cur_x = new_x;
                 path.insert(new_x);
             } else {
+                mCRL2log(log::verbose) << "else "  << "\n";
                 stable = false;
                 pvi_done = true;
             }
@@ -483,7 +494,7 @@ inline void self_substitute(pbes_equation& equation,
         }
         else
         {
-          mCRL2log(log::debug) << "Not simpler: " << cur_x << " \n-->\n " << phi << " and size " << phi_vector.size()
+          mCRL2log(log::debug) << "Not simpler: " << cur_x << " \n--> size: " << phi_vector.size() << "\n " << phi << " and size " << phi_vector.size()
                                << "\n";
           pvi_done = true;
           if (depth > 1)
@@ -542,7 +553,7 @@ inline void substitute(pbes_equation& into,
 inline pbes fill_pvi(pbes& p, data::rewriter data_rewriter)
 {
   detail::stategraph_pbes stategraph(p, data_rewriter);
-  simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(data_rewriter);
+  simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_rewriter);
 
   // Preparation
   for (detail::stategraph_equation& equation: stategraph.equations())
@@ -585,9 +596,9 @@ struct pbeschain_pbes_backward_substituter
         data_default_rewriter = data_rewriter;
     }
 #endif // MCRL2_ENABLE_JITTYC
-    simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
-    simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
-    simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
+    simplify_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
+    simplify_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
+    simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_default_rewriter);
     rewrite_if_builder<pbes_system::pbes_expression_builder> if_rewriter(pbes_default_rewriter);
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder> pvi_substituter(
