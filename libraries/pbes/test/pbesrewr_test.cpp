@@ -15,11 +15,14 @@
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/tools/pbeschain.h"
+#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/utilities/logger.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -51,6 +54,35 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr2)
   bool enumerate_infinite_sorts = true;
   enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
   pbes_rewrite(p, pbesr);
+  BOOST_CHECK(p.is_well_typed());
+}
+
+BOOST_AUTO_TEST_CASE(test_pbesrewr3)
+{
+  std::string pbes_text =
+    "map config: Nat -> Bool;                           \n"
+    "var  n: Nat;                                       \n"
+    "eqn config(n) = false;                             \n"
+    "pbes mu X(vc_TS: Nat -> Bool)= forall n : Nat. "
+    "                               X(vc_TS[n -> true]);\n"
+    "init X(config);                                    \n"
+    ;
+  pbes p = txt2pbes(pbes_text);
+  data::rewriter datar(p.data());
+  simplify_data_rewriter<data::rewriter> pbesr(datar);
+  data::mutable_indexed_substitution sigma;
+  data::variable var = p.equations()[0].variable().parameters().front();
+  propositional_variable_instantiation fn = *find_propositional_variable_instantiations(p.equations()[0].formula()).begin();
+  auto update = fn.parameters().front();
+  mCRL2log(log::info) << "The function update: " <<  update << std::endl;
+  sigma[var] = update;
+  pbes_rewrite(p, pbesr, sigma);
+  mCRL2log(log::info) << pp(p) << std::endl;
+  
+  pbes_rewrite(p, pbesr, sigma);
+  pbes_rewrite(p, pbesr, sigma);
+  
+  mCRL2log(log::info) << pp(p) << std::endl;
   BOOST_CHECK(p.is_well_typed());
 }
 
