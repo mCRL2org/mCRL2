@@ -16,6 +16,7 @@
 #include "unordered_map"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/suminst.h"
 #include "mcrl2/lps/detail/parameter_selection.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
@@ -441,13 +442,17 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
 
     void explore_domains()
     {
+      // First instantiate the finite sorts in the sum operator.
+      std::set<data::sort_expression> sorts = lps::finite_sorts(m_spec.data());
+      mCRL2log(log::verbose) << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
+
+      lps::suminst_algorithm<data::rewriter, stochastic_specification>(m_spec, m_rewriter, sorts).run();
+
       // Initial process
       mCRL2log(log::debug) << "Process the initial state" << std::endl;
       process_initial_process();
 
       // Summands
-      mCRL2log(log::debug) << "Updating summands" << std::endl;
-
       std::size_t round=0;
       while (round < m_maximal_number_of_rounds && !m_parameter_values.stable())      
       {
@@ -490,6 +495,7 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
     {
       mCRL2log(log::debug) << "Start to explore parameter domains" << std::endl;
       detail::instantiate_global_variables(m_spec);
+
       explore_domains();
       mCRL2log(log::verbose) << m_parameter_values.report(true);
       mCRL2log(log::info) << "This process has at most " << m_parameter_values.product_size() << " states.\n";
