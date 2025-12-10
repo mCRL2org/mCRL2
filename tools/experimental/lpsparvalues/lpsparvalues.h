@@ -299,7 +299,7 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
                              { 
                                if (find_free_variables(d).empty() && d!=data::sort_bool::true_() && d!=data::sort_bool::false_())
                                { 
-                                 mCRL2log(log::warning) << "The expression " << d << " does not rewrite to true or false\n";
+                                 mCRL2log(log::warning) << "The expression " << d << " does not rewrite to true or false. It is assumed to be true.\n";
                                }
                                return d==data::sort_bool::false_(); 
                              },
@@ -387,14 +387,14 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
         for(const data::data_expression& e: m_parameter_values.at(curr_var).m_elements_stable)
         {
           sigma[curr_var]=e;
-          calculate_additional_parameter_values_set_substitution(sigma, v, sumvars, condition, rewritten_new_expression,true);
+          calculate_additional_parameter_values_set_substitution(sigma, v, sumvars, condition, rewritten_new_expression,used_a_variable_from_the_new_round);
         }
       }
 
       for(const data::data_expression& e: m_parameter_values.at(curr_var).m_elements_added_in_previous_round)
       {
         sigma[curr_var]=e;
-        calculate_additional_parameter_values_set_substitution(sigma, v, sumvars, condition, rewritten_new_expression,used_a_variable_from_the_new_round);
+        calculate_additional_parameter_values_set_substitution(sigma, v, sumvars, condition, rewritten_new_expression,true);
       }
       sigma[curr_var]=curr_var;
 
@@ -425,9 +425,9 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
 
     // Insert parameter values in their respective domains based on the already exising values based on this action summand.
     // Yields true if a new value is added to some domain.
-    void process_action_summand(const action_summand& a)
+    void process_action_summand(const action_summand& a, std::size_t round)
     {
-      mCRL2log(log::debug) << "Process action summand " << a << "\n==================================================================================\n";
+      mCRL2log(log::debug) << "Process action summand (round " << round << ") " << a << "\n==================================================================================\n";
 
       for(const data::variable& v: m_spec.process().process_parameters())
       {
@@ -450,13 +450,13 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
       std::size_t round=0;
       while (!m_parameter_values.stable())      
       {
-        mCRL2log(log::verbose) << "Parameter instantiation round " << round << " (domain upperbound: " << m_parameter_values.product_size() << ").\n";
+        mCRL2log(log::verbose) << "Parameter instantiation round " << round << " (upperbound on the state space: " << m_parameter_values.product_size() << ").\n";
         round++;
         mCRL2log(log::debug) << m_parameter_values.report(true);
         m_parameter_values.new_round();
         for (const action_summand& a: m_spec.process().action_summands())
         {
-          process_action_summand(a);
+          process_action_summand(a, round);
         }
       }
 
