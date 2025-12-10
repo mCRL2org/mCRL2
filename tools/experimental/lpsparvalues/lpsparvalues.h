@@ -141,9 +141,9 @@ public:
   }
 
   // Provide the product size of the domains for the parameters.
-  double product_size()
+  long double product_size()
   {
-    double size=1;
+    long double size=1;
     for(const variable_expression_pair_type& elm: m_domains)
     {
       size=size*(elm.second.m_elements_stable.size()+
@@ -213,6 +213,7 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
     /// Rewriter
     DataRewriter m_rewriter;
     std::size_t m_qlimit;
+    std::size_t m_maximal_number_of_rounds;
     data::enumerator_identifier_generator& m_generator;
 
     detail::elements_for_all_domains m_parameter_values;
@@ -448,9 +449,9 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
       mCRL2log(log::debug) << "Updating summands" << std::endl;
 
       std::size_t round=0;
-      while (!m_parameter_values.stable())      
+      while (round < m_maximal_number_of_rounds && !m_parameter_values.stable())      
       {
-        mCRL2log(log::verbose) << "Parameter instantiation round " << round << " (upperbound on the state space: " << m_parameter_values.product_size() << ").\n";
+        mCRL2log(log::verbose) << "Parameter instantiation round " << round << " (estimated upperbound on the state space: " << m_parameter_values.product_size() << ").\n";
         round++;
         mCRL2log(log::debug) << m_parameter_values.report(true);
         m_parameter_values.new_round();
@@ -459,8 +460,11 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
           process_action_summand(a, round);
         }
       }
-
-
+      if (round == m_maximal_number_of_rounds)
+      {
+        mCRL2log(log::warning) << "The maximal number of rounds (" << round << ") has been reached. " 
+                               << "Exploration is stopped prematurely. The domains and the upperbound of the state space can be too low.\n";
+      }
     }
 
   public:
@@ -469,11 +473,13 @@ class lps_explore_domains_algorithm: public detail::lps_algorithm<Specification>
     /// \param r a rewriter for data
     lps_explore_domains_algorithm(Specification& spec,
                      DataRewriter& r,
-                     const std::size_t qlimit)
+                     const std::size_t qlimit,
+                     const std::size_t maximal_number_of_rounds)
                      
       : detail::lps_algorithm<Specification>(spec),
         m_rewriter(r),
         m_qlimit(qlimit),
+        m_maximal_number_of_rounds(maximal_number_of_rounds),
         m_generator(const_cast<data::enumerator_identifier_generator&>(r.identifier_generator()))
     {
     }

@@ -29,6 +29,28 @@ class lps_explore_domains_tool: public rewriter_tool<input_tool>
 
     using super = rewriter_tool<input_tool>;
 
+    std::size_t m_maximal_number_of_rounds = std::numeric_limits<std::size_t>::max();
+
+    void add_options(interface_description& desc) override
+    {
+      super::add_options(desc);
+      desc.add_option("max", make_mandatory_argument("NUM"),
+                      "limit the number of iterations. This may cause certain parameters in some domains to not be found. "
+                      "The estimated state space size can also be too low. ",
+                      'l');
+    }
+
+    void parse_options(const command_line_parser& parser) override
+    {
+      super::parse_options(parser);
+
+      if (0 < parser.options.count("max"))
+      {
+        m_maximal_number_of_rounds = parser.option_argument_as<std::size_t>("max");
+      }
+    }
+
+
   public:
 
     lps_explore_domains_tool()
@@ -49,7 +71,7 @@ class lps_explore_domains_tool: public rewriter_tool<input_tool>
       load_lps(spec, m_input_filename);
       data::rewriter r(spec.data(), rewrite_strategy());
 
-      lps::lps_explore_domains_algorithm<data::rewriter, stochastic_specification>(spec, r, m_qlimit).run();
+      lps::lps_explore_domains_algorithm<data::rewriter, stochastic_specification>(spec, r, m_qlimit, m_maximal_number_of_rounds).run();
       return true;
     }
 
