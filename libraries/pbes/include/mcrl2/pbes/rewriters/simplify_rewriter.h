@@ -192,24 +192,24 @@ template <typename Derived>
 struct simplify_builder: public add_simplify<pbes_system::pbes_expression_builder, Derived>
 { };
 
-template <typename Derived, typename DataRewriter, typename Substitution>
-struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, Substitution>
+template <typename Derived, typename DataRewriter, typename MutableSubstitution>
+struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, MutableSubstitution>
 {
-  using super = add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, Substitution>;
+  using super = add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, MutableSubstitution>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  using substitution_administration_type = data::detail::substitution_updater_with_an_identifier_generator<Substitution,
+  using substitution_administration_type = data::detail::substitution_updater_with_an_identifier_generator<MutableSubstitution,
                                                                   data::enumerator_identifier_generator>;
   substitution_administration_type substitution_administration;
 
-  simplify_data_rewriter_builder(const DataRewriter& R, Substitution& sigma)
+  simplify_data_rewriter_builder(const DataRewriter& R, MutableSubstitution& sigma)
     : super(R, sigma),
       substitution_administration(sigma, const_cast<data::enumerator_identifier_generator&>(R.identifier_generator()))
   {}
 
-  Substitution& substitution()
+  MutableSubstitution& substitution()
   {
     substitution_administration.substitution();
   }
@@ -231,26 +231,66 @@ struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::de
     data::optimized_exists(result, vl, result, true);
     substitution_administration.pop(vl);
   }
+
+
 };
 
-template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
-struct apply_data_rewrite_builder: public Builder<apply_data_rewrite_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>
+// TODO (JK 2025-12-11): This class partly copies the replace_propositional_variables_builder
+// however, I don't see a way to construct a hierarchy of builders in which multiple
+// layers use additional member variables, without making the combination explicit.
+template<typename Derived, typename DataRewriter, typename MutableSubstitution, typename PbesSubstitution>
+struct simplify_data_rewriter_with_pbes_substitution_builder
+  : public simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution>
 {
-  using super = Builder<apply_data_rewrite_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>;
+  using super = simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution>;
+  using super::apply;
   using super::enter;
   using super::leave;
 
-  apply_data_rewrite_builder(const DataRewriter& R, MutableSubstitution& sigma, data::enumerator_identifier_generator& id_generator)
-    : super(R, sigma, id_generator)
+  const PbesSubstitution& m_sigma_pbes;
+
+  simplify_data_rewriter_with_pbes_substitution_builder(const DataRewriter& R, MutableSubstitution& sigma, const PbesSubstitution& sigma_pbes)
+    : super(R, sigma),
+      m_sigma_pbes(sigma_pbes)
+  {}
+
+  template<class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
+  {
+    super::apply(result, x);
+    result = m_sigma_pbes(atermpp::down_cast<propositional_variable_instantiation>(result));
+  }
+};
+
+template<template<class, class, class, class> class Builder, class DataRewriter, class MutableSubstitution, class PbesSubstitution>
+struct apply_data_rewriter_with_pbes_substitution_builder
+  : public Builder<apply_data_rewriter_with_pbes_substitution_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution>,
+      DataRewriter,
+      MutableSubstitution,
+      PbesSubstitution>
+{
+  using super = Builder<
+    apply_data_rewriter_with_pbes_substitution_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution>,
+    DataRewriter,
+    MutableSubstitution,
+    PbesSubstitution>;
+  using super::enter;
+  using super::leave;
+
+  apply_data_rewriter_with_pbes_substitution_builder(const DataRewriter& R, MutableSubstitution& sigma, const PbesSubstitution& sigma_pbes)
+    : super(R, sigma, sigma_pbes)
   {}
 };
 
-template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
-apply_data_rewrite_builder<Builder, DataRewriter, MutableSubstitution>
-make_apply_data_rewrite_builder(const DataRewriter& R, MutableSubstitution& sigma, data::enumerator_identifier_generator& id_generator)
+template <template <class, class, class, class> class Builder, class DataRewriter, class MutableSubstitution, class PbesSubstitution>
+apply_data_rewriter_with_pbes_substitution_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution>
+make_apply_data_rewrite_with_pbes_substitution_builder(const DataRewriter& R, MutableSubstitution& sigma, const PbesSubstitution& sigma_pbes)
 {
-  return apply_data_rewrite_builder<Builder, DataRewriter, MutableSubstitution>(R, sigma, id_generator);
+  return apply_data_rewriter_with_pbes_substitution_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution>(R,
+    sigma,
+    sigma_pbes);
 }
+
 
 } // namespace detail
 
@@ -324,6 +364,28 @@ struct simplify_data_rewriter
   void operator()(pbes_expression& result, const pbes_expression& x, Substitution& sigma) const
   {
     detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(result, x);
+  }
+
+  template<typename Substitution, typename PbesSubstitution>
+  pbes_expression operator()(const pbes_expression& x,
+    Substitution& sigma,
+    const PbesSubstitution& sigma_pbes) const
+  {
+    pbes_expression result;
+    detail::make_apply_data_rewrite_with_pbes_substitution_builder<pbes_system::detail::simplify_data_rewriter_with_pbes_substitution_builder>(
+      R,
+      sigma,
+      sigma_pbes)
+      .apply(result, x);
+    return result;
+  }
+
+  template<typename Substitution, typename PbesSubstitution>
+  void operator()(pbes_expression& result, const pbes_expression& x, Substitution& sigma, const PbesSubstitution& sigma_pbes) const
+  {
+    detail::make_apply_data_rewrite_with_pbes_substitution_builder<
+      pbes_system::detail::simplify_data_rewriter_with_pbes_substitution_builder>(R, sigma, sigma_pbes)
+      .apply(result, x);
   }
 };
 

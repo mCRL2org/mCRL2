@@ -10,6 +10,10 @@
 /// \brief Test for PBES rewriters.
 
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/standard_numbers_utility.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/substitutions/no_substitution.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #define BOOST_TEST_MODULE rewriter_test
 #include <boost/test/included/unit_test.hpp>
@@ -181,10 +185,30 @@ void test_simplify(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string ex
   ));
 }
 
-template<typename Rewriter, typename Substitution>
-void test_simplify_with_pbes_substitution(Rewriter R, Substitution sigma, std::string expr1, std::string expr2)
+
+template<typename Rewriter, typename PbesSubstitution>
+void test_simplify_with_pbes_substitution(Rewriter R, PbesSubstitution sigma, std::string expr1, std::string expr2)
 {
   BOOST_CHECK(utilities::detail::test_operation(expr1, expr2, parser(), equal_to(), [&](const pbes_expression& x){return R(x, sigma);}, "simplify_with_pbes_substitution"));
+}
+
+template<typename Rewriter1, typename Rewriter2, typename DataSubstitution, typename PbesSubstitution>
+void test_simplify_with_data_and_pbes_substitution(Rewriter1 R,
+  Rewriter2 R2,
+  DataSubstitution sigma,
+  PbesSubstitution sigma_pbes,
+  std::string expr1,
+  std::string expr2)
+{
+  BOOST_CHECK(utilities::detail::test_operation(
+    expr1,
+    expr2,
+    parser(),
+    equal_to(),
+    [&](const pbes_expression& x) { return R(x, sigma, sigma_pbes); },
+    "simplify_with_pbes_substitution",
+    R2,
+    "datarewr"));
 }
 
 template <typename Rewriter1, typename Rewriter2>
@@ -300,6 +324,77 @@ BOOST_AUTO_TEST_CASE(test_simplifying_rewriter_with_pbes_substitution)
   test_simplify_with_pbes_substitution(R, substitution, "!!X", "true");
   test_simplify_with_pbes_substitution(R, substitution, "!X", "false");
   test_simplify_with_pbes_substitution(R, substitution, "forall m:Nat. X", "true");
+}
+
+BOOST_AUTO_TEST_CASE(test_simplifying_data_rewriter_with_pbes_substitution)
+{
+  data::data_specification data_spec = data::data_specification();
+  data_spec.add_context_sort(data::sort_nat::nat());
+  data::rewriter datar(data_spec);
+  pbes_system::simplify_data_rewriter<data::rewriter> R(datar);
+  pbes_system::data_rewriter<data::rewriter> r(datar);
+  std::cerr << "Data expression: " <<  data::parse_data_expression("1", data_spec) << std::endl;
+  auto substitution = [&](const pbes_system::propositional_variable_instantiation& X) -> pbes_expression
+  {
+    std::cerr << "applying substitution to " << X << std::endl;
+    if (X.name() == core::identifier_string("X"))
+    {
+      std::cerr << "X.name() == X" << std::endl;
+      return pbes_system::true_();
+    }
+    else if (pbes_system::pp(X) == pbes_system::pp(parser()("Y(1)")))
+    {
+      return pbes_system::false_();
+    }
+
+    return X;
+  };
+
+  data::mutable_indexed_substitution data_substitution;
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "val(n == 0) || Y(n)", "val(n == 0) || Y(n)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "Y(0)", "Y(0)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "Y(1)", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "Y(1+0)", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "Y(1+1)", "Y(2)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "false", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "true", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "true && true", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "(true && true) && true", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "true && false", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "true => val(b)", "val(b)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "X && true", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "true && X", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "X && false", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "X && val(false)", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "false && X", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "X && (false && X)", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "X && (X0 && X)", "X0");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "X && (X && X0)", "X0");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "Y(1+2)", "Y(3)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "true || true", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "(true || true) || true", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "true || false", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "false => X", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "Y(n+n)", "Y(n+n)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "Y(n+p)", "Y(n+p)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall m:Nat. false", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "X && X", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "val(true)", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "exists m:Nat.true", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall m:Nat. val(m < 0 && m > 3)", "false");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall m:Nat. val(m < 0 && m > 3) => Y(n)", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall m:Nat. Y(n)", "Y(n)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall m:Nat. val(m < 0 && m > 3) || Y(n)", "Y(n)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "!!X", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall m:Nat. X", "true");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall m,n:Nat. Y(n)", "forall n:Nat. Y(n)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall m,n:Nat. Y(m)", "forall m:Nat. Y(m)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)", "forall n: Nat. val(n > 3) || Y(n)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall n: Nat. forall b: Bool. val(n > 3) || Y(n)", "forall n: Nat. val(n > 3) || Y(n)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall n: Nat. val(b) && Y(n)", "forall n: Nat. val(b) && Y(n)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall n: Nat. val(b)", "val(b)");
+  test_simplify_with_data_and_pbes_substitution(R, r, data_substitution, substitution, "forall m: Nat. val(m > 2) && X", "(forall m: Nat. val(m > 2))");
 }
 
 BOOST_AUTO_TEST_CASE(test_enumerate_quantifiers_rewriter)
