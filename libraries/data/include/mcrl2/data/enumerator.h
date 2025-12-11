@@ -686,13 +686,13 @@ class enumerator_algorithm
     /// The enumeration is interrupted when report_solution returns true for the reported solution.
     /// \param P The todo list of the algorithm.
     /// \param sigma A mutable substitution that is applied by the rewriter.
-    /// \param reject Elements p for which reject(p) is true are discarded.
-    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \param report_solution A callback function that is called whenever a solution is found.
     /// It takes an enumerator element as argument.
     /// If report_solution returns true, the enumeration is interrupted.
     /// N.B. If the enumeration is resumed after an interruption, the element p that
     /// was interrupted will be enumerated again.
+    /// \param reject Elements p for which reject(p) is true are discarded.
+    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \pre !P.empty()
     /// \return If the return value is true, enumeration will be interrupted
     template <typename EnumeratorListElement,
@@ -735,7 +735,7 @@ class enumerator_algorithm
                                             const typename EnumeratorListElement::expression_type& phi,
                                             const data::variable& v,
                                             const data::data_expression& e,
-const bool print=false
+                                            const bool print=false
                                            ) -> bool
                                            {
                                              rewrite(P.scratch_expression, phi, sigma);
@@ -914,13 +914,13 @@ const bool print=false
     /// The enumeration is interrupted when report_solution returns true for the reported solution.
     /// \param P The todo list of the algorithm.
     /// \param sigma A substitution.
-    /// \param reject Elements p for which reject(p) is true are discarded.
-    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \param report_solution A callback function that is called whenever a solution is found.
     /// It takes an enumerator element as argument.
     /// If report_solution returns true, the enumeration is interrupted.
     /// N.B. If the enumeration is resumed after an interruption, the element p that
     /// was interrupted will be enumerated again.
+    /// \param reject Elements p for which reject(p) is true are discarded.
+    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \return The number of elements that have been processed
     template <typename EnumeratorListElement,
               typename MutableSubstitution,
@@ -954,13 +954,13 @@ const bool print=false
     /// The enumeration is interrupted when report_solution returns true for the reported solution.
     /// \param p An enumerator element, i.e. an expression with a list of variables.
     /// \param sigma A substitution.
-    /// \param reject Elements p for which reject(p) is true are discarded.
-    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \param report_solution A callback function that is called whenever a solution is found.
     /// It takes an enumerator element as argument.
     /// If report_solution returns true, the enumeration is interrupted.
     /// N.B. If the enumeration is resumed after an interruption, the element p that
     /// was interrupted will be enumerated again.
+    /// \param reject Elements p for which reject(p) is true are discarded.
+    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \return The number of elements that have been processed
     template <typename EnumeratorListElement,
               typename MutableSubstitution,
@@ -981,15 +981,16 @@ const bool print=false
 
     /// \brief Enumerates the variables v for condition c. Solutions are reported using the callback function report_solution.
     /// The enumeration is interrupted when report_solution returns true for the reported solution.
-    /// \param p An enumerator element, i.e. an expression with a list of variables.
+    /// \param vars The list of variables v to enumerate over.
+    /// \param cond The condition to evaluate for each enumerated value.
     /// \param sigma A substitution.
-    /// \param reject Elements p for which reject(p) is true are discarded.
-    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \param report_solution A callback function that is called whenever a solution is found.
     /// It takes an enumerator element as argument.
     /// If report_solution returns true, the enumeration is interrupted.
     /// N.B. If the enumeration is resumed after an interruption, the element p that
     /// was interrupted will be enumerated again.
+    /// \param reject Elements p for which reject(p) is true are discarded.
+    /// \param accept Elements p for which accept(p) is true are reported as a solution, even if the list of variables of the enumerator element is non-empty.
     /// \return The number of elements that have been processed
     template <typename EnumeratorListElement,
               typename MutableSubstitution,
