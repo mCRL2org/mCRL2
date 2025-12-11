@@ -66,7 +66,7 @@ static void rewrite_star(pbes_expression& result,
     const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping,
     std::unordered_map<std::string, std::set<int>> R)
 {
-  bool changed = false;
+  assert(&result != &psi);
   std::smatch match;
 
 
@@ -157,8 +157,8 @@ static void rewrite_star(pbes_expression& result,
   }
 
   mCRL2log(log::debug) << "Ys := " << core::detail::print_set(Ys) << std::endl;
-
-  replace_propositional_variables(result,
+  simplify_rewriter simplify;
+  simplify(result,
       psi,
       [&](const propositional_variable_instantiation& Y) -> pbes_expression
       {
@@ -179,7 +179,6 @@ static void rewrite_star(pbes_expression& result,
           }
           else
           {
-            changed = true;
             if (alpha == 0)
             {
               // If Y is not reachable, replace it by false
@@ -196,14 +195,7 @@ static void rewrite_star(pbes_expression& result,
         }
       });
 
-  if (changed)
-  {
-    simplify_rewriter simplify;
-    const pbes_expression result1 = result;
-    simplify(result, result1);
-  }
-
-  mCRL2log(log::debug) << "result = " << psi << std::endl;
+  mCRL2log(log::debug) << "result = " << result << std::endl;
 }
 
 class pbesinst_counter_example_structure_graph_algorithm : public pbesinst_structure_graph_algorithm
@@ -232,6 +224,7 @@ public:
       const propositional_variable_instantiation& X,
       const pbes_expression& psi) override
   {
+    assert(&result != &psi); // required by super::rewrite_psi
     pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, psi);
     rewrite_star(result, symbol, X, psi, G, alpha, mapping, R);
   }
