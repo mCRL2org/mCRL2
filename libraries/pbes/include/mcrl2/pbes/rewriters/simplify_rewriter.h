@@ -14,6 +14,8 @@
 
 #include "mcrl2/data/detail/enumerator_identifier_generator.h"
 #include "mcrl2/data/replace_capture_avoiding_with_an_identifier_generator.h"
+#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 
 namespace mcrl2::pbes_system {
@@ -29,7 +31,7 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const not_& x)
   {
-    assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
+    assert(&result!=&x);  // Result is used as temporary store and cannot match x.
     apply(result, x.operand());
     if (is_false(result))
     {
@@ -52,7 +54,7 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const and_& x)
   {
-    assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
+    assert(&result!=&x);  // Result is used as temporary store and cannot match x.
     apply(result, x.left());
     if (is_false(result))
     {
@@ -75,10 +77,10 @@ struct add_simplify: public Builder<Derived>
     {
       return;
     }
-    if (data::is_data_expression(result) && data::is_data_expression(right)) 
+    if (data::is_data_expression(result) && data::is_data_expression(right))
     {
-      data::sort_bool::make_and_(atermpp::assign_cast<data::data_expression>(result), 
-                                     atermpp::down_cast<data::data_expression>(result), 
+      data::sort_bool::make_and_(atermpp::assign_cast<data::data_expression>(result),
+                                     atermpp::down_cast<data::data_expression>(result),
                                      atermpp::down_cast<data::data_expression>(right));
       return;
     }
@@ -88,7 +90,7 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const or_& x)
   {
-    assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
+    assert(&result!=&x);  // Result is used as temporary store and cannot match x.
     apply(result, x.left());
     if (is_true(result))
     {
@@ -111,10 +113,10 @@ struct add_simplify: public Builder<Derived>
     {
       return;
     }
-    if (data::is_data_expression(result) && data::is_data_expression(right)) 
+    if (data::is_data_expression(result) && data::is_data_expression(right))
     {
-      data::sort_bool::make_or_(atermpp::assign_cast<data::data_expression>(result), 
-                                    atermpp::down_cast<data::data_expression>(result), 
+      data::sort_bool::make_or_(atermpp::assign_cast<data::data_expression>(result),
+                                    atermpp::down_cast<data::data_expression>(result),
                                     atermpp::down_cast<data::data_expression>(right));
       return;
     }
@@ -124,23 +126,23 @@ struct add_simplify: public Builder<Derived>
   template <class T>
   void apply(T& result, const imp& x)
   {
-    assert(&result!=&x);  // Result is used as temporary store and cannot match x. 
-    if (is_false(x.left()))  // This test is cheap. 
+    assert(&result!=&x);  // Result is used as temporary store and cannot match x.
+    if (is_false(x.left()))  // This test is cheap.
     {
       result = true_();
       return;
     }
     apply(result, x.right());
     if (is_true(result))
-    { 
+    {
       result = true_();
       return;
     }
     if (is_false(result))
-    { 
+    {
       apply(result, x.left());
       if (is_not(result))
-      { 
+      {
         result = atermpp::down_cast<not_>(result).operand();
         return;
       }
@@ -160,11 +162,11 @@ struct add_simplify: public Builder<Derived>
     pbes_expression left;
     apply(left, x.left());
     if (is_true(left))
-    { 
+    {
       return;
     }
     if (is_false(left) || result==left)
-    { 
+    {
       result = true_();
       return;
     }
@@ -192,7 +194,7 @@ struct simplify_builder: public add_simplify<pbes_system::pbes_expression_builde
 
 template <typename Derived, typename DataRewriter, typename Substitution>
 struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, Substitution>
-{ 
+{
   using super = add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, Substitution>;
   using super::enter;
   using super::leave;
@@ -269,9 +271,27 @@ struct simplify_rewriter
   {
     core::make_apply_builder<detail::simplify_builder>().apply(result, x);
   }
+
+  // sigma maps propositional variable instantiations to PBES expression.
+  template<class PbesSubstitution>
+  pbes_expression operator()(const pbes_expression& x, const PbesSubstitution& sigma) const
+  {
+    pbes_expression result;
+    pbes_system::detail::make_replace_propositional_variables_builder<detail::simplify_builder>(sigma).apply(result, x);
+    return result;
+  }
+
+  // sigma maps propositional variable instantiations to PBES expression.
+  template <class PbesSubstitution>
+  void operator()(pbes_expression& result, const pbes_expression& x, const PbesSubstitution& sigma) const
+  {
+    assert(&result != &x); // precondition for simplify_builder.apply
+    pbes_system::detail::make_replace_propositional_variables_builder<detail::simplify_builder>(sigma)
+      .apply(result, x);
+  }
 };
 
-/// \brief A rewriter that simplifies boolean expressions in a term, and rewrites data expressions.
+/// \brief A rewriter that simplifies boolean expressions in a term, and rewrites data expressions using DataRewriter.
 template <typename DataRewriter>
 struct simplify_data_rewriter
 {
