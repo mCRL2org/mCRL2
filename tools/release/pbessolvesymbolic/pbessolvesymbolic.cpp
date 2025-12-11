@@ -73,6 +73,7 @@ public:
     const propositional_variable_instantiation& X,
     const pbes_expression& psi) override
   {
+    assert(&result != &psi); // precondition for simplify
     std::vector<std::uint32_t> singleton;
     bool changed = false;
     std::smatch match;
@@ -80,7 +81,8 @@ public:
     mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
     if (!std::regex_match(static_cast<const std::string&>(X.name()), match, mcrl2::pbes_system::detail::positive_or_negative))
     {
-      replace_propositional_variables(
+      simplify_rewriter simplify;
+      simplify(
           result,
           psi,
           [&](const propositional_variable_instantiation& Y) -> pbes_expression
@@ -159,14 +161,8 @@ public:
 
     }
 
-    if (changed)
-    {
-        simplify_rewriter simplify;
-        const pbes_expression result1 = result;
-        simplify(result, result1);
-    }
-
-    mCRL2log(log::debug) << "result = " << psi << std::endl;
+    mCRL2log(log::trace) << "rewrite_star: right hand side changed to " << result << "\n" << std::endl;
+    mCRL2log(log::debug) << "result = " << result << std::endl;
     const pbes_expression result2 = result;
     pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, result2);
   }
