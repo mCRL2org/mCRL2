@@ -13,9 +13,17 @@
 #define MCRL2_PBES_SUBSTITUTIONS_H
 
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/replace.h"
 
 namespace mcrl2::pbes_system {
+
+/// \brief An empty struct that can be used to indicate that there
+///        is no substitution that should be applied to propositional variables
+struct no_substitution
+{
+  const propositional_variable_instantiation& operator()(const propositional_variable_instantiation& v) { return v; }
+};
 
 /** \brief Substitution function for propositional variables
  *
@@ -187,6 +195,24 @@ class propositional_variable_substitution
       return this->m_map.empty();
     }
 };
+
+// Compose two substitution functions.
+// Fist, we attempt to apply sigma1; if that does not change X, we apply sigma 2.
+inline
+std::function<pbes_expression(const propositional_variable_instantiation&)> compose_substitutions(
+  const std::function<pbes_expression(const propositional_variable_instantiation&)> sigma1,
+  const std::function<pbes_expression(const propositional_variable_instantiation&)> sigma2)
+  {
+    return [sigma1, sigma2](const propositional_variable_instantiation& X)
+    {
+      pbes_expression result = sigma1(X);
+      if (result != X)
+      {
+        return result;
+      }
+      return sigma2(X);
+    };
+  }
 
 } // namespace mcrl2::pbes_system
 

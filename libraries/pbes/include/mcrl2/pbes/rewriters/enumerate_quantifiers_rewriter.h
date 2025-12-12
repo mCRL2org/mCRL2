@@ -16,7 +16,9 @@
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/detail/split_finite_variables.h"
 #include "mcrl2/pbes/enumerator.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/pbes/substitutions.h"
 
 namespace mcrl2::pbes_system
 {
@@ -25,11 +27,11 @@ namespace detail {
 
 // Simplifying PBES rewriter that eliminates quantifiers using enumeration.
 /// \param MutableSubstitution This must be a MapSubstitution.
-template <typename Derived, typename DataRewriter, typename MutableSubstitution>
-struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution>
+template <typename Derived, typename DataRewriter, typename MutableSubstitution, typename PbesSubstitution>
+struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution, PbesSubstitution>
 {
-  using super = simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution>;
-  using self = enumerate_quantifiers_builder<Derived, DataRewriter, MutableSubstitution>;
+  using super = simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution, PbesSubstitution>;
+  using self = enumerate_quantifiers_builder<Derived, DataRewriter, MutableSubstitution, PbesSubstitution>;
   using enumerator_element = data::enumerator_list_element<pbes_expression>;
   using super::enter;
   using super::leave;
@@ -52,11 +54,15 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   /// \param id_generator A generator to generate fresh variable names.
   /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well.
   enumerate_quantifiers_builder(const DataRewriter& r,
-                                MutableSubstitution& sigma,
-                                const data::data_specification& dataspec,
-                                data::enumerator_identifier_generator& id_generator,
-                                bool enumerate_infinite_sorts = true)
-    : super(r, sigma), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts), E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)())
+    MutableSubstitution& sigma,
+    const PbesSubstitution& sigma_pbes,
+    const data::data_specification& dataspec,
+    data::enumerator_identifier_generator& id_generator,
+    bool enumerate_infinite_sorts = true)
+    : super(r, sigma, sigma_pbes),
+      m_dataspec(dataspec),
+      m_enumerate_infinite_sorts(enumerate_infinite_sorts),
+      E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)())
   { }
 
   Derived& derived()
@@ -86,7 +92,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     }
   }
 
-  // We assume that phi is already rewritten. 
+  // We assume that phi is already rewritten.
   void enumerate_forall(pbes_expression& result, const data::variable_list& v, const pbes_expression& phi)
   {
     assert(!v.empty());
@@ -139,7 +145,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       data::variable_list enumerable;
       data::variable_list non_enumerable;
       data::variable_list unused;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, 
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R,
                                                enumerable, non_enumerable, unused,
                                                [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
       if (enumerable.empty())
@@ -158,8 +164,8 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       data::variable_list finite;
       data::variable_list infinite;
       data::variable_list unused;
-      data::detail::split_finite_variables(x.variables(), m_dataspec, 
-                                           finite, infinite, unused, 
+      data::detail::split_finite_variables(x.variables(), m_dataspec,
+                                           finite, infinite, unused,
                                            [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
       if (finite.empty())
       {
@@ -187,7 +193,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       data::variable_list enumerable;
       data::variable_list non_enumerable;
       data::variable_list unused;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R, 
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R,
                                                enumerable, non_enumerable, unused,
                                                [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
       if (enumerable.empty())
@@ -195,7 +201,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
         data::optimized_exists_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
       }
       else
-      { 
+      {
         pbes_expression phi_;
         enumerate_exists(phi_, enumerable, result);
         data::optimized_exists_no_empty_domain(result, non_enumerable, phi_, remove_unused_variables);
@@ -206,8 +212,8 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       data::variable_list finite;
       data::variable_list infinite;
       data::variable_list unused;
-      data::detail::split_finite_variables(x.variables(), m_dataspec, 
-                                           finite, infinite, unused, 
+      data::detail::split_finite_variables(x.variables(), m_dataspec,
+                                           finite, infinite, unused,
                                            [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
       if (finite.empty())
       {
@@ -232,30 +238,69 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   }
 
   // N.B. This function has been added to make this class operate well with the enumerator.
-  //      that employs the "make_rewrite" variant with an explicit result. 
+  //      that employs the "make_rewrite" variant with an explicit result.
   void operator()(pbes_expression& result, const pbes_expression& x, MutableSubstitution&)
   {
     derived().apply(result, x);
   }
 };
 
-template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
-struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>
+template <template <class, class, class, class> class Builder, class DataRewriter, class MutableSubstitution, class PbesSubstitution = no_substitution>
+struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution>, DataRewriter, MutableSubstitution, PbesSubstitution>
 {
-  using super = Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>, DataRewriter, MutableSubstitution>;
+  using super = Builder<apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution>,
+    DataRewriter,
+    MutableSubstitution,
+    PbesSubstitution>;
   using super::enter;
   using super::leave;
 
-  apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, data::enumerator_identifier_generator& id_generator, bool enumerate_infinite_sorts)
-    : super(R, sigma, dataspec, id_generator, enumerate_infinite_sorts)
+  apply_enumerate_builder(const DataRewriter& R,
+    MutableSubstitution& sigma,
+    const PbesSubstitution& sigma_pbes,
+    const data::data_specification& dataspec,
+    data::enumerator_identifier_generator& id_generator,
+    bool enumerate_infinite_sorts)
+    : super(R, sigma, sigma_pbes, dataspec, id_generator, enumerate_infinite_sorts)
   {}
 };
 
-template <template <class, class, class> class Builder, class DataRewriter, class MutableSubstitution>
-apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>
-make_apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, data::enumerator_identifier_generator& id_generator, bool enumerate_infinite_sorts)
+template<template<class, class, class, class> class Builder,
+  class DataRewriter,
+  class MutableSubstitution,
+  class PbesSubstitution>
+apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution> make_apply_enumerate_builder(
+  const DataRewriter& R,
+  MutableSubstitution& sigma,
+  const PbesSubstitution& sigma_pbes,
+  const data::data_specification& dataspec,
+  data::enumerator_identifier_generator& id_generator,
+  bool enumerate_infinite_sorts)
 {
-  return apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution>(R, sigma, dataspec, id_generator, enumerate_infinite_sorts);
+  return apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution>(R,
+    sigma,
+    sigma_pbes,
+    dataspec,
+    id_generator,
+    enumerate_infinite_sorts);
+}
+
+template<template<class, class, class, class> class Builder,
+  class DataRewriter,
+  class MutableSubstitution>
+apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution, no_substitution> make_apply_enumerate_builder(
+  const DataRewriter& R,
+  MutableSubstitution& sigma,
+  const data::data_specification& dataspec,
+  data::enumerator_identifier_generator& id_generator,
+  bool enumerate_infinite_sorts)
+{
+  return apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution, no_substitution>(R,
+    sigma,
+    no_substitution(),
+    dataspec,
+    id_generator,
+    enumerate_infinite_sorts);
 }
 
 } // namespace detail
@@ -287,7 +332,7 @@ struct enumerate_quantifiers_rewriter
     {
       data::rewriter::substitution_type sigma;
       pbes_expression result;
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
       return result;
     }
 
@@ -295,14 +340,44 @@ struct enumerate_quantifiers_rewriter
     pbes_expression operator()(const pbes_expression& x, MutableSubstitution& sigma) const
     {
       pbes_expression result;
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
       return result;
     }
 
     template <typename MutableSubstitution>
     void operator()(pbes_expression& result, const pbes_expression& x, MutableSubstitution& sigma) const
     {
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+    }
+
+    template<typename MutableSubstitution, typename PbesSubstitution>
+    pbes_expression operator()(const pbes_expression& x, MutableSubstitution& sigma, const PbesSubstitution& sigma_pbes) const
+    {
+      pbes_expression result;
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder,
+        data::rewriter,
+        MutableSubstitution,
+        PbesSubstitution>(m_rewriter,
+        sigma,
+        sigma_pbes,
+        m_dataspec,
+        m_id_generator,
+        m_enumerate_infinite_sorts)
+        .apply(result, x);
+      return result;
+    }
+
+    template<typename MutableSubstitution, typename PbesSubstitution>
+    void operator()(pbes_expression& result, const pbes_expression& x, MutableSubstitution& sigma, const PbesSubstitution& sigma_pbes) const
+    {
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution, PbesSubstitution>(
+        m_rewriter,
+        sigma,
+        sigma_pbes,
+        m_dataspec,
+        m_id_generator,
+        m_enumerate_infinite_sorts)
+        .apply(result, x);
     }
 
     void clear_identifier_generator()
@@ -310,19 +385,19 @@ struct enumerate_quantifiers_rewriter
       m_id_generator.clear();
     }
 
-    /// \brief Create a clone of the rewriter in which the underlying rewriter is copied, and not passed as a shared pointer. 
-    /// \details This is useful when the rewriter is used in different parallel processes. One rewriter can only be used sequentially. 
-    /// \return A rewriter, with a copy of the underlying jitty, jittyc or jittyp rewriting engine. 
+    /// \brief Create a clone of the rewriter in which the underlying rewriter is copied, and not passed as a shared pointer.
+    /// \details This is useful when the rewriter is used in different parallel processes. One rewriter can only be used sequentially.
+    /// \return A rewriter, with a copy of the underlying jitty, jittyc or jittyp rewriting engine.
     enumerate_quantifiers_rewriter clone()
     {
       return enumerate_quantifiers_rewriter(m_rewriter.clone(), m_dataspec, m_enumerate_infinite_sorts);
     }
 
-    /// \brief Initialises this rewriter with thread dependent information. 
+    /// \brief Initialises this rewriter with thread dependent information.
     /// \details This function sets a pointer to the m_busy_flag and m_forbidden_flag of this.
     ///          process, such that rewriter can access these faster than via the general thread.
     ///          local mechanism. It is expected that this is not needed when compilers become.
-    ///          faster, and should be removed in due time. 
+    ///          faster, and should be removed in due time.
     void thread_initialise()
     {
       m_rewriter.thread_initialise();

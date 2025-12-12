@@ -116,8 +116,8 @@ class pbesinst_lazy_todo
     }
 
     template <typename FwdIter, bool ThreadSafe>
-    void insert(FwdIter first, 
-                FwdIter last, 
+    void insert(FwdIter first,
+                FwdIter last,
                 const atermpp::indexed_set<propositional_variable_instantiation, ThreadSafe>& discovered,
                 const std::size_t thread_index)
     {
@@ -149,14 +149,14 @@ class pbesinst_lazy_todo
         {
           new_irrelevant.insert(x);
         }
-      } 
+      }
       for (const propositional_variable_instantiation& x: irrelevant)
       {
         if (!contains(new_todo, x))
         {
           new_irrelevant.insert(x);
         }
-      } 
+      }
       std::swap(todo, new_todo);
       std::swap(irrelevant, new_irrelevant);
 
@@ -240,40 +240,33 @@ class pbesinst_lazy_algorithm
       return p;
     }
 
-    static void rewrite_true_false(pbes_expression& result,
-                                   const fixpoint_symbol& symbol,
-                                   const propositional_variable_instantiation& X,
-                                   const pbes_expression& psi
-                                  )
+    struct true_false_substitution
     {
-      bool changed = false;
-      replace_propositional_variables(
-        result,
-        psi,
-        [&](const propositional_variable_instantiation& Y) -> pbes_expression
-        {
-          if (Y == X)
-          {
-            changed = true;
-            if (symbol.is_mu())
-            {
-              return false_();
-            }
-            else
-            {
-              return true_();
-            }
-          }
-          return Y;
-        }
-      );
-      if (changed)
+      const fixpoint_symbol &symbol;
+      const propositional_variable_instantiation &X;
+
+      true_false_substitution(const fixpoint_symbol& symbol,
+        const propositional_variable_instantiation& X)
+      : symbol(symbol),
+        X(X)
+      {}
+
+      pbes_expression operator()(const propositional_variable_instantiation& Y) const
       {
-        simplify_rewriter simplify;
-        const pbes_expression result1=result;
-        simplify(result, result1);
+        if (Y == X)
+        {
+          if (symbol.is_mu())
+          {
+            return false_();
+          }
+          else
+          {
+            return true_();
+          }
+        }
+        return Y;
       }
-    }
+    };
 
     data::rewriter construct_rewriter(const pbes& pbesspec)
     {
@@ -346,19 +339,29 @@ class pbesinst_lazy_algorithm
       return m_pbes.equations()[i].symbol();
     }
 
-    // rewrite the right hand side of the equation X = psi
+    // Return PBES substitution that is applied to the right hand size of the
+    // equation symbol X = phi during initial exploration of the right hand side phi.
+    virtual std::function<pbes_expression(const propositional_variable_instantiation&)> phi_substitution(const std::size_t /* thread_index */,
+      const fixpoint_symbol& symbol,
+      const propositional_variable_instantiation& X,
+      const pbes_expression& /* phi */)
+    {
+      if (m_options.optimization >= partial_solve_strategy::remove_self_loops)
+      {
+        return true_false_substitution(symbol, X);
+      }
+
+      return pbes_system::no_substitution();
+    }
+
+    // rewrite the right hand side of the equation symbol X = psi
     virtual void rewrite_psi(const std::size_t /* thread_index */,
                              pbes_expression& result,
                              const fixpoint_symbol& symbol,
                              const propositional_variable_instantiation& X,
                              const pbes_expression& psi
                             )
-    {  
-      if (m_options.optimization >= partial_solve_strategy::remove_self_loops)
-      {
-        rewrite_true_false(result, symbol, X, psi);
-      }
-    }
+    {}
 
     virtual bool solution_found(const propositional_variable_instantiation& /* init */) const
     {
@@ -382,6 +385,7 @@ class pbesinst_lazy_algorithm
 
       propositional_variable_instantiation X_e;
       pbes_expression psi_e;
+      pbes_expression tmp; // temporary storate for rewritten psi_e.
 
       while (number_of_active_processes > 0)
       {
@@ -404,13 +408,14 @@ class pbesinst_lazy_algorithm
           const pbes_equation& eqn = m_pbes.equations()[index];
           const auto& phi = eqn.formula();
           data::add_assignments(sigma, eqn.variable().parameters(), X_e.parameters());
-          R(psi_e, phi, sigma);
+          R(psi_e, phi, sigma, phi_substitution(thread_index, eqn.symbol(), X_e, phi));
           R.clear_identifier_generator();
           data::remove_assignments(sigma, eqn.variable().parameters());
 
           // optional step
           m_todo_access.lock();
-          rewrite_psi(thread_index, psi_e, eqn.symbol(), X_e, psi_e);
+          tmp = psi_e; // use tmp as input, psi_e as output for rewriting
+          rewrite_psi(thread_index, psi_e, eqn.symbol(), X_e, tmp);
           m_todo_access.unlock();
 
           std::set<propositional_variable_instantiation> occ = find_propositional_variable_instantiations(psi_e);
@@ -494,7 +499,7 @@ class pbesinst_lazy_algorithm
           threads[i-1].join();
         }
       }
-      else 
+      else
       {
         // There is only one thread. Run the process in the main thread, without cloning sigma or the rewriter.
         const std::size_t single_thread_index=0;
