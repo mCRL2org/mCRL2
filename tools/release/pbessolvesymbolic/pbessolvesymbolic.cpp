@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include "mcrl2/pbes/detail/pbessolve_algorithm.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/pbesreach_partial.h"
@@ -66,115 +67,127 @@ public:
       propvar_map(_propvar_map)
   {}
 
-  /// Removes PBES expressions that are irrelevant w.r.t the given strategy
-  void rewrite_psi(const std::size_t thread_index,
-    pbes_expression& result,
+  std::function<pbes_expression(const propositional_variable_instantiation&)> phi_substitution(
+    const std::size_t thread_index,
     const fixpoint_symbol& symbol,
     const propositional_variable_instantiation& X,
-    const pbes_expression& psi) override
+    const pbes_expression& phi) override
   {
-    assert(&result != &psi); // precondition for simplify
-    std::vector<std::uint32_t> singleton;
-    bool changed = false;
-    std::smatch match;
+    return compose_substitutions(
+     rewrite_star_substitution(data_index, propvar_map, strategy, Valpha, X, alpha),
+     pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi));
+  }
 
-    mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
-    if (!std::regex_match(static_cast<const std::string&>(X.name()), match, mcrl2::pbes_system::detail::positive_or_negative))
+  private:
+    bool alpha;
+    sylvan::ldds::ldd strategy;
+    sylvan::ldds::ldd Valpha;
+    sylvan::ldds::ldd Vall;
+    const std::vector<symbolic::data_expression_index>& data_index;
+    const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map;
+
+    /// Removes PBES expressions that are irrelevant w.r.t the given strategy
+    struct rewrite_star_substitution
     {
-      simplify_rewriter simplify;
-      simplify(
-          result,
-          psi,
-          [&](const propositional_variable_instantiation& Y) -> pbes_expression
+      mutable std::vector<std::uint32_t> singleton;
+      mutable std::smatch match;
+
+      const std::vector<symbolic::data_expression_index>& data_index;
+      const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map;
+      const sylvan::ldds::ldd& strategy;
+      const sylvan::ldds::ldd& Valpha;
+      const propositional_variable_instantiation& X;
+      const bool alpha;
+
+      rewrite_star_substitution(const std::vector<symbolic::data_expression_index>& data_index,
+        const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map,
+        const sylvan::ldds::ldd& strategy,
+        const sylvan::ldds::ldd& Valpha,
+        const propositional_variable_instantiation& X,
+        bool alpha)
+        : data_index(data_index),
+          propvar_map(propvar_map),
+          strategy(strategy),
+          Valpha(Valpha),
+          X(X),
+          alpha(alpha)
+      {}
+
+      pbes_expression operator()(const propositional_variable_instantiation& Y) const
+      {
+        if (std::regex_match(static_cast<const std::string&>(Y.name()),
+              match,
+              mcrl2::pbes_system::detail::positive_or_negative))
+        {
+          // If Y in L return Y
+          mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
+          return Y;
+        }
+
+        // TODO: This depends on the encoding used in pbesreach.
+        // Determine whether X belongs to player alpha
+        singleton.clear();
+        singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
+
+        std::size_t i = 1;
+        for (const auto& param: X.parameters())
+        {
+          singleton.emplace_back(data_index[i].index(param));
+          ++i;
+        }
+
+        if (sylvan::ldds::member_cube(Valpha, singleton))
+        {
+          // Determine whether (X, Y) is in the strategy.
+
+          // Add the propositional variables.
+          singleton.clear();
+          singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
+          singleton.emplace_back(data_index[0].index(propvar_map.at(Y.name())));
+
+          // Add the interleaved data expressions.
+          std::size_t i = 1;
+          auto param_Y_it = Y.parameters().begin();
+
+          for (const data::data_expression& param_X_it: X.parameters())
           {
-            if (std::regex_match(static_cast<const std::string&>(Y.name()), match, mcrl2::pbes_system::detail::positive_or_negative))
+            singleton.emplace_back(data_index[i].index(param_X_it));
+            singleton.emplace_back(data_index[i].index(*param_Y_it));
+
+            ++param_Y_it;
+            ++i;
+          }
+
+          if (sylvan::ldds::member_cube(strategy, singleton))
+          {
+            // If Y in E0
+            mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+            return Y;
+          }
+          else
+          {
+            if (alpha == 0)
             {
-              // If Y in L return Y
-              mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
-              return Y;
-            }
-
-            // TODO: This depends on the encoding used in pbesreach.
-            // Determine whether X belongs to player alpha
-            singleton.clear();
-            singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
-
-            std::size_t i = 1;
-            for (const auto& param : X.parameters())
-            {
-              singleton.emplace_back(data_index[i].index(param));
-              ++i;
-            }
-
-            if (sylvan::ldds::member_cube(Valpha, singleton))
-            {
-              // Determine whether (X, Y) is in the strategy.
-
-              // Add the propositional variables.
-              singleton.clear();
-              singleton.emplace_back(data_index[0].index(propvar_map.at(X.name())));
-              singleton.emplace_back(data_index[0].index(propvar_map.at(Y.name())));
-
-              // Add the interleaved data expressions.
-              std::size_t i = 1;
-              auto param_Y_it = Y.parameters().begin();
-
-              for (const data::data_expression& param_X_it : X.parameters())
-              {
-                singleton.emplace_back(data_index[i].index(param_X_it));
-                singleton.emplace_back(data_index[i].index(*param_Y_it));
-
-                ++param_Y_it;
-                ++i;
-              }
-
-              if (sylvan::ldds::member_cube(strategy, singleton))
-              {
-                // If Y in E0
-                mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
-                return Y;
-              }
-              else
-              {
-                changed = true;
-                if (alpha == 0)
-                {
-                  // If Y is not reachable, replace it by false
-                  mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
-                  return false_();
-                }
-                else
-                {
-                  // If Y is not reachable, replace it by true
-                  mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
-                  return true_();
-                }
-              }
+              // If Y is not reachable, replace it by false
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
+              return false_();
             }
             else
             {
-              mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
-              return Y;
+              // If Y is not reachable, replace it by true
+              mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
+              return true_();
             }
           }
-        );
-
-    }
-
-    mCRL2log(log::trace) << "rewrite_star: right hand side changed to " << result << "\n" << std::endl;
-    mCRL2log(log::debug) << "result = " << result << std::endl;
-    const pbes_expression result2 = result;
-    pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, result2);
-  }
-
-private:
-  bool alpha;
-  sylvan::ldds::ldd strategy;
-  sylvan::ldds::ldd Valpha;
-  sylvan::ldds::ldd Vall;
-  const std::vector<symbolic::data_expression_index>& data_index;
-  const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map;
-};
+        }
+        else
+        {
+          mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+          return Y;
+        }
+      }
+    };
+  };
 
 } // namespace mcrl2::pbes_system
 

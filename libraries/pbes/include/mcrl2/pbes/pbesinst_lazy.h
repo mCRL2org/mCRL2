@@ -240,34 +240,33 @@ class pbesinst_lazy_algorithm
       return p;
     }
 
-    static void rewrite_true_false(pbes_expression& result,
-                                   const fixpoint_symbol& symbol,
-                                   const propositional_variable_instantiation& X,
-                                   const pbes_expression& psi
-                                  )
+    struct true_false_substitution
     {
-      assert(&result != &psi);
-      simplify_rewriter simplify;
-      simplify(
-        result,
-        psi,
-        [&](const propositional_variable_instantiation& Y) -> pbes_expression
+      const fixpoint_symbol &symbol;
+      const propositional_variable_instantiation &X;
+
+      true_false_substitution(const fixpoint_symbol& symbol,
+        const propositional_variable_instantiation& X)
+      : symbol(symbol),
+        X(X)
+      {}
+
+      pbes_expression operator()(const propositional_variable_instantiation& Y) const
+      {
+        if (Y == X)
         {
-          if (Y == X)
+          if (symbol.is_mu())
           {
-            if (symbol.is_mu())
-            {
-              return false_();
-            }
-            else
-            {
-              return true_();
-            }
+            return false_();
           }
-          return Y;
+          else
+          {
+            return true_();
+          }
         }
-      );
-    }
+        return Y;
+      }
+    };
 
     data::rewriter construct_rewriter(const pbes& pbesspec)
     {
@@ -340,19 +339,29 @@ class pbesinst_lazy_algorithm
       return m_pbes.equations()[i].symbol();
     }
 
-    // rewrite the right hand side of the equation X = psi
+    // Return PBES substitution that is applied to the right hand size of the
+    // equation symbol X = phi during initial exploration of the right hand side phi.
+    virtual std::function<pbes_expression(const propositional_variable_instantiation&)> phi_substitution(const std::size_t /* thread_index */,
+      const fixpoint_symbol& symbol,
+      const propositional_variable_instantiation& X,
+      const pbes_expression& /* phi */)
+    {
+      if (m_options.optimization >= partial_solve_strategy::remove_self_loops)
+      {
+        return true_false_substitution(symbol, X);
+      }
+
+      return pbes_system::no_substitution();
+    }
+
+    // rewrite the right hand side of the equation symbol X = psi
     virtual void rewrite_psi(const std::size_t /* thread_index */,
                              pbes_expression& result,
                              const fixpoint_symbol& symbol,
                              const propositional_variable_instantiation& X,
                              const pbes_expression& psi
                             )
-    {
-      if (m_options.optimization >= partial_solve_strategy::remove_self_loops)
-      {
-        rewrite_true_false(result, symbol, X, psi);
-      }
-    }
+    {}
 
     virtual bool solution_found(const propositional_variable_instantiation& /* init */) const
     {

@@ -56,66 +56,103 @@ propositional_variable_instantiation rewrite_PVI(const propositional_variable_in
   }
 }
 
-/// Replaces propositional variables in the expression psi that are irrelevant for the given proof_graph.
-static void rewrite_star(pbes_expression& result,
-    const fixpoint_symbol& /* symbol */,
-    const propositional_variable_instantiation& X,
-    const pbes_expression& psi,
-    const structure_graph& G,
-    bool alpha,
-    const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping,
-    std::unordered_map<std::string, std::set<int>> R)
+namespace detail {
+struct rewrite_star_substitution
 {
-  assert(&result != &psi);
-  std::smatch match;
+  const fixpoint_symbol& symbol;
+  const propositional_variable_instantiation& X;
+  const pbes_expression& psi;
+  const structure_graph& G;
+  bool alpha;
+  const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping;
+  const std::unordered_map<std::string, std::set<int>>& R;
 
+  rewrite_star_substitution(const fixpoint_symbol& symbol,
+      const propositional_variable_instantiation& X,
+      const pbes_expression& psi,
+      const structure_graph& G,
+      bool alpha,
+      const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping,
+      const std::unordered_map<std::string, std::set<int>>& R)
+      : symbol(symbol),
+      X(X),
+      psi(psi),
+      G(G),
+      alpha(alpha),
+      mapping(mapping),
+      R(R)
+  {}
 
-  // Now we need to find all reachable X --> Y, following vertices that are not ranked.
-  mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
+  pbes_expression operator()(const propositional_variable_instantiation& Y) const {
+    std::smatch match;
 
-  std::unordered_set<pbes_expression> Ys;
+    // Now we need to find all reachable X --> Y, following vertices that are not ranked.
+    mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
 
-  // If X is won by player alpha, i.e. in the winning set W.
-  auto it = mapping.find(rewrite_PVI(X, R));
-  if (it != mapping.end())
-  {
-    structure_graph::index_type index = it->second;
-    std::unordered_set<structure_graph::index_type> todo = {index};
-    std::unordered_set<structure_graph::index_type> done;
+    std::unordered_set<pbes_expression> Ys;
 
-    while (!todo.empty())
+    // If X is won by player alpha, i.e. in the winning set W.
+    auto it = mapping.find(rewrite_PVI(X, R));
+    if (it != mapping.end())
     {
-      structure_graph::index_type u = *todo.begin();
-      todo.erase(todo.begin());
-      done.insert(u);
+      structure_graph::index_type index = it->second;
+      std::unordered_set<structure_graph::index_type> todo = {index};
+      std::unordered_set<structure_graph::index_type> done;
 
-      if (mapping.count(G.find_vertex(u).formula()) != 0)
+      while (!todo.empty())
       {
-        // This vertex is won by alpha
-        if (G.strategy(u) != undefined_vertex() &&
-            ((!alpha && G.decoration(u) == structure_graph::d_disjunction)
-            || (alpha && G.decoration(u) == structure_graph::d_conjunction)))
+        structure_graph::index_type u = *todo.begin();
+        todo.erase(todo.begin());
+        done.insert(u);
+
+        if (mapping.count(G.find_vertex(u).formula()) != 0)
         {
-          // The strategy is defined so only explore the strategy edge.
-          auto v = G.strategy(u);
-          if (G.rank(v) == data::undefined_index())
+          // This vertex is won by alpha
+          if (G.strategy(u) != undefined_vertex()
+              && ((!alpha && G.decoration(u) == structure_graph::d_disjunction)
+                  || (alpha && G.decoration(u) == structure_graph::d_conjunction)))
           {
-            if (!mcrl2::utilities::detail::contains(done, v))
+            // The strategy is defined so only explore the strategy edge.
+            auto v = G.strategy(u);
+            if (G.rank(v) == data::undefined_index())
             {
-              // explore all outgoing edges that are unranked
-              todo.insert(v);
+              if (!mcrl2::utilities::detail::contains(done, v))
+              {
+                // explore all outgoing edges that are unranked
+                todo.insert(v);
+              }
+            }
+            else if (mapping.count(G.find_vertex(v).formula()) != 0)
+            {
+              // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
+              Ys.insert(G.find_vertex(v).formula());
             }
           }
-          else if (mapping.count(G.find_vertex(v).formula()) != 0)
+          else
           {
-            // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
-            Ys.insert(G.find_vertex(v).formula());
+            // Explore all edges.
+            for (structure_graph::index_type v: G.all_successors(u))
+            {
+              if (G.rank(v) == data::undefined_index())
+              {
+                if (!mcrl2::utilities::detail::contains(done, v))
+                {
+                  // explore all outgoing edges that are unranked
+                  todo.insert(v);
+                }
+              }
+              else if (mapping.count(G.find_vertex(v).formula()) != 0)
+              {
+                // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
+                Ys.insert(G.find_vertex(v).formula());
+              }
+            }
           }
         }
         else
         {
           // Explore all edges.
-          for (structure_graph::index_type v : G.all_successors(u))
+          for (structure_graph::index_type v: G.all_successors(u))
           {
             if (G.rank(v) == data::undefined_index())
             {
@@ -133,69 +170,46 @@ static void rewrite_star(pbes_expression& result,
           }
         }
       }
+    }
+
+    mCRL2log(log::debug) << "Ys := " << core::detail::print_set(Ys) << std::endl;
+
+    if (std::regex_match(static_cast<const std::string&>(Y.name()),
+          match,
+          mcrl2::pbes_system::detail::positive_or_negative))
+    {
+      // If Y in L return Y
+      mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
+      return Y;
+    }
+    else
+    {
+      if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y, R)))
+      {
+        mCRL2log(log::debug) << "rewrite_star " << Y << " ( " << rewrite_PVI(Y, R) << ") is reachable"
+                              << std::endl;
+        return Y;
+      }
       else
       {
-        // Explore all edges.
-        for (structure_graph::index_type v : G.all_successors(u))
+        if (alpha == 0)
         {
-          if (G.rank(v) == data::undefined_index())
-          {
-            if (!mcrl2::utilities::detail::contains(done, v))
-            {
-              // explore all outgoing edges that are unranked
-              todo.insert(v);
-            }
-          }
-          else if (mapping.count(G.find_vertex(v).formula()) != 0)
-          {
-            // Insert the outgoing edge, but do not add it to the todo set to stop exploring this vertex.
-            Ys.insert(G.find_vertex(v).formula());
-          }
+          // If Y is not reachable, replace it by false
+          mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y, R)
+                                << " is not reachable, becomes false" << std::endl;
+          return false_();
+        }
+        else
+        {
+          // If Y is not reachable, replace it by true
+          mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y, R)
+                                << " is not reachable, becomes true" << std::endl;
+          return true_();
         }
       }
     }
   }
-
-  mCRL2log(log::debug) << "Ys := " << core::detail::print_set(Ys) << std::endl;
-  simplify_rewriter simplify;
-  simplify(result,
-      psi,
-      [&](const propositional_variable_instantiation& Y) -> pbes_expression
-      {
-        if (std::regex_match(static_cast<const std::string&>(Y.name()),
-                match,
-                mcrl2::pbes_system::detail::positive_or_negative))
-        {
-          // If Y in L return Y
-          mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
-          return Y;
-        }
-        else
-        {
-          if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y, R)))
-          {
-            mCRL2log(log::debug) << "rewrite_star " << Y << " ( " << rewrite_PVI(Y, R) << ") is reachable" << std::endl;
-            return Y;
-          }
-          else
-          {
-            if (alpha == 0)
-            {
-              // If Y is not reachable, replace it by false
-              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,R) << " is not reachable, becomes false" << std::endl;
-              return false_();
-            }
-            else
-            {
-              // If Y is not reachable, replace it by true
-              mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y,R) << " is not reachable, becomes true" << std::endl;
-              return true_();
-            }
-          }
-        }
-      });
-
-  mCRL2log(log::debug) << "result = " << result << std::endl;
+};
 }
 
 class pbesinst_counter_example_structure_graph_algorithm : public pbesinst_structure_graph_algorithm
@@ -218,15 +232,14 @@ public:
   // TODO ensure that the PVIs in mapping match the shape of the
   // vertices in G after they are rewritten with R.
 
-  void rewrite_psi(const std::size_t thread_index,
-      pbes_expression& result,
-      const fixpoint_symbol& symbol,
-      const propositional_variable_instantiation& X,
-      const pbes_expression& psi) override
+  std::function<pbes_expression(const propositional_variable_instantiation&)> phi_substitution(
+    const std::size_t thread_index,
+    const fixpoint_symbol& symbol,
+    const propositional_variable_instantiation& X,
+    const pbes_expression& phi) override
   {
-    assert(&result != &psi); // required by super::rewrite_psi
-    pbesinst_structure_graph_algorithm::rewrite_psi(thread_index, result, symbol, X, psi);
-    rewrite_star(result, symbol, X, psi, G, alpha, mapping, R);
+    return compose_substitutions(detail::rewrite_star_substitution(symbol, X, phi, G, alpha, mapping, R),
+      pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi));
   }
 
 private:
@@ -254,14 +267,14 @@ public:
         R(_R)
   {}
 
-  void rewrite_psi(const std::size_t thread_index,
-      pbes_expression& result,
-      const fixpoint_symbol& symbol,
-      const propositional_variable_instantiation& X,
-      const pbes_expression& psi) override
+  std::function<pbes_expression(const propositional_variable_instantiation&)> phi_substitution(
+    const std::size_t thread_index,
+    const fixpoint_symbol& symbol,
+    const propositional_variable_instantiation& X,
+    const pbes_expression& phi) override
   {
-    rewrite_star(result, symbol, X, psi, G, alpha, mapping, R);
-    pbesinst_structure_graph_algorithm2::rewrite_psi(thread_index, result, symbol, X, psi);
+    return compose_substitutions(detail::rewrite_star_substitution(symbol, X, phi, G, alpha, mapping, R),
+      pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi));
   }
 
 private:
