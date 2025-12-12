@@ -193,7 +193,7 @@ template <typename Derived>
 struct simplify_builder: public add_simplify<pbes_system::pbes_expression_builder, Derived>
 { };
 
-template <typename Derived, typename DataRewriter, typename MutableSubstitution, typename PbesSubstitution = pbes_system::no_substitution>
+template <typename Derived, typename DataRewriter, typename MutableSubstitution, typename PbesSubstitution>
 struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, MutableSubstitution>
 {
   using super = add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, MutableSubstitution>;
@@ -204,7 +204,7 @@ struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::de
   using substitution_administration_type = data::detail::substitution_updater_with_an_identifier_generator<MutableSubstitution,
                                                                   data::enumerator_identifier_generator>;
   substitution_administration_type substitution_administration;
-  const PbesSubstitution m_sigma_pbes = no_substitution();
+  const PbesSubstitution& m_sigma_pbes;
 
   simplify_data_rewriter_builder(const DataRewriter& R, MutableSubstitution& sigma)
     : super(R, sigma),
@@ -288,7 +288,7 @@ struct apply_data_rewriter_with_pbes_substitution_builder
 
   apply_data_rewriter_with_pbes_substitution_builder(const DataRewriter& R,
     MutableSubstitution& sigma)
-    : super(R, sigma)
+    : super(R, sigma, no_substitution())
   {}
 };
 
