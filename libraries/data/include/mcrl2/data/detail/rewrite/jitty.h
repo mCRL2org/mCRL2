@@ -104,7 +104,8 @@ class RewriterJitty: public Rewriter
                       data_expression& result,
                       const function_symbol& op,
                       const application& term,
-                      substitution_type& sigma);
+                      substitution_type& sigma,
+                      const bool do_not_rewrite_first_argument=false);
 
     void rewrite_aux_const_function_symbol(
                       data_expression& result,

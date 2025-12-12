@@ -102,3 +102,38 @@ BOOST_AUTO_TEST_CASE(test_pbeschain2)
   BOOST_CHECK(free_variables.size()==1);
 }
 
+// The test below checks whether the head of a term is rewritten too often.
+// If so, the variable vc_TS is substituted infinitely often causing the rewriting
+// of the PBES to not terminate. 
+
+BOOST_AUTO_TEST_CASE(test_pbesrewr3)
+{
+  std::string pbes_text =
+  "map VC_config: Nat -> Bool;"
+  "var  n: Nat;"
+  "eqn  VC_config(n)  =  false;"
+  "pbes nu Y(vc_TS: Nat -> Bool) = "
+         "val(vc_TS(1)) && (forall v_TS1: Nat. Y(vc_TS[v_TS1 -> true]));"
+  "init Y(VC_config);"
+  ;
+    
+  pbes p = txt2pbes(pbes_text);
+  data::rewriter datar(p.data(), data::jitty);
+  simplify_data_rewriter<data::rewriter> pbesr(datar);
+std::cerr << "PBES1" << p << "\n";
+    
+  data::mutable_indexed_substitution sigma;
+  pbes_equation equation = p.equations()[0];
+std::cerr << "Equation " << equation << "\n";
+  propositional_variable_instantiation pvi = *find_propositional_variable_instantiations(equation.formula()).begin();
+std::cerr << "PVI " << pvi << "\n";
+  data::variable var = equation.variable().parameters().front();
+std::cerr << "VAR " << var << ":" << var.sort() << "\n";
+  sigma[var] = *pvi.parameters().begin();
+std::cerr << "RHS " << (*pvi.parameters().begin()) << "\n";
+  // With erroneous rewriting this does not terminate.
+  pbes_rewrite(p, pbesr, sigma);
+std::cerr << "PBES2" << p << "\n";
+  // After this rewrite p is not well typed. 
+  BOOST_CHECK(true);
+}

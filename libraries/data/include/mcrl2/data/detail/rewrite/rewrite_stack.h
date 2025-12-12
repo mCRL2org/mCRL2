@@ -100,13 +100,22 @@ class rewrite_stack : protected atermpp::vector<data_expression>
     void set_element(std::size_t pos, std::size_t frame_size, const data_expression& d)
     {
       assert(m_stack_size+pos>=frame_size && pos<frame_size);
+      assert(m_stack_size-frame_size+pos < size());
       operator[](m_stack_size-frame_size+pos)=d;
     }
 
     data_expression& element(std::size_t pos, std::size_t frame_size)
     {
       assert(m_stack_size+pos>=frame_size && pos<frame_size);
+      assert(m_stack_size-frame_size+pos<size());
       return operator[](m_stack_size-frame_size+pos);
+    }
+
+    const data_expression& get_element(std::size_t pos, std::size_t frame_size) const
+    {
+      assert(m_stack_size+pos>=frame_size && pos<frame_size);
+      assert(m_stack_size-frame_size+pos<size());
+      return operator [](m_stack_size-frame_size+pos);
     }
 
     atermpp::vector<data_expression>::const_iterator stack_iterator(std::size_t pos, std::size_t frame_size) const

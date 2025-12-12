@@ -396,7 +396,6 @@ static bool match_jitty(
       return false;
     }
 
-
     if (!match_jitty(ta.head(),
                      pa.head(),assignments,true))
     {
@@ -453,6 +452,7 @@ void RewriterJitty::rewrite_aux(
                       const data_expression& term,
                       substitution_type& sigma)
 {
+
   if (is_function_symbol(term))
   {
     assert(term!=this_term_is_in_normal_form());
@@ -537,16 +537,18 @@ void RewriterJitty::rewrite_aux(
     // binder x1,...,xn.t' where the binder is a lambda, exists or forall.
   
     const std::size_t head1 = 1;  // Index of variable head1 in the stack. 
-    m_rewrite_stack.element(head1,2) = get_nested_head(m_rewrite_stack.element(t,2));
-    if (is_function_symbol(m_rewrite_stack.element(head1,2)))
+    m_rewrite_stack.set_element(head1,2,get_nested_head(m_rewrite_stack.get_element(t,2)));
+    if (is_function_symbol(m_rewrite_stack.get_element(head1,2)))
     {
-      // In this case t (is top of the rewrite stack) has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
-      // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
-      make_application(result, m_rewrite_stack.element(t,2) , tapp.begin(), tapp.end()); 
+      // In this case t (i.e. the top of the rewrite stack) has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
+      // In the invocation of rewrite_aux_function_symbol these terms must not be rewritten to normalform again.
+      make_application(result, m_rewrite_stack.get_element(t,2) , tapp.begin(), tapp.end()); 
+      const bool do_not_rewrite_first_argument=true;
       rewrite_aux_function_symbol(m_rewrite_stack.element(t,2),
                                   atermpp::down_cast<function_symbol>(m_rewrite_stack.element(head1,2)),
                                   atermpp::down_cast<application>(result),
-                                  sigma);
+                                  sigma,
+                                  do_not_rewrite_first_argument);
       result=m_rewrite_stack.element(t,2);
       m_rewrite_stack.decrease(2);
       return;
@@ -588,7 +590,8 @@ void RewriterJitty::rewrite_aux_function_symbol(
                       data_expression& result, 
                       const function_symbol& op,
                       const application& term,
-                      substitution_type& sigma)
+                      substitution_type& sigma,
+                      const bool do_not_rewrite_first_argument /*=false*/)
 {
   assert(is_function_sort(op.sort()));
 
@@ -623,8 +626,14 @@ void RewriterJitty::rewrite_aux_function_symbol(
           if (!rewritten_defined[i])
           {
             // new (&rewritten[i]) data_expression(rewrite_aux(detail::get_argument_of_higher_order_term(term,i),sigma));
-            rewrite_aux(m_rewrite_stack.element(i,arity+1),detail::get_argument_of_higher_order_term(term,i),sigma);
-            
+            if (do_not_rewrite_first_argument && i==0)
+            {
+              m_rewrite_stack.set_element(i,arity+1,detail::get_argument_of_higher_order_term(term,i)); 
+            }
+            else
+            {
+              rewrite_aux(m_rewrite_stack.element(i,arity+1),detail::get_argument_of_higher_order_term(term,i),sigma);
+            }
             rewritten_defined[i]=true;
           }
           // assert(rewritten[i].defined());
@@ -692,7 +701,7 @@ void RewriterJitty::rewrite_aux_function_symbol(
         {
           assert(i<arity);
           if (!match_jitty(rewritten_defined[i]?
-                                 m_rewrite_stack.element(i,arity+1):
+                                 m_rewrite_stack.get_element(i,arity+1):
                                  detail::get_argument_of_higher_order_term(term,i),
                            detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(lhs),i),
                            assignments,rewritten_defined[i]))
