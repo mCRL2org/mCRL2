@@ -435,14 +435,6 @@ protected:
   /// \brief Update an action summand with the new Boolean parameters
   void update_action_summand(action_summand& s)
   {
-    s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_substitution, m_generator);
-    s.multi_action() = lps::replace_variables_capture_avoiding(s.multi_action(), m_substitution, m_generator);
-    s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
-  }
-
-  /// \brief Update an action summand with the new unary Boolean parameters
-  void update_action_summand_unary(action_summand& s)
-  {
     mCRL2log(log::debug) << "condition before update :" << data::pp(s.condition()) << std::endl;
     s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_substitution, m_generator);
     mCRL2log(log::debug) << "condition after update :" << data::pp(s.condition()) << std::endl;
@@ -510,19 +502,9 @@ public:
     // Summands
     mCRL2log(log::debug) << "Updating summands" << std::endl;
 
-    if (m_unary_option)
-    {
-      for (action_summand& a: m_spec.process().action_summands())
-      {
-        update_action_summand_unary(a);
-      }
-    }
-    else
-    {
       for (action_summand& a: m_spec.process().action_summands())
       {
         update_action_summand(a);
-      }
     }
 
     for (deadlock_summand& d: m_spec.process().deadlock_summands())
