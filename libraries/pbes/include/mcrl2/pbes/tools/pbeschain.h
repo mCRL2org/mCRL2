@@ -466,7 +466,7 @@ inline void self_substitute(pbes_equation& equation,
             }
           }
         }
-        else if (size == 0)
+        else if (size == 0 && is_quantifier_free(phi, options))
         {
           pvi_substituter.set_pvi(cur_x);
           pvi_substituter.set_replacement(phi);
