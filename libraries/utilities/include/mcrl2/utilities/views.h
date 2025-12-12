@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux
+// Author(s): Maurice Laveaux, Thomas Neele
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -10,6 +10,8 @@
 #define MCRL2_UTILITIES_VIEWS_H
 
 #include <ranges>
+
+namespace mcrl2::utilities {
 
 /// Cartesian product of two ranges, should be available in C++23.
 template<typename Range1, typename Range2>
@@ -115,6 +117,110 @@ template<typename Range1, typename Range2>
 auto cartesian_product(Range1 r1, Range2 r2)
 {
   return cartesian_product_view<Range1, Range2>(r1, r2);
+}
+
+// zip of two ranges, length of zip is the minimum length of the two ranges
+template<typename Range1, typename Range2>
+class zip_view : public std::ranges::view_interface<zip_view<Range1, Range2>>
+{
+public:
+  using value_type
+    = std::pair<typename std::ranges::range_value_t<Range1>, typename std::ranges::range_value_t<Range2>>;
+
+  zip_view() = default;
+
+  zip_view(Range1 r1, Range2 r2)
+    : m_range1(r1),
+      m_range2(r2)
+  {}
+
+  class iterator
+  {
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using iterator_concept = std::forward_iterator_tag;
+    using value_type = zip_view::value_type;
+    using difference_type = std::ptrdiff_t;
+    using pointer = value_type*;
+    using reference = value_type;
+
+    iterator() = default;
+
+    iterator(auto it1, auto it1_end, auto it2, auto it2_end)
+      : m_it1(it1),
+        m_it1_end(it1_end),
+        m_it2(it2),
+        m_it2_end(it2_end)
+    {
+      if (m_it1 != m_it1_end && m_it2 == m_it2_end)
+      {
+        m_it1 = m_it1_end; // End iterator
+      }
+    }
+
+    value_type operator*() const { return std::make_pair(*m_it1, *m_it2); }
+
+    iterator& operator++()
+    {
+      ++m_it1;
+      ++m_it2;
+      if (m_it1 == m_it1_end || m_it2 == m_it2_end)
+      {
+        m_it1 = m_it1_end;
+        m_it2 = m_it2_end;
+      }
+      return *this;
+    }
+
+    iterator operator++(int)
+    {
+      iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const iterator& other) const
+    {
+      return m_it1 == other.m_it1;
+    }
+
+    bool operator!=(const iterator& other) const
+    {
+      return !(*this == other);
+    }
+
+  private:
+    decltype(std::ranges::begin(std::declval<const Range1&>())) m_it1, m_it1_end;
+    decltype(std::ranges::begin(std::declval<const Range2&>())) m_it2, m_it2_end;
+  };
+
+  iterator begin() const
+  {
+    auto it1 = std::ranges::begin(m_range1);
+    auto it1_end = std::ranges::end(m_range1);
+    auto it2 = std::ranges::begin(m_range2);
+    auto it2_end = std::ranges::end(m_range2);
+    return iterator(it1, it1_end, it2, it2_end);
+  }
+
+  iterator end() const
+  {
+    auto it1_end = std::ranges::end(m_range1);
+    auto it2_end = std::ranges::end(m_range2);
+    return iterator(it1_end, it1_end, it2_end, it2_end);
+  }
+
+private:
+  Range1 m_range1;
+  Range2 m_range2;
+};
+
+template<typename Range1, typename Range2>
+auto zip(Range1 r1, Range2 r2)
+{
+  return zip_view<Range1, Range2>(r1, r2);
+}
+
 }
 
 #endif // MCRL2_UTILITIES_VIEWS_H
