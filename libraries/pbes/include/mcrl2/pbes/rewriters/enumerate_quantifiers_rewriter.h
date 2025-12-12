@@ -347,7 +347,7 @@ struct enumerate_quantifiers_rewriter
     template <typename MutableSubstitution>
     void operator()(pbes_expression& result, const pbes_expression& x, MutableSubstitution& sigma) const
     {
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
     }
 
     template<typename MutableSubstitution, typename PbesSubstitution>
