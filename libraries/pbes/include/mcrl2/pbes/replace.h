@@ -72,8 +72,6 @@ struct replace_propositional_variables_builder: public Builder<replace_propositi
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    // TODO: enforce that this method is only performed when when super::apply results in a propositional_variable_instantiation
-    super::apply(result, x);
     result = sigma(atermpp::down_cast<propositional_variable_instantiation>(result));
   }
 };
