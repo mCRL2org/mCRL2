@@ -30,6 +30,7 @@ class binary_tool: public rewriter_tool<input_output_tool>
     using super = rewriter_tool<input_output_tool>;
 
     std::string m_parameter_selection;
+    bool m_unary_option = false;
 
     void add_options(interface_description& desc) override
     {
@@ -39,6 +40,9 @@ class binary_tool: public rewriter_tool<input_output_tool>
                       "All selected parameters must have a finite sort other than Bool. "
                       "Examples: --select=a:*,b:Data or --select=*:Enum4.",
                       'f');
+      desc.add_option("unary",
+                      "use unary encoding. ",
+                      'u');
     }
 
     void parse_options(const command_line_parser& parser) override
@@ -53,6 +57,10 @@ class binary_tool: public rewriter_tool<input_output_tool>
         {
           mCRL2log(mcrl2::log::info) << "Ignoring option --select since its argument is empty." << std::endl;
         }
+      }
+      if (0 < parser.options.count("unary"))
+      {
+        m_unary_option = true;
       }
     }
   public:
@@ -74,7 +82,7 @@ class binary_tool: public rewriter_tool<input_output_tool>
       load_lps(spec, m_input_filename);
       data::rewriter r(spec.data());
 
-      lps::binary_algorithm<data::rewriter, stochastic_specification>(spec, r, m_parameter_selection).run();
+      lps::binary_algorithm<data::rewriter, stochastic_specification>(spec, r, m_parameter_selection, m_unary_option).run();
       save_lps(spec, m_output_filename);
       return true;
     }
