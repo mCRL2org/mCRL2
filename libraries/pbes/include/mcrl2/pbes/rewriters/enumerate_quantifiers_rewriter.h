@@ -263,19 +263,19 @@ struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, 
     bool enumerate_infinite_sorts)
     : super(R, sigma, sigma_pbes, dataspec, id_generator, enumerate_infinite_sorts)
   {}
-
-  apply_enumerate_builder(const DataRewriter& R,
-    MutableSubstitution& sigma,
-    const data::data_specification& dataspec,
-    data::enumerator_identifier_generator& id_generator,
-    bool enumerate_infinite_sorts)
-    : super(R, sigma, no_substitution(), dataspec, id_generator, enumerate_infinite_sorts)
-  {}
 };
 
-template <template <class, class, class, class> class Builder, class DataRewriter, class MutableSubstitution, class PbesSubstitution = no_substitution>
-apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution>
-make_apply_enumerate_builder(const DataRewriter& R, MutableSubstitution& sigma, const data::data_specification& dataspec, data::enumerator_identifier_generator& id_generator, const PbesSubstitution& sigma_pbes, bool enumerate_infinite_sorts)
+template<template<class, class, class, class> class Builder,
+  class DataRewriter,
+  class MutableSubstitution,
+  class PbesSubstitution>
+apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution> make_apply_enumerate_builder(
+  const DataRewriter& R,
+  MutableSubstitution& sigma,
+  const PbesSubstitution& sigma_pbes,
+  const data::data_specification& dataspec,
+  data::enumerator_identifier_generator& id_generator,
+  bool enumerate_infinite_sorts)
 {
   return apply_enumerate_builder<Builder, DataRewriter, MutableSubstitution, PbesSubstitution>(R,
     sigma,
@@ -332,7 +332,7 @@ struct enumerate_quantifiers_rewriter
     {
       data::rewriter::substitution_type sigma;
       pbes_expression result;
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
       return result;
     }
 
@@ -340,7 +340,7 @@ struct enumerate_quantifiers_rewriter
     pbes_expression operator()(const pbes_expression& x, MutableSubstitution& sigma) const
     {
       pbes_expression result;
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
       return result;
     }
 
@@ -370,7 +370,7 @@ struct enumerate_quantifiers_rewriter
     template<typename MutableSubstitution, typename PbesSubstitution>
     void operator()(pbes_expression& result, const pbes_expression& x, MutableSubstitution& sigma, const PbesSubstitution& sigma_pbes) const
     {
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution, PbesSubstitution>(
         m_rewriter,
         sigma,
         sigma_pbes,
