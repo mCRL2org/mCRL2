@@ -23,6 +23,21 @@
 namespace mcrl2::lps
 {
 
+namespace detail {
+
+struct expr_substitution
+{
+  std::map<data::data_expression, data::data_expression> subst;
+
+  const data::data_expression& operator()(const data::data_expression& e) const
+  {
+    auto find_it = subst.find(e);
+    return find_it == subst.end() ? e : find_it->second;
+  }
+};
+
+}
+
 // Compute the number of booleans needed to represent a set of size n.
 inline std::size_t nr_of_booleans_for_elements(std::size_t n, bool unary_option)
 {
@@ -71,6 +86,7 @@ protected:
 
   /// Mapping of variables to corresponding encoding (either binary or unary)
   data::mutable_map_substitution<> m_substitution;
+  detail::expr_substitution m_expr_substitution;
 
   /// Contains the names of variables appearing in rhs of m_substitution
   data::set_identifier_generator m_generator;
@@ -148,6 +164,30 @@ protected:
 
     return result;
   }
+
+  std::vector<std::pair<data::data_expression, data::data_expression>> make_constant_substitution(
+    const data::variable& par,
+    const data::variable_vector& new_pars,
+    const data::data_expression_vector& enumerated_elements
+  )
+  {
+    std::vector<std::pair<data::data_expression, data::data_expression>> result;
+
+    auto par_it = new_pars.cbegin();
+    auto enum_it = enumerated_elements.cbegin();
+    while (par_it != new_pars.cend() && enum_it != enumerated_elements.cend())
+    {
+      result.emplace_back(data::equal_to(par, *enum_it), *par_it);
+      result.emplace_back(data::equal_to(*enum_it, par), *par_it);
+      result.emplace_back(data::not_equal_to(par, *enum_it), data::sort_bool::not_(*par_it));
+      result.emplace_back(data::not_equal_to(*enum_it, par), data::sort_bool::not_(*par_it));
+
+      ++par_it; ++enum_it;
+    }
+
+    return result;
+  }
+
   /// \brief Determine which variables should be replaced, based on parameter_selection
   /// \return A subset of the process parameters, with a finite sort that is not Bool
   std::set<data::variable> select_parameters(const std::string parameter_selection) const
@@ -260,6 +300,10 @@ protected:
           mCRL2log(log::debug) << "Using unary encoding" << std::endl;
 
           m_substitution[par] = make_linear_substitution(new_pars, enumerated_elements);
+          for (auto& [from, to]: make_constant_substitution(par, new_pars, enumerated_elements))
+          {
+            m_expr_substitution.subst[from] = to;
+          }
         }
         else
         {
@@ -276,6 +320,7 @@ protected:
     mCRL2log(log::debug) << "New process parameter(s): " << data::pp(new_parameters) << std::endl;
 
     m_spec.process().process_parameters() = data::variable_list(new_parameters.begin(), new_parameters.end());
+    // TODO: get rid of this approach that searches for free variables
     for (const data::variable& v: data::substitution_variables(m_substitution))
     {
       m_generator.add_identifier(v.name());
@@ -435,9 +480,12 @@ protected:
   /// \brief Update an action summand with the new Boolean parameters
   void update_action_summand(action_summand& s)
   {
-    mCRL2log(log::debug) << "condition before update :" << data::pp(s.condition()) << std::endl;
+    if (!m_expr_substitution.subst.empty())
+    {
+      s.condition() = data::replace_data_expressions(s.condition(), m_expr_substitution, true);
+      s.multi_action() = lps::replace_data_expressions(s.multi_action(), m_expr_substitution, true);
+    }
     s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_substitution, m_generator);
-    mCRL2log(log::debug) << "condition after update :" << data::pp(s.condition()) << std::endl;
     s.multi_action() = lps::replace_variables_capture_avoiding(s.multi_action(), m_substitution, m_generator);
     s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
   }
@@ -446,12 +494,21 @@ protected:
   void update_action_summand(stochastic_action_summand& s)
   {
     update_action_summand(static_cast<action_summand&>(s));
+    if (!m_expr_substitution.subst.empty())
+    {
+      s.distribution() = lps::replace_data_expressions(s.distribution(), m_expr_substitution, true);
+    }
     s.distribution() = lps::replace_variables_capture_avoiding(s.distribution(), m_substitution, m_generator);
   }
 
   /// \brief Update a deadlock summand with the new Boolean parameters
   void update_deadlock_summand(deadlock_summand& s)
   {
+    if (!m_expr_substitution.subst.empty())
+    {
+      s.condition() = data::replace_data_expressions(s.condition(), m_expr_substitution, true);
+      lps::replace_data_expressions(s.deadlock(), m_expr_substitution, true);
+    }
     s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_substitution, m_generator);
     lps::replace_variables_capture_avoiding(s.deadlock(), m_substitution, m_generator);
   }
@@ -502,9 +559,9 @@ public:
     // Summands
     mCRL2log(log::debug) << "Updating summands" << std::endl;
 
-      for (action_summand& a: m_spec.process().action_summands())
-      {
-        update_action_summand(a);
+    for (action_summand& a: m_spec.process().action_summands())
+    {
+      update_action_summand(a);
     }
 
     for (deadlock_summand& d: m_spec.process().deadlock_summands())
