@@ -408,7 +408,7 @@ class pbesinst_lazy_algorithm
           const pbes_equation& eqn = m_pbes.equations()[index];
           const auto& phi = eqn.formula();
           data::add_assignments(sigma, eqn.variable().parameters(), X_e.parameters());
-          R(psi_e, phi, sigma);
+          R(psi_e, phi, sigma, phi_substitution(thread_index, eqn.symbol(), X_e, phi));
           R.clear_identifier_generator();
           data::remove_assignments(sigma, eqn.variable().parameters());
 
