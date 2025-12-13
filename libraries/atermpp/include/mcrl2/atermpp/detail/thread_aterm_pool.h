@@ -121,6 +121,9 @@ public:
   /// Returns true iff we are in a shared section.
   inline bool is_shared_locked() { return m_shared_mutex.is_shared_locked(); }
 
+  /// Provides access to the underlying shared mutex.
+  inline mcrl2::utilities::shared_mutex& shared_mutex() { return m_shared_mutex; }
+
   /// Triggers a global garbage collection
   inline void collect() { m_pool.collect(m_shared_mutex); }
 
