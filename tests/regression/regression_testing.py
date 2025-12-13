@@ -98,7 +98,7 @@ regression_tests = {
     'pfnf1'         : lambda name, settings: PbesrewrTest(name, [abspath('pfnf/1.txt')], 'pfnf', settings),
     }
 
-if os != 'nt':
+if os.name != 'nt':
     regression_tests['ticket-1892'] = lambda name, settings: YmlTest(name, ymlfile('ticket_1892'), [abspath('tickets/1892/1.mcrl2'), abspath('tickets/1892/2.mcf')], settings)
 
 pbessolve_tests       = { 'pbessolve-{}'.format(filename[:-4]) : lambda name, settings: YmlTest(name, ymlfile('pbespgsolve'), [abspath('pbessolve/{}'.format(filename))], settings) for filename in sorted(os.listdir(abspath('pbessolve'))) }
