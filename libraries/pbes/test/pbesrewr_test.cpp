@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr3)
   ;
     
   pbes p = txt2pbes(pbes_text);
-  data::rewriter datar(p.data(), data::jitty);
+  data::rewriter datar(p.data(), data::rewriter::strategy::jitty_compiling);
   simplify_data_rewriter<data::rewriter> pbesr(datar);
     
   data::mutable_indexed_substitution sigma;
