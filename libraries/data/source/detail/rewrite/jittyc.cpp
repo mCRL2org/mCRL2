@@ -1255,7 +1255,7 @@ class RewriterCompilingJitty::ImplementTree
       assert(local_result_type.str()=="data_expression");
       s << m_padding << "this_rewriter->" << rewriter_function << "(" << target_for_output << 
            ", this_rewriter->binding_variable_list_get(" << m_rewriter.binding_variable_list_index(a.variables()) << "), ";
-      s << bodyvar << ", true, sigma(this_rewriter));\n";
+      s << bodyvar << ", sigma(this_rewriter), true);\n";
       result_type << "data_expression";
     }
     else

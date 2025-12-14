@@ -59,6 +59,7 @@ static void set_the_precompiled_rewrite_functions_in_a_lookup_table(RewriterComp
 
 template <bool ARGUMENTS_IN_NORMAL_FORM>
 static void rewrite_aux(data_expression& result, const data_expression& t, RewriterCompilingJitty* this_rewriter);
+template <bool ARGUMENTS_IN_NORMAL_FORM>
 static void rewrite_abstraction_aux(data_expression& result, const abstraction& a, const data_expression& t, RewriterCompilingJitty* this_rewriter);
 
 static void rewrite_with_arguments_in_normal_form(
@@ -68,13 +69,6 @@ static void rewrite_with_arguments_in_normal_form(
 {
   rewrite_aux<true>(result, t, this_rewriter);
   return;
-}
-
-static data_expression rewrite_with_arguments_in_normal_form(const data_expression& t, RewriterCompilingJitty* this_rewriter)
-{
-  data_expression result; // TODO: Optimize
-  rewrite_aux<true>(result, t, this_rewriter);
-  return result;
 }
 
 static void rewrite(data_expression& result, const data_expression& t, RewriterCompilingJitty* this_rewriter)
@@ -138,15 +132,15 @@ class delayed_abstraction
       data_expression& t = this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();
       make_abstraction(t, m_binding_operator, m_variables, local_rewrite(m_body));
       data_expression& result = this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();
-      rewrite_abstraction_aux(result, atermpp::down_cast<abstraction>(t),t,this_rewriter);
+      rewrite_abstraction_aux<false>(result, atermpp::down_cast<abstraction>(t),t,this_rewriter);
       return result;
     }
 
     void normal_form(data_expression& result) const
     {
-      local_rewrite(result, m_body);  // TODO: HERE m_body is rewritten twice, even if it is in normal form. 
+      local_rewrite(result, m_body);  
       make_abstraction(result, m_binding_operator, m_variables, result);
-      rewrite_abstraction_aux(result, atermpp::down_cast<abstraction>(result),result,this_rewriter);
+      rewrite_abstraction_aux<true>(result, atermpp::down_cast<abstraction>(result),result,this_rewriter);
     }
 };
 
@@ -228,13 +222,14 @@ static inline rewriter_function get_precompiled_rewrite_function(
   }
 }
 
+template <bool ARGUMENTS_IN_NORMAL_FORM>
 static inline 
 void rewrite_abstraction_aux(data_expression& result, const abstraction& head, const data_expression& a, RewriterCompilingJitty* this_rewriter)
 {
   const binder_type& binder(head.binding_operator());
   if (is_lambda_binder(binder))
   {
-    this_rewriter->rewrite_lambda_application(result, a, sigma(this_rewriter));
+    this_rewriter->rewrite_lambda_application(result, a, sigma(this_rewriter), ARGUMENTS_IN_NORMAL_FORM);
     assert(result.sort()==a.sort());
     return;
   }
@@ -251,6 +246,8 @@ void rewrite_abstraction_aux(data_expression& result, const abstraction& head, c
 }
 
 
+// Rewrite t with the arguments in normal form. 
+template <bool ARGUMENTS_IN_NORMAL_FORM>
 static inline
 void rewrite_appl_aux(data_expression& result, const application& t, RewriterCompilingJitty* this_rewriter)
 {
@@ -258,10 +255,10 @@ void rewrite_appl_aux(data_expression& result, const application& t, RewriterCom
   if (is_function_symbol(thead))
   {
     const std::size_t arity=recursive_number_of_args(t);
-    const rewriter_function f = get_precompiled_rewrite_function<false>(atermpp::down_cast<function_symbol>(thead),arity,this_rewriter);
+    const rewriter_function f = get_precompiled_rewrite_function<ARGUMENTS_IN_NORMAL_FORM>(atermpp::down_cast<function_symbol>(thead),arity,this_rewriter);
     if (f != nullptr)
     {
-      f(result, t,this_rewriter);
+      f(result, t, this_rewriter);
       assert(t.sort()==result.sort());
       return;
     }
@@ -271,11 +268,11 @@ void rewrite_appl_aux(data_expression& result, const application& t, RewriterCom
   // Here the head symbol of, which can be deeply nested, is not a function_symbol.
   const data_expression& head0 = get_nested_head(t);
   data_expression head;
-  if (is_variable(head0))
+  if (!ARGUMENTS_IN_NORMAL_FORM && is_variable(head0))
   { 
     head=sigma(this_rewriter)(down_cast<const variable>(head0));
   }
-  else if (is_where_clause(head0))
+  else if (ARGUMENTS_IN_NORMAL_FORM && is_where_clause(head0))
   { 
     this_rewriter->rewrite_where(head, atermpp::down_cast<where_clause>(head0), sigma(this_rewriter));
   }
@@ -292,21 +289,28 @@ void rewrite_appl_aux(data_expression& result, const application& t, RewriterCom
   // variable, function_symbol, lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,
   if (is_variable(head1))
   {
-    rewrite_all_arguments(result, t1, rewrite_functor(this_rewriter));
+    if constexpr (ARGUMENTS_IN_NORMAL_FORM)
+    {
+      result=t1;
+    }
+    else 
+    {
+      rewrite_all_arguments(result, t1, rewrite_functor(this_rewriter));
+    }
     return;
   }
   else
   if (is_abstraction(head1))
   {
     const abstraction& ha=down_cast<abstraction>(head1);
-    rewrite_abstraction_aux(result, ha,t1,this_rewriter);
+    rewrite_abstraction_aux<ARGUMENTS_IN_NORMAL_FORM>(result, ha,t1,this_rewriter);
     return;
   }
   else
   {
     assert(is_function_symbol(head1));
     const std::size_t arity = recursive_number_of_args(t1);
-    const rewriter_function f = get_precompiled_rewrite_function<false>(down_cast<function_symbol>(head1),arity,this_rewriter);
+    const rewriter_function f = get_precompiled_rewrite_function<ARGUMENTS_IN_NORMAL_FORM>(down_cast<function_symbol>(head1),arity,this_rewriter);
     if (f != nullptr)
     {
       f(result, t1, this_rewriter);
@@ -366,7 +370,7 @@ void rewrite_aux(data_expression& result, const data_expression& t, RewriterComp
     }
     else
     {
-      rewrite_appl_aux(result, appl, this_rewriter);
+      rewrite_appl_aux<ARGUMENTS_IN_NORMAL_FORM>(result, appl, this_rewriter);
       assert(result.sort()==appl.sort());
       return;
     }
@@ -396,7 +400,7 @@ void rewrite_aux(data_expression& result, const data_expression& t, RewriterComp
       return;
     }
     assert(is_lambda_binder(binder));
-    this_rewriter->rewrite_single_lambda(result, abstr.variables(), abstr.body(), false, sigma(this_rewriter));
+    this_rewriter->rewrite_single_lambda(result, abstr.variables(), abstr.body(), sigma(this_rewriter), false);
     return;
   }
   else

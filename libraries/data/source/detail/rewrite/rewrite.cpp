@@ -110,8 +110,8 @@ void Rewriter::rewrite_single_lambda(
                       data_expression& result,
                       const variable_list& vl,
                       const data_expression& body,
-                      const bool body_in_normal_form,
-                      substitution_type& sigma)
+                      substitution_type& sigma,
+                      const bool body_in_normal_form)
 {
   assert(vl.size()>0);
   // A lambda term without arguments; Take care that the bound variable is made unique with respect to
@@ -214,37 +214,28 @@ void Rewriter::rewrite_single_lambda(
 void Rewriter::rewrite_lambda_application(
                       data_expression& result,
                       const data_expression& t,
-                      substitution_type& sigma)
+                      substitution_type& sigma,
+                      const bool arguments_are_in_normal_form /*= false*/)
 {
   if (is_lambda(t))
   {
     const abstraction& ta=atermpp::down_cast<abstraction>(t);
-    rewrite_single_lambda(result,ta.variables(),ta.body(),false,sigma);
+    rewrite_single_lambda(result,ta.variables(),ta.body(), sigma, arguments_are_in_normal_form);
     return;
   }
 
   const application ta(t);
   if (is_lambda(ta.head()))
   {
-    rewrite_lambda_application(result,atermpp::down_cast<abstraction>(ta.head()),ta,sigma);
+    rewrite_lambda_application(result,atermpp::down_cast<abstraction>(ta.head()),ta,sigma, arguments_are_in_normal_form);
     return;
   }
-  rewrite_lambda_application(result,ta.head(),sigma);
+  assert(0);
+  rewrite_lambda_application(result,ta.head(),sigma, arguments_are_in_normal_form);
   data_expression aux;     // TODO. Optimize. 
   make_application(aux,result,ta.begin(),ta.end());
   rewrite(result,aux,sigma);
   return;
-}
-
-// A variant of rewrite_lambda that delivers its result via the stack.
-// This is less efficient as the result on the stack will temporarily be protected.
-data_expression Rewriter::rewrite_lambda_application(
-                      const data_expression& t,
-                      substitution_type& sigma)
-{
-  data_expression result;
-  rewrite_lambda_application(result, t, sigma);
-  return result;
 }
 
 // The function rewrite_lambda_application rewrites a lambda term to a set of
@@ -257,7 +248,8 @@ void Rewriter::rewrite_lambda_application(
                       data_expression& result,
                       const abstraction& lambda_term,
                       const application& t,
-                      substitution_type& sigma)
+                      substitution_type& sigma,
+                      const bool arguments_are_in_normal_form /*= false*/)
 {
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
@@ -265,7 +257,7 @@ void Rewriter::rewrite_lambda_application(
   std::size_t arity=t.size();
   if (arity==0) // The term has shape application(lambda d..:D...t), i.e. without arguments.
   {
-    rewrite_single_lambda(result, vl, lambda_body, true, sigma);
+    rewrite_single_lambda(result, vl, lambda_body, sigma, arguments_are_in_normal_form);
     return;
   }
   assert(vl.size()<=arity);
@@ -278,7 +270,14 @@ void Rewriter::rewrite_lambda_application(
   // Calculate the values that must be substituted for the variables in vl and store these in vl_backup.
   for(std::size_t count=0; count<vl.size(); count++)
   {
-    new (&vl_backup[count]) data_expression(rewrite(t[count],sigma));
+    if (arguments_are_in_normal_form)
+    {
+      new (&vl_backup[count]) data_expression(t[count]);
+    }
+    else
+    {
+      new (&vl_backup[count]) data_expression(rewrite(t[count],sigma));
+    }
   }
 
   // Swap the values assigned to variables in vl with those in vl_backup.
@@ -325,7 +324,10 @@ void Rewriter::rewrite_lambda_application(
                      result,
                      t.begin()+vl.size(),
                      t.end(),
-                     [this, &sigma](const data_expression& t) -> data_expression { return rewrite(t, sigma); },
+                     [this, arguments_are_in_normal_form, &sigma](data_expression& result, const data_expression& t) -> void 
+                     { 
+                       if (arguments_are_in_normal_form){ result=t;} else { result=rewrite(t, sigma); }
+                     },
                      false // This false indicates that the function is not applied to head, i.e., result. 
                     );
   return;
@@ -334,13 +336,14 @@ void Rewriter::rewrite_lambda_application(
 void Rewriter::existential_quantifier_enumeration(
       data_expression& result,
       const abstraction& t,
-      substitution_type& sigma)
+      substitution_type& sigma,
+      const bool t_is_normal_form /*= false*/)
 {
   // This is a quantifier elimination that works on the existential quantifier as specified
   // in data types, i.e. without applying the implement function anymore.
 
   assert(is_exists(t));
-  existential_quantifier_enumeration(result, t.variables(), t.body(), false, sigma);
+  existential_quantifier_enumeration(result, t.variables(), t.body(), sigma, t_is_normal_form);
   return;
 }
 
@@ -351,8 +354,8 @@ void Rewriter::existential_quantifier_enumeration(
       data_expression& result,
       const variable_list& vl,
       const data_expression& t1,
-      const bool t1_is_normal_form,
-      substitution_type& sigma)
+      substitution_type& sigma,
+      const bool t1_is_normal_form /*= false*/)
 {
   quantifier_enumeration(result, vl, t1, t1_is_normal_form, sigma, exists_binder(), &lazy::or_, sort_bool::false_(), sort_bool::true_());
   return;
@@ -362,10 +365,11 @@ void Rewriter::existential_quantifier_enumeration(
 void Rewriter::universal_quantifier_enumeration(
       data_expression& result,
       const abstraction& t,
-      substitution_type& sigma)
+      substitution_type& sigma,
+      const bool t_is_normal_form /*= false*/)
 {
   assert(is_forall(t));
-  universal_quantifier_enumeration(result, t.variables(),t.body(),false,sigma);
+  universal_quantifier_enumeration(result, t.variables(),t.body(),sigma, t_is_normal_form);
   return;
 }
 
@@ -376,8 +380,8 @@ void Rewriter::universal_quantifier_enumeration(
       data_expression& result,
       const variable_list& vl,
       const data_expression& t1,
-      const bool t1_is_normal_form,
-      substitution_type& sigma)
+      substitution_type& sigma,
+      const bool t1_is_normal_form)
 {
   quantifier_enumeration(result, vl, t1, t1_is_normal_form, sigma, forall_binder(), &lazy::and_, sort_bool::true_(), sort_bool::false_());
   return;

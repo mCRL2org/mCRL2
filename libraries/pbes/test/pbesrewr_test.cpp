@@ -120,20 +120,24 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr3)
   pbes p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::jitty);
   simplify_data_rewriter<data::rewriter> pbesr(datar);
-std::cerr << "PBES1" << p << "\n";
     
   data::mutable_indexed_substitution sigma;
   pbes_equation equation = p.equations()[0];
-std::cerr << "Equation " << equation << "\n";
   propositional_variable_instantiation pvi = *find_propositional_variable_instantiations(equation.formula()).begin();
-std::cerr << "PVI " << pvi << "\n";
   data::variable var = equation.variable().parameters().front();
-std::cerr << "VAR " << var << ":" << var.sort() << "\n";
   sigma[var] = *pvi.parameters().begin();
-std::cerr << "RHS " << (*pvi.parameters().begin()) << "\n";
   // With erroneous rewriting this does not terminate.
   pbes_rewrite(p, pbesr, sigma);
-std::cerr << "PBES2" << p << "\n";
-  // After this rewrite p is not well typed. 
+  // After this rewrite p is not well typed anymore. 
+
+  // Now do ti again with the compiling rewriter. 
+  data::rewriter datar_compiling(p.data(), data::jitty_compiling);
+  simplify_data_rewriter<data::rewriter> pbesr_compiling(datar_compiling);
+  std::cerr << "RHS " << (*pvi.parameters().begin()) << "\n";
+  pbes_rewrite(p, pbesr_compiling, sigma);
+  // After this rewrite p is not well typed anymore. 
+  std::cerr << "PBES2" << p << "\n";
+
+
   BOOST_CHECK(true);
 }

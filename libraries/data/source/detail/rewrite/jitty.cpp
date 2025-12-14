@@ -491,7 +491,7 @@ void RewriterJitty::rewrite_aux(
       return;
     }
     assert(is_lambda(ta));
-    rewrite_single_lambda(result,ta.variables(),ta.body(),false,sigma);
+    rewrite_single_lambda(result,ta.variables(),ta.body(), sigma, false);
     return;
   }
 

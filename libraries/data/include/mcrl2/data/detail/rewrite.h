@@ -111,25 +111,27 @@ class Rewriter
 
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
-    void existential_quantifier_enumeration(
-         data_expression& result,
-         const abstraction& t,
-         substitution_type& sigma);
     void existential_quantifier_enumeration(data_expression& result,
-      const variable_list& vl,
-      const data_expression& t1,
-      bool t1_is_normal_form,
-      substitution_type& sigma);
+                                            const abstraction& t,
+                                            substitution_type& sigma,
+                                            bool t1_is_normal_form = false);
 
-    void universal_quantifier_enumeration(
-         data_expression& result,
-         const abstraction& t,
-         substitution_type& sigma);
+    void existential_quantifier_enumeration(data_expression& result,
+                                            const variable_list& vl,
+                                            const data_expression& t1,
+                                            substitution_type& sigma,
+                                            bool t1_is_normal_form = false);
+
     void universal_quantifier_enumeration(data_expression& result,
-      const variable_list& vl,
-      const data_expression& t1,
-      bool t1_is_normal_form,
-      substitution_type& sigma);
+                                          const abstraction& t,
+                                          substitution_type& sigma,
+                                          bool t1_is_normal_form = false);
+
+    void universal_quantifier_enumeration(data_expression& result,
+                                          const variable_list& vl,
+                                          const data_expression& t1,
+                                          substitution_type& sigma,
+                                          bool t1_is_normal_form = false);
 
     /* The functions below exist temporarily in the transformation of the jittyc rewriter to a rewrite_stack */
     /* They ought to be removed. */
@@ -148,7 +150,7 @@ class Rewriter
          substitution_type& sigma)
     {
       data_expression result;
-      existential_quantifier_enumeration(result, vl, t1, t1_is_normal_form, sigma);
+      existential_quantifier_enumeration(result, vl, t1, sigma, t1_is_normal_form);
       return result;
     }
 
@@ -168,7 +170,7 @@ class Rewriter
          substitution_type& sigma)
     {
       data_expression result;
-      universal_quantifier_enumeration(result, vl, t1, t1_is_normal_form, sigma);
+      universal_quantifier_enumeration(result, vl, t1, sigma, t1_is_normal_form);
       return result;
     }
 
@@ -188,17 +190,17 @@ class Rewriter
     void rewrite_single_lambda(data_expression& result,
       const variable_list& vl,
       const data_expression& body,
-      bool body_in_normal_form,
-      substitution_type& sigma);
+      substitution_type& sigma,
+      bool body_in_normal_form);
 
     data_expression rewrite_single_lambda(                    // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
                       const variable_list& vl,
                       const data_expression& body,
-                      const bool body_in_normal_form,
-                      substitution_type& sigma)
+                      substitution_type& sigma,
+                      const bool body_in_normal_form)
     { 
       data_expression result;
-      rewrite_single_lambda(result, vl, body, body_in_normal_form, sigma);
+      rewrite_single_lambda(result, vl, body, sigma, body_in_normal_form);
       return result;
     }
 
@@ -206,17 +208,26 @@ class Rewriter
     void rewrite_lambda_application(
                       data_expression& result,
                       const data_expression& t,
-                      substitution_type& sigma);
+                      substitution_type& sigma,
+                      const bool arguments_are_in_normal_form = false);
 
     data_expression rewrite_lambda_application(
                       const data_expression& t,
-                      substitution_type& sigma);
+                      const bool arguments_are_in_normal_form,
+                      substitution_type& sigma)
+    {
+      data_expression result;
+      rewrite_lambda_application(result, t, sigma, arguments_are_in_normal_form);
+      return result;
+
+    }
 
     void rewrite_lambda_application(
                       data_expression& result,
                       const abstraction& lambda_term,
                       const application& t,
-                      substitution_type& sigma);
+                      substitution_type& sigma,
+                      const bool arguments_are_in_normal_form = false);
 
     virtual void thread_initialise()
     {
