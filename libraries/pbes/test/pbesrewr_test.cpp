@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr3)
   // After this rewrite p is not well typed anymore. 
 
   // Now do ti again with the compiling rewriter. 
-  data::rewriter datar_compiling(p.data(), data::jitty_compiling);
+  data::rewriter datar_compiling(p.data(), data::rewriter::strategy::jitty_compiling);
   simplify_data_rewriter<data::rewriter> pbesr_compiling(datar_compiling);
   std::cerr << "RHS " << (*pvi.parameters().begin()) << "\n";
   pbes_rewrite(p, pbesr_compiling, sigma);
