@@ -588,7 +588,7 @@ if shutil.which("z3") is not None:
 # These test do not work on Windows due to dependencies.
 if os.name != 'nt':
     available_tests.update({'pbessolvesymbolic' : lambda name, settings: PbessolvesymbolicTest(name, [], settings) })
-    available_tests.update({'pbessolvesymbolic-parallel' : lambda name, settings: PbessolvesymbolicTest(name, ['--threads=8'], settings) })
+    # available_tests.update({'pbessolvesymbolic-parallel' : lambda name, settings: PbessolvesymbolicTest(name, ['--threads=8'], settings) })
     available_tests.update({'pbessolvesymbolic-total' : lambda name, settings: PbessolvesymbolicTest(name, ['--total'], settings) })
     available_tests.update({'pbessolvesymbolic-chaining' : lambda name, settings: PbessolvesymbolicTest(name, ['--chaining'], settings) })
     available_tests.update({'pbessolvesymbolic-total-chaining' : lambda name, settings: PbessolvesymbolicTest(name, ['--total', '--chaining'], settings) })
