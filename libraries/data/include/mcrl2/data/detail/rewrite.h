@@ -133,55 +133,11 @@ class Rewriter
                                           substitution_type& sigma,
                                           bool t1_is_normal_form = false);
 
-    /* The functions below exist temporarily in the transformation of the jittyc rewriter to a rewrite_stack */
-    /* They ought to be removed. */
-    data_expression existential_quantifier_enumeration(     // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
-         const abstraction& t,
-         substitution_type& sigma)
-    {
-      data_expression result;
-      existential_quantifier_enumeration(result, t, sigma);
-      return result;
-    }
-    data_expression existential_quantifier_enumeration(      // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
-         const variable_list& vl,
-         const data_expression& t1,
-         const bool t1_is_normal_form,
-         substitution_type& sigma)
-    {
-      data_expression result;
-      existential_quantifier_enumeration(result, vl, t1, sigma, t1_is_normal_form);
-      return result;
-    }
-
-    data_expression universal_quantifier_enumeration(         // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
-         const abstraction& t,
-         substitution_type& sigma)
-    {
-      data_expression result;
-      universal_quantifier_enumeration(result, t, sigma);
-      return result;
-    }
-
-    data_expression  universal_quantifier_enumeration(          // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
-         const variable_list& vl,
-         const data_expression& t1,
-         const bool t1_is_normal_form,
-         substitution_type& sigma)
-    {
-      data_expression result;
-      universal_quantifier_enumeration(result, vl, t1, sigma, t1_is_normal_form);
-      return result;
-    }
-
     // Rewrite a where expression where the subdataexpressions are in internal format.
     // It yields a term without a where expression. The result is passed back in the variable result. 
     void rewrite_where(data_expression& result,
                        const where_clause& term,
                        substitution_type& sigma);
-
-    data_expression rewrite_where(const where_clause& term,    // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
-                                  substitution_type& sigma);
 
     // Rewrite an expression with a lambda as outermost symbol. The expression is in internal format.
     // Bound variables are replaced by new variables to avoid a clash with variables in the right hand sides
@@ -193,34 +149,12 @@ class Rewriter
       substitution_type& sigma,
       bool body_in_normal_form);
 
-    data_expression rewrite_single_lambda(                    // TODO: THIS SHOULD BE REMOVED IN DUE TIME. 
-                      const variable_list& vl,
-                      const data_expression& body,
-                      substitution_type& sigma,
-                      const bool body_in_normal_form)
-    { 
-      data_expression result;
-      rewrite_single_lambda(result, vl, body, sigma, body_in_normal_form);
-      return result;
-    }
-
     /// Rewrite t, assuming that the headsymbol of t, which can be nested, is a lambda term.
     void rewrite_lambda_application(
                       data_expression& result,
                       const data_expression& t,
                       substitution_type& sigma,
                       const bool arguments_are_in_normal_form = false);
-
-    data_expression rewrite_lambda_application(
-                      const data_expression& t,
-                      const bool arguments_are_in_normal_form,
-                      substitution_type& sigma)
-    {
-      data_expression result;
-      rewrite_lambda_application(result, t, sigma, arguments_are_in_normal_form);
-      return result;
-
-    }
 
     void rewrite_lambda_application(
                       data_expression& result,

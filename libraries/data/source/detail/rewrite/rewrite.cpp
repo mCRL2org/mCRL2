@@ -58,15 +58,6 @@ bool occur_check(const variable& v, const atermpp::aterm& e)
 }
 #endif
 
-data_expression Rewriter::rewrite_where(
-                      const where_clause& term,
-                      substitution_type& sigma)
-{
-  data_expression result;
-  rewrite_where(result, term, sigma);
-  return result;
-}
-
 void Rewriter::rewrite_where(
                       data_expression& result,
                       const where_clause& term,
@@ -225,16 +216,8 @@ void Rewriter::rewrite_lambda_application(
   }
 
   const application ta(t);
-  if (is_lambda(ta.head()))
-  {
-    rewrite_lambda_application(result,atermpp::down_cast<abstraction>(ta.head()),ta,sigma, arguments_are_in_normal_form);
-    return;
-  }
-  assert(0);
-  rewrite_lambda_application(result,ta.head(),sigma, arguments_are_in_normal_form);
-  data_expression aux;     // TODO. Optimize. 
-  make_application(aux,result,ta.begin(),ta.end());
-  rewrite(result,aux,sigma);
+  assert(is_lambda(ta.head()));
+  rewrite_lambda_application(result,atermpp::down_cast<abstraction>(ta.head()),ta,sigma, arguments_are_in_normal_form);
   return;
 }
 
