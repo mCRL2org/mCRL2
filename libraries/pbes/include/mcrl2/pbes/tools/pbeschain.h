@@ -326,7 +326,8 @@ inline void self_substitute(pbes_equation& equation,
   std::vector<propositional_variable_instantiation> set
       = get_propositional_variable_instantiations(equation.formula());
   std::size_t initial_size = set.size();
-  std::size_t previous_size =initial_size;
+  std::size_t previous_size = initial_size;
+  std::size_t current_size = initial_size;
   while (!stable)
   {
     stable = true;
@@ -505,7 +506,7 @@ inline void self_substitute(pbes_equation& equation,
       std::vector<propositional_variable_instantiation> set
           = get_propositional_variable_instantiations(equation.formula());
 
-      std::size_t current_size = set.size();
+      current_size = set.size();
       mCRL2log(log::status) << "New number of pvi: " << initial_size <<  " --> " << current_size << "" << std::endl;
 
       // Simplify
@@ -518,6 +519,8 @@ inline void self_substitute(pbes_equation& equation,
       }
     }
   }
+  
+  mCRL2log(log::status) << "New number of pvi: " << initial_size <<  " --> " << current_size << "" << std::endl;
 }
 
 inline void substitute(pbes_equation& into,
