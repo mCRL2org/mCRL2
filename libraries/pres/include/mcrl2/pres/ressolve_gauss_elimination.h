@@ -659,11 +659,11 @@ inline void collect_m_and_split_lines(const std::vector<linear_fixed_point_equat
     if (eq.c_j_term_present)
     {
       data::data_expression is_shallow=rewriter(data::less(eq.c_j,data::sort_real::real_one()));
-      if (is_true(is_shallow))
+      if (is_true(atermpp::down_cast<pres_expression>(is_shallow)))
       {
         shallow_lines.push_back(eq);
       }
-      else if (is_false(is_shallow))
+      else if (is_false(atermpp::down_cast<pres_expression>(is_shallow)))
       {
         steep_lines.push_back(eq);
       }
@@ -828,11 +828,11 @@ disjunction_fj_cj(std::vector<linear_fixed_point_equation>& l, const pres_expres
     pres_expression disjunct = false_();
     assert(eq.c_j_term_present);
     data::data_expression is_c_j_equal_one = rewriter(data::equal_to(eq.c_j, data::sort_real::real_one()));
-    if (is_true(is_c_j_equal_one))
+    if (is_true(atermpp::down_cast<pres_expression>(is_c_j_equal_one)))
     {
       disjunct = atermpp::down_cast<pres_expression>(data::sort_real::real_zero());        
     }
-    else if (is_false(is_c_j_equal_one))
+    else if (is_false(atermpp::down_cast<pres_expression>(is_c_j_equal_one)))
     {
       optimized_const_multiply(disjunct, rewriter(data::sort_real::minus(eq.c_j,data::sort_real::real_one())), U);
     }
@@ -871,11 +871,11 @@ conjunction_fj_cj(std::vector<linear_fixed_point_equation>& l, const pres_expres
       assert(eq.c_j_term_present);
       pres_expression conjunct;
       data::data_expression is_c_j_equal_one = rewriter(data::equal_to(eq.c_j, data::sort_real::real_one()));
-      if (is_true(is_c_j_equal_one))
+      if (is_true(atermpp::down_cast<pres_expression>(is_c_j_equal_one)))
       {   
         conjunct = atermpp::down_cast<pres_expression>(data::sort_real::real_zero());
       }
-      else if (is_false(is_c_j_equal_one))
+      else if (is_false(atermpp::down_cast<pres_expression>(is_c_j_equal_one)))
       { 
         optimized_const_multiply(conjunct, rewriter(data::sort_real::minus(eq.c_j,data::sort_real::real_one())), U);
       }
