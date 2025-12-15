@@ -130,6 +130,7 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr3)
   pbes_rewrite(p, pbesr, sigma);
   // After this rewrite p is not well typed anymore. 
 
+#ifdef MCRL2_ENABLE_JITTYC
   // Now do ti again with the compiling rewriter. 
   data::rewriter datar_compiling(p.data(), data::rewrite_strategy::jitty_compiling);
   simplify_data_rewriter<data::rewriter> pbesr_compiling(datar_compiling);
@@ -140,4 +141,5 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr3)
 
 
   BOOST_CHECK(true);
+#endif // MCRL2_ENABLE_JITTYC
 }
