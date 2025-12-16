@@ -3754,17 +3754,14 @@ class bisim_partitioner_gj
                 // It doesn't happen often that the source is marked NewBotSt
                 // exactly while AvoidLrg is running this search -- so we do
                 /* not test this very often.                                 */ assert(!non_bottom_states_NewBotSt.find(current_source_AvoidLrg));
-                if (aborted!=status_NewBotSt &&
-                    !abort_if_non_bottom_size_too_large_NewBotSt(1))
-                {                                                               assert(aborted!=status_NewBotSt);
-                  // but actually if NewBotSt is already aborted, there is no
-                  // need to add the state to NewBotSt.  (If the current search
-                  // ends first or second, the state will be added to NewBotSt
-                  // later anyway, but if the current search ends as third we
-                  // have saved the assignment.)
-                  current_source_AvoidLrg.ref_state->counter=marked_NewBotSt;
-                  non_bottom_states_NewBotSt.add_todo(current_source_AvoidLrg);
-                }
+                // We have to add the state to NewBotSt even if NewBotSt is
+                // already aborted; otherwise, the counter stays at the value
+                // that indicates it is part of AvoidLrg, which it is not,
+                // and the later part that would move *potential* non-bottom
+                // states to NewBotSt would not do its job properly.
+                current_source_AvoidLrg.ref_state->counter=marked_NewBotSt;
+                non_bottom_states_NewBotSt.add_todo(current_source_AvoidLrg);
+                abort_if_non_bottom_size_too_large_NewBotSt(0);
               }                                                                 else  {  assert(non_bottom_states_NewBotSt.find(current_source_AvoidLrg));  }
             }
             else if (current_outgoing_iter_AvoidLrg=
