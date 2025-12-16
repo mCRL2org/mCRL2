@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include "mcrl2/pbes/detail/pbessolve_algorithm.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbesreach.h"
@@ -64,7 +65,9 @@ public:
       Valpha(Valpha_),
       Vall(Vall_),
       data_index(_data_index),
-      propvar_map(_propvar_map)
+      propvar_map(_propvar_map),
+      X_false(p.equations()[p.equations().size() - 2].variable().name()),
+      X_true(p.equations()[p.equations().size() - 1].variable().name())
   {}
 
   std::function<pbes_expression(const propositional_variable_instantiation&)> phi_substitution(
@@ -73,9 +76,10 @@ public:
     const propositional_variable_instantiation& X,
     const pbes_expression& phi) override
   {
-    return compose_substitutions(
-     rewrite_star_substitution(data_index, propvar_map, strategy, Valpha, X, alpha),
-     pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi));
+    return compose_substitutions(X_false_X_true_substitution(X_false, X_true),
+     compose_substitutions(
+      rewrite_star_substitution(data_index, propvar_map, strategy, Valpha, X, alpha),
+      pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi)));
   }
 
   private:
@@ -85,9 +89,39 @@ public:
     sylvan::ldds::ldd Vall;
     const std::vector<symbolic::data_expression_index>& data_index;
     const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map;
+    const core::identifier_string &X_false;
+    const core::identifier_string &X_true;
 
-    /// Removes PBES expressions that are irrelevant w.r.t the given strategy
-    struct rewrite_star_substitution
+    struct X_false_X_true_substitution
+    {
+      const core::identifier_string& X_false;
+      const core::identifier_string& X_true;
+
+      X_false_X_true_substitution(const core::identifier_string& X_false,
+      const core::identifier_string& X_true)
+      : X_false(X_false),
+        X_true(X_true)
+      {}
+
+      pbes_expression operator()(const propositional_variable_instantiation& x)
+      {
+        if (x.name() == X_false)
+        {
+          return false_();
+        }
+        else if (x.name() == X_true)
+        {
+          return true_();
+        }
+        else
+        {
+          return x;
+        }
+      }
+    };
+
+      /// Removes PBES expressions that are irrelevant w.r.t the given strategy
+      struct rewrite_star_substitution
     {
       mutable std::vector<std::uint32_t> singleton;
       mutable std::smatch match;
