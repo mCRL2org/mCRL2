@@ -13,7 +13,6 @@
 #define MCRL2_PBES_REPLACE_H
 
 #include "mcrl2/data/replace.h"
-#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/replace_capture_avoiding.h"
 
 namespace mcrl2::pbes_system
@@ -72,7 +71,7 @@ struct replace_propositional_variables_builder: public Builder<replace_propositi
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    result = sigma(atermpp::down_cast<propositional_variable_instantiation>(result));
+    result = sigma(x);
   }
 };
 
