@@ -55,8 +55,9 @@ using state_index = std::size_t;
 using transition_index = std::size_t;
 
 using label_index = std::size_t;
-using outgoing_transitions_it = fixed_vector<outgoing_transition_type>::iterator;
-using outgoing_transitions_const_it = fixed_vector<outgoing_transition_type>::const_iterator;
+using outgoing_transitions_it=fixed_vector<outgoing_transition_type>::iterator;
+using outgoing_transitions_const_it =
+                        fixed_vector<outgoing_transition_type>::const_iterator;
 
 constexpr constellation_type* null_constellation=nullptr;
 constexpr transition_index null_transition=-1;
@@ -64,7 +65,8 @@ constexpr label_index null_action=-1;
 constexpr state_index null_state=-1;
 constexpr block_type* null_block=nullptr;
 
-/// default counter value if the counter field of a state is not in use currently
+/// default counter value if the counter field of a state is not in use
+/// currently
 constexpr transition_index undefined=0;
 
   /// \brief the number of counter values that can be used for one subblock
@@ -150,10 +152,13 @@ struct outgoing_transition_type
     ~iterator_or_counter()  {  BLC_transitions.~BLC_list_iterator();  }
   } ref;
 
-  /// this pointer is used to find transitions with the same source state, action label, and target constellation
-  /// (Transitions are grouped according to these in m_outgoing_transitions.)
-  /// For most transitions, it points to the last transition with the same source state, action label, and target constellation;
-  /// but if this transition is the last one in the group, start_same_saC points to the first transition in the group.
+  /// this pointer is used to find transitions with the same source state,
+  /// action label, and target constellation
+  /// (Transitions are grouped according to these in `m_outgoing_transitions`.)
+  /// For most transitions, it points to the last transition with the same
+  /// source state, action label, and target constellation;
+  /// but if this transition is the last one in the group,
+  /// `start_same_saC` points to the first transition in the group.
   outgoing_transitions_it start_same_saC;
 
   // The default initialiser does not initialize the fields of this struct.
@@ -187,8 +192,8 @@ struct state_in_block_pointer
   }
 };
 
-/// a vector with an additional (internal) field to indicate how much work has been
-/// done already on it.
+/// a vector with an additional (internal) field to indicate how much work has
+/// been done already on it.
 class todo_state_vector
 {
   std::size_t m_todo_indicator=0;
@@ -196,7 +201,7 @@ class todo_state_vector
 
   public:
     using const_iterator = std::vector<state_in_block_pointer>::const_iterator;
-#ifndef NDEBUG
+                                                                                #ifndef NDEBUG
                                                                                   bool find(const state_in_block_pointer s) const
                                                                                   {
                                                                                     return std::find(m_vec.begin(), m_vec.end(), s)!=m_vec.end();
@@ -470,7 +475,8 @@ struct transition_type
 {
   // The position of the transition type corresponds to m_aut.get_transitions().
   // std::size_t from, label, to are found in m_aut.get_transitions().
-  linked_list<BLC_indicators>::iterator transitions_per_block_to_constellation{};
+  linked_list<BLC_indicators>::iterator
+                                      transitions_per_block_to_constellation{};
   outgoing_transitions_it ref_outgoing_transitions;  // This refers to the position of this transition in m_outgoing_transitions.
                                                      // During initialisation m_outgoing_transitions contains the indices of this
                                                      // transition. After initialisation m_outgoing_transitions refers to the corresponding
@@ -570,8 +576,7 @@ struct block_type
     /// corresponding co-splitter in the list.
     /// During `stabilize()`, BLC sets that are regarded as unstable are near
     /// the end of the list.
-    linked_list<BLC_indicators> to_constellation;
-    static_assert(std::is_trivially_destructible_v<linked_list<BLC_indicators>>);
+    linked_list<BLC_indicators> to_constellation;                               static_assert(std::is_trivially_destructible_v<linked_list<BLC_indicators>>);
     /// \brief used during initialisation for a pointer to a vector of marked states
     /// \details During initialisation (when there is only one constellation)
     /// the same space as `to_constellation` is actually used for something
@@ -721,7 +726,7 @@ class bisim_partitioner_gj
 
     using set_of_states_type = std::unordered_set<state_index>;
     using set_of_transitions_type = std::unordered_set<transition_index>;
-#ifndef NDEBUG
+                                                                                #ifndef NDEBUG
                                                                                   public: // needed for the debugging functions, e.g. debug_id().
                                                                                 #endif
     /// \brief automaton that is being reduced
@@ -1809,7 +1814,8 @@ class bisim_partitioner_gj
       if (m_aut.has_state_info())   // If there are no state labels
       {                             // this step is not needed
         /* Create a vector for the new labels */
-        std::remove_reference_t<decltype(m_aut.state_labels())> new_labels(num_eq_classes());
+        std::remove_reference_t<decltype(m_aut.state_labels())>
+                                                  new_labels(num_eq_classes());
 
         for(std::size_t i=0; i<m_aut.num_states(); ++i)
         {                                                                       //mCRL2complexity(&m_states[i], add_work(..., 1), *this);
@@ -1949,7 +1955,8 @@ class bisim_partitioner_gj
     {                                                                           assert(count<m_aut.num_states());  assert(m_states_in_blocks.data()<=pos1);
       /* if (pos1 > pos2)  std::swap(pos1, pos2);                            */ assert(pos1<pos2);  assert(pos2<=m_states_in_blocks.data_end()-count);
       {
-        std::make_signed_t<state_index> overlap = std::distance(pos2, pos1) + count;
+        std::make_signed_t<state_index> overlap =
+                                             std::distance(pos2, pos1) + count;
         if (overlap > 0)
         {
           count -= overlap;
@@ -2506,7 +2513,8 @@ class bisim_partitioner_gj
             new_position=m_branching ? new_bi->block.to_constellation.begin()
                                      : new_bi->block.to_constellation.end();
           }                                                                     assert(!m_branching || new_bi->block.to_constellation.end()!=new_position);
-          const BLC_list_iterator old_BLC_start=this_block_to_constellation->start_same_BLC;
+          const BLC_list_iterator old_BLC_start=
+                                   this_block_to_constellation->start_same_BLC;
           new_BLC_block=new_bi->block.to_constellation.emplace_after
                           (new_position, old_BLC_start, old_BLC_start,
                                      this_block_to_constellation->is_stable());
@@ -3219,13 +3227,13 @@ class bisim_partitioner_gj
         new (&bi->c) block_type::
                constellation_or_first_unmarked_bottom_state(new_constellation);
                                                                                 #ifndef NDEBUG
-        for (const state_in_block_pointer& st: potential_non_bottom_states[ReachAlw])
-        {
-          assert(0 < st.ref_state->no_of_outgoing_block_inert_transitions);
-          assert(st.ref_state->counter == marked(ReachAlw) + st.ref_state->no_of_outgoing_block_inert_transitions);
-          assert(is_in_marked_range_of(st.ref_state->counter, ReachAlw));
-        }
-#endif
+                                                                                  for (const state_in_block_pointer& st: potential_non_bottom_states[ReachAlw])
+                                                                                  {
+                                                                                    assert(0<st.ref_state->no_of_outgoing_block_inert_transitions);
+                                                                                    assert(st.ref_state->counter==marked(ReachAlw)+st.ref_state->no_of_outgoing_block_inert_transitions);
+                                                                                    assert(is_in_marked_range_of(st.ref_state->counter, ReachAlw));
+                                                                                  }
+                                                                                #endif
         large_splitter_iter_NewBotSt=m_BLC_transitions.data_end();
         large_splitter_iter_end_NewBotSt=m_BLC_transitions.data_end();
       }
@@ -3402,9 +3410,8 @@ class bisim_partitioner_gj
       ///
       /// This macro can be used before the coroutines start or while they run.
       #define abort_if_non_bottom_size_too_large_NewBotSt(i)                                                                                   \
-          ((                                                                    assert(aborted!=status_NewBotSt),                              \
-            non_bottom_states_NewBotSt.size()+(i)>                                                                                             \
-                                         no_of_unfinished_states_in_block/2) &&                                                                \
+          (non_bottom_states_NewBotSt.size()+(i)>                                                                                              \
+                                          no_of_unfinished_states_in_block/2 &&                                                                \
            (/* Algorithm 2, Line 2.12                                        */ assert(std::numeric_limits<state_index>::max()!=               \
                                                                                                             no_of_unfinished_states_in_block), \
             no_of_unfinished_states_in_block=                                                                                                  \
@@ -3526,7 +3533,7 @@ class bisim_partitioner_gj
           st.ref_state->counter=marked_NewBotSt;                                // constellation are new, see above).
         }
         ++no_of_finished_searches;
-        status[ReachAlw]=finished;
+        status[ReachAlw]=finished;                                              assert(aborted!=status_NewBotSt);
         abort_if_non_bottom_size_too_large_NewBotSt(0);
       }
       else if (!abort_if_bottom_size_too_large(ReachAlw))
@@ -3568,9 +3575,12 @@ class bisim_partitioner_gj
       {                                                                         assert(2>=no_of_finished_searches);
         state_in_block_pointer* new_start_bottom_states_plus_one[3];
         state_in_block_pointer* new_end_bottom_states_plus_one[2];
-        #define new_start_bottom_states(idx) (assert(1<=(idx)), assert((idx)<=3), new_start_bottom_states_plus_one[(idx)-1])
-        #define new_end_bottom_states(idx) (assert(1<=(idx)), assert((idx)<=2), new_end_bottom_states_plus_one[(idx)-1])
-        #define new_end_bottom_states_NewBotSt (new_start_bottom_states_plus_one[2])
+        #define new_start_bottom_states(idx) (                                  assert(1<=(idx)), assert((idx)<=3), \
+                                     new_start_bottom_states_plus_one[(idx)-1])
+        #define new_end_bottom_states(idx) (                                    assert(1<=(idx)), assert((idx)<=2), \
+                                       new_end_bottom_states_plus_one[(idx)-1])
+        #define new_end_bottom_states_NewBotSt \
+                                          (new_start_bottom_states_plus_one[2])
         for (int current_search_index=0; current_search_index<
                                 no_of_running_searches; ++current_search_index)
         {
@@ -3930,7 +3940,8 @@ class bisim_partitioner_gj
                             +potential_non_bottom_states[current_search].size()
                             -non_bottom_states[current_search].size());
               }
-              for (const state_in_block_pointer& st: potential_non_bottom_states[current_search])
+              for (const state_in_block_pointer& st:
+                                   potential_non_bottom_states[current_search])
               {                                                                 // The work in this loop can be assigned to the same transition(s) that made
                                                                                 // st go into `potential_non_bottom_states[current_search]`.  (It can now be
                                                                                 // a final counter, as we know for sure the subblock is not aborted.)
@@ -3964,7 +3975,8 @@ class bisim_partitioner_gj
                 // Algorithm 2, Line 2.37 left
                 /* The HitSmall states can be assigned to NewBotSt because   */ assert(finished!=status[AvoidSml]);
                 /* they cannot be in ReachAlw or AvoidLrg                    */ assert(finished!=status_NewBotSt);
-                for (const state_in_block_pointer& st: potential_non_bottom_states_HitSmall)
+                for (const state_in_block_pointer& st:
+                                          potential_non_bottom_states_HitSmall)
                 {                                                               assert(0<st.ref_state->no_of_outgoing_block_inert_transitions);
                                                                                 // The work in this loop can be assigned to the same transitions in
                                                                                 // the main splitter as the one(s) that made st become a member of
@@ -4017,7 +4029,7 @@ class bisim_partitioner_gj
                   --no_of_running_searches;                                     assert(1==no_of_running_searches);
                 }
                 else
-                {
+                {                                                               assert(aborted!=status_NewBotSt);
                   abort_if_non_bottom_size_too_large_NewBotSt(0);
                 }
               }
@@ -4129,14 +4141,11 @@ class bisim_partitioner_gj
               non_bottom_states[max_process].swap_vec
                                     (potential_non_bottom_states[max_process]);
                                                                                 #ifndef NDEBUG
-              for (const state_in_block_pointer& st: potential_non_bottom_states_HitSmall)
-              {
-                assert(has_small_splitter);
-                assert(has_large_splitter);
-                /* All HitSmall states must have been assigned to some         */ assert(
-                    marked(ReachAlw) == st.ref_state->counter ||
-                    /* subblock, so there is no need to clear these state counters */ marked(AvoidLrg)
-                        == st.ref_state->counter);
+                                                                                  for (const state_in_block_pointer& st: potential_non_bottom_states_HitSmall)
+                                                                                  {
+                                                                                    assert(has_small_splitter);  assert(has_large_splitter);
+              /* All HitSmall states must have been assigned to some         */     assert(marked(ReachAlw) == st.ref_state->counter ||
+              /* subblock, so there is no need to clear these state counters */            marked(AvoidLrg) == st.ref_state->counter);
               /* as well:                                                    */   }
                                                                                 #endif
               if (has_small_splitter && has_large_splitter)
@@ -4309,7 +4318,7 @@ class bisim_partitioner_gj
             // Algorithm 2, Line 2.17 right
             if (marked_NewBotSt!=src.ref_state->counter)
             {                                                                   assert(!non_bottom_states_NewBotSt.find(src));
-              // Algorithm 2, Line 2.12
+              /* Algorithm 2, Line 2.12                                      */ assert(aborted!=status_NewBotSt);
               if (abort_if_non_bottom_size_too_large_NewBotSt(1))
               {
                 // but actually if NewBotSt is already aborted, there is no
@@ -4368,7 +4377,7 @@ class bisim_partitioner_gj
               large_splitter_iter_NewBotSt!=large_splitter_iter_end_NewBotSt)
           {                                                                     assert(finished==status[ReachAlw]);  assert(finished==status[AvoidSml]);
             // Because we have nothing else to do, we handle one transition in
-            // the co-splitter.
+            // the large splitter.
             do
             {
               // Algorithm 2, Line 2.23 right
@@ -4406,7 +4415,7 @@ class bisim_partitioner_gj
                   // We must add state src to NewBotSt even if NewBotSt is
                   // about to be aborted: it may happen that this was exactly
                   // the last transition in the co-splitter, and then the
-                  // AvoidLrg-coroutine could add state src erroneously.
+                  /* AvoidLrg-coroutine could add state src erroneously.     */ assert(aborted!=status_NewBotSt);
                   abort_if_non_bottom_size_too_large_NewBotSt(0);
                   break;
                 }                                                               else  {  assert(marked_HitSmall!=src.ref_state->counter);  }
@@ -4901,6 +4910,9 @@ class bisim_partitioner_gj
         }                                                                       else {
                                                                                   assert(aborted==status_NewBotSt);
                                                                                 }
+        #undef new_start_bottom_states
+        #undef new_end_bottom_states
+        #undef new_end_bottom_states_NewBotSt
       } // end of outer coroutine loop for ReachAlw/AvoidSml/AvoidLrg and NewBotSt together
 
       #undef bottom_size
@@ -5907,7 +5919,8 @@ class bisim_partitioner_gj
           #ifdef INIT_WITHOUT_BLC_SETS
             m_transitions[*ti].ref_outgoing_transitions->ref.transitions=*ti;
           #else
-            m_transitions[*ti].ref_outgoing_transitions->ref.BLC_transitions=ti;
+            m_transitions[*ti].ref_outgoing_transitions->
+                                                        ref.BLC_transitions=ti;
           #endif
           ++count_outgoing_transitions_per_state[t.from()];
         }
@@ -6489,9 +6502,11 @@ class bisim_partitioner_gj
             }
 
             // Update the doubly linked list L_B->C in blocks as the constellation is split in B and C\B.
-            if (update_the_doubly_linked_list_LBC_new_constellation(index_block_B, t, t_index) &&
+            if (update_the_doubly_linked_list_LBC_new_constellation
+                                                 (index_block_B, t, t_index) &&
                 !source_block_is_singleton &&
-                (!is_inert_during_init(t) || index_block_B!=m_states[t.from()].block))
+                (!is_inert_during_init(t) ||
+                 index_block_B!=m_states[t.from()].block))
             {
               // a new BLC set has been constructed, insert its start position into calM.
               // (unless the source block is a singleton)
@@ -6681,7 +6696,8 @@ class bisim_partitioner_gj
     ///                            applied.
     /// \param preserve_divergence If true and branching is true, preserve
     ///                            tau loops on states.
-    bisim_partitioner_gj(LTS_TYPE& aut, const bool branching = false, const bool preserve_divergence = false)
+    bisim_partitioner_gj(LTS_TYPE& aut, const bool branching = false,
+                                        const bool preserve_divergence = false)
         : m_aut(aut),
           m_states(aut.num_states()),
           m_outgoing_transitions(aut.num_transitions()),
@@ -6732,11 +6748,11 @@ class bisim_partitioner_gj
 ///                                    are preserved.
 template <class LTS_TYPE>
 void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
-                                         const bool preserve_divergence = false)
+                                         const bool preserve_divergence=false)
 {
     if (1 >= l.num_states())
     {
-        mCRL2log(log::warning) << "There is only 1 state in the LTS. It is not "
+        mCRL2log(log::warning) <<"There is only 1 state in the LTS. It is not "
                 "guaranteed that branching bisimulation minimisation runs in "
                 "time O(m log n).\n";
     }
