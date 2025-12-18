@@ -309,7 +309,6 @@ is_not_too_big(pbeschain_options& options, propositional_variable_instantiation&
 inline bool
 is_avoiding_alternation(pbeschain_options& options, propositional_variable_instantiation& new_x, pbes_equation& eq)
 {
-    mCRL2log(log::verbose) << "Checking if " << new_x.name() << " is avoiding alternation with " << eq.variable().name() << std::endl;
     return !(options.avoid_alternating) || new_x.name() == eq.variable().name();
 }
 
