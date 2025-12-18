@@ -42,6 +42,7 @@ struct pbeschain_options
   double timeout = 0.0; // timeout in seconds, 0 = no timeout
   double pvi_pp_factor = 0.0; // factor of the maximum size the chained predicate formula should be after chaining compared to the size of the original PVI.
   bool quantifier_free = false;
+  bool avoid_alternating = false;
 };
 
 // Substitutor to target specific path, replace our specific pvi with true/false
@@ -305,6 +306,13 @@ is_not_too_big(pbeschain_options& options, propositional_variable_instantiation&
   return !(options.pvi_pp_factor > 0.0) || ((double)pp(phi).size() <= options.pvi_pp_factor * (double)pp(cur_x).size());
 }
 
+inline bool
+is_avoiding_alternation(pbeschain_options& options, propositional_variable_instantiation& new_x, pbes_equation& eq)
+{
+    mCRL2log(log::verbose) << "Checking if " << new_x.name() << " is avoiding alternation with " << eq.variable().name() << std::endl;
+    return !(options.avoid_alternating) || new_x.name() == eq.variable().name();
+}
+
 inline void self_substitute(pbes_equation& equation,
   substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
   rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
@@ -421,7 +429,7 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // (3) check if simpler
-        if (size == 1 && is_not_too_big(options, cur_x, phi) && is_quantifier_free(phi, options))
+        if (size == 1 && is_avoiding_alternation(options, *phi_vector.begin(), equation) && is_not_too_big(options, cur_x, phi) && is_quantifier_free(phi, options))
         {
           propositional_variable_instantiation new_x = *phi_vector.begin();
 
