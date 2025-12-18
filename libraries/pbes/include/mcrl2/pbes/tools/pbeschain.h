@@ -521,6 +521,12 @@ inline void self_substitute(pbes_equation& equation,
   }
   
   mCRL2log(log::status) << "New number of pvi: " << initial_size <<  " --> " << current_size << "" << std::endl;
+  
+  if (current_size == 0) {
+      equation.formula() = simplify_expr(equation.formula(),
+          if_substituter,
+          pbes_rewriter);
+  }
 }
 
 inline void substitute(pbes_equation& into,
