@@ -15,8 +15,8 @@
 map N:Pos;
     MAX:Pos;
      
-eqn N=10;
-    MAX=4;
+eqn N=64;
+    MAX=5;
     
 % Interactions
 act new_file;
