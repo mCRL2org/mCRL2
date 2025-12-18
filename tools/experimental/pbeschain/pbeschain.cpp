@@ -43,6 +43,7 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
       m_options.timeout = parser.option_argument_as<double>("timeout");
       m_options.pvi_pp_factor = parser.option_argument_as<double>("pvi-pp-factor");
       m_options.quantifier_free = parser.has_option("quantifier-free");
+      m_options.avoid_alternating = parser.has_option("avoid-alternating");
     }
 
     void add_options(interface_description& desc) override
@@ -70,7 +71,9 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
                   "Set a factor of the maximum size the chained predicate formula should be after chaining compared to the size of the original PVI."
                   "0 means no limit.");
       desc.add_option("quantifier-free",
-                  "Do not chain if the unfolded predicate variable instance contains any quantifier.");
+                  "Do not chain if the unfolded formula contains any quantifier.");
+      desc.add_option("avoid-alternating",
+                  "Do not chain if the unfolded formula contains a PVI with a different name than the current equation. So X(a) -> Y(b) is not allowed.");
     }
 
   public:
