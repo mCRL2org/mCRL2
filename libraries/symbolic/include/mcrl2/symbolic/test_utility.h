@@ -122,8 +122,7 @@ inline sylvan::ldds::ldd to_ldd(const std::set<std::vector<std::uint32_t>>& vect
 inline void initialise_sylvan()
 {
   //mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
-  lace_init(1, static_cast<size_t>(1024 * 1024 * 4));
-  lace_startup(0, nullptr, nullptr);
+  lace_start(0, 0);
   sylvan::sylvan_set_limits(static_cast<size_t>(1024) * 1024 * 1024, 6, 6);
   sylvan::sylvan_init_package();
   sylvan::sylvan_init_ldd();
@@ -133,7 +132,7 @@ inline void initialise_sylvan()
 inline void quit_sylvan()
 {
   sylvan::sylvan_quit();
-  lace_exit();
+  lace_stop();
 }
 
 } // namespace mcrl2::symbolic
