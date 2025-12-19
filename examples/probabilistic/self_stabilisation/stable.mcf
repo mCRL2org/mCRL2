@@ -1,0 +1,4 @@
+% The maximal probability to finally reach a stable state.
+% "Pmax=? [ F  (num_tokens = 1) ]"
+
+<true*>(<stable>val(1) || val(0))
