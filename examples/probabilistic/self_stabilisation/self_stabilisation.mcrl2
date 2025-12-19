@@ -15,6 +15,7 @@
 act send_token:Int#Int;
     read_token:Int#Int;
     comm_token:Int#Int;
+    token, notoken, stable;
 
 %   token:
 proc P(id:Int, token:Bool, prev:Int, next:Int)=
@@ -25,12 +26,17 @@ proc P(id:Int, token:Bool, prev:Int, next:Int)=
                          )+
         % It is always possible to receive a token from prev or next
         read_token(next,id).P(id,true,prev,next) + 
-        read_token(prev,id).P(id,true,prev,next)
+        read_token(prev,id).P(id,true,prev,next) +
+        % Check for token
+        (token) ->token.P()+
+        (!token)->notoken.P()
     ;
                
 init 
-	allow({comm_token},
-    comm({send_token | read_token -> comm_token},
+    allow({comm_token,stable},
+    comm({send_token | read_token -> comm_token,
+          token | notoken | notoken | notoken | notoken -> stable
+         },
          P(0,true,4,1)||
          P(1,true,0,2)||
          P(2,true,1,3)||
