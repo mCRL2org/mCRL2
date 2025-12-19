@@ -45,7 +45,7 @@
 /// block, one state is picked, and its outgoing transitions are used as an
 /// estimate how many transitions this block / equivalence class will have in
 /// the quotient.  This method takes more effort -- enabling the option may
-/// reduce the running time by 5–10%.  Therefore it is provided as an option,
+/// increase the running time by 5–10%.  Therefore it is provided as an option,
 /// not always enabled.
 
 #ifndef LIBLTS_BISIM_GJ_LAZY_BLC_H
@@ -1531,9 +1531,10 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                           { all_blocks_are_singletons = false; }
                                                                                           if (!is_inert_during_init(first_t) || b.constellation != &to_constln)
                                                                                           {
-                                                                                            // The transitions from block b in this super-BLC set are
+                                                                                            // The transitions from block b in this super-BLC set are not
                                                                                             // constellation-inert.  So b should be stable under it.
                                                                                             set_of_states_type all_source_bottom_states;
+                                                                                            bool has_transitions = false;
                                                                                             for (BLC_list_const_iterator i=ind->start_same_BLC;
                                                                                                                                       i<ind->end_same_BLC; ++i)
                                                                                             {
@@ -1543,6 +1544,7 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                               {
                                                                                                 continue;
                                                                                               }
+                                                                                              has_transitions = true;
                                                                                               if (src.ref_states_in_blocks < b.sta.rt_non_bottom_states) {
                                                                                                 assert(b.start_bottom_states <= src.ref_states_in_blocks);
                                                                                                 assert(0 == src.no_of_outgoing_block_inert_transitions);
@@ -1558,7 +1560,7 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                             if (all_source_bottom_states.size() != static_cast<std::size_t>
                                                                                                                  (std::distance(b.start_bottom_states,
                                                                                                                                 b.sta.rt_non_bottom_states)) &&
-                                                                                                !all_source_bottom_states.empty())
+                                                                                                has_transitions)
                                                                                             {
                                                                                               // only splitters should be instable.
                                                                                               mCRL2log(log::debug) << "Not all "
@@ -1579,6 +1581,7 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                               else
                                                                                               { eventual_instability_is_ok = false; }
                                                                                             }
+//else if (has_transitions) { std::cerr << b.debug_id(*this) << " is stable under the " << m_aut.action_label(first_t.label()) << "-transitions to " << to_constln.debug_id(*this) << '\n'; }
                                                                                           }
                                                                                         }
                                                                                         // now check marked states:
@@ -1691,6 +1694,8 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                             eventual_marking_is_ok = true;
                                                                                           }
                                                                                         }
+                                                                                        assert(eventual_instability_is_ok);
+                                                                                        assert(eventual_marking_is_ok);
                                                                                       }
                                                                                     }
                                                                                     mCRL2log(log::debug) << "Check stability finished: " << tag << ".\n";
@@ -2308,6 +2313,10 @@ class bisim_partitioner_gj_lazy_BLC
                simple_list<BLC_indicators_lb>::iterator new_BLC_block,
                simple_list<BLC_indicators_lb>::iterator old_BLC_block)
     {                                                                           assert(new_BLC_block->is_stable());
+//std::cerr << "swap_in_the_doubly_linked_list_LBC_in_blocks_new_constellation("
+//<< m_transitions[ti].debug_id_short(*this) << ','
+//<< new_BLC_block->debug_id(*this) << ','
+//<< old_BLC_block->debug_id(*this) << ")\n";
       BLC_list_iterator old_position=
                m_transitions[ti].ref_outgoing_transitions->ref_BLC_transitions; assert(old_BLC_block->start_same_BLC <= old_position);
                                                                                 assert(old_position<old_BLC_block->end_same_BLC);
@@ -2590,7 +2599,8 @@ class bisim_partitioner_gj_lazy_BLC
                                           const int split_type = SPLIT_SMALLER)
     {                                                                           assert(BLC_source.start_BLC_source < splitpoint);
       state_in_block_pointer_lb* it = splitpoint;                               assert(splitpoint < BLC_source.end_BLC_source);
-      state_in_block_pointer_lb* end_it = splitpoint;
+      state_in_block_pointer_lb* end_it = splitpoint;                           assert((null_constellation_lb==old_constellation)==
+                                                                                       (null_constellation_lb==new_constellation));
       update_small_subblock_counters(BLC_source.start_BLC_source, splitpoint,
                                         BLC_source.end_BLC_source, split_type);
       if (0 > split_type ||
@@ -2650,6 +2660,7 @@ class bisim_partitioner_gj_lazy_BLC
           {
             // move transition *out_it from its BLC set to a new BLC set.
             BLC_list_iterator old_position = out_it->ref_BLC_transitions;
+//std::cerr << "Moving transition " << m_transitions[*old_position].debug_id(*this) << " to a new BLC set.\n";
             simple_list<BLC_indicators_lb>::iterator
                     old_BLC_set = m_transitions[*old_position].
                                         transitions_per_block_to_constellation; assert(old_BLC_set->start_same_BLC<=old_position);
@@ -2659,6 +2670,8 @@ class bisim_partitioner_gj_lazy_BLC
             const transition& tr = m_aut.get_transitions()[*old_position];
             const label_index a = label_or_divergence(tr);
             const transition* prev_tr;
+            bool empty_old_BLC_set_can_be_deleted_immediately =
+                                    null_constellation_lb == old_constellation;
             if (new_position == m_BLC_transitions.data() ||
                 (prev_tr = &m_aut.get_transitions()[*std::prev(new_position)],
                  m_states[prev_tr->from()].ref_states_in_blocks <
@@ -2671,6 +2684,7 @@ class bisim_partitioner_gj_lazy_BLC
             {
               // a new BLC set needs to be created (and added to the list of
               // new_BLC_source).
+//std::cerr << "    This is the first transition in a to-be-created BLC set.\n";
 
               if (old_BLC_set->is_stable())
               {
@@ -2679,7 +2693,7 @@ class bisim_partitioner_gj_lazy_BLC
                 // the BLC set is a potential co- or main splitter.
                 const constellation_type_lb* to_constln;
                 simple_list<BLC_indicators_lb>::const_iterator old_co_splitter;
-                constellation_type_lb* co_to_constln;
+                constellation_type_lb* co_to_constln=null_constellation_lb;
                 transition_index perhaps_new_co_spl_transition;
                 const transition* perhaps_new_co_spl_t;
                 if (null_constellation_lb != old_constellation &&
@@ -2691,16 +2705,20 @@ class bisim_partitioner_gj_lazy_BLC
                         // i.e. old_BLC_set is a co-splitter
                         (old_co_splitter =
                            BLC_source.block_to_constellation.next(old_BLC_set),
+//(std::cerr << "    The transition is in a co-splitter\n"),
                          co_to_constln = new_constellation, true)) ||
                      (to_constln == new_constellation &&
                         // i.e. old_BLC_set is a main splitter
                         (old_co_splitter =
                            BLC_source.block_to_constellation.prev(old_BLC_set),
+//(std::cerr << "    The transition is in a main splitter\n"),
                          co_to_constln = old_constellation, true)) ||
                      (// `to_constln` is neither the new nor the old
                       // constellation, so if `old_BLC_set` becomes empty it
                       // can be deleted immediately
-                      old_constellation = null_constellation_lb, false)) &&
+//(std::cerr << "    The transition is neither in a main nor in a co-splitter\n"),
+                      empty_old_BLC_set_can_be_deleted_immediately = true,
+                      false)) &&
                     BLC_source.block_to_constellation.end()!=old_co_splitter &&
                     // old_BLC_set is a co-splitter or a main splitter, and if
                     // its corresponding main/co-splitter exists, then it is
@@ -2724,10 +2742,11 @@ class bisim_partitioner_gj_lazy_BLC
                     co_to_constln == m_states
                              [perhaps_new_co_spl_t->to()].block->constellation)
                 {
+//std::cerr << "    a new main/co-splitter already exists, containing the " << m_transitions[perhaps_new_co_spl_transition].debug_id(*this) << '\n';
                   // found that a new main/co-splitter already exists.
                   if (old_constellation==to_constln)
                   {
-                    // (`old_BLC_set` was a co-splitter:)
+                    /* (`old_BLC_set` was a co-splitter:)                    */ assert(new_constellation==co_to_constln);
                     // `perhaps_new_co_spl_transition` is in the new main
                     // splitter; place the new BLC set immediately before
                     // this main splitter in the list
@@ -2741,7 +2760,7 @@ class bisim_partitioner_gj_lazy_BLC
                   }
                   else
                   {
-                    // (`old_BLC_set` was a main splitter:)
+                    /* (`old_BLC_set` was a main splitter:)                  */ assert(old_constellation==co_to_constln);
                     // `perhaps_new_co_spl_transition` is in the new
                     // co-splitter; place the new BLC set immediately
                     // after this co-splitter in the list
@@ -2752,11 +2771,12 @@ class bisim_partitioner_gj_lazy_BLC
                                       transitions_per_block_to_constellation,
                                            new_position, new_position, true);
                     // If the old BLC set gets empty, we no longer need it.
-                    old_constellation = null_constellation_lb;
+                    empty_old_BLC_set_can_be_deleted_immediately = true;
                   }
                 }
                 else
                 {
+//std::cerr << "    There is no new co-splitter (yet).\n";
                   // This BLC set does not contain relevant transitions, or
                   // there is no new co-splitter. We need to create the new
                   // super-BLC set and possibly we will have a transition that
@@ -2805,8 +2825,9 @@ class bisim_partitioner_gj_lazy_BLC
 //const transition& tr=m_aut.get_transitions()[*old_position];
 //std::cerr << "The last element has been removed from BLC set (" << BLC_source.debug_id(*this)
 //<< " -" << pp(m_aut.action_label(tr.label())) << "-> " << m_states[tr.to()].block->constellation->debug_id(*this) << ").\n";
-              if (null_constellation_lb != old_constellation ||
-                  !old_BLC_set->is_stable())
+              if (!empty_old_BLC_set_can_be_deleted_immediately ||
+                  (null_constellation_lb != old_constellation &&
+                   !old_BLC_set->is_stable()))
               {
                 // Sometimes we could still remove this_block_to_constellation
                 // immediately (namely if the new main splitter and the new
@@ -2838,6 +2859,10 @@ class bisim_partitioner_gj_lazy_BLC
               {
                 /* remove the old BLC set, as it has become empty            */ assert(old_BLC_set->start_same_BLC==old_BLC_set->end_same_BLC);
                 BLC_source.block_to_constellation.erase(old_BLC_set);
+//std::cerr << " -- it is removed immediately: old_constellation == "
+//<< (null_constellation_lb == old_constellation ? "nullptr" : old_constellation->debug_id(*this)) << ", new_constellation == "
+//<< (null_constellation_lb == new_constellation ? "nullptr" : new_constellation->debug_id(*this)) << ", old_BLC_set->is_stable() =="
+//<< (old_BLC_set->is_stable() ? "true\n" : "false\n");
               }
             }                                                                   else  {  assert(old_BLC_set->start_same_BLC<old_BLC_set->end_same_BLC);  }
           }
@@ -4563,7 +4588,8 @@ class bisim_partitioner_gj_lazy_BLC
                 }
               }
               else
-              {
+              {                                                                 assert(null_constellation_lb != old_constellation);
+                                                                                assert(null_constellation_lb != new_constellation);
                 #ifdef MORE_STATISTICS
                   ++number_of_large_splitters_searched_in_large_subblocks;
                 #endif
@@ -5275,7 +5301,7 @@ class bisim_partitioner_gj_lazy_BLC
           if (0==bi->small_subblock_counter &&
               bi->sta.rt_non_bottom_states < bi->end_states)
           {
-//std::cerr << "; it is a large subblock.\n";
+//std::cerr << "; it is a large subblock.\n";                                     print_data_structures("Before make_BLC_simple()");
             // Either the subblock is large, or its smallness has been used
             // during an earlier run of this main loop in stabilizeB().  So we
             // now have to treat is as a large subblock, at least for the
@@ -7181,6 +7207,7 @@ class bisim_partitioner_gj_lazy_BLC
                 // split.
                 refine_super_BLC(*small_splitter, nullptr);
               }
+//else { std::cerr << "No refinement needed under " << small_splitter->debug_id(*this) << " because the large splitter is empty and it's not the splitter of formerly inert transitions.\n"; }
             }
             else
             {
