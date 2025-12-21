@@ -1,0 +1,8 @@
+% The probability the sender does not report a successful transmission
+% Property 1 of [D'AJJL01]
+% "P=?[ F s=5 ]"
+
+<true*>(<status_s(5)>val(1) || val(0))
+
+% Alternative formulation
+%<true*>(<fail_transmission>val(1) || val(0))

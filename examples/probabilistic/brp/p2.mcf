@@ -1,0 +1,5 @@
+% The probability the sender reports an uncertaintly on the success of the transmission
+% Property 2 of [D'AJJL01]
+% "P=?[ F s=5 & srep=2 ]"
+
+<true*>(<status_s(5).status_srep(2)>val(1) || val(0))
