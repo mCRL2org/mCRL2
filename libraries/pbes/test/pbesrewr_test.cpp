@@ -134,15 +134,12 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr3)
   // Now do ti again with the compiling rewriter. 
   data::rewriter datar_compiling(p.data(), data::rewrite_strategy::jitty_compiling);
   simplify_data_rewriter<data::rewriter> pbesr_compiling(datar_compiling);
-  std::cerr << "RHS TEST3" << (*pvi.parameters().begin()) << "\n";
   pbes_rewrite(p, pbesr_compiling, sigma);
   // After this rewrite p is not well typed anymore. 
-  std::cerr << "PBES2" << p << "\n";
-
 
   BOOST_CHECK(true);
 #endif // MCRL2_ENABLE_JITTYC
-} 
+}
 
 // The test below checks whether the head of a term is rewritten too often.
 // If so, the variable vc_TS is substituted infinitely often causing the rewriting
@@ -173,14 +170,13 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr4)
   // After this rewrite p is not well typed anymore. 
 
 #ifdef MCRL2_ENABLE_JITTYC
-  // Now do ti again with the compiling rewriter. 
+  // Now do it again with the compiling rewriter. 
   data::rewriter datar_compiling(p.data(), data::rewrite_strategy::jitty_compiling);
   simplify_data_rewriter<data::rewriter> pbesr_compiling(datar_compiling);
   std::cerr << "COMPILING TEST4 " << (*pvi.parameters().begin()) << "\n";
-  // pbes_rewrite(p, pbesr_compiling, sigma); This test is failing. 
+  pbes_rewrite(p, pbesr_compiling, sigma); 
   // After this rewrite p is not well typed anymore. 
   std::cerr << "PBES2" << p << "\n";
-
 
   BOOST_CHECK(true);
 #endif // MCRL2_ENABLE_JITTYC

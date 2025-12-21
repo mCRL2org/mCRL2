@@ -251,6 +251,7 @@ template <bool ARGUMENTS_IN_NORMAL_FORM>
 static inline
 void rewrite_appl_aux(data_expression& result, const application& t, RewriterCompilingJitty* this_rewriter)
 {
+  // Here t has the shape F(u1,...,um) and F is either a lambda term, variable or an application. 
   const data_expression& thead=get_nested_head(t);
   if (is_function_symbol(thead))
   {
@@ -271,55 +272,41 @@ void rewrite_appl_aux(data_expression& result, const application& t, RewriterCom
   if (!ARGUMENTS_IN_NORMAL_FORM && is_variable(head0))
   { 
     head=sigma(this_rewriter)(down_cast<const variable>(head0));
+    // Rewrite all arguments, but not the head. 
+    rewrite_all_arguments(result, t, rewrite_functor(this_rewriter), true);
+    const application t1=atermpp::down_cast<application>(replace_nested_head(result, head));
+    rewrite_appl_aux<true>(result, t1, this_rewriter);
+    return;
   }
-  else if (ARGUMENTS_IN_NORMAL_FORM && is_where_clause(head0))
+  else if (!ARGUMENTS_IN_NORMAL_FORM && is_where_clause(head0))
   { 
     this_rewriter->rewrite_where(head, atermpp::down_cast<where_clause>(head0), sigma(this_rewriter));
-  }
-  else
-  {
-    head= head0;
+    rewrite_all_arguments(result, t, rewrite_functor(this_rewriter), true);
+    const application t1=atermpp::down_cast<application>(replace_nested_head(result, head));
+    rewrite_appl_aux<true>(result, t1, this_rewriter);
+    return;
   }
 
-  // Reconstruct term t.
-  const application t1((head0 == head) ? static_cast<const data_expression&>(t) : replace_nested_head(t, head));
-
-  const data_expression head1(get_nested_head(t1));
+  const data_expression head1(get_nested_head(t));
   // Here head1 has the shape
   // variable, function_symbol, lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,
   if (is_variable(head1))
   {
     if constexpr (ARGUMENTS_IN_NORMAL_FORM)
     {
-      result=t1;
+      result=t;
     }
     else 
     {
-      rewrite_all_arguments(result, t1, rewrite_functor(this_rewriter));
+      rewrite_all_arguments(result, t, rewrite_functor(this_rewriter),true);
     }
     return;
   }
-  else
-  if (is_abstraction(head1))
-  {
-    const abstraction& ha=down_cast<abstraction>(head1);
-    rewrite_abstraction_aux<ARGUMENTS_IN_NORMAL_FORM>(result, ha,t1,this_rewriter);
-    return;
-  }
-  else
-  {
-    assert(is_function_symbol(head1));
-    const std::size_t arity = recursive_number_of_args(t1);
-    const rewriter_function f = get_precompiled_rewrite_function<ARGUMENTS_IN_NORMAL_FORM>(down_cast<function_symbol>(head1),arity,this_rewriter);
-    if (f != nullptr)
-    {
-      f(result, t1, this_rewriter);
-      assert(t1.sort()==result.sort());
-      return;
-    }
-    make_application(result, head1, t1.begin(), t1.end(), rewrite_functor(this_rewriter)); 
-    return;
-  }
+
+  assert(is_abstraction(head1));
+  const abstraction& ha=down_cast<abstraction>(head1);
+  rewrite_abstraction_aux<ARGUMENTS_IN_NORMAL_FORM>(result, ha,t,this_rewriter);
+  return;
 }
 
 template <bool ARGUMENTS_IN_NORMAL_FORM>
@@ -370,6 +357,7 @@ void rewrite_aux(data_expression& result, const data_expression& t, RewriterComp
     }
     else
     {
+      // Here appl has the shape F(u1,...,um) and F is either a lambda term, variable or an application. 
       rewrite_appl_aux<ARGUMENTS_IN_NORMAL_FORM>(result, appl, this_rewriter);
       assert(result.sort()==appl.sort());
       return;
