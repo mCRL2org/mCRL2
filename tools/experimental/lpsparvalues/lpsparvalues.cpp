@@ -9,12 +9,12 @@
 /// \file lpsexploredomains.cpp
 /// \brief The explore_domains tool which enumerates the possible parameter values of a linear process
 
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/io.h"
+#include "mcrl2/lps/lpsparvalues.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/data/rewriter.h"
-#include "lpsparvalues.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -71,7 +71,13 @@ class lps_explore_domains_tool: public rewriter_tool<input_tool>
       load_lps(spec, m_input_filename);
       data::rewriter r(spec.data(), rewrite_strategy());
 
-      lps::lps_explore_domains_algorithm<data::rewriter, stochastic_specification>(spec, r, m_qlimit, m_maximal_number_of_rounds).run();
+      // lps::lps_explore_domains_algorithm<data::rewriter, stochastic_specification>(spec, r, m_qlimit, m_maximal_number_of_rounds).run();
+      auto result = lps::lps_parvalues_algorithm<data::rewriter, stochastic_specification>(spec, r, m_qlimit, m_maximal_number_of_rounds).run();
+      for (const auto& [par, values]: result)
+      {
+        std::cout << "Parameter " << par << ": " << par.sort() << " := " << core::detail::print_set(values) << std::endl;
+      }
+
       return true;
     }
 
