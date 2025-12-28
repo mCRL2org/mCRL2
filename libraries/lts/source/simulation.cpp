@@ -128,6 +128,7 @@ void simulation::select_transition(std::size_t transition_number)
 void simulation::randomly_select_transition()
 {
   std::size_t s=m_full_trace.back().transitions.size();
+  assert(s>0);
   std::size_t transition_number= m_distrib(m_gen) % s;
   select_transition(transition_number);
 }

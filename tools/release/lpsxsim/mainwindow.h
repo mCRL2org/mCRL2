@@ -75,8 +75,8 @@ class MainWindow : public QMainWindow
     Simulation::Trace m_trace;
     unsigned long long m_selected_state;
     QTimer *m_animationTimer;
-    bool m_randomAnimation;
-    bool m_animationDisabled;
+    bool m_randomAnimation=false;
+    bool m_animationDisabled=true;
     const bool m_do_not_use_dummies;
     bool update_simulation_is_running=false;  
 

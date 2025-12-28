@@ -168,6 +168,12 @@ void MainWindow::randomPlay()
   }
 
   m_randomAnimation = true;
+  // Set the trace to its current position. 
+  if (m_selected_state<m_trace.size())
+  {
+    reset(m_selected_state, false);
+  }
+  updateSimulation();
   m_animationTimer->start();
 
   m_ui.actionPlayTrace->setEnabled(false);
@@ -182,6 +188,7 @@ void MainWindow::stopPlay()
   m_ui.actionPlayTrace->setEnabled(true);
   m_ui.actionRandomPlay->setEnabled(true);
   m_ui.actionStop->setEnabled(false);
+  m_randomAnimation = false;
 }
 
 void MainWindow::setPlayDelay()
@@ -265,6 +272,13 @@ void MainWindow::stateSelected()
   QList<QTableWidgetSelectionRange> selection = m_ui.traceTable->selectedRanges();
   if (selection.size() > 0)
   {
+    // If a row of the trace table is selected, stop random simulation.
+    // If this row is selected random simulation of the trace does not have appropriate
+    //
+    if (m_randomAnimation && selection[0].topRow()+1<m_trace.size())
+    {
+      stopPlay();
+    }
     selectState(selection[0].topRow());
   }
 }
