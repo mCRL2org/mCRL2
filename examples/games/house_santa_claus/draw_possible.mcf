@@ -1,0 +1,4 @@
+% It is possible to draw the house of Santa Claus from an arbitrary starting point
+
+exists p:Point . <start(p)>
+    <d(This) . d(Is) . d(The) . d(House) . d(Of) . d(San) . d(ta) . d(Claus)> true

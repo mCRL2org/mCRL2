@@ -1,0 +1,4 @@
+% It is not possible to draw the house of Santa Claus starting from the roof
+
+<start(Roof)>
+    <d(This) . d(Is) . d(The) . d(House) . d(Of) . d(San) . d(ta) . d(Claus)> true
