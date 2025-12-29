@@ -9,16 +9,23 @@
 % bidirectional. A process decides whether to send its token to the
 % next or previous process in the ring with probability of 1/2 for each
 % decision.
+%
+% The model below has the particular property that the components 
+% can communicate independently of each other. A process may decide
+% to communicate with another process, but postpone this, such that
+% other processes may already have carried out various rounds of
+% communication before the first process executes its first communication.
+% This is different from the Prism description, which requires . 
 % 
 % Hector Joao Rivera Verduzco. November 2016.
 
-act send_token:Int#Int;
-    read_token:Int#Int;
-    comm_token:Int#Int;
+act send_token:Nat#Nat;
+    read_token:Nat#Nat;
+    comm_token:Nat#Nat;
     token, notoken, stable;
 
 %   token:
-proc P(id:Int, token:Bool, prev:Int, next:Int)=
+proc P(id:Nat, token:Bool, prev:Nat, next:Nat)=
         (token == true)->(
                            dist b:Bool[1/2].
                            b-> send_token(id,next).P(id,false,prev,next)

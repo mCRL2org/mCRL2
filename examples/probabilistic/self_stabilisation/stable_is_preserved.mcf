@@ -1,0 +1,5 @@
+% The following boolean formula expresses that if 
+% the action stable is possible, it will remain possible forever.
+
+form [true*](<stable>true => [true]<stable>true);
+

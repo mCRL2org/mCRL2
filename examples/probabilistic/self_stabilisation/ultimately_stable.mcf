@@ -1,0 +1,5 @@
+% The formula below represents the probability that the protocol 
+% will ultimately stabilize. I.e., it is the probability, assuming
+% that the nondeterministic communications are chosen badly. 
+
+form mu X.val(0) || <stable>val(1) || [true]X;

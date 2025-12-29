@@ -1,0 +1,11 @@
+% The following formula counts the expected maximal number of 
+% steps to stabilize. The communications of the protocol are 
+% nondeterministic, and this formula calculates the expected
+% number of steps assuming that the worst choice is made each
+% time when selecting a communication.
+
+form mu X.val(0) || ([stable]val(0) && (val(1)+<exists n,m:Nat.val(n<5)&&val(m<5)&&comm_token(m,n)>X));
+
+% To obtain the minimal number of steps to stabilize use the following formula:
+
+% form mu X.val(0) || ([stable]val(0) && (val(1)+[exists n,m:Nat.val(n<5)&&val(m<5)&&comm_token(m,n)]X));

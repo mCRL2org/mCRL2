@@ -1,0 +1,9 @@
+% The formula below indicates the minimal probability
+% to reach a stable configuration within K steps.
+
+map K:Nat;
+eqn K=10;
+
+form mu X(steps:Nat=0).
+     (val(steps==K) && val(0) ||
+      (val(steps<K) && (<stable>val(1) || [true]X(steps+1))));
