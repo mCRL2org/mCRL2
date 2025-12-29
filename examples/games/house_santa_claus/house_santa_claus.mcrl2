@@ -1,0 +1,44 @@
+% The "House of Santa Claus" ("Haus vom Nikolaus" or "Huis met een kruis")
+% is an Euler path for a simple drawing of the following form:
+%     /\
+%    /  \
+%   /    \
+%   +----+
+%   |\  /|
+%   | \/ |
+%   | /\ |
+%   |/  \|
+%   +----+
+%
+% The house can be drawn follwing the rhyme "This is the house of Santa Claus".
+% See https://de.wikipedia.org/wiki/Haus_vom_Nikolaus
+
+sort Syllable  = struct This | Is | The | House | Of | San | ta | Claus;
+sort Point = struct Roof | TopLeft | TopRight | BottomLeft | BottomRight;
+sort Line = struct L(s : Point, t : Point);
+
+% Valid lines
+map valid: Line -> Bool;
+var p1, p2 : Point;
+eqn (p1 == Roof        &&   p2 in {TopLeft, TopRight})                        -> valid(L(p1, p2)) = true;
+    (p1 == Roof        && !(p2 in {TopLeft, TopRight}))                       -> valid(L(p1, p2)) = false;
+    (p1 == TopLeft     &&   p2 in {Roof, TopRight, BottomLeft, BottomRight})  -> valid(L(p1, p2)) = true;
+    (p1 == TopLeft     && !(p2 in {Roof, TopRight, BottomLeft, BottomRight})) -> valid(L(p1, p2)) = false;
+    (p1 == TopRight    &&   p2 in {Roof, TopLeft, BottomLeft, BottomRight})   -> valid(L(p1, p2)) = true;
+    (p1 == TopRight    && !(p2 in {Roof, TopLeft, BottomLeft, BottomRight}))  -> valid(L(p1, p2)) = false;
+    (p1 == BottomLeft  &&   p2 in {TopLeft, TopRight, BottomRight})           -> valid(L(p1, p2)) = true;
+    (p1 == BottomLeft  && !(p2 in {TopLeft, TopRight, BottomRight}))          -> valid(L(p1, p2)) = false;
+    (p1 == BottomRight &&   p2 in {TopLeft, TopRight, BottomLeft})            -> valid(L(p1, p2)) = true;
+    (p1 == BottomRight && !(p2 in {TopLeft, TopRight, BottomLeft}))           -> valid(L(p1, p2)) = false;
+
+% Actions
+act d : Syllable;
+act start : Point;
+
+% Drawing the house
+% p is the current point
+% drawn is the set of already drawn lines
+proc Draw(p:Point, drawn : FSet(Line)) =
+    sum next:Point . sum sy:Syllable . (valid(L(p, next)) && !(L(p, next) in drawn) && !(L(next, p) in drawn)) -> d(sy) . Draw(next, drawn + {L(p, next )});
+
+init sum p:Point . start(p) . Draw(p, {});
