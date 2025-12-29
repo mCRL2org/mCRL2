@@ -5,7 +5,7 @@
 % http://www.prismmodelchecker.org/casestudies/self-stabilisation.php
 %
 % In this case there are 5 processes. Each process can hold a token
-% and they are interconnected in a ring fasion, the communication is
+% and they are interconnected in a ring fashion. The communication is
 % bidirectional. A process decides whether to send its token to the
 % next or previous process in the ring with probability of 1/2 for each
 % decision.
@@ -22,7 +22,7 @@ proc P(id:Int, token:Bool, prev:Int, next:Int)=
         (token == true)->(
                            dist b:Bool[1/2].
                            b-> send_token(id,next).P(id,false,prev,next)
-                           <>  send_token(id,prev).P(id,false,prev,next)
+                            <> send_token(id,prev).P(id,false,prev,next)
                          )+
         % It is always possible to receive a token from prev or next
         read_token(next,id).P(id,true,prev,next) + 

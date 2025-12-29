@@ -80,7 +80,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
                  make_enum_argument<presinst_strategy>("NAME")
                  .add_value(presinst_lazy_strategy)
                  .add_value(presinst_finite_strategy, true),
-                 "compute the BES using strategy NAME:", 's').
+                 "compute the RES using strategy NAME:", 's').
       add_option("select",
                  make_optional_argument("PARAMS", ""),
                  "select finite parameters that need to be expanded. "
@@ -99,15 +99,15 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
     presinst_tool()
       : super(
         "presinst",
-        "Wieger Wesselink; Alexander van Dam and Tim Willemse",
-        "compute a BES out of a PRES",
-        "Transforms the PRES from INFILE into an equivalent BES and writes it to OUTFILE. "
+        "Jan Friso Groote. Based on pbesinst",
+        "compute a RES out of a PRES",
+        "Transforms the PRES from INFILE into an equivalent RES and writes it to OUTFILE. "
         "If INFILE is not present, standard input is used. If OUTFILE is not present,   "
         "standard output is used."
         "The format of OUTFILE is determined by its extension (unless it is specified "
         "by an option). The supported formats are:\n"
         "  'pres' for the mCRL2 PRES format,\n"
-        "  'res'  for the mCRL2 BES format,\n"
+        "  'res'  for the mCRL2 RES format,\n"
       )
     {}
 
@@ -165,7 +165,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
       {
         if (algorithms::is_res(p))
         {
-          mCRL2log(log::debug) << "The result is a BES.\n";
+          mCRL2log(log::debug) << "The result is a RES.\n";
         }
         else
         {
