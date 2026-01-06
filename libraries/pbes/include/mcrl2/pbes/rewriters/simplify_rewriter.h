@@ -219,7 +219,7 @@ struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::de
 
   MutableSubstitution& substitution()
   {
-    substitution_administration.substitution();
+    return substitution_administration.substitution();
   }
 
 
