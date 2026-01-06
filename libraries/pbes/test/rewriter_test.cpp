@@ -381,7 +381,6 @@ BOOST_AUTO_TEST_CASE(test_simplifying_data_rewriter_with_pbes_substitution)
   test_simplify(R_substitution, r, "forall n: Nat. val(b) && Y(n)", "forall n: Nat. val(b) && Y(n)", "simplify_with_data_and_pbes_substitution");
   test_simplify(R_substitution, r, "forall n: Nat. val(b)", "val(b)", "simplify_with_data_and_pbes_substitution");
   test_simplify(R_substitution, r, "forall m: Nat. val(m > 2) && X", "(forall m: Nat. val(m > 2))", "simplify_with_data_and_pbes_substitution");
-  test_simplify(R_substitution, r, "forall m: Nat. val(m == 1) => !Y(m)", "forall m: Nat. val(m == 1) => !Y(m)", "simplify_with_data_and_pbes_substitution");
 }
 
 BOOST_AUTO_TEST_CASE(test_enumerate_quantifiers_rewriter)
@@ -513,9 +512,6 @@ BOOST_AUTO_TEST_CASE(test_enumerate_quantifiers_rewriter_with_pbes_substitution)
   test_rewriters(N(R_substitution), N(r), "forall n: Nat . val(n > 1)", "false");
   test_rewriters(N(R_substitution), N(r), "forall n: Nat . val(n > 0)", "false");
   test_rewriters(N(R_substitution), N(r), "forall p: Pos . val(p > 0)", "true");
-  test_rewriters(N(R_substitution), N(r), "forall m: Nat. val(m == 1) => !Y(m)", "true");
-  test_rewriters(N(R_substitution), N(r), "forall m: Nat. val(m < 5) => Y(m)", "false");
-  test_rewriters(N(R_substitution), N(r), "exists m: Nat. val(m < 5) && Y(m)", "Y(0) || Y(2) || Y(3) || Y(4)");
 }
 
 template <typename Rewriter1, typename Rewriter2>

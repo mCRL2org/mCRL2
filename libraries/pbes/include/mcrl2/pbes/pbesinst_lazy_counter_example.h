@@ -84,12 +84,6 @@ struct rewrite_star_substitution
   {}
 
   pbes_expression operator()(const propositional_variable_instantiation& Y) const {
-    // the rewrite_star substitution is only applicable to closed PVIs.
-    if(!find_free_variables(Y).empty())
-    {
-      return Y;
-    }
-
     std::smatch match;
 
     // Now we need to find all reachable X --> Y, following vertices that are not ranked.

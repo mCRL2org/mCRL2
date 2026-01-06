@@ -73,16 +73,17 @@ struct add_data_rewriter: public Builder<Derived>
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    make_propositional_variable_instantiation(result,
-                              x.name(),
-                              [this, &x](data::data_expression_list& r) -> void
-                              {
-                                atermpp::make_term_list<data::data_expression>(r,
-                                  x.parameters().begin(),
-                                  x.parameters().end(),
-                                  [this](data::data_expression& r1, const data::data_expression& arg) -> void
-                                  { data_rewrite(r1, arg, R, sigma); });
-                              });
+    make_propositional_variable_instantiation(
+              result,
+              x.name(),
+              [this, &x](data::data_expression_list& r) -> void
+                  { atermpp::make_term_list<data::data_expression>(
+                               r,
+                               x.parameters().begin(),
+                               x.parameters().end(),
+                               [this](data::data_expression& r1, const data::data_expression& arg) -> void
+                                     { data_rewrite(r1, arg, R, sigma); } ) ;
+                  });
   }
 };
 
