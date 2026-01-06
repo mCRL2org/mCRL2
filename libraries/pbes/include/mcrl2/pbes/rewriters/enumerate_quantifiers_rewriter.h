@@ -156,7 +156,13 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         pbes_expression phi_;
         enumerate_forall(phi_, enumerable, result);
-        data::optimized_forall_no_empty_domain(result, non_enumerable, phi_, remove_unused_variables);
+        if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
+        {
+          // we need to rewrite the new body again to deal properly with PBES substitutions
+          // TODO: update enumerate_forall such that it uses the rewriter in derived() during enumeration
+          derived().apply(result, phi_);
+        }
+        data::optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
       }
     }
     else
@@ -175,7 +181,13 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         pbes_expression phi_;
         enumerate_forall(phi_, finite, result);
-        data::optimized_forall_no_empty_domain(result, infinite, phi_, remove_unused_variables);
+        if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
+        {
+          // we need to rewrite the new body again to deal properly with PBES substitutions
+          // TODO: update enumerate_forall such that it uses the rewriter in derived() during enumeration
+          derived().apply(result, phi_);
+        }
+        data::optimized_forall_no_empty_domain(result, infinite, result, remove_unused_variables);
       }
     }
     redo_substitution(x.variables(), undo);
@@ -204,6 +216,12 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         pbes_expression phi_;
         enumerate_exists(phi_, enumerable, result);
+        if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
+        {
+          // we need to rewrite the new body again to deal properly with PBES substitutions
+          // TODO: update enumerate_exists such that it uses the rewriter in derived() during enumeration
+          derived().apply(result, phi_);
+        }
         data::optimized_exists_no_empty_domain(result, non_enumerable, phi_, remove_unused_variables);
       }
     }
@@ -223,6 +241,12 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         pbes_expression phi_;
         enumerate_exists(phi_, finite, result);
+        if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
+        {
+          // we need to rewrite the new body again to deal properly with PBES substitutions
+          // TODO: update enumerate_exists such that it uses the rewriter in derived() during enumeration
+          derived().apply(result, phi_);
+        }
         data::optimized_exists_no_empty_domain(result, infinite, phi_, remove_unused_variables);
       }
     }
