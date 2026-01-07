@@ -1907,11 +1907,11 @@ class specification_basic_type
 
         if (options.lin_method==lmRegular)
         {
-          mCRL2log(mcrl2::log::warning) << " A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method." << std::endl;
+          mCRL2log(mcrl2::log::warning) << " If linearisation does not terminate, the use of the flag `--lin-method=regular2' or `--lin-method=stack' in mcrl22lps can help." << std::endl;
         }
         else if (options.lin_method==lmRegular2)
         {
-          mCRL2log(mcrl2::log::warning) << " A possible unbounded loop can be avoided by using `stack' as the linearisation method." << std::endl;
+          mCRL2log(mcrl2::log::warning) << " If linearisation does not terminate, using the flag `--lin-method=stack' in mcrl22lps can help.\n" << std::endl;
         }
         else
         {
