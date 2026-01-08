@@ -10,6 +10,7 @@
   --mcrl2-caption:hsl(153, 22%, 18%);
   --mcrl2-title:hsl(152, 33%, 49%);
   --mcrl2-light:#c3e2d4;
+  --mcrl2-light2:#f2f5d9;
 }
 
 /* Change the table layout */
@@ -121,4 +122,16 @@ img.frontpage-logo { margin-top: 1.5em; }
 
 .wy-side-nav-search > div.version {
   color: var(--mcrl2-light);
+}
+
+.admonition.admonition-ex .admonition-title { background-color: var(--mcrl2-title); }
+.admonition.admonition-ex { background-color: var(--mcrl2-light2); }
+  /* this is used to add some space below tikz */
+.math.math-tikz {
+  text-align: center;
+  margin-bottom: 1em;
+}
+  /* this is used to align left math*/
+.math.math-left {
+  text-align: left;
 }

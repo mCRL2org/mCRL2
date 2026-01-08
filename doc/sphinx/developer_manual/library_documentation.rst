@@ -110,6 +110,7 @@ PBES
    :maxdepth: 1
    
    libraries/pbes/pbes_library
+   libraries/pbes/pbes-inst-solving
 
 *PDF documentation*
 
