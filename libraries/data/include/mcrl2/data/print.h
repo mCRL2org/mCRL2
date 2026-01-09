@@ -15,6 +15,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/is_untyped.h"
 #include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/data/nat64.h"
 #include "mcrl2/data/standard_container_utility.h"
 
 namespace mcrl2::data
@@ -1864,6 +1865,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print("max(0,");
       derived().apply(sort_nat::arg(x));
       derived().print(" - 1)");
+    } else if (sort_nat::is_not_equals_zero_application(x))
+    {
+      derived().print("!(");
+      derived().apply(sort_nat::arg(x));
+      derived().print(" == 0)");
     }
 #else
     else if (sort_nat::is_cnat_application(x))
