@@ -1,0 +1,23 @@
+% A simple example defining the set of prime numbers to demonstrate the use of quantifiers.
+% When generating prime numbers the universally bound variable m must be sufficiently instantiated.
+% This requires the use of the flag -Q in lps2lts. A state space can be generated as follows.
+%
+% mcrl22lps prime.mcrl2 prime.lps -v
+% lps2lts -Q0 temp.lps -v prime.aut
+%
+% The file prime.aut now contains action isPrime(n,b) where boolean b indicates whether number n
+% is a prime number. 
+%
+% The option -Q0 allows to instantiate quantified variables without limit. 
+%
+% This example is a slight variation of an example by Gert Veltink provided in 2024.
+
+map  primes: Set(Pos);
+
+eqn  primes = { n: Pos | n > 1 && forall m: Pos . (1<m && m<n => n mod m != 0) };
+
+act  isPrime: Pos # Bool;
+
+proc ShowPrimes(p : Pos) = (p < 150) -> isPrime(p, p in primes) . ShowPrimes(p + 1);
+
+init ShowPrimes(1);
