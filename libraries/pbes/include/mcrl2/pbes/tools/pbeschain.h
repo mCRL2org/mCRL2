@@ -313,6 +313,7 @@ is_avoiding_alternation(pbeschain_options& options, propositional_variable_insta
 }
 
 inline void self_substitute(pbes_equation& equation,
+  std::size_t initial_size,
   substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
   rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
   simplify_data_rewriter<data::rewriter>& pbes_rewriter,
@@ -321,25 +322,21 @@ inline void self_substitute(pbes_equation& equation,
 {
   bool stable = false;
   auto start_time = std::chrono::high_resolution_clock::now();
-  
+
   if (options.timeout > 0.0)
   {
-    mCRL2log(log::verbose) << "Starting substitution for equation " << equation.variable().name() 
+    mCRL2log(log::verbose) << "Starting substitution for equation " << equation.variable().name()
                            << " with timeout " << options.timeout << "s" << std::endl;
   }
 
   std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
-  
-  std::vector<propositional_variable_instantiation> set
-      = get_propositional_variable_instantiations(equation.formula());
-  std::size_t initial_size = set.size();
   std::size_t previous_size = initial_size;
   std::size_t current_size = initial_size;
   while (!stable)
   {
     stable = true;
-    set = get_propositional_variable_instantiations(equation.formula());
-    
+    std::vector<propositional_variable_instantiation> set = get_propositional_variable_instantiations(equation.formula());
+
     std::set<std::string> parameterNames = {};
     for (auto a: equation.variable().parameters())
     {
@@ -355,7 +352,7 @@ inline void self_substitute(pbes_equation& equation,
         if (elapsed >= options.timeout)
         {
           stable = true;
-          mCRL2log(log::verbose) << "Timeout reached (" << options.timeout << "s) for equation " 
+          mCRL2log(log::verbose) << "Timeout reached (" << options.timeout << "s) for equation "
                                  << equation.variable().name() << " after " << elapsed << "s, stopping substitution" << std::endl;
           break;
         }
@@ -421,7 +418,7 @@ inline void self_substitute(pbes_equation& equation,
         // Simplify
         phi = simplify_expr(phi, if_substituter, pbes_rewriter);
         phi_vector = get_propositional_variable_instantiations(phi);
-        int size = phi_vector.size();
+        std::size_t size = phi_vector.size();
         if (options.count_unique_pvi)
         {
           size = std::set(phi_vector.begin(), phi_vector.end()).size();
@@ -526,9 +523,9 @@ inline void self_substitute(pbes_equation& equation,
       }
     }
   }
-  
+
   mCRL2log(log::status) << "New number of pvi: " << initial_size <<  " --> " << current_size << "" << std::endl;
-  
+
   if (current_size == 0) {
       equation.formula() = simplify_expr(equation.formula(),
           if_substituter,
@@ -606,20 +603,28 @@ struct pbeschain_pbes_backward_substituter
     {
       p = fill_pvi(p, data_rewriter);
     }
-    
+
     if (options.max_depth <= 0){
        return;
     }
+    
+    std::vector<std::size_t> initial_sizes = {};
+    for (auto i = p.equations().size(); i > 0; i--)
+    {
+        initial_sizes.push_back(get_propositional_variable_instantiations(p.equations()[i - 1].formula()).size());
+    }
+
     for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
     {
       mCRL2log(log::verbose) << "Investigating the equation for " << i->variable().name() << "\n";
       self_substitute(*i,
+          initial_sizes[i - p.equations().rbegin()],
           pvi_substituter,
           if_rewriter,
           pbes_rewriter,
           pbes_default_rewriter,
           options);
-      
+
       std::set<propositional_variable_instantiation> pvi_set
           = find_propositional_variable_instantiations((*i).formula());
       mCRL2log(log::verbose) << "How many unique PVI are left? " << pvi_set.size() << "\n";
