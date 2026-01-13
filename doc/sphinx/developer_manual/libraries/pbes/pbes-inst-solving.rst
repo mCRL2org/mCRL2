@@ -1,4 +1,4 @@
-:Date: 19-12-2025
+:Date: 12-02-2026
 :Authors: - Anna Stramaglia
 :Institute: Eindhoven University of Technology
 
@@ -18,7 +18,7 @@ The PBES instantiation algorithm, defined in Algorithm :ref:`PbesInstStructureGr
 Structure graph
 """""""""""""""
 
-A structure graph, \cite{keiren_structural_2012}, is a graph structure that captures BESs in their full generality. Structure graphs generalize other graphs, such as dependency graphs, in the representation of equations systems since they do not require that each vertex necessarily represents a proposition variable occurring at the left-hand side of some equation; also by facilitating to reason about Boolean constants.
+A structure graph, see [KRW12]_, is a graph structure that captures BESs in their full generality. Structure graphs generalize other graphs, such as dependency graphs, in the representation of equations systems since they do not require that each vertex necessarily represents a proposition variable occurring at the left-hand side of some equation; also by facilitating to reason about Boolean constants.
 
 .. _strcture-graph:
 
@@ -286,7 +286,7 @@ for some data expression `\psi`. The inductive defition of `\Equ` is extended wi
         \Equ(\varphi) &=& (\emptyset, \emptyset) \text{ otherwise}\\
     \end{eqnarray*}
 
-We define the *one-point-rule* rewriter `\qr` inductively as follows
+We define the *one-point-rule* rewriter `\qr` inductively as follows:
 
 .. _rewriter-onepoint:
 
@@ -416,7 +416,7 @@ Function `SG^0` uses functions :ref:`decoration <decoration>` `\dec` and :ref:`r
   
 In the following, rank is undefined, denoted with `-`, if not applied to a predicate variable.
 
-Function `SG^0` is defined as follows.
+Function `SG^0` is defined as follows:
 
 .. _sg0:
 
@@ -495,7 +495,7 @@ Afterwards, sets `\td` and `\discovered` are updated such that the former will b
 Solving strategies for PBES instantiation
 -----------------------------------------
 
-The tool ``pbessolve`` has a flag that is used to set the solving strategy. The flas is ``--solve-strategy=NAME`` (for short ``-sNAME``) where ``NAME`` goes from ``0`` to ``4``. The :ref:`list of solving strategies <list-opt>` is as follows.
+The tool ``pbessolve`` has a flag that is used to set the solving strategy. The flas is ``--solve-strategy=NAME`` (for short ``-sNAME``) where ``NAME`` goes from ``0`` to ``4``. The :ref:`list of solving strategies <list-opt>` is as follows:
 
 .. _list-opt:
 
@@ -1201,7 +1201,7 @@ where
     pred^{= j}(u, U) = \{v \in U \mid (v,u) \in E \wedge (\rnk(v) = j \vee (v \notin \mathrm{dom}(\rnk) \wedge \dec(v) \in \{\blacktriangle,\blacktriangledown\}) )\}
     \end{eqnarray*}
 
-The above optimisation can be integrated in the instantiation algorithm as follows.
+The above optimisation can be integrated in the instantiation algorithm as follows:
 
 .. _detect-loops:
 
@@ -1495,7 +1495,7 @@ where
     pred^{\geq j}(u, U) = \{v \in U \mid (v,u) \in E \wedge (\rnk(v) \geq j \vee (v \notin \mathrm{dom}(\rnk) \wedge \dec(v) \in \{\blacktriangle,\blacktriangledown\}) )\}
     \end{eqnarray*}
 
-The above optimisation can be integrated in the instantiation algorithm as follows.
+The above optimisation can be integrated in the instantiation algorithm as follows:
 
 .. _solve-fatal-attractor:
 
@@ -1592,7 +1592,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
         
         mu Y.(nu X .(mu W.(<a>Y || <b>X || <a>W)))
     
-    We again consider to instantiate the PBES without evidence information. The PBES is as follows
+    We again consider to instantiate the PBES without evidence information. The PBES is as follows:
 
     :: 
 
@@ -1866,7 +1866,7 @@ Algorithm :ref:`PbesInstStructureGraph4 <solve-using-solver>` uses :ref:`Partial
     \EndFunction
     \end{algorithmic}
 
-The above optimisation can be integrated in the instantiation algorithm as follows.
+The above optimisation can be integrated in the instantiation algorithm as follows:
 
 .. _solve-using-solver:
 
@@ -1909,7 +1909,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 .. admonition:: 4- Solve subgames using the solver
     :class: warning
 
-    Optimization *4- Solve subgames using the solver* does not perform as expected. 
+    Optimization :ref:`4- Solve subgames using the solver <solve-using-solver>` does not perform as expected. 
     Currently, for :ref:`Example 2 <example-solved>` it is comparable to optimization :ref:`1- Propagate solved equations using an attractor <propagate-solved-eq-attr>`, for :ref:`Example 4 <example-detect-loops>` it is comparable to optimizations :ref:`0- No on-the-fly solving is applied <instantiation-no-on-the-fly>` and :ref:`1- Propagate solved equations using an attractor <propagate-solved-eq-attr>`, and for :ref:`Example 5 <example-solved-fatal>` it is comparable to optimizations :ref:`0- No on-the-fly solving is applied <instantiation-no-on-the-fly>`, :ref:`1- Propagate solved equations using an attractor <propagate-solved-eq-attr>` and :ref:`2- Detect winning loops <detect-loops>`.
 
 Additional optimizations to PBES instantiation
@@ -1989,7 +1989,7 @@ The above routine can be integrated in the instantiation algorithm as follows. N
             \State \qquad \qquad {\colorbox{lightgray}{$\td, \irr := \text{\textsc{PruneTodo}}(\init, \td, \irr) \text{ (executed periodically)}$}} 
         \State \qquad $V := \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_1, \tau_0, \tau_1)$
         \State \qquad \Return $(V,E, d, r)$
-    \State $\mathbf{end function}$
+    \State $\mathbf{end\ function}$
     \end{algorithmic}
 
 Pruning the todo set can help reduce the number of iterations to execute in the instantiation procedure.
@@ -2070,7 +2070,30 @@ Finally Algorithm :ref:`AttrDefaultNoStrategy <attr-no-tau>` does not set any st
 Solve recursively
 """""""""""""""""
 
-The algorithm to recursively solve a structure graph, Algorithm :ref:`SolveRecursive <ziel-expl>`, is based on Zielonka's recursive algorithm. It computes a partitioning of the set of vertices `V` of a structure graph `G = (V, E, d , r)` into `(W_0, W_1)` of vertices `W_0` that represent equations evaluating to true, and vertices `W_1` that represent equations evaluating to false. A precondition of this algorithm is that it contains no nodes with decoration `\top` or `\bot`. (LEFT OUT NOW)
+The algorithm to recursively solve a structure graph, Algorithm :ref:`SolveRecursive <ziel-expl>`, is based on Zielonka's recursive algorithm. It computes a partitioning of the set of vertices `V` of a structure graph `G = (V, E, d , r)` into `(W_0, W_1)` of vertices `W_0` that represent equations evaluating to true, and vertices `W_1` that represent equations evaluating to false. A precondition of this algorithm is that it contains no nodes with decoration `\top` or `\bot`. 
+
+To satisfy the precondition, a pre-processing step is needed, see Algorithm :ref:`PreProcessing <preproc>`.
+
+.. _preproc:
+
+.. math::
+    :nowrap:
+    :class: math-left
+
+        \begin{algorithmic}[1]
+        \Function {PreProcessing}{$V$}
+        \State \textbf{if} {$ V = \emptyset$} \textbf{then} \Return {$\emptyset$}
+        \State $T_0 := \{ v \in V \mid d(v) = \top\}$
+        \State $TT_0:=$ \textsc{AttrDefault}{$(T_0, 0)$}
+        \State $T_1 := \{ v \in V \mid d(v) = \bot\}$
+        \State $TT_1 :=$ \textsc{AttrDefault}{$(T_1, 1)$}
+        \State $V := V \setminus (TT_0 \cup TT_1)$
+        \State \Return {$V$}
+        \EndFunction
+        \end{algorithmic}
+
+
+Algorithm :ref:`SolveRecursive <ziel-expl>` is as follows:
 
 .. _ziel-expl:
 
@@ -2096,11 +2119,11 @@ The algorithm to recursively solve a structure graph, Algorithm :ref:`SolveRecur
     \EndFunction
     \end{algorithmic}
 
-In Algorithm :ref:`SolveRecursive <ziel-expl>` the routine starts by checking whether the set of nodes `V` is empty and if so it returns a tuple with empty sets. Otherwise, `m` gets the value of the minimal rank of the nodes in `V`, `\alpha` (the player) is computed such that the result is either 0 or 1 depending on `m \mod 2`, and the set `U` is updated to be the set of all nodes in `V` that have rank `m`. Then by executing routine `\textsc{AttrDefault}` and `\textsc{SolveRecursive}` a set of vertices `W_0` that represent equations evaluating to true, and a set of vertices `W_1` that represent equations evaluating to false are computed.
+In Algorithm :ref:`SolveRecursive <ziel-expl>` the routine starts by checking whether the set of nodes `V` is empty and if so it returns a tuple with empty sets. Otherwise, `m` gets the value of the minimal rank of the nodes in `V`, `\alpha` (the player) is computed such that the result is either 0 or 1 depending on `m \mod 2`, and the set `U` is updated to be the set of all nodes in `V` that have rank `m`. Then, by executing routine `\textsc{AttrDefault}` and `\textsc{SolveRecursive}` a set of vertices `W_0` that represent equations evaluating to true, and a set of vertices `W_1` that represent equations evaluating to false are computed.
 
 Note that this algorithm does not explicitly include how to extract strategies from the procedure of solving a structure graph.
 
-Before defining Algorithm :ref:`SolveRecursiveStrategies <ziel-expl-tau>` which solves a structure graph and computes its strategies `\tau_0, \tau_1` let us first define strategies function and priority function.
+Before defining Algorithm :ref:`SolveRecursiveStrategies <ziel-expl-tau>` which solves a structure graph and computes strategies `\tau_0, \tau_1`, let us define strategies function and priority function.
 
 .. _strategy:
 
@@ -2164,3 +2187,8 @@ The priority function application is left-associative, thus, given `f_1, \ldots,
     \end{algorithmic}
 
 In line 11 the strategy for player `\alpha` is updated, in particular `\tau_U` is the strategy computed in set `U`, `\tau` is the strategy that results from the computation of the attractor set of `U` and `\tau_{\alpha}'` is the strategy resulting from the recursive call to `\textsc{SolveRecursive}(V\setminus A)`. In line 12 the strategy for player `1- \alpha` is empty. In line 17 the strategy for player `1- \alpha` is updated, in particular `\tau_{1-\alpha}'` is the strategy resulting from the recursive call to `\textsc{SolveRecursive}(V\setminus A)`, `\tau_B` is the strategy that results from the computation of the attractor set of `W_{1 - \alpha}'` and `\tau_{1-\alpha}` is the strategy resulting from the recursive call to `\textsc{SolveRecursive}(V\setminus B)`.
+
+
+References
+----------
+.. [KRW12] J.J.A. Keiren, M.A. Reniers and T.A.C. Willemse. Structural Analysis of Boolean Equation Systems. In ACM Transactions on Computational Logic 13(1): 8-1/35, 2012. `(DOI) <http://doi.acm.org/10.1145/2071368.2071376>`__
