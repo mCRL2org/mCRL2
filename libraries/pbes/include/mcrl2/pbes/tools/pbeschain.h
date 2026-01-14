@@ -220,78 +220,6 @@ std::vector<propositional_variable_instantiation> get_propositional_variable_ins
   return result;
 }
 
-// TODO: Replace this
-inline std::set<propositional_variable_instantiation> filter_pvis(const propositional_variable_instantiation& needle,
-  const std::vector<propositional_variable_instantiation>& haystack)
-{
-  std::set<propositional_variable_instantiation> result;
-
-  std::copy_if(haystack.begin(),
-    haystack.end(),
-    std::inserter(result, result.end()),
-    [&](const propositional_variable_instantiation& v)
-    {
-      if (v.name() != needle.name())
-      {
-        return false;
-      }
-
-      const auto& v_params = as_vector(v.parameters());
-      const auto& needle_params = as_vector(needle.parameters());
-
-      if (v_params.size() != needle_params.size())
-      {
-        return false;
-      }
-
-      for (std::size_t i = 0; i < v_params.size(); ++i)
-      {
-        if (v_params[i] != needle_params[i])
-        // if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
-        {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-  return result;
-}
-
-// TODO: Replace this
-inline bool pvi_in_set(const propositional_variable_instantiation needle,
-  const std::set<propositional_variable_instantiation> haystack)
-{
-  return std::any_of(haystack.begin(),
-    haystack.end(),
-    [&](const propositional_variable_instantiation& v)
-    {
-      if (v.name() != needle.name())
-      {
-        return false;
-      }
-
-      const auto& v_params = as_vector(v.parameters());
-      const auto& needle_params = as_vector(needle.parameters());
-
-      if (v_params.size() != needle_params.size())
-      {
-        return false;
-      }
-
-      for (size_t i = 0; i < v_params.size(); i++)
-      {
-        if (v_params[i] != needle_params[i])
-        // if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
-        {
-          return false;
-        }
-      }
-      return true;
-    });
-}
-
 inline pbes_expression simplify_expr(pbes_expression& phi,
   rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
   simplify_data_rewriter<data::rewriter>& pbes_rewriter)
@@ -411,15 +339,14 @@ inline void self_substitute(pbes_equation& equation,
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
         // (2) replace all reoccuring with true (nu) and false (mu)
-        std::set<propositional_variable_instantiation> gauss_set = filter_pvis(cur_x, phi_vector);
-        for (const propositional_variable_instantiation& gauss_pvi: gauss_set)
+        auto it = find(phi_vector.begin(), phi_vector.end(), cur_x);
+        if (it != phi_vector.end())
         {
-          mCRL2log(log::debug) << "Need to replace this with true/false " << pp(gauss_pvi) << "\n";
+          mCRL2log(log::debug) << "Need to replace this with true/false " << pp(cur_x) << "\n";
           mCRL2log(log::debug) << phi << "\n";
           mCRL2log(log::debug) << equation.formula() << "\n";
 
-          // pbes_expression p_;
-          pvi_substituter.set_pvi(gauss_pvi);
+          pvi_substituter.set_pvi(cur_x);
           pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
           pvi_substituter.apply(phi, phi);
 
@@ -449,7 +376,7 @@ inline void self_substitute(pbes_equation& equation,
             mCRL2log(log::debug) << itr << "\n";
           }
 
-          if (pvi_in_set(new_x, path))
+          if (path.contains(new_x))
           {
             // We have already seen this, so we are in a loop.
             mCRL2log(log::debug) << "Loop, seen " << new_x << " in path after " << cur_x << "    " << phi << "\n";
