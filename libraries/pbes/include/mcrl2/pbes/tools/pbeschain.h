@@ -30,7 +30,6 @@
 #include <chrono>
 #include <cstddef>
 #include <iostream>
-#include <ranges>
 
 namespace mcrl2::pbes_system
 {
@@ -662,19 +661,19 @@ struct pbeschain_pbes_backward_substituter
         pbes_system::srf_pbes_with_ce result = preprocess(p, opts);
         pbes srf_pbes = pre_srf2srfpbes(result).to_pbes();
 
-        pbes_equation srf_eq = srf_pbes.equations()[original_i];
-        auto original_eq = std::find_if(original_pbes.equations().rbegin(),
-          original_pbes.equations().rend(),
-          [&](const pbes_equation& eq) { return eq.variable().name() == srf_eq.variable().name(); });
-        if (original_eq == original_pbes.equations().rend())
+        pbes_equation original_eq = original_pbes.equations()[original_i];
+        auto srf_eq = std::find_if(srf_pbes.equations().rbegin(),
+          srf_pbes.equations().rend(),
+          [&](const pbes_equation& eq) { return eq.variable().name() == original_eq.variable().name(); });
+        if (srf_eq == srf_pbes.equations().rend())
           continue;
 
-        std::size_t original_size = pp((*original_eq).formula()).size();
-        std::size_t new_size = pp(srf_eq.formula()).size();
+        std::size_t original_size = pp(original_eq.formula()).size();
+        std::size_t new_size = pp(srf_eq->formula()).size();
         if (options.srf_factor * (double)original_size <= (double)new_size)
         {
           log_number_pvi(initial_sizes[original_i], initial_sizes[original_i]);
-          (*i).formula() = (*original_eq).formula();
+          (*i).formula() = original_eq.formula();
           pvi_set = find_propositional_variable_instantiations((*i).formula());
         }
       }
