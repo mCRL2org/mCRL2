@@ -149,6 +149,13 @@ public:
 
       pbes_expression operator()(const propositional_variable_instantiation& Y) const
       {
+        // the rewrite_star substitution is only applicable to closed PVIs.
+        if (!find_free_variables(Y).empty())
+        {
+          mCRL2log(log::trace) << "rewrite_star " << Y << " contains free variables, not applying substitution\n";
+          return Y;
+        }
+
         if (std::regex_match(static_cast<const std::string&>(Y.name()),
               match,
               mcrl2::pbes_system::detail::positive_or_negative))

@@ -87,6 +87,7 @@ struct rewrite_star_substitution
     // the rewrite_star substitution is only applicable to closed PVIs.
     if(!find_free_variables(Y).empty())
     {
+      mCRL2log(log::trace) << "rewrite_star " << Y << " contains free variables, not applying substitution\n";
       return Y;
     }
 
