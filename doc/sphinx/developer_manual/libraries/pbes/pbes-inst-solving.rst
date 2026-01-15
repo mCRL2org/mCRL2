@@ -10,6 +10,8 @@ Parameterised Boolean Equation Systems Instantiation and Solving
 
 This section describes instantiation and solving algorithms for PBESs that are used in the tool ``pbessolve``.
 
+This is based on a previous documentation written by Wieger Wesselink and Tim Willemse.
+
 Preliminaries to PBES instantiation to structure graph
 ------------------------------------------------------
 
@@ -1429,7 +1431,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 """""""""""""""""""""""""""""""""""""""""
 
 In Algorithm :ref:`PbesInstStructureGraph3 <solve-fatal-attractor>` we present the algorithm for optimization *3- Solve subgames using a fatal attractor*.
-Algorithm :ref:`PbesInstStructureGraph3 <solve-fatal-attractor>` uses :ref:`FatalAttractorOriginal <fatal-attractor-original>`. 
+Algorithm :ref:`PbesInstStructureGraph3 <solve-fatal-attractor>` uses :ref:`FatalAttractorOriginal <fatal-attractor-original>`, which is very close to the original fatal attractors computation by Micheal Huth, Jim Huan-Pu Kuo, and Nir Piterman. 
 
 .. _fatal-attractor-original:
 
