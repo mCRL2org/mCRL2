@@ -15,6 +15,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESCHAIN_H
 #define MCRL2_PBES_TOOLS_PBESCHAIN_H
 
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/algorithms.h"
@@ -46,7 +47,7 @@ struct pbeschain_options
                               // compared to the size of the original PVI.
   bool quantifier_free = false;
   bool avoid_alternating = false;
-  double srf_factor = 1.5; // factor of the maximum size the chained equation in SRF should be after chaining compared
+  double srf_factor = 1.2; // factor of the maximum size the chained equation in SRF should be after chaining compared
                            // to the size of the original equation.
 };
 
@@ -585,18 +586,30 @@ struct pbeschain_pbes_backward_substituter
       {
         // Use the same SRF form as pbessolvesymbolic
         symbolic_reachability_options opts;
-        pbes_system::srf_pbes_with_ce result = preprocess(p, opts);
-        pbes srf_pbes = pre_srf2srfpbes(result).to_pbes();
+        pbes_system::srf_pbes_with_ce result_presrf_pbes = preprocess(p, opts);
+        pbes result_srf_pbes = pre_srf2srfpbes(result_presrf_pbes).to_pbes();
 
+        pbes_system::srf_pbes_with_ce original_presrf_pbes = preprocess(original_pbes, opts);
+        pbes original_srf_pbes = pre_srf2srfpbes(original_presrf_pbes).to_pbes();
+
+        // Find our equation in both PBESs
         pbes_equation original_eq = original_pbes.equations()[original_i];
-        auto srf_eq = std::find_if(srf_pbes.equations().rbegin(),
-          srf_pbes.equations().rend(),
-          [&](const pbes_equation& eq) { return eq.variable().name() == original_eq.variable().name(); });
-        if (srf_eq == srf_pbes.equations().rend())
+        core::identifier_string original_variable_name = original_eq.variable().name();
+
+        auto result_srf_eq = std::find_if(result_srf_pbes.equations().rbegin(),
+          result_srf_pbes.equations().rend(),
+          [&](const pbes_equation& eq) { return eq.variable().name() == original_variable_name; });
+        if (result_srf_eq == result_srf_pbes.equations().rend())
           continue;
 
-        std::size_t original_size = pp(original_eq.formula()).size();
-        std::size_t new_size = pp(srf_eq->formula()).size();
+        auto original_srf_eq = std::find_if(original_srf_pbes.equations().rbegin(),
+          original_srf_pbes.equations().rend(),
+          [&](const pbes_equation& eq) { return eq.variable().name() == original_variable_name; });
+        if (original_srf_eq == original_srf_pbes.equations().rend())
+          continue;
+
+        std::size_t original_size = pp(original_srf_eq->formula()).size();
+        std::size_t new_size = pp(result_srf_eq->formula()).size();
         if (options.srf_factor * (double)original_size <= (double)new_size)
         {
           log_number_pvi(initial_sizes[original_i], initial_sizes[original_i]);
