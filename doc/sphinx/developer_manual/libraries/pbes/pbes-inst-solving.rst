@@ -1,5 +1,5 @@
-:Date: 13-01-2026
-:Authors: - Anna Stramaglia
+:Date: 16-01-2026
+:Authors: Jeroen Keiren, Maurice Laveaux, Anna Stramaglia, Wieger Wesselink and Tim Willemse.
 :Institute: Eindhoven University of Technology
 
 .. default-role:: math
@@ -9,8 +9,6 @@ Parameterised Boolean Equation Systems Instantiation and Solving
 ================================================================
 
 This section describes instantiation and solving algorithms for PBESs that are used in the tool ``pbessolve``.
-
-This is based on a previous documentation written by Wieger Wesselink and Tim Willemse.
 
 Preliminaries to PBES instantiation to structure graph
 ------------------------------------------------------

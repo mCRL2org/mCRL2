@@ -1,0 +1,201 @@
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[dvipsnames]{xcolor}
+
+\setcounter{MaxMatrixCols}{10}
+
+\font \aap cmmi10
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+\newcommand{\ap}{{:}}
+\newcommand{\tuple}[1]{\ensuremath{\langle {#1} \rangle}}
+\newcommand{\vars}{\mathit{vars}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+
+\newcommand{\up}{\blacktriangle}
+\newcommand{\down}{\blacktriangledown}
+
+%--- pseudo code ---%
+\newcommand{\Space}{\text{\ }}
+\newcommand{\If}{\text{\textbf{if }}}
+\newcommand{\Do}{\text{\textbf{ do }}}
+\newcommand{\Then}{\text{\textbf{ then }}}
+\newcommand{\Else}{\text{\textbf{else }}}
+\newcommand{\For}{\text{\textbf{for }}}
+\newcommand{\While}{\text{\textbf{while }}}
+\newcommand{\Break}{\text{\textbf{break }}}
+\newcommand{\Continue}{\text{\textbf{continue }}}
+\newcommand{\Choose}{\text{\textbf{choose }}}
+\newcommand{\Return}{\text{\textbf{return }}}
+\newcommand{\With}{\text{\textbf{ with }}}
+
+\begin{document}
+
+\title{PBES Instantiation}
+\author{Jeroen Keiren, Maurice Laveaux, Anna Stramaglia, Wieger Wesselink and Tim Willemse}
+\maketitle
+
+This document describes instantiation algorithms for PBESs that
+are used in the tool \texttt{pbesinst}.
+
+\section{Finite algorithm}
+
+In this section we describe an implementation of the finite instantiation
+algorithm \textsc{PbesInstFinite} that eliminates data parameters with
+finite sorts. It is implemented in the tool \texttt{pbesinst}. Let $\mathcal{%
+E=(\sigma }_{1}X_{1}(d_{1}:D_{1},e_{1}:E_{1})=\varphi _{1})\cdots \mathcal{%
+(\sigma }_{n}X_{n}(d_{n}:D_{n},e_{n}:E_{n})=\varphi _{n})$ be a PBES. We
+assume that all data sorts $D_{i}$ are finite and all data sorts $E_{i}$ are
+infinite. Let $r$ be a data rewriter, and let $\rho $ be an injective
+function that creates a unique predicate variable from a predicate variable
+name and a data value according to $\rho (X(d:D,e:E),d_{0})\rightarrow Y(e:E)
+$, where $D$ is finite and $E$ is infinite and $d_{0}\in D$. Note that $D$
+and $D_{i}$ may be multi-dimensional sorts.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{PbesInstFinite(}}\mathcal{E}\text{, }r\text{, }\rho \text{%
+\textsc{)}} \\
+\For i:=1\cdots n\text{ \textbf{do}} \\
+\qquad \mathcal{E}_{i}:=\{\mathcal{\sigma }_{i}\rho (X_{i},d)=R(\varphi
+_{k}[d_{k}:=d])\ |\ d\in D_{i}\} \\
+\Return \mathcal{E}_{1}\cdots \mathcal{E}_{n},%
+\end{array}%
+\end{equation*}%
+with $R$ a rewriter on pbes expressions that is defined as follows:%
+\begin{eqnarray*}
+R(b) &=&b \\
+R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
+R(\varphi \oplus \psi ) &=&R(\varphi )\oplus R(\psi ) \\
+R(X_{i}(d,e)) &=&\left\{
+\begin{array}{cc}
+\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset  \\
+\bigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) &
+\text{if }FV(d)\neq \emptyset
+\end{array}%
+\right.  \\
+R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
+R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
+\end{eqnarray*}%
+where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and
+$\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
+variables appearing in $d$.\newpage
+
+\section{Lazy algorithm}
+
+In this section we describe an implementation of the lazy instantiation
+algorithm \textsc{PbesInstLazy} that uses instantiation to compute a BES. It
+is implemented in the tool \texttt{pbesinst}. It takes two extra parameters,
+an injective function $\rho $ that renames predicate variables to
+proposition variables, and a rewriter $R$ that eliminates quantifiers from
+predicate formulae. Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1})=\varphi
+_{1})\ldots \mathcal{(\sigma }_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a
+PBES, and $X_{init}(e_{init})$ an initial state.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{PbesInstLazy(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
+\text{, }\rho \text{\textsc{)}} \\
+\For i:=1\cdots n\text{ \textbf{do }}\mathcal{E}%
+_{i}:=\epsilon  \\
+todo:=\{R(X_{init}(e_{init}))\} \\
+done:=\emptyset  \\
+\While todo\neq \emptyset \Do \\
+\qquad \Choose X_{k}(e)\in todo \\
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\
+\qquad done:=done\cup \{X_{k}(e)\} \\
+\qquad X^{e}:=\rho (X_{k}(e)) \\
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\
+\qquad \mathcal{E}_{k}:=\mathcal{E}_{k}(\mathcal{\sigma }_{k}X^{e}=\rho
+(\psi ^{e})) \\
+\qquad todo:=todo\cup \{Y(f)\in \mathsf{occ}(\psi ^{e})\ |\ Y(f)\notin done\}
+\\
+\Return \mathcal{E}_{1}\cdots \mathcal{E}_{n},%
+\end{array}%
+\end{equation*}%
+where $\rho $ is extended from predicate variables to quantifier free
+predicate formulae using
+
+\begin{eqnarray*}
+\rho (b) &=&b \\
+\quad \rho (\varphi \oplus \psi ) &=&\rho (\varphi )\oplus \rho (\psi )
+\end{eqnarray*}%
+\newpage
+
+\section{Generic lazy algorithms}
+
+In this section two generic variants of lazy PBES instantiation are
+described that report all discovered BES equations using a callback
+function \textsc{ReportEquation}. These versions are later extended to compute
+structure graphs.
+
+The first version \textsc{PbesInstLazy1}
+maintains a collection $done$, that contains all BES variables for
+which an equation has been computed.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{PbesInstLazy1(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }%
+R\text{\textsc{)}} \\
+init:=R(X_{init}(e_{init})) \\
+todo:=\{init\} \\
+done:=\emptyset \\
+\While todo\neq \emptyset \Do \\
+\qquad \Choose X_{k}(e)\in todo \\
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\
+\qquad done:=done\cup \{X_{k}(e)\} \\
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\
+\qquad \text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\
+\qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus done)
+\end{array}
+\end{equation*}
+
+The second version \textsc{PbesInstLazy2} maintains a set $discovered$
+instead of $done$. This set contains BES
+variables that have been discovered, but for which the corresponding
+equation may not have been computed yet. The sets are related via
+$done = discovered \setminus todo$.
+
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{PbesInstLazy2(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, } R\text{\textsc{)}} \\
+init:=R(X_{init}(e_{init})) \\
+todo:=\{init\} \\
+discovered:=\{init\} \\
+\While todo\neq \emptyset \Do \\
+\qquad \Choose X_{k}(e)\in todo \\
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\
+\qquad \text{\textsc{ReportEquation}}(X_{k}(e),\psi ^{e}) \\
+\qquad todo:=todo\cup (\mathrm{occ}(\psi ^{e})\setminus discovered) \\
+\qquad discovered:=discovered\ \cup \mathrm{occ}(\psi ^{e})
+\end{array}
+\end{equation*}
+
+It turned out that the second version has slightly better performance for
+some larger use cases.
+
+To support breadth first and depth first search, the implementation stores the
+set $todo$ as a double ended queue. New elements are always appended to $todo$.
+In the case of breadth first search always the first element is chosen, and in the
+case of depth first search the last element.
