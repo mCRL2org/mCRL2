@@ -118,7 +118,7 @@ PBES
 * :mcrl2_pdflatex:`PBES Generation <libraries/pbes/latex/pbes-generation.tex>`
 * :mcrl2_pdflatex:`PBES Implementation Notes <libraries/pbes/latex/pbes-implementation-notes.tex>`
 * :mcrl2_pdflatex:`PBES rewriters <libraries/pbes/latex/pbes-rewriters.tex>`
-* :mcrl2_pdflatex:`PBES Instantiation and Solving <libraries/pbes/latex/pbes-instantiation-solving.tex>`
+* :mcrl2_pdflatex:`PBES Instantiation <libraries/pbes/latex/pbes-instantiation.tex>`
 * :mcrl2_pdflatex:`kant-pbes-greybox-notes.tex <libraries/pbes/latex/kant-pbes-greybox-notes.tex>`
 * :mcrl2_pdflatex:`Some notes on a BES library <libraries/pbes/latex/bes-library.tex>`
 
