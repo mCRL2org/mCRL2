@@ -477,12 +477,6 @@ class pbessolve_tool
     }
     
     bool has_counter_example = detail::has_counter_example_information(pbesspec);
-    if (has_counter_example)
-    {      
-        mCRL2log(mcrl2::log::warning) << "Warning: Cannot use partial solving with PBES that has counter example information, using strategy 0 instead." << std::endl;
-        options.optimization = partial_solve_strategy::no_optimisation;
-    }    
-
     if (options.optimization < partial_solve_strategy::no_optimisation || options.optimization >  partial_solve_strategy::detect_winning_loops_original)
     {
       throw mcrl2::runtime_error("Invalid strategy " +
