@@ -64,7 +64,7 @@ struct pbessolve_options
   search_strategy exploration_strategy = breadth_first;
   partial_solve_strategy optimization = partial_solve_strategy::no_optimisation;
 
-  // if true, apply optimization 4 and 5 at every iteration
+  // if true, apply optimizations at every iteration.
   bool aggressive = false;
 
   // if true, run the naive algorithm for instantiating pbes with counter example information.

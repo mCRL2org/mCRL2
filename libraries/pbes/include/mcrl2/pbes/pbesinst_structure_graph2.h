@@ -577,7 +577,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       stopwatch timer;
 
       bool report = false;
-      if (m_options.optimization == partial_solve_strategy::propagate_solved_equations_using_attractor)
+      if (m_options.optimization == partial_solve_strategy::propagate_solved_equations_using_attractor || m_options.aggressive)
       {
         if (S_guard[0](S[0].size()))
         {
