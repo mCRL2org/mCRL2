@@ -28,6 +28,7 @@ namespace mcrl2::pbes_system
 /// \param PVI A propositional variable instantiation X(e).
 /// \param R A set of indices of parameters that are redundant in X(e).
 /// \return A copy of X(e) without redundancy.
+inline
 propositional_variable_instantiation rewrite_PVI(const propositional_variable_instantiation PVI,
   const std::unordered_map<std::string, std::set<int>> R)
 {
@@ -245,8 +246,8 @@ public:
     const propositional_variable_instantiation& X,
     const pbes_expression& phi) override
   {
-    return compose_substitutions(detail::rewrite_star_substitution(symbol, X, phi, G, alpha, mapping, R),
-      pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi));
+    return compose_substitutions(pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi), 
+      detail::rewrite_star_substitution(symbol, X, phi, G, alpha, mapping, R));
   }
 
 private:
@@ -280,8 +281,8 @@ public:
     const propositional_variable_instantiation& X,
     const pbes_expression& phi) override
   {
-    return compose_substitutions(detail::rewrite_star_substitution(symbol, X, phi, G, alpha, mapping, R),
-      pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi));
+    return compose_substitutions(pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi),
+      detail::rewrite_star_substitution(symbol, X, phi, G, alpha, mapping, R));
   }
 
 private:
