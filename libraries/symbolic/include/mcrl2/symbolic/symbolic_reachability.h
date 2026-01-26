@@ -15,6 +15,7 @@
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/find_quantifier_variables.h"
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/undefined.h"
@@ -105,6 +106,11 @@ void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
 {
   if (p.expression() != data::sort_bool::true_())
   {    
+    if (!data::find_quantifier_variables(p.expression()).empty()) 
+    {
+      mCRL2log(log::info) << "The condition contains quantifiers, which means that rewriting to normal form could fail when the quantifier enumeration limit is too low. Use ---qlimit/-Q to increase the limit." << std::endl;
+    }
+
     throw data::enumerator_error("Expression does not rewrite to true or false: " + data::pp(p.expression()));
   }
 }

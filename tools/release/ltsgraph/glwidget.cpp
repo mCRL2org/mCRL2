@@ -650,6 +650,8 @@ void GLWidget::paintDeadlocks()
       m_graph.node(i).color() = m_paintcolor;
     }
   }
+  update();
+  m_graph.hasNewFrame(true);
 }
 
 const QVector3D& GLWidget::getPaint() const
