@@ -8,7 +8,6 @@
 //
 /// \file pbeschain.cpp
 
-#include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/pbes_rewriter_tool.h"
