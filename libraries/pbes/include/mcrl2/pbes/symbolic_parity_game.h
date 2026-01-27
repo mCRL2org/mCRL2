@@ -813,7 +813,9 @@ private:
                              << watch.seconds() << "s)\n";
 
         P = union_(P, todo1);
-        strategy = union_(strategy, merge(minus(intersect(todo1, Vplayer[alpha]), todo), todo));
+        if (m_compute_strategy) {
+          strategy = union_(strategy, merge(minus(intersect(todo1, Vplayer[alpha]), todo), todo));
+        }
         todo = union_(todo, intersect(todo1, W));
       }
 
@@ -855,7 +857,7 @@ private:
 
       // the predecessor computation without chaining does not compute a strategy
       // so we still need to calculate it.
-      if(!m_chaining)
+      if(!m_chaining && m_compute_strategy)
       {
         strategy = merge(minus(Palpha, U), U);
       }

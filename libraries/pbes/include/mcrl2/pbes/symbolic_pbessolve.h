@@ -62,11 +62,13 @@ class symbolic_pbessolve_algorithm
   private:
     const symbolic_parity_game& m_G;
     bool m_check_strategy = false;
+    bool m_compute_strategy = false;
 
   public:
-    symbolic_pbessolve_algorithm(const symbolic_parity_game& G, bool check_strategy = false) :
+    symbolic_pbessolve_algorithm(const symbolic_parity_game& G, bool check_strategy = false, bool compute_strategy = false) :
       m_G(G),
-      m_check_strategy(check_strategy)
+      m_check_strategy(check_strategy),
+      m_compute_strategy(compute_strategy)
     {}
 
     symbolic_solution_t zielonka(const ldd& V)
@@ -98,10 +100,12 @@ class symbolic_pbessolve_algorithm
       {
         solution.winning[alpha] = union_(A, solution_V_minus_A.winning[alpha]);
         solution.winning[1 - alpha] = empty_set();
-        solution.strategy[alpha]
-          = union_(union_(A_strategy, solution_V_minus_A.strategy[alpha]), merge(intersect(U, Vplayer[alpha]), V));
-        solution.strategy[1 - alpha] = empty_set();
-
+        
+        if (m_compute_strategy) {
+            solution.strategy[alpha]
+              = union_(union_(A_strategy, solution_V_minus_A.strategy[alpha]), merge(intersect(U, Vplayer[alpha]), V));
+            solution.strategy[1 - alpha] = empty_set();
+        }
         assert(union_(solution.winning[0], solution.winning[1]) == V);
       }
       else
@@ -110,7 +114,9 @@ class symbolic_pbessolve_algorithm
         mCRL2log(log::trace) << "B = attractor(" << m_G.print_nodes(solution_V_minus_A.winning[1 - alpha]) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(B) << std::endl;
         solution = zielonka(minus(V, B));
         solution.winning[1 - alpha] = union_(solution.winning[1 - alpha], B);
-        solution.strategy[1 - alpha] = union_(union_(solution_V_minus_A.strategy[1 - alpha], B_strategy), solution.strategy[1 - alpha]);
+        if (m_compute_strategy) {
+            solution.strategy[1 - alpha] = union_(union_(solution_V_minus_A.strategy[1 - alpha], B_strategy), solution.strategy[1 - alpha]);
+        }
         assert(union_(solution.winning[0], solution.winning[1]) == V);
       }
 
@@ -195,6 +201,9 @@ class symbolic_pbessolve_algorithm
 
       // Solve with zielonka twice for the safe sets.
       symbolic_solution_t zielonka_solution_0 = zielonka(m_G.compute_safe_vertices(0, Vtotal, I));
+      if (!m_compute_strategy) {
+          assert(zielonka_solution_0.strategy[0].empty() && zielonka_solution_1.strategy[1].empty());
+      }
       zielonka_solution_0.winning[0] = union_(zielonka_solution_0.winning[0], solution.winning[0]);
       zielonka_solution_0.strategy[0] = union_(zielonka_solution_0.strategy[0], solution.strategy[0]);
 
@@ -206,6 +215,9 @@ class symbolic_pbessolve_algorithm
       }
 
       symbolic_solution_t zielonka_solution_1 = zielonka(m_G.compute_safe_vertices(1, Vtotal, I));
+      if (!m_compute_strategy) {
+          assert(zielonka_solution_1.strategy[0].empty() && zielonka_solution_1.strategy[1].empty());
+      }
       zielonka_solution_1.winning[1] = union_(zielonka_solution_1.winning[1], solution.winning[1]);
       zielonka_solution_1.strategy[1] = union_(zielonka_solution_1.strategy[1], solution.strategy[1]);
 
@@ -294,7 +306,12 @@ class symbolic_pbessolve_algorithm
         mCRL2log(log::trace) << "detect_solitair_cycles: states in cycles:\n"
         << "U = " << m_G.print_nodes(U) << "\n";
 
-        solution.strategy[alpha] = union_(solution.strategy[alpha], merge(U, U));
+        if (m_compute_strategy)
+        {
+          solution.strategy[alpha] = union_(solution.strategy[alpha], merge(U, U));
+        } else {
+            assert(solution.strategy[alpha]);
+        }
 
         mCRL2log(log::trace) << "detect_solitair_cycles: extended strategy for player " << alpha << " to \n"
         << "  S[alpha] = " << m_G.print_strategy(solution.strategy[alpha]) << "\n";
@@ -305,13 +322,23 @@ class symbolic_pbessolve_algorithm
         {
           std::pair<ldd, ldd> attr = m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I);
           solution.winning[alpha] = union_(solution.winning[alpha], attr.first);
-          solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
+          if(m_compute_strategy)
+          {
+              solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
+          } else {
+              assert(attr.second.empty());
+          }
         }
         else
         {
           std::pair<ldd, ldd> attr = m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer);
           solution.winning[alpha] = union_(solution.winning[alpha], attr.first);
-          solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
+          if(m_compute_strategy)
+          {
+              solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
+          } else {
+              assert(attr.second.empty());
+          }
         }
         mCRL2log(log::trace) << "detect_solitair_cycles: extended winning sets and strategy for player " << alpha
                              << " to \n"
@@ -398,19 +425,31 @@ class symbolic_pbessolve_algorithm
         mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
 
         // Overapproximate strategy for the forced winning cycles
-        solution.strategy[alpha] = union_(solution.strategy[alpha], merge(U, U));
+        if (m_compute_strategy) {
+            solution.strategy[alpha] = union_(solution.strategy[alpha], merge(U, U));
+        } else {
+            assert(solution.strategy[alpha].empty());
+        }
 
         if (safe_variant)
         {
           std::pair<ldd, ldd> attr = m_G.safe_attractor(U, alpha, Vtotal, Vplayer, I);
           solution.winning[alpha] = union_(solution.winning[alpha], attr.first);
-          solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
+          if (m_compute_strategy) {
+              solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
+          } else {
+              assert(attr.second.empty());
+          }
         }
         else
         {
           std::pair<ldd, ldd> attr = m_G.safe_attractor(U, alpha, Vsafe[alpha], Vplayer);
           solution.winning[alpha] = union_(solution.winning[alpha], attr.first);
-          solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
+          if (m_compute_strategy) {
+              solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
+          } else {
+              assert(attr.second.empty());
+          }
         }
       }
 
@@ -518,8 +557,7 @@ class symbolic_pbessolve_algorithm
       // there may be new sinks due to vertices whose strategy is not defined.
       ldd new_Vsinks = compute_deadlocks(V, new_G);
 
-
-      symbolic_pbessolve_algorithm check(new_G);
+      symbolic_pbessolve_algorithm check(new_G, false, m_compute_strategy);
 
       auto [result, solution_prime] = check.solve(initial_vertex, V, new_Vsinks, symbolic_solution_t(), false);
 

@@ -539,7 +539,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
                 options_.chaining,
                 options_.compute_strategy);
               G.print_information();
-              pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy);
+              pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy, options_.compute_strategy);
 
               mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
               timer().start("solving");
@@ -585,7 +585,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             options_.chaining,
             options_.compute_strategy);
           G.print_information();
-          pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy);
+          pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy, options_.compute_strategy);
 
           timer().start("first-solving");
           // Solve the remainder of the partially solved game.

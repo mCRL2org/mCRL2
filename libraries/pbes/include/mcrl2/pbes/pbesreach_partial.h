@@ -10,6 +10,7 @@
 #ifndef MCRL2_PBES_PBESREACH_PARTIAL_H
 #define MCRL2_PBES_PBESREACH_PARTIAL_H
 
+#include "mcrl2/utilities/logger.h"
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include <sylvan_ldd.hpp>
@@ -50,7 +51,7 @@ public:
         m_options.chaining,
         m_options.compute_strategy);
       G.print_information();
-      symbolic_pbessolve_algorithm solver(G);
+      symbolic_pbessolve_algorithm solver(G, false, m_options.compute_strategy);
 
       if (m_options.solve_strategy == 1)
       {
