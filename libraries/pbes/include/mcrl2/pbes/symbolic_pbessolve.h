@@ -202,7 +202,7 @@ class symbolic_pbessolve_algorithm
       // Solve with zielonka twice for the safe sets.
       symbolic_solution_t zielonka_solution_0 = zielonka(m_G.compute_safe_vertices(0, Vtotal, I));
       if (!m_compute_strategy) {
-          assert(zielonka_solution_0.strategy[0]==ldds::empty_set() && zielonka_solution_1.strategy[1]==ldds::empty_set());
+          assert(zielonka_solution_0.strategy[0]==empty_set() && zielonka_solution_1.strategy[1]==empty_set());
       }
       zielonka_solution_0.winning[0] = union_(zielonka_solution_0.winning[0], solution.winning[0]);
       zielonka_solution_0.strategy[0] = union_(zielonka_solution_0.strategy[0], solution.strategy[0]);
@@ -216,7 +216,7 @@ class symbolic_pbessolve_algorithm
 
       symbolic_solution_t zielonka_solution_1 = zielonka(m_G.compute_safe_vertices(1, Vtotal, I));
       if (!m_compute_strategy) {
-          assert(zielonka_solution_1.strategy[0]==ldds::empty_set() && zielonka_solution_1.strategy[1]==ldds::empty_set());
+          assert(zielonka_solution_1.strategy[0]==empty_set() && zielonka_solution_1.strategy[1]==empty_set());
       }
       zielonka_solution_1.winning[1] = union_(zielonka_solution_1.winning[1], solution.winning[1]);
       zielonka_solution_1.strategy[1] = union_(zielonka_solution_1.strategy[1], solution.strategy[1]);
@@ -310,7 +310,7 @@ class symbolic_pbessolve_algorithm
         {
           solution.strategy[alpha] = union_(solution.strategy[alpha], merge(U, U));
         } else {
-            assert(solution.strategy[alpha]==ldds::empty_set());
+            assert(solution.strategy[alpha]==empty_set());
         }
 
         mCRL2log(log::trace) << "detect_solitair_cycles: extended strategy for player " << alpha << " to \n"
@@ -326,7 +326,7 @@ class symbolic_pbessolve_algorithm
           {
               solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
           } else {
-              assert(attr.second==ldds::empty_set());
+              assert(attr.second==empty_set());
           }
         }
         else
@@ -337,7 +337,7 @@ class symbolic_pbessolve_algorithm
           {
               solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
           } else {
-              assert(attr.second==ldds::empty_set());
+              assert(attr.second==empty_set());
           }
         }
         mCRL2log(log::trace) << "detect_solitair_cycles: extended winning sets and strategy for player " << alpha
@@ -428,7 +428,7 @@ class symbolic_pbessolve_algorithm
         if (m_compute_strategy) {
             solution.strategy[alpha] = union_(solution.strategy[alpha], merge(U, U));
         } else {
-            assert(solution.strategy[alpha]==ldds::empty_set());
+            assert(solution.strategy[alpha]==empty_set());
         }
 
         if (safe_variant)
@@ -438,7 +438,7 @@ class symbolic_pbessolve_algorithm
           if (m_compute_strategy) {
               solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
           } else {
-              assert(attr.second==ldds::empty_set());
+              assert(attr.second==empty_set());
           }
         }
         else
@@ -448,7 +448,7 @@ class symbolic_pbessolve_algorithm
           if (m_compute_strategy) {
               solution.strategy[alpha] = union_(solution.strategy[alpha], attr.second);
           } else {
-              assert(attr.second==ldds::empty_set());
+              assert(attr.second==empty_set());
           }
         }
       }
