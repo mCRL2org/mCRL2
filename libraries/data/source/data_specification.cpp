@@ -113,7 +113,8 @@ class finiteness_helper
 
     bool is_finite(const container_sort& s)
     {
-      return (s.container_name() == set_container()) ? is_finite(s.element_sort()) : false;
+      return (s.container_name() == set_container() || 
+              s.container_name() == fset_container()) ? is_finite(s.element_sort()) : false;
     }
 
     bool is_finite(const alias&)
