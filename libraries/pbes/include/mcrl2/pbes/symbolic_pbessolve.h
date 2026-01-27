@@ -202,7 +202,7 @@ class symbolic_pbessolve_algorithm
       // Solve with zielonka twice for the safe sets.
       symbolic_solution_t zielonka_solution_0 = zielonka(m_G.compute_safe_vertices(0, Vtotal, I));
       if (!m_compute_strategy) {
-          assert(zielonka_solution_0.strategy[0]==empty_set() && zielonka_solution_1.strategy[1]==empty_set());
+          assert(zielonka_solution_0.strategy[0]==empty_set() && zielonka_solution_0.strategy[1]==empty_set());
       }
       zielonka_solution_0.winning[0] = union_(zielonka_solution_0.winning[0], solution.winning[0]);
       zielonka_solution_0.strategy[0] = union_(zielonka_solution_0.strategy[0], solution.strategy[0]);
