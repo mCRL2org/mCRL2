@@ -31,7 +31,6 @@ class lpsreach_tool: public parallel_tool<rewriter_tool<input_output_tool>>
     symbolic::symbolic_reachability_options options;
 
     // Lace options
-    std::size_t lace_n_workers = 1;
     std::size_t lace_dqsize = static_cast<std::size_t>(1024*1024)*4; // set large default
     std::size_t lace_stacksize = 0; // use default
 
@@ -100,7 +99,6 @@ class lpsreach_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       options.variable_order                        = parser.option_argument("reorder");
       options.rewrite_strategy                      = rewrite_strategy();
       options.dot_file                              = parser.option_argument("dot");
-      lace_n_workers = number_of_threads();
       if (parser.has_option("lace-dqsize"))
       {
         lace_dqsize = parser.option_argument_as<int>("lace-dqsize");
@@ -149,8 +147,8 @@ class lpsreach_tool: public parallel_tool<rewriter_tool<input_output_tool>>
     {
       using namespace sylvan::ldds;
 
-      lace_init(lace_n_workers, lace_dqsize);
-      lace_startup(lace_stacksize, nullptr, nullptr);
+      lace_start(number_of_threads(), lace_dqsize);
+      lace_set_stacksize(lace_stacksize);
       sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
@@ -188,7 +186,7 @@ class lpsreach_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       }
 
       sylvan::sylvan_quit();
-      lace_exit();
+      lace_stop();
       return true;
     }
 };
