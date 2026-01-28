@@ -639,8 +639,9 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
             pbessolve_options.check_strategy = options_.check_strategy;
             pbessolve_options.number_of_threads = 1; // If we spawn multiple threads here, the threads of Sylvan and the explicit exploration will interfere
-
-            PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], V, result ? solution.strategy[0] : solution.strategy[1], reach.rewriter());
+            
+            mCRL2log(log::info) << "Starting second instantiation";
+            PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], V, result ? solution.strategy[0].value() : solution.strategy[1].value(), reach.rewriter());
 
             // Perform the second instantiation given the proof graph.
             timer().start("second-instantiation");
