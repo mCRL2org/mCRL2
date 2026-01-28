@@ -591,7 +591,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
           // Solve the remainder of the partially solved game.
           bool solution_found = false;
           bool result;
-          symbolic_solution_t solution;
+          symbolic_solution_t solution(true);
           if(reach.I() == empty_set())
           {
             std::tie(result,solution) = solver.solve(reach.initial_state(),
