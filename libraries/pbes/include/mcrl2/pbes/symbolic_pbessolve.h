@@ -33,7 +33,7 @@ struct symbolic_solution_t
   /// Strategies for both players
   std::array<std::optional<ldd>,2> strategy;
 
-  symbolic_solution_t(bool instantiated_strategies = false)
+  symbolic_solution_t(bool instantiated_strategies)
     : winning({sylvan::ldds::empty_set(), sylvan::ldds::empty_set()}),
       strategy({std::nullopt, std::nullopt})
   {
@@ -590,7 +590,7 @@ class symbolic_pbessolve_algorithm
 
       symbolic_pbessolve_algorithm check(new_G, false, m_compute_strategy);
 
-      auto [result, solution_prime] = check.solve(initial_vertex, V, new_Vsinks, symbolic_solution_t(), false);
+      auto [result, solution_prime] = check.solve(initial_vertex, V, new_Vsinks, symbolic_solution_t(m_compute_strategy), false);
 
       if (includes(union_(solution.winning[0], solution.winning[1]), V))
       {
