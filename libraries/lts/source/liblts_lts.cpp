@@ -8,14 +8,15 @@
 //
 /// \file liblts_lts.cpp
 
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/lts/lts_io.h"
-
-#include "mcrl2/atermpp/standard_containers/indexed_set.h"
-
 #include <algorithm>
 #include <fstream>
 #include <optional>
+
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
+
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/lts_io.h"
+
 
 namespace mcrl2::lts
 {
@@ -249,7 +250,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
         lts.add_transition(transition(from.value(), index, to_index));
 
         // Update the number of states
-        number_of_states = std::max({number_of_states, from.value() + 1, to_index + 1});
+        number_of_states = std::max({number_of_states, from.value() + 1, to.maximal_state() + 1});
 
         if (inserted)
         {

@@ -254,6 +254,28 @@ class probabilistic_state
       m_probabilistic_state.clear();
     }
 
+    /** \brief Provides the maximal state index in a probabilistic state.
+     ** \return A STATE with the maximal index, ordered using >. */
+    STATE maximal_state() const 
+    {
+      if (size()<=1)
+      {
+        return get();
+      }
+      // else
+      STATE result(STATE(-1));
+      for(const lps::state_probability_pair<STATE, PROBABILITY>& p: *this)
+      {
+        if (result==STATE(-1) || p.state()>result)
+        {
+          result=p.state();
+        }
+      }
+      assert(result!=STATE(-1));
+      return result;
+    }
+
+
     /** \brief Gets an iterator over pairs of state and probability. This can only be used when the state is stored 
      **        internally as a vector.  
      *  \return The iterator pointing at the first state probability pair. */
