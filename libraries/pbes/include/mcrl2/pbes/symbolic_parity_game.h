@@ -21,6 +21,7 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/stopwatch.h"
 
+#include <optional>
 #include "sylvan_ldd.hpp"
 
 
@@ -396,19 +397,19 @@ class symbolic_parity_game
     /// \param Vplayer a partitioning of the nodes into the sets of even nodes V[0] and odd V[1].
     /// \param I is a set of incomplete vertices.
     /// \param T A set of states such that iteration stops when one of them occurs in the attractor.
-    std::pair<ldd, ldd> safe_attractor(const ldd& U,
+    std::pair<ldd, std::optional<ldd>> safe_attractor(const ldd& U,
       std::size_t alpha,
       const ldd& V,
       const std::array<const ldd, 2>& Vplayer,
-      const ldd& I = sylvan::ldds::empty_set(),
-      const ldd& T = sylvan::ldds::empty_set()) const
+      const std::optional<ldd>& I = std::nullopt,
+      const std::optional<ldd>& T = std::nullopt) const
     {
       stopwatch attractor_watch;
       mCRL2log(log::debug) << "safe_attractor: start attractor set computation\n";
       mCRL2log(log::trace) << "  player = " << alpha << "\n"
                            << "  U = " << print_nodes(U) << "\n"
-                           << "  I = " << print_nodes(I) << "\n"
-                           << "  T = " << print_nodes(T) << "\n";
+                           << "  I = " << print_nodes(I.value_or(sylvan::ldds::empty_set())) << "\n"
+                           << "  T = " << print_nodes(T.value_or(sylvan::ldds::empty_set())) << "\n";
 
       using namespace sylvan::ldds;
 
@@ -416,7 +417,7 @@ class symbolic_parity_game
       ldd Z = U;
       ldd todo = U;
       ldd Zoutside = minus(V, Z);
-      ldd strategy = empty_set();
+      std::optional<ldd> strategy = m_compute_strategy ?  std::optional<ldd>(empty_set()) : std::nullopt;
 
       while (todo != empty_set())
       {
@@ -424,10 +425,10 @@ class symbolic_parity_game
         mCRL2log(log::trace) << "  Z = " << print_nodes(Z) << "\n"
                              << "  todo = " << print_nodes(todo) << "\n"
                              << "  Zoutside = " << print_nodes(Zoutside) << "\n"
-                             << "  strategy = " << print_strategy(strategy) << "\n";
+                             << (strategy.has_value() ? "  strategy = " + print_strategy(strategy.value()) : "") << "\n";
 
         // Terminate early when a vertex in T was found.
-        if (intersect(T, Z) != empty_set() )
+        if (T.has_value() && intersect(T.value(), Z) != empty_set() )
         {
           return std::make_pair(Z, strategy);
         }
@@ -437,10 +438,13 @@ class symbolic_parity_game
         const auto& [pred, pred_strategy] = safe_control_predecessors_impl(alpha, todo, Zoutside, Zoutside, V, Vplayer, I);
         mCRL2log(log::trace) << "safe_attractor: computed safe_control_predecessors\n"
           << "  pred = " << print_nodes(pred) << "\n"
-          << "  pred_strategy = " << print_strategy(pred_strategy) << "\n";
+          << (pred_strategy.has_value() ? "  pred_strategy = " + print_strategy(pred_strategy.value()) : "") << "\n";
 
         todo = minus(pred, Z);
-        strategy = union_(strategy, pred_strategy);
+        if (m_compute_strategy)
+        {
+          strategy = union_(strategy.value(), pred_strategy.value());
+        }
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
@@ -450,7 +454,7 @@ class symbolic_parity_game
 
         ++iter;
       }
-
+      
       mCRL2log(log::debug) << "safe_attractor: finished attractor set computation (time = " << std::setprecision(2)
                            << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
 
@@ -458,7 +462,7 @@ class symbolic_parity_game
       mCRL2log(log::trace) << "  Z = " << print_nodes(Z) << "\n"
                            << "  todo = " << print_nodes(todo) << "\n"
                            << "  Zoutside = " << print_nodes(Zoutside) << "\n"
-                           << "  strategy = " << print_strategy(strategy) << "\n";
+                           << (strategy.has_value() ? "  strategy = " + print_strategy(strategy.value()) : "") << "\n";
       return std::make_pair(Z, strategy);
     }
 
@@ -580,7 +584,7 @@ class symbolic_parity_game
     }
 
     /// \brief Removes all winning states (and updates winning partition).
-    ldd compute_total_graph(const ldd& V, const ldd& I, const ldd& Vsinks, std::array<ldd, 2>& winning, std::array<ldd, 2>& strategy) const
+    ldd compute_total_graph(const ldd& V, const ldd& I, const ldd& Vsinks, std::array<ldd, 2>& winning, std::array<std::optional<ldd>, 2>& strategy) const
     {
       using namespace sylvan::ldds;
       std::array<const ldd, 2> Vplayer = players(V);
@@ -606,10 +610,10 @@ class symbolic_parity_game
         << "compute_total_graph: extending winning sets using attractor set computations. Initial winning sets are:\n"
         << "  W[0] = " << print_nodes(winning[0]) << "\n"
         << "  W[1] = " << print_nodes(winning[1]) << "\n"
-        << "  S[0] = " << print_strategy(strategy[0]) << "\n"
-        << "  S[1] = " << print_strategy(strategy[1]) << "\n";
+        << (strategy[0].has_value() ? "  S[0] = " + print_strategy(strategy[0].value()) + "\n" : "")
+        << (strategy[1].has_value() ? "  S[1] = " + print_strategy(strategy[1].value()) + "\n" : "");
 
-        std::array<ldd, 2>
+        std::array<std::optional<ldd>, 2>
           attr_strategy;
       mCRL2log(log::trace) << "compute_total_graph: compute safe attractor into W[0]\n";
       std::tie(winning[0], attr_strategy[0]) = safe_attractor(winning[0], 0, V, Vplayer, I);
@@ -621,16 +625,19 @@ class symbolic_parity_game
                            << "  W[0] = " << print_nodes(winning[0]) << "\n"
                            << "  W[1] = " << print_nodes(winning[1]) << "\n"
                            << "with attractor strategy:\n"
-                           << "  S[0] = " << print_strategy(attr_strategy[0]) << "\n"
-                           << "  S[1] = " << print_strategy(attr_strategy[1]) << "\n";
+                           << (attr_strategy[0].has_value() ? "  S[0] = " + print_strategy(attr_strategy[0].value()) + "\n" : "")
+                           << (attr_strategy[1].has_value() ? "  S[1] = " + print_strategy(attr_strategy[1].value()) + "\n" : "");
 
       // Update strategy with attractor strategy. Note this is done in-place
-      strategy[0] = union_(strategy[0], attr_strategy[0]);
-      strategy[1] = union_(strategy[1], attr_strategy[1]);
+      if (m_compute_strategy) 
+      {
+          strategy[0] = union_(strategy[0].value_or(empty_set()), attr_strategy[0].value());
+          strategy[1] = union_(strategy[1].value_or(empty_set()), attr_strategy[1].value());
+      }
 
       mCRL2log(log::trace) << "compute_total_graph: combined strategies are:\n"
-                           << "  S[0] = " << print_strategy(strategy[0]) << "\n"
-                           << "  S[1] = " << print_strategy(strategy[1]) << "\n";
+                           << (strategy[0].has_value() ? "  S[0] = " + print_strategy(strategy[0].value()) + "\n" : "")
+                           << (strategy[1].has_value() ? "  S[1] = " + print_strategy(strategy[1].value()) + "\n" : "");
 
       // After removing the deadlock (winning) states the resulting set of states is a total graph.
       return minus(minus(V, winning[0]), winning[1]);
@@ -790,7 +797,7 @@ private:
     /// (without chaining ->* = ->), and a strategy for player alpha on P \setminus U.
     ///
     /// \pre U,W subseteq V.
-    std::pair<ldd, ldd> predecessors_chaining(const std::size_t alpha,
+    std::pair<ldd, std::optional<ldd>> predecessors_chaining(const std::size_t alpha,
       const ldd& U,
       const ldd& V,
       const ldd& W,
@@ -799,7 +806,7 @@ private:
       using namespace sylvan::ldds;
 
       ldd P(empty_set());
-      ldd strategy(empty_set());
+      std::optional<ldd> strategy = m_compute_strategy ?  std::optional<ldd>(empty_set()) : std::nullopt;
 
       ldd todo = V;
       for (int i = m_summand_groups.size() - 1; i >= 0; --i)
@@ -813,8 +820,9 @@ private:
                              << watch.seconds() << "s)\n";
 
         P = union_(P, todo1);
-        if (m_compute_strategy) {
-          strategy = union_(strategy, merge(minus(intersect(todo1, Vplayer[alpha]), todo), todo));
+        if (m_compute_strategy) 
+        {
+          strategy = union_(strategy.value(), merge(minus(intersect(todo1, Vplayer[alpha]), todo), todo));
         }
         todo = union_(todo, intersect(todo1, W));
       }
@@ -824,13 +832,13 @@ private:
 
     /// \brief Compute the safe control attractor set for U where chaining is restricted to W and V are vertices considered as control predecessors (can be different from outside).
     ///        The set outside should be minus(V, U)
-    std::pair<ldd, ldd> safe_control_predecessors_impl(std::size_t alpha,
+    std::pair<ldd, std::optional<ldd>> safe_control_predecessors_impl(std::size_t alpha,
       const ldd& U,
       const ldd& V,
       const ldd& outside,
       const ldd& W,
       const std::array<const ldd, 2>& Vplayer,
-      const ldd& I = sylvan::ldds::empty_set()) const
+      const std::optional<ldd>& I = std::nullopt) const
     {
       using namespace sylvan::ldds;
 
@@ -839,10 +847,10 @@ private:
         << "  U = " << print_nodes(U) << "\n"
         << "  outside = " << print_nodes(outside) << "\n"
         << "  W = " << print_nodes(W) << "\n"
-        << "  I = " << print_nodes(I) << "\n";
-
+        << (I.has_value() ? "  I = " + print_nodes(I.value()) : "") << "\n";
+        
       ldd P(empty_set());
-      ldd strategy(empty_set());
+      std::optional<ldd> strategy = m_compute_strategy ?  std::optional<ldd>(empty_set()) : std::nullopt;
       if(m_chaining)
       {
         std::tie(P, strategy) = predecessors_chaining(alpha, V, U, intersect(Vplayer[alpha], W), Vplayer);
@@ -853,7 +861,7 @@ private:
       }
 
       ldd Palpha = intersect(P, Vplayer[alpha]);
-      ldd Pforced = minus(intersect(P, Vplayer[1-alpha]), I);
+      ldd Pforced = minus(intersect(P, Vplayer[1-alpha]), I.value_or(empty_set()));
 
       // the predecessor computation without chaining does not compute a strategy
       // so we still need to calculate it.
@@ -866,7 +874,7 @@ private:
         << "  P = " << print_nodes(P) << "\n"
         << "  Palpha = " << print_nodes(Palpha) << "\n"
         << "  Pforced = " << print_nodes(Pforced) << "\n"
-        << "  strategy = " << print_strategy(strategy) << "\n";
+        << (strategy.has_value() ? "  strategy = " + print_strategy(strategy.value()) : "") << "\n";
 
       for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
       {

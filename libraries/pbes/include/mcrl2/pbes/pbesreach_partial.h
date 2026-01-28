@@ -10,7 +10,6 @@
 #ifndef MCRL2_PBES_PBESREACH_PARTIAL_H
 #define MCRL2_PBES_PBESREACH_PARTIAL_H
 
-#include "mcrl2/utilities/logger.h"
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include <sylvan_ldd.hpp>
@@ -29,7 +28,9 @@ public:
   pbesreach_algorithm_partial(const srf_pbes& pbesspec, const symbolic_reachability_options& options_)
     : pbesreach_algorithm(pbesspec, options_),
     m_partial_solution(symbolic_solution_t())
-  {}
+  {
+      
+  }
 
   void on_end_while_loop() override
   {
@@ -52,6 +53,11 @@ public:
         m_options.compute_strategy);
       G.print_information();
       symbolic_pbessolve_algorithm solver(G, false, m_options.compute_strategy);
+      
+      if (m_options.compute_strategy) 
+      {
+          m_partial_solution.strategy = { sylvan::ldds::empty_set(), sylvan::ldds::empty_set() };
+      }
 
       if (m_options.solve_strategy == 1)
       {
