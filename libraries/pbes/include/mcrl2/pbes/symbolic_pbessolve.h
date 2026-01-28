@@ -33,10 +33,15 @@ struct symbolic_solution_t
   /// Strategies for both players
   std::array<std::optional<ldd>,2> strategy;
 
-  symbolic_solution_t()
+  symbolic_solution_t(bool instantiated_strategies = false)
     : winning({sylvan::ldds::empty_set(), sylvan::ldds::empty_set()}),
       strategy({std::nullopt, std::nullopt})
-  {}
+  {
+      if (instantiated_strategies)
+      {
+          strategy = { sylvan::ldds::empty_set(), sylvan::ldds::empty_set() };
+      }
+  }
 
   /// Determine if vertex is part of the solution.
   bool solution_found(const ldd& vertex) const
@@ -52,11 +57,11 @@ std::string print_solution(const symbolic_parity_game& G, const symbolic_solutio
   std::ostringstream os;
   os << "W0 = " << G.print_nodes(solution.winning[0]) << std::endl;
   os << "W1 = " << G.print_nodes(solution.winning[1]) << std::endl;
-  if (solution.strategy[0].has_value()) 
+  if (solution.strategy[0].has_value())
   {
       os << "S0 = " << G.print_strategy(solution.strategy[0].value()) << std::endl;
   }
-  if (solution.strategy[1].has_value()) 
+  if (solution.strategy[1].has_value())
   {
       os << "S1 = " << G.print_strategy(solution.strategy[1].value()) << std::endl;
   }
@@ -81,7 +86,7 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
-      symbolic_solution_t solution;
+      symbolic_solution_t solution(m_compute_strategy);
       if (m_compute_strategy)
       {
           solution.strategy = {empty_set(), empty_set()};
@@ -333,7 +338,7 @@ class symbolic_pbessolve_algorithm
             assert(!solution.strategy[alpha].has_value());
         }
 
-        if (solution.strategy[alpha].has_value()) 
+        if (solution.strategy[alpha].has_value())
         {
             mCRL2log(log::trace) << "detect_solitair_cycles: extended strategy for player " << alpha << " to \n"
             << "  S[alpha] = " << m_G.print_strategy(solution.strategy[alpha].value()) << "\n";
