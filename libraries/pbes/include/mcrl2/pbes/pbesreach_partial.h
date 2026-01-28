@@ -28,9 +28,7 @@ public:
   pbesreach_algorithm_partial(const srf_pbes& pbesspec, const symbolic_reachability_options& options_)
     : pbesreach_algorithm(pbesspec, options_),
     m_partial_solution(symbolic_solution_t())
-  {
-      
-  }
+  {}
 
   void on_end_while_loop() override
   {
