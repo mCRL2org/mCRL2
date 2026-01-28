@@ -539,7 +539,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
                 options_.chaining,
                 options_.compute_strategy);
               G.print_information();
-              pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy);
+              pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy, options_.compute_strategy);
 
               mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
               timer().start("solving");
@@ -585,13 +585,13 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             options_.chaining,
             options_.compute_strategy);
           G.print_information();
-          pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy);
+          pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy, options_.compute_strategy);
 
           timer().start("first-solving");
           // Solve the remainder of the partially solved game.
           bool solution_found = false;
           bool result;
-          symbolic_solution_t solution;
+          symbolic_solution_t solution(true);
           if(reach.I() == empty_set())
           {
             std::tie(result,solution) = solver.solve(reach.initial_state(),
@@ -639,8 +639,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
             pbessolve_options.remove_unused_rewrite_rules = options_.remove_unused_rewrite_rules;
             pbessolve_options.check_strategy = options_.check_strategy;
             pbessolve_options.number_of_threads = 1; // If we spawn multiple threads here, the threads of Sylvan and the explicit exploration will interfere
-
-            PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], V, result ? solution.strategy[0] : solution.strategy[1], reach.rewriter());
+            
+            PbesInstAlgorithm second_instantiate(SG, pbessolve_options, pbesspec_simplified, !result, reach.propvar_map(), reach.data_index(), G.players(V)[result ? 0 : 1], V, result ? solution.strategy[0].value() : solution.strategy[1].value(), reach.rewriter());
 
             // Perform the second instantiation given the proof graph.
             timer().start("second-instantiation");

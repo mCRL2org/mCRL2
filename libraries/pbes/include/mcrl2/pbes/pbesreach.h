@@ -582,7 +582,7 @@ class pbesreach_algorithm
     /// \returns Partial solution that has been computed during reachability
     virtual symbolic_solution_t partial_solution() const
     {
-      return symbolic_solution_t();
+      return symbolic_solution_t(m_options.compute_strategy);
     }
 
     std::vector<symbolic::summand_group> summand_groups() const
