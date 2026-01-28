@@ -10,7 +10,6 @@
 #ifndef MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 #define MCRL2_PBES_SYMBOLIC_PBESSOLVE_H
 
-#include <optional>
 #ifdef MCRL2_ENABLE_SYLVAN
 #include "sylvan_ldd.hpp"
 
@@ -115,7 +114,7 @@ class symbolic_pbessolve_algorithm
         if (m_compute_strategy) 
         {
             solution.strategy[alpha]
-              = union_(union_(A_strategy.value_or(empty_set()), solution_V_minus_A.strategy[alpha].value_or(empty_set())), merge(intersect(U, Vplayer[alpha]), V));
+              = union_(union_(A_strategy.value(), solution_V_minus_A.strategy[alpha].value()), merge(intersect(U, Vplayer[alpha]), V));
             solution.strategy[1 - alpha] = empty_set();
         }
         assert(union_(solution.winning[0], solution.winning[1]) == V);
@@ -128,7 +127,7 @@ class symbolic_pbessolve_algorithm
         solution.winning[1 - alpha] = union_(solution.winning[1 - alpha], B);
         if (m_compute_strategy) 
         {
-            solution.strategy[1 - alpha] = union_(union_(solution_V_minus_A.strategy[1 - alpha].value_or(empty_set()), B_strategy.value()), solution.strategy[1 - alpha].value_or(empty_set()));
+            solution.strategy[1 - alpha] = union_(union_(solution_V_minus_A.strategy[1 - alpha].value(), B_strategy.value()), solution.strategy[1 - alpha].value());
         }
         assert(union_(solution.winning[0], solution.winning[1]) == V);
       }
@@ -150,8 +149,8 @@ class symbolic_pbessolve_algorithm
     /// \returns The winner and W0, W1, S0, S1. Where S0 and S1 are the strategies.
     std::tuple<bool, symbolic_solution_t> solve(const ldd& initial_vertex,
         const ldd& V,
-        const ldd& Vsinks = sylvan::ldds::empty_set(),
-        const symbolic_solution_t& partial_solution = symbolic_solution_t(),
+        const ldd& Vsinks,
+        const symbolic_solution_t& partial_solution,
         bool allow_early_termination = true)
     {
       using namespace sylvan::ldds;
@@ -202,12 +201,12 @@ class symbolic_pbessolve_algorithm
     symbolic_solution_t partial_solve(const ldd& initial_vertex,
       const ldd& V,
       const ldd& I,
-      const ldd& Vsinks = sylvan::ldds::empty_set(),
-      const symbolic_solution_t& partial_solution = symbolic_solution_t())
+      const ldd& Vsinks,
+      const symbolic_solution_t& partial_solution)
     {
       // Make the game total.
       using namespace sylvan::ldds;
-      symbolic_solution_t solution = partial_solution;      
+      symbolic_solution_t solution = partial_solution;
 
       ldd Vtotal = m_G.compute_total_graph(V, I, Vsinks, solution.winning, solution.strategy);
       if (includes(solution.winning[0], initial_vertex) || includes(solution.winning[1], initial_vertex))
@@ -220,8 +219,8 @@ class symbolic_pbessolve_algorithm
       zielonka_solution_0.winning[0] = union_(zielonka_solution_0.winning[0], solution.winning[0]);
       if (m_compute_strategy)
       {
-          zielonka_solution_0.strategy[0] = union_(zielonka_solution_0.strategy[0].value_or(empty_set()), 
-                                                   solution.strategy[0].value_or(empty_set()));
+          zielonka_solution_0.strategy[0] = union_(zielonka_solution_0.strategy[0].value(), 
+                                                   solution.strategy[0].value());
       } else {
           assert(!zielonka_solution_0.strategy[0].has_value() && !zielonka_solution_0.strategy[1].has_value());
       }
@@ -237,8 +236,8 @@ class symbolic_pbessolve_algorithm
       zielonka_solution_1.winning[1] = union_(zielonka_solution_1.winning[1], solution.winning[1]);
       if (m_compute_strategy)
       {
-          zielonka_solution_1.strategy[1] = union_(zielonka_solution_1.strategy[1].value_or(empty_set()), 
-                                                   solution.strategy[1].value_or(empty_set()));
+          zielonka_solution_1.strategy[1] = union_(zielonka_solution_1.strategy[1].value(), 
+                                                   solution.strategy[1].value());
       } else {
           assert(!zielonka_solution_1.strategy[0].has_value() && !zielonka_solution_0.strategy[1].has_value());
       }
@@ -257,7 +256,7 @@ class symbolic_pbessolve_algorithm
       const ldd& I,
       bool safe_variant,
       const ldd& Vsinks,
-      const symbolic_solution_t& partial_solution = symbolic_solution_t())
+      const symbolic_solution_t& partial_solution)
     {
       using namespace sylvan::ldds;
 
@@ -329,7 +328,7 @@ class symbolic_pbessolve_algorithm
 
         if (m_compute_strategy)
         {
-            solution.strategy[alpha] = union_(solution.strategy[alpha].value_or(empty_set()), merge(U, U));
+            solution.strategy[alpha] = union_(solution.strategy[alpha].value(), merge(U, U));
         } else {
             assert(!solution.strategy[alpha].has_value());
         }
@@ -348,7 +347,7 @@ class symbolic_pbessolve_algorithm
           solution.winning[alpha] = union_(solution.winning[alpha], attr.first);
           if(m_compute_strategy)
           {
-              solution.strategy[alpha] = union_(solution.strategy[alpha].value_or(empty_set()), attr.second.value());
+              solution.strategy[alpha] = union_(solution.strategy[alpha].value(), attr.second.value());
           } else {
               assert(!attr.second.has_value());
           }
@@ -359,7 +358,7 @@ class symbolic_pbessolve_algorithm
           solution.winning[alpha] = union_(solution.winning[alpha], attr.first);
           if(m_compute_strategy)
           {
-              solution.strategy[alpha] = union_(solution.strategy[alpha].value_or(empty_set()), attr.second.value());
+              solution.strategy[alpha] = union_(solution.strategy[alpha].value(), attr.second.value());
           } else {
               assert(!attr.second.has_value());
           }
@@ -367,7 +366,7 @@ class symbolic_pbessolve_algorithm
         mCRL2log(log::trace) << "detect_solitair_cycles: extended winning sets and strategy for player " << alpha
                              << " to \n"
                              << "  W[alpha] = " << m_G.print_nodes(solution.winning[alpha]) << "\n"
-                             << (solution.strategy[alpha].has_value() ? "  S[alpha] = " + m_G.print_strategy(solution.strategy[alpha].value()) : "") << "\n";
+                             << (solution.strategy[alpha].has_value() ? "  S[alpha] = " + m_G.print_strategy(solution.strategy[alpha].value()) + "\n" : "");
       }
 
       mCRL2log(log::trace) << "detect_solitair_cycles: partial solution after detecting solitair cycles:\n"
@@ -385,7 +384,7 @@ class symbolic_pbessolve_algorithm
       const ldd& I,
       bool safe_variant,
       const ldd& Vsinks,
-      const symbolic_solution_t& partial_solution = symbolic_solution_t())
+      const symbolic_solution_t& partial_solution)
     {
       using namespace sylvan::ldds;
 
@@ -451,7 +450,7 @@ class symbolic_pbessolve_algorithm
         // Overapproximate strategy for the forced winning cycles
         if (m_compute_strategy) 
         {
-            solution.strategy[alpha] = union_(solution.strategy[alpha].value_or(empty_set()), merge(U, U));
+            solution.strategy[alpha] = union_(solution.strategy[alpha].value(), merge(U, U));
         } else {
             assert(!solution.strategy[alpha].has_value());
         }
