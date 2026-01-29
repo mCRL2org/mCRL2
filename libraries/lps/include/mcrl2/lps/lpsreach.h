@@ -12,17 +12,19 @@
 #ifndef MCRL2_LPS_LPSREACH_H
 #define MCRL2_LPS_LPSREACH_H
 
+#include "mcrl2/symbolic/data_index.h"
 #ifdef MCRL2_ENABLE_SYLVAN
 
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/detail/configuration.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include "mcrl2/lps/detail/replace_global_variables.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/order_summand_variables.h"
 #include "mcrl2/lps/replace_constants_by_variables.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/symbolic_lts.h"
-#include "mcrl2/lps/detail/replace_global_variables.h"
 #include "mcrl2/symbolic/ordering.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
@@ -37,6 +39,196 @@
 #include <boost/dynamic_bitset.hpp>
 
 namespace mcrl2::lps {
+
+namespace detail {
+  class lpsreach_statistics_t
+  {
+    public:
+      std::map<std::size_t, std::size_t> num_relprod_calls_per_group;
+      std::map<std::size_t, std::map<std::size_t, double>> num_new_states_per_group_per_step_nosat;
+      std::map<std::size_t, std::map<std::size_t, std::vector<double>>> num_new_states_per_group_per_step_sat;
+      std::map<std::pair<std::size_t, std::size_t>, std::map<std::size_t, std::vector<double>>> num_new_states_per_group_per_step_sat_chaining;
+      std::size_t num_rewrite_action_calls = 0;
+      std::size_t num_learn_successors_calls = 0;
+      std::size_t num_step_calls = 0;
+
+      template <typename Rewriter, typename Substitution>
+      void log_rewrite_action(const lps::multi_action& /*a*/, const Rewriter& /*rewr*/, const Substitution& /*sigma*/)
+      {
+        if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
+        {
+          ++num_rewrite_action_calls;
+        }
+      }
+
+      void log_learn_successors(std::size_t /*i*/, const symbolic::summand_group& /*R*/, const sylvan::ldds::ldd& /*X*/)
+      {
+        if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
+        {
+          ++num_learn_successors_calls;
+        }
+      }
+
+      void log_relprod(
+        const sylvan::ldds::ldd& /*U*/,
+        const lps_summand_group& /*group*/,
+        std::size_t i)
+      {
+        if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
+        {
+          auto it = num_relprod_calls_per_group.find(i);
+          if (it == num_relprod_calls_per_group.end())
+          {
+            num_relprod_calls_per_group[i] = 1;
+          }
+          else
+          {
+            ++(it->second);
+          }
+        }
+      }
+
+      void log_step(
+        const sylvan::ldds::ldd& /*visited*/,
+        const sylvan::ldds::ldd& /*todo*/,
+        bool /*learn_transitions*/,
+        bool /*detect_deadlocks*/)
+      {
+        ++num_step_calls;
+      }
+
+      /// \brief Logs statistics for each summand group in step without saturation.
+      /// \param visited The set of visited before applying transition group i.
+      /// \param relprod The result of applying transition group i.
+      /// \param i The index of the summand group.
+      void log_step_iter_nosat(
+        const sylvan::ldds::ldd& visited,
+        const sylvan::ldds::ldd& succ,
+        std::size_t i)
+      {
+        if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
+        {
+          const double num_new = sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited));
+          auto step_it = num_new_states_per_group_per_step_nosat.find(num_step_calls);
+          if (step_it == num_new_states_per_group_per_step_nosat.end())
+          {
+            num_new_states_per_group_per_step_nosat[num_step_calls] = std::map<std::size_t, double>({{i, num_new}});;
+          }
+          else
+          {
+            step_it->second[i] = num_new;
+          }
+        }
+      }
+
+      void log_step_iter_sat(const sylvan::ldds::ldd& visited, const sylvan::ldds::ldd& succ, std::size_t i)
+      {
+        if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
+        {
+          const double num_new = sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited));
+          auto step_it = num_new_states_per_group_per_step_sat.find(num_step_calls);
+          if (step_it == num_new_states_per_group_per_step_sat.end())
+          {
+            num_new_states_per_group_per_step_sat[num_step_calls] = std::map<std::size_t, std::vector<double>>({{i, {num_new}}});
+          }
+          else
+          {
+            step_it->second[i].push_back(num_new);
+          }
+        }
+      }
+
+      void log_step_iter_sat_chaining(const sylvan::ldds::ldd& visited, const sylvan::ldds::ldd& succ, std::size_t i, std::size_t j)
+      {
+        if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
+        {
+          const double num_new = sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited));
+          auto step_it = num_new_states_per_group_per_step_sat_chaining.find({num_step_calls, i});
+          if (step_it == num_new_states_per_group_per_step_sat_chaining.end())
+          {
+            num_new_states_per_group_per_step_sat_chaining[{num_step_calls, i}]
+              = std::map<std::size_t, std::vector<double>>({{j, {num_new}}});
+          }
+          else
+          {
+            step_it->second[j].push_back(num_new);
+          }
+        }
+      }
+
+      std::ostream& print(std::ostream& out, bool saturation, bool chaining)
+      {
+        out << "Number of rewrite_action calls: " << num_rewrite_action_calls << std::endl;
+        out << "Number of learn_successors calls: " << num_learn_successors_calls << std::endl;
+        out << "Number of step calls: " << num_step_calls << std::endl;
+        out << "Number of relprod calls per group:" << std::endl;
+        for (const auto& [group, count] : num_relprod_calls_per_group)
+        {
+          out << "  Group " << group << ": " << count << std::endl;
+        }
+        if(saturation)
+        {
+          out << "Number of new states per group per step (saturation):" << std::endl;
+          for (const auto& [step, group_map]: num_new_states_per_group_per_step_sat)
+          {
+            out << "  Step " << step << ":" << std::endl;
+            for (const auto& [group, counts]: group_map)
+            {
+              out << "    Group " << group << ": ";
+              for (const auto& count: counts)
+              {
+                out << count << " ";
+              }
+              out << std::endl;
+              if (chaining)
+              {
+                out << "      Chaining steps for group " << group << ": " << std::endl;
+                for (const auto& [chain_group, counts]: num_new_states_per_group_per_step_sat_chaining[{step, group}])
+                {
+                  out << "        Group " << chain_group << ": ";
+                  for (const auto& count: counts)
+                  {
+                    out << count << " ";
+                  }
+                  out << std::endl;
+                }
+              }
+            }
+          }
+        }
+        else
+        {
+          if (chaining)
+          {
+            out << "Number of new states per group per step (no saturation, chaining):" << std::endl;
+          }
+          else
+          {
+            out << "Number of new states per group per step (no saturation, no chaining):" << std::endl;
+          }
+          for (const auto& [step, group_map] : num_new_states_per_group_per_step_nosat)
+          {
+            out << "  Step " << step << ":" << std::endl;
+            for (const auto& [group, count] : group_map)
+            {
+              out << "    Group " << group << ": " << count << std::endl;
+            }
+          }
+        }
+
+        return out;
+      }
+
+      void log(const bool saturation, const bool chaining)
+      {
+        if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
+        {
+          mCRL2log(log::debug) << "=== Symbolic exploration statistics ===" << std::endl;
+          print(log::logger(log::debug).get(), saturation, chaining);
+        }
+      }
+  };
+}
 
 class lpsreach_algorithm
 {
@@ -56,11 +248,14 @@ class lpsreach_algorithm
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
     std::vector<std::size_t> m_variable_order;
     symbolic_lts m_lts;
-    
-    /// \brief Rewrites all arguments of the given action.
-    template<typename Rewriter, typename Substitution>
-    lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
+    detail::lpsreach_statistics_t m_stats;
+
+      /// \brief Rewrites all arguments of the given action.
+      template<typename Rewriter, typename Substitution>
+      lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
     {
+      m_stats.log_rewrite_action(a, rewr, sigma);
+
       const process::action_list& actions = a.actions();
       const data::data_expression& time = a.time();
       return
@@ -81,7 +276,10 @@ class lpsreach_algorithm
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)
     {
-      mCRL2log(log::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
+      m_stats.log_learn_successors(i, R, X);
+      mCRL2log(log::trace) << "learn successors of summand group " << i
+                           << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
+
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
@@ -178,6 +376,7 @@ class lpsreach_algorithm
     /// \brief Computes relprod(U, group).
     ldd relprod_impl(const ldd& U, const lps_summand_group& group, std::size_t i)
     {
+      m_stats.log_relprod(U, group, i);
       if (m_options.no_relprod)
       {
         ldd z = symbolic::alternative_relprod(U, group);
@@ -196,6 +395,7 @@ class lpsreach_algorithm
     /// \returns The tuple <visited, todo, deadlocks>
     std::tuple<ldd, ldd, ldd> step(const ldd& visited, const ldd& todo, bool learn_transitions = true, bool detect_deadlocks = false)
     {
+      m_stats.log_step(visited, todo, learn_transitions, detect_deadlocks);
       using namespace sylvan::ldds;
       auto& R = m_lts.summand_groups;
 
@@ -217,7 +417,10 @@ class lpsreach_algorithm
             mCRL2log(log::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
-          todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
+          ldd step_i = relprod_impl(m_options.chaining ? todo1 : todo, R[i], i);
+          m_stats.log_step_iter_nosat(todo1, step_i, i);
+          todo1 = union_(todo1, step_i);
+
 
           if (detect_deadlocks)
           {
@@ -245,7 +448,9 @@ class lpsreach_algorithm
           do
           {
             todo1_old = todo1;
-            todo1 = union_(todo1, relprod_impl(todo1, R[i], i));
+            ldd succ_i = relprod_impl(todo1, R[i], i);
+            m_stats.log_step_iter_sat(todo1, succ_i, i);
+            todo1 = union_(todo1, succ_i);
           }
           while (todo1 != todo1_old);
 
@@ -262,7 +467,9 @@ class lpsreach_algorithm
               todo1_old = todo1;
               for (std::size_t j = 0; j <= i; j++)
               {
-                todo1 = union_(todo1, relprod_impl(todo1, R[j], j));
+                ldd succ_j = relprod_impl(todo1, R[j], j);
+                m_stats.log_step_iter_sat_chaining(todo1, succ_j, i, j);
+                todo1 = union_(todo1, succ_j);
               }
             }
             while (todo1 != todo1_old);
@@ -319,7 +526,7 @@ class lpsreach_algorithm
       for (std::size_t i = 0; i < R.size(); i++)
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(10) << print_size(R[i].L) << " transitions (learn time = "
-                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls 
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls
                                << " calls, cached " << print_size(R[i].Ldomain) << " values" << ")" << std::endl;
 
         total_time += R[i].learn_time;
@@ -346,6 +553,8 @@ class lpsreach_algorithm
           mCRL2log(log::debug) << m_lts.action_index.index(action) << ": " << action << std::endl;
       }
 
+      m_stats.log(m_options.saturation, m_options.chaining);
+
       m_lts.states = visited;
       return visited;
     }
@@ -359,7 +568,7 @@ class lpsreach_algorithm
     {
       return m_group_patterns;
     }
-    
+
     std::vector<symbolic::data_expression_index>& data_index()
     {
       return m_lts.data_index;
