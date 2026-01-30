@@ -372,13 +372,13 @@ We define the *one-point-rule* rewriter `\qr` inductively as follows:
         \qr(\varphi \Rightarrow \psi ) &=& \qr(\varphi ) \Rightarrow \qr(\psi ) \\
         \qr(\forall x.\varphi ) &=&\left\{
         \begin{array}{cc}
-            \qr(\varphi)[x := e] & \text{if } x \neq e \text{ , where } (V,W) = \Equ(\varphi)\\
+            \qr(\varphi)[x := e] & \text{if } x \neq e \in W \text{ , where } (V,W) = \Equ(\varphi)\\
             \forall x . \qr(\varphi) & \text{ otherwise}
         \end{array}%
         \right.  \\
         \qr(\exists x.\varphi ) &=&\left\{
         \begin{array}{cc}
-            \qr(\varphi)[x := e] & \text{if } x = e \text{ , where } (V,W) = \Equ(\varphi)\\
+            \qr(\varphi)[x := e] & \text{if } x = e \in V \text{ , where } (V,W) = \Equ(\varphi)\\
             \exists x . \qr(\varphi) & \text{ otherwise}
         \end{array}%
         \right.  \\
