@@ -10,7 +10,7 @@
   --mcrl2-caption:hsl(153, 22%, 18%);
   --mcrl2-title:hsl(152, 33%, 49%);
   --mcrl2-light:#c3e2d4;
-  --mcrl2-light2:#f2f5d9;
+  --mcrl2-light-yellow:#f2f5d9; /* proposed color for body of admonition-example*/
 }
 
 /* Change the table layout */
@@ -124,9 +124,10 @@ img.frontpage-logo { margin-top: 1.5em; }
   color: var(--mcrl2-light);
 }
 
-.admonition.admonition-ex .admonition-title { background-color: var(--mcrl2-title); }
-.admonition.admonition-ex { background-color: var(--mcrl2-light2); }
-  /* this is used to add some space below tikz */
+/*.admonition.admonition-ex .admonition-title { background-color: var(--mcrl2-title); }
+.admonition.admonition-ex { background-color: var(--mcrl2-light-yellow); }*/
+  
+/* this is used to add some space below tikz */
 .math.math-tikz {
   text-align: center;
   margin-bottom: 1em;

@@ -18,7 +18,7 @@ The PBES instantiation algorithm, defined in Algorithm :ref:`PbesInstStructureGr
 Structure graph
 """""""""""""""
 
-A structure graph, see [KRW12]_, is a graph structure that captures BESs in their full generality. Structure graphs generalize other graphs, such as dependency graphs, in the representation of equations systems since they do not require that each vertex necessarily represents a proposition variable occurring at the left-hand side of some equation; also by facilitating to reason about Boolean constants.
+A structure graph, see [KRW12]_, is a graph structure that captures BESs in their full generality. Structure graphs capture information regarding (the order of) fixed points, as well as the structure of the right hand sides of the equations.
 
 .. _strcture-graph:
 
@@ -103,11 +103,83 @@ A structure graph, see [KRW12]_, is a graph structure that captures BESs in thei
 
 In the implementation, each proposition variable (BES variables) is replaced by a propositional variable instantiation (PVI). Thus, in the implementation, the nodes of the structure graphs are PVIs.
 
+
+Attractor sets
+""""""""""""""
+
+Let `A \subseteq V` be a subset of vertices of a structure graph `G = (V, E, d , r)`. We define Algorithm :ref:`AttrDefault <attr>` to compute the attractor set of A. The value `\alpha = 0` corresponds with disjunction (`\blacktriangledown`) and `\alpha = 1` corresponds with conjunction (`\blacktriangle`), i.e. the decoration of `u` is `\blacktriangledown` if `d_u = 0`. 
+
+.. _attr:
+
+.. math::
+    :nowrap:
+    :class: math-left
+
+    \begin{algorithmic}[1]
+    \Function {AttrDefault}{$A, \alpha$}
+    \State {$ \td := \bigcup_{u \in A}(\mathit{pred(u)} \setminus A )$} 
+    \State $\mathbf{while}\ \td \neq \emptyset\ \mathbf{do}$
+        \State $\qquad \textbf{choose}\ u \in \td$
+        \State $\qquad \td := \td \setminus \{u\}$
+        \State {$\qquad \mathbf{if}\ d_u = \alpha \vee \mathit{succ(u)} \subseteq A\ \mathbf{then}$} 
+            \State \qquad \qquad {\colorbox{lightgray}{$\mathbf{if}\ d_u = \alpha\ \mathbf{then}\ \tau[u \to v] \mid v \in A \cap \mathit{succ(u)}$}}
+            \State $\qquad \qquad A := A \cup \{u\}$
+            \State $\qquad \qquad \td := \td \cup (\mathit{pred(u)} \setminus A )$
+    \State \Return {$A$}
+    \EndFunction
+    \end{algorithmic}
+
+where, `\pred(v) = \{u \in V | (u,v) \in E\}` and `\scc(u) = \{v \in V | (u,v) \in E\}`. The algorithm returns, for player `\alpha`, the attractor set `A`. As a side effect a mapping `\tau` is produced that corresponds to a winning strategy.
+
+The algorithm is extended in Algorithm :ref:`AttrDefaultWithTau <attr-tau>` such that in addition it sets a local strategy in the mapping `\tau_\alpha`.
+
+.. _attr-tau:
+
+.. math::
+    :nowrap:
+    :class: math-left
+ 
+    \begin{algorithmic}[1]
+    \Function{AttrDefaultWithTau}{$A, \alpha, \tau_\alpha$}
+    \State {$ \td := \bigcup_{u \in A}(\mathit{pred(u)} \setminus A )$} 
+    \State $\mathbf{while}\ \td \neq \emptyset\ \mathbf{do}$
+        \State $\qquad \textbf{choose}\ u \in \td$
+        \State $\qquad \td := \td \setminus \{u\}$
+        \State $\qquad \mathbf{if}\ d_u = \alpha \vee \mathit{succ(u)} \subseteq A\ \mathbf{then}$ 
+            \State \qquad \qquad {\colorbox{lightgray}{$\mathbf{if}\ d_u = \alpha\ \mathbf{then}\ \tau_\alpha[u \to v] \mid v \in A \cap \mathit{succ(u)}$}}
+            \State $\qquad \qquad A := A \cup \{u\}$
+            \State $\qquad \qquad \td := \td \cup (\mathit{pred(u)} \setminus A)$
+    \State \Return {$A, \tau_\alpha$}
+    \EndFunction
+    \end{algorithmic}
+
+Finally Algorithm :ref:`AttrDefaultNoStrategy <attr-no-tau>` does not set any strategy.
+
+.. _attr-no-tau:
+
+.. math::
+    :nowrap:
+    :class: math-left
+ 
+    \begin{algorithmic}[1]
+    \Function{AttrDefaultNoStrategy}{$A, \alpha$}
+    \State {$ \td := \bigcup_{u \in A}(\mathit{pred(u)} \setminus A )$} 
+    \State $\mathbf{while}\ \td \neq \emptyset\ \mathbf{do}$
+        \State $\qquad \textbf{choose}\ u \in \td$
+        \State $\qquad \td := \td \setminus \{u\}$
+        \State $\qquad \mathbf{if}\ d_u = \alpha \vee \mathit{succ(u)} \subseteq A\ \mathbf{then}$ 
+            \State $\qquad \qquad A := A \cup \{u\}$
+            \State $\qquad \qquad \td := \td \cup (\mathit{pred(u)} \setminus A)$
+    \State \Return {$A$}
+    \EndFunction
+    \end{algorithmic}
+
 Preprocessing rewriters
 """""""""""""""""""""""
+
 Two rewriters are used to preprocess PBES equations before instantiation: the *simplify rewriter* and the *one-point-rule quantifier elimination rewriter*. 
 
-In Algorithm :ref:`PbesInstStructureGraph <instantiation_algorithm>` the application of first *simplify rewriter* and then *one-point-rule quantifier elimination rewriter* is combined in rewriter `R` (as it is done in the implementation of the algorithm).
+In Algorithm :ref:`PbesInstStructureGraph <instantiation_algorithm>` the application of first *simplify rewriter* and then *one-point-rule quantifier elimination rewriter* is combined in rewriter `R`.
 
 Simplify rewriter
 ~~~~~~~~~~~~~~~~~
@@ -164,22 +236,22 @@ We define the *simplify* rewriter `\sr` inductively as follows. For the cases in
         \sr(\forall_V . \varphi) &=& \left\{
         \begin{array}{ll}
             \true & \text{if } n = 0\\
-            \lnot \exists_{V \cup \free(\psi)}. \psi & \text{if } \sr(\varphi) = \lnot \psi\\
-            (\forall_{V \cup \free(\psi_1)} .\psi_1) \wedge (\forall_{V \cup \free(\psi_1)}. \psi_2) & \text{if } \sr(\varphi) = \psi_1 \wedge \psi_2\\
-            (\forall_{V \cup \free(\psi_1)}. \psi_1) \vee \psi_2 & \text{if } \sr(\varphi) = \psi_1 \vee \psi_2\\
-            \psi_1 \vee (\forall_{V \cup \free(\psi_2)}. \psi_2) & \text{if } \sr(\varphi) = \psi_1 \vee \psi_2\\
-            \forall_{V \cup \free(\varphi)}. \sr(\varphi) & \text{otherwise}
+            \lnot \exists_{V \cap \free(\psi)}. \psi & \text{if } \sr(\varphi) = \lnot \psi\\
+            (\forall_{V \cap \free(\psi_1)} .\psi_1) \wedge (\forall_{V \cap \free(\psi_1)}. \psi_2) & \text{if } \sr(\varphi) = \psi_1 \wedge \psi_2\\
+            (\forall_{V \cap \free(\psi_1)}. \psi_1) \vee \psi_2 & \text{if } \sr(\varphi) = \psi_1 \vee \psi_2\\
+            \psi_1 \vee (\forall_{V \cap \free(\psi_2)}. \psi_2) & \text{if } \sr(\varphi) = \psi_1 \vee \psi_2\\
+            \forall_{V \cap \free(\varphi)}. \sr(\varphi) & \text{otherwise}
         \end{array}%
         \right.  \\
         & & \text{where } \forall_{\emptyset} .\varphi = \varphi.\\
         \sr(\exists_V . \varphi) &=& \left\{
         \begin{array}{ll}
             \true & \text{if } n = 0\\
-            \lnot \forall_{V \cup \free(\psi)}. \psi & \text{if } \sr(\varphi) = \lnot \psi\\
-            (\exists_{V \cup \free(\psi_1)} .\psi_1) \vee (\exists_{V \cup \free(\psi_1)}. \psi_2) & \text{if } \sr(\varphi) = \psi_1 \vee \psi_2\\
-            (\exists_{V \cup \free(\psi_1)}. \psi_1) \wedge \psi_2 & \text{if } \sr(\varphi) = \psi_1 \wedge \psi_2\\
-            \psi_1 \wedge (\exists_{V \cup \free(\psi_2)}. \psi_2) & \text{if } \sr(\varphi) = \psi_1 \wedge \psi_2\\
-            \exists_{V \cup \free(\varphi)}. \sr(\varphi) & \text{otherwise}
+            \lnot \forall_{V \cap \free(\psi)}. \psi & \text{if } \sr(\varphi) = \lnot \psi\\
+            (\exists_{V \cap \free(\psi_1)} .\psi_1) \vee (\exists_{V \cap \free(\psi_1)}. \psi_2) & \text{if } \sr(\varphi) = \psi_1 \vee \psi_2\\
+            (\exists_{V \cap \free(\psi_1)}. \psi_1) \wedge \psi_2 & \text{if } \sr(\varphi) = \psi_1 \wedge \psi_2\\
+            \psi_1 \wedge (\exists_{V \cap \free(\psi_2)}. \psi_2) & \text{if } \sr(\varphi) = \psi_1 \wedge \psi_2\\
+            \exists_{V \cap \free(\varphi)}. \sr(\varphi) & \text{otherwise}
         \end{array}%
         \right.  \\
         & & \text{where } \exists_{\emptyset} .\varphi = \varphi.
@@ -316,6 +388,7 @@ We define the *one-point-rule* rewriter `\qr` inductively as follows:
 
 Rewriter `Rw^*`
 """""""""""""""
+
 .. admonition:: Disclaimer on rewriter `Rw^*`
     :class: warning
 
@@ -528,14 +601,14 @@ The lemma below indicated that one can simplify the PBES equation that is being 
 
   The solution to all variables in a PBES `\mathcal{E} (\sigma X(d:D) = \varphi) \mathcal{E}'` is equivalent to the solution to those variables in the PBES `\mathcal{E} (\sigma X(d:D)=` `\varphi[X := \lambda d':D . (d \approx d' \implies b_\sigma) \wedge (d \not \approx d' \implies X(d'))]) \mathcal{E}'`, where `b_\sigma = \true` if `\sigma = \nu` and `b_\sigma = \false` if `\sigma = \mu`.
 
-Using this lemma in the instantiation algorithm, rather than creating a structure graph underlying the equation `\sigma X_k(d_k:D) = \psi_{X_k}^e`, we can create a structure graph for `\sigma X_k(d_k:D) = \psi_{X_k}^e[X_k(e) := b_\sigma]`. This can be done by adding the assignment `\psi_{X_k}^e := R(\psi_{X_k}^e[X(e) := b_\sigma])` below assignment `\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])`.
+Using this lemma in the instantiation algorithm, rather than creating a structure graph underlying the equation `\sigma X_k(d_k:D) = \psi_{X_k}^e`, we can create a structure graph for `\sigma X_k(d_k:D) = \psi_{X_k}^e[X_k(e) := b_\sigma]`. This can be done by adding, in Algorithm :ref:`PbesInstStructureGraph0 <instantiation-no-on-the-fly>`, the assignment `\psi_{X_k}^e := R(\psi_{X_k}^e[X(e) := b_\sigma])` below assignment `\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])`.
 
 Propagation of solved equations
 """""""""""""""""""""""""""""""
 
 This technique exploits the fact that some of the PBES equations that are generated while exploring the PBES are already solved (possibly after using the self-loop removal technique).
 
-We first introduce some additional notation. By `S_0` we denote the set of vertices that represent equations with solution `true`, whereas `S_1` denotes the set of vertices representing equations with solution `false`.  Let `\pi` be a partial function that maps vertices to the PVIs they represent. For a set of vertices `S \subseteq V`, we define the substitution `\rho_i` as follows for all `s \in S \cap \textsf{dom}(\pi)$: $\rho_i(\pi(s)) = \true` if `i = 0` and `\rho_i(\pi(s)) = \false` if `i = 1`. The union of two substitutions is again a substitution, provided that the domain of variables these substitutions range over are disjoint.
+We first introduce some additional notation. By `S_0` we denote the set of vertices that represent equations with solution `\true`, whereas `S_1` denotes the set of vertices representing equations with solution `\false`.  Let `\pi` be a partial function that maps vertices to the PVIs they represent. For a set of vertices `S \subseteq V`, we define the substitution `\rho_i` as follows for all `s \in S \cap \textsf{dom}(\pi): \rho_i(\pi(s)) = \true` if `i = 0` and `\rho_i(\pi(s)) = \false` if `i = 1`. The union of two substitutions is again a substitution, provided that the domain of variables these substitutions range over are disjoint.
 
 The lemma below indicates how one can utilise such information to simplify the PBES equation that is being created, again without affecting the solution to the PBES.
 
@@ -555,8 +628,8 @@ We implement this using a rewriter `R^+` which takes a formula (and implicitly t
     :nowrap:
 
     \begin{eqnarray*}
-    R^+(\true) &=& (\varphi,\varphi, \true,\false) \\
-    R^+(\false) &=& (\varphi,\varphi,\true,\false) \\
+    R^+(\true) &=& (\true,\true, \true,\false) \\
+    R^+(\false) &=& (\false,\false,\true,\false) \\
     R^+(X(e)) &=& \left\{
         \begin{array}{ll}
             (\true,X(e),X(e),\false) & \text{if $X(e) \in S_0$}\\
@@ -626,7 +699,7 @@ Self-loop removal example
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. admonition:: Example 1
-    :class: admonition-ex
+    :class: admonition-example
 
     Let us consider the following mCRL2 specification
 
@@ -737,7 +810,7 @@ Self-loop removal example
 .. _example-solved:
 
 .. admonition:: Example 2
-    :class: admonition-ex
+    :class: admonition-example
 
     Let us consider the following mCRL2 specification
 
@@ -751,7 +824,7 @@ Self-loop removal example
 
         init P(0);
 
-    The labelled transition system underlying this specification is (for the sake of calarity we also add numbers to identify the states)
+    The labelled transition system underlying this specification is (for the sake of clarity we also add numbers to identify the states)
     
     .. math::
         :nowrap:
@@ -1062,7 +1135,7 @@ In Algorithm :ref:`PbesInstStructureGraph1 <propagate-solved-eq-attr>` we presen
 .. _example-solved-attractor:
 
 .. admonition:: Example 3
-    :class: admonition-ex
+    :class: admonition-example
 
     Let us consider again :ref:`Example 2 <example-solved>`. 
 
@@ -1110,7 +1183,7 @@ In Algorithm :ref:`PbesInstStructureGraph1 <propagate-solved-eq-attr>` we presen
             ;
         \end{tikzpicture}
     
-    The instantiation procedure does not explore further vertex `Y(12)` and, in turn, it finds that vertex `Y(10)` is solved. The information that vertex `Y(10)` is solved is propagated backwords. Conseguently, strategy `\tau_{0}[Y(9)] = Y(10)` is set and the structure graph is simplified to the following minimal structure graph
+    The instantiation procedure does not explore further vertex `Y(12)` and, in turn, it finds that vertex `Y(10)` is solved. The information that vertex `Y(10)` is solved is propagated backwords. Consequently, strategy `\tau_{0}[Y(9)] = Y(10)` is set and the structure graph is simplified to the following minimal structure graph
 
     .. math::
         :nowrap:
@@ -1138,7 +1211,7 @@ In Algorithm :ref:`PbesInstStructureGraph1 <propagate-solved-eq-attr>` we presen
 
 In Algorithm :ref:`PbesInstStructureGraph2 <detect-loops>` we present the algorithm for optimization *2- Detect winning loops*. 
 Algorithm :ref:`PbesInstStructureGraph2 <detect-loops>` uses :ref:`FindLoops2 <find-loops-2>`.
-In :ref:`FindLoops2 <find-loops-2>` rountine `dom(rnk)` yields the set of vertices with the rank associated to them.
+In :ref:`FindLoops2 <find-loops-2>` routine `dom(rnk)` yields the ranked vertices.
 
 .. _find-loops-2:
 
@@ -1170,7 +1243,7 @@ In :ref:`FindLoops2 <find-loops-2>` rountine `dom(rnk)` yields the set of vertic
     \EndFunction
     \end{algorithmic}
 
-where :ref:`AttrMinRankGeneric <attr-min-rank-generic>` is a slightly modified version of the original attractor set computation :ref:`AttrDefault <attr>`, which computes the `\alpha`-min attractor into set `A`, restricted to vertices in `U` with rank `j`:
+where :ref:`AttrMinRankGeneric <attr-min-rank-generic>` is a slightly modified version of the original attractor set computation :ref:`AttrDefault <attr>`, which computes the `\alpha`-min attractor into set `U` restricted to vertices of rank `j`:
 
 .. _attr-min-rank-generic:
 
@@ -1243,7 +1316,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 .. _example-detect-loops:
 
 .. admonition:: Example 4
-    :class: admonition-ex
+    :class: admonition-example
 
     Let us consider the following mCRL2 specification
 
@@ -1257,7 +1330,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 
         init P(0);
 
-    The labelled transition system underlying this specification is (for the sake of calarity we also add numbers to identify the states)
+    The labelled transition system underlying this specification is (for the sake of clarity we also add numbers to identify the states)
     
     .. math::
         :nowrap:
@@ -1400,7 +1473,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 
         \end{tikzpicture}
 
-    The instantiation procedure does not explore further vertex `Y(7)` and, in turn, sets strategies `\tau_{0}[Y(4)] = Y(5)` and `\tau_{0}[Y(5)] = Y(4)`. Conseguently, the structure graph is simplified to the following minimal structure graph
+    The instantiation procedure does not explore further vertex `Y(7)` and, in turn, sets strategies `\tau_{0}[Y(4)] = Y(5)` and `\tau_{0}[Y(5)] = Y(4)`. Consequently, the structure graph is simplified to the following minimal structure graph
 
     .. math::
         :nowrap:
@@ -1429,7 +1502,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 """""""""""""""""""""""""""""""""""""""""
 
 In Algorithm :ref:`PbesInstStructureGraph3 <solve-fatal-attractor>` we present the algorithm for optimization *3- Solve subgames using a fatal attractor*.
-Algorithm :ref:`PbesInstStructureGraph3 <solve-fatal-attractor>` uses :ref:`FatalAttractorOriginal <fatal-attractor-original>`, which is very close to the original fatal attractors computation by Micheal Huth, Jim Huan-Pu Kuo, and Nir Piterman. 
+Algorithm :ref:`PbesInstStructureGraph3 <solve-fatal-attractor>` uses :ref:`FatalAttractorOriginal <fatal-attractor-original>`, which is very close to the original fatal attractors computation [HKP13]_. 
 
 .. _fatal-attractor-original:
 
@@ -1463,7 +1536,7 @@ Algorithm :ref:`PbesInstStructureGraph3 <solve-fatal-attractor>` uses :ref:`Fata
     \EndFunction
     \end{algorithmic}
 
-where :ref:`AttrMinRankOriginal <attr-min-rank-original>` is a slightly modified version of the original attractor set computation :ref:`AttrMinRankGeneric <attr-min-rank-generic>`, which computes the `\alpha`-min attractor into set `A`, restricted to vertices in `U` with a rank of at least `j`:
+where :ref:`AttrMinRankOriginal <attr-min-rank-original>` is a slightly modified version of the original attractor set computation :ref:`AttrMinRankGeneric <attr-min-rank-generic>`, which computes the  `\alpha`-min attractor into set `U` restricted to vertices of rank at least `j`:
 
 .. _attr-min-rank-original:
 
@@ -1537,7 +1610,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 .. _example-solved-fatal:
 
 .. admonition:: Example 5
-    :class: admonition-ex
+    :class: admonition-example
 
     Let us consider the following mCRL2 specification
 
@@ -1551,7 +1624,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 
         init P(0);
 
-    The labelled transition system underlying this specification is (for the sake of calarity we also add numbers to identify the states)
+    The labelled transition system underlying this specification is (for the sake of clarity we also add numbers to identify the states)
     
     .. math::
         :nowrap:
@@ -1804,7 +1877,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 
         \end{tikzpicture}
     
-    The instantiation procedure does not explore further vertices `X(5)` and `X(6)` and, in turn, sets strategies `\tau[Y0(0)] = Y0(1)`, `\tau[Y0(1)] = Y0(2)`, `\tau[Y0(2)] = Y0(3)`, `\tau[Y0(3)] = Y0(4)`, `\tau[Y0(4)] = Y0(5)`, `\tau[Y0(15)] = X0(4)` and `\tau[X0(4)] = Y0(4)`. Conseguently, the structure graph is simplified to the following minimal structure graph
+    The instantiation procedure does not explore further vertices `X(5)` and `X(6)` and, in turn, sets strategies `\tau[Y0(0)] = Y0(1)`, `\tau[Y0(1)] = Y0(2)`, `\tau[Y0(2)] = Y0(3)`, `\tau[Y0(3)] = Y0(4)`, `\tau[Y0(4)] = Y0(5)`, `\tau[Y0(15)] = X0(4)` and `\tau[X0(4)] = Y0(4)`. Consequently, the structure graph is simplified to the following minimal structure graph
 
     .. math::
         :nowrap:
@@ -1916,7 +1989,7 @@ Additional optimizations to PBES instantiation
 ----------------------------------------------
 
 During the execution of the instantiation algorithm (with any solving strategy), the set *todo*  may contain nodes that can be proven to be irrelevant, i.e., the solution of the PBES can already be computed without exploring these irrelevant nodes. 
-To this end we present a rountine, :ref:`PruneTodo <prune-todo>`, that partitions the set *todo* into a new set *todo* and a set *irrelevant*. Note that elements from *irrelevant* may be moved to the new set *todo* when new elements are added to the *todo* set.
+To this end we present a routine, :ref:`PruneTodo <prune-todo>`, that partitions the set *todo* into a new set *todo* and a set *irrelevant*. Note that elements from *irrelevant* may be moved to the new set *todo* when new elements are added to the *todo* set.
 
 In the tool ``pbessolve``, flag ``--prune-todo-list`` can be used to enable this routine.
 The routine can be used in combination with any solving strategy.
@@ -1997,80 +2070,8 @@ Pruning the todo set can help reduce the number of iterations to execute in the 
 Recursive procedure for solving structure graphs
 ------------------------------------------------
 
-Attractor sets
-""""""""""""""
 
-Let `A \subseteq V` be a subset of vertices of a structure graph `G = (V, E, d , r)`. We define Algorithm :ref:`AttrDefault <attr>` to compute the attractor set of A. The value `\alpha = 0` corresponds with disjunction (`\blacktriangledown`) and `\alpha = 1` corresponds with conjunction (`\blacktriangle`), i.e. the decoration of `u` is `\blacktriangledown` if `d_u = 0`. 
-
-.. _attr:
-
-.. math::
-    :nowrap:
-    :class: math-left
-
-    \begin{algorithmic}[1]
-    \Function {AttrDefault}{$A, \alpha$}
-    \State {$ \td := \bigcup_{u \in A}(\mathit{pred(u)} \setminus A )$} 
-    \State $\mathbf{while}\ \td \neq \emptyset\ \mathbf{do}$
-        \State $\qquad \textbf{choose}\ u \in \td$
-        \State $\qquad \td := \td \setminus \{u\}$
-        \State {$\qquad \mathbf{if}\ d_u = \alpha \vee \mathit{succ(u)} \subseteq A\ \mathbf{then}$} 
-            \State \qquad \qquad {\colorbox{lightgray}{$\mathbf{if}\ d_u = \alpha\ \mathbf{then}\ \tau[u \to v] \mid v \in A \cap \mathit{succ(u)}$}}
-            \State $\qquad \qquad A := A \cup \{u\}$
-            \State $\qquad \qquad \td := \td \cup (\mathit{pred(u)} \setminus A )$
-    \State \Return {$A$}
-    \EndFunction
-    \end{algorithmic}
-
-where, `\pred(v) = \{u \in V | (u,v) \in E\}` and `\scc(u) = \{v \in V | (u,v) \in E\}`. The algorithm returns, for player `\alpha`, the attractor set `A`. As a side effect a mapping `\tau` is produced that corresponds to a winning strategy.
-
-The algorithm is extended in Algorithm :ref:`AttrDefaultWithTau <attr-tau>` such that in addition it sets a local strategy in the mapping `\tau_\alpha`.
-
-.. _attr-tau:
-
-.. math::
-    :nowrap:
-    :class: math-left
- 
-    \begin{algorithmic}[1]
-    \Function{AttrDefaultWithTau}{$A, \alpha, \tau_\alpha$}
-    \State {$ \td := \bigcup_{u \in A}(\mathit{pred(u)} \setminus A )$} 
-    \State $\mathbf{while}\ \td \neq \emptyset\ \mathbf{do}$
-        \State $\qquad \textbf{choose}\ u \in \td$
-        \State $\qquad \td := \td \setminus \{u\}$
-        \State $\qquad \mathbf{if}\ d_u = \alpha \vee \mathit{succ(u)} \subseteq A\ \mathbf{then}$ 
-            \State \qquad \qquad {\colorbox{lightgray}{$\mathbf{if}\ d_u = \alpha\ \mathbf{then}\ \tau_\alpha[u \to v] \mid v \in A \cap \mathit{succ(u)}$}}
-            \State $\qquad \qquad A := A \cup \{u\}$
-            \State $\qquad \qquad \td := \td \cup (\mathit{pred(u)} \setminus A)$
-    \State \Return {$A, \tau_\alpha$}
-    \EndFunction
-    \end{algorithmic}
-
-Finally Algorithm :ref:`AttrDefaultNoStrategy <attr-no-tau>` does not set any strategy.
-
-.. _attr-no-tau:
-
-.. math::
-    :nowrap:
-    :class: math-left
- 
-    \begin{algorithmic}[1]
-    \Function{AttrDefaultNoStrategy}{$A, \alpha$}
-    \State {$ \td := \bigcup_{u \in A}(\mathit{pred(u)} \setminus A )$} 
-    \State $\mathbf{while}\ \td \neq \emptyset\ \mathbf{do}$
-        \State $\qquad \textbf{choose}\ u \in \td$
-        \State $\qquad \td := \td \setminus \{u\}$
-        \State $\qquad \mathbf{if}\ d_u = \alpha \vee \mathit{succ(u)} \subseteq A\ \mathbf{then}$ 
-            \State $\qquad \qquad A := A \cup \{u\}$
-            \State $\qquad \qquad \td := \td \cup (\mathit{pred(u)} \setminus A)$
-    \State \Return {$A$}
-    \EndFunction
-    \end{algorithmic}
-
-Solve recursively
-"""""""""""""""""
-
-The algorithm to recursively solve a structure graph, Algorithm :ref:`SolveRecursive <ziel-expl>`, is based on Zielonka's recursive algorithm. It computes a partitioning of the set of vertices `V` of a structure graph `G = (V, E, d , r)` into `(W_0, W_1)` of vertices `W_0` that represent equations evaluating to true, and vertices `W_1` that represent equations evaluating to false. A precondition of this algorithm is that it contains no nodes with decoration `\top` or `\bot`. 
+The algorithm to recursively solve a structure graph, Algorithm :ref:`SolveRecursive <ziel-expl>`, is based on Zielonka's recursive algorithm [Z98]_. It computes a partitioning of the set of vertices `V` of a structure graph `G = (V, E, d , r)` into `(W_0, W_1)` of vertices `W_0` that represent equations evaluating to true, and vertices `W_1` that represent equations evaluating to false. A precondition of this algorithm is that it contains no nodes with decoration `\top` or `\bot`. 
 
 To satisfy the precondition, a pre-processing step is needed, see Algorithm :ref:`PreProcessing <preproc>`.
 
@@ -2191,4 +2192,13 @@ In line 11 the strategy for player `\alpha` is updated, in particular `\tau_U` i
 
 References
 ----------
-.. [KRW12] J.J.A. Keiren, M.A. Reniers and T.A.C. Willemse. Structural Analysis of Boolean Equation Systems. In ACM Transactions on Computational Logic 13(1): 8-1/35, 2012. `(DOI) <http://doi.acm.org/10.1145/2071368.2071376>`__
+
+.. [KRW12] J.J.A. Keiren, M.A. Reniers and T.A.C. Willemse. Structural Analysis
+            of Boolean Equation Systems. In ACM Transactions on Computational Logic 13(1): 8-1/35, 2012. `(DOI) <http://doi.acm.org/10.1145/2071368.2071376>`__
+
+.. [HKP13] M. Huth, J.HP. Kuo, N. Piterman, (2013). Fatal Attractors in Parity 
+            Games. In: Pfenning, F. (eds) Foundations of Software Science and Computation Structures. FoSSaCS 2013. Lecture Notes in Computer Science, vol 7794. Springer, Berlin, Heidelberg. `(DOI) <https://doi.org/10.1007/978-3-642-37075-5_3>`__
+
+
+.. [Z98] W. Zielonka, Infinite games on finitely coloured graphs with 
+        applications to automata on infinite trees. Theor. Comput. Sci. 200, 1-2 (1998), 135–183, `(DOI) <https://doi.org/10.1016/S0304-3975(98)00009-7>`__
