@@ -718,7 +718,6 @@ class lpsreach_algorithm
           mCRL2log(log::debug) << m_lts.action_index.index(action) << ": " << action << std::endl;
       }
 
-      m_stats.log(m_options.saturation, m_options.chaining);
       m_stats.output_json(std::cout, m_options.saturation, m_options.chaining);
 
       m_lts.states = visited;

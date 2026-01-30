@@ -10,6 +10,7 @@
 #ifndef MCRL2_LPS_SYMBOLIC_PRINT_H
 #define MCRL2_LPS_SYMBOLIC_PRINT_H
 
+#include <optional>
 #ifdef MCRL2_ENABLE_SYLVAN
 
 
@@ -27,10 +28,10 @@
 
 namespace mcrl2::symbolic {
 
-namespace 
+namespace
 {
 
-/// \brief Converts a state vector of indices to a vector of the corresponding data expressions. 
+/// \brief Converts a state vector of indices to a vector of the corresponding data expressions.
 std::vector<data::data_expression> ldd2state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x)
 {
   std::vector<data::data_expression> result;
@@ -48,7 +49,7 @@ std::vector<data::data_expression> ldd2state(const std::vector<data_expression_i
   return result;
 }
 
-/// \brief Converts a state vector of indices projected on used to a vector of the corresponding data expressions. 
+/// \brief Converts a state vector of indices projected on used to a vector of the corresponding data expressions.
 std::vector<data::data_expression> ldd2state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x, const std::vector<std::size_t>& used)
 {
   std::vector<data::data_expression> result;
@@ -66,14 +67,14 @@ std::vector<data::data_expression> ldd2state(const std::vector<data_expression_i
   return result;
 }
 
-/// \brief Prints a state vector of indices as a list of the corresponding data expressions. 
+/// \brief Prints a state vector of indices as a list of the corresponding data expressions.
 inline
 std::string print_state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x)
 {
   return core::detail::print_list(ldd2state(data_index, x));
 }
 
-/// \brief Prints a state vector of indices projected on used as a list of the corresponding data expressions. 
+/// \brief Prints a state vector of indices projected on used as a list of the corresponding data expressions.
 inline
 std::string print_state(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& x, const std::vector<std::size_t>& used)
 {
@@ -126,11 +127,11 @@ std::string print_states(const std::vector<data_expression_index>& data_index, c
   return out.str();
 }
 
-namespace 
+namespace
 {
 
 /// \brief Print a transition vector as 'x -> y' where x is the from vector and y the to vector.
-/* This funcion is not used. 
+/* This funcion is not used.
 std::string print_transition(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& xy)
 {
   std::size_t n = xy.size() / 2;
@@ -198,33 +199,46 @@ inline std::string print_relation(const std::vector<data_expression_index>& data
   return out.str();
 }
 
+inline
+std::optional<long long> safe_llround(double x)
+{
+  // Use this ugly construct to figure out if the conversion succeeded, should have been an exception or sum type.
+  std::fenv_t save_env;
+  std::feholdexcept(&save_env);
+
+  std::feclearexcept(FE_ALL_EXCEPT);
+  std::optional<long long> exact(std::llround(x));
+
+  if (std::fetestexcept(FE_INVALID))
+  {
+    exact = std::nullopt;
+  }
+
+  std::feupdateenv(&save_env);
+  return exact;
+}
+
 /// \brief Prints the number of elements represented by the ldd L and optionally also include the number of nodes of L.
 inline std::string print_size(const sylvan::ldds::ldd& L, bool print_exact, bool print_nodecount)
 {
   std::ostringstream out;
   if (print_exact)
   {
-    // Use this ugly construct to figure out if the conversion succeeded, should have been an exception or sum type.
-    std::fenv_t save_env;
-    std::feholdexcept(&save_env);
+    std::optional<long long> exact = safe_llround(sylvan::ldds::satcount(L));
 
-    std::feclearexcept(FE_ALL_EXCEPT);
-    long long exact = std::llround(satcount(L));
-    if (std::fetestexcept(FE_INVALID))
+    if (!exact.has_value())
     {
       //  the result of the rounding is outside the range of the return type.
       out << satcount(L);
     }
     else
     {
-      out << exact;
+      out << exact.value();
     }
-    
-    std::feupdateenv(&save_env);
   }
   else
   {
-    out << satcount(L);
+    out << sylvan::ldds::satcount(L);
   }
 
   if (print_nodecount)
