@@ -13,6 +13,7 @@
 #define MCRL2_LPS_LPSREACH_H
 
 #include "mcrl2/symbolic/data_index.h"
+#include "mcrl2/utilities/logger.h"
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "mcrl2/lps/detail/configuration.h"
@@ -45,9 +46,10 @@ namespace detail {
   {
     public:
       std::map<std::size_t, std::size_t> num_relprod_calls_per_group;
-      std::map<std::size_t, std::map<std::size_t, double>> num_new_states_per_group_per_step_nosat;
-      std::map<std::size_t, std::map<std::size_t, std::vector<double>>> num_new_states_per_group_per_step_sat;
-      std::map<std::pair<std::size_t, std::size_t>, std::map<std::size_t, std::vector<double>>> num_new_states_per_group_per_step_sat_chaining;
+      std::map<std::size_t, std::map<std::size_t, long long>> num_new_states_per_group_per_step_nosat;
+      std::map<std::size_t, std::map<std::size_t, std::vector<long long>>> num_new_states_per_group_per_step_sat;
+      std::map<std::pair<std::size_t, std::size_t>, std::map<std::size_t, std::vector<long long>>>
+        num_new_states_per_group_per_step_sat_chaining;
       std::size_t num_rewrite_action_calls = 0;
       std::size_t num_learn_successors_calls = 0;
       std::size_t num_step_calls = 0;
@@ -108,15 +110,21 @@ namespace detail {
       {
         if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
         {
-          const double num_new = sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited));
+          std::optional<long long> num_new = symbolic::safe_llround(sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited)));
+          if (!num_new.has_value())
+          {
+            num_new = std::numeric_limits<long long>::max();
+            mCRL2log(log::warning) << "Failed to compute number of new states in log_step_iter_nosat for group " << i << " using " << std::numeric_limits<long long>::max() << std::endl;
+          }
+
           auto step_it = num_new_states_per_group_per_step_nosat.find(num_step_calls);
           if (step_it == num_new_states_per_group_per_step_nosat.end())
           {
-            num_new_states_per_group_per_step_nosat[num_step_calls] = std::map<std::size_t, double>({{i, num_new}});;
+            num_new_states_per_group_per_step_nosat[num_step_calls] = std::map<std::size_t, long long>({{i, num_new.value()}});;
           }
           else
           {
-            step_it->second[i] = num_new;
+            step_it->second[i] = num_new.value();
           }
         }
       }
@@ -125,15 +133,23 @@ namespace detail {
       {
         if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
         {
-          const double num_new = sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited));
+          std::optional<long long> num_new
+            = symbolic::safe_llround(sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited)));
+          if (!num_new.has_value())
+          {
+            num_new = std::numeric_limits<long long>::max();
+            mCRL2log(log::warning) << "Failed to compute number of new states in log_step_iter_sat for group " << i
+                                   << " using " << std::numeric_limits<long long>::max() << std::endl;
+          }
+
           auto step_it = num_new_states_per_group_per_step_sat.find(num_step_calls);
           if (step_it == num_new_states_per_group_per_step_sat.end())
           {
-            num_new_states_per_group_per_step_sat[num_step_calls] = std::map<std::size_t, std::vector<double>>({{i, {num_new}}});
+            num_new_states_per_group_per_step_sat[num_step_calls] = std::map<std::size_t, std::vector<long long>>({{i, {num_new.value()}}});
           }
           else
           {
-            step_it->second[i].push_back(num_new);
+            step_it->second[i].push_back(num_new.value());
           }
         }
       }
@@ -142,16 +158,24 @@ namespace detail {
       {
         if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
         {
-          const double num_new = sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited));
+          std::optional<long long> num_new
+            = symbolic::safe_llround(sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited)));
+          if (!num_new.has_value())
+          {
+            num_new = std::numeric_limits<long long>::max();
+            mCRL2log(log::warning) << "Failed to compute number of new states in log_step_iter_sat for group " << i
+                                   << " using " << std::numeric_limits<long long>::max() << std::endl;
+          }
+
           auto step_it = num_new_states_per_group_per_step_sat_chaining.find({num_step_calls, i});
           if (step_it == num_new_states_per_group_per_step_sat_chaining.end())
           {
             num_new_states_per_group_per_step_sat_chaining[{num_step_calls, i}]
-              = std::map<std::size_t, std::vector<double>>({{j, {num_new}}});
+              = std::map<std::size_t, std::vector<long long>>({{j, {num_new.value()}}});
           }
           else
           {
-            step_it->second[j].push_back(num_new);
+            step_it->second[j].push_back(num_new.value());
           }
         }
       }
@@ -226,6 +250,147 @@ namespace detail {
           mCRL2log(log::debug) << "=== Symbolic exploration statistics ===" << std::endl;
           print(log::logger(log::debug).get(), saturation, chaining);
         }
+      }
+
+      std::ostream& output_json(std::ostream& os, bool saturation, bool chaining)
+      {
+        os << "{";
+        os << "\"num_rewrite_action_calls\": " << num_rewrite_action_calls << ",";
+        os << "\"num_learn_successors_calls\": " << num_learn_successors_calls << ",";
+        os << "\"num_step_calls\": " << num_step_calls << ",";
+        os << "\"num_relprod_calls_per_group\": [";
+        {
+          bool first = true;
+          for (const auto& [group, count] : num_relprod_calls_per_group)
+          {
+            if (!first)
+            {
+              os << ",";
+            }
+            first = false;
+            os << "[" << group << ", " << count << "]";
+          }
+        }
+        os << "]";
+        if (saturation)
+        {
+          os << ", \"num_new_states_per_group_per_step_sat\": [";
+          {
+            bool first_step = true;
+            for (const auto& [step, group_map]: num_new_states_per_group_per_step_sat)
+            {
+              if (!first_step)
+              {
+                os << ",";
+              }
+              first_step = false;
+              os << "[" << step << ", [";
+              {
+                bool first_group = true;
+                for (const auto& [group, counts]: group_map)
+                {
+                  if (!first_group)
+                  {
+                    os << ",";
+                  }
+                  first_group = false;
+                  os << "[" << group << ", [";
+                  {
+                    bool first_count = true;
+                    for (const auto& count: counts)
+                    {
+                      if (!first_count)
+                      {
+                        os << ",";
+                      }
+                      first_count = false;
+                      os << count;
+                    }
+                  }
+                  os << "]]";
+                }
+              }
+              os << "]]";
+            }
+          }
+          os << "]";
+          if (chaining)
+          {
+            os << ", \"num_new_states_per_group_per_step_sat_chaining\": {";
+            {
+              bool first_entry = true;
+              for (const auto& [key, group_map] : num_new_states_per_group_per_step_sat_chaining)
+              {
+                if (!first_entry)
+                {
+                  os << ",";
+                }
+                first_entry = false;
+                os << "\"" << key.first << "," << key.second << "\": {";
+                {
+                  bool first_group = true;
+                  for (const auto& [group, counts] : group_map)
+                  {
+                    if (!first_group)
+                    {
+                      os << ",";
+                    }
+                    first_group = false;
+                    os << "\"" << group << "\": [";
+                    {
+                      bool first_count = true;
+                      for (const auto& count : counts)
+                      {
+                        if (!first_count)
+                        {
+                          os << ",";
+                        }
+                        first_count = false;
+                        os << count;
+                      }
+                    }
+                    os << "]";
+                  }
+                }
+                os << "}";
+              }
+            }
+            os << "}";
+          }
+        }
+        else
+        {
+          os << ", \"num_new_states_per_group_per_step_nosat\": [";
+
+          bool first_step = true;
+          for (const auto& [step, group_map] : num_new_states_per_group_per_step_nosat)
+          {
+            if (!first_step)
+            {
+              os << ",";
+            }
+            first_step = false;
+            os << "[" << step << ", [";
+            {
+              bool first_group = true;
+              for (const auto& [group, count] : group_map)
+              {
+                if (!first_group)
+                {
+                  os << ",";
+                }
+                first_group = false;
+                os << "[" << group << ", " << count << "]";
+              }
+            }
+            os << "]]";
+          }
+          os << "]";
+        }
+
+        os << "}";
+
+        return os;
       }
   };
 }
@@ -554,6 +719,7 @@ class lpsreach_algorithm
       }
 
       m_stats.log(m_options.saturation, m_options.chaining);
+      m_stats.output_json(std::cout, m_options.saturation, m_options.chaining);
 
       m_lts.states = visited;
       return visited;
