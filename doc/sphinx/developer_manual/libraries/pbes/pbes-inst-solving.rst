@@ -510,7 +510,7 @@ Function `SG^0` is defined as follows:
     where the *otherwise* case considers `\psi = \psi_1 \wedge \cdots \wedge \psi_n` or `\psi = \psi_1 \vee \cdots \vee \psi_n` and for which we assume that in `\psi _{1}\wedge \cdots \wedge \psi _{n}` none of the `\psi _{i}` is a conjunction, and in `\psi _{1}\vee \cdots \vee \psi _{n}` none of the `\psi _{i}` is a disjunction. And where `SG^1(\psi_i, \dec(\psi_i))` returns a tuple where nodes, edges, decoration and rank are computed for subformulas `\psi_i` of `\psi`.
 
 
-Given the assumption that `SG^1(\psi, \dec(\psi)) = (V,E, \dec, \rnk) \implies \psi \in V`, we define `SG^1` as follows:
+We define `SG^1` as follows:
 
 .. _sg1:
 
@@ -606,7 +606,7 @@ Using this lemma in the instantiation algorithm, rather than creating a structur
 Propagation of solved equations
 """""""""""""""""""""""""""""""
 
-This technique exploits the fact that some of the BES equations that are generated while exploring the PBES are already solved (possibly after using the self-loop removal technique).
+This technique exploits the fact that some of the PBES equations that are generated while exploring the PBES are already solved (possibly after using the self-loop removal technique).
 
 We first introduce some additional notation. By `S_0` we denote the set of vertices that represent equations with solution `\true`, whereas `S_1` denotes the set of vertices representing equations with solution `\false`.  Let `\pi` be a partial function that maps vertices to the PVIs they represent. For a set of vertices `S \subseteq V`, we define the substitution `\rho_i` as follows for all `s \in S \cap \textsf{dom}(\pi): \rho_i(\pi(s)) = \true` if `i = 0` and `\rho_i(\pi(s)) = \false` if `i = 1`. The union of two substitutions is again a substitution, provided that the domain of variables these substitutions range over are disjoint.
 
