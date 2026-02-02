@@ -47,8 +47,8 @@ struct pbeschain_options
                               // compared to the size of the original PVI.
   bool quantifier_free = false;
   bool avoid_alternating = false;
-  double srf_factor = 1.2; // factor of the maximum size the chained equation in SRF should be after chaining compared
-                           // to the size of the original equation.
+  double srf_factor; // factor of the maximum size the chained equation in SRF should be after chaining compared
+                     // to the size of the original equation. Default is 1.2
 };
 
 // Substitutor to target specific path, replace our specific pvi with true/false
