@@ -101,7 +101,7 @@ A structure graph, see [KRW12]_, is a graph structure that captures BESs in thei
             \end{cases}
             \end{equation*}
 
-In the implementation, each proposition variable (BES variables) is replaced by a propositional variable instantiation (PVI). Thus, in the implementation, the nodes of the structure graphs are PVIs.
+In the implementation, each proposition variable (BES variables) is replaced by a propositional variable instantiation (PVI). A PVI is a predicate variable instantiation, i.e., given a predicate formula `\varphi`, an occurrence `Y(e)` in `\varphi` is a PVI. In the implementation, the nodes of the structure graphs are PVIs.
 
 
 Attractor sets
@@ -606,7 +606,7 @@ Using this lemma in the instantiation algorithm, rather than creating a structur
 Propagation of solved equations
 """""""""""""""""""""""""""""""
 
-This technique exploits the fact that some of the PBES equations that are generated while exploring the PBES are already solved (possibly after using the self-loop removal technique).
+This technique exploits the fact that some of the BES equations that are generated while exploring the PBES are already solved (possibly after using the self-loop removal technique).
 
 We first introduce some additional notation. By `S_0` we denote the set of vertices that represent equations with solution `\true`, whereas `S_1` denotes the set of vertices representing equations with solution `\false`.  Let `\pi` be a partial function that maps vertices to the PVIs they represent. For a set of vertices `S \subseteq V`, we define the substitution `\rho_i` as follows for all `s \in S \cap \textsf{dom}(\pi): \rho_i(\pi(s)) = \true` if `i = 0` and `\rho_i(\pi(s)) = \false` if `i = 1`. The union of two substitutions is again a substitution, provided that the domain of variables these substitutions range over are disjoint.
 
