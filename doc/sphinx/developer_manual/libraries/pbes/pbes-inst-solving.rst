@@ -118,13 +118,17 @@ Let `A \subseteq V` be a subset of vertices of a structure graph `G = (V, E, d ,
     \begin{algorithmic}[1]
     \Function {AttrDefault}{$A, \alpha$}
     \State {$ \td := \bigcup_{u \in A}(\mathit{pred(u)} \setminus A )$} 
-    \State $\mathbf{while}\ \td \neq \emptyset\ \mathbf{do}$
-        \State $\qquad \textbf{choose}\ u \in \td$
-        \State $\qquad \td := \td \setminus \{u\}$
-        \State {$\qquad \mathbf{if}\ d_u = \alpha \vee \mathit{succ(u)} \subseteq A\ \mathbf{then}$} 
-            \State \qquad \qquad {\colorbox{lightgray}{$\mathbf{if}\ d_u = \alpha\ \mathbf{then}\ \tau[u \to v] \mid v \in A \cap \mathit{succ(u)}$}}
-            \State $\qquad \qquad A := A \cup \{u\}$
-            \State $\qquad \qquad \td := \td \cup (\mathit{pred(u)} \setminus A )$
+    \While {$\td \neq \emptyset$}
+        \State $\textbf{choose}\ u \in \td$
+        \State $\td := \td \setminus \{u\}$
+        \If {$d_u = \alpha \vee \mathit{succ(u)} \subseteq A$} 
+            \If {\colorbox{lightgray}{$d_u = \alpha$}}
+                {\colorbox{lightgray}{$\tau[u \to v] \mid v \in A \cap \mathit{succ(u)}$}}
+            \EndIf
+            \State $A := A \cup \{u\}$
+            \State $\td := \td \cup (\mathit{pred(u)} \setminus A )$
+        \EndIf
+    \EndWhile
     \State \Return {$A$}
     \EndFunction
     \end{algorithmic}
@@ -142,13 +146,17 @@ The algorithm is extended in Algorithm :ref:`AttrDefaultWithTau <attr-tau>` such
     \begin{algorithmic}[1]
     \Function{AttrDefaultWithTau}{$A, \alpha, \tau_\alpha$}
     \State {$ \td := \bigcup_{u \in A}(\mathit{pred(u)} \setminus A )$} 
-    \State $\mathbf{while}\ \td \neq \emptyset\ \mathbf{do}$
-        \State $\qquad \textbf{choose}\ u \in \td$
-        \State $\qquad \td := \td \setminus \{u\}$
-        \State $\qquad \mathbf{if}\ d_u = \alpha \vee \mathit{succ(u)} \subseteq A\ \mathbf{then}$ 
-            \State \qquad \qquad {\colorbox{lightgray}{$\mathbf{if}\ d_u = \alpha\ \mathbf{then}\ \tau_\alpha[u \to v] \mid v \in A \cap \mathit{succ(u)}$}}
-            \State $\qquad \qquad A := A \cup \{u\}$
-            \State $\qquad \qquad \td := \td \cup (\mathit{pred(u)} \setminus A)$
+    \While {$\td \neq \emptyset$}
+        \State $\textbf{choose}\ u \in \td$
+        \State $\td := \td \setminus \{u\}$
+        \If {$d_u = \alpha \vee \mathit{succ(u)} \subseteq A$}
+            \If {\colorbox{lightgray}{$d_u = \alpha$}}
+                {\colorbox{lightgray}{$\tau_\alpha[u \to v] \mid v \in A \cap \mathit{succ(u)}$}}
+            \EndIf
+            \State $A := A \cup \{u\}$
+            \State $\td := \td \cup (\mathit{pred(u)} \setminus A)$
+        \EndIf
+    \EndWhile
     \State \Return {$A, \tau_\alpha$}
     \EndFunction
     \end{algorithmic}
@@ -164,12 +172,15 @@ Finally Algorithm :ref:`AttrDefaultNoStrategy <attr-no-tau>` does not set any st
     \begin{algorithmic}[1]
     \Function{AttrDefaultNoStrategy}{$A, \alpha$}
     \State {$ \td := \bigcup_{u \in A}(\mathit{pred(u)} \setminus A )$} 
-    \State $\mathbf{while}\ \td \neq \emptyset\ \mathbf{do}$
-        \State $\qquad \textbf{choose}\ u \in \td$
-        \State $\qquad \td := \td \setminus \{u\}$
-        \State $\qquad \mathbf{if}\ d_u = \alpha \vee \mathit{succ(u)} \subseteq A\ \mathbf{then}$ 
-            \State $\qquad \qquad A := A \cup \{u\}$
-            \State $\qquad \qquad \td := \td \cup (\mathit{pred(u)} \setminus A)$
+    \While {$\td \neq \emptyset$}
+        \State $\textbf{choose}\ u \in \td$
+        \State $\td := \td \setminus \{u\}$
+        \If {$d_u = \alpha \vee \mathit{succ(u)} \subseteq A$} 
+            \State $A := A \cup \{u\}$
+            \State $\td := \td \cup (\mathit{pred(u)} \setminus A)$
+
+        \EndIf
+    \EndWhile
     \State \Return {$A$}
     \EndFunction
     \end{algorithmic}
@@ -546,15 +557,16 @@ The instantiation algorithm :ref:`PbesInstStructureGraph <instantiation_algorith
         \State $\td := \{\init\}$
         \State $\discovered := \{\init\}$
         \State $(V,E,d,r) := (\emptyset, \emptyset, -, -)$
-        \State $\textbf{while}\ \td \neq \emptyset \ \textbf{do}$
-            \State $\qquad \textbf{choose}\ X_k(e) \in \td$ 
-            \State $\qquad \td := \td \setminus \{X_k(e)\}$
-            \State $\qquad \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State $\qquad \psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
-            \State $\qquad (V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
-            \State $\qquad (V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
-            \State $\qquad \td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
-            \State $\qquad \discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+        \While {$\td \neq \emptyset$}
+            \State $\textbf{choose}\ X_k(e) \in \td$ 
+            \State $\td := \td \setminus \{X_k(e)\}$
+            \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
+            \State $\psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
+            \State $(V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
+            \State $(V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
+            \State $\td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
+            \State $\discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+        \EndWhile
         \State \Return $(V,E, d, r)$
     \EndFunction
     \end{algorithmic}
@@ -674,23 +686,26 @@ In Algorithm :ref:`PbesInstStructureGraph0 <instantiation-no-on-the-fly>` we pre
         \State $(V,E,d,r) := (\emptyset, \emptyset, -, -)$
         \State {\colorbox{orange}{$S_0 := \emptyset$}}
         \State {\colorbox{orange}{$S_1 := \emptyset$}}
-        \State $\textbf{while}\ \td \neq \emptyset \ \textbf{do}$
-            \State $\qquad \textbf{choose}\ X_k(e) \in \td$ 
-            \State $\qquad \td := \td \setminus \{X_k(e)\}$
-            \State $\qquad \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State \qquad{\colorbox{lightgray}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true]) $}}
-            \State \qquad{\colorbox{orange}{$(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$}}
-            \State \qquad {\colorbox{orange}{$\mathbf{if}\ b = \true\ \mathbf{then}$}}
-                \State \qquad \qquad {\colorbox{orange}{$S_0 := S_0 \cup \{X_k(e)\}$}}
-                \State \qquad \qquad {\colorbox{orange}{$\psi_{X_k}^e := g_0$}}
-            \State \qquad {\colorbox{orange}{$\mathbf{if}\ b = \false\ \mathbf{then}$}}
-                \State \qquad \qquad {\colorbox{orange}{$S_1 := S_1 \cup \{X_k(e)\}$}}
-                \State \qquad \qquad {\colorbox{orange}{$\psi_{X_k}^e := g_1$}}
-            \State $\qquad \psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
-            \State $\qquad (V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
-            \State $\qquad (V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
-            \State $\qquad \td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
-            \State $\qquad \discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+        \While {$\td \neq \emptyset$}
+            \State $\textbf{choose}\ X_k(e) \in \td$ 
+            \State $\td := \td \setminus \{X_k(e)\}$
+            \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
+            \State {\colorbox{lightgray}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true]) $}}
+            \State {\colorbox{orange}{$(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$}}
+            \If {\colorbox{orange}{$b = \true$}}
+                \State {\colorbox{orange}{$S_0 := S_0 \cup \{X_k(e)\}$}}
+                \State {\colorbox{orange}{$\psi_{X_k}^e := g_0$}}
+            \EndIf
+            \If {\colorbox{orange}{$b = \false$}}
+                \State {\colorbox{orange}{$S_1 := S_1 \cup \{X_k(e)\}$}}
+                \State {\colorbox{orange}{$\psi_{X_k}^e := g_1$}}
+            \EndIf
+            \State $\psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
+            \State $(V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
+            \State $(V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
+            \State $\td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
+            \State $\discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+        \EndWhile
         \State \Return $(V,E, d, r)$
     \EndFunction
     \end{algorithmic}
@@ -1030,24 +1045,27 @@ Solving strategies 1 to 4 each use a different function for `applyAttractor`, in
         \State $(V,E,d,r) := (\emptyset, \emptyset, -, -)$
         \State $S_0 := \emptyset$
         \State $S_1 := \emptyset$
-        \State $\textbf{while}\ \td \neq \emptyset {\colorbox{lightgray}{$\wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1$}}\ \textbf{do}$
-            \State $\qquad \textbf{choose}\ X_k(e) \in \td$ 
-            \State $\qquad \td := \td \setminus \{X_k(e)\}$
-            \State $\qquad \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State {\colorbox{white}{$\qquad \psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
-            \State $\qquad (b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
-            \State $\qquad \mathbf{if}\ b = \true\ \mathbf{then}$
-                \State $\qquad \qquad S_0 := S_0 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_0$
-            \State $\qquad \mathbf{if}\ b = \false\ \mathbf{then}$
-                \State $\qquad \qquad S_1 := S_1 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_1$
-            \State $\qquad \psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
-            \State $\qquad (V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
-            \State $\qquad (V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
-            \State $\qquad \td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
-            \State $\qquad \discovered := \discovered \cup \occ(\psi_{X_k}^e)$
-            \State \qquad {\colorbox{lightgray}{$S_0, S_1, \tau_0 , \tau_1:= applyAttractor(S_0,  S_1, \tau_0, \tau_1)$ \text{(executed periodically)}}}
+        \While {$\td \neq \emptyset {\colorbox{lightgray}{$\wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1$}}$}
+            \State $\textbf{choose}\ X_k(e) \in \td$ 
+            \State $\td := \td \setminus \{X_k(e)\}$
+            \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
+            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
+            \If {$b = \true$}
+                \State $S_0 := S_0 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_0$
+            \EndIf
+            \If {$b = \false$}
+                \State $S_1 := S_1 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_1$
+            \EndIf
+            \State $\psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
+            \State $(V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
+            \State $(V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
+            \State $\td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
+            \State $\discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+            \State {\colorbox{lightgray}{$S_0, S_1, \tau_0 , \tau_1:= applyAttractor(S_0,  S_1, \tau_0, \tau_1)$ \text{(executed periodically)}}}
+        \EndWhile
         \State {\colorbox{lightgray}{$V := \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_1, \tau_0, \tau_1)$}}
         \State \Return $(V,E, d, r)$
     \EndFunction
@@ -1062,27 +1080,33 @@ Routine :ref:`ExtractMinimalStructureGraph <extract-minimal>` is used to extract
     :class: math-left
 
     \begin{algorithmic}[1]
-    \State $\mathbf{function}\ \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_0, \tau_0, \tau_1)$
-        \State $\qquad \td := {\init}$
-        \State $\qquad \done := \emptyset$
-        \State $\qquad \textbf{while}\ \td \neq \emptyset$
-            \State $\qquad \qquad \textbf{choose}\ u \in \td$ 
-            \State $\qquad \qquad \td := \td \setminus \{u\}$
-            \State $\qquad \qquad \done := \done \cup \{u\}$
-            \State $\qquad \qquad \mathbf{if}\ (u \in S_0 \wedge \dec(u) = \blacktriangledown)\ \mathbf{then}$
-                \State $\qquad \qquad \qquad v := \tau_0(u)$
-                \State $\qquad \qquad \qquad \mathbf{if}\ v \notin \done\ \mathbf{then}$
-                        \State $\qquad \qquad \qquad \qquad  \td := \td \cup \{v\}$
-            \State $\qquad \qquad \mathbf{else}\ \mathbf{if}\ (u \in S_1 \wedge \dec(u) = \blacktriangle)\ \mathbf{then}$
-                \State $\qquad \qquad \qquad v := \tau_1(u)$
-                \State $\qquad \qquad \qquad \mathbf{if}\ v \notin \done\ \mathbf{then}$
-                    \State $\qquad \qquad \qquad \qquad  \td := \td \cup \{v\}$
-            \State $\qquad \qquad \mathbf{else}$
-                \State $\qquad \qquad \qquad \mathbf{for}\ v \in \scc(u) \mathbf{do}$
-                    \State $\qquad \qquad \qquad \qquad \mathbf{if}\ v \notin \done\ \mathbf{then}$
-                        \State $\qquad \qquad \qquad \qquad \qquad \td := \td \cup \{v\}$
-        \State \qquad \Return $\done$
-    \State $\mathbf{end\ function}$
+    \Function {ExtractMinimalStructureGraph}{$V, \init, S_0, S_1, \tau_0, \tau_1$}
+        \State $\td := {\init}$
+        \State $\done := \emptyset$
+        \While {$\td \neq \emptyset$}
+            \State $\textbf{choose}\ u \in \td$ 
+            \State $\td := \td \setminus \{u\}$
+            \State $\done := \done \cup \{u\}$
+            \If {$(u \in S_0 \wedge \dec(u) = \blacktriangledown)$}
+                \State $v := \tau_0(u)$
+                \If {$\ v \notin \done$}
+                    \State $\td := \td \cup \{v\}$
+                \EndIf
+            \ElsIf {$(u \in S_1 \wedge \dec(u) = \blacktriangle)$}
+                \State $v := \tau_1(u)$
+                \If {$v \notin \done$}
+                    \State $\td := \td \cup \{v\}$
+                \EndIf
+            \Else
+                \For {$v \in \scc(u)$}
+                    \If {$v \notin \done$}
+                        \State $\td := \td \cup \{v\}$
+                    \EndIf
+                \EndFor
+            \EndIf
+        \EndWhile
+        \State \Return $\done$
+    \EndFunction
     \end{algorithmic}
 
 
@@ -1108,25 +1132,28 @@ In Algorithm :ref:`PbesInstStructureGraph1 <propagate-solved-eq-attr>` we presen
         \State $S_0 := \emptyset$
         \State $S_1 := \emptyset$
         \State $\textbf{choose}\ X_k(e) \in \td$ 
-        \State $\textbf{while}\ \td \neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1\ \textbf{do}$
-            \State $\qquad \textbf{choose}\ X_k(e) \in \td$ 
-            \State $\qquad \td := \td \setminus \{X_k(e)\}$
-            \State $\qquad \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State \qquad {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
-            \State $\qquad (b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
-            \State $\qquad \mathbf{if}\ b = \true\ \mathbf{then}$
-                \State $\qquad \qquad S_0 := S_0 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_0$
-            \State $\qquad \mathbf{if}\ b = \false\ \mathbf{then}$
-                \State $\qquad \qquad S_1 := S_1 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_1$
-            \State $\qquad \psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
-            \State $\qquad (V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
-            \State $\qquad (V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
-            \State $\qquad \td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
-            \State $\qquad \discovered := \discovered \cup \occ(\psi_{X_k}^e)$
-            \State \qquad {\colorbox{lightgray}{$S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$}}
-            \State \qquad {\colorbox{lightgray}{$S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$}}
+        \While {$\td \neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1$}
+            \State $ \textbf{choose}\ X_k(e) \in \td$ 
+            \State $\td := \td \setminus \{X_k(e)\}$
+            \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
+            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
+            \If {$b = \true$}
+                \State $S_0 := S_0 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_0$
+            \EndIf
+            \If {$b = \false$}
+                \State $S_1 := S_1 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_1$
+            \EndIf
+            \State $\psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
+            \State $(V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
+            \State $(V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
+            \State $\td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
+            \State $\discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+            \State {\colorbox{lightgray}{$S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$}}
+            \State {\colorbox{lightgray}{$S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$}}
+        \EndWhile
         \State $V := \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_1, \tau_0, \tau_1)$
         \State \Return $(V,E, d, r)$
     \EndFunction
@@ -1224,22 +1251,29 @@ In :ref:`FindLoops2 <find-loops-2>` routine `dom(rnk)` yields the ranked vertice
     \State $J := \{ j \mid \exists u \in V \cap \mathrm{dom}(\rnk) : \rnk(u) = j \}$
     \State $S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$
     \State $S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$
-    \State $\mathbf{for}\ j \in J$
-            \State $\qquad \alpha := j \bmod 2$
-            \State \qquad {\colorbox{white}{$U_j := \{u \in V \mid \rnk(u) = j \wedge (\alpha = 0 \rightarrow \dec(u) \neq \false) \wedge (\alpha = 1 \rightarrow \dec(u) \neq \true) \} \setminus S_{1 - \alpha}$}}
-            \State $\qquad U := U_j \cup S_\alpha$
-            \State $\qquad X := \textsc{AttrMinRankGeneric}(U, \alpha, V, j)$
-            \State $\qquad Y := V \setminus \textsc{AttrDefault}(V \setminus X, 1-\alpha)$
-            \State {$\qquad \textbf{while}\ X \neq Y\ \textbf{do}$}
-                \State $\qquad \qquad X := \textsc{AttrMinRankGeneric}(U \cap Y, \alpha, V, j)$
-                \State $\qquad \qquad Y := Y \setminus \textsc{AttrDefault}(Y \setminus X, 1-\alpha)$
-            \State $\qquad\ \mathbf{for}\ v \in X \setminus S_{\alpha}\ \mathbf{do}$
-                \State \qquad \qquad {\colorbox{white}{$\mathbf{if}\ (\alpha = 0 \land \dec(u) = \blacktriangledown) \lor (\alpha = 1 \land \dec(u) = \blacktriangle)\ \mathbf{then}$}}
-                    \State \qquad \qquad \qquad {\colorbox{white}{$\mathbf{if}\ v \in U_j\ \mathbf{then}\ \tau_{\alpha}(v) := w\ \mathbf{with}\ w \in \scc(v) \cap Y$}}
-                    \State $\qquad \qquad \qquad \mathbf{else}\ \tau_{\alpha}(v) := \tau(v)$
-            \State $\qquad S_\alpha := S_\alpha \cup X$
-            \State $\qquad S_\alpha, \tau_\alpha := \textsc{AttrDefaultWithTau}(S_\alpha, \alpha, \tau_\alpha)$
-        \State \Return $S_0, S_1, \tau_0,\tau_1$
+    \For {$j \in J$}
+            \State $\alpha := j \bmod 2$
+            \State {\colorbox{white}{$U_j := \{u \in V \mid \rnk(u) = j \wedge (\alpha = 0 \rightarrow \dec(u) \neq \false) \wedge (\alpha = 1 \rightarrow \dec(u) \neq \true) \} \setminus S_{1 - \alpha}$}}
+            \State $U := U_j \cup S_\alpha$
+            \State $X := \textsc{AttrMinRankGeneric}(U, \alpha, V, j)$
+            \State $Y := V \setminus \textsc{AttrDefault}(V \setminus X, 1-\alpha)$
+            \While {$X \neq Y$}
+                \State $X := \textsc{AttrMinRankGeneric}(U \cap Y, \alpha, V, j)$
+                \State $Y := Y \setminus \textsc{AttrDefault}(Y \setminus X, 1-\alpha)$
+            \EndWhile
+            \For {$v \in X \setminus S_{\alpha}$}
+                \If {$(\alpha = 0 \land \dec(u) = \blacktriangledown) \lor (\alpha = 1 \land \dec(u) = \blacktriangle)$}
+                    \If {$v \in U_j$}
+                        \State {$\tau_{\alpha}(v) := w\ \mathbf{with}\ w \in \scc(v) \cap Y$}
+                    \Else 
+                        \State $\tau_{\alpha}(v) := \tau(v)$
+                    \EndIf
+                \EndIf
+            \EndFor
+            \State $S_\alpha := S_\alpha \cup X$
+            \State $S_\alpha, \tau_\alpha := \textsc{AttrDefaultWithTau}(S_\alpha, \alpha, \tau_\alpha)$
+    \EndFor
+    \State \Return $S_0, S_1, \tau_0,\tau_1$
     \EndFunction
     \end{algorithmic}
 
@@ -1254,13 +1288,17 @@ where :ref:`AttrMinRankGeneric <attr-min-rank-generic>` is a slightly modified v
     \begin{algorithmic}[1]
     \Function {AttrMinRankGeneric}{$A, \alpha, U, j$}
         \State $\td := \bigcup_{u \in A} (pred^{= j}(u, U) \setminus A)$
-        \State {$\textbf{while}\ \td \neq \emptyset\ \textbf{do}$}
-        \State $\qquad \textbf{choose}\ u \in \td$
-        \State $\qquad \td := \td \setminus \{u\}$
-        \State $\qquad \mathbf{if}\ d_u = \alpha \vee succ(u) \subseteq A\ \mathbf{then}$
-            \State $\qquad \qquad \mathbf{if}\ d_u = \alpha\ \mathbf{then}\ \tau \lbrack u \rbrack:=v\ \mathbf{with}\ v\in A\cap succ(u) $ 
-            \State $\qquad \qquad A := A \cup \{u \}$
-            \State $\qquad \qquad \td := \td \cup (pred^{= j}(u, U) \setminus A)$
+        \While {$\td \neq \emptyset$}
+            \State $\textbf{choose}\ u \in \td$
+            \State $\td := \td \setminus \{u\}$
+            \If {$d_u = \alpha \vee succ(u) \subseteq A$}
+                \If {$d_u = \alpha$}
+                    \State $\tau \lbrack u \rbrack:=v\ \mathbf{with}\ v\in A\cap succ(u) $ 
+                \EndIf
+                \State $A := A \cup \{u \}$
+                \State $\td := \td \cup (pred^{= j}(u, U) \setminus A)$
+            \EndIf
+        \EndWhile
         \State \Return $A$ 
     \EndFunction
     \end{algorithmic}
@@ -1290,24 +1328,27 @@ The above optimisation can be integrated in the instantiation algorithm as follo
         \State $(V,E,d,r) := (\emptyset, \emptyset, -, -)$
         \State $S_0 := \emptyset$
         \State $S_1 := \emptyset$
-        \State {$\mathbf{while}\ \td \neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1 \ \mathbf{do}$}
-            \State $\qquad \mathbf{choose}\ X_k(e) \in \td$ 
-            \State $\qquad \td := \td \setminus \{X_k(e)\}$
-            \State $\qquad \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State \qquad {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
-            \State $\qquad (b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
-            \State $\qquad \mathbf{if}\ b = \true\ \mathbf{then}$
-                \State $\qquad \qquad S_0 := S_0 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_0$
-            \State $\qquad \mathbf{if}\ b = \false\ \mathbf{then}$
-                \State $\qquad \qquad S_1 := S_1 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_1$
-            \State $\qquad \psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
-            \State $\qquad (V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
-            \State $\qquad (V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
-            \State $\qquad \td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
-            \State $\qquad \discovered := \discovered \cup \occ(\psi_{X_k}^e)$
-            \State \qquad {\colorbox{lightgray}{$S_0, S_1, \tau_0, \tau_1 := \text{\textsc{FindLoops2}}(V, S_0, S_1, \tau_0, \tau_1) $}} 
+        \While {$\td \neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1$}
+            \State $\mathbf{choose}\ X_k(e) \in \td$ 
+            \State $\td := \td \setminus \{X_k(e)\}$
+            \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
+            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
+            \If {$b = \true$}
+                \State $S_0 := S_0 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_0$
+            \EndIf
+            \If {$b = \false$}
+                \State $S_1 := S_1 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_1$
+            \EndIf
+            \State $\psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
+            \State $(V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
+            \State $(V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
+            \State $\td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
+            \State $\discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+            \State {\colorbox{lightgray}{$S_0, S_1, \tau_0, \tau_1 := \text{\textsc{FindLoops2}}(V, S_0, S_1, \tau_0, \tau_1) $}} 
+        \EndWhile
         \State $V := \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_1, \tau_0, \tau_1)$
         \State \Return $(V,E, d, r)$
     \EndFunction
@@ -1515,24 +1556,32 @@ Algorithm :ref:`PbesInstStructureGraph3 <solve-fatal-attractor>` uses :ref:`Fata
     \State $J := \{ j \mid \exists u \in V : \rnk(u) = j \}$
     \State $S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$
     \State $S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$
-    \State $\mathbf{for}\ j \in J$
-            \State $\qquad \alpha := j \bmod 2$
-            \State \qquad {\colorbox{white}{$U_j := \{u \in V \mid \rnk(u) = j \wedge (\alpha = 0 \rightarrow \dec(u) \neq \false) \wedge (\alpha = 1 \rightarrow \dec(u) \neq \true) \} \setminus S_{1 - \alpha}$}}
-            \State $\qquad X := \emptyset$
-            \State {$\qquad \textbf{while}\ U_j \neq \emptyset \wedge U_j \neq X \ \textbf{do}$}
-                \State $\qquad \qquad X := U_j$
-                \State $\qquad \qquad Y := \textsc{AttrMinRankOriginal}(X \cup S_{\alpha}, \alpha, V, j)$
-                \State $\qquad \qquad \mathbf{if}\ U_j \subseteq Y\ \mathbf{then}$
-                    \State $\qquad \qquad \qquad \ \mathbf{for}\ v \in Y \setminus S_{\alpha}\ \mathbf{do}$
-                        \State \qquad \qquad \qquad \qquad {\colorbox{white}{$\mathbf{if}\ (\alpha = 0 \land \dec(u) = \blacktriangledown) \lor (\alpha = 1 \land \dec(u) = \blacktriangle)\ \mathbf{then}$}}
-                        \State \qquad \qquad \qquad \qquad \qquad {\colorbox{white}{$\mathbf{if}\ v \in U_j\ \mathbf{then}\ \tau_{\alpha}(v) := w\ \mathbf{with}\ w \in \scc(v) \cap Y$}}
-                        \State $\qquad \qquad \qquad \qquad \qquad \mathbf{else}\ \tau_{\alpha}(v) := \tau(v)$
-                    \State $\qquad \qquad \qquad  S_\alpha := S_\alpha \cup Y$
-                    \State $\qquad \qquad \qquad  S_\alpha, \tau_\alpha := \textsc{AttrDefaultWithTau}(S_\alpha, \alpha, \tau_\alpha)$
-                    \State $\qquad \qquad \qquad \mathbf{break}$
-                \State $\qquad \qquad \mathbf{else}$
-                    \State $\qquad \qquad \qquad U_j := U_j \cap Y$
-        \State \Return $S_0, S_1, \tau_0,\tau_1$
+    \For {$j \in J$}
+            \State $\alpha := j \bmod 2$
+            \State {\colorbox{white}{$U_j := \{u \in V \mid \rnk(u) = j \wedge (\alpha = 0 \rightarrow \dec(u) \neq \false) \wedge (\alpha = 1 \rightarrow \dec(u) \neq \true) \} \setminus S_{1 - \alpha}$}}
+            \State $X := \emptyset$
+            \While {$U_j \neq \emptyset \wedge U_j \neq X$}
+                \State $X := U_j$
+                \State $Y := \textsc{AttrMinRankOriginal}(X \cup S_{\alpha}, \alpha, V, j)$
+                \If {$U_j \subseteq Y$}
+                    \For {$v \in Y \setminus S_{\alpha}$}
+                        \If {$(\alpha = 0 \land \dec(u) = \blacktriangledown) \lor (\alpha = 1 \land \dec(u) = \blacktriangle)$}
+                            \If {$v \in U_j$}
+                                \State $\tau_{\alpha}(v) := w\ \mathbf{with}\ w \in \scc(v) \cap Y$
+                            \Else
+                                \State $\tau_{\alpha}(v) := \tau(v)$
+                            \EndIf
+                        \EndIf
+                    \EndFor
+                    \State $S_\alpha := S_\alpha \cup Y$
+                    \State $S_\alpha, \tau_\alpha := \textsc{AttrDefaultWithTau}(S_\alpha, \alpha, \tau_\alpha)$
+                    \State $\mathbf{break}$
+                \Else
+                    \State $U_j := U_j \cap Y$
+                \EndIf
+            \EndWhile
+    \EndFor
+    \State \Return $S_0, S_1, \tau_0,\tau_1$
     \EndFunction
     \end{algorithmic}
 
@@ -1548,13 +1597,17 @@ where :ref:`AttrMinRankOriginal <attr-min-rank-original>` is a slightly modified
     \Function {AttrMinRankOriginal}{$A, \alpha, U, j$}
         \State $\td := \bigcup_{u \in A} (pred^{\geq j}(u, U))$
         \State $X := \{ u \in \td \cap A \mid d_u = \alpha \vee \scc(u) \subseteq A\}$
-        \State {$\textbf{while}\ \td \neq \emptyset\ \textbf{do}$}
-        \State $\qquad \textbf{choose}\ u \in \td$
-        \State $\qquad \td := \td \setminus \{u\}$
-        \State $\qquad \mathbf{if}\ d_u = \alpha \vee succ(u) \subseteq A\ \mathbf{then}$
-            \State \qquad \qquad {\colorbox{white}{$\mathbf{if}\ d_u = \alpha\ \mathbf{then}\ \tau \lbrack u \rbrack:=v\ \mathbf{with}\ v\in (A \cup X) \cap succ(u)$}} 
-            \State $\qquad \qquad X := X \cup \{u \}$
-            \State $\qquad \qquad \td := \td \cup (pred^{\geq j}(u, U) \setminus X)$
+        \While {$\td \neq \emptyset$}
+            \State $ \textbf{choose}\ u \in \td$
+            \State $\td := \td \setminus \{u\}$
+            \If {$d_u = \alpha \vee succ(u) \subseteq A$}
+                \If {$d_u = \alpha$}
+                    \State $\tau \lbrack u \rbrack:=v\ \mathbf{with}\ v\in (A \cup X) \cap succ(u)$
+                \EndIf
+                \State $X := X \cup \{u \}$
+                \State $\td := \td \cup (pred^{\geq j}(u, U) \setminus X)$
+            \EndIf
+        \EndWhile
         \State \Return $X$ 
     \EndFunction
     \end{algorithmic}
@@ -1584,24 +1637,27 @@ The above optimisation can be integrated in the instantiation algorithm as follo
         \State $(V,E,d,r) := (\emptyset, \emptyset, -, -)$
         \State $S_0 := \emptyset$
         \State $S_1 := \emptyset$
-        \State {$\mathbf{while}\ \td \neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1 \ \mathbf{do}$}
-            \State $\qquad \mathbf{choose}\ X_k(e) \in \td$ 
-            \State $\qquad \td := \td \setminus \{X_k(e)\}$
-            \State $\qquad \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State \qquad {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
-            \State $\qquad (b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
-            \State $\qquad \mathbf{if}\ b = \true\ \mathbf{then}$
-                \State $\qquad \qquad S_0 := S_0 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_0$
-            \State $\qquad \mathbf{if}\ b = \false\ \mathbf{then}$
-                \State $\qquad \qquad S_1 := S_1 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_1$
-            \State $\qquad \psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
-            \State $\qquad (V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
-            \State $\qquad (V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
-            \State $\qquad \td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
-            \State $\qquad \discovered := \discovered \cup \occ(\psi_{X_k}^e)$
-            \State \qquad {\colorbox{lightgray}{$S_0, S_1, \tau_0, \tau_1 := \text{\textsc{FatalAttractorOriginal}}(V, S_0, S_1, \tau_0, \tau_1) $}} 
+        \While {$\td \neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1$}
+            \State $\mathbf{choose}\ X_k(e) \in \td$ 
+            \State $\td := \td \setminus \{X_k(e)\}$
+            \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
+            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
+            \If {$b = \true$}
+                \State $S_0 := S_0 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_0$
+            \EndIf
+            \If {$b = \false$}
+                \State $S_1 := S_1 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_1$
+            \EndIf
+            \State $\psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
+            \State $(V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
+            \State $(V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
+            \State $\td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
+            \State $\discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+            \State {\colorbox{lightgray}{$S_0, S_1, \tau_0, \tau_1 := \text{\textsc{FatalAttractorOriginal}}(V, S_0, S_1, \tau_0, \tau_1) $}} 
+        \EndWhile
         \State $V := \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_1, \tau_0, \tau_1)$
         \State \Return $(V,E, d, r)$
     \EndFunction
@@ -1928,12 +1984,18 @@ Algorithm :ref:`PbesInstStructureGraph4 <solve-using-solver>` uses :ref:`Partial
         \State $S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$
         \State $S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$
         \State{\colorbox{white}{$W_0, W_1 := \textsc{SolveRecursive}(V \setminus (S_1 \cup \textsc{AttrDefaultNoStrategy}(S_0 \cup \td, 0)))$}}
-        \State $\mathbf{for}\ v \in W_1 \setminus S_1\ \mathbf{do}$
-            \State \qquad $\mathbf{if}\ \dec(u) = \blacktriangle\ \mathbf{then}\ \tau_1(v) := \tau(v)$
+        \For {$v \in W_1 \setminus S_1$}
+            \If {$\dec(v) = \blacktriangle$} 
+                \State $\tau_1(v) := \tau(v)$
+            \EndIf
+        \EndFor
         \State $S_1 := S_1 \cup W_1$   
         \State{\colorbox{white}{$W_0, W_1 := \textsc{SolveRecursive}(V \setminus (S_0 \cup \textsc{AttrDefaultNoStrategy}(S_1 \cup \td, 1)))$}}
-        \State $\mathbf{for}\ v \in W_0 \setminus S_0\ \mathbf{do}$
-            \State \qquad $\mathbf{if}\ \dec(u) = \blacktriangle\ \mathbf{then}\ \tau_0(v) := \tau(v)$
+        \For {$v \in W_0 \setminus S_0$}
+            \If {$\dec(v) = \blacktriangle$}
+                \State $\tau_0(v) := \tau(v)$
+            \EndIf
+        \EndFor
         \State $S_0 := S_0 \cup W_0$              
         \State \Return $S_0, S_1, \tau_0,\tau_1$
     \EndFunction
@@ -1955,24 +2017,27 @@ The above optimisation can be integrated in the instantiation algorithm as follo
         \State $(V,E,d,r) := (\emptyset, \emptyset, -, -)$
         \State $S_0 := \emptyset$
         \State $S_1 := \emptyset$
-        \State {$\mathbf{while}\ \td \neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1 \ \mathbf{do}$}
-            \State $\qquad \mathbf{choose}\ X_k(e) \in \td$ 
-            \State $\qquad \td := \td \setminus \{X_k(e)\}$
-            \State $\qquad \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State \qquad {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
-            \State $\qquad (b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
-            \State $\qquad \mathbf{if}\ b = \true\ \mathbf{then}$
-                \State $\qquad \qquad S_0 := S_0 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_0$
-            \State $\qquad \mathbf{if}\ b = \false\ \mathbf{then}$
-                \State $\qquad \qquad S_1 := S_1 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \psi_{X_k}^e := g_1$
-            \State $\qquad \psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
-            \State $\qquad (V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
-            \State $\qquad (V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
-            \State $\qquad \td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
-            \State $\qquad \discovered := \discovered \cup \occ(\psi_{X_k}^e)$
-            \State \qquad {\colorbox{lightgray}{$S_0, S_1, \tau_0, \tau_1 := \text{\textsc{PartialSolve}}(V, \td, S_0, S_1, \tau_0, \tau_1) $}} 
+        \While {$\td \neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1$}
+            \State $ \mathbf{choose}\ X_k(e) \in \td$ 
+            \State $ \td := \td \setminus \{X_k(e)\}$
+            \State $ \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
+            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
+            \If {$b = \true$}
+                \State $S_0 := S_0 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_0$
+            \EndIf
+            \If {$b = \false$}
+                \State $S_1 := S_1 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_1$
+            \EndIf
+            \State $\psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
+            \State $(V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
+            \State $(V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
+            \State $\td := \td \cup (\occ(\psi_{X_k}^e) \setminus \discovered)$
+            \State $\discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+            \State {\colorbox{lightgray}{$S_0, S_1, \tau_0, \tau_1 := \text{\textsc{PartialSolve}}(V, \td, S_0, S_1, \tau_0, \tau_1) $}} 
+        \EndWhile
         \State $V := \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_1, \tau_0, \tau_1)$
         \State \Return $(V,E, d, r)$
     \EndFunction
@@ -2008,14 +2073,16 @@ In fact, algorithm :ref:`PbesInstStructureGraphPrune <solve-prune>` uses :ref:`P
         \State $\td' := \{\init\}$
         \State $\done' := \emptyset$
         \State $\newtd := \emptyset$
-        \State $\mathbf{while}\ \td' \neq \emptyset\ \mathbf{do}$
-            \State \qquad $\mathbf{choose}\ u \in \td'$
-            \State \qquad $\td' := \td' \setminus \{u\}$
-            \State \qquad $\done' := \done' \cup \{u\}$
-            \State \qquad $\mathbf{if}\ \dec(u) = - \wedge \scc(u) = \emptyset \ \mathbf{then}$
-                \State \qquad \qquad $\newtd := \newtd \cup \{ u\}$
-             \State \qquad $\mathbf{else}\ \mathbf{if}\ u \notin S_0 \cup S_1 \ \mathbf{then}$
-                \State \qquad \qquad $\td' := \td' \cup (\scc(u) \setminus \done')$
+        \While {$\td' \neq \emptyset$}
+            \State $\mathbf{choose}\ u \in \td'$
+            \State $\td' := \td' \setminus \{u\}$
+            \State $\done' := \done' \cup \{u\}$
+            \If {$\dec(u) = - \wedge \scc(u) = \emptyset$}
+                \State $\newtd := \newtd \cup \{ u\}$
+            \ElsIf {$u \notin S_0 \cup S_1$}
+                \State $\td' := \td' \cup (\scc(u) \setminus \done')$
+            \EndIf
+        \EndWhile
         \State $\newtd := \newtd \cap (\td \cup \irr)$  
         \State $\newirr := (\td \cup \newirr) \setminus \newtd$             
         \State \Return $\newtd, \newirr$
@@ -2032,37 +2099,40 @@ The above routine can be integrated in the instantiation algorithm as follows. N
     :class: math-left
 
     \begin{algorithmic}[1]
-    \State $\mathbf{function}${\colorbox{white}{$\text{\textsc{PbesInstStructureGraphPrune}}(\E, X_{\init}(e_{\init}), R, E^0, \lsetpre)$}}
-        \State $\qquad \init := X_{\init}(e_{\init})$
-        \State $\qquad \td := \{\init\}$
-        \State \qquad {\colorbox{lightgray}{$\irr := \emptyset$}} 
-        \State $\qquad \discovered := \{\init\}$
-        \State $\qquad (V,E,d,r) := (\emptyset, \emptyset, -, -)$
-        \State $\qquad S_0 := \emptyset$
-        \State $\qquad S_1 := \emptyset$
-        \State $\qquad \mathbf{while}\ ${\colorbox{lightgray}{$(\td \setminus \irr) $}} $\neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1\ \mathbf{do}$
-            \State $\qquad \qquad \mathbf{choose}\ X_k(e) \in \td$ 
-            \State $\qquad \qquad \td := \td \setminus \{X_k(e)\}$
-            \State $\qquad \qquad \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State \qquad \qquad {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
-            \State $\qquad \qquad (b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
-            \State $\qquad \qquad \mathbf{if}\ b = \true\ \mathbf{then}$
-                \State $\qquad \qquad \qquad S_0 := S_0 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \qquad \psi_{X_k}^e := g_0$
-            \State $\qquad \qquad \mathbf{if}\ b = \false\ \mathbf{then}$
-                \State $\qquad \qquad \qquad S_1 := S_1 \cup \{X_k(e)\}$
-                \State $\qquad \qquad \qquad \psi_{X_k}^e := g_1$
-            \State $\qquad \qquad \psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
-            \State $\qquad \qquad (V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
-            \State $\qquad \qquad (V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
-            \State $\qquad \qquad \td := \td \cup (\occ(\psi_{X_k}^e) \setminus$ {\colorbox{lightgray}{$(\discovered \setminus \irr)$}}$)$
-            \State $\qquad \qquad \discovered := \discovered \cup \occ(\psi_{X_k}^e)$
-            \State \qquad \qquad {\colorbox{lightgray}{$\irr := \irr 
+    \Function{PbesInstStructureGraphPrune}{$\E, X_{\init}(e_{\init}), R, E^0, \lsetpre$}
+        \State $ \init := X_{\init}(e_{\init})$
+        \State $\td := \{\init\}$
+        \State {\colorbox{lightgray}{$\irr := \emptyset$}} 
+        \State $ \discovered := \{\init\}$
+        \State $ (V,E,d,r) := (\emptyset, \emptyset, -, -)$
+        \State $ S_0 := \emptyset$
+        \State $ S_1 := \emptyset$
+        \While {{\colorbox{lightgray}{$(\td \setminus \irr)$}} $\neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1$}
+            \State $\mathbf{choose}\ X_k(e) \in \td$ 
+            \State $\td := \td \setminus \{X_k(e)\}$
+            \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
+            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
+            \If {$b = \true$}
+                \State $S_0 := S_0 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_0$
+            \EndIf
+            \If {$b = \false$}
+                \State $S_1 := S_1 \cup \{X_k(e)\}$
+                \State $\psi_{X_k}^e := g_1$
+            \EndIf
+            \State $\psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
+            \State $(V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
+            \State $(V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
+            \State $\td := \td \cup (\occ(\psi_{X_k}^e) \setminus$ {\colorbox{lightgray}{$(\discovered \setminus \irr)$}}$)$
+            \State $\discovered := \discovered \cup \occ(\psi_{X_k}^e)$
+            \State {\colorbox{lightgray}{$\irr := \irr 
             \setminus \occ(\psi_{X_k}^e)$}} 
-            \State \qquad \qquad {\colorbox{lightgray}{$\td, \irr := \text{\textsc{PruneTodo}}(\init, \td, \irr) \text{ (executed periodically)}$}} 
-        \State \qquad $V := \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_1, \tau_0, \tau_1)$
-        \State \qquad \Return $(V,E, d, r)$
-    \State $\mathbf{end\ function}$
+            \State {\colorbox{lightgray}{$\td, \irr := \text{\textsc{PruneTodo}}(\init, \td, \irr) \text{ (executed periodically)}$}} 
+        \EndWhile
+        \State $V := \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_1, \tau_0, \tau_1)$
+        \State \Return $(V,E, d, r)$
+    \EndFunction
     \end{algorithmic}
 
 Pruning the todo set can help reduce the number of iterations to execute in the instantiation procedure.
@@ -2083,7 +2153,9 @@ To satisfy the precondition, a pre-processing step is needed, see Algorithm :ref
 
         \begin{algorithmic}[1]
         \Function {PreProcessing}{$V$}
-        \State \textbf{if} {$ V = \emptyset$} \textbf{then} \Return {$\emptyset$}
+        \If {$ V = \emptyset$} 
+            \State \Return {$\emptyset$}
+        \EndIf
         \State $T_0 := \{ v \in V \mid d(v) = \top\}$
         \State $TT_0:=$ \textsc{AttrDefault}{$(T_0, 0)$}
         \State $T_1 := \{ v \in V \mid d(v) = \bot\}$
@@ -2104,18 +2176,21 @@ Algorithm :ref:`SolveRecursive <ziel-expl>` is as follows:
 
     \begin{algorithmic}[1]
     \Function {SolveRecursive}{$V$}
-    \State \textbf{if} {$ V = \emptyset$} \textbf{then} \Return {($\emptyset$,\ $\emptyset$)}
+    \If {$ V = \emptyset$} 
+        \State \Return {($\emptyset$,\ $\emptyset$)}
+    \EndIf
     \State $m := \min(\{\rnk(v) \mid v \in V\})$
     \State $\alpha := m \mod 2$
     \State $U := \{ v \in V \mid \rnk(v) = m\}$
     \State $A :=$ \textsc{AttrDefault}{$(U, \alpha)$}
     \State $W_{0}', W_{1}' := {\textsc{SolveRecursive}}{(V \setminus A)}$
-    \State $\mathbf{if}\ W_{1-\alpha}' = \emptyset\ \mathbf{then}$ 
-        \State $\qquad W_\alpha,W_{1 - \alpha} := A \cup W_{\alpha}', \emptyset$
-    \State $\mathbf{else}$
-        \State $\qquad B := $\textsc{AttrDefault}{$(W_{1 - \alpha}', 1 - \alpha)$}
-        \State $\qquad W_0, W_1 := {\textsc{SolveRecursive}}{(V \setminus B)}$
-        \State $\qquad W_{1 - \alpha} := W_{1 - \alpha} \cup B$
+    \If {$W_{1-\alpha}' = \emptyset$}
+        \State $W_\alpha,W_{1 - \alpha} := A \cup W_{\alpha}', \emptyset$
+    \Else
+        \State $ B := $\textsc{AttrDefault}{$(W_{1 - \alpha}', 1 - \alpha)$}
+        \State $ W_0, W_1 := {\textsc{SolveRecursive}}{(V \setminus B)}$
+        \State $ W_{1 - \alpha} := W_{1 - \alpha} \cup B$
+    \EndIf
     \State \Return {($W_0, W_1$)}
     \EndFunction
     \end{algorithmic}
@@ -2166,23 +2241,26 @@ The priority function application is left-associative, thus, given `f_1, \ldots,
 
     \begin{algorithmic}[1]
     \Function {SolveRecursiveStrategies}{$V$}
-    \State \textbf{if} {$ V = \emptyset$} \textbf{then} \Return {($\emptyset$,\ $\emptyset$,\ $\emptyset$, $\emptyset$)}
+    \If {$ V = \emptyset$} 
+        \State \Return {($\emptyset$,\ $\emptyset$,\ $\emptyset$, $\emptyset$)}
+    \EndIf
     \State $m := \min(\{\rnk(v) \mid v \in V\})$
     \State $\alpha := m \mod 2$
     \State $U := \{ v \in V \mid \rnk(v) = m\}$
     \State {\colorbox{lightgray}{$\tau_U := \tau(U)$}}
     \State {\colorbox{lightgray}{$A, \tau :=$ \textsc{AttrDefaultWithTau}{$(U, \alpha, \tau_U)$}}}
     \State {\colorbox{lightgray}{$W_{0}', W_{1}', \tau_{0}', \tau_{1}' := {\textsc{SolveRecursiveStrategies}}{(V \setminus A)}$}}
-    \State {$\mathbf{if}\ W_{1-\alpha}' = \emptyset\ \mathbf{then}$} 
-        \State $\qquad W_\alpha,W_{1 - \alpha} := A \cup W_{\alpha}', \emptyset$
-        \State {\colorbox{lightgray}{$\qquad \tau_\alpha := \tau_{\alpha}' \lceil \tau \lceil \tau_U$}}
-        \State {\colorbox{lightgray}{$\qquad \tau_{1 - \alpha} := \tau_{1 - \alpha}'$}}
-    \State $\mathbf{else}$
-        \State {\colorbox{lightgray}{$\qquad B,\tau_B := $\textsc{AttrDefaultWithTau}{$(W_{1 - \alpha}', 1 - \alpha, \tau_{1 - \alpha}')$}}}
-        \State {\colorbox{lightgray}{$\qquad W_0, W_1, \tau_0, \tau_1 := {\textsc{SolveRecursiveStrategies}}{(V \setminus B)}$}}
-        \State $\qquad W_{1 - \alpha} := W_{1 - \alpha} \cup B$
-        \State {\colorbox{lightgray}{$\qquad \tau_{1 - \alpha} := \tau_{1 - \alpha} \lceil \tau_B \lceil \tau_{1 - \alpha}'$}}
-        \State {\colorbox{lightgray}{$\qquad \tau_\alpha := \tau_\alpha \lceil \tau_{\alpha}'$}}
+    \If {$\ W_{1-\alpha}' = \emptyset$} 
+        \State $W_\alpha,W_{1 - \alpha} := A \cup W_{\alpha}', \emptyset$
+        \State {\colorbox{lightgray}{$\tau_\alpha := \tau_{\alpha}' \lceil \tau \lceil \tau_U$}}
+        \State {\colorbox{lightgray}{$\tau_{1 - \alpha} := \tau_{1 - \alpha}'$}}
+    \Else
+        \State {\colorbox{lightgray}{$B,\tau_B := $\textsc{AttrDefaultWithTau}{$(W_{1 - \alpha}', 1 - \alpha, \tau_{1 - \alpha}')$}}}
+        \State {\colorbox{lightgray}{$W_0, W_1, \tau_0, \tau_1 := {\textsc{SolveRecursiveStrategies}}{(V \setminus B)}$}}
+        \State $ W_{1 - \alpha} := W_{1 - \alpha} \cup B$
+        \State {\colorbox{lightgray}{$ \tau_{1 - \alpha} := \tau_{1 - \alpha} \lceil \tau_B \lceil \tau_{1 - \alpha}'$}}
+        \State {\colorbox{lightgray}{$ \tau_\alpha := \tau_\alpha \lceil \tau_{\alpha}'$}}
+    \EndIf
     \State \Return {($W_0, W_1, \tau_0, \tau_1$)}
     \EndFunction
     \end{algorithmic}
