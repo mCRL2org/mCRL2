@@ -50,6 +50,17 @@ namespace detail {
       std::map<std::size_t, std::map<std::size_t, std::vector<long long>>> num_new_states_per_group_per_step_sat;
       std::map<std::pair<std::size_t, std::size_t>, std::map<std::size_t, std::vector<long long>>>
         num_new_states_per_group_per_step_sat_chaining;
+
+      // Statistics for number of LDD nodes of the sets visited and todo at the start of each step
+      std::map<std::size_t, std::size_t> num_ldd_nodes_visited_per_step;
+      std::map<std::size_t, std::size_t> num_ldd_nodes_todo_per_step;
+
+      // Statistics for number of LDD nodes of the sets visited and todo at the start of each summand group in step
+      std::map<std::size_t, std::map<std::size_t, std::size_t>> num_ldd_nodes_todo_per_group_per_step_nosat;
+      std::map<std::size_t, std::map<std::size_t, std::vector<std::size_t>>> num_ldd_nodes_todo_per_group_per_step_sat;
+      std::map<std::pair<std::size_t, std::size_t>, std::map<std::size_t, std::vector<std::size_t>>>
+        num_ldd_nodes_todo_per_group_per_step_sat_chaining;
+
       std::size_t num_rewrite_action_calls = 0;
       std::size_t num_learn_successors_calls = 0;
       std::size_t num_step_calls = 0;
@@ -91,12 +102,17 @@ namespace detail {
       }
 
       void log_step(
-        const sylvan::ldds::ldd& /*visited*/,
-        const sylvan::ldds::ldd& /*todo*/,
+        const sylvan::ldds::ldd& visited,
+        const sylvan::ldds::ldd& todo,
         bool /*learn_transitions*/,
         bool /*detect_deadlocks*/)
       {
-        ++num_step_calls;
+        if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
+        {
+          ++num_step_calls;
+          num_ldd_nodes_visited_per_step[num_step_calls] = sylvan::ldds::nodecount(visited);
+          num_ldd_nodes_todo_per_step[num_step_calls] = sylvan::ldds::nodecount(todo);
+        }
       }
 
       /// \brief Logs statistics for each summand group in step without saturation.
@@ -104,37 +120,49 @@ namespace detail {
       /// \param relprod The result of applying transition group i.
       /// \param i The index of the summand group.
       void log_step_iter_nosat(
-        const sylvan::ldds::ldd& visited,
+        const sylvan::ldds::ldd& todo,
         const sylvan::ldds::ldd& succ,
         std::size_t i)
       {
         if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
         {
-          std::optional<long long> num_new = symbolic::safe_llround(sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited)));
+          std::optional<long long> num_new = symbolic::safe_llround(sylvan::ldds::satcount(sylvan::ldds::minus(succ, todo)));
           if (!num_new.has_value())
           {
             num_new = std::numeric_limits<long long>::max();
             mCRL2log(log::warning) << "Failed to compute number of new states in log_step_iter_nosat for group " << i << " using " << std::numeric_limits<long long>::max() << std::endl;
           }
 
-          auto step_it = num_new_states_per_group_per_step_nosat.find(num_step_calls);
-          if (step_it == num_new_states_per_group_per_step_nosat.end())
+          auto states_step_it = num_new_states_per_group_per_step_nosat.find(num_step_calls);
+          if (states_step_it == num_new_states_per_group_per_step_nosat.end())
           {
             num_new_states_per_group_per_step_nosat[num_step_calls] = std::map<std::size_t, long long>({{i, num_new.value()}});;
           }
           else
           {
-            step_it->second[i] = num_new.value();
+            states_step_it->second[i] = num_new.value();
           }
+
+          auto todo_nodes_step_it = num_ldd_nodes_todo_per_group_per_step_nosat.find(num_step_calls);
+          if (todo_nodes_step_it == num_ldd_nodes_todo_per_group_per_step_nosat.end())
+          {
+            num_ldd_nodes_todo_per_group_per_step_nosat[num_step_calls]
+              = std::map<std::size_t, std::size_t>({{i, sylvan::ldds::nodecount(todo)}});
+          }
+          else
+          {
+            todo_nodes_step_it->second[i] = sylvan::ldds::nodecount(todo);
+          }
+
         }
       }
 
-      void log_step_iter_sat(const sylvan::ldds::ldd& visited, const sylvan::ldds::ldd& succ, std::size_t i)
+      void log_step_iter_sat(const sylvan::ldds::ldd& todo, const sylvan::ldds::ldd& succ, std::size_t i)
       {
         if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
         {
           std::optional<long long> num_new
-            = symbolic::safe_llround(sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited)));
+            = symbolic::safe_llround(sylvan::ldds::satcount(sylvan::ldds::minus(succ, todo)));
           if (!num_new.has_value())
           {
             num_new = std::numeric_limits<long long>::max();
@@ -142,24 +170,35 @@ namespace detail {
                                    << " using " << std::numeric_limits<long long>::max() << std::endl;
           }
 
-          auto step_it = num_new_states_per_group_per_step_sat.find(num_step_calls);
-          if (step_it == num_new_states_per_group_per_step_sat.end())
+          auto states_step_it = num_new_states_per_group_per_step_sat.find(num_step_calls);
+          if (states_step_it == num_new_states_per_group_per_step_sat.end())
           {
             num_new_states_per_group_per_step_sat[num_step_calls] = std::map<std::size_t, std::vector<long long>>({{i, {num_new.value()}}});
           }
           else
           {
-            step_it->second[i].push_back(num_new.value());
+            states_step_it->second[i].push_back(num_new.value());
+          }
+
+          auto nodes_todo_step_it = num_ldd_nodes_todo_per_group_per_step_sat.find(num_step_calls);
+          if (nodes_todo_step_it == num_ldd_nodes_todo_per_group_per_step_sat.end())
+          {
+            num_ldd_nodes_todo_per_group_per_step_sat[num_step_calls]
+              = std::map<std::size_t, std::vector<std::size_t>>({{i, {sylvan::ldds::nodecount(todo)}}});
+          }
+          else
+          {
+            states_step_it->second[i].push_back(sylvan::ldds::nodecount(todo));
           }
         }
       }
 
-      void log_step_iter_sat_chaining(const sylvan::ldds::ldd& visited, const sylvan::ldds::ldd& succ, std::size_t i, std::size_t j)
+      void log_step_iter_sat_chaining(const sylvan::ldds::ldd& todo, const sylvan::ldds::ldd& succ, std::size_t i, std::size_t j)
       {
         if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
         {
           std::optional<long long> num_new
-            = symbolic::safe_llround(sylvan::ldds::satcount(sylvan::ldds::minus(succ, visited)));
+            = symbolic::safe_llround(sylvan::ldds::satcount(sylvan::ldds::minus(succ, todo)));
           if (!num_new.has_value())
           {
             num_new = std::numeric_limits<long long>::max();
@@ -167,15 +206,26 @@ namespace detail {
                                    << " using " << std::numeric_limits<long long>::max() << std::endl;
           }
 
-          auto step_it = num_new_states_per_group_per_step_sat_chaining.find({num_step_calls, i});
-          if (step_it == num_new_states_per_group_per_step_sat_chaining.end())
+          auto states_step_it = num_new_states_per_group_per_step_sat_chaining.find({num_step_calls, i});
+          if (states_step_it == num_new_states_per_group_per_step_sat_chaining.end())
           {
             num_new_states_per_group_per_step_sat_chaining[{num_step_calls, i}]
               = std::map<std::size_t, std::vector<long long>>({{j, {num_new.value()}}});
           }
           else
           {
-            step_it->second[j].push_back(num_new.value());
+            states_step_it->second[j].push_back(num_new.value());
+          }
+
+          auto todo_nodes_step_it = num_ldd_nodes_todo_per_group_per_step_sat_chaining.find({num_step_calls, i});
+          if (todo_nodes_step_it == num_ldd_nodes_todo_per_group_per_step_sat_chaining.end())
+          {
+            num_ldd_nodes_todo_per_group_per_step_sat_chaining[{num_step_calls, i}]
+              = std::map<std::size_t, std::vector<std::size_t>>({{j, {sylvan::ldds::nodecount(todo)}}});
+          }
+          else
+          {
+            states_step_it->second[j].push_back(sylvan::ldds::nodecount(todo));
           }
         }
       }
@@ -254,143 +304,171 @@ namespace detail {
 
       std::ostream& output_json(std::ostream& os, bool saturation, bool chaining)
       {
-        os << "{";
-        os << "\"num_rewrite_action_calls\": " << num_rewrite_action_calls << ",";
-        os << "\"num_learn_successors_calls\": " << num_learn_successors_calls << ",";
-        os << "\"num_step_calls\": " << num_step_calls << ",";
-        os << "\"num_relprod_calls_per_group\": [";
+        if constexpr (mcrl2::lps::detail::EnableSymbolicExplorationStatistics)
         {
-          bool first = true;
-          for (const auto& [group, count] : num_relprod_calls_per_group)
-          {
-            if (!first)
-            {
-              os << ",";
-            }
-            first = false;
-            os << "[" << group << ", " << count << "]";
-          }
-        }
-        os << "]";
-        if (saturation)
-        {
-          os << ", \"num_new_states_per_group_per_step_sat\": [";
-          {
-            bool first_step = true;
-            for (const auto& [step, group_map]: num_new_states_per_group_per_step_sat)
-            {
-              if (!first_step)
-              {
-                os << ",";
-              }
-              first_step = false;
-              os << "[" << step << ", [";
-              {
-                bool first_group = true;
-                for (const auto& [group, counts]: group_map)
-                {
-                  if (!first_group)
-                  {
-                    os << ",";
-                  }
-                  first_group = false;
-                  os << "[" << group << ", [";
-                  {
-                    bool first_count = true;
-                    for (const auto& count: counts)
-                    {
-                      if (!first_count)
-                      {
-                        os << ",";
-                      }
-                      first_count = false;
-                      os << count;
-                    }
-                  }
-                  os << "]]";
-                }
-              }
-              os << "]]";
-            }
-          }
-          os << "]";
-          if (chaining)
-          {
-            os << ", \"num_new_states_per_group_per_step_sat_chaining\": {";
-            {
-              bool first_entry = true;
-              for (const auto& [key, group_map] : num_new_states_per_group_per_step_sat_chaining)
-              {
-                if (!first_entry)
-                {
-                  os << ",";
-                }
-                first_entry = false;
-                os << "\"" << key.first << "," << key.second << "\": {";
-                {
-                  bool first_group = true;
-                  for (const auto& [group, counts] : group_map)
-                  {
-                    if (!first_group)
-                    {
-                      os << ",";
-                    }
-                    first_group = false;
-                    os << "\"" << group << "\": [";
-                    {
-                      bool first_count = true;
-                      for (const auto& count : counts)
-                      {
-                        if (!first_count)
-                        {
-                          os << ",";
-                        }
-                        first_count = false;
-                        os << count;
-                      }
-                    }
-                    os << "]";
-                  }
-                }
-                os << "}";
-              }
-            }
-            os << "}";
-          }
-        }
-        else
-        {
-          os << ", \"num_new_states_per_group_per_step_nosat\": [";
+          os << "{";
+          output_json("num_rewrite_action_calls", os);
+          os << ": ";
+          output_json(num_rewrite_action_calls, os);
 
-          bool first_step = true;
-          for (const auto& [step, group_map] : num_new_states_per_group_per_step_nosat)
-          {
-            if (!first_step)
-            {
-              os << ",";
-            }
-            first_step = false;
-            os << "[" << step << ", [";
-            {
-              bool first_group = true;
-              for (const auto& [group, count] : group_map)
-              {
-                if (!first_group)
-                {
-                  os << ",";
-                }
-                first_group = false;
-                os << "[" << group << ", " << count << "]";
-              }
-            }
-            os << "]]";
-          }
-          os << "]";
-        }
+          os << ", ";
+          output_json("num_learn_successors_calls", os);
+          os << ": ";
+          output_json(num_learn_successors_calls, os);
 
-        os << "}";
+          os << ", ";
+          output_json("num_step_calls", os);
+          os << ": ";
+          output_json(num_step_calls, os);
+
+          os << ", ";
+          output_json("num_relprod_calls_per_group", os);
+          os << ": ";
+          output_json(num_relprod_calls_per_group, os);
+
+          if (saturation)
+          {
+            os << ", ";
+            output_json("num_new_states_per_group_per_step_sat", os);
+            os << ": ";
+            output_json(num_new_states_per_group_per_step_sat, os);
+
+            if (chaining)
+            {
+              os << ", ";
+              output_json("num_new_states_per_group_per_step_sat_chaining", os);
+              os << ": ";
+              output_json(num_new_states_per_group_per_step_sat_chaining, os);
+            }
+          }
+          else
+          {
+            os << ", ";
+            output_json("num_new_states_per_group_per_step_nosat", os);
+            os << ": ";
+            output_json(num_new_states_per_group_per_step_nosat, os);
+          }
+
+          os << ", ";
+          output_json("num_ldd_nodes_visited_per_step", os);
+          os << ": ";
+          output_json(num_ldd_nodes_visited_per_step, os);
+
+          os << ", ";
+          output_json("num_ldd_nodes_todo_per_step", os);
+          os << ": ";
+          output_json(num_ldd_nodes_todo_per_step, os);
+
+          if (saturation)
+          {
+            os << ", ";
+            output_json("num_ldd_nodes_todo_per_group_per_step_sat", os);
+            os << ": ";
+            output_json(num_ldd_nodes_todo_per_group_per_step_sat, os);
+
+            if (chaining) {
+              os << ", ";
+              output_json("num_ldd_nodes_todo_per_group_per_step_sat_chaining", os);
+              os << ": ";
+              output_json(num_ldd_nodes_todo_per_group_per_step_sat_chaining, os);
+            }
+          }
+          else
+          {
+            os << ", ";
+            output_json("num_ldd_nodes_todo_per_group_per_step_nosat", os);
+            os << ": ";
+            output_json(num_ldd_nodes_todo_per_group_per_step_nosat, os);
+          }
+
+          os << "}";
+        }
 
         return os;
+      }
+
+    protected:
+      std::ostream& output_json(const std::string& s, std::ostream& o)
+      {
+        o << "\"" << s << "\"";
+        return o;
+      }
+
+      template<std::integral T>
+      std::ostream& output_json(const T& n, std::ostream& o)
+      {
+        o << n;
+        return o;
+      }
+
+      template <typename T1, typename T2>
+      std::ostream& output_json(const std::pair<T1, T2>& p, std::ostream& o)
+      {
+        o << "[";
+        output_json(p.first, o);
+        o << ", ";
+        output_json(p.second, o);
+        o << "]";
+        return o;
+      }
+
+      template <typename T>
+      std::ostream& output_json(const std::vector<T>& v, std::ostream& o)
+      {
+        o << "[";
+        bool first = true;
+        for (const auto& item : v)
+        {
+          if (!first)
+          {
+            o << ", ";
+          }
+          first = false;
+          output_json(item, o);
+        }
+        o << "]";
+        return o;
+      }
+
+      template<typename T1, typename T2>
+      std::ostream& output_json(const std::map<T1, T2>& m, std::ostream& o)
+      {
+        o << "[";
+        bool first = true;
+        for (const auto& [key, value] : m)
+        {
+          if (!first)
+          {
+            o << ", ";
+          }
+          first = false;
+          o << "[";
+          output_json(key, o);
+          o << ", ";
+          output_json(value, o);
+          o << "]";
+        }
+        o << "]";
+        return o;
+      }
+
+      template <typename T>
+      std::ostream& output_json(const std::map<std::string, T>& m, std::ostream& o)
+      {
+        o << "{";
+        bool first = true;
+        for (const auto& [key, value]: m)
+        {
+          if (!first)
+          {
+            o << ", ";
+          }
+          output_json(key, o);
+          o << ": ";
+          output_json(value, o);
+        }
+        o << "}";
+        return o;
       }
   };
 }
