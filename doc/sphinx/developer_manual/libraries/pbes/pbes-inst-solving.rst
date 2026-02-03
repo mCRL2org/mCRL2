@@ -1049,7 +1049,7 @@ Solving strategies 1 to 4 each use a different function for `applyAttractor`, in
             \State $\textbf{choose}\ X_k(e) \in \td$ 
             \State $\td := \td \setminus \{X_k(e)\}$
             \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State \mbox{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}
             \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
             \If {$b = \true$}
                 \State $S_0 := S_0 \cup \{X_k(e)\}$
@@ -1080,7 +1080,7 @@ Routine :ref:`ExtractMinimalStructureGraph <extract-minimal>` is used to extract
     :class: math-left
 
     \begin{algorithmic}[1]
-    \Function {ExtractMinimalStructureGraph}{$V, \init, S_0, S_1, \tau_0, \tau_1$}
+    \Function {\mbox{ExtractMinimalStructureGraph}{$(V, \init, S_0, S_1, \tau_0, \tau_1)$}}{}
         \State $\td := {\init}$
         \State $\done := \emptyset$
         \While {$\td \neq \emptyset$}
@@ -1136,7 +1136,7 @@ In Algorithm :ref:`PbesInstStructureGraph1 <propagate-solved-eq-attr>` we presen
             \State $ \textbf{choose}\ X_k(e) \in \td$ 
             \State $\td := \td \setminus \{X_k(e)\}$
             \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State \mbox{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}
             \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
             \If {$b = \true$}
                 \State $S_0 := S_0 \cup \{X_k(e)\}$
@@ -1253,7 +1253,7 @@ In :ref:`FindLoops2 <find-loops-2>` routine `dom(rnk)` yields the ranked vertice
     \State $S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$
     \For {$j \in J$}
             \State $\alpha := j \bmod 2$
-            \State {\colorbox{white}{$U_j := \{u \in V \mid \rnk(u) = j \wedge (\alpha = 0 \rightarrow \dec(u) \neq \false) \wedge (\alpha = 1 \rightarrow \dec(u) \neq \true) \} \setminus S_{1 - \alpha}$}}
+            \State \mbox{$U_j := \{u \in V \mid \rnk(u) = j \wedge (\alpha = 0 \rightarrow \dec(u) \neq \false) \wedge (\alpha = 1 \rightarrow \dec(u) \neq \true) \} \setminus S_{1 - \alpha}$}
             \State $U := U_j \cup S_\alpha$
             \State $X := \textsc{AttrMinRankGeneric}(U, \alpha, V, j)$
             \State $Y := V \setminus \textsc{AttrDefault}(V \setminus X, 1-\alpha)$
@@ -1262,7 +1262,7 @@ In :ref:`FindLoops2 <find-loops-2>` routine `dom(rnk)` yields the ranked vertice
                 \State $Y := Y \setminus \textsc{AttrDefault}(Y \setminus X, 1-\alpha)$
             \EndWhile
             \For {$v \in X \setminus S_{\alpha}$}
-                \If {$(\alpha = 0 \land \dec(u) = \blacktriangledown) \lor (\alpha = 1 \land \dec(u) = \blacktriangle)$}
+                \If {$(\alpha{=}0 \land \dec(u){=}\blacktriangledown) \lor (\alpha{=}1 \land \dec(u){=}\blacktriangle)$}
                     \If {$v \in U_j$}
                         \State {$\tau_{\alpha}(v) := w\ \mathbf{with}\ w \in \scc(v) \cap Y$}
                     \Else 
@@ -1332,7 +1332,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
             \State $\mathbf{choose}\ X_k(e) \in \td$ 
             \State $\td := \td \setminus \{X_k(e)\}$
             \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State \mbox{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}
             \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
             \If {$b = \true$}
                 \State $S_0 := S_0 \cup \{X_k(e)\}$
@@ -1557,29 +1557,29 @@ Algorithm :ref:`PbesInstStructureGraph3 <solve-fatal-attractor>` uses :ref:`Fata
     \State $S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$
     \State $S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$
     \For {$j \in J$}
-            \State $\alpha := j \bmod 2$
-            \State {\colorbox{white}{$U_j := \{u \in V \mid \rnk(u) = j \wedge (\alpha = 0 \rightarrow \dec(u) \neq \false) \wedge (\alpha = 1 \rightarrow \dec(u) \neq \true) \} \setminus S_{1 - \alpha}$}}
-            \State $X := \emptyset$
-            \While {$U_j \neq \emptyset \wedge U_j \neq X$}
-                \State $X := U_j$
-                \State $Y := \textsc{AttrMinRankOriginal}(X \cup S_{\alpha}, \alpha, V, j)$
-                \If {$U_j \subseteq Y$}
-                    \For {$v \in Y \setminus S_{\alpha}$}
-                        \If {$(\alpha = 0 \land \dec(u) = \blacktriangledown) \lor (\alpha = 1 \land \dec(u) = \blacktriangle)$}
-                            \If {$v \in U_j$}
-                                \State $\tau_{\alpha}(v) := w\ \mathbf{with}\ w \in \scc(v) \cap Y$
-                            \Else
-                                \State $\tau_{\alpha}(v) := \tau(v)$
-                            \EndIf
+        \State $\alpha := j \bmod 2$
+        \State \mbox{$U_j := \{u \in V \mid \rnk(u) = j \wedge (\alpha = 0 \rightarrow \dec(u) \neq \false) \wedge (\alpha = 1 \rightarrow \dec(u) \neq \true) \} \setminus S_{1 - \alpha}$}
+        \State $X := \emptyset$
+        \While {$U_j \neq \emptyset \wedge U_j \neq X$}
+            \State $X := U_j$
+            \State $Y := \textsc{AttrMinRankOriginal}(X \cup S_{\alpha}, \alpha, V, j)$
+            \If {$U_j \subseteq Y$}
+                \For {$v \in Y \setminus S_{\alpha}$}
+                    \If{\mbox{$(\alpha=0\land\dec(u)=\blacktriangledown)\lor(\alpha=1\land\dec(u)=\blacktriangle)$}}
+                        \If {$v \in U_j$}
+                            \State $\tau_{\alpha}(v) := w\ \mathbf{with}\ w \in \scc(v) \cap Y$
+                        \Else
+                            \State $\tau_{\alpha}(v) := \tau(v)$
                         \EndIf
-                    \EndFor
-                    \State $S_\alpha := S_\alpha \cup Y$
-                    \State $S_\alpha, \tau_\alpha := \textsc{AttrDefaultWithTau}(S_\alpha, \alpha, \tau_\alpha)$
-                    \State $\mathbf{break}$
-                \Else
-                    \State $U_j := U_j \cap Y$
-                \EndIf
-            \EndWhile
+                    \EndIf
+                \EndFor
+                \State $S_\alpha := S_\alpha \cup Y$
+                \State $S_\alpha, \tau_\alpha := \textsc{AttrDefaultWithTau}(S_\alpha, \alpha, \tau_\alpha)$
+                \State $\mathbf{break}$
+            \Else
+                \State $U_j := U_j \cap Y$
+            \EndIf
+        \EndWhile
     \EndFor
     \State \Return $S_0, S_1, \tau_0,\tau_1$
     \EndFunction
@@ -1641,7 +1641,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
             \State $\mathbf{choose}\ X_k(e) \in \td$ 
             \State $\td := \td \setminus \{X_k(e)\}$
             \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State \mbox{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}
             \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
             \If {$b = \true$}
                 \State $S_0 := S_0 \cup \{X_k(e)\}$
@@ -1983,14 +1983,14 @@ Algorithm :ref:`PbesInstStructureGraph4 <solve-using-solver>` uses :ref:`Partial
     \Function {PartialSolve}{$V, \td, S_0, S_1, \tau_0, \tau_1$}
         \State $S_0, \tau_0 := \textsc{AttrDefaultWithTau}(S_0, 0, \tau_0)$
         \State $S_1, \tau_1 := \textsc{AttrDefaultWithTau}(S_1, 1, \tau_1)$
-        \State{\colorbox{white}{$W_0, W_1 := \textsc{SolveRecursive}(V \setminus (S_1 \cup \textsc{AttrDefaultNoStrategy}(S_0 \cup \td, 0)))$}}
+        \State\mbox{$W_0, W_1 := \textsc{SolveRecursive}(V \setminus (S_1 \cup \textsc{AttrDefaultNoStrategy}(S_0 \cup \td, 0)))$}
         \For {$v \in W_1 \setminus S_1$}
             \If {$\dec(v) = \blacktriangle$} 
                 \State $\tau_1(v) := \tau(v)$
             \EndIf
         \EndFor
         \State $S_1 := S_1 \cup W_1$   
-        \State{\colorbox{white}{$W_0, W_1 := \textsc{SolveRecursive}(V \setminus (S_0 \cup \textsc{AttrDefaultNoStrategy}(S_1 \cup \td, 1)))$}}
+        \State\mbox{$W_0, W_1 := \textsc{SolveRecursive}(V \setminus (S_0 \cup \textsc{AttrDefaultNoStrategy}(S_1 \cup \td, 1)))$}
         \For {$v \in W_0 \setminus S_0$}
             \If {$\dec(v) = \blacktriangle$}
                 \State $\tau_0(v) := \tau(v)$
@@ -2021,7 +2021,7 @@ The above optimisation can be integrated in the instantiation algorithm as follo
             \State $ \mathbf{choose}\ X_k(e) \in \td$ 
             \State $ \td := \td \setminus \{X_k(e)\}$
             \State $ \psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State \mbox{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}
             \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
             \If {$b = \true$}
                 \State $S_0 := S_0 \cup \{X_k(e)\}$
@@ -2099,7 +2099,7 @@ The above routine can be integrated in the instantiation algorithm as follows. N
     :class: math-left
 
     \begin{algorithmic}[1]
-    \Function{PbesInstStructureGraphPrune}{$\E, X_{\init}(e_{\init}), R, E^0, \lsetpre$}
+    \Function{\mbox{PbesInstStructureGraphPrune}{$(\E, X_{\init}(e_{\init}), R, E^0, \lsetpre)$}}{}
         \State $ \init := X_{\init}(e_{\init})$
         \State $\td := \{\init\}$
         \State {\colorbox{lightgray}{$\irr := \emptyset$}} 
@@ -2111,7 +2111,7 @@ The above routine can be integrated in the instantiation algorithm as follows. N
             \State $\mathbf{choose}\ X_k(e) \in \td$ 
             \State $\td := \td \setminus \{X_k(e)\}$
             \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
-            \State {\colorbox{white}{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}}
+            \State \mbox{$\psi_{X_k}^e := \mathbf{if}\ \sigma_k = \mu\ \mathbf{then}\ R(\psi_{X_k}^e[X_k(e) := \false])\ \mathbf{else}\ R(\psi_{X_k}^e[X_k(e) := \true])$}
             \State $(b,\psi_{X_k}^e,g_0,g_1) := R^+(\psi_{X_k}^e)$
             \If {$b = \true$}
                 \State $S_0 := S_0 \cup \{X_k(e)\}$
