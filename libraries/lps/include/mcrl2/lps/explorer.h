@@ -18,7 +18,6 @@
 #include "mcrl2/data/find_quantifier_variables.h"
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/skip.h"
-#include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
@@ -28,6 +27,8 @@
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/explorer_options.h"
+#include "mcrl2/lps/explorer_todo_set.h"
+#include "mcrl2/lps/explorer_utilities.h"
 #include "mcrl2/lps/find_representative.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/order_summand_variables.h"
@@ -36,431 +37,6 @@
 #include "mcrl2/lps/stochastic_state.h"
 
 namespace mcrl2::lps {
-
-// Global helpers to construct a rewriter and add real operators for explorer
-inline std::set<data::function_symbol> add_real_operators(std::set<data::function_symbol> s)
-{
-  s.insert(data::less_equal(data::sort_real::real_()));
-  s.insert(data::greater_equal(data::sort_real::real_()));
-  s.insert(data::sort_real::plus(data::sort_real::real_(), data::sort_real::real_()));
-  return s;
-}
-
-template <typename Specification>
-data::rewriter construct_rewriter(const Specification& lpsspec, data::rewrite_strategy rewrite_strategy, bool remove_unused_rewrite_rules)
-{
-  if (remove_unused_rewrite_rules)
-  {
-    return data::rewriter(lpsspec.data(),
-      data::used_data_equation_selector(lpsspec.data(), add_real_operators(lps::find_function_symbols(lpsspec)), lpsspec.global_variables(), false),
-      rewrite_strategy);
-  }
-  else
-  {
-    return data::rewriter(lpsspec.data(), rewrite_strategy);
-  }
-}
-
-enum class caching { none, local, global };
-
-inline
-std::ostream& operator<<(std::ostream& os, caching c)
-{
-  switch(c)
-  {
-    case caching::none: os << "none"; break;
-    case caching::local: os << "local"; break;
-    case caching::global: os << "global"; break;
-    default: os.setstate(std::ios_base::failbit);
-  }
-  return os;
-}
-
-inline
-std::vector<data::data_expression> make_data_expression_vector(const data::data_expression_list& v)
-{
-  return std::vector<data::data_expression>(v.begin(), v.end());
-}
-
-class todo_set
-{
-  protected:
-    atermpp::deque<state> todo;
-
-  public:
-    explicit todo_set() = default;
-
-    explicit todo_set(const state& init)
-      : todo{init}
-    {}
-
-    template<typename ForwardIterator>
-    todo_set(ForwardIterator first, ForwardIterator last)
-      : todo(first, last)
-    {}
-
-    virtual ~todo_set() = default;
-
-    virtual void choose_element(state& result)
-    {
-      result = todo.front();
-      todo.pop_front();
-    }
-
-    virtual void insert(const state& s)
-    {
-      todo.push_back(s);
-    }
-
-    virtual void finish_state()
-    { }
-
-    virtual bool empty() const
-    {
-      return todo.empty();
-    }
-
-    virtual std::size_t size() const
-    {
-      return todo.size();
-    }
-};
-
-class breadth_first_todo_set : public todo_set
-{
-  public:
-    explicit breadth_first_todo_set()
-      : todo_set()
-    {}
-
-    explicit breadth_first_todo_set(const state& init)
-      : todo_set(init)
-    {}
-
-    template<typename ForwardIterator>
-    breadth_first_todo_set(ForwardIterator first, ForwardIterator last)
-      : todo_set(first, last)
-    {}
-
-    void choose_element(state& result) override
-    {
-      result = todo.front();
-      todo.pop_front();
-    }
-
-    void insert(const state& s) override
-    {
-      todo.push_back(s);
-    }
-
-    atermpp::deque<state>& todo_buffer()
-    {
-      return todo;
-    }
-
-    void swap(breadth_first_todo_set& other) noexcept { todo.swap(other.todo); }
-};
-
-class depth_first_todo_set : public todo_set
-{
-  public:
-    explicit depth_first_todo_set(const state& init)
-      : todo_set(init)
-    {}
-
-    template<typename ForwardIterator>
-    depth_first_todo_set(ForwardIterator first, ForwardIterator last)
-      : todo_set(first, last)
-    {}
-
-    void choose_element(state& result) override
-    {
-      result = todo.back();
-      todo.pop_back();
-    }
-
-    void insert(const state& s) override
-    {
-      todo.push_back(s);
-    }
-};
-
-class highway_todo_set : public todo_set
-{
-  protected:
-    std::size_t N;
-    breadth_first_todo_set new_states;
-    std::size_t n=0;    // This is the number of new_states that are seen, of which at most N are stored in new_states.
-    std::random_device device;
-    std::mt19937 generator;
-
-  public:
-    explicit highway_todo_set(const state& init, std::size_t N_)
-      : N(N_),
-        new_states(init),
-        n(1),
-        device(),
-        generator(device())
-    {
-    }
-
-    template<typename ForwardIterator>
-    highway_todo_set(ForwardIterator first, ForwardIterator last, std::size_t N_)
-      : N(N_),
-        device(),
-        generator(device())
-    {
-      for(ForwardIterator i=first; i!=last; ++i)
-      {
-        insert(*i);
-      }
-    }
-
-    void choose_element(state& result) override
-    {
-      if (todo.empty()) 
-      {
-        assert(new_states.size()>0);
-        todo.swap(new_states.todo_buffer());
-      }
-      result = todo.front();
-      todo.pop_front();
-    }
-
-    void insert(const state& s) override
-    {
-      if (new_states.size() < N-1)
-      {
-        new_states.insert(s);
-      }
-      else
-      {
-        std::uniform_int_distribution<> distribution(0, n-1);
-        std::size_t k = distribution(generator);
-        if (k < N)
-        {
-          assert(N==new_states.size());
-          (new_states.todo_buffer())[k] = s;
-        }
-      }
-      n++;
-    }
-
-    std::size_t size() const override
-    {
-      return todo.size() + new_states.size();
-    }
-
-    bool empty() const override
-    {
-      return todo.empty() && new_states.empty();
-    }
-
-    void finish_state() override
-    {
-    }
-};
-
-template <typename Summand>
-inline const stochastic_distribution& summand_distribution(const Summand& /* summand */)
-{
-  static stochastic_distribution empty_distribution;
-  return empty_distribution;
-}
-
-template <>
-inline const stochastic_distribution& summand_distribution(const lps::stochastic_action_summand& summand)
-{
-  return summand.distribution();
-}
-
-inline
-const stochastic_distribution& initial_distribution(const lps::specification& /* lpsspec */)
-{
-  static stochastic_distribution empty_distribution;
-  return empty_distribution;
-}
-
-inline
-const stochastic_distribution& initial_distribution(const lps::stochastic_specification& lpsspec)
-{
-  return lpsspec.initial_process().distribution();
-}
-
-namespace detail
-{
-// The functions below are used to support the key type in caches. 
-//
-struct cheap_cache_key
-{
-  data::mutable_indexed_substitution<>& m_sigma;
-  const std::vector<data::variable>& m_gamma;
-
-  cheap_cache_key(data::mutable_indexed_substitution<>& sigma, const std::vector<data::variable>& gamma)
-    : m_sigma(sigma),
-      m_gamma(gamma)
-  {}
-  
-};
-
-struct cache_equality
-{
-  bool operator()(const atermpp::aterm& key1, const atermpp::aterm& key2) const
-  {
-    return key1==key2;
-  }
-
-  bool operator()(const atermpp::aterm& key1, const cheap_cache_key& key2) const
-  {
-    std::vector<data::variable>::const_iterator i=key2.m_gamma.begin();
-    for(const atermpp::aterm& d: key1)
-    {
-      if (d!=key2.m_sigma(*i))
-      {
-        return false;
-      }
-      ++i;
-    }
-    return true;
-  }
-};
-
-struct cache_hash
-{
-  std::size_t operator()(const std::pair<const atermpp::aterm, 
-                                         std::list<atermpp::term_list<mcrl2::data::data_expression>>>& pair) const
-  {
-    return operator()(pair.first);
-  }
-
-  std::size_t operator()(const atermpp::aterm& key) const
-  {
-    std::size_t hash=0;
-    for(const atermpp::aterm& d: key)
-    {
-      hash=atermpp::detail::combine(hash,d);
-    }
-    return hash;
-  }
-
-  std::size_t operator()(const cheap_cache_key& key) const
-  {
-    std::size_t hash=0;
-    for(const data::variable& v: key.m_gamma)
-    {
-      hash=atermpp::detail::combine(hash,key.m_sigma(v));
-    }
-    return hash;
-  }
-};
-
-} // end namespace detail
-
-using summand_cache_map = atermpp::utilities::unordered_map<atermpp::aterm,
-    atermpp::term_list<data::data_expression_list>,
-    detail::cache_hash,
-    detail::cache_equality,
-    std::allocator<std::pair<atermpp::aterm, atermpp::term_list<data::data_expression_list>>>,
-    true>;
-
-struct explorer_summand
-{
-  data::variable_list variables;
-  data::data_expression condition;
-  lps::multi_action multi_action;
-  stochastic_distribution distribution;
-  std::vector<data::data_expression> next_state;
-  std::size_t index;
-
-  // attributes for caching
-  caching cache_strategy;
-  std::vector<data::variable> gamma;
-  atermpp::function_symbol f_gamma;
-  mutable summand_cache_map local_cache;
-
-  template <typename ActionSummand>
-  explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
-    : variables(summand.summation_variables()),
-      condition(summand.condition()),
-      multi_action(summand.multi_action()),
-      distribution(summand_distribution(summand)),
-      next_state(make_data_expression_vector(summand.next_state(process_parameters))),
-      index(summand_index),
-      cache_strategy(cache_strategy_)
-  {
-    gamma = free_variables(summand.condition(), process_parameters);
-    if (cache_strategy_ == caching::global)
-    {
-      gamma.insert(gamma.begin(), data::variable());
-    }
-    f_gamma = atermpp::function_symbol("@gamma", gamma.size());
-  }
-
-  template <typename T>
-  std::vector<data::variable> free_variables(const T& x, const data::variable_list& v)
-  {
-    using utilities::detail::contains;
-    std::set<data::variable> FV = data::find_free_variables(x);
-    std::vector<data::variable> result;
-    for (const data::variable& vi: v)
-    {
-      if (contains(FV, vi))
-      {
-        result.push_back(vi);
-      }
-    }
-    return result;
-  }
-
-  void compute_key(atermpp::aterm& key,
-                   data::mutable_indexed_substitution<>& sigma) const
-  {
-    if (cache_strategy == caching::global)
-    {
-      bool is_first_element = true;
-      atermpp::make_term_appl(key, f_gamma, gamma.begin(), gamma.end(),
-                                        [&](data::data_expression& result, const data::variable& x)
-                                        {
-                                          if (is_first_element)
-                                          {
-                                            is_first_element = false;
-                                            result=condition;
-                                            return;
-                                          }
-                                          sigma.apply(x, result);
-                                          return;
-                                        }
-                             );
-    }
-    else
-    {
-      atermpp::make_term_appl(key, f_gamma, gamma.begin(), gamma.end(),
-                                        [&](data::data_expression& result, const data::variable& x)
-                                        {
-                                          sigma.apply(x, result);
-                                        }
-                              );
-    }
-  }
-};
-
-inline
-std::ostream& operator<<(std::ostream& out, const explorer_summand& summand)
-{
-  return out << lps::stochastic_action_summand(
-    summand.variables,
-    summand.condition,
-    summand.multi_action,
-    data::make_assignment_list(summand.variables, summand.next_state),
-    summand.distribution
-  );
-}
-
-struct abortable
-{
-  virtual ~abortable() = default;
-  virtual void abort() = 0;
-};
 
 template <bool Stochastic, bool Timed, typename Specification>
 class explorer: public abortable
@@ -1123,189 +699,7 @@ private:
       FinishState finish_state,
       data::rewriter thread_rewr,
       data::mutable_indexed_substitution<> thread_sigma  // This is intentionally a copy. 
-    )
-    {
-      thread_rewr.thread_initialise();
-      mCRL2log(log::debug) << "Start thread " << thread_index << ".\n";
-      data::enumerator_identifier_generator thread_id_generator("t_");;
-      data::data_specification thread_data_specification = m_global_lpsspec.data(); /// XXXX Nodig??
-      data::enumerator_algorithm<> thread_enumerator(thread_rewr, thread_data_specification, thread_rewr, thread_id_generator, false);
-      state current_state;
-      data::data_expression condition;   // The condition is used often, and it is effective not to declare it whenever it is used.
-      state_type state_;                 // The same holds for state.
-      std::vector<state> dummy;
-      std::unique_ptr<todo_set> thread_todo=make_todo_set(dummy.begin(),dummy.end()); // The new states for each process are temporarily stored in this vector for each thread. 
-      atermpp::aterm key;
-
-      if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-      {
-        m_exclusive_state_access.lock();
-      }
-      while (number_of_active_processes>0 || !todo->empty())
-      {
-        assert(m_must_abort || thread_todo->empty());
-          
-        if (!todo->empty())
-        {
-          todo->choose_element(current_state);
-          thread_todo->insert(current_state);
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-          {
-            m_exclusive_state_access.unlock();
-          }
-
-          while (!thread_todo->empty() && !m_must_abort.load(std::memory_order_relaxed))
-          { 
-            thread_todo->choose_element(current_state);
-            std::size_t s_index = discovered.index(current_state,thread_index);
-            start_state(thread_index, current_state, s_index);
-            data::add_assignments(thread_sigma, m_process_parameters, current_state);
-            for (const explorer_summand& summand: regular_summands)
-            {   
-              generate_transitions(
-                summand,
-                confluent_summands,
-                thread_sigma,
-                thread_rewr,
-                condition,
-                state_,
-                key,
-                thread_enumerator,
-                thread_id_generator,
-                [&](const lps::multi_action& a, const state_type& s1)
-                {   
-                  if constexpr (Timed)
-                  { 
-                    const data::data_expression& t = current_state[m_n];
-                    if (a.has_time() && less_equal(a.time(), t, thread_sigma, thread_rewr))
-                    {
-                      return;
-                    }
-                  } 
-                  if constexpr (Stochastic)
-                  { 
-                    std::list<std::size_t> s1_index;
-                    const auto& S1 = s1.states;
-                    // TODO: join duplicate targets
-                    for (const state& s1_: S1)
-                    { 
-                      std::size_t k = discovered.index(s1_,thread_index);
-                      if (k >= discovered.size())
-                      { 
-                        thread_todo->insert(s1_);
-                        k = discovered.insert(s1_, thread_index).first;
-                        discover_state(thread_index, s1_, k);
-                      }
-                      s1_index.push_back(k);
-                    }
-
-                    examine_transition(thread_index, m_options.number_of_threads, current_state, s_index, a, s1, s1_index, summand.index);
-                  } 
-                  else 
-                  { 
-                    std::size_t s1_index; 
-                    if constexpr (Timed)
-                    { 
-                      s1_index = discovered.index(s1,thread_index);
-                      if (s1_index >= discovered.size())
-                      {   
-                        const data::data_expression& t = current_state[m_n];
-                        const data::data_expression& t1 = a.has_time() ? a.time() : t;
-                        make_timed_state(state_, s1, t1);
-                        s1_index = discovered.insert(state_, thread_index).first;
-                        discover_state(thread_index, state_, s1_index);
-                        thread_todo->insert(state_);
-                      } 
-                    }
-                    else
-                    { 
-                      std::pair<std::size_t,bool> p = discovered.insert(s1, thread_index);
-                      s1_index=p.first;
-                      if (p.second)  // Index is newly added. 
-                      {
-                        discover_state(thread_index, s1, s1_index);
-                        thread_todo->insert(s1); 
-                      }
-                    }
-
-                    examine_transition(thread_index, m_options.number_of_threads, current_state, s_index, a, s1, s1_index, summand.index);
-                  }
-                }
-              );
-            }
-
-            if (number_of_idle_processes>0 && thread_todo->size()>1)
-            {
-              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-              {
-                m_exclusive_state_access.lock();
-              }
-
-              if (todo->size() < m_options.number_of_threads) 
-              {
-                // move 25% of the states of this thread to the global todo buffer.
-                for(std::size_t i=0; i<std::min(thread_todo->size()-1,1+(thread_todo->size()/4)); ++i)  
-                {
-                  thread_todo->choose_element(current_state);
-                  todo->insert(current_state);
-                }
-              }
-
-              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-              {
-                m_exclusive_state_access.unlock();
-              }
-            }
-
-            finish_state(thread_index, m_options.number_of_threads, current_state, s_index, thread_todo->size());
-            thread_todo->finish_state();
-          }
-        }
-        else
-        {
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-          {
-            m_exclusive_state_access.unlock();
-          }
-        }
-        // Check whether all processes are ready. If so the number_of_active_processes becomes 0. 
-        // Otherwise, this thread becomes active again, and tries to see whether the todo buffer is
-        // not empty, to take up more work. 
-        number_of_active_processes--;
-        number_of_idle_processes++;
-        if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-        {
-          m_exclusive_state_access.lock();
-        }
-
-        assert(thread_todo->empty() || m_must_abort);
-        if (todo->empty())
-        {
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-          {
-            m_exclusive_state_access.unlock();
-          }
-          std::this_thread::sleep_for(std::chrono::milliseconds(100));
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-          {
-            m_exclusive_state_access.lock();
-          }
-        }
-        if (number_of_active_processes>0 || !todo->empty())
-        {
-          number_of_active_processes++;
-        }
-        number_of_idle_processes--;
-      } 
-      mCRL2log(log::debug) << "Stop thread " << thread_index << ".\n";
-      if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-      {
-        m_exclusive_state_access.unlock();
-      }
-
-    }  // end generate_state_space_thread.
-
-
+    );
 
     // pre: s0 is in normal form
     template <
@@ -1329,87 +723,7 @@ private:
       FinishState finish_state = FinishState(),
       [[maybe_unused]]
       DiscoverInitialState discover_initial_state = DiscoverInitialState()
-    )
-    {
-      const std::size_t number_of_threads=m_options.number_of_threads;
-      assert(number_of_threads>0);
-      const std::size_t initialisation_thread_index= (number_of_threads==1?0:1);
-      m_recursive = recursive;
-      std::unique_ptr<todo_set> todo;
-      discovered.clear(initialisation_thread_index);
-
-      if constexpr (Stochastic)
-      {
-        state_type s0_ = make_state(s0);
-        const auto& S = s0_.states;
-        todo = make_todo_set(S.begin(), S.end());
-        discovered.clear(initialisation_thread_index);
-        std::list<std::size_t> s0_index;
-        for (const state& s: S)
-        {
-          // TODO: join duplicate targets
-          std::size_t s_index = discovered.index(s, initialisation_thread_index);
-          if (s_index >= discovered.size())
-          {
-            s_index = discovered.insert(s, initialisation_thread_index).first;
-            discover_state(initialisation_thread_index, s, s_index);
-          }
-          s0_index.push_back(s_index);
-        }
-        discover_initial_state(s0_, s0_index);
-      }
-      else
-      {
-        todo = make_todo_set(s0);
-        std::size_t s0_index = discovered.insert(s0, initialisation_thread_index).first;
-        discover_state(initialisation_thread_index, s0, s0_index);
-      }
-
-      std::atomic<std::size_t> number_of_active_processes=number_of_threads;
-      std::atomic<std::size_t> number_of_idle_processes=0;
-
-      if (number_of_threads>1)
-      {
-        std::vector<std::thread> threads;
-        threads.reserve(number_of_threads);
-        for(std::size_t i=1; i<=number_of_threads; ++i)  // Threads are numbered from 1 to number_of_threads. Thread number 0 is reserved as 
-                                                         // indicator for a sequential implementation. 
-        {
-          threads.emplace_back([&, i](){ 
-                                    generate_state_space_thread< StateType, SummandSequence,
-                                                         DiscoverState, ExamineTransition,
-                                                         StartState, FinishState,
-                                                         DiscoverInitialState >
-                                       (todo, 
-                                        i, number_of_active_processes, number_of_idle_processes,
-                                        regular_summands,confluent_summands,discovered, discover_state,
-                                        examine_transition, start_state, finish_state, 
-                                        m_global_rewr.clone(), m_global_sigma); } );  // It is essential that the rewriter is cloned as
-                                                                                      // one rewriter cannot be used in parallel.
-        }
-
-        for(std::size_t i=1; i<=number_of_threads; ++i)
-        {
-          threads[i-1].join();
-        }
-      }
-      else
-      {
-        // Single threaded variant. Do not start a separate thread. 
-        assert(number_of_threads==1);
-        const std::size_t single_thread_index=0;
-        generate_state_space_thread< StateType, SummandSequence,
-                                                DiscoverState, ExamineTransition,
-                                                StartState, FinishState,
-                                                DiscoverInitialState >
-                                  (todo,single_thread_index,number_of_active_processes, number_of_idle_processes,
-                                   regular_summands,confluent_summands,discovered, discover_state,
-                                   examine_transition, start_state, finish_state, 
-                                   m_global_rewr, m_global_sigma);  
-      }
-
-      m_must_abort = false;
-    }
+    );
 
     /// \brief Generates the state space, and reports all discovered states and transitions by means of callback
     /// functions.
@@ -1431,28 +745,7 @@ private:
       StartState start_state = StartState(),
       FinishState finish_state = FinishState(),
       DiscoverInitialState discover_initial_state = DiscoverInitialState()
-    )
-    {
-      state_type s0;
-      if constexpr (Stochastic)
-      {
-        compute_initial_stochastic_state(s0);
-      }
-      else
-      {
-        compute_state(s0,m_initial_state,m_global_sigma, m_global_rewr);
-        if (!m_confluent_summands.empty())
-        {
-          s0 = find_representative(s0, m_confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator);
-        }
-        if constexpr (Timed)
-        {
-          make_timed_state(s0, s0, data::sort_real::real_zero());
-        }
-      }
-      generate_state_space(recursive, s0, m_regular_summands, m_confluent_summands, m_discovered, discover_state, 
-                           examine_transition, start_state, finish_state, discover_initial_state);
-    }
+    );
 
     /// \brief Generates outgoing transitions for a given state.
     std::vector<std::pair<lps::multi_action, state_type>> generate_transitions(
@@ -1544,6 +837,7 @@ private:
       return result;
     }
 
+    // --- Recursive DFS (core) ---------------------------------------------
     // pre: s0 is in normal form
     // N.B. Does not support stochastic specifications!
     template <
@@ -1567,66 +861,9 @@ private:
       BackEdge back_edge = BackEdge(),
       ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
       FinishState finish_state = FinishState()
-    )
-    {
-      using utilities::detail::contains;
+    );
 
-      // invariants:
-      // - s not in discovered => color(s) = white
-      // - s in discovered && s in gray => color(s) = gray
-      // - s in discovered && s not in gray => color(s) = black
-
-      gray.insert(s0);
-      discovered.insert(s0);
-      discover_state(0, s0);
-
-      if (m_options.number_of_threads>1) 
-      {
-        throw mcrl2::runtime_error("Dfs exploration is not thread safe.");
-      }
-
-      for (const transition& tr: out_edges(s0, regular_summands, confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator))
-      {
-        if (m_must_abort)
-        {
-          break;
-        }
-
-        const auto&[a, s1] = tr;
-        const std::size_t number_of_threads = 1;
-        examine_transition(0, number_of_threads, s0, a, s1); // TODO MAKE THREAD SAFE
-
-        if (discovered.find(s1) == discovered.end())
-        {
-          tree_edge(s0, a, s1);
-          if constexpr (Timed)
-          {
-            const data::data_expression& t = s0[m_n];
-            const data::data_expression& t1 = a.has_time() ? a.time() : t;
-            state s1_at_t1;
-            make_timed_state(s1_at_t1, s1, t1);
-            discovered.insert(s1_at_t1);
-          }
-          else
-          {
-            discovered.insert(s1);
-          }
-          generate_state_space_dfs_recursive(s1, gray, discovered, regular_summands, confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
-        }
-        else if (contains(gray, s1))
-        {
-          back_edge(s0, a, s1);
-        }
-        else
-        {
-          forward_or_cross_edge(s0, a, s1);
-        }
-      }
-      gray.erase(s0);
-      
-      finish_state(0, s0); // TODO MAKE THREAD SAFE
-    }
-
+    // --- Recursive DFS (entry point) ---------------------------------------
     template <
       typename DiscoverState = utilities::skip,
       typename ExamineTransition = utilities::skip,
@@ -1643,26 +880,9 @@ private:
       BackEdge back_edge = BackEdge(),
       ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
       FinishState finish_state = FinishState()
-    )
-    {
-      m_recursive = recursive;
-      std::unordered_set<state> gray;
-      std::unordered_set<state> discovered;
+    );
 
-      state s0;
-      compute_state(s0, m_initial_state, m_global_sigma, m_global_rewr);
-      if (!m_confluent_summands.empty())
-      {
-        s0 = find_representative(s0, m_confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator);
-      }
-      if constexpr (Timed)
-      {
-        s0 = make_timed_state(s0, data::sort_real::real_zero());
-      }
-      generate_state_space_dfs_recursive(s0, gray, discovered, m_regular_summands, m_confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
-      m_recursive = false;
-    }
-
+    // --- Iterative DFS (core) ----------------------------------------------
     // pre: s0 is in normal form
     // N.B. Does not support stochastic specifications!
     template <
@@ -1685,76 +905,9 @@ private:
       BackEdge back_edge = BackEdge(),
       ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
       FinishState finish_state = FinishState()
-    )
-    {
-      using utilities::detail::contains;
+    );
 
-      // invariants:
-      // - s not in discovered => color(s) = white
-      // - s in discovered && s in todo => color(s) = gray
-      // - s in discovered && s not in todo => color(s) = black
-
-      std::vector<std::pair<state, std::list<transition>>> todo;
-
-      if (m_options.number_of_threads>0)
-      {
-        throw mcrl2::runtime_error("DFS exploration cannot be performed with multiple threads.");
-      }
-      todo.emplace_back(s0, out_edges(s0, regular_summands, confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator));
-      discovered.insert(s0);
-      discover_state(s0);
-
-      while (!todo.empty() && !m_must_abort)
-      {
-        const state* s = &todo.back().first;
-        std::list<transition>* E = &todo.back().second;
-        while (!E->empty())
-        {
-          transition e = E->front();
-          const auto& a = e.action;
-          const auto& s1 = e.state;
-          E->pop_front();
-          examine_transition(0, 1, *s, a, s1); // TODO: MAKE THREAD SAFE.
-
-          if (discovered.find(s1) == discovered.end())
-          {
-            tree_edge(*s, a, s1);
-            if constexpr (Timed)
-            {
-              const data::data_expression& t = (*s)[m_n];
-              const data::data_expression& t1 = a.has_time() ? a.time() : t;
-              state s1_at_t1;
-              make_timed_state(s1_at_t1, s1, t1);
-              discovered.insert(s1_at_t1);
-              discover_state(s1_at_t1);
-            }
-            else
-            {
-              discovered.insert(s1);
-              discover_state(s1);
-            }
-            todo.emplace_back(s1, out_edges(s1, regular_summands, confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator));
-            s = &todo.back().first;
-            E = &todo.back().second;
-          }
-          else
-          {
-            if (std::find_if(todo.begin(), todo.end(), [&](const std::pair<state, std::list<transition>>& p) { return s1 == p.first; }) != todo.end())
-            {
-              back_edge(*s, a, s1);
-            }
-            else
-            {
-              forward_or_cross_edge(*s, a, s1);
-            }
-          }
-        }
-        todo.pop_back();
-        finish_state(0, *s);  // TODO: Make thread safe
-      }
-      m_must_abort = false;
-    }
-
+    // --- Iterative DFS (entry point) ---------------------------------------
     template <
       typename DiscoverState = utilities::skip,
       typename ExamineTransition = utilities::skip,
@@ -1771,24 +924,7 @@ private:
       BackEdge back_edge = BackEdge(),
       ForwardOrCrossEdge forward_or_cross_edge = ForwardOrCrossEdge(),
       FinishState finish_state = FinishState()
-    )
-    {
-      m_recursive = recursive;
-      std::unordered_set<state> discovered;
-
-      state s0;
-      compute_state(s0,m_initial_state,m_global_sigma, m_global_rewr);
-      if (!m_confluent_summands.empty())
-      {
-        s0 = find_representative(s0, m_confluent_summands, m_global_sigma, m_global_rewr, m_global_enumerator, m_global_id_generator);
-      }
-      if constexpr (Timed)
-      {
-        s0 = make_timed_state(s0, data::sort_real::real_zero());
-      }
-      generate_state_space_dfs_iterative(s0, discovered, m_regular_summands, m_confluent_summands, discover_state, examine_transition, tree_edge, back_edge, forward_or_cross_edge, finish_state);
-      m_recursive = false;
-    }
+    );
 
     /// \brief Abort the state space generation
     void abort() override
@@ -1843,3 +979,7 @@ private:
 } // namespace mcrl2::lps
 
 #endif // MCRL2_LPS_EXPLORER_H
+
+// implementation
+#include "mcrl2/lps/explorer_bfs.h"
+#include "mcrl2/lps/explorer_dfs.h"
