@@ -75,9 +75,9 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
                   "Do not chain if the unfolded formula contains any quantifier.");
       desc.add_option("avoid-alternating",
                   "Do not chain if the unfolded formula contains a PVI with a different name than the current equation. So X(a) -> Y(b) is not allowed.");
-      desc.add_option("srf-factor", utilities::make_optional_argument("FACTOR", "1.2"),
+      desc.add_option("srf-factor", utilities::make_optional_argument("FACTOR", "1.0"),
                   "Set a factor of the maximum size the chained equation in SRF should be after chaining compared to the size of the original equation. "
-                  "0 means no limit. Default is 1.2.");
+                  "0 means no limit. Default is 1.0.");
     }
 
   public:
