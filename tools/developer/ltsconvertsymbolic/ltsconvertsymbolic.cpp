@@ -20,6 +20,7 @@
 #include "mcrl2/utilities/logger.h"
 
 #include "convert_concrete_lts.h"
+#include "mcrl2/utilities/parallel_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lts;
@@ -94,12 +95,11 @@ inline std::string description(const symbolic_lts_equivalence eq)
   }
 }
 
-class ltsconvert_tool : public input_output_tool
+class ltsconvert_tool : public parallel_tool<input_output_tool>
 {
-  using super = input_output_tool;
+  using super = parallel_tool<input_output_tool>;
 
   // Lace options
-  std::size_t lace_n_workers = 1;
   std::size_t lace_dqsize = static_cast<std::size_t>(1024 * 1024 * 4); // set large default
   std::size_t lace_stacksize = 0;            // use default
 
@@ -110,7 +110,7 @@ class ltsconvert_tool : public input_output_tool
 
 public:
   ltsconvert_tool()
-      : input_output_tool("ltsconvertsymbolic", "Maurice Laveaux", "applies various conversions to symbolic LTSs", "")
+      : parallel_tool<input_output_tool>("ltsconvertsymbolic", "Maurice Laveaux", "applies various conversions to symbolic LTSs", "")
   {}
 
   void add_options(utilities::interface_description& desc) override
@@ -123,9 +123,6 @@ public:
             .add_value(symbolic_lts_equivalence::bisim),
         "generate an equivalent LTS, preserving equivalence NAME:",
         'e');
-    desc.add_option("lace-workers",
-        utilities::make_optional_argument("NUM", "1"),
-        "set number of Lace workers (threads for parallelization), (0=autodetect, default 1)");
     desc.add_option("lace-dqsize",
         utilities::make_optional_argument("NUM", "4194304"),
         "set length of Lace task queue (default 1024*1024*4)");
@@ -144,10 +141,6 @@ public:
     {
       super::parse_options(parser);
 
-      if (parser.has_option("lace-workers"))
-      {
-        lace_n_workers = parser.option_argument_as<int>("lace-workers");
-      }
       if (parser.has_option("lace-dqsize"))
       {
         lace_dqsize = parser.option_argument_as<int>("lace-dqsize");
@@ -202,8 +195,8 @@ public:
     
     bool run() override
     {      
-      lace_init(lace_n_workers, lace_dqsize);
-      lace_startup(lace_stacksize, nullptr, nullptr);
+      lace_start(number_of_threads(), lace_dqsize);
+      lace_set_stacksize(lace_stacksize);
       sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
@@ -248,7 +241,7 @@ public:
       }
 
       sylvan::sylvan_quit();
-      lace_exit();
+      lace_stop();
       return true;
     }
 

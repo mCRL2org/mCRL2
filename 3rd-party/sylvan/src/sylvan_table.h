@@ -51,22 +51,22 @@ typedef void (*llmsset_destroy_cb)(uint64_t, uint64_t);
 
 typedef struct llmsset
 {
-    uint64_t          *table;       // table with hashes
-    uint8_t           *data;        // table with values
-    uint64_t          *bitmap1;     // ownership bitmap (per 512 buckets)
-    uint64_t          *bitmap2;     // bitmap for "contains data"
-    uint64_t          *bitmapc;     // bitmap for "use custom functions"
-    size_t            max_size;     // maximum size of the hash table (for resizing)
-    size_t            table_size;   // size of the hash table (number of slots) --> power of 2!
+    _Atomic(uint64_t)* table;        // table with hashes
+    uint8_t*           data;         // table with values
+    _Atomic(uint64_t)* bitmap1;      // ownership bitmap (per 512 buckets)
+    _Atomic(uint64_t)* bitmap2;      // bitmap for "contains data"
+    uint64_t*          bitmapc;      // bitmap for "use custom functions"
+    size_t             max_size;     // maximum size of the hash table (for resizing)
+    size_t             table_size;   // size of the hash table (number of slots) --> power of 2!
 #if LLMSSET_MASK
-    size_t            mask;         // size-1
+    size_t             mask;         // size-1
 #endif
-    size_t            f_size;
-    llmsset_hash_cb   hash_cb;      // custom hash function
-    llmsset_equals_cb equals_cb;    // custom equals function
-    llmsset_create_cb create_cb;    // custom create function
-    llmsset_destroy_cb destroy_cb;  // custom destroy function
-    int16_t           threshold;    // number of iterations for insertion until returning error
+    size_t             f_size;
+    llmsset_hash_cb    hash_cb;      // custom hash function
+    llmsset_equals_cb  equals_cb;    // custom equals function
+    llmsset_create_cb  create_cb;    // custom create function
+    llmsset_destroy_cb destroy_cb;   // custom destroy function
+    _Atomic(int16_t)   threshold;    // number of iterations for insertion until returning error
 } *llmsset_t;
 
 /**
@@ -149,13 +149,13 @@ uint64_t llmsset_lookupc(const llmsset_t dbs, const uint64_t a, const uint64_t b
  * 3) call llmsset_rehash 
  */
 VOID_TASK_DECL_1(llmsset_clear, llmsset_t);
-#define llmsset_clear(dbs) CALL(llmsset_clear, dbs)
+#define llmsset_clear(dbs) RUN(llmsset_clear, dbs)
 
 VOID_TASK_DECL_1(llmsset_clear_data, llmsset_t);
-#define llmsset_clear_data(dbs) CALL(llmsset_clear_data, dbs)
+#define llmsset_clear_data(dbs) RUN(llmsset_clear_data, dbs)
 
 VOID_TASK_DECL_1(llmsset_clear_hashes, llmsset_t);
-#define llmsset_clear_hashes(dbs) CALL(llmsset_clear_hashes, dbs)
+#define llmsset_clear_hashes(dbs) RUN(llmsset_clear_hashes, dbs)
 
 /**
  * Check if a certain data bucket is marked (in use).
@@ -174,7 +174,7 @@ int llmsset_mark(const llmsset_t dbs, uint64_t index);
  * Returns 0 if successful, or the number of buckets not rehashed if not.
  */
 TASK_DECL_1(int, llmsset_rehash, llmsset_t);
-#define llmsset_rehash(dbs) CALL(llmsset_rehash, dbs)
+#define llmsset_rehash(dbs) RUN(llmsset_rehash, dbs)
 
 /**
  * Rehash a single bucket.
@@ -186,14 +186,14 @@ int llmsset_rehash_bucket(const llmsset_t dbs, uint64_t d_idx);
  * Retrieve number of marked buckets.
  */
 TASK_DECL_1(size_t, llmsset_count_marked, llmsset_t);
-#define llmsset_count_marked(dbs) CALL(llmsset_count_marked, dbs)
+#define llmsset_count_marked(dbs) RUN(llmsset_count_marked, dbs)
 
 /**
  * During garbage collection, this method calls the destroy callback
  * for all 'custom' data that is not kept.
  */
 VOID_TASK_DECL_1(llmsset_destroy_unmarked, llmsset_t);
-#define llmsset_destroy_unmarked(dbs) CALL(llmsset_destroy_unmarked, dbs)
+#define llmsset_destroy_unmarked(dbs) RUN(llmsset_destroy_unmarked, dbs)
 
 /**
  * Set custom functions

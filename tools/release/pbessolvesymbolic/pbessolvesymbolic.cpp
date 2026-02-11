@@ -662,8 +662,8 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
 
     bool run() override
     {
-      lace_init( options.max_workers, lace_dqsize);
-      lace_startup(lace_stacksize, nullptr, nullptr);
+      lace_start(number_of_threads(), lace_dqsize);
+      lace_set_stacksize(lace_stacksize);
       sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
@@ -690,7 +690,7 @@ class pbessolvesymbolic_tool: public parallel_tool<rewriter_tool<input_output_to
       }
 
       sylvan::sylvan_quit();
-      lace_exit();
+      lace_stop();
       return true;
     }
 };
