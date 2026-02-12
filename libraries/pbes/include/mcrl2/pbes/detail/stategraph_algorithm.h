@@ -281,7 +281,7 @@ class stategraph_algorithm
               {
                 if ((is_undefined(Ye.source(), n) || is_undefined(Ye.target(), n)) && !is_mapped_to(Ye.copy(), n, n))
                 {
-                  mCRL2log(log::debug) << "parameter " << print_cfp(X, n) << " is not an LCFP due to " << Ye << "(source and target undefined, and no copy to self)" << std::endl;
+                  mCRL2log(log::debug) << "parameter " << print_cfp(X, n) << " is not an LCFP due to " << Ye << "(source or target undefined, and no copy to self)" << std::endl;
                   m_is_LCFP[X][n] = false;
                 }
               }
