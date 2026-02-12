@@ -15,6 +15,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESCHAIN_H
 #define MCRL2_PBES_TOOLS_PBESCHAIN_H
 
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/algorithms.h"
@@ -23,14 +24,13 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
-#include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
+#include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/utilities/logger.h"
-#include <cstddef>
 #include <chrono>
+#include <cstddef>
 #include <iostream>
-#include <future>
 
 namespace mcrl2::pbes_system
 {
@@ -43,23 +43,29 @@ struct pbeschain_options
   bool count_unique_pvi = false;
   bool fill_pvi = false;
   double timeout = 0.0; // timeout in seconds, 0 = no timeout
+  double pvi_pp_factor = 0.0; // factor of the maximum size the chained predicate formula should be after chaining
+                              // compared to the size of the original PVI.
+  bool quantifier_free = false;
+  bool avoid_alternating = false;
+  bool rewrite_only_substitution = false;
+  double srf_factor; // factor of the maximum size the chained equation in SRF should be after chaining compared
+                     // to the size of the original equation. Default is 1.0
 };
 
 // Substitutor to target specific path, replace our specific pvi with true/false
 template<template<class> class Builder>
 struct substitute_propositional_variables_for_true_false_builder
-    : public Builder<substitute_propositional_variables_for_true_false_builder<Builder>>
+  : public Builder<substitute_propositional_variables_for_true_false_builder<Builder>>
 {
   using super = Builder<substitute_propositional_variables_for_true_false_builder<Builder>>;
   using super::apply;
 
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
   propositional_variable_instantiation m_pvi;
   pbes_expression m_replacement;
 
-  explicit substitute_propositional_variables_for_true_false_builder(
-      simplify_quantifiers_data_rewriter<data::rewriter>& r)
-      : m_pbes_rewriter(r)
+  explicit substitute_propositional_variables_for_true_false_builder(simplify_data_rewriter<data::rewriter>& r)
+    : m_pbes_rewriter(r)
   {}
 
   void set_pvi(const propositional_variable_instantiation x) { m_pvi = x; }
@@ -85,10 +91,10 @@ struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
   using super = Builder<rewrite_if_builder<Builder>>;
   using super::apply;
 
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
 
-  explicit rewrite_if_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
-      : m_pbes_rewriter(r)
+  explicit rewrite_if_builder(simplify_data_rewriter<data::rewriter>& r)
+    : m_pbes_rewriter(r)
   {}
 
   data::data_expression simpl_data(const data::data_expression& x)
@@ -114,7 +120,7 @@ struct rewrite_if_builder : public Builder<rewrite_if_builder<Builder>>
   template<class T>
   void apply(T& result, const data::data_expression& x)
   {
-    result =  atermpp::down_cast<T>(simpl_data(x));
+    result = atermpp::down_cast<T>(simpl_data(x));
   }
 };
 
@@ -126,11 +132,11 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
 
   pbes_equation m_eq;
   core::identifier_string name;
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
   bool m_stable = false;
 
-  explicit substitute_propositional_variables_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r)
-      : m_pbes_rewriter(r)
+  explicit substitute_propositional_variables_builder(simplify_data_rewriter<data::rewriter>& r)
+    : m_pbes_rewriter(r)
   {}
 
   void set_stable(bool b) { m_stable = b; }
@@ -163,11 +169,11 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
       pbes_expression p = pbes_rewrite(m_eq.formula(), m_pbes_rewriter, sigma);
       std::set<propositional_variable_instantiation> set = find_propositional_variable_instantiations(p);
       if (std::all_of(set.begin(),
-              set.end(),
-              [this](const propositional_variable_instantiation& v) { return v.name() != m_eq.variable().name(); }))
+            set.end(),
+            [this](const propositional_variable_instantiation& v) { return v.name() != m_eq.variable().name(); }))
       {
         // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler.
-        mCRL2log(log::verbose) << "Replaced in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
+        mCRL2log(log::debug) << "Replaced in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
         result = p;
         m_stable = false;
         return;
@@ -182,19 +188,19 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
 
 template<template<class> class Builder>
 struct substitute_propositional_variables_i_builder
-    : public Builder<substitute_propositional_variables_i_builder<Builder>>
+  : public Builder<substitute_propositional_variables_i_builder<Builder>>
 {
   typedef Builder<substitute_propositional_variables_i_builder<Builder>> super;
   using super::apply;
 
-  simplify_quantifiers_data_rewriter<data::rewriter> m_pbes_rewriter;
+  simplify_data_rewriter<data::rewriter> m_pbes_rewriter;
   std::vector<detail::predicate_variable> predvars;
   int i = 0;
 
-  explicit substitute_propositional_variables_i_builder(simplify_quantifiers_data_rewriter<data::rewriter>& r,
-      std::vector<detail::predicate_variable> predvars)
-      : m_pbes_rewriter(r),
-        predvars(predvars)
+  explicit substitute_propositional_variables_i_builder(simplify_data_rewriter<data::rewriter>& r,
+    std::vector<detail::predicate_variable> predvars)
+    : m_pbes_rewriter(r),
+      predvars(predvars)
   {}
 
   template<class T>
@@ -216,131 +222,81 @@ std::vector<propositional_variable_instantiation> get_propositional_variable_ins
   return result;
 }
 
-inline std::set<propositional_variable_instantiation> filter_pvis(const propositional_variable_instantiation& needle,
-    const std::vector<propositional_variable_instantiation>& haystack)
-{
-  std::set<propositional_variable_instantiation> result;
-
-  std::copy_if(haystack.begin(),
-      haystack.end(),
-      std::inserter(result, result.end()),
-      [&](const propositional_variable_instantiation& v)
-      {
-        if (v.name() != needle.name())
-        {
-          return false;
-        }
-
-        const auto& v_params = as_vector(v.parameters());
-        const auto& needle_params = as_vector(needle.parameters());
-
-        if (v_params.size() != needle_params.size())
-        {
-          return false;
-        }
-
-        for (std::size_t i = 0; i < v_params.size(); ++i)
-        {
-          if (v_params[i] != needle_params[i])
-          // if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
-          {
-            return false;
-          }
-        }
-
-        return true;
-      });
-
-  return result;
-}
-
-inline bool pvi_in_set(const propositional_variable_instantiation needle,
-    const std::set<propositional_variable_instantiation> haystack)
-{
-  return std::any_of(haystack.begin(),
-      haystack.end(),
-      [&](const propositional_variable_instantiation& v)
-      {
-        if (v.name() != needle.name())
-        {
-          return false;
-        }
-
-        const auto& v_params = as_vector(v.parameters());
-        const auto& needle_params = as_vector(needle.parameters());
-
-        if (v_params.size() != needle_params.size())
-        {
-          return false;
-        }
-
-        for (size_t i = 0; i < v_params.size(); i++)
-        {
-          if (v_params[i] != needle_params[i])
-          // if (!(data::is_variable(needle_params[i]) || v_params[i] == needle_params[i]))
-          {
-            return false;
-          }
-        }
-        return true;
-      });
-}
-
 inline pbes_expression simplify_expr(pbes_expression& phi,
-    rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
-    simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter)
+  rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
+  simplify_data_rewriter<data::rewriter>& pbes_rewriter)
 {
   pbes_expression res = pbes_rewrite(phi, pbes_rewriter);
   if_substituter.apply(res, res);
   return res;
 }
 
+inline bool is_quantifier_free(pbes_expression& phi, pbeschain_options options)
+{
+  return !(options.quantifier_free) || (find_all_variables(phi).size() - find_free_variables(phi).size()) == 0;
+}
+
+inline bool
+is_not_too_big(pbeschain_options& options, propositional_variable_instantiation& cur_x, pbes_expression& phi)
+{
+  return !(options.pvi_pp_factor > 0.0) || ((double)pp(phi).size() <= options.pvi_pp_factor * (double)pp(cur_x).size());
+}
+
+inline bool
+is_avoiding_alternation(pbeschain_options& options, propositional_variable_instantiation& new_x, pbes_equation& eq)
+{
+  return !(options.avoid_alternating) || new_x.name() == eq.variable().name();
+}
+
+inline void log_number_pvi(std::size_t& initial_size, std::size_t& current_size)
+{
+  mCRL2log(log::status) << "New number of pvi: " << initial_size << " --> " << current_size << "" << std::endl;
+}
+
 inline void self_substitute(pbes_equation& equation,
-    substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
-    rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
-    simplify_quantifiers_data_rewriter<data::rewriter>& pbes_rewriter,
-    simplify_quantifiers_data_rewriter<data::rewriter>& pbes_default_rewriter,
-    pbeschain_options options)
+  std::size_t initial_size,
+  substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder>& pvi_substituter,
+  rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
+  simplify_data_rewriter<data::rewriter>& pbes_rewriter,
+  simplify_data_rewriter<data::rewriter>& pbes_default_rewriter,
+  pbeschain_options options)
 {
   bool stable = false;
-  auto start_time = std::chrono::high_resolution_clock::now();
-  
+  std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+
   if (options.timeout > 0.0)
   {
-    mCRL2log(log::verbose) << "Starting substitution for equation " << equation.variable().name() 
-                           << " with timeout " << options.timeout << "s" << std::endl;
+    mCRL2log(log::verbose) << "Starting substitution for equation " << equation.variable().name() << " with timeout "
+                           << options.timeout << "s" << std::endl;
   }
 
   std::set<propositional_variable_instantiation> stable_set = {}; // To record pvi that have reach a max depth
-  
-  data::set_identifier_generator id_generator;
-  std::set<core::identifier_string> ids = pbes_system::find_identifiers(equation.formula());
-  id_generator.add_identifiers(ids);
-  
+  std::size_t previous_size = initial_size;
+  std::size_t current_size = initial_size;
   while (!stable)
   {
     stable = true;
     std::vector<propositional_variable_instantiation> set
-        = get_propositional_variable_instantiations(equation.formula());
-    std::size_t previous_size = set.size();
+      = get_propositional_variable_instantiations(equation.formula());
 
     std::set<std::string> parameterNames = {};
-    for (auto a: equation.variable().parameters())
+    for (data::variable a: equation.variable().parameters())
     {
-        parameterNames.insert(a.name());
+      parameterNames.insert(a.name());
     }
     for (const propositional_variable_instantiation& x: set)
     {
       // Check timeout
       if (options.timeout > 0.0)
       {
-        auto current_time = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration<double>(current_time - start_time).count();
+        std::chrono::time_point current_time = std::chrono::high_resolution_clock::now();
+        double elapsed = std::chrono::duration<double>(current_time - start_time).count();
         if (elapsed >= options.timeout)
         {
           stable = true;
-          mCRL2log(log::verbose) << "Timeout reached (" << options.timeout << "s) for equation " 
-                                 << equation.variable().name() << " after " << elapsed << "s, stopping substitution" << std::endl;
+          mCRL2log(log::verbose) << "Timeout reached (" << options.timeout << "s) for equation "
+                                 << equation.variable().name() << " after " << elapsed << "s, stopping substitution"
+                                 << std::endl;
           break;
         }
       }
@@ -359,7 +315,7 @@ inline void self_substitute(pbes_equation& equation,
       pbes_expression result = x;
 
       mCRL2log(log::debug) << " -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n"
-                           << equation.formula() << "\n\nStart " << (cur_x) << "\n";
+                           << "\n\nStart " << (cur_x) << "\n";
       bool pvi_done = false;
       int depth = 0;
       while (!pvi_done)
@@ -375,51 +331,24 @@ inline void self_substitute(pbes_equation& equation,
           pars.pop_front();
           if (par.sort() != v.sort())
           {
-            // Parameters do not match with variables. Ignore this substitution.
-            result = x;
-            break;
+            throw mcrl2::runtime_error("PBES is not well-typed.");
           }
           sigma[v] = par;
         }
 
-        std::set<data::variable> all_free_vars = find_free_variables(cur_x);
-        std::set<std::string> free_vars = {};
-        for (const data::variable& v: all_free_vars)
-        {
-          if (!parameterNames.contains(v.name()))
-          {
-            free_vars.insert(v.name());
-          }
-        }
-
-        pbes_expression phi;
-        mCRL2log(log::debug) << "\n Contains free vars? " << (free_vars.size() > 0) << "\n";
-        if (free_vars.size() == 0)
-        {
-          phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
-        }
-        else
-        {
-          for (const std::string& v: free_vars)
-          {
-            id_generator.add_identifier(v);
-          }
-          phi = mcrl2::pbes_system::replace_variables_capture_avoiding(equation.formula(), sigma, id_generator);
-          phi = pbes_rewrite(phi, pbes_default_rewriter);
-        }
+        pbes_expression phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
         // (2) replace all reoccuring with true (nu) and false (mu)
-        auto gauss_set = filter_pvis(cur_x, phi_vector);
-        for (const auto& gauss_pvi: gauss_set)
+        auto it = find(phi_vector.begin(), phi_vector.end(), cur_x);
+        if (it != phi_vector.end())
         {
-          mCRL2log(log::debug) << "Need to replace this with true/false " << pp(gauss_pvi) << "\n";
+          mCRL2log(log::debug) << "Need to replace this with true/false " << pp(cur_x) << "\n";
           mCRL2log(log::debug) << phi << "\n";
           mCRL2log(log::debug) << equation.formula() << "\n";
 
-          // pbes_expression p_;
-          pvi_substituter.set_pvi(gauss_pvi);
+          pvi_substituter.set_pvi(cur_x);
           pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
           pvi_substituter.apply(phi, phi);
 
@@ -429,31 +358,31 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // Simplify
-
         phi = simplify_expr(phi, if_substituter, pbes_rewriter);
         phi_vector = get_propositional_variable_instantiations(phi);
-        int size = phi_vector.size();
+        std::size_t size = phi_vector.size();
         if (options.count_unique_pvi)
         {
           size = std::set(phi_vector.begin(), phi_vector.end()).size();
         }
 
         // (3) check if simpler
-        if (size == 1 && (*phi_vector.begin()).name() == equation.variable().name())
+        if (size == 1 && is_avoiding_alternation(options, *phi_vector.begin(), equation)
+            && is_not_too_big(options, cur_x, phi) && is_quantifier_free(phi, options))
         {
           propositional_variable_instantiation new_x = *phi_vector.begin();
 
           mCRL2log(log::debug) << "Trying loop " << new_x << " in path with \n";
-          for (const auto& itr: path)
+          for (const propositional_variable_instantiation& itr: path)
           {
             mCRL2log(log::debug) << itr << "\n";
           }
 
-          if (pvi_in_set(new_x, path))
+          if (path.contains(new_x))
           {
             // We have already seen this, so we are in a loop.
             mCRL2log(log::debug) << "Loop, seen " << new_x << " in path after " << cur_x << "    " << phi << "\n";
-            for (const auto& itr: path)
+            for (const propositional_variable_instantiation& itr: path)
             {
               mCRL2log(log::debug) << itr << "\n";
             }
@@ -476,11 +405,19 @@ inline void self_substitute(pbes_equation& equation,
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(phi);
             pvi_substituter.apply(equation.formula(), equation.formula());
-            cur_x = new_x;
-            path.insert(new_x);
+            if (new_x.name() == equation.variable().name())
+            {
+              cur_x = new_x;
+              path.insert(new_x);
+            }
+            else
+            {
+              stable = false;
+              pvi_done = true;
+            }
           }
         }
-        else if (size == 0)
+        else if (size == 0 && is_quantifier_free(phi, options))
         {
           pvi_substituter.set_pvi(cur_x);
           pvi_substituter.set_replacement(phi);
@@ -491,8 +428,8 @@ inline void self_substitute(pbes_equation& equation,
         }
         else
         {
-          mCRL2log(log::debug) << "Not simpler: " << cur_x << " \n-->\n " << phi << " and size " << phi_vector.size()
-                               << "\n";
+          mCRL2log(log::debug) << "Not simpler: " << cur_x << " \n--> size: " << phi_vector.size() << "\n " << phi
+                               << " and size " << phi_vector.size() << "\n";
           pvi_done = true;
           if (depth > 1)
           {
@@ -517,27 +454,31 @@ inline void self_substitute(pbes_equation& equation,
       }
 
       std::vector<propositional_variable_instantiation> set
-          = get_propositional_variable_instantiations(equation.formula());
+        = get_propositional_variable_instantiations(equation.formula());
 
-      std::size_t current_size = set.size();
-      mCRL2log(log::verbose) << "\rNew number of pvi: " << current_size << "";
+      current_size = set.size();
+      log_number_pvi(initial_size, current_size);
 
       // Simplify
       if (current_size == 0 || (previous_size >= current_size + 10))
       {
         previous_size = current_size;
-        equation.formula() = simplify_expr(equation.formula(),
-            if_substituter,
-            pbes_rewriter);
+        equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
       }
     }
   }
-  mCRL2log(log::verbose) << "\n" << equation.variable() << "\n is stable! \n\n\n";
+
+  log_number_pvi(initial_size, current_size);
+
+  if (current_size == 0)
+  {
+    equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
+  }
 }
 
 inline void substitute(pbes_equation& into,
-    const pbes_equation& by,
-    substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
+  const pbes_equation& by,
+  substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
 {
   substituter.set_equation(by);
   substituter.set_name(into.variable().name());
@@ -550,7 +491,7 @@ inline void substitute(pbes_equation& into,
 inline pbes fill_pvi(pbes& p, data::rewriter data_rewriter)
 {
   detail::stategraph_pbes stategraph(p, data_rewriter);
-  simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(data_rewriter);
+  simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_rewriter);
 
   // Preparation
   for (detail::stategraph_equation& equation: stategraph.equations())
@@ -567,8 +508,8 @@ inline pbes fill_pvi(pbes& p, data::rewriter data_rewriter)
   for (detail::stategraph_equation& eq: stategraph.equations())
   {
     substitute_propositional_variables_i_builder<pbes_system::pbes_expression_builder> substituter(
-        pbes_default_rewriter,
-        eq.predicate_variables());
+      pbes_default_rewriter,
+      eq.predicate_variables());
 
     pbes_expression new_formula;
     substituter.apply(new_formula, eq.formula());
@@ -589,42 +530,104 @@ struct pbeschain_pbes_backward_substituter
     data::rewriter data_rewriter(p.data(), options.rewrite_strategy);
     data::rewriter data_default_rewriter(p.data());
 #ifdef MCRL2_ENABLE_JITTYC
-    if (options.rewrite_strategy == data::rewriter::strategy::jitty_compiling || options.rewrite_strategy == data::rewriter::strategy::jitty_compiling_prover) {
-        data_default_rewriter = data_rewriter;
+    if (options.rewrite_strategy == data::rewriter::strategy::jitty_compiling
+        || options.rewrite_strategy == data::rewriter::strategy::jitty_compiling_prover)
+    {
+      data_default_rewriter = data_rewriter;
     }
 #endif // MCRL2_ENABLE_JITTYC
-    simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
-    simplify_quantifiers_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
-    simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
+    simplify_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
+    simplify_data_rewriter<data::rewriter> pbes_rewriter2(data_rewriter);
+    simplify_data_rewriter<data::rewriter> pbes_default_rewriter(data_default_rewriter);
     substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(pbes_default_rewriter);
     rewrite_if_builder<pbes_system::pbes_expression_builder> if_rewriter(pbes_default_rewriter);
     substitute_propositional_variables_for_true_false_builder<pbes_system::pbes_expression_builder> pvi_substituter(
-        pbes_rewriter);
+      pbes_rewriter);
 
     if (options.fill_pvi)
     {
       p = fill_pvi(p, data_rewriter);
     }
-    
-    if (options.max_depth <= 0){
-       return;
+
+    if (options.max_depth <= 0)
+    {
+      return;
     }
+
+    std::vector<std::size_t> initial_sizes = {};
+    for (pbes_equation& i: p.equations())
+    {
+      initial_sizes.push_back(get_propositional_variable_instantiations(i.formula()).size());
+    }
+
+    pbes original_pbes;
+    if (options.srf_factor > 0)
+    {
+      original_pbes = p;
+    }
+
     for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
     {
       mCRL2log(log::verbose) << "Investigating the equation for " << i->variable().name() << "\n";
-      self_substitute(*i,
-          pvi_substituter,
-          if_rewriter,
-          pbes_rewriter,
-          pbes_default_rewriter,
-          options);
-      
-      std::set<propositional_variable_instantiation> pvi_set
-          = find_propositional_variable_instantiations((*i).formula());
-      mCRL2log(log::verbose) << "How many are left? " << pvi_set.size() << "\n";
+      std::size_t original_i = (p.equations().rend() - i) - 1;
 
+      self_substitute(*i,
+        initial_sizes[original_i],
+        pvi_substituter,
+        if_rewriter,
+        options.rewrite_only_substitution ? pbes_default_rewriter : pbes_rewriter,
+        pbes_default_rewriter,
+        options);
+
+      std::set<propositional_variable_instantiation> pvi_set
+        = find_propositional_variable_instantiations((*i).formula());
+
+      // If the SRF form of some equation is too big, replace the formula of that equation with the original formula.
+      if (pvi_set.size() > 0 && options.srf_factor > 0)
+      {
+        // Use the same SRF form as pbessolvesymbolic
+        symbolic_reachability_options opts;
+        pbes_system::srf_pbes_with_ce result_presrf_pbes = preprocess(p, opts);
+        pbes result_srf_pbes = pre_srf2srfpbes(result_presrf_pbes).to_pbes();
+
+        pbes_system::srf_pbes_with_ce original_presrf_pbes = preprocess(original_pbes, opts);
+        pbes original_srf_pbes = pre_srf2srfpbes(original_presrf_pbes).to_pbes();
+
+        // Find our equation in both PBESs
+        pbes_equation original_eq = original_pbes.equations()[original_i];
+        core::identifier_string original_variable_name = original_eq.variable().name();
+
+        auto result_srf_eq = std::find_if(result_srf_pbes.equations().rbegin(),
+          result_srf_pbes.equations().rend(),
+          [&](const pbes_equation& eq) { return eq.variable().name() == original_variable_name; });
+        if (result_srf_eq == result_srf_pbes.equations().rend())
+          continue;
+
+        auto original_srf_eq = std::find_if(original_srf_pbes.equations().rbegin(),
+          original_srf_pbes.equations().rend(),
+          [&](const pbes_equation& eq) { return eq.variable().name() == original_variable_name; });
+        if (original_srf_eq == original_srf_pbes.equations().rend())
+          continue;
+
+        std::size_t original_size = pp(original_srf_eq->formula()).size();
+        std::size_t new_size = pp(result_srf_eq->formula()).size();
+        if (options.srf_factor * (double)original_size <= (double)new_size)
+        {
+          log_number_pvi(initial_sizes[original_i], initial_sizes[original_i]);
+          (*i).formula() = original_eq.formula();
+          pvi_set = find_propositional_variable_instantiations((*i).formula());
+        }
+      }
+
+      mCRL2log(log::verbose) << "How many unique PVI are left? " << pvi_set.size() << "\n";
+
+      // Substitute back
       if (pvi_set.size() == 0 && options.back_substitution)
       {
+        if (options.rewrite_only_substitution)
+        {
+          (*i).formula() = simplify_expr((*i).formula(), if_rewriter, pbes_rewriter);
+        }
         for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
         {
           substitute(*j, *i, substituter);
@@ -635,10 +638,10 @@ struct pbeschain_pbes_backward_substituter
 };
 
 inline void pbeschain(const std::string& input_filename,
-    const std::string& output_filename,
-    const utilities::file_format& input_format,
-    const utilities::file_format& output_format,
-    pbeschain_options options)
+  const std::string& output_filename,
+  const utilities::file_format& input_format,
+  const utilities::file_format& output_format,
+  pbeschain_options options)
 {
   pbes p;
   load_pbes(p, input_filename, input_format);

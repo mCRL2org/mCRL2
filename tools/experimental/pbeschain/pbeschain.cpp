@@ -41,6 +41,11 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
       m_options.count_unique_pvi = parser.has_option("count-unique-pvi");
       m_options.fill_pvi = parser.has_option("fill-pvi");
       m_options.timeout = parser.option_argument_as<double>("timeout");
+      m_options.pvi_pp_factor = parser.option_argument_as<double>("pvi-pp-factor");
+      m_options.quantifier_free = parser.has_option("quantifier-free");
+      m_options.avoid_alternating = parser.has_option("avoid-alternating");
+      m_options.rewrite_only_substitution = parser.has_option("rewrite-only-substitution");
+      m_options.srf_factor = parser.option_argument_as<double>("srf-factor");
     }
 
     void add_options(interface_description& desc) override
@@ -64,6 +69,18 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
       desc.add_option("timeout", utilities::make_optional_argument("SECONDS", "0.0"),
                   "Set a timeout in seconds for the substitution process per equation. "
                   "0 means no timeout.", 't');
+      desc.add_option("pvi-pp-factor", utilities::make_optional_argument("FACTOR", "0.0"),
+                  "Set a factor of the maximum size the chained predicate formula should be after chaining compared to the size of the original PVI. "
+                  "0 means no limit.");
+      desc.add_option("quantifier-free",
+                  "Do not chain if the unfolded formula contains any quantifier.");
+      desc.add_option("avoid-alternating",
+                  "Do not chain if the unfolded formula contains a PVI with a different name than the current equation. So X(a) -> Y(b) is not allowed.");
+      desc.add_option("rewrite-only-substitution",
+                  "Do not use rewriter for any intermediate rewriting, only when substituting right-hand sides.");
+      desc.add_option("srf-factor", utilities::make_optional_argument("FACTOR", "1.0"),
+                  "Set a factor of the maximum size the chained equation in SRF should be after chaining compared to the size of the original equation. "
+                  "0 means no limit. Default is 1.0.");
     }
 
   public:
