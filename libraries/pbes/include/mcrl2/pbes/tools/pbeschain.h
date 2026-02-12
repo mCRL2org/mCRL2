@@ -47,6 +47,7 @@ struct pbeschain_options
                               // compared to the size of the original PVI.
   bool quantifier_free = false;
   bool avoid_alternating = false;
+  bool rewrite_only_substitution = false;
   double srf_factor; // factor of the maximum size the chained equation in SRF should be after chaining compared
                      // to the size of the original equation. Default is 1.0
 };
@@ -574,7 +575,7 @@ struct pbeschain_pbes_backward_substituter
         initial_sizes[original_i],
         pvi_substituter,
         if_rewriter,
-        pbes_rewriter,
+        options.rewrite_only_substitution ? pbes_default_rewriter : pbes_rewriter,
         pbes_default_rewriter,
         options);
 
@@ -623,6 +624,10 @@ struct pbeschain_pbes_backward_substituter
       // Substitute back
       if (pvi_set.size() == 0 && options.back_substitution)
       {
+        if (options.rewrite_only_substitution)
+        {
+          (*i).formula() = simplify_expr((*i).formula(), if_rewriter, pbes_rewriter);
+        }
         for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
         {
           substitute(*j, *i, substituter);
