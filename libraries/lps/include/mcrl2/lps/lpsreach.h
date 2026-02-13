@@ -12,22 +12,22 @@
 #ifndef MCRL2_LPS_LPSREACH_H
 #define MCRL2_LPS_LPSREACH_H
 
+#include "mcrl2/symbolic/data_index.h"
+#include "mcrl2/utilities/logger.h"
 #ifdef MCRL2_ENABLE_SYLVAN
 
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
-#include "mcrl2/lps/io.h"
+#include "mcrl2/lps/detail/replace_global_variables.h"
+#include "mcrl2/lps/detail/lpsreach_stats.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/order_summand_variables.h"
 #include "mcrl2/lps/replace_constants_by_variables.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/symbolic_lts.h"
-#include "mcrl2/lps/detail/replace_global_variables.h"
 #include "mcrl2/symbolic/ordering.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
-#include "mcrl2/utilities/parse_numbers.h"
-#include "mcrl2/utilities/stack_array.h"
 #include "mcrl2/utilities/stopwatch.h"
 
 #include <sylvan_ldd.hpp>
@@ -56,11 +56,14 @@ class lpsreach_algorithm
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
     std::vector<std::size_t> m_variable_order;
     symbolic_lts m_lts;
-    
-    /// \brief Rewrites all arguments of the given action.
-    template<typename Rewriter, typename Substitution>
-    lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
+    detail::lpsreach_statistics_t m_stats;
+
+      /// \brief Rewrites all arguments of the given action.
+      template<typename Rewriter, typename Substitution>
+      lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
     {
+      m_stats.log_rewrite_action(a, rewr, sigma);
+
       const process::action_list& actions = a.actions();
       const data::data_expression& time = a.time();
       return
@@ -81,7 +84,10 @@ class lpsreach_algorithm
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)
     {
-      mCRL2log(log::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
+      m_stats.log_learn_successors(i, R, X);
+      mCRL2log(log::trace) << "learn successors of summand group " << i
+                           << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
+
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
@@ -178,6 +184,7 @@ class lpsreach_algorithm
     /// \brief Computes relprod(U, group).
     ldd relprod_impl(const ldd& U, const lps_summand_group& group, std::size_t i)
     {
+      m_stats.log_relprod(U, group, i);
       if (m_options.no_relprod)
       {
         ldd z = symbolic::alternative_relprod(U, group);
@@ -196,6 +203,7 @@ class lpsreach_algorithm
     /// \returns The tuple <visited, todo, deadlocks>
     std::tuple<ldd, ldd, ldd> step(const ldd& visited, const ldd& todo, bool learn_transitions = true, bool detect_deadlocks = false)
     {
+      m_stats.log_step(visited, todo, learn_transitions, detect_deadlocks);
       using namespace sylvan::ldds;
       auto& R = m_lts.summand_groups;
 
@@ -217,7 +225,10 @@ class lpsreach_algorithm
             mCRL2log(log::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
-          todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
+          ldd step_i = relprod_impl(m_options.chaining ? todo1 : todo, R[i], i);
+          m_stats.log_step_iter_nosat(todo1, step_i, i);
+          todo1 = union_(todo1, step_i);
+
 
           if (detect_deadlocks)
           {
@@ -245,7 +256,9 @@ class lpsreach_algorithm
           do
           {
             todo1_old = todo1;
-            todo1 = union_(todo1, relprod_impl(todo1, R[i], i));
+            ldd succ_i = relprod_impl(todo1, R[i], i);
+            m_stats.log_step_iter_sat(todo1, succ_i, i);
+            todo1 = union_(todo1, succ_i);
           }
           while (todo1 != todo1_old);
 
@@ -262,7 +275,9 @@ class lpsreach_algorithm
               todo1_old = todo1;
               for (std::size_t j = 0; j <= i; j++)
               {
-                todo1 = union_(todo1, relprod_impl(todo1, R[j], j));
+                ldd succ_j = relprod_impl(todo1, R[j], j);
+                m_stats.log_step_iter_sat_chaining(todo1, succ_j, i, j);
+                todo1 = union_(todo1, succ_j);
               }
             }
             while (todo1 != todo1_old);
@@ -319,7 +334,7 @@ class lpsreach_algorithm
       for (std::size_t i = 0; i < R.size(); i++)
       {
         mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(10) << print_size(R[i].L) << " transitions (learn time = "
-                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls 
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls
                                << " calls, cached " << print_size(R[i].Ldomain) << " values" << ")" << std::endl;
 
         total_time += R[i].learn_time;
@@ -346,6 +361,8 @@ class lpsreach_algorithm
           mCRL2log(log::debug) << m_lts.action_index.index(action) << ": " << action << std::endl;
       }
 
+      m_stats.output_json(std::cout, m_options.saturation, m_options.chaining);
+
       m_lts.states = visited;
       return visited;
     }
@@ -359,7 +376,7 @@ class lpsreach_algorithm
     {
       return m_group_patterns;
     }
-    
+
     std::vector<symbolic::data_expression_index>& data_index()
     {
       return m_lts.data_index;
