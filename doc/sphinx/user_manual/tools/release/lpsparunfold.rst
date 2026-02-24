@@ -49,7 +49,7 @@ Thus, the original parameter ``s_Sys`` is now effectively unfolded intro three p
 Options
 -------
 
-Selecting which parameter to unfold can be done with the `--sort` or `--index` options (exactly one should be given). Unfolding may be repeated with the `--num` option. For example, to unfold the first 4 elements of a list into process parameters, one may use ``lpsparunfold --sort=List(Nat) --num=4``. The LPS is rewritten using the rewrite rules after every unfolding step (similar to using the tool :ref:`tool-lpsrewr`).
+Selecting which parameter to unfold can be done with the `--sort` or `--index` options (exactly one should be given). Unfolding may be repeated with the `--repeat` option. For example, to unfold the first 4 elements of a list into process parameters, one may use ``lpsparunfold --sort=List(Nat) --repeat=4``. The LPS is rewritten using the rewrite rules after every unfolding step (similar to using the tool :ref:`tool-lpsrewr`).
 
 There are also a few advanced options. First, there is `--alt-case`, which nests the newly introduced mapping ``C_Sort`` (where ``Sort`` is the sort to unfold) at a higher level, potentially allowing more rewriting. For example, when unfolding ``l : List(Nat)``, the expression ``l != []`` becomes ``C_ListNat(stack_pp, false, true)`` instead of ``!(C_ListNat(stack_pp, [], stack_pp1 |> stack_pp2) == [])``. In some corner cases, this may create exponentially large expressions with the number of unfoldings.
 
