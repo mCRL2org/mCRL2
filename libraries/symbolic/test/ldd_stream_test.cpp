@@ -28,9 +28,12 @@ BOOST_AUTO_TEST_CASE(dummy_test)
 using sylvan::ldds::ldd;
 using namespace mcrl2::symbolic;
 
-BOOST_AUTO_TEST_CASE(random_test_ldd_stream)
-{
-  initialise_sylvan();
+
+TASK_DECL_0(bool, random_test_ldd_stream_task);
+#define random_test_ldd_stream_task(a) RUN(random_test_ldd_stream_task, a)
+
+TASK_IMPL_0(bool, random_test_ldd_stream_task)
+{ 
 
   for (std::size_t i = 0; i < 100; ++i)
   {
@@ -50,14 +53,24 @@ BOOST_AUTO_TEST_CASE(random_test_ldd_stream)
 
     BOOST_CHECK_EQUAL(input, result);
   }
-  
-  quit_sylvan();
+
+  return true;
 }
 
-BOOST_AUTO_TEST_CASE(random_test_ldd_stream_sequence)
+BOOST_AUTO_TEST_CASE(random_test_ldd_stream)
 {
   initialise_sylvan();
 
+  random_test_ldd_stream_task();
+
+  quit_sylvan();
+}
+
+TASK_DECL_0(bool, random_test_ldd_stream_sequence_task);
+#define random_test_ldd_stream_sequence_task(a) RUN(random_test_ldd_stream_sequence_task, a)
+
+TASK_IMPL_0(bool, random_test_ldd_stream_sequence_task)
+{ 
   for (std::size_t i = 0; i < 100; ++i)
   {
     std::vector<ldd> input = std::vector<ldd>(10);
@@ -89,14 +102,24 @@ BOOST_AUTO_TEST_CASE(random_test_ldd_stream_sequence)
       BOOST_CHECK_EQUAL(input[i], result[i]);
     }
   }
-  
-  quit_sylvan();
+
+  return true;
 }
 
-BOOST_AUTO_TEST_CASE(random_test_simple_cases)
+BOOST_AUTO_TEST_CASE(random_test_ldd_stream_sequence)
 {
   initialise_sylvan();
 
+  random_test_ldd_stream_sequence_task();
+
+  quit_sylvan();
+}
+
+TASK_DECL_0(bool, random_test_ldd_stream_simple_cases_task);
+#define random_test_ldd_stream_simple_cases_task(a) RUN(random_test_ldd_stream_simple_cases_task, a)
+
+TASK_IMPL_0(bool, random_test_ldd_stream_simple_cases_task)
+{ 
   std::stringstream stream;
   {
     binary_ldd_ostream output(stream);
@@ -116,6 +139,15 @@ BOOST_AUTO_TEST_CASE(random_test_simple_cases)
 
   BOOST_CHECK_EQUAL(result1, sylvan::ldds::false_());
   BOOST_CHECK_EQUAL(result2, sylvan::ldds::true_());
+
+  return true;
+}
+
+BOOST_AUTO_TEST_CASE(random_test_simple_cases)
+{
+  initialise_sylvan();
+
+  random_test_ldd_stream_simple_cases_task();
 
   quit_sylvan();
 }
