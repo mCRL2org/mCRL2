@@ -147,6 +147,10 @@ endif()
 if (MCRL2_ENABLE_SYLVAN)
   add_subdirectory(3rd-party/lace/)
   add_subdirectory(3rd-party/sylvan/)
+
+  # Enable position independent code for Sylvan to avoid linker errors.
+  set_target_properties(sylvan PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+  set_target_properties(lace PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 endif()
 
 if (MCRL2_ENABLE_BENCHMARKS)
