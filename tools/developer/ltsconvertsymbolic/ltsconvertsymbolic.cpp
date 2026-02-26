@@ -195,8 +195,8 @@ public:
     
     bool run() override
     {      
-      lace_start(number_of_threads(), lace_dqsize);
       lace_set_stacksize(lace_stacksize);
+      lace_start(number_of_threads(), lace_dqsize);
       sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
