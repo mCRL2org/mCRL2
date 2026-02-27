@@ -513,6 +513,7 @@ public:
       .lpsfile = lpsfile,
       .ltsfile = ltsfile,
       .timer = timer()};
+    pbessolvesymbolic_task(&args);
 
     sylvan::sylvan_quit();
     lace_stop();
