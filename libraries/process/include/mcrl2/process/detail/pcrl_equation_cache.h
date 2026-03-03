@@ -14,6 +14,7 @@
 
 #include "mcrl2/process/alphabet_efficient.h"
 #include "mcrl2/process/process_variable_strongly_connected_components.h" // find_process_identifiers
+#include "mcrl2/process/utility.h"
 
 namespace mcrl2::process::detail
 {

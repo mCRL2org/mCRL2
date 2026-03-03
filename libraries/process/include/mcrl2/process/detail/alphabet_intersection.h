@@ -42,7 +42,7 @@ struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
     Node& node = top();
     for (multi_action_name_set::iterator i = node.alphabet.begin(); i != node.alphabet.end(); )
     {
-      bool remove = !alphabet_operations::includes(A, *i);
+      bool remove = !process::includes(A, *i);
       if (remove)
       {
         node.alphabet.erase(i++);

@@ -738,7 +738,7 @@ process_expression push_allow(const process_expression& x,
                               std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache
                             )
 {
-  allow_set A(alphabet_operations::make_name_set(V));
+  allow_set A(process::make_name_set(V));
   detail::push_allow_cache W(id_generator, pcrl_equation_cache);
   detail::push_allow_node node = detail::push_allow(x, A, equations, W, true);
   return node.expression;
