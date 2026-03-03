@@ -29,6 +29,12 @@
 namespace sylvan {
 #endif
 
+// TODO move this to a configuration header or replace this in the future
+// with a standard malloc/realloc or other platform dependent code
+#ifndef SYLVAN_CACHE_LINE_SIZE
+#define SYLVAN_CACHE_LINE_SIZE 64
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -36,19 +42,19 @@ extern "C" {
 static inline void*
 alloc_aligned(size_t size)
 { 
-    // make sure size is a multiple of LINE_SIZE
-    size = (size + LINE_SIZE - 1) & (~(LINE_SIZE - 1));
+    // make sure size is a multiple of SYLVAN_CACHE_LINE_SIZE
+    size = (size + SYLVAN_CACHE_LINE_SIZE - 1) & (~(SYLVAN_CACHE_LINE_SIZE - 1));
     void* res;
 #if SYLVAN_USE_MMAP
     res = mmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (res == MAP_FAILED) return 0;
 #else
 #if defined(_MSC_VER) || defined(__MINGW64_VERSION_MAJOR)
-    res = _aligned_malloc(size, LINE_SIZE);
+    res = _aligned_malloc(size, SYLVAN_CACHE_LINE_SIZE);
 #elif defined(__MINGW32__)
-    res = __mingw_aligned_malloc(size, LINE_SIZE);
+    res = __mingw_aligned_malloc(size, SYLVAN_CACHE_LINE_SIZE);
 #else
-    res = aligned_alloc(LINE_SIZE, size);
+    res = aligned_alloc(SYLVAN_CACHE_LINE_SIZE, size);
 #endif
     if (res != 0) memset(res, 0, size);
 #endif
@@ -58,8 +64,8 @@ alloc_aligned(size_t size)
 static inline void
 free_aligned(void* ptr, size_t size)
 {
-    // make sure size is a multiple of LINE_SIZE
-    size = (size + LINE_SIZE - 1) & (~(LINE_SIZE - 1));
+    // make sure size is a multiple of SYLVAN_CACHE_LINE_SIZE
+    size = (size + SYLVAN_CACHE_LINE_SIZE - 1) & (~(SYLVAN_CACHE_LINE_SIZE - 1));
 #if SYLVAN_USE_MMAP
     munmap(ptr, size);
 #elif defined(_MSC_VER) || defined(__MINGW64_VERSION_MAJOR)
@@ -75,8 +81,8 @@ free_aligned(void* ptr, size_t size)
 static inline void
 clear_aligned(void* ptr, size_t size)
 {
-    // make sure size is a multiple of LINE_SIZE
-    size = (size + LINE_SIZE - 1) & (~(LINE_SIZE - 1));
+    // make sure size is a multiple of SYLVAN_CACHE_LINE_SIZE
+    size = (size + SYLVAN_CACHE_LINE_SIZE - 1) & (~(SYLVAN_CACHE_LINE_SIZE - 1));
 #if SYLVAN_USE_MMAP
     // this is a trick to use mmap to try and reassign fresh zero'ed pages to the region
     void* res = mmap(ptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0);

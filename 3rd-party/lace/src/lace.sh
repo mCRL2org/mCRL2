@@ -1,7 +1,7 @@
 #! /bin/bash
 
-# Minimum number of task parameters: 2
-if [ "$1" -le 1 ] ; then k=2; else k=$1; fi
+nparams=$1
+tasksize=$2
 
 # Copyright notice:
 echo "/* 
@@ -245,6 +245,16 @@ void lace_run_together(Task *task);
  */
 #define LACE_WORKER_ID    ( __lace_worker->worker )
 
+#if defined(__has_feature)
+    #if __has_feature(thread_sanitizer)
+        #define LACE_NO_SANITIZE_THREAD __attribute__((no_sanitize("thread")))
+    #else
+        #define LACE_NO_SANITIZE_THREAD
+    #endif
+#else
+    #define LACE_NO_SANITIZE_THREAD
+#endif
+
 /**
  * Initialize local variables __lace_worker and __lace_dq_head which are required for most Lace functionality.
  * This only works inside a Lace thread.
@@ -291,9 +301,11 @@ void lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head);
  * Now follows the implementation of Lace
  */
 
-/* Typical cacheline size of system architectures */
-#ifndef LINE_SIZE
-#define LINE_SIZE 64
+/* We add padding to some datastructures in order to avoid false sharing.
+   We just overapproximate the size of cache lines. On some modern machines,
+   cache lines are 128 bytes, so we pick that. */
+#ifndef PADDING_TARGET
+#define PADDING_TARGET 128
 #endif
 
 /* The size of a pointer, 8 bytes on a 64-bit architecture */
@@ -302,11 +314,12 @@ void lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head);
 #define PAD(x,b) ( ( (b) - ((x)%(b)) ) & ((b)-1) ) /* b must be power of 2 */
 #define ROUND(x,b) ( (x) + PAD( (x), (b) ) )
 
-/* The size is in bytes. Note that this is without the extra overhead from Lace.
-   The value must be greater than or equal to the maximum size of your tasks.
-   The task size is the maximum of the size of the result or of the sum of the parameter sizes. */
+/* The size is in bytes. That includes the common fields, so that leaves a little less space for the
+   task and parameters. Typically tasksize is 64 for lace.h and 128 for lace14.h. If the size of a
+   pointer is 32/64 bits (4/8 bytes) then this leaves 56/48 bytes for parameters of the task and the
+   return value. */
 #ifndef LACE_TASKSIZE
-#define LACE_TASKSIZE ('$k')*P_SZ
+#define LACE_TASKSIZE ('$tasksize')
 #endif
 
 /* Compiler specific branch prediction optimization */
@@ -397,7 +410,7 @@ typedef enum {
 #define THIEF_COMPLETED ((struct _Worker*)0x2)
 
 #define TASK_COMMON_FIELDS(type)                               \
-    void (*f)(struct _WorkerP *, struct _Task *, struct type *);  \
+    void (*f)(struct _WorkerP *, struct _Task *, struct _Task *);  \
     _Atomic(struct _Worker*) thief;
 
 struct __lace_common_fields_only { TASK_COMMON_FIELDS(_Task) };
@@ -407,12 +420,10 @@ static_assert((LACE_COMMON_FIELD_SIZE % P_SZ) == 0, "LACE_COMMON_FIELD_SIZE is n
 
 typedef struct _Task {
     TASK_COMMON_FIELDS(_Task)
-    char d[LACE_TASKSIZE];
-//    char d[LACE_TASKSIZE];
-//    char p2[PAD(ROUND(LACE_COMMON_FIELD_SIZE, P_SZ) + LACE_TASKSIZE, LINE_SIZE)];
+    char d[LACE_TASKSIZE-sizeof(void*)-sizeof(struct _Worker*)];
 } Task;
 
-static_assert((sizeof(Task) % LINE_SIZE) == 0, "Task size should be a multiple of LINE_SIZE");
+static_assert(sizeof(Task) == '$tasksize', "A Lace task should be '$tasksize' bytes.");
 
 /* hopefully packed? */
 typedef union {
@@ -436,7 +447,7 @@ typedef struct _Worker {
     TailSplit ts;
     uint8_t allstolen;
 
-    char pad1[PAD(P_SZ+sizeof(TailSplit)+1, LINE_SIZE)];
+    char pad1[PAD(P_SZ+sizeof(TailSplit)+1, PADDING_TARGET)];
 
     uint8_t movesplit;
 } Worker;
@@ -467,7 +478,7 @@ void lace_abort_stack_overflow(void) __attribute__((noreturn));
 typedef struct
 {
     _Atomic(Task*) t;
-    char pad[LINE_SIZE-sizeof(Task *)];
+    char pad[PADDING_TARGET-sizeof(Task *)];
 } lace_newframe_t;
 
 extern lace_newframe_t lace_newframe;
@@ -576,12 +587,13 @@ static void lace_time_event( WorkerP *w, int event )
 #define lace_time_event( w, e ) /* Empty */
 #endif
 
+LACE_NO_SANITIZE_THREAD
 static Worker* __attribute__((noinline))
 lace_steal(WorkerP *self, Task *__dq_head, Worker *victim)
 {
     if (victim != NULL && !victim->allstolen) {
         TailSplitNA ts;
-        ts.v = victim->ts.v;
+        ts.v = *(uint64_t*)&victim->ts.v;
         if (ts.ts.tail < ts.ts.split) {
             TailSplitNA ts_new;
             ts_new.v = ts.v;
@@ -712,7 +724,7 @@ void lace_drop(WorkerP *w, Task *__dq_head)
 # Create macros for each arity
 #
 
-for(( r = 0; r <= $k; r++ )) do
+for(( r = 0; r <= $nparams; r++ )) do
 
 # Extend various argument lists
 if ((r)); then
@@ -769,14 +781,14 @@ typedef struct _TD_##NAME {
   $UNION
 } TD_##NAME;
 
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), \"TD_\" #NAME \" is too large, set LACE_TASKSIZE to a higher value!\");
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), \"TD_\" #NAME \" is too large to fit in the Task struct!\");
 
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);
+void NAME##_WRAP(WorkerP *, Task *, Task *);
 $RTYPE NAME##_CALL(WorkerP *, Task * $FUN_ARGS);
 static inline $RTYPE NAME##_SYNC(WorkerP *, Task *);
 static $RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);
 
-static inline __attribute__((unused))
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head $FUN_ARGS)
 {
     PR_COUNTTASK(w);
@@ -816,7 +828,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head $FUN_ARGS)
     }
 }
 
-static inline __attribute__((unused))
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD
 $RTYPE NAME##_NEWFRAME($FUN_ARGS_NC)
 {
     Task _t;
@@ -828,7 +840,7 @@ $RTYPE NAME##_NEWFRAME($FUN_ARGS_NC)
     return $RETURN_RES;
 }
 
-static inline __attribute__((unused))
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD
 void NAME##_TOGETHER($FUN_ARGS_NC)
 {
     Task _t;
@@ -839,7 +851,7 @@ void NAME##_TOGETHER($FUN_ARGS_NC)
     lace_run_together(&_t);
 }
 
-static inline __attribute__((unused))
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD
 $RTYPE NAME##_RUN($FUN_ARGS_NC)
 {
     Task _t;
@@ -851,7 +863,7 @@ $RTYPE NAME##_RUN($FUN_ARGS_NC)
     return $RETURN_RES;
 }
 
-static inline __attribute__((unused))
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD
 $RTYPE NAME##_RUNEX($FUN_ARGS_NC)
 {
     Task _t;
@@ -863,7 +875,7 @@ $RTYPE NAME##_RUNEX($FUN_ARGS_NC)
     return $RETURN_RES;
 }
 
-static __attribute__((noinline))
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD
 $RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)
 {
     TD_##NAME *t;
@@ -895,7 +907,7 @@ $RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)
     ${SS_RETURN}NAME##_CALL(w, __dq_head $TASK_GET_FROM_t);
 }
 
-static inline __attribute__((unused))
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD
 $RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)
 {
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */
@@ -919,8 +931,10 @@ echo ""
 
 (\
 echo "$IMPL_MACRO
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))
+LACE_NO_SANITIZE_THREAD
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)
 {
+    TD_##NAME *t = (TD_##NAME*)task;
     $SAVE_RVAL NAME##_CALL(w, __dq_head $TASK_GET_FROM_t);
 }
 
@@ -928,6 +942,7 @@ static inline __attribute__((always_inline))
 $RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head $DECL_ARGS);
 
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */
+LACE_NO_SANITIZE_THREAD
 $RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head $FUN_ARGS)
 {
     ${SS_RETURN}NAME##_WORK(w, __dq_head $CALL_ARGS);

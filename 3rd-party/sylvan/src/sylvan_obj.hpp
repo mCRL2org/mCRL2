@@ -789,6 +789,7 @@ class MtbddMap
     MtbddMap(MTBDD from) : mtbdd(from) { mtbdd_protect(&mtbdd); }
     MtbddMap(Mtbdd &from) : mtbdd(from.mtbdd) { mtbdd_protect(&mtbdd); }
 public:
+    MtbddMap(const MtbddMap& from) : mtbdd(from.mtbdd) { mtbdd_protect(&mtbdd); }
     MtbddMap() : mtbdd(mtbdd_map_empty()) { mtbdd_protect(&mtbdd); }
     ~MtbddMap() { mtbdd_unprotect(&mtbdd); }
 
