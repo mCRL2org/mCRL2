@@ -13,7 +13,8 @@
 #define MCRL2_PROCESS_ALLOW_SET_H
 
 #include "mcrl2/process/alphabet_operations.h"
-#include "mcrl2/process/utility.h"
+#include "mcrl2/process/multi_action_name.h"
+#include "mcrl2/process/print.h"
 
 namespace mcrl2::process {
 
@@ -95,7 +96,7 @@ struct allow_set
   bool contains(const multi_action_name& alpha) const
   {
     multi_action_name beta = alphabet_operations::hide(I, alpha);
-    return beta.empty() || (A_includes_subsets ? alphabet_operations::includes(A, beta) : alphabet_operations::contains(A, beta));
+    return beta.empty() || (A_includes_subsets ? process::includes(A, beta) : process::contains(A, beta));
   }
 
   /// \brief Returns the intersection of the allow set with alphabet.
@@ -226,7 +227,7 @@ inline
 std::pair<multi_action_name_set, bool> bounded_merge(const multi_action_name_set& A1, const multi_action_name_set& A2, const allow_set& A)
 {
   std::pair<multi_action_name_set, bool> A1A2 = bounded_concat(A1, A2, A);
-  return { alphabet_operations::set_union(alphabet_operations::set_union(A1, A2), A1A2.first), A1A2.second };
+  return { process::set_union(process::set_union(A1, A2), A1A2.first), A1A2.second };
 }
 
 // Returns the intersection of left_merge(A1, A2) and A
@@ -274,7 +275,7 @@ allow_set allow(const action_name_multiset_list& V, const allow_set& x)
   {
     const core::identifier_string_list& names = v.names();
     multi_action_name beta(names.begin(), names.end());
-    bool add = x.A_includes_subsets ? alphabet_operations::includes(x.A, alphabet_operations::hide(x.I, beta)) : alphabet_operations::contains(x.A, alphabet_operations::hide(x.I, beta));
+    bool add = x.A_includes_subsets ? process::includes(x.A, alphabet_operations::hide(x.I, beta)) : process::contains(x.A, alphabet_operations::hide(x.I, beta));
     if (add)
     {
       A.insert(beta);
@@ -319,7 +320,7 @@ allow_set subsets(const allow_set& x)
   result.A_includes_subsets = true;
   if (result.A.size() <= 1000)
   {
-    result.A = alphabet_operations::remove_subsets(result.A);
+    result.A = process::remove_subsets(result.A);
   }
   else
   {

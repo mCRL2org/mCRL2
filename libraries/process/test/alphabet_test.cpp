@@ -99,8 +99,8 @@ BOOST_AUTO_TEST_CASE(test_includes)
 {
   multi_action_name alpha = detail::parse_simple_multi_action_name("abb");
   multi_action_name beta = detail::parse_simple_multi_action_name("aabb");
-  BOOST_CHECK(!alphabet_operations::includes(alpha, beta));
-  BOOST_CHECK(alphabet_operations::includes(beta, alpha));
+  BOOST_CHECK(!process::includes(alpha, beta));
+  BOOST_CHECK(process::includes(beta, alpha));
 }
 
 BOOST_AUTO_TEST_CASE(test_alphabet_reduce)
@@ -354,4 +354,3 @@ BOOST_AUTO_TEST_CASE(test_alphabet_new)
   process_specification procspec = parse_process_specification(text);
   alphabet_reduce(procspec);
 }
-

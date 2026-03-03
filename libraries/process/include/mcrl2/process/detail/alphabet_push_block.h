@@ -308,7 +308,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   template <class T>
   void apply(T& result, const process::allow& x)
   {
-    allow_set A(alphabet_operations::make_name_set(x.allow_set()));
+    allow_set A(process::make_name_set(x.allow_set()));
     core::identifier_string_list B1(B.begin(), B.end());
     allow_set A1(alphabet_operations::block(B1, A.A));
     detail::push_allow_cache W_allow(id_generator, W.pcrl_equation_cache);
