@@ -238,6 +238,16 @@ void lace_run_together(Task *task);
  */
 #define LACE_WORKER_ID    ( __lace_worker->worker )
 
+#if defined(__has_feature)
+    #if __has_feature(thread_sanitizer)
+        #define LACE_NO_SANITIZE_THREAD __attribute__((no_sanitize("thread")))
+    #else
+        #define LACE_NO_SANITIZE_THREAD
+    #endif
+#else
+    #define LACE_NO_SANITIZE_THREAD
+#endif
+
 /**
  * Initialize local variables __lace_worker and __lace_dq_head which are required for most Lace functionality.
  * This only works inside a Lace thread.
@@ -284,9 +294,11 @@ void lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head);
  * Now follows the implementation of Lace
  */
 
-/* Typical cacheline size of system architectures */
-#ifndef LINE_SIZE
-#define LINE_SIZE 64
+/* We add padding to some datastructures in order to avoid false sharing.
+   We just overapproximate the size of cache lines. On some modern machines,
+   cache lines are 128 bytes, so we pick that. */
+#ifndef PADDING_TARGET
+#define PADDING_TARGET 128
 #endif
 
 /* The size of a pointer, 8 bytes on a 64-bit architecture */
@@ -295,11 +307,12 @@ void lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head);
 #define PAD(x,b) ( ( (b) - ((x)%(b)) ) & ((b)-1) ) /* b must be power of 2 */
 #define ROUND(x,b) ( (x) + PAD( (x), (b) ) )
 
-/* The size is in bytes. Note that this is without the extra overhead from Lace.
-   The value must be greater than or equal to the maximum size of your tasks.
-   The task size is the maximum of the size of the result or of the sum of the parameter sizes. */
+/* The size is in bytes. That includes the common fields, so that leaves a little less space for the
+   task and parameters. Typically tasksize is 64 for lace.h and 128 for lace14.h. If the size of a
+   pointer is 32/64 bits (4/8 bytes) then this leaves 56/48 bytes for parameters of the task and the
+   return value. */
 #ifndef LACE_TASKSIZE
-#define LACE_TASKSIZE (14)*P_SZ
+#define LACE_TASKSIZE (128)
 #endif
 
 /* Compiler specific branch prediction optimization */
@@ -390,7 +403,7 @@ typedef enum {
 #define THIEF_COMPLETED ((struct _Worker*)0x2)
 
 #define TASK_COMMON_FIELDS(type)                               \
-    void (*f)(struct _WorkerP *, struct _Task *, struct type *);  \
+    void (*f)(struct _WorkerP *, struct _Task *, struct _Task *);  \
     _Atomic(struct _Worker*) thief;
 
 struct __lace_common_fields_only { TASK_COMMON_FIELDS(_Task) };
@@ -400,12 +413,10 @@ static_assert((LACE_COMMON_FIELD_SIZE % P_SZ) == 0, "LACE_COMMON_FIELD_SIZE is n
 
 typedef struct _Task {
     TASK_COMMON_FIELDS(_Task)
-    char d[LACE_TASKSIZE];
-//    char d[LACE_TASKSIZE];
-//    char p2[PAD(ROUND(LACE_COMMON_FIELD_SIZE, P_SZ) + LACE_TASKSIZE, LINE_SIZE)];
+    char d[LACE_TASKSIZE-sizeof(void*)-sizeof(struct _Worker*)];
 } Task;
 
-static_assert((sizeof(Task) % LINE_SIZE) == 0, "Task size should be a multiple of LINE_SIZE");
+static_assert(sizeof(Task) == 128, "A Lace task should be 128 bytes.");
 
 /* hopefully packed? */
 typedef union {
@@ -429,7 +440,7 @@ typedef struct _Worker {
     TailSplit ts;
     uint8_t allstolen;
 
-    char pad1[PAD(P_SZ+sizeof(TailSplit)+1, LINE_SIZE)];
+    char pad1[PAD(P_SZ+sizeof(TailSplit)+1, PADDING_TARGET)];
 
     uint8_t movesplit;
 } Worker;
@@ -460,7 +471,7 @@ void lace_abort_stack_overflow(void) __attribute__((noreturn));
 typedef struct
 {
     _Atomic(Task*) t;
-    char pad[LINE_SIZE-sizeof(Task *)];
+    char pad[PADDING_TARGET-sizeof(Task *)];
 } lace_newframe_t;
 
 extern lace_newframe_t lace_newframe;
@@ -569,12 +580,13 @@ static void lace_time_event( WorkerP *w, int event )
 #define lace_time_event( w, e ) /* Empty */
 #endif
 
+LACE_NO_SANITIZE_THREAD
 static Worker* __attribute__((noinline))
 lace_steal(WorkerP *self, Task *__dq_head, Worker *victim)
 {
     if (victim != NULL && !victim->allstolen) {
         TailSplitNA ts;
-        ts.v = victim->ts.v;
+        ts.v = *(uint64_t*)&victim->ts.v;
         if (ts.ts.tail < ts.ts.split) {
             TailSplitNA ts_new;
             ts_new.v = ts.v;
@@ -711,14 +723,14 @@ typedef struct _TD_##NAME {                                                     
   union {  RTYPE res; } d;                                                            \
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * );                                                \
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                       \
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -758,7 +770,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                 
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME()                                                               \
 {                                                                                     \
     Task _t;                                                                          \
@@ -770,7 +782,7 @@ RTYPE NAME##_NEWFRAME()                                                         
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER()                                                                \
 {                                                                                     \
     Task _t;                                                                          \
@@ -781,7 +793,7 @@ void NAME##_TOGETHER()                                                          
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN()                                                                    \
 {                                                                                     \
     Task _t;                                                                          \
@@ -793,7 +805,7 @@ RTYPE NAME##_RUN()                                                              
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX()                                                                  \
 {                                                                                     \
     Task _t;                                                                          \
@@ -805,7 +817,7 @@ RTYPE NAME##_RUNEX()                                                            
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -837,7 +849,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head );                                                \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -857,8 +869,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_0(RTYPE, NAME)                                                      \
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head );                                            \
 }                                                                                     \
                                                                                       \
@@ -866,6 +880,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head );                     \
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head )                                       \
 {                                                                                     \
     return NAME##_WORK(w, __dq_head );                                                \
@@ -883,14 +898,14 @@ typedef struct _TD_##NAME {                                                     
                                                                                       \
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * );                                                 \
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                       \
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -930,7 +945,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                 
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME()                                                                \
 {                                                                                     \
     Task _t;                                                                          \
@@ -942,7 +957,7 @@ void NAME##_NEWFRAME()                                                          
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER()                                                                \
 {                                                                                     \
     Task _t;                                                                          \
@@ -953,7 +968,7 @@ void NAME##_TOGETHER()                                                          
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN()                                                                     \
 {                                                                                     \
     Task _t;                                                                          \
@@ -965,7 +980,7 @@ void NAME##_RUN()                                                               
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX()                                                                   \
 {                                                                                     \
     Task _t;                                                                          \
@@ -977,7 +992,7 @@ void NAME##_RUNEX()                                                             
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -1009,7 +1024,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head );                                                       \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -1029,8 +1044,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_0(NAME)                                                        \
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head );                                                      \
 }                                                                                     \
                                                                                       \
@@ -1038,6 +1055,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head );                      \
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head )                                        \
 {                                                                                     \
     NAME##_WORK(w, __dq_head );                                                       \
@@ -1058,14 +1076,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; } args; RTYPE res; } d;                            \
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1);                                 \
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                        \
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -1105,7 +1123,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                  
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1)                                                  \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1117,7 +1135,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1)                                            
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1)                                                   \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1128,7 +1146,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1)                                             
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1)                                                       \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1140,7 +1158,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1)                                                 
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1)                                                     \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1152,7 +1170,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1)                                               
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -1184,7 +1202,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1);                               \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -1204,8 +1222,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_1(RTYPE, NAME, ATYPE_1, ARG_1)                                      \
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1);                           \
 }                                                                                     \
                                                                                       \
@@ -1213,6 +1233,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1);            \
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                        \
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1);                                         \
@@ -1230,14 +1251,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; } args; } d;                                       \
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1);                                  \
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                        \
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -1277,7 +1298,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                  
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1)                                                   \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1289,7 +1310,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1)                                             
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1)                                                   \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1300,7 +1321,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1)                                             
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1)                                                        \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1312,7 +1333,7 @@ void NAME##_RUN(ATYPE_1 arg_1)                                                  
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1)                                                      \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1324,7 +1345,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1)                                                
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -1356,7 +1377,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1);                                      \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -1376,8 +1397,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_1(NAME, ATYPE_1, ARG_1)                                        \
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1);                                     \
 }                                                                                     \
                                                                                       \
@@ -1385,6 +1408,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1);             \
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                         \
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1);                                                \
@@ -1405,14 +1429,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; } args; RTYPE res; } d;             \
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2);                  \
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)         \
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -1452,7 +1476,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)   
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2)                                   \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1464,7 +1488,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2)                             
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2)                                    \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1475,7 +1499,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2)                              
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2)                                        \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1487,7 +1511,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2)                                  
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2)                                      \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1499,7 +1523,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2)                                
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -1531,7 +1555,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2);              \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -1551,8 +1575,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_2(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2)                      \
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2);          \
 }                                                                                     \
                                                                                       \
@@ -1560,6 +1586,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2);   \
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)         \
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2);                                  \
@@ -1577,14 +1604,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; } args; } d;                        \
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2);                   \
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)         \
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -1624,7 +1651,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)   
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2)                                    \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1636,7 +1663,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2)                              
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2)                                    \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1647,7 +1674,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2)                              
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2)                                         \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1659,7 +1686,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2)                                   
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2)                                       \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1671,7 +1698,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2)                                 
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -1703,7 +1730,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2);                     \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -1723,8 +1750,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_2(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2)                        \
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2);                    \
 }                                                                                     \
                                                                                       \
@@ -1732,6 +1761,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2);    \
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)          \
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2);                                         \
@@ -1752,14 +1782,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3);   \
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -1799,7 +1829,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                    \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1811,7 +1841,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)              
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                     \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1822,7 +1852,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)               
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                         \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1834,7 +1864,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                   
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                       \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1846,7 +1876,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                 
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -1878,7 +1908,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -1898,8 +1928,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_3(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3)      \
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3);\
 }                                                                                     \
                                                                                       \
@@ -1907,6 +1939,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3);                           \
@@ -1924,14 +1957,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; } args; } d;         \
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3);    \
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -1971,7 +2004,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                     \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1983,7 +2016,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)               
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                     \
 {                                                                                     \
     Task _t;                                                                          \
@@ -1994,7 +2027,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)               
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                          \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2006,7 +2039,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                    
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                        \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2018,7 +2051,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)                  
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -2050,7 +2083,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3);    \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -2070,8 +2103,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_3(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3)        \
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3);   \
 }                                                                                     \
                                                                                       \
@@ -2079,6 +2114,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3);                                  \
@@ -2099,14 +2135,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -2146,7 +2182,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)     \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2158,7 +2194,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)      \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2169,7 +2205,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)          \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2181,7 +2217,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)    
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)        \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2193,7 +2229,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)  
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -2225,7 +2261,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -2245,8 +2281,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_4(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4);\
 }                                                                                     \
                                                                                       \
@@ -2254,6 +2292,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4);                    \
@@ -2271,14 +2310,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -2318,7 +2357,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)      \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2330,7 +2369,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)      \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2341,7 +2380,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)           \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2353,7 +2392,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)     
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)         \
 {                                                                                     \
     Task _t;                                                                          \
@@ -2365,7 +2404,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)   
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -2397,7 +2436,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -2417,8 +2456,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_4(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4);\
 }                                                                                     \
                                                                                       \
@@ -2426,6 +2467,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4);                           \
@@ -2446,14 +2488,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -2493,7 +2535,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2505,7 +2547,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2516,7 +2558,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2528,7 +2570,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2540,7 +2582,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -2572,7 +2614,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -2592,8 +2634,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_5(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5);\
 }                                                                                     \
                                                                                       \
@@ -2601,6 +2645,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5);             \
@@ -2618,14 +2663,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -2665,7 +2710,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2677,7 +2722,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2688,7 +2733,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2700,7 +2745,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2712,7 +2757,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -2744,7 +2789,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -2764,8 +2809,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_5(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5);\
 }                                                                                     \
                                                                                       \
@@ -2773,6 +2820,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5);                    \
@@ -2793,14 +2841,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -2840,7 +2888,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2852,7 +2900,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2863,7 +2911,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2875,7 +2923,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -2887,7 +2935,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -2919,7 +2967,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -2939,8 +2987,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_6(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6);\
 }                                                                                     \
                                                                                       \
@@ -2948,6 +2998,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6);      \
@@ -2965,14 +3016,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -3012,7 +3063,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3024,7 +3075,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3035,7 +3086,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3047,7 +3098,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3059,7 +3110,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -3091,7 +3142,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -3111,8 +3162,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_6(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6);\
 }                                                                                     \
                                                                                       \
@@ -3120,6 +3173,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6);             \
@@ -3140,14 +3194,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -3187,7 +3241,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3199,7 +3253,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3210,7 +3264,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3222,7 +3276,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3234,7 +3288,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -3266,7 +3320,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -3286,8 +3340,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_7(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7);\
 }                                                                                     \
                                                                                       \
@@ -3295,6 +3351,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7);\
@@ -3312,14 +3369,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -3359,7 +3416,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3371,7 +3428,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3382,7 +3439,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3394,7 +3451,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3406,7 +3463,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -3438,7 +3495,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -3458,8 +3515,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_7(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7);\
 }                                                                                     \
                                                                                       \
@@ -3467,6 +3526,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7);      \
@@ -3487,14 +3547,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -3534,7 +3594,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3546,7 +3606,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3557,7 +3617,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3569,7 +3629,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3581,7 +3641,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -3613,7 +3673,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -3633,8 +3693,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_8(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8);\
 }                                                                                     \
                                                                                       \
@@ -3642,6 +3704,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8);\
@@ -3659,14 +3722,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -3706,7 +3769,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3718,7 +3781,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3729,7 +3792,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3741,7 +3804,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3753,7 +3816,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -3785,7 +3848,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -3805,8 +3868,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_8(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8);\
 }                                                                                     \
                                                                                       \
@@ -3814,6 +3879,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8);\
@@ -3834,14 +3900,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -3881,7 +3947,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3893,7 +3959,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3904,7 +3970,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3916,7 +3982,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -3928,7 +3994,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -3960,7 +4026,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -3980,8 +4046,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_9(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9);\
 }                                                                                     \
                                                                                       \
@@ -3989,6 +4057,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9);\
@@ -4006,14 +4075,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -4053,7 +4122,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4065,7 +4134,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4076,7 +4145,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4088,7 +4157,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4100,7 +4169,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -4132,7 +4201,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -4152,8 +4221,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_9(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9);\
 }                                                                                     \
                                                                                       \
@@ -4161,6 +4232,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9);\
@@ -4181,14 +4253,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -4228,7 +4300,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4240,7 +4312,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4251,7 +4323,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4263,7 +4335,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4275,7 +4347,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -4307,7 +4379,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -4327,8 +4399,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_10(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10);\
 }                                                                                     \
                                                                                       \
@@ -4336,6 +4410,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10);\
@@ -4353,14 +4428,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -4400,7 +4475,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4412,7 +4487,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4423,7 +4498,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4435,7 +4510,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4447,7 +4522,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -4479,7 +4554,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -4499,8 +4574,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_10(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10);\
 }                                                                                     \
                                                                                       \
@@ -4508,6 +4585,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10);\
@@ -4528,14 +4606,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; ATYPE_11 arg_11; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -4575,7 +4653,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4587,7 +4665,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4598,7 +4676,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4610,7 +4688,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4622,7 +4700,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -4654,7 +4732,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -4674,8 +4752,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_11(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10, ATYPE_11, ARG_11)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11);\
 }                                                                                     \
                                                                                       \
@@ -4683,6 +4763,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10, ATYPE_11);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10, arg_11);\
@@ -4700,14 +4781,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; ATYPE_11 arg_11; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -4747,7 +4828,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4759,7 +4840,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4770,7 +4851,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4782,7 +4863,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4794,7 +4875,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -4826,7 +4907,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -4846,8 +4927,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_11(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10, ATYPE_11, ARG_11)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11);\
 }                                                                                     \
                                                                                       \
@@ -4855,6 +4938,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10, ATYPE_11);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10, arg_11);\
@@ -4875,14 +4959,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; ATYPE_11 arg_11; ATYPE_12 arg_12; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -4922,7 +5006,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4934,7 +5018,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4945,7 +5029,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4957,7 +5041,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -4969,7 +5053,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -5001,7 +5085,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -5021,8 +5105,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_12(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10, ATYPE_11, ARG_11, ATYPE_12, ARG_12)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12);\
 }                                                                                     \
                                                                                       \
@@ -5030,6 +5116,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10, ATYPE_11, ATYPE_12);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10, arg_11, arg_12);\
@@ -5047,14 +5134,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; ATYPE_11 arg_11; ATYPE_12 arg_12; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -5094,7 +5181,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5106,7 +5193,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5117,7 +5204,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5129,7 +5216,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5141,7 +5228,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -5173,7 +5260,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -5193,8 +5280,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_12(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10, ATYPE_11, ARG_11, ATYPE_12, ARG_12)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12);\
 }                                                                                     \
                                                                                       \
@@ -5202,6 +5291,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10, ATYPE_11, ATYPE_12);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10, arg_11, arg_12);\
@@ -5222,14 +5312,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; ATYPE_11 arg_11; ATYPE_12 arg_12; ATYPE_13 arg_13; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -5269,7 +5359,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5281,7 +5371,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5292,7 +5382,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5304,7 +5394,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5316,7 +5406,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -5348,7 +5438,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12, t->d.args.arg_13);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -5368,8 +5458,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_13(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10, ATYPE_11, ARG_11, ATYPE_12, ARG_12, ATYPE_13, ARG_13)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12, t->d.args.arg_13);\
 }                                                                                     \
                                                                                       \
@@ -5377,6 +5469,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10, ATYPE_11, ATYPE_12, ATYPE_13);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10, arg_11, arg_12, arg_13);\
@@ -5394,14 +5487,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; ATYPE_11 arg_11; ATYPE_12 arg_12; ATYPE_13 arg_13; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -5441,7 +5534,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5453,7 +5546,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5464,7 +5557,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5476,7 +5569,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5488,7 +5581,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -5520,7 +5613,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12, t->d.args.arg_13);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -5540,8 +5633,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_13(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10, ATYPE_11, ARG_11, ATYPE_12, ARG_12, ATYPE_13, ARG_13)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12, t->d.args.arg_13);\
 }                                                                                     \
                                                                                       \
@@ -5549,6 +5644,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10, ATYPE_11, ATYPE_12, ATYPE_13);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10, arg_11, arg_12, arg_13);\
@@ -5569,14 +5665,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; ATYPE_11 arg_11; ATYPE_12 arg_12; ATYPE_13 arg_13; ATYPE_14 arg_14; } args; RTYPE res; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 RTYPE NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14);\
 static inline RTYPE NAME##_SYNC(WorkerP *, Task *);                                   \
 static RTYPE NAME##_SYNC_SLOW(WorkerP *, Task *);                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -5616,7 +5712,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5628,7 +5724,7 @@ RTYPE NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5639,7 +5735,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5651,7 +5747,7 @@ RTYPE NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATY
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5663,7 +5759,7 @@ RTYPE NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, A
     return ((TD_##NAME *)t)->d.res;                                                   \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                   \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -5695,7 +5791,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
     return NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12, t->d.args.arg_13, t->d.args.arg_14);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                        \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -5715,8 +5811,10 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
                                                                                       \
 
 #define TASK_IMPL_14(RTYPE, NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10, ATYPE_11, ARG_11, ATYPE_12, ARG_12, ATYPE_13, ARG_13, ATYPE_14, ARG_14)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12, t->d.args.arg_13, t->d.args.arg_14);\
 }                                                                                     \
                                                                                       \
@@ -5724,6 +5822,7 @@ static inline __attribute__((always_inline))                                    
 RTYPE NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10, ATYPE_11, ATYPE_12, ATYPE_13, ATYPE_14);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 RTYPE NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     return NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10, arg_11, arg_12, arg_13, arg_14);\
@@ -5741,14 +5840,14 @@ typedef struct _TD_##NAME {                                                     
   union { struct {  ATYPE_1 arg_1; ATYPE_2 arg_2; ATYPE_3 arg_3; ATYPE_4 arg_4; ATYPE_5 arg_5; ATYPE_6 arg_6; ATYPE_7 arg_7; ATYPE_8 arg_8; ATYPE_9 arg_9; ATYPE_10 arg_10; ATYPE_11 arg_11; ATYPE_12 arg_12; ATYPE_13 arg_13; ATYPE_14 arg_14; } args; } d;\
 } TD_##NAME;                                                                          \
                                                                                       \
-static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large, set LACE_TASKSIZE to a higher value!");\
+static_assert(sizeof(TD_##NAME) <= sizeof(Task), "TD_" #NAME " is too large to fit in the Task struct!");\
                                                                                       \
-void NAME##_WRAP(WorkerP *, Task *, TD_##NAME *);                                     \
+void NAME##_WRAP(WorkerP *, Task *, Task *);                                          \
 void NAME##_CALL(WorkerP *, Task * , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14);\
 static inline void NAME##_SYNC(WorkerP *, Task *);                                    \
 static void NAME##_SYNC_SLOW(WorkerP *, Task *);                                      \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     PR_COUNTTASK(w);                                                                  \
@@ -5788,7 +5887,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     }                                                                                 \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5800,7 +5899,7 @@ void NAME##_NEWFRAME(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5811,7 +5910,7 @@ void NAME##_TOGETHER(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4,
     lace_run_together(&_t);                                                           \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5823,7 +5922,7 @@ void NAME##_RUN(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYP
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     Task _t;                                                                          \
@@ -5835,7 +5934,7 @@ void NAME##_RUNEX(ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, AT
     return ;                                                                          \
 }                                                                                     \
                                                                                       \
-static __attribute__((noinline))                                                      \
+static __attribute__((noinline)) LACE_NO_SANITIZE_THREAD                              \
 void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                                    \
 {                                                                                     \
     TD_##NAME *t;                                                                     \
@@ -5867,7 +5966,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
     NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12, t->d.args.arg_13, t->d.args.arg_14);\
 }                                                                                     \
                                                                                       \
-static inline __attribute__((unused))                                                 \
+static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
 void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                         \
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
@@ -5887,8 +5986,10 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
                                                                                       \
 
 #define VOID_TASK_IMPL_14(NAME, ATYPE_1, ARG_1, ATYPE_2, ARG_2, ATYPE_3, ARG_3, ATYPE_4, ARG_4, ATYPE_5, ARG_5, ATYPE_6, ARG_6, ATYPE_7, ARG_7, ATYPE_8, ARG_8, ATYPE_9, ARG_9, ATYPE_10, ARG_10, ATYPE_11, ARG_11, ATYPE_12, ARG_12, ATYPE_13, ARG_13, ATYPE_14, ARG_14)\
-void NAME##_WRAP(WorkerP *w, Task *__dq_head, TD_##NAME *t __attribute__((unused)))   \
+LACE_NO_SANITIZE_THREAD                                                               \
+void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
+    TD_##NAME *t = (TD_##NAME*)task;                                                  \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10, t->d.args.arg_11, t->d.args.arg_12, t->d.args.arg_13, t->d.args.arg_14);\
 }                                                                                     \
                                                                                       \
@@ -5896,6 +5997,7 @@ static inline __attribute__((always_inline))                                    
 void NAME##_WORK(WorkerP *__lace_worker, Task *__lace_dq_head , ATYPE_1, ATYPE_2, ATYPE_3, ATYPE_4, ATYPE_5, ATYPE_6, ATYPE_7, ATYPE_8, ATYPE_9, ATYPE_10, ATYPE_11, ATYPE_12, ATYPE_13, ATYPE_14);\
                                                                                       \
 /* NAME##_WORK is inlined in NAME##_CALL and the parameter __lace_in_task will disappear */\
+LACE_NO_SANITIZE_THREAD                                                               \
 void NAME##_CALL(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, ATYPE_3 arg_3, ATYPE_4 arg_4, ATYPE_5 arg_5, ATYPE_6 arg_6, ATYPE_7 arg_7, ATYPE_8 arg_8, ATYPE_9 arg_9, ATYPE_10 arg_10, ATYPE_11 arg_11, ATYPE_12 arg_12, ATYPE_13 arg_13, ATYPE_14 arg_14)\
 {                                                                                     \
     NAME##_WORK(w, __dq_head , arg_1, arg_2, arg_3, arg_4, arg_5, arg_6, arg_7, arg_8, arg_9, arg_10, arg_11, arg_12, arg_13, arg_14);\

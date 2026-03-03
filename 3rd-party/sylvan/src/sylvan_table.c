@@ -105,9 +105,9 @@ is_custom_bucket(const llmsset_t dbs, uint64_t index)
  * CL_MASK and CL_MASK_R are for the probe sequence calculation.
  * With 64 bytes per cacheline, there are 8 64-bit values per cacheline.
  */
-// The LINE_SIZE is defined in lace.h
-static const uint64_t CL_MASK     = ~(((LINE_SIZE) / 8) - 1);
-static const uint64_t CL_MASK_R   = ((LINE_SIZE) / 8) - 1;
+// The SYLVAN_CACHE_LINE_SIZE is defined in sylvan_align.h
+static const uint64_t CL_MASK     = ~(((SYLVAN_CACHE_LINE_SIZE) / 8) - 1);
+static const uint64_t CL_MASK_R   = ((SYLVAN_CACHE_LINE_SIZE) / 8) - 1;
 
 /* 40 bits for the index, 24 bits for the hash */
 #define MASK_INDEX ((uint64_t)0x000000ffffffffff)

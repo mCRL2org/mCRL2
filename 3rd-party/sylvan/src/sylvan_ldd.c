@@ -2624,7 +2624,7 @@ VOID_TASK_IMPL_0(lddmc_gc_mark_serialize)
     while ((s=lddmc_ser_iter_next(it))) {
         CALL(lddmc_gc_mark_rec, s->mdd);
     }
-    
+
     lddmc_ser_iter_free(it);
 }
 
