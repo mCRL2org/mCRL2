@@ -14,11 +14,12 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/lps/detail/configuration.h"
 #include "mcrl2/lps/linearise_allow_block.h"
 #include "mcrl2/lps/linearise_utility.h"
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/lps/sumelm.h"
-#include "mcrl2/lps/detail/configuration.h"
+#include "mcrl2/process/action_label.h"
 #include "mcrl2/process/process_expression.h"
 
 #include <optional>
@@ -41,7 +42,7 @@ inline std::vector<core::identifier_string> get_actions(const process::action_na
     const core::identifier_string_list& names = l.names();
     result.insert(result.end(), names.begin(), names.end());
   }
-  std::sort(result.begin(), result.end(), action_name_compare());
+  std::sort(result.begin(), result.end(), process::action_name_compare());
   const auto it = std::unique(result.begin(), result.end());
   result.erase(it, result.end());
 
@@ -146,7 +147,7 @@ protected:
   /// NB: resets temporary data before performing computations.
   bool match_multiaction(const process::action_list& multi_action)
   {
-    assert(std::is_sorted(multi_action.begin(), multi_action.end(), action_compare()));
+    assert(std::is_sorted(multi_action.begin(), multi_action.end(), process::action_compare()));
 
     reset_temporary_data();
 
@@ -198,7 +199,7 @@ protected:
     for (const process::communication_expression& l : communications)
     {
       const core::identifier_string_list& names = l.action_name().names();
-      assert(std::is_sorted(names.begin(), names.end(), action_name_compare()));
+      assert(std::is_sorted(names.begin(), names.end(), process::action_name_compare()));
       result.emplace_back(names.begin(), names.end());
     }
     return result;
@@ -246,7 +247,7 @@ public:
   /// if \exists_{(b,c) \in C} b = \mu(m), return c, otherwise return action_label()
   process::action_label can_communicate(const process::action_list& m)
   {
-    assert(std::is_sorted(m.begin(), m.end(), action_compare()));
+    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
 
     process::action_label result; // if no match found, return process::action_label()
 
@@ -279,8 +280,8 @@ public:
   /// a1|...|ak that are not in m are in n. I.e., there is a subbag o of n such that m+o can communicate.
   bool might_communicate(const process::action_list& m, const process::action_list& n)
   {
-    assert(std::is_sorted(m.begin(), m.end(), action_compare()));
-    assert(std::is_sorted(n.begin(), n.end(), action_compare()));
+    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
+    assert(std::is_sorted(n.begin(), n.end(), process::action_compare()));
 
     /* this function indicates whether the actions in m
        consisting of actions and data occur in C, such that
@@ -395,7 +396,7 @@ public:
   /// \param RewriteTerm The rewriter that should be used to simplify the conditions.
   tuple_list apply(const process::action_list& m)
   {
-    assert(std::is_sorted(m.begin(), m.end(), action_compare()));
+    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
     const process::action_list r;
     return makeMultiActionConditionList_aux(m, r);
   }
@@ -550,7 +551,7 @@ public:
             ++false_condition_summands;
           }
         }
-        
+
         if (new_summand.condition() != data::sort_bool::false_())
         {
           resulting_action_summands.push_back(new_summand);
@@ -653,7 +654,7 @@ protected:
       // the list of allowed actions.
       // We maintains sort order of the vector
       std::vector<core::identifier_string>::iterator it
-          = std::upper_bound(result.begin(), result.end(), termination_action.label().name(), action_name_compare());
+          = std::upper_bound(result.begin(), result.end(), termination_action.label().name(), process::action_name_compare());
       result.insert(it, termination_action.label().name());
     }
 
@@ -696,8 +697,8 @@ protected:
   /// and it is not part of a block expression
   bool maybe_allowed(const process::action_label& a) const
   {
-    assert(std::is_sorted(m_allowed_actions.begin(), m_allowed_actions.end(), action_name_compare()));
-    assert(std::is_sorted(m_blocked_actions.begin(), m_blocked_actions.end(), action_name_compare()));
+    assert(std::is_sorted(m_allowed_actions.begin(), m_allowed_actions.end(), process::action_name_compare()));
+    assert(std::is_sorted(m_blocked_actions.begin(), m_blocked_actions.end(), process::action_name_compare()));
     assert(!m_is_block || m_allowed_actions.empty());
     assert(!m_is_allow || m_blocked_actions.empty());
 
@@ -706,12 +707,12 @@ protected:
                && std::binary_search(m_allowed_actions.begin(),
                    m_allowed_actions.end(),
                    a.name(),
-                   action_name_compare()))
+                   process::action_name_compare()))
            || (m_is_block
                && !std::binary_search(m_blocked_actions.begin(),
                    m_blocked_actions.end(),
                    a.name(),
-                   action_name_compare()));
+                   process::action_name_compare()));
   }
 
   /// Calculate the communication operator applied to a multiaction.
@@ -726,8 +727,8 @@ protected:
   /// \param RewriteTerm Data rewriter for simplifying expressions.
   inline tuple_list makeMultiActionConditionList_aux(const process::action_list& m, const process::action_list& r)
   {
-    assert(std::is_sorted(m.begin(), m.end(), action_compare()));
-    assert(std::is_sorted(r.begin(), r.end(), action_compare()));
+    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
+    assert(std::is_sorted(r.begin(), r.end(), process::action_compare()));
 
     tuple_list S; // result
 
@@ -784,10 +785,10 @@ protected:
       const process::action_list& n,
       const process::action_list& r)
   {
-    assert(std::is_sorted(m.begin(), m.end(), action_compare()));
-    assert(std::is_sorted(w.begin(), w.end(), action_compare()));
-    assert(std::is_sorted(n.begin(), n.end(), action_compare()));
-    assert(std::is_sorted(r.begin(), r.end(), action_compare()));
+    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
+    assert(std::is_sorted(w.begin(), w.end(), process::action_compare()));
+    assert(std::is_sorted(n.begin(), n.end(), process::action_compare()));
+    assert(std::is_sorted(r.begin(), r.end(), process::action_compare()));
 
     tuple_list S;
 
@@ -870,7 +871,7 @@ protected:
 
   data::data_expression psi(process::action_list alpha)
   {
-    assert(std::is_sorted(alpha.begin(), alpha.end(), action_compare()));
+    assert(std::is_sorted(alpha.begin(), alpha.end(), process::action_compare()));
     data::data_expression cond = data::sort_bool::false_();
 
     process::action_list actl; // used in inner loop.

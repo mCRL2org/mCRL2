@@ -293,27 +293,38 @@ std::pair<multi_action_name, multi_action_name> apply_comm_inverse(const communi
   return result;
 }
 
-// Add inverse communication to A
+/// Apply the inverse of communication rule gamma = lhs -> c to alpha, and add the result to out.
+template <typename OutputIt>
+void apply_comm_inverse(const communication_expression& gamma, const multi_action_name& alpha, OutputIt out)
+{
+  const core::identifier_string& c = gamma.name();
+  const core::identifier_string_list& lhs = gamma.action_name().names();
+  assert(std::is_sorted(lhs.begin(), lhs.end(), process::action_name_compare()));
+
+  const std::size_t n = alpha.count(c);
+  if (n > 0)
+  {
+    multi_action_name beta = alpha;
+    for (std::size_t k = 0; k < n; k++)
+    {
+      beta.erase(beta.find(c));
+      beta.insert(lhs.begin(), lhs.end());
+      *out++ = beta;
+    }
+  }
+}
+
+/// Apply the inverse of communication rule gamma = lhs -> c to each alpha in A, and add the result to A.
 inline
 void apply_comm_inverse(const communication_expression& gamma, multi_action_name_set& A)
 {
+  mCRL2log(log::trace) << "Calculating apply_comm_inverse with gamma = " << gamma << " and A.size() = " << A.size() << "\n";
   std::vector<multi_action_name> to_be_added;
-  const core::identifier_string& c = gamma.name();
-  core::identifier_string_list lhs = gamma.action_name().names();
+  std::back_insert_iterator<std::vector<multi_action_name>> out = std::back_inserter(to_be_added);
 
   for (const multi_action_name& alpha: A)
   {
-    std::size_t n = alpha.count(c);
-    if (n > 0)
-    {
-      multi_action_name beta = alpha;
-      for (std::size_t k = 0; k < n; k++)
-      {
-        beta.erase(beta.find(c));
-        beta.insert(lhs.begin(), lhs.end());
-        to_be_added.push_back(beta);
-      }
-    }
+    apply_comm_inverse(gamma, alpha, out);
   }
   A.insert(to_be_added.begin(), to_be_added.end());
 }

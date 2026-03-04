@@ -115,35 +115,16 @@ inline bool contains(const multi_action_name_set& A, const multi_action_name& a)
   return a.empty() || A.find(a) != A.end();
 }
 
+inline bool subset_includes(const multi_action_name_set& A, const multi_action_name& x)
+{
+  return std::any_of(A.begin(), A.end(), [&x](const multi_action_name& a){ return includes(a, x); });
+}
+
 inline
   // Returns true if A contains an x such that includes(x, y)
   bool includes(const multi_action_name_set& A, const multi_action_name& y)
 {
-  // degenerate case
-  if (A.empty() && y.empty())
-  {
-    return true;
-  }
-  for (const multi_action_name& alpha: A)
-  {
-    if (includes(alpha, y))
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
-inline bool subset_includes(const multi_action_name_set& A, const multi_action_name& x)
-{
-  for (const multi_action_name& a: A)
-  {
-    if (includes(a, x))
-    {
-      return true;
-    }
-  }
-  return false;
+  return (A.empty() && y.empty()) || subset_includes(A, y);
 }
 
 inline multi_action_name_set set_difference(const multi_action_name_set& A1, const multi_action_name_set& A2)
