@@ -78,49 +78,6 @@ lps_statistics_t get_statistics(const stochastic_action_summand_vector& action_s
   return statistics;
 }
 
-struct action_name_compare
-{
-  bool operator()(const core::identifier_string& s1, const core::identifier_string& s2) const
-  {
-    return std::string(s1) < std::string(s2);
-  }
-};
-
-/// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
-/// consistent.
-struct action_label_compare
-{
-
-  bool operator()(const process::action_label& a1, const process::action_label& a2) const
-  {
-    /* first compare the strings in the actions */
-    const core::identifier_string& a1_name = a1.name();
-    const core::identifier_string& a2_name = a2.name();
-
-    return action_name_compare()(a1_name, a2_name) ||
-                       (a1_name == a2_name && a1.sorts() < a2.sorts());
-  }
-};
-
-
-/// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
-/// consistent.
-///
-/// \returns true iff the label of a1 is less than the label of a2.
-/// The arguments are ignored in this comparison.
-/// The sort order is used for efficient application of process operators such as allow and comm
-/// which are defined in terms of  action names.
-struct action_compare
-{
-  bool operator()(const process::action& a1, const process::action& a2) const
-  {
-    const process::action_label& a1_label = a1.label();
-    const process::action_label& a2_label = a2.label();
-
-    return action_label_compare()(a1_label, a2_label);
-  }
-};
-
 /// Insert action into an action_list, keeping the action list sorted w.r.t. action_compare.
 /// Complexity: O(n) for an action_list of length n.
 inline
@@ -134,7 +91,7 @@ process::action_list insert(
   }
   const process::action& head = l.front();
 
-  if (action_compare()(act, head))
+  if (process::action_compare()(act, head))
   {
     l.push_front(act);
     return l;
@@ -157,7 +114,7 @@ core::identifier_string_list insert(
   }
   const core::identifier_string& head = l.front();
 
-  if (action_name_compare()(s, head))
+  if (process::action_name_compare()(s, head))
   {
     l.push_front(s);
     return l;
@@ -171,7 +128,7 @@ core::identifier_string_list insert(
 inline
 process::action_name_multiset sort_action_names(const process::action_name_multiset& action_labels,
   const std::function<bool(const core::identifier_string&, const core::identifier_string&)>& cmp
-                                    = [](const core::identifier_string& t1, const core::identifier_string& t2){ return action_name_compare()(t1, t2);})
+                                    = [](const core::identifier_string& t1, const core::identifier_string& t2){ return process::action_name_compare()(t1, t2);})
 {
   return process::action_name_multiset(atermpp::sort_list(action_labels.names(), cmp));
 }
@@ -185,7 +142,7 @@ process::action_name_multiset_list sort_multi_action_labels(const process::actio
 inline
 process::action_list sort_actions(const process::action_list& actions,
   const std::function<bool(const process::action&, const process::action&)>& cmp
-                                    = [](const process::action& t1, const process::action& t2){ return action_compare()(t1, t2);})
+                                    = [](const process::action& t1, const process::action& t2){ return process::action_compare()(t1, t2);})
 {
   return process::action_list(atermpp::sort_list(actions, cmp));
 }

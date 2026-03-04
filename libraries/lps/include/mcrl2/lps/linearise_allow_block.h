@@ -77,8 +77,8 @@ inline bool allow_(const process::action_name_multiset& allow_action,
      dealt with separately. */
   assert(!multi_action.empty());
   assert(multi_action != process::action_list({termination_action}));
-  assert(std::is_sorted(allow_action.names().begin(), allow_action.names().end(), action_name_compare()));
-  assert(std::is_sorted(multi_action.begin(), multi_action.end(), action_compare()));
+  assert(std::is_sorted(allow_action.names().begin(), allow_action.names().end(), process::action_name_compare()));
+  assert(std::is_sorted(multi_action.begin(), multi_action.end(), process::action_compare()));
 
   const core::identifier_string_list& names = allow_action.names();
   if (names.size() != multi_action.size())
@@ -137,10 +137,10 @@ inline bool allow_(const process::action_name_multiset_list& allow_list,
 inline bool encap(const process::action_name_multiset_list& encaplist, const process::action_list& multiaction)
 {
   assert(encaplist.size() == 1);
-  assert(std::is_sorted(multiaction.begin(), multiaction.end(), action_compare()));
+  assert(std::is_sorted(multiaction.begin(), multiaction.end(), process::action_compare()));
 
   const core::identifier_string_list& blocked_actions = encaplist.front().names();
-  assert(std::is_sorted(blocked_actions.begin(), blocked_actions.end(), action_name_compare()));
+  assert(std::is_sorted(blocked_actions.begin(), blocked_actions.end(), process::action_name_compare()));
 
   core::identifier_string_list::const_iterator blocked_actions_it = blocked_actions.begin();
   process::action_list::const_iterator multiaction_it = multiaction.begin();
@@ -152,7 +152,7 @@ inline bool encap(const process::action_name_multiset_list& encaplist, const pro
       return true;
     }
 
-    if (action_name_compare()(*blocked_actions_it, multiaction_it->label().name()))
+    if (process::action_name_compare()(*blocked_actions_it, multiaction_it->label().name()))
     {
       ++blocked_actions_it;
     }
@@ -160,7 +160,7 @@ inline bool encap(const process::action_name_multiset_list& encaplist, const pro
     {
       // The following assertion should hold because blocked_actions_it is not less than or equal to the name
       // of multiaction_it
-      assert(action_name_compare()(multiaction_it->label().name(), *blocked_actions_it));
+      assert(process::action_name_compare()(multiaction_it->label().name(), *blocked_actions_it));
       ++multiaction_it;
     }
   }
@@ -281,7 +281,7 @@ inline void allowblockcomposition(
         deadlock_summand(data::variable_list(), data::sort_bool::true_(), deadlock()),
         ignore_time);
   }
-  
+
   if (mCRL2logEnabled(mcrl2::log::verbose) && (sourcesumlist_length > 2 || is_allow))
   {
     mCRL2log(mcrl2::log::verbose) << ", resulting in " << action_summands.size() << " action summands and "

@@ -63,7 +63,7 @@ class action_label: public atermpp::aterm
 };
 
 /// \\brief Make_action_label constructs a new term into a given address.
-/// \\ \param t The reference into which the new action_label is constructed. 
+/// \\ \param t The reference into which the new action_label is constructed.
 template <class... ARGUMENTS>
 inline void make_action_label(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -110,6 +110,31 @@ std::string pp(const action_label_list& x, bool precedence_aware = true);
 std::string pp(const action_label_vector& x, bool precedence_aware = true);
 action_label_list normalize_sorts(const action_label_list& x, const data::sort_specification& sortspec);
 std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x);
+
+/// Compare two actions names.
+/// This is implemented using string comparison, such that the comparison is
+/// stable across different runs.
+struct action_name_compare
+{
+  bool operator()(const core::identifier_string& s1, const core::identifier_string& s2) const
+  {
+    return std::string(s1) < std::string(s2);
+  }
+};
+
+/// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
+/// consistent.
+struct action_label_compare
+{
+  bool operator()(const process::action_label& a1, const process::action_label& a2) const
+  {
+    /* first compare the strings in the actions */
+    const core::identifier_string& a1_name = a1.name();
+    const core::identifier_string& a2_name = a2.name();
+
+    return action_name_compare()(a1_name, a2_name) || (a1_name == a2_name && a1.sorts() < a2.sorts());
+  }
+};
 
 } // namespace mcrl2::process
 
