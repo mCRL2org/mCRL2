@@ -45,7 +45,7 @@ struct alphabet_intersection_traverser: public alphabet_traverser<Derived, Node>
       bool remove = !process::includes(A, *i);
       if (remove)
       {
-        i = node.alphabet.erase(i);  // Use the return value; erase() returns iterator to next element
+        node.alphabet.erase(i++);
       }
       else
       {
