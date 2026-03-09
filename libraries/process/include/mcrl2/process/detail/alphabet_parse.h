@@ -102,6 +102,18 @@ core::identifier_string_list make_identifier_string_list(const std::vector<std::
   return core::identifier_string_list(ids.begin(), ids.end());
 }
 
+// Converts a vector of strings into an set of identifier_strings.
+inline
+std::set<core::identifier_string> make_identifier_string_set(const std::vector<std::string>& words)
+{
+  std::set<core::identifier_string> ids;
+  for (const std::string& word: words)
+  {
+    ids.emplace(word);
+  }
+  return ids;
+}
+
 // Converts a list of strings into a multi action name.
 inline
 multi_action_name make_multi_action(const std::vector<std::string>& words)
