@@ -191,30 +191,35 @@ BOOST_AUTO_TEST_CASE(test_push_allow1)
 }
 
 template <typename Operation>
-void test_comm_operation(const std::string& comm_text, const std::string& Atext, const std::string& expected_result, Operation op, const std::string& title)
+void test_comm_operation(const std::string& comm_text, const std::string& action_names_text, const std::string& Atext, const std::string& expected_result, Operation op, const std::string& title)
 {
   communication_expression_list C = detail::parse_comm_set(comm_text);
   auto [A, A_includes_subsets] = detail::parse_simple_multi_action_name_set(Atext);
-  multi_action_name_set A1 = op(C, A, A_includes_subsets);
+  action_name_set action_names = detail::make_identifier_string_set(detail::set_elements(action_names_text));
+  multi_action_name_set A1 = op(C,action_names, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
-  check_result(comm_text + ", " + Atext, result, expected_result, title);
+  check_result(comm_text + ", " + Atext + (title == "comm_inverse" ? "" : ", " + action_names_text), result, expected_result, title);
 
   if (title == "comm_inverse")
   {
-    allow_set A2 = alphabet_operations::comm_inverse(C, allow_set(A, A_includes_subsets));
+    allow_set A2 = alphabet_operations::comm_inverse(C, action_names, allow_set(A, A_includes_subsets));
     std::string result_allow = print(A2);
-    check_result(comm_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
+    check_result(comm_text + ", " + Atext + ", " + action_names_text, result_allow, expected_result, title + "<allow>");
   }
 }
 
 BOOST_AUTO_TEST_CASE(test_comm_operations)
 {
   // resolve ambiguity
-  auto comm_inverse = [](const communication_expression_list& C, const multi_action_name_set& A, bool A_includes_subsets) { return alphabet_operations::comm_inverse(C, A, A_includes_subsets); };
-  test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", comm_inverse, "comm_inverse");
-  test_comm_operation("{a|a -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", comm_inverse, "comm_inverse");
-  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", alphabet_operations::comm, "comm");
-  test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}@", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}@", alphabet_operations::comm, "comm");
+  auto comm_inverse = [](const communication_expression_list& C, const action_name_set& action_names,const multi_action_name_set& A, bool A_includes_subsets) { return alphabet_operations::comm_inverse(C, action_names, A, A_includes_subsets); };
+  auto comm = [](const communication_expression_list& C, const action_name_set& /*action_names*/,const multi_action_name_set& A, bool A_includes_subsets) { return alphabet_operations::comm(C, A, A_includes_subsets); };
+  test_comm_operation("{a|b -> c}", "{a, b, c}", "{c}", "{ab, c}", comm_inverse, "comm_inverse");
+  test_comm_operation("{a|b -> c}", "{a, b}", "{c}", "{ab}", comm_inverse, "comm_inverse");
+  test_comm_operation("{a|a -> b}", "{a, b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", comm_inverse, "comm_inverse");
+  test_comm_operation("{a|b -> c}", "{a, b, c}", "{cc}", "{aabb, abc, cc}", comm_inverse, "comm_inverse");
+  test_comm_operation("{a|b -> c}", "{a, b}", "{ccc}", "{aaabbb}", comm_inverse, "comm_inverse");
+  test_comm_operation("{a|b -> c}", "{a, b, c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", comm, "comm");
+  test_comm_operation("{a|b -> c}", "{a, b, c}", "{ab, aab, aabb, abd}@", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}@", comm, "comm");
 }
 
 template <typename Operation>

@@ -292,11 +292,13 @@ allow_set rename_inverse(const rename_expression_list& R, const allow_set& x)
   return result;
 }
 
-inline
-allow_set comm_inverse(const communication_expression_list& C, const allow_set& x)
+inline allow_set comm_inverse(
+  const communication_expression_list& C,
+  const action_name_set& action_names,
+  const allow_set& x)
 {
-  allow_set result(comm_inverse1(C, x.A), x.A_includes_subsets, comm_inverse(C, x.I));
-  mCRL2log(log::trace) << "comm_inverse(" << C << ", " << x << ") = " << result << std::endl;
+  allow_set result(comm_inverse1(C, action_names, x.A), x.A_includes_subsets, comm_inverse(C, action_names, x.I));
+  mCRL2log(log::trace) << "comm_inverse(" << C << ", " << core::pp(action_names) << ", " << x << ") = " << result << std::endl;
   return result;
 }
 
