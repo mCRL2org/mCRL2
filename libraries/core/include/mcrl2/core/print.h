@@ -199,7 +199,7 @@ struct apply_printer: public Traverser<apply_printer<Traverser>>
   using super::leave;
   using super::apply;
 
-  /// \brief precedence_aware Indicates whether the printer should take precendence into account when printing expressions.
+  /// \brief precedence_aware Indicates whether the printer should take precedence into account when printing expressions.
   apply_printer(std::ostream& out, bool precedence_aware)
   {
     using Super = printer<apply_printer<Traverser>>;
