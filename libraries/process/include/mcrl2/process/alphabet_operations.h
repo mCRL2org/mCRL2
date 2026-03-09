@@ -32,7 +32,7 @@ inline
 multi_action_name_set block(const core::identifier_string_list& B, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   multi_action_name_set result;
-  multi_action_name beta(B.begin(), B.end());
+  multi_action_name beta(boost::container::ordered_range_t(), B.begin(), B.end());
 
   if (A_includes_subsets)
   {
@@ -362,7 +362,7 @@ void comm_inverse(const communication_expression_list& C, const action_name_set&
   {
     if (contains(alpha1, c.name()))
     {
-      std::pair<multi_action_name, multi_action_name> beta = apply_comm_inverse(c, alpha1, alpha2);
+      const std::pair<multi_action_name, multi_action_name> beta = apply_comm_inverse(c, alpha1, alpha2);
       comm_inverse(C, action_names, beta.first, beta.second, result);
     }
   }
@@ -475,7 +475,7 @@ communication_expression_list filter_comm_set(const communication_expression_lis
   for (const communication_expression& c: C)
   {
     core::identifier_string_list lhs = c.action_name().names();
-    multi_action_name alpha(lhs.begin(), lhs.end());
+    multi_action_name alpha(boost::container::ordered_range_t(), lhs.begin(), lhs.end());
     if (includes(alphabet, alpha))
     {
       result.push_back(c);
