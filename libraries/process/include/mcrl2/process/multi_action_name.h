@@ -163,6 +163,17 @@ inline multi_action_name_set remove_subsets(const multi_action_name_set& A)
 }
 
 inline
+std::set<core::identifier_string> action_names(const multi_action_name_set& A)
+{
+  std::set<core::identifier_string> result;
+  for (const multi_action_name& alpha: A)
+  {
+    result.insert(alpha.begin(), alpha.end());
+  }
+  return result;
+}
+
+inline
 std::ostream& operator<<(std::ostream& out, const multi_action_name& alpha)
 {
   return out << pp(alpha);
