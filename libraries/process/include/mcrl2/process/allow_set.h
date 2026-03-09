@@ -274,7 +274,7 @@ allow_set allow(const action_name_multiset_list& V, const allow_set& x)
   for (const action_name_multiset& v: V)
   {
     const core::identifier_string_list& names = v.names();
-    multi_action_name beta(names.begin(), names.end());
+    multi_action_name beta(boost::container::ordered_range_t(), names.begin(), names.end());
     bool add = x.A_includes_subsets ? process::includes(x.A, alphabet_operations::hide(x.I, beta)) : process::contains(x.A, alphabet_operations::hide(x.I, beta));
     if (add)
     {

@@ -12,22 +12,31 @@
 #ifndef MCRL2_PROCESS_MULTI_ACTION_NAME_H
 #define MCRL2_PROCESS_MULTI_ACTION_NAME_H
 
+#include <boost/container/flat_set.hpp>
+
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/process/action_label.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2::process
 {
 
 /// \brief Represents the name of a multi action
-struct multi_action_name: public std::multiset<core::identifier_string>
+/// Uses boost::flat_multiset for improved cache locality and memory efficiency
+struct multi_action_name: public boost::container::flat_multiset<core::identifier_string, process::action_name_compare>
 {
-  using super = std::multiset<core::identifier_string>;
+  using super = boost::container::flat_multiset<core::identifier_string, process::action_name_compare>;
 
   multi_action_name() = default;
 
   template <typename InputIterator>
   multi_action_name(InputIterator first, InputIterator last)
     : super(first, last)
+  {}
+
+  template<typename InputIterator>
+  multi_action_name(boost::container::ordered_range_t tag, InputIterator first, InputIterator last)
+    : super(tag, first, last)
   {}
 };
 
@@ -64,11 +73,18 @@ inline multi_action_name multiset_difference(const multi_action_name& alpha, con
   return result;
 }
 
-inline multi_action_name multiset_union(const multi_action_name& alpha, const multi_action_name& beta)
+inline multi_action_name multiset_union(multi_action_name alpha, multi_action_name beta)
 {
-  multi_action_name result;
-  std::merge(alpha.begin(), alpha.end(), beta.begin(), beta.end(), std::inserter(result, result.end()));
-  return result;
+  if(alpha.size() > beta.size())
+  {
+    alpha.merge(std::move(beta));
+    return alpha;
+  }
+  else
+  {
+    beta.merge(std::move(alpha));
+    return beta;
+  }
 }
 
 /// \brief Pretty print function for a multi action name
@@ -104,7 +120,7 @@ inline multi_action_name_set make_name_set(const action_name_multiset_list& v)
   for (const action_name_multiset& i: v)
   {
     const core::identifier_string_list& names = i.names();
-    result.insert(multi_action_name(names.begin(), names.end()));
+    result.insert(multi_action_name(boost::container::ordered_range_t(), names.begin(), names.end()));
   }
   return result;
 }
