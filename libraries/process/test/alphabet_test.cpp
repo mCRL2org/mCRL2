@@ -211,7 +211,7 @@ void test_comm_operation(const std::string& comm_text, const std::string& action
 BOOST_AUTO_TEST_CASE(test_comm_operations)
 {
   // resolve ambiguity
-  auto comm_inverse = [](const communication_expression_list& C, const action_name_set& action_names,const multi_action_name_set& A, bool A_includes_subsets) { return alphabet_operations::comm_inverse(C, action_names, A, A_includes_subsets); };
+  auto comm_inverse = [](const communication_expression_list& C, const action_name_set& action_names,const multi_action_name_set& A, bool A_includes_subsets) { return alphabet_operations::comm_inverse1(C, action_names, A); };
   auto comm = [](const communication_expression_list& C, const action_name_set& /*action_names*/,const multi_action_name_set& A, bool A_includes_subsets) { return alphabet_operations::comm(C, A, A_includes_subsets); };
   test_comm_operation("{a|b -> c}", "{a, b, c}", "{c}", "{ab, c}", comm_inverse, "comm_inverse");
   test_comm_operation("{a|b -> c}", "{a, b}", "{c}", "{ab}", comm_inverse, "comm_inverse");

@@ -120,7 +120,7 @@ inline multi_action_name_set make_name_set(const action_name_multiset_list& v)
   for (const action_name_multiset& i: v)
   {
     const core::identifier_string_list& names = i.names();
-    result.insert(multi_action_name(boost::container::ordered_range_t(), names.begin(), names.end()));
+    result.insert(multi_action_name(names.begin(), names.end()));
   }
   return result;
 }

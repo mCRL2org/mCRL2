@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_ALPHABET_OPERATIONS_H
 #define MCRL2_PROCESS_ALPHABET_OPERATIONS_H
 
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/process/communication_expression.h"
 #include "mcrl2/process/multi_action_name.h"
 #include "mcrl2/process/action_names.h"
@@ -33,7 +34,7 @@ inline
 multi_action_name_set block(const core::identifier_string_list& B, const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   multi_action_name_set result;
-  multi_action_name beta(boost::container::ordered_range_t(), B.begin(), B.end());
+  multi_action_name beta(B.begin(), B.end());
 
   if (A_includes_subsets)
   {
@@ -294,81 +295,59 @@ bool includes(const action_name_set& action_names, const multi_action_name& alph
   });
 }
 
-/// If the right hand side of communiction rule x appears in alpha1, return the
-/// pair (beta1, beta2) such that beta1 = alpha1 \ {x} and beta2 = alpha2 U lhs(x).
-/// Otherwise, return std::nullopt.
+/// Cache communication expressions by their name, to speed up the implementation of comm_inverse.
+using comm_inverse_cache = std::unordered_map<core::identifier_string, std::vector<communication_expression>>;
+
+/// Calculate the inverse of a communication expression list C. The result is cached
 inline
-std::pair<multi_action_name, multi_action_name> apply_comm_inverse(const communication_expression& x, const multi_action_name& alpha1, const multi_action_name& alpha2)
+comm_inverse_cache calculate_comm_inverse_cache(const communication_expression_list& C)
 {
-  const core::identifier_string& c = x.name();
-  const core::identifier_string_list& lhs = x.action_name().names();
-  std::pair<multi_action_name, multi_action_name> result({alpha1, alpha2});
-  result.first.erase(result.first.find(c));
-  result.second.insert(lhs.begin(), lhs.end());
-  return result;
-}
-
-/// Apply the inverse of communication rule gamma = lhs -> c to alpha, and add the result to out.
-template <typename OutputIt>
-void apply_comm_inverse(const communication_expression& gamma, const action_name_set& action_names, const multi_action_name& alpha, OutputIt out)
-{
-  const core::identifier_string& c = gamma.name();
-  const core::identifier_string_list& lhs = gamma.action_name().names();
-  assert(std::is_sorted(lhs.begin(), lhs.end(), process::action_name_compare()));
-  bool c_in_action_names = utilities::detail::contains(action_names, c);
-
-  const std::size_t n = alpha.count(c);
-  if (n > 0)
+  comm_inverse_cache cache;
+  for (const communication_expression& c: C)
   {
-    multi_action_name beta = alpha;
-    for (std::size_t k = 0; k < n; k++)
-    {
-      beta.erase(beta.find(c));
-      beta.insert(lhs.begin(), lhs.end());
-      // Action c appears in action_names, so we need to take partial communication into account.
-      if(c_in_action_names)
-      {
-        *out++ = beta;
-      }
-    }
-
-    // If action c does not appear in action_names, we only have to add the result of
-    // applying the communication rule maximally.
-    if(!c_in_action_names)
-    {
-      *out++ = beta;
-    }
+    cache[c.name()].push_back(c);
   }
+  return cache;
 }
 
-/// Apply the inverse of communication rule gamma = lhs -> c to each alpha in A, and add the result to A.
-template <typename OutIter>
-void apply_comm_inverse(const communication_expression& gamma, const action_name_set& action_names, const multi_action_name_set& A, OutIter out)
-{
-  for (const multi_action_name& alpha: A)
-  {
-    apply_comm_inverse(gamma, action_names, alpha, out);
-  }
-}
-
+/// Calculates the inverse of a communication expression on alpha1, and accumulates
+/// expressions to which the inverse of communication have been applied in alpha2.
+/// \param C_inverse a cache of communication expressions, indexed by their name.
+/// \param action_names the set of action names that are allowed to be used in the result.
+/// \param alpha1 the multi action name to which the inverse of communication expressions are applied.
+/// \param alpha2 the multi action name to which the inverse of communication expressions have been applied.
+/// \param result the set of multi action names that are the result of applying the inverse of communication expressions to alpha1 and alpha2.
 inline
-void comm_inverse(const communication_expression_list& C, const action_name_set& action_names, const multi_action_name& alpha1, const multi_action_name& alpha2, multi_action_name_set& result)
+void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& action_names, multi_action_name& alpha1, const multi_action_name& alpha2, multi_action_name_set& result)
 {
   if (includes(action_names, alpha1) && includes(action_names, alpha2))
   {
     result.insert(multiset_union(alpha1, alpha2));
   }
 
-  for (const communication_expression& c: C)
+  if (!alpha1.empty())
   {
-    if (contains(alpha1, c.name()))
+    multi_action_name::const_iterator alpha1_last_it = alpha1.nth(alpha1.size() - 1);
+    core::identifier_string alpha1_last = *alpha1_last_it;
+    alpha1.erase(alpha1_last_it);
+
+    comm_inverse_cache::const_iterator i = C_inverse.find(alpha1_last);
+    if (i != C_inverse.end())
     {
-      const std::pair<multi_action_name, multi_action_name> beta = apply_comm_inverse(c, alpha1, alpha2);
-      comm_inverse(C, action_names, beta.first, beta.second, result);
+      for (const communication_expression& c: i->second)
+      {
+        multi_action_name beta2 = alpha2;
+        beta2.insert(c.action_name().names().begin(), c.action_name().names().end());
+        comm_inverse(C_inverse, action_names, alpha1, beta2, result);
+      }
     }
   }
 }
 
+/// Returns the set of multiactions that, with application of communication expressions in C, can result in a multiaction in A.
+/// \param C a list of communication expressions
+/// \param action_names the set of action names that are allowed to be used in the result
+/// \param A a set of multi action names
 inline multi_action_name_set comm_inverse1(
   const communication_expression_list& C,
   const action_name_set& action_names,
@@ -376,35 +355,10 @@ inline multi_action_name_set comm_inverse1(
 {
   multi_action_name_set result;
   multi_action_name empty;
-  for (const multi_action_name& alpha: A)
+  const comm_inverse_cache C_inverse = calculate_comm_inverse_cache(C);
+  for (multi_action_name alpha: A)
   {
-    comm_inverse(C, action_names, alpha, empty, result);
-  }
-  return result;
-}
-
-inline multi_action_name_set comm_inverse(
-  const communication_expression_list& C,
-  const action_name_set& action_names,
-  const multi_action_name_set& A,
-  bool /* A_includes_subsets */ = false)
-{
-  multi_action_name_set result;
-  std::insert_iterator<multi_action_name_set> result_it(result, result.begin());
-
-  // Filter A to only include action names that are in action_names
-  std::copy_if(
-    A.begin(),
-    A.end(),
-    result_it,
-    [&action_names](const multi_action_name& alpha)
-    {
-      return includes(action_names, alpha);
-    });
-
-  for (const communication_expression& c: C)
-  {
-    apply_comm_inverse(c, action_names, A, result_it);
+    comm_inverse(C_inverse, action_names, alpha, empty, result);
   }
   return result;
 }
@@ -413,12 +367,14 @@ inline multi_action_name_set comm_inverse(
 inline
 std::set<core::identifier_string> comm_inverse(const communication_expression_list& C, const action_name_set& action_names, const std::set<core::identifier_string>& I)
 {
+  const comm_inverse_cache C_inverse = calculate_comm_inverse_cache(C);
   std::set<core::identifier_string> result = I;
   for (const core::identifier_string& i: I)
   {
-    for (const communication_expression& j: C)
+    comm_inverse_cache::const_iterator C_inverse_it = C_inverse.find(i);
+    if (C_inverse_it != C_inverse.end())
     {
-      if (i == j.name())
+      for (const communication_expression& j: C_inverse_it->second)
       {
         std::set<core::identifier_string> lhs(j.action_name().names().begin(), j.action_name().names().end());
         if (utilities::detail::set_includes(action_names, lhs))
