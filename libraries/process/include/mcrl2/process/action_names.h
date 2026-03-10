@@ -204,7 +204,11 @@ struct action_names_traverser: public process_expression_traverser<Derived>
 
   void leave(const process::allow& x)
   {
-    std::set<core::identifier_string> allow_set(x.allow_set().begin(), x.allow_set().end());
+    std::set<core::identifier_string> allow_set;
+    for (const action_name_multiset& allow: x.allow_set()){
+      const core::identifier_string_list& names = allow.names();
+      allow_set.insert(names.begin(), names.end());
+    }
     top().action_names = utilities::detail::set_intersection(top().action_names, allow_set);
   }
 
