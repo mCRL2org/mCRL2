@@ -19,6 +19,7 @@
 #include "mcrl2/process/rename_expression.h"
 #include "mcrl2/utilities/detail/atomic_wrapper.h"
 #include "mcrl2/utilities/sequence.h"
+#include <algorithm>
 #include <iterator>
 
 namespace mcrl2::process::alphabet_operations
@@ -475,7 +476,7 @@ communication_expression_list filter_comm_set(const communication_expression_lis
   for (const communication_expression& c: C)
   {
     core::identifier_string_list lhs = c.action_name().names();
-    multi_action_name alpha(boost::container::ordered_range_t(), lhs.begin(), lhs.end());
+    multi_action_name alpha(lhs.begin(), lhs.end());
     if (includes(alphabet, alpha))
     {
       result.push_back(c);
@@ -636,7 +637,7 @@ void rename_inverse(const rename_inverse_map& Rinverse, const multi_action_name&
     auto j = Rinverse.find(*i);
     if (j != Rinverse.end())
     {
-      alpha.erase(i++);
+      i = alpha.erase(i);
       if (!j->second.empty() || !x_includes_subsets)
       {
         V.push_back(j->second);
