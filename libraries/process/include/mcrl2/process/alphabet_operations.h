@@ -21,6 +21,7 @@
 #include "mcrl2/utilities/detail/atomic_wrapper.h"
 #include "mcrl2/utilities/sequence.h"
 #include <algorithm>
+#include <iostream>
 #include <iterator>
 
 namespace mcrl2::process::alphabet_operations
@@ -318,7 +319,7 @@ comm_inverse_cache calculate_comm_inverse_cache(const communication_expression_l
 /// \param alpha2 the multi action name to which the inverse of communication expressions have been applied.
 /// \param result the set of multi action names that are the result of applying the inverse of communication expressions to alpha1 and alpha2.
 inline
-void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& action_names, multi_action_name& alpha1, const multi_action_name& alpha2, multi_action_name_set& result)
+void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& action_names, const multi_action_name& alpha1, const multi_action_name& alpha2, multi_action_name_set& result)
 {
   if (includes(action_names, alpha1) && includes(action_names, alpha2))
   {
@@ -327,18 +328,27 @@ void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& ac
 
   if (!alpha1.empty())
   {
-    multi_action_name::const_iterator alpha1_last_it = alpha1.nth(alpha1.size() - 1);
-    core::identifier_string alpha1_last = *alpha1_last_it;
-    alpha1.erase(alpha1_last_it);
+    multi_action_name beta1(alpha1);
+    multi_action_name::const_iterator beta1_last_it = beta1.nth(beta1.size() - 1);
+    core::identifier_string beta1_last = *beta1_last_it;
+    beta1.erase(beta1_last_it);
 
-    comm_inverse_cache::const_iterator i = C_inverse.find(alpha1_last);
+    /// Case where action name is not the result of communication
+    if (action_names.find(beta1_last) != action_names.end())
+    {
+      multi_action_name beta2(alpha2);
+      beta2.insert(beta1_last);
+      comm_inverse(C_inverse, action_names, beta1, beta2, result);
+    }
+
+    comm_inverse_cache::const_iterator i = C_inverse.find(beta1_last);
     if (i != C_inverse.end())
     {
       for (const communication_expression& c: i->second)
       {
-        multi_action_name beta2 = alpha2;
+        multi_action_name beta2(alpha2);
         beta2.insert(c.action_name().names().begin(), c.action_name().names().end());
-        comm_inverse(C_inverse, action_names, alpha1, beta2, result);
+        comm_inverse(C_inverse, action_names, beta1, beta2, result);
       }
     }
   }
