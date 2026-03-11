@@ -13,7 +13,9 @@
 #define MCRL2_PROCESS_MULTI_ACTION_NAME_H
 
 #include <boost/container/flat_set.hpp>
+#include <iterator>
 
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/process/action_label.h"
 #include "mcrl2/process/action_name_multiset.h"
@@ -50,7 +52,7 @@ using multi_action_name_set = std::set<multi_action_name>;
 // Returns true if the multiset y is contained in x
 inline bool includes(const multi_action_name& x, const multi_action_name& y)
 {
-  return std::includes(x.begin(), x.end(), y.begin(), y.end());
+  return std::includes(x.begin(), x.end(), y.begin(), y.end(), multi_action_name::key_compare());
 }
 
 inline bool contains(const multi_action_name& alpha, const core::identifier_string& a)
@@ -61,15 +63,13 @@ inline bool contains(const multi_action_name& alpha, const core::identifier_stri
 // Returns alpha \ beta
 inline multi_action_name multiset_difference(const multi_action_name& alpha, const multi_action_name& beta)
 {
-  multi_action_name result = alpha;
-  for (const core::identifier_string& i: beta)
-  {
-    multi_action_name::iterator j = result.find(i);
-    if (j != result.end())
-    {
-      result.erase(j);
-    }
-  }
+  multi_action_name result;
+  std::set_difference(alpha.begin(),
+    alpha.end(),
+    beta.begin(),
+    beta.end(),
+    std::inserter(result, result.end()),
+    multi_action_name::key_compare());
   return result;
 }
 
