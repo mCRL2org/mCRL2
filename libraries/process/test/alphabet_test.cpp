@@ -218,6 +218,7 @@ BOOST_AUTO_TEST_CASE(test_comm_operations)
   test_comm_operation("{a|a -> b}", "{a, b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", comm_inverse, "comm_inverse");
   test_comm_operation("{a|b -> c}", "{a, b, c}", "{cc}", "{aabb, abc, cc}", comm_inverse, "comm_inverse");
   test_comm_operation("{a|b -> c}", "{a, b}", "{ccc}", "{aaabbb}", comm_inverse, "comm_inverse");
+  test_comm_operation("{r|s->c}", "{i, r, s}", "{ic}", "{irs}", comm_inverse, "comm_inverse");
   test_comm_operation("{a|b -> c}", "{a, b, c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", comm, "comm");
   test_comm_operation("{a|b -> c}", "{a, b, c}", "{ab, aab, aabb, abd}@", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}@", comm, "comm");
 }
