@@ -56,15 +56,15 @@ bool contains(const Container& c, const typename Container::value_type& v)
 }
 
 // specialization
-template <typename T>
-bool contains(const std::set<T>& c, const typename std::set<T>::value_type& v)
+template <typename T, typename Compare>
+bool contains(const std::set<T, Compare>& c, const typename std::set<T, Compare>::value_type& v)
 {
   return c.find(v) != c.end();
 }
 
 // specialization
-template <typename T>
-bool contains(const std::multiset<T>& c, const typename std::multiset<T>::value_type& v)
+template <typename T, typename Compare>
+bool contains(const std::multiset<T, Compare>& c, const typename std::multiset<T>::value_type& v)
 {
   return c.find(v) != c.end();
 }
@@ -103,18 +103,15 @@ typename Container::value_type pick_element(Container& v)
 }
 
 // inserts elements of c into s
-template <typename T, typename Container>
-void set_insert(std::set<T>& s, const Container& c)
+template <typename T, typename Compare, typename Container>
+void set_insert(std::set<T, Compare>& s, const Container& c)
 {
-  for (auto i = c.begin(); i != c.end(); ++i)
-  {
-    s.insert(*i);
-  }
+  s.insert(c.begin(), c.end());
 }
 
 // removes elements of c from s
-template <typename T, typename Container>
-void set_remove(std::set<T>& s, const Container& c)
+template <typename T,typename Compare, typename Container>
+void set_remove(std::set<T, Compare>& s, const Container& c)
 {
   for (auto i = c.begin(); i != c.end(); ++i)
   {
@@ -141,16 +138,16 @@ void remove_if(ContainerT& items, const PredicateT& predicate)
 }
 
 /// Returns true if the sorted ranges [first1, ..., last1) and [first2, ..., last2) have an empty intersection
-template <typename InputIterator1, typename InputIterator2>
-bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2)
+template <typename InputIterator1, typename InputIterator2, typename Compare = std::less<typename InputIterator1::value_type>>
+bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, Compare comp)
 {
   while (first1 != last1 && first2 != last2)
   {
-    if (*first1 < *first2)
+    if (comp(*first1, *first2))
     {
       ++first1;
     }
-    else if (*first2 < *first1)
+    else if (comp(*first2, *first1))
     {
       ++first2;
     }
@@ -165,42 +162,42 @@ bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIt
 template <typename SetContainer1, typename SetContainer2>
 bool has_empty_intersection(const SetContainer1& s1, const SetContainer2& s2)
 {
-  return has_empty_intersection(s1.begin(), s1.end(), s2.begin(), s2.end());
+  return has_empty_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), typename SetContainer1::key_compare());
 }
 
-/// \brief Returns the union of two sets.
+/// \brief Returns the union of two sets that are sorted in the same way.
 /// \param x A set
 /// \param y A set
 /// \return The union of two sets.
-template <typename T>
-std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
+template <typename T, typename Compare>
+std::set<T, Compare> set_union(const std::set<T, Compare>& x, const std::set<T, Compare>& y)
 {
-  std::set<T> result;
-  std::set_union(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  std::set<T, Compare> result;
+  std::set_union(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()), Compare());
   return result;
 }
 
-/// \brief Returns the difference of two sets.
+/// \brief Returns the difference of two sets that are sorted in the same way.
 /// \param x A set
 /// \param y A set
 /// \return The difference of two sets.
-template <typename T>
-std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
+template<typename T, typename Compare>
+std::set<T, Compare> set_difference(const std::set<T, Compare>& x, const std::set<T, Compare>& y)
 {
-  std::set<T> result;
-  std::set_difference(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  std::set<T, Compare> result;
+  std::set_difference(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()), Compare());
   return result;
 }
 
-/// \brief Returns the intersection of two sets.
+/// \brief Returns the intersection of two sets that are sorted in the same way.
 /// \param x A set
 /// \param y A set
 /// \return The intersection of two sets.
-template <typename T>
-std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
+template <typename T, typename Compare>
+std::set<T, Compare> set_intersection(const std::set<T, Compare>& x, const std::set<T, Compare>& y)
 {
-  std::set<T> result;
-  std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  std::set<T, Compare> result;
+  std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()), Compare());
   return result;
 }
 
@@ -208,23 +205,23 @@ std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
 /// \param x A set
 /// \param y A set
 /// \return The intersection of two sets.
-template <typename T>
-bool set_includes(const std::set<T>& x, const std::set<T>& y)
+template <typename T, typename Compare>
+bool set_includes(const std::set<T, Compare>& x, const std::set<T, Compare>& y)
 {
-  return std::includes(x.begin(), x.end(), y.begin(), y.end());
+  return std::includes(x.begin(), x.end(), y.begin(), y.end(), Compare());
 }
 
 
-template <typename T>
-std::vector<T> as_vector(const std::set<T>& x)
+template <typename T, typename Compare>
+std::vector<T> as_vector(const std::set<T, Compare>& x)
 {
   return std::vector<T>(x.begin(), x.end());
 }
 
-template <typename T>
-std::set<T> as_set(const std::vector<T>& x)
+template <typename T, typename Compare = std::less<T>>
+std::set<T, Compare> as_set(const std::vector<T>& x)
 {
-  return std::set<T>(x.begin(), x.end());
+  return std::set<T, Compare>(x.begin(), x.end());
 }
 
 } // namespace mcrl2::utilities::detail
