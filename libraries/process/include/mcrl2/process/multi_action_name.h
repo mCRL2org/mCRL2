@@ -19,6 +19,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/process/action_label.h"
 #include "mcrl2/process/action_name_multiset.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2::process
 {
@@ -58,6 +59,11 @@ inline bool includes(const multi_action_name& x, const multi_action_name& y)
 inline bool contains(const multi_action_name& alpha, const core::identifier_string& a)
 {
   return alpha.find(a) != alpha.end();
+}
+
+inline bool has_empty_intersection(const multi_action_name& x, const multi_action_name& y)
+{
+  return utilities::detail::has_empty_intersection(x,y);
 }
 
 // Returns alpha \ beta
