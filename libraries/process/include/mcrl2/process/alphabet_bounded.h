@@ -84,7 +84,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   {
     auto right = pop();
     auto left = pop();
-    push(alphabet_operations::set_union(left.A, right.A));
+    push(process::set_union(left.A, right.A));
   }
 
   void leave(const process::action& x)
@@ -168,7 +168,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   void apply(const process::comm& x)
   {
     const communication_expression_list& C = x.comm_set();
-    allow_set A1 = alphabet_operations::comm_inverse(C, A);
+    allow_set A1 = alphabet_operations::comm_inverse(C, A); // JK 2026-03-12 this function does not exist anymore. This also means this code is dead, otherwise it would not compile
     multi_action_name_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
     communication_expression_list C1 = alphabet_operations::filter_comm_set(x.comm_set(), A2);
     A2 = alphabet_operations::comm(C1, A2);
