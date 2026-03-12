@@ -1,0 +1,8 @@
+act
+    c,e,d,b,a;
+  proc
+    P = e;
+    Q = sum b1: Bool. (((true) -> (c) <> ((b | b | d | e) . (delta))) + (sum b2: Bool. ((b) . ((a) . (b)))));
+    R = ((sum b1: Bool. (sum b2: Bool. ((delta) . (sum b3: Bool. ((true) -> (c) <> (b)))))) . (d)) . (b);
+  init
+    block({b}, hide({e}, block({a}, (allow({e, d, a | b, b}, block({c}, Q))) || ((P) || (R)))));

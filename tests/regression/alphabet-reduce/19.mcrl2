@@ -1,0 +1,8 @@
+act
+  e,a,b,c,d;
+proc
+  P = (true) -> ((true) -> (((d) + (c)) + ((a) + ((c) . (sum b1: Bool. (a)))))) <> (b);
+  Q = ((b) . ((true) -> (delta))) . ((d) . ((e) . (delta)));
+  R = (true) -> ((e) + ((((a) + (c)) . (a | d)) + (e)));
+init
+  block({e}, hide({b}, allow({e, a | d, d, a | b, a | a}, (comm({c | a -> d}, Q)) || (comm({a | e -> d}, (P) || (R))))));
