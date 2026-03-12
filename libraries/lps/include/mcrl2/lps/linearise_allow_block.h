@@ -81,15 +81,17 @@ inline bool allow_(const process::action_name_multiset& allow_action,
   assert(std::is_sorted(multi_action.begin(), multi_action.end(), process::action_compare()));
 
   const core::identifier_string_list& names = allow_action.names();
-  if (names.size() != multi_action.size())
-  {
-    return false;
-  }
+  // Note: names.size() and multi_action.size() are O(n) operations, so
+  // optimizing them as special case is not helpful.
+  // if (names.size() != multi_action.size())
+  // {
+  //   return false;
+  // }
 
   core::identifier_string_list::const_iterator names_it = names.begin();
   process::action_list::const_iterator multiaction_it = multi_action.begin();
 
-  while (names_it != names.end())
+  while (names_it != names.end() && multiaction_it != multi_action.end())
   {
     if (*names_it != multiaction_it->label().name())
     {
@@ -99,10 +101,7 @@ inline bool allow_(const process::action_name_multiset& allow_action,
     ++multiaction_it;
   }
 
-  assert(names_it == names.end());
-  assert(multiaction_it == multi_action.end());
-
-  return true;
+  return names_it == names.end() && multiaction_it == multi_action.end();
 }
 
 /// \brief Determine if multi_action is allowed by an allow expression in allow_list
