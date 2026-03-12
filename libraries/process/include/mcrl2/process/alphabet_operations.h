@@ -55,7 +55,7 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
   {
     for (const multi_action_name& alpha: A)
     {
-      if (utilities::detail::has_empty_intersection(beta.begin(), beta.end(), alpha.begin(), alpha.end()))
+      if (has_empty_intersection(beta, alpha))
       {
         result.insert(alpha);
       }
@@ -317,13 +317,38 @@ comm_inverse_cache calculate_comm_inverse_cache(const communication_expression_l
 /// \param action_names the set of action names that are allowed to be used in the result.
 /// \param alpha1 the multi action name to which the inverse of communication expressions are applied.
 /// \param alpha2 the multi action name to which the inverse of communication expressions have been applied.
+/// \param A_includes_subsets if true, in case not all action names in alpha = alpha1 \cup alpha2 are in action_names, the result will include the maximum subset of alpha of actions in action_names
 /// \param result the set of multi action names that are the result of applying the inverse of communication expressions to alpha1 and alpha2.
 inline
-void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& action_names, const multi_action_name& alpha1, const multi_action_name& alpha2, multi_action_name_set& result)
+void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& action_names, const multi_action_name& alpha1, const multi_action_name& alpha2, const bool A_includes_subsets, multi_action_name_set& result)
 {
+  mCRL2log(log::trace) << "comm_inverse: action_names = " << core::pp(action_names) << ", alpha1 = " << pp(alpha1) << ", alpha2 = " << pp(alpha2) << "\n";
+
   if (includes(action_names, alpha1) && includes(action_names, alpha2))
   {
+    mCRL2log(log::trace) << "comm_inverse: result += {" << multiset_union(alpha1, alpha2) << "}\n";
     result.insert(multiset_union(alpha1, alpha2));
+  }
+  else if (A_includes_subsets)
+  {
+    // keep the largest subset that is included in action_names
+    multi_action_name alpha;
+    for (const core::identifier_string& a: alpha1)
+    {
+      if (utilities::detail::contains(action_names, a))
+      {
+        alpha.insert(a);
+      }
+    }
+    for (const core::identifier_string& a: alpha2)
+    {
+      if (utilities::detail::contains(action_names, a))
+      {
+        alpha.insert(a);
+      }
+    }
+    result.insert(alpha);
+    mCRL2log(log::trace) << "comm_inverse: result += {" << alpha << "}\n";
   }
 
   if (!alpha1.empty())
@@ -338,7 +363,7 @@ void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& ac
     {
       multi_action_name beta2(alpha2);
       beta2.insert(beta1_last);
-      comm_inverse(C_inverse, action_names, beta1, beta2, result);
+      comm_inverse(C_inverse, action_names, beta1, beta2, A_includes_subsets, result);
     }
 
     comm_inverse_cache::const_iterator i = C_inverse.find(beta1_last);
@@ -348,7 +373,7 @@ void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& ac
       {
         multi_action_name beta2(alpha2);
         beta2.insert(c.action_name().names().begin(), c.action_name().names().end());
-        comm_inverse(C_inverse, action_names, beta1, beta2, result);
+        comm_inverse(C_inverse, action_names, beta1, beta2, A_includes_subsets, result);
       }
     }
   }
@@ -361,15 +386,18 @@ void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& ac
 inline multi_action_name_set comm_inverse1(
   const communication_expression_list& C,
   const action_name_set& action_names,
-  const multi_action_name_set& A)
+  const multi_action_name_set& A,
+  const bool A_includes_subsets = false)
 {
+  mCRL2log(log::trace) << "comm_inverse1: C = " << core::pp(C) << ", action_names = " << core::pp(action_names) << ", A = " << pp(A) << "\n";
   multi_action_name_set result;
   multi_action_name empty;
   const comm_inverse_cache C_inverse = calculate_comm_inverse_cache(C);
   for (multi_action_name alpha: A)
   {
-    comm_inverse(C_inverse, action_names, alpha, empty, result);
+    comm_inverse(C_inverse, action_names, alpha, empty, A_includes_subsets, result);
   }
+  mCRL2log(log::trace) << "comm_inverse1: result = " << pp(result) << "\n";
   return result;
 }
 

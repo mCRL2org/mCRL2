@@ -63,7 +63,6 @@ struct allow_set
 
   bool check_invariant() const
   {
-    using utilities::detail::contains;
     if (I.empty())
     {
       return true;
@@ -72,7 +71,7 @@ struct allow_set
     {
       for (const core::identifier_string& j: alpha)
       {
-        if (contains(I, j))
+        if (utilities::detail::contains(I, j))
         {
           return false;
         }
@@ -96,7 +95,7 @@ struct allow_set
   bool contains(const multi_action_name& alpha) const
   {
     multi_action_name beta = alphabet_operations::hide(I, alpha);
-    return beta.empty() || (A_includes_subsets ? process::includes(A, beta) : process::contains(A, beta));
+    return beta.empty() || (A_includes_subsets ? includes(A, beta) : process::contains(A, beta));
   }
 
   /// \brief Returns the intersection of the allow set with alphabet.
@@ -298,7 +297,7 @@ inline allow_set comm_inverse(
   const action_name_set& action_names,
   const allow_set& x)
 {
-  allow_set result(comm_inverse1(C, action_names, x.A), x.A_includes_subsets, comm_inverse(C, action_names, x.I));
+  allow_set result(comm_inverse1(C, action_names, x.A, x.A_includes_subsets), x.A_includes_subsets, comm_inverse(C, action_names, x.I));
   mCRL2log(log::trace) << "comm_inverse(" << C << ", " << core::pp(action_names) << ", " << x << ") = " << result << std::endl;
   return result;
 }
