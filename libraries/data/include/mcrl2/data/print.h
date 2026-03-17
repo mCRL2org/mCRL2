@@ -1865,6 +1865,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().apply(sort_nat::arg(x));
       derived().print(" - 1)");
     }
+    else if (sort_nat::is_equals_one_application(x))
+    {
+      derived().print("(");
+      derived().apply(sort_nat::arg(x));
+      derived().print(" == 1)");
+    }
 #else
     else if (sort_nat::is_cnat_application(x))
     {
