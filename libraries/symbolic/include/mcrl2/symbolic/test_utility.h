@@ -122,7 +122,7 @@ inline sylvan::ldds::ldd to_ldd(const std::set<std::vector<std::uint32_t>>& vect
 inline void initialise_sylvan()
 {
   //mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
-  lace_start(0, 0);
+  lace_start(1, 0);
   sylvan::sylvan_set_limits(static_cast<size_t>(1024) * 1024 * 1024, 6, 6);
   sylvan::sylvan_init_package();
   sylvan::sylvan_init_ldd();
