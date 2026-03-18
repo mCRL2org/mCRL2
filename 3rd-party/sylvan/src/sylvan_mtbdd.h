@@ -269,7 +269,7 @@ MTBDD mtbdd_ithvar(uint32_t var);
  * A set of variables is represented by a cube/conjunction of (positive) variables.
  */
 static inline MTBDD
-mtbdd_set_empty()
+mtbdd_set_empty(void)
 {
     return mtbdd_true;
 }
@@ -944,7 +944,7 @@ void mtbdd_reader_end(uint64_t *arr);
  * A MTBDDMAP node has variable level, low edge going to the next MTBDDMAP, high edge to the mapped MTBDD.
  */
 static inline MTBDD
-mtbdd_map_empty()
+mtbdd_map_empty(void)
 {
     return mtbdd_false;
 }

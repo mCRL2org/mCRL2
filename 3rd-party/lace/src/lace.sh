@@ -333,7 +333,7 @@ void lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head);
 
 #if LACE_PIE_TIMES
 /* High resolution timer */
-static inline uint64_t gethrtime()
+static inline uint64_t gethrtime(void)
 {
     uint32_t hi, lo;
     asm volatile ("rdtsc" : "=a"(lo), "=d"(hi) :: "memory");
@@ -342,7 +342,7 @@ static inline uint64_t gethrtime()
 #endif
 
 #if LACE_COUNT_EVENTS
-void lace_count_reset();
+void lace_count_reset(void);
 void lace_count_report_file(FILE *file);
 #endif
 
@@ -740,6 +740,7 @@ if ((r)); then
 fi
 
 FUN_ARGS_NC=${FUN_ARGS:2}
+FUN_ARGS_NC=${FUN_ARGS_NC:-void}
 
 echo
 echo "// Task macros for tasks of arity $r"
@@ -935,6 +936,7 @@ LACE_NO_SANITIZE_THREAD
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)
 {
     TD_##NAME *t = (TD_##NAME*)task;
+    (void)t;
     $SAVE_RVAL NAME##_CALL(w, __dq_head $TASK_GET_FROM_t);
 }
 

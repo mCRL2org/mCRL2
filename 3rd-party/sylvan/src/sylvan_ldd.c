@@ -217,6 +217,18 @@ lddmc_refs_init_key(void)
     SET_THREAD_LOCAL(lddmc_refs_key, s);
 }
 
+VOID_TASK_0(lddmc_refs_free)
+{
+    LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
+    if (lddmc_refs_key != NULL) {
+        free(lddmc_refs_key->pbegin);
+        free(lddmc_refs_key->rbegin);
+        free(lddmc_refs_key->sbegin);
+        free(lddmc_refs_key);
+        SET_THREAD_LOCAL(lddmc_refs_key, NULL);
+    }
+}
+
 VOID_TASK_0(lddmc_refs_init_task)
 {
     lddmc_refs_init_key();
@@ -261,13 +273,9 @@ void __attribute__((unused))
 lddmc_refs_pushptr(const MDD *ptr)
 {
     LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
-    if (lddmc_refs_key == 0) {
-        lddmc_refs_init_key();
-        lddmc_refs_pushptr(ptr);
-    } else {
-        *lddmc_refs_key->pcur++ = ptr;
-        if (lddmc_refs_key->pcur == lddmc_refs_key->pend) lddmc_refs_ptrs_up(lddmc_refs_key);
-    }
+    // If you get a segfault here (null dereference) then you're running this from outside Lace threads
+    *lddmc_refs_key->pcur++ = ptr;
+    if (lddmc_refs_key->pcur == lddmc_refs_key->pend) lddmc_refs_ptrs_up(lddmc_refs_key);
 }
 
 void __attribute__((unused))
@@ -281,14 +289,10 @@ MDD __attribute__((unused))
 lddmc_refs_push(MDD lddmc)
 {
     LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
-    if (lddmc_refs_key == 0) {
-        lddmc_refs_init_key();
-        return lddmc_refs_push(lddmc);
-    } else {
-        *(lddmc_refs_key->rcur++) = lddmc;
-        if (lddmc_refs_key->rcur == lddmc_refs_key->rend) return lddmc_refs_refs_up(lddmc_refs_key, lddmc);
-        else return lddmc;
-    }
+    // If you get a segfault here (null dereference) then you're running this from outside Lace threads
+    *(lddmc_refs_key->rcur++) = lddmc;
+    if (lddmc_refs_key->rcur == lddmc_refs_key->rend) return lddmc_refs_refs_up(lddmc_refs_key, lddmc);
+    else return lddmc;
 }
 
 void __attribute__((unused))
@@ -323,13 +327,19 @@ VOID_TASK_DECL_0(lddmc_gc_mark_serialize);
  */
 
 static void
-lddmc_quit()
+lddmc_quit(void)
 {
+    TOGETHER(lddmc_refs_free);
     refs_free(&lddmc_refs);
+
+    if (lddmc_protected_created) {
+        protect_free(&lddmc_protected);
+        lddmc_protected_created = 0;
+    }
 }
 
 void
-sylvan_init_ldd()
+sylvan_init_ldd(void)
 {
     sylvan_register_quit(lddmc_quit);
     sylvan_gc_add_mark(TASK(lddmc_gc_mark_external_refs));

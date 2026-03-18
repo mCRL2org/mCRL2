@@ -148,7 +148,7 @@ void sylvan_mt_set_read_binary(uint32_t type, sylvan_mt_read_binary_cb read_bina
 static int mt_initialized = 0;
 
 static void
-sylvan_mt_quit()
+sylvan_mt_quit(void)
 {
     if (mt_initialized == 0) return;
     mt_initialized = 0;
@@ -160,7 +160,7 @@ sylvan_mt_quit()
 }
 
 void
-sylvan_init_mt()
+sylvan_init_mt(void)
 {
     if (mt_initialized) return;
     mt_initialized = 1;

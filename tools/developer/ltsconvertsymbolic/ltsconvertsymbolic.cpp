@@ -269,6 +269,8 @@ TASK_IMPL_1(bool, ltsconvertsymbolic_task, arguments*, args)
   {
     bisim(args->input);
   }
+
+  return true;
 }
 
 int main(int argc, char* argv[])
