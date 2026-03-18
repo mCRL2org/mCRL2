@@ -107,7 +107,7 @@ Note that the definition of bisimilarity does not have to be changed to deal
 with recursive systems; the co-inductive definition guarantees that the future
 behaviour stays the same.
 
-.. admonition:: Exercise
+.. exercise::
   
    Show that the statespaces from figures :ref:`the ever-lasting coffee machine <coffee-inf1>` and
    :ref:`the unfolded ever-lasting coffee machine <coffee-inf2>` are bisimilar.
@@ -129,7 +129,7 @@ over action formulas inside the `\mccan{\cdot}` and `\mcall{\cdot}` modalities.
 In particular, the Kleene star is a powerful operator that effectively
 abbreviates certain HML formulas of infinite size.
 
-.. admonition:: Definition (Regular HML)
+.. definition:: Regular HML
 
    A *regular HML* formula interpreted over an LTS with action labels `\act`
    adheres to the following syntax in pseudo-BNF, where `A` is an action formula
@@ -150,7 +150,7 @@ regular HML formulas to infinitary HML formulas:
    \mccan{\alpha + \beta}\varphi &= (\mccan{\alpha}\varphi) \lor (\mccan{\beta}\varphi) \\
    \mccan{\alpha^*}\varphi &= \varphi \lor (\mccan{\alpha}\varphi) \lor (\mccan{\alpha\cdot\alpha}\varphi) \lor \ldots
 
-.. admonition:: Exercise
+.. exercise::
 
    Rewrite the regular HML formula `[a+b]\false` to a pure HML formula.
 
@@ -170,7 +170,7 @@ after the least fixpoint operator `\mu`. The µ-calculus (we often leave out the
 for its unintelligability. We will therefore first give the definition and the
 formal semantics, and then elaborate more informally on its use.
 
-.. admonition:: Definition (µ-calculus)
+.. definition:: µ-calculus
 
    A *µ-calculus* formula interpreted over an LTS with action labels `\act` 
    adheres to the following syntax in pseudo-BNF, where `A` is an action formula
@@ -264,7 +264,7 @@ all states. Each next approximation `\hat{X}^{i+1}` is given by
 `\varphi[\hat{X}^i / X]`. If `\hat{X}^{i+1} = \hat{X}^i`, then we have reached
 our fixpoint.
 
-.. admonition:: Example
+.. example::
 
    Consider the following formula, which states that a coffee machine will
    always give coffee after a finite number of steps.
@@ -292,7 +292,7 @@ our fixpoint.
 
 More complicated properties can be expressed by nesting fixpoint operators.
 
-.. admonition:: Exercise
+.. exercise::
 
    What does the formula `\nu X \,.\, \varphi \land \mccan{a}X` express? Can it
    be expressed in regular HML?
@@ -421,7 +421,7 @@ The Boolean condition ``even(v)`` evaluates to ``true`` or ``false``, dependent
 on the value of ``v``. If, the expression ``even(v)`` evaluates to ``true``,
 action ``num(v)`` is possible. 
 
-.. admonition:: Exercise
+.. exercise::
 
    Give a µ-calculus  expression that states that this 
    :ref:`process <nats>` cannot execute actions ``num`` with an odd natural
@@ -503,7 +503,7 @@ that can no longer be visualised on a sheet of paper. However, the interaction
 between the data and process language is quite powerful. 
 
 .. _exercise_data:
-.. admonition:: Exercises
+.. exercises::
 
    #. Is there a labelled transition system with a finite number of states that 
       is bisimilar to the incrementer? If so, give this transition system and
@@ -567,7 +567,7 @@ extend the Hennessy-Milner action formulae with the facilities to
 reason about the possible values these expressions can have. This is
 most naturally done using quantifiers.
 
-.. admonition:: Definition (Action formulae) 
+.. definition:: Action formulae 
 
    An action formula over a set of action names `\act` is an expression that
    adheres to the following syntax in pseudo-BNF, where `a \in \act`, `d` is a
@@ -607,7 +607,7 @@ in the following manner.
       \bigcup\limits_{v \in D} \sem{A}{\varepsilon[d := v]} 
     \end{align*}
 
-.. admonition:: Remark
+.. remark::
 
    Note that the function `\varepsilon` is used to assign concrete values to
    variables and extends easily to expressions. Consider, for instance, the
@@ -639,7 +639,7 @@ from the initial state, no action ``num(v)`` can be followed by an action
 ``num(v')`` for which ``v <= v'``. We can mend this by also extending the
 grammar for Hennessy-Milner logic.
 
-.. admonition:: Definition (First-order HML)
+.. definition:: First-order HML
 
    A *First-order Hennessy-Milner logic* formula interpreted over an LTS with
    action labels `\act` adheres to the following syntax in pseudo-BNF, where `A`
@@ -680,7 +680,7 @@ the formula holds. It is defined as follows.
 We say that `T` *satisfies* `\varphi`, denoted `T \models \varphi`, if and only
 if for all `\varepsilon`, `i \in \sem{\varphi}_T^\varepsilon`.
 
-.. admonition:: Example
+.. example::
 
    The property that from the initial state the `\a{num}(v)` action cannot be
    followed by a `\a{num}(v')` action with `v' \geq v` can now be written in a

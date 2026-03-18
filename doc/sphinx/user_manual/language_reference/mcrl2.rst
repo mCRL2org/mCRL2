@@ -28,7 +28,7 @@ is used.
 
 .. dparser:: mCRL2SpecElt Init mCRL2Spec
 
-.. admonition:: Example
+.. example::
 
    Assume that ``delta`` is a valid process (it is: it is the process that 
    cannot do any action). A fairly minimal valid mCRL2 specification would be 
@@ -36,7 +36,7 @@ is used.
 
      init delta;
 
-.. admonition:: Example
+.. example::
 
    A slightly more elaborate specification that does not use data can be made
    by using constructs from the :doc:`process <process>` language::

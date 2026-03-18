@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from docutils import nodes
+from docutils.parsers.rst import directives
 from sphinx.util.docutils import SphinxDirective
 
 
@@ -21,10 +22,19 @@ class _Mcrl2AdmonitionDirective(SphinxDirective):
     has_content = True
     optional_arguments = 1
     final_argument_whitespace = True
+    option_spec = {
+        "class": directives.class_option,
+        "name": directives.unchanged,
+    }
 
     # Overridden in subclasses
     label = "Admonition"
     css_class = "mcrl2-admonition"
+
+    def _format_title(self, suffix: str) -> str:
+        if suffix.startswith("(") and suffix.endswith(")"):
+            return f"{self.label} {suffix}"
+        return f"{self.label} ({suffix})"
 
     def run(self):
         self.assert_has_content()
@@ -33,11 +43,14 @@ class _Mcrl2AdmonitionDirective(SphinxDirective):
         if self.arguments:
             suffix = self.arguments[0].strip()
             if suffix:
-                title = f"{self.label} {suffix}"
+                title = self._format_title(suffix)
 
         admonition = nodes.admonition()
         admonition["classes"].extend(["mcrl2-admonition", self.css_class])
+        if "class" in self.options:
+            admonition["classes"].extend(self.options["class"])
         admonition += nodes.title(text=title)
+        self.add_name(admonition)
 
         self.state.nested_parse(self.content, self.content_offset, admonition)
         return [admonition]

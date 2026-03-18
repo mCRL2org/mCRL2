@@ -88,7 +88,7 @@ following specification, that is also available as
 .. literalinclude:: files/phonebook1.mcrl2
    :language: mcrl2
 
-.. admonition:: Exercise
+.. exercise::
 
   There are some obvious flaws in the phone book that we have specified. Can you
   find and explain them?
@@ -99,18 +99,18 @@ following specification, that is also available as
    Think about the special meaning of phone number ``p0``, and explain the
    ``findPhone`` function to yourself.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    In this specification, the "special" phone number ``p0`` can be assigned to a
    name freely. Furthermore, a ``findPhone`` action can be performed, but the
    actual phone number is never reported.
 
-.. admonition:: Exercise
+.. exercise::
 
    Fix these issues in the above specification.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    Preventing the assignment of ``p0`` to a name can easily prevented by
@@ -153,7 +153,7 @@ functions, with descriptive names, that take care of the modifications of
 parameters that is done in the process. As a bonus this usually makes it easier
 to change the data structures used in a specification.
 
-.. admonition:: Exercise
+.. exercise::
 
    Modify the specification in :download:`phonebook2b.mcrl2
    <files/phonebook2b.mcrl2>` by adding functions ``emptybook, add_phone,
@@ -168,7 +168,7 @@ to change the data structures used in a specification.
 
    Define equations implementing the above operations.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    A solution to the above exercise is given by the following specification
@@ -181,14 +181,14 @@ It should be noted that, instead of using a function of names to phone numbers,
 we could also have modelled the phone book using a set of pairs of names and
 phone numbers. A model using sets is likely to become complicated in this case.
 
-.. admonition:: Exercise
+.. exercise::
 
    Modify the specification in :download:`phonebook3.mcrl2
    <files/phonebook3.mcrl2>` such that it uses a set of pairs of names and phone
    numbers instead of function from names to phone numbers to store the phone
    numbers internally.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    A possible solution to this exercise is given in
@@ -209,11 +209,11 @@ A suitable property for our specification is the following:
   provided that in the meantime no other phone number has been added for name
   ``n``, and the phone number for name ``n`` has not been deleted".
 
-.. admonition:: Exercise
+.. exercise::
 
    Write the above propery in the µ-calculus.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    A solution (available as :download:`phonebook1.mcf <files/phonebook1.mcf>`)
@@ -222,7 +222,7 @@ A suitable property for our specification is the following:
    .. literalinclude:: files/phonebook1.mcf
       :language: mcrl2
 
-.. admonition:: Exercise
+.. exercise::
 
    Try to verify this property using the tools. What do you observe?
 
@@ -232,7 +232,7 @@ A suitable property for our specification is the following:
    You need to use the tools :ref:`tool-mcrl22lps`, :ref:`tool-lps2pbes` and
    :ref:`tool-pbessolve`.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    We try checking this property using the following command::
@@ -246,13 +246,13 @@ A suitable property for our specification is the following:
    sort ``Name``, but is not able to do so. This indeed makes sense as we have
    not given a specification of names and phone numbers yet.
 
-.. admonition:: Exercise
+.. exercise::
 
    Fix the specification by making sure there are 3 names, and 3 phone numbers
    (apart from the special phone number ``p0``). Rerun the verification on the
    fixed specification.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    The following is a fixed specification (also available as
@@ -267,7 +267,7 @@ A suitable property for our specification is the following:
      $ mcrl22lps phonebook5.mcrl2 | lps2pbes -f phonebook1.mcf | pbessolve
      true
 
-.. admonition:: Exercise
+.. exercise::
 
    Verify whether the following property holds for :download:`phonebook5.mcrl2
    <files/phonebook5.mcrl2>`.
@@ -280,7 +280,7 @@ A suitable property for our specification is the following:
    You first need to formalise this property as a  µ-calculus formula, and then
    verify whether it holds. Explain the outcome of the verification.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    The following formula (available as :download:`phonebook2.mcf <files/phonebook2.mcf>`)
@@ -298,7 +298,7 @@ A suitable property for our specification is the following:
    a phone number for a person that already has a phone number. If a new phone
    number is added for such a person, the original phone number is overwritten.
 
-.. admonition:: Exercise
+.. exercise::
 
    Modify the specification in :download:`phonebook5.mcrl2
    <files/phonebook5.mcrl2>` such that ``addPhone(n,p)`` can only be executed if
@@ -313,7 +313,7 @@ A suitable property for our specification is the following:
    phone number, and that afterwards the phone number of ``n`` has been updated
    to ``p``. Save the result as :file:`phonebook6.mcrl2`
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    A sample solution is the following (:download:`phonebook6.mcrl2
@@ -322,12 +322,12 @@ A suitable property for our specification is the following:
    .. literalinclude:: files/phonebook6.mcrl2
       :language: mcrl2
 
-.. admonition:: Exercise
+.. exercise::
 
    Verify whether your new specification satisfies the property you formulated
    before. Explain the outcome.
 
-.. admonition:: Solution
+.. solution::
 
    For our version of the property, the verification delivers the following
    result::
@@ -335,14 +335,14 @@ A suitable property for our specification is the following:
      $ mcrl22lps phonebook6.mcrl2 | lps2pbes -f phonebook2.mcf | pbessolve
      false
 
-.. admonition:: Exercise
+.. exercise::
 
    If the verification in the previous exercise failed, think about the influence
    of the ``changePhone`` action on the validity of the property you are trying
    to check. Describe the changed property in natural language, give the modal
    µ-calculus formula, and do the verification.
 
-.. admonition:: Solution
+.. solution::
 
    Our modified property is the following (:download:`phonebook3.mcf <files/phonebook3.mcf>`).
 

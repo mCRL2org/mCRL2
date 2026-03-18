@@ -64,7 +64,7 @@ In the following exercises we will extend the specification towards a full
 description of the problem, and we will find out the minimal time needed for
 all adventurers to cross the bridge.
 
-.. admonition:: Exercise
+.. exercise::
 
   Study the stub specification in :download:`bridge-holes.mcrl2
   <files/bridge-holes.mcrl2>`. Then add the process definition for an
@@ -76,7 +76,7 @@ all adventurers to cross the bridge.
   You will have to add action declarations and a process definition
   at the places marked ``%%% TODO (Exercise 1):`` in the mCRL2 specification.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    The clue in the file gives away that an adventurer is identified by her
@@ -118,7 +118,7 @@ all adventurers to cross the bridge.
       :language: mcrl2
       :lines: 33-49
 
-.. admonition:: Exercise
+.. exercise::
 
   Add the four adventurers to the initial process definition.
   Apart from adding parallel processes to the definition, you have to
@@ -135,7 +135,7 @@ all adventurers to cross the bridge.
   * Ensure that only the synchronised actions can occur, using the
     *allow operator*, ``allow``.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    Adding the four adventurers to the initial process definition (which already
@@ -173,7 +173,7 @@ all adventurers to cross the bridge.
       :language: mcrl2
       :lines: 51-
 
-.. admonition:: Exercise
+.. exercise::
 
   Simulate the model using the mCRL2 toolset by executing the following commands:
 
@@ -198,7 +198,7 @@ all adventurers to cross the bridge.
   or incorrect behaviour? If so, try to improve your model of the rope bridge
   and simulate it again.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    A complete specification is the following (also available as
@@ -207,7 +207,7 @@ all adventurers to cross the bridge.
    .. literalinclude:: files/bridge.mcrl2
       :language: mcrl2
 
-.. admonition:: Exercise
+.. exercise::
 
   Generate the state space of your model by executing the
   following command::
@@ -222,7 +222,7 @@ all adventurers to cross the bridge.
 
   $ ltsview bridge.fsm
 
-.. admonition:: Exercise
+.. exercise::
 
   The total amount of time that the adventurers consumed so far, is not yet
   being measured within the model. For this purpose, add a new process to the
@@ -237,7 +237,7 @@ all adventurers to cross the bridge.
   and extend the initial process definition, including the communication and
   allow operators.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    A possible definition of the ``Referee`` process is the following.
@@ -268,14 +268,14 @@ A. It is possible for all adventurers to reach the `finish` side in 17 minutes.
 B. It is not possible for all adventurers to reach the `finish` side in less
    than 17 minutes.
 
-.. admonition:: Exercise
+.. exercise::
 
    Express each of these properties in the modal µ-calculus.
    Add the formulas to the files :download:`formula_A.mcf <files/formula_A.mcf>`
    and :download:`formula_B.mcf <files/formula_B.mcf>`
    using a text editor.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    Property A can e.g. be expressed using the following formula (available as
@@ -299,7 +299,7 @@ B. It is not possible for all adventurers to reach the `finish` side in less
    However, executing :ref:`tool-pbessolve` does not terminate if this
    phrasing is used.
 
-.. admonition:: Exercise
+.. exercise::
 
   Verify the formulas using the toolset.
 
@@ -315,7 +315,7 @@ B. It is not possible for all adventurers to reach the `finish` side in less
 
     $ lps2pbes --formula=formula_X.mcf bridge.lps | pbessolve
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    This boils down to executing the following commands on :file:`bridge.mcrl2`,
@@ -332,7 +332,7 @@ A disadvantage of using PBESs for model checking is that insightful diagnostic
 information is hard to obtain. We shall now verify both properties again using
 the LTS tools.
 
-.. admonition:: Exercise
+.. exercise::
 
   Verify the properties by generating traces as follows. Assuming that the
   action that reports the time is called ``report``, execute::
@@ -351,7 +351,7 @@ the LTS tools.
   This gives an optimal strategy for crossing the bridge in 17 minutes as
   claimed by the computer scientist adventurer.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    The following is the output for our solution::

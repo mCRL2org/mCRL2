@@ -73,12 +73,12 @@ which that equation applies. For example, the last equation defines ``top(s)``
 only for stacks ``s`` for which the guard ``!empty(s)`` holds, i.e. non-empty
 stacks ``s``.
 
-.. admonition:: Exercise
+.. exercise::
 
    Complete the specification for the ``Stack`` data sort using the list
    operations introduced above.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    A possible solution to this exercise is the following (also available as
@@ -103,7 +103,7 @@ stacks ``s``.
     pattern matching in the left hand side of the equation for the non-empty
     stack.
 
-.. admonition:: Exercise
+.. exercise::
 
   Your specification for the Towers of Hanoi puzzle has to be
   parameterized by the number of discs ``N``, such that changing the
@@ -118,7 +118,7 @@ stacks ``s``.
   numbers ``x`` and ``y``. For example, ``build_stack(1,4)`` should return
   ``[1,2,3,4]``. For now, define ``N`` to be equal to 3.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    This can be achieved using the following mCRL2 code:
@@ -155,7 +155,7 @@ all is well, the tool reports the following in the :guilabel:`Output` window::
 
    [08:34:30.908 info]    Result: "[1, 2, 3, 4]"
 
-.. admonition:: Exercise
+.. exercise::
 
    Specify the ``Peg`` process in mCRL2. It should have two parameters:
 
@@ -165,7 +165,7 @@ all is well, the tool reports the following in the :guilabel:`Output` window::
    What actions can a single peg perform? What data parameters must these actions
    have? Declare the actions first and then define the ``Peg`` process in mCRL2.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    A peg can ``receive`` a disc from another peg, and it can ``send`` a disc
@@ -187,12 +187,12 @@ all is well, the tool reports the following in the :guilabel:`Output` window::
       :language: mcrl2
       :lines: 24-29
 
-.. admonition:: Exercise
+.. exercise::
 
   Specify the initial process. Use the ``allow`` and ``comm``
   operators to enforce communication between the ``Peg`` processes.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    The complete specification is given below, where the following actions are used:

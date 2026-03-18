@@ -395,14 +395,14 @@ internally represented using abstract data types. This has the advantage that
 numbers do not have a limited range. In particular, there is no largest number
 in any of these domains, and there are no smallest integers and reals.
 
-.. admonition:: Example
+.. example::
 
    If the mCRL2 toolset encounters the string ``1024`` in a context where a
    ``Pos``, ``Nat``, ``Int`` or ``Real`` was expected, then it will be
    interpreted as the decimal number ``1024`` of sort ``Pos``, as this is the
    most specific type that matches.
 
-.. admonition:: Example
+.. example::
 
    To specify the decimal fractional value ``3.141592``, you will need to
    specify it as a fraction, *i.e.*, ``3141592/1000000``.
@@ -931,7 +931,7 @@ This defines a structured sort which has ``S`` as an alias.
    then two terms that have the same constructor as outermost symbol are
    compared by comparing their arguments lexicographically (left-to-right).
 
-.. admonition:: Example
+.. example::
    :class: example collapse
 
    A well known and illustrative example of a structured sort is the definition
@@ -993,7 +993,7 @@ This defines a structured sort which has ``S`` as an alias.
      eqn is_leaf(t) -> dfs(t) = [value(t)];
          is_node(t) -> dfs(t) = dfs(left(t)) ++ dfs(right(t));
 
-.. admonition:: Example
+.. example::
    :class: example collapse
 
    An often used structured type is the enumerated type that consists of a
@@ -1008,7 +1008,7 @@ This defines a structured sort which has ``S`` as an alias.
    Note that ``idle < running`` and ``running < broken``: there is a strict
    ordering on the constructors of the structured sort.
 
-.. admonition:: Example
+.. example::
    :class: example collapse
 
    A common example is the sort of pairs for given sorts ``A`` and ``B``::

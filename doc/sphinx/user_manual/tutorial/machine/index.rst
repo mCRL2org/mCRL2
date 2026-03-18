@@ -207,7 +207,7 @@ Figure :ref:`fig-mach2`.
 
    Vending machine 2
 
-.. admonition:: Exercise
+.. exercise::
 
    Extend the following mCRL2 specification (:download:`vm02-holes.mcrl2 <files/vm02-holes.mcrl2>`)
    to describe the vending machine sketched above, and save the resulting
@@ -222,7 +222,7 @@ Figure :ref:`fig-mach2`.
    Linearise your specification using :ref:`tool-mcrl22lps`, saving the LPS
    as :file:`vm02.lps`.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    A sample solution is available in :download:`vm02.mcrl2 <files/vm02.mcrl2>`.
@@ -246,7 +246,7 @@ optimization panel of the user interface. Manual manipulation by
 dragging states is also possible. For small examples, increasing
 the natural transition length may provide better results.
 
-.. admonition:: Exercise
+.. exercise::
 
    Prove that your specification satisfies the following properties:
 
@@ -254,7 +254,7 @@ the natural transition length may provide better results.
    b. no chocolate after 10ct only, and
    c. an apple only after 10ct, a chocolate after 20ct.
 
-.. admonition:: Solution
+.. solution::
    :class: collapse
 
    Each of the properties can be expressed as a µ-calculus formula. Possible
@@ -295,7 +295,7 @@ with respect to branching bisimulation after hiding the readies and returns::
 
   $ ltsconvert -ebranching-bisim --tau=out10,out20,readyA,readyC,prod vm02.lts vm02min.lts
 
-.. admonition:: Exercise
+.. exercise::
 
    Compare the LTSs :file:`vm02min.lts` and `vm02-taus.lts` visually using
    :ref:`tool-ltsgraph`.
@@ -305,7 +305,7 @@ Third variation
 A basic version of a vending machine with parametrized actions is available
 in the file :download:`vm03-basic.mcrl2 <files/vm03-basic.mcrl2>`.
 
-.. admonition:: Exercise
+.. exercise::
 
    Modify this specification such that all coins of denomination
    50ct, 20ct, 10ct and 5ct can be inserted. The machine accumulates

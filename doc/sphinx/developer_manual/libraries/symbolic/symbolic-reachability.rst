@@ -18,7 +18,7 @@ We assume that the set of states :math:`S` is a Cartesian product
 
 In other words, states are vectors of :math:`m` elements.
 
-.. admonition:: Definition
+.. definition::
 
    The domain of a relation :math:`R` is defined as
 
@@ -28,7 +28,7 @@ In other words, states are vectors of :math:`m` elements.
 
 
 
-.. admonition:: Definition
+.. definition::
 
    The function :math:`\textsf{next}` returns the successors of an element :math:`x \in S`:
 
@@ -44,7 +44,7 @@ In other words, states are vectors of :math:`m` elements.
 
 
 
-.. admonition:: Definition
+.. definition::
 
    The set of reachable states that can be reached from an initial state :math:`x \in S` is defined as
 
@@ -70,7 +70,7 @@ In order to satisfy these requirements we define a
 read independent parameter as a parameter whose value is always copied (:math:`y_i = x_i`), or mapped to a constant value (:math:`y_i = c`). However, this is not enough for being able to discard the value of such a parameter. In addition, the corresponding transition has
 to be enabled for any value in its domain. We define a write independent parameter as a parameter whose value is always copied  (:math:`y_i = x_i`).
 
-.. admonition:: Definition
+.. definition::
 
    For a vector :math:`x = [x_1, \ldots, x_m] \in S` we define the following notation for updating the element at position :math:`i` with value :math:`y \in S_i`:
 
@@ -94,7 +94,7 @@ to be enabled for any value in its domain. We define a write independent paramet
 
 
 
-.. admonition:: Definition
+.. definition::
 
 
    .. math::
@@ -105,7 +105,7 @@ to be enabled for any value in its domain. We define a write independent paramet
 
 
 
-.. admonition:: Definition
+.. definition::
 
 
    .. math::
@@ -116,7 +116,7 @@ to be enabled for any value in its domain. We define a write independent paramet
 
 
 
-.. admonition:: Definition
+.. definition::
 
 
    .. math::
@@ -126,7 +126,7 @@ to be enabled for any value in its domain. We define a write independent paramet
 
 
 
-.. admonition:: Definition
+.. definition::
 
 
    .. math::
@@ -140,7 +140,7 @@ to be enabled for any value in its domain. We define a write independent paramet
    but they are equivalent. To illustrate these definitions, consider the
    following example.
 
-.. admonition:: Example
+.. example::
 
    Let :math:`S = \mathbb{N} \times \mathbb{N} \times \mathbb{N}` and let :math:`R` be a relation on the variables :math:`x_1`, :math:`x_2` and
    :math:`x_3` defined by the statement
@@ -160,7 +160,7 @@ to be enabled for any value in its domain. We define a write independent paramet
 
 Read and write parameters are defined using
 
-.. admonition:: Definition
+.. definition::
 
    .. math::
 
@@ -168,21 +168,21 @@ Read and write parameters are defined using
       \neg \textsf{read\_independent}(R, i)
 
 
-.. admonition:: Definition
+.. definition::
 
    .. math::
 
       \textsf{write}(R, i) = \neg \textsf{write\_independent}(R, i)
 
 
-.. admonition:: Definition
+.. definition::
 
    .. math::
 
       \textsf{read\_parameters}(R) = \{ i \mid \textsf{read}(R, i) \}
 
 
-.. admonition:: Definition
+.. definition::
 
    .. math::
 
@@ -289,7 +289,7 @@ Reachability of a sparse relation
 
 Suppose that we have a sparse relation :math:`R`, i.e. the number of read and write parameters is small. In that case we can use projections to increase the efficiency.
 
-.. admonition:: Definition
+.. definition::
 
    The projection of a state :math:`x \in S` with respect to a set of parameter indices :math:`\{ i_1, \ldots i_k \}` with :math:`1 \leq i_1 < \ldots < i_k \leq m` is defined as
 
@@ -308,7 +308,7 @@ Suppose that we have a sparse relation :math:`R`, i.e. the number of read and wr
 
    The application of a projected relation to an unprojected state is defined using the function :math:`\textsf{relprod}`. The Sylvan function :math:`\textsf{relprod}` implements this, or something similar.
 
-.. admonition:: Definition
+.. definition::
 
    Let :math:`R` be a relation with read parameter indices :math:`I_r` and write parameter indices :math:`I_w`, let :math:`x \in S` and let
    :math:`\hat{R} = \textsf{project}(R, I_r, I_w)`. Then we define
@@ -507,7 +507,7 @@ If two or more of the relations :math:`R_i` have approximately the same set of r
 In order to
 determine how well two relations match, we define a bit pattern for a relation that contains the read and write information of the parameters.
 
-.. admonition:: Definition
+.. definition::
 
    The read write pattern of a relation :math:`R` is defined as
 
@@ -524,7 +524,7 @@ determine how well two relations match, we define a bit pattern for a relation t
 
    For two read write patterns :math:`p` and :math:`q`, we define :math:`p \lor q` as the bitwise or of both patterns. In other words, if :math:`r = p \lor q`, then :math:`r_i = p_i \lor q_i ~ (1 \leq i \leq 2m)`. Similarly we say that :math:`p \leq q` iff :math:`p_i \leq q_i` for :math:`1 \leq i \leq 2m`.
 
-.. admonition:: Example
+.. example::
 
    Let :math:`S = \mathbb{N} \times \mathbb{N}` and let :math:`T` and :math:`U` be relations on the variables :math:`x`, :math:`y`. Let :math:`T` be defined by
    :math:`(x,y) \rightarrow (x + 1, x)`
@@ -687,7 +687,7 @@ Application: PBES Reachability
 ==============================
 
 
-.. admonition:: Definition
+.. definition::
 
    A parameterised Boolean equation system (PBES) is a sequence of equations as defined by the following grammar:
 
@@ -700,7 +700,7 @@ Application: PBES Reachability
    variable of sort :math:`D \rightarrow B`. The right-hand side :math:`\varphi` is a syntactically monotone predicate formula. Lastly, :math:`d \in V` is a parameter of
    sort :math:`D`.
 
-.. admonition:: Definition
+.. definition::
 
    Let :math:`\mathcal{E}` be a PBES. Then :math:`\mathcal{E}` is in standard recursive form (SRF) iff for all :math:`\sigma_i X_i(d:D) = \varphi) \in \mathcal{E}`, where
    :math:`\varphi` is either disjunctive or conjunctive, i.e., the equation for :math:`X_i` has the shape
