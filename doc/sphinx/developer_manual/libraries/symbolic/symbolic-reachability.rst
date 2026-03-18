@@ -18,36 +18,39 @@ We assume that the set of states :math:`S` is a Cartesian product
 
 In other words, states are vectors of :math:`m` elements.
 
-**Definition.**
-The domain of a relation :math:`R` is defined as
+.. admonition:: Definition
 
-.. math::
+   The domain of a relation :math:`R` is defined as
 
-   \textsf{domain}(R) = \{ x \in S \mid \exists y \in S:  (x,y) \in R \}
+   .. math::
 
-
-
-**Definition.**
-The function :math:`\textsf{next}` returns the successors of an element :math:`x \in S`:
-
-.. math::
-
-   \textsf{next}(R, x) = \{ y \in S \mid (x,y) \in R \}
-
-It can be lifted to a subset :math:`X \subseteq S` using
-
-.. math::
-
-   \textsf{next}(R, X) = \cup \{ \textsf{next}(R, x) \mid x \in X \}
+      \textsf{domain}(R) = \{ x \in S \mid \exists y \in S:  (x,y) \in R \}
 
 
 
-**Definition.**
-The set of reachable states that can be reached from an initial state :math:`x \in S` is defined as
+.. admonition:: Definition
 
-.. math::
+   The function :math:`\textsf{next}` returns the successors of an element :math:`x \in S`:
 
-       \textsf{reachable\_states}(R, x) = \{ y \in S \mid \exists n \geq 0: (x, y) \in R^n \}
+   .. math::
+
+      \textsf{next}(R, x) = \{ y \in S \mid (x,y) \in R \}
+
+   It can be lifted to a subset :math:`X \subseteq S` using
+
+   .. math::
+
+      \textsf{next}(R, X) = \cup \{ \textsf{next}(R, x) \mid x \in X \}
+
+
+
+.. admonition:: Definition
+
+   The set of reachable states that can be reached from an initial state :math:`x \in S` is defined as
+
+   .. math::
+
+          \textsf{reachable\_states}(R, x) = \{ y \in S \mid \exists n \geq 0: (x, y) \in R^n \}
 
 
 
@@ -67,121 +70,123 @@ In order to satisfy these requirements we define a
 read independent parameter as a parameter whose value is always copied (:math:`y_i = x_i`), or mapped to a constant value (:math:`y_i = c`). However, this is not enough for being able to discard the value of such a parameter. In addition, the corresponding transition has
 to be enabled for any value in its domain. We define a write independent parameter as a parameter whose value is always copied  (:math:`y_i = x_i`).
 
-**Definition.**
-For a vector :math:`x = [x_1, \ldots, x_m] \in S` we define the following notation for updating the element at position :math:`i` with value :math:`y \in S_i`:
+.. admonition:: Definition
 
-.. math::
+   For a vector :math:`x = [x_1, \ldots, x_m] \in S` we define the following notation for updating the element at position :math:`i` with value :math:`y \in S_i`:
 
-   x[i=y] = [x_1, \ldots, x_{i-1}, y, x_{i+1}, \ldots, x_m]
+   .. math::
 
-We lift this definition to a set as follows.
-Let :math:`I = \{ i_1, \ldots i_k \}` with :math:`1 \leq i_1 < \ldots < i_k \leq m` be a set of parameter indices, and
-:math:`y \in S_{i_1} \times \ldots \times S_{i_k}`. Then
+      x[i=y] = [x_1, \ldots, x_{i-1}, y, x_{i+1}, \ldots, x_m]
 
-.. math::
+   We lift this definition to a set as follows.
+   Let :math:`I = \{ i_1, \ldots i_k \}` with :math:`1 \leq i_1 < \ldots < i_k \leq m` be a set of parameter indices, and
+   :math:`y \in S_{i_1} \times \ldots \times S_{i_k}`. Then
 
-   x[I = y] = z \text{ with } z_r =
-     \left\{
-       \begin{array}{ll}
-            x_r & \text{if } r \notin I \\
-            y_r & \text{otherwise}
-       \end{array}
-     \right.
+   .. math::
 
-
-
-**Definition.**
-
-.. math::
-
-   \textsf{always\_copy}(R, i) =
-     (\forall (x, y) \in R: x_i = y_i) \land
-     (\forall (x, y) \in R, d \in S_i: (x[i=d], y[i=d]) \in R)
+      x[I = y] = z \text{ with } z_r =
+        \left\{
+          \begin{array}{ll}
+               x_r & \text{if } r \notin I \\
+               y_r & \text{otherwise}
+          \end{array}
+        \right.
 
 
 
-**Definition.**
-
-.. math::
-
-   \textsf{always\_constant}(R, i) =
-     (\exists d \in S_i: \forall (x, y) \in R: y_i = d) \land
-     (\forall (x, y) \in R, d \in S_i: (x[i=d], y) \in R)
+.. admonition:: Definition
 
 
+   .. math::
 
-**Definition.**
-
-.. math::
-
-   \textsf{read\_independent}(R, i) =
-   \textsf{always\_copy}(R, i) \lor \textsf{always\_constant}(R, i)
+      \textsf{always\_copy}(R, i) =
+        (\forall (x, y) \in R: x_i = y_i) \land
+        (\forall (x, y) \in R, d \in S_i: (x[i=d], y[i=d]) \in R)
 
 
 
-**Definition.**
-
-.. math::
-
-   \textsf{write\_independent}(R, i) =
-     \forall (x, y) \in R: x_i = y_i
+.. admonition:: Definition
 
 
+   .. math::
 
-Note that our definitions differ slightly from the ones in [MKBvdP2014]_,
-but they are equivalent. To illustrate these definitions, consider the
-following example.
+      \textsf{always\_constant}(R, i) =
+        (\exists d \in S_i: \forall (x, y) \in R: y_i = d) \land
+        (\forall (x, y) \in R, d \in S_i: (x[i=d], y) \in R)
 
-**Example.**
-Let :math:`S = \mathbb{N} \times \mathbb{N} \times \mathbb{N}` and let :math:`R` be a relation on the variables :math:`x_1`, :math:`x_2` and
-:math:`x_3` defined by the statement
 
-.. math::
 
-   \textsf{if } x_3 > 4 \textsf{ then begin } x_2 := 3 \textsf{ end}
+.. admonition:: Definition
 
-In this case :math:`x_1` is both read and write independent, :math:`x_2` is
-read independent, and :math:`x_3` is write independent. Even though the
-value of :math:`x_3` is always copied, we do not consider it read independent. This is because for values :math:`x_3 \leq 4` the transition is not enabled,
-and this information would be lost if we discard those values from
-the transition relation. Now instead of storing the transition
-:math:`((1,2,5), (1,3,5))`, we only need to store :math:`((5),(3))` to be able
-to derive that a transition from :math:`(1,2,5)` to :math:`(1,3,5)` is possible.
+
+   .. math::
+
+      \textsf{read\_independent}(R, i) =
+      \textsf{always\_copy}(R, i) \lor \textsf{always\_constant}(R, i)
+
+
+
+.. admonition:: Definition
+
+
+   .. math::
+
+      \textsf{write\_independent}(R, i) =
+        \forall (x, y) \in R: x_i = y_i
+
+
+
+   Note that our definitions differ slightly from the ones in [MKBvdP2014]_,
+   but they are equivalent. To illustrate these definitions, consider the
+   following example.
+
+.. admonition:: Example
+
+   Let :math:`S = \mathbb{N} \times \mathbb{N} \times \mathbb{N}` and let :math:`R` be a relation on the variables :math:`x_1`, :math:`x_2` and
+   :math:`x_3` defined by the statement
+
+   .. math::
+
+      \textsf{if } x_3 > 4 \textsf{ then begin } x_2 := 3 \textsf{ end}
+
+   In this case :math:`x_1` is both read and write independent, :math:`x_2` is
+   read independent, and :math:`x_3` is write independent. Even though the
+   value of :math:`x_3` is always copied, we do not consider it read independent. This is because for values :math:`x_3 \leq 4` the transition is not enabled,
+   and this information would be lost if we discard those values from
+   the transition relation. Now instead of storing the transition
+   :math:`((1,2,5), (1,3,5))`, we only need to store :math:`((5),(3))` to be able
+   to derive that a transition from :math:`(1,2,5)` to :math:`(1,3,5)` is possible.
 
 
 Read and write parameters are defined using
 
-**Definition.**
+.. admonition:: Definition
 
-.. math::
+   .. math::
 
-   \textsf{read}(R, i) =
-   \neg \textsf{read\_independent}(R, i)
-
-
-
-**Definition.**
-
-.. math::
-
-   \textsf{write}(R, i) = \neg \textsf{write\_independent}(R, i)
+      \textsf{read}(R, i) =
+      \neg \textsf{read\_independent}(R, i)
 
 
+.. admonition:: Definition
 
-**Definition.**
+   .. math::
 
-.. math::
-
-   \textsf{read\_parameters}(R) = \{ i \mid \textsf{read}(R, i) \}
-
+      \textsf{write}(R, i) = \neg \textsf{write\_independent}(R, i)
 
 
-**Definition.**
+.. admonition:: Definition
 
-.. math::
+   .. math::
 
-   \textsf{write\_parameters}(R) = \{ i \mid \textsf{write}(R, i) \}
+      \textsf{read\_parameters}(R) = \{ i \mid \textsf{read}(R, i) \}
 
+
+.. admonition:: Definition
+
+   .. math::
+
+      \textsf{write\_parameters}(R) = \{ i \mid \textsf{write}(R, i) \}
 
 
 Now let us consider an mCRL2 summand :math:`P` of the following shape:
@@ -284,45 +289,47 @@ Reachability of a sparse relation
 
 Suppose that we have a sparse relation :math:`R`, i.e. the number of read and write parameters is small. In that case we can use projections to increase the efficiency.
 
-**Definition.**
-The projection of a state :math:`x \in S` with respect to a set of parameter indices :math:`\{ i_1, \ldots i_k \}` with :math:`1 \leq i_1 < \ldots < i_k \leq m` is defined as
+.. admonition:: Definition
 
-.. math::
+   The projection of a state :math:`x \in S` with respect to a set of parameter indices :math:`\{ i_1, \ldots i_k \}` with :math:`1 \leq i_1 < \ldots < i_k \leq m` is defined as
 
-   \textsf{project}(x, \{ i_1, \ldots, i_k \} ) = (x_{i_1}, \ldots, x_{i_k})
+   .. math::
 
-
-We lift this to a relation :math:`R` with read parameter indices :math:`I_r` and write parameter indices :math:`I_w` as follows:
-
-.. math::
-
-   \textsf{project}(R, I_r, I_w) = \{ (\textsf{project}(x,I_r), \textsf{project}(y,I_w)) \mid (x,y) \in R \}
+      \textsf{project}(x, \{ i_1, \ldots, i_k \} ) = (x_{i_1}, \ldots, x_{i_k})
 
 
+   We lift this to a relation :math:`R` with read parameter indices :math:`I_r` and write parameter indices :math:`I_w` as follows:
 
-The application of a projected relation to an unprojected state is defined using the function :math:`\textsf{relprod}`. The Sylvan function :math:`\textsf{relprod}` implements this, or something similar.
+   .. math::
 
-**Definition.**
-Let :math:`R` be a relation with read parameter indices :math:`I_r` and write parameter indices :math:`I_w`, let :math:`x \in S` and let
-:math:`\hat{R} = \textsf{project}(R, I_r, I_w)`. Then we define
-
-.. math::
-
-       \textsf{relprod}(\hat{R}, x, I_r, I_w) =
-           \{
-             x[I_w = \hat{y}] \mid \textsf{project}(x, I_r) = \hat{x} \land
-             (\hat{x}, \hat{y}) \in \hat{R}
-           \}
+      \textsf{project}(R, I_r, I_w) = \{ (\textsf{project}(x,I_r), \textsf{project}(y,I_w)) \mid (x,y) \in R \}
 
 
-.. math::
 
-       \textsf{relprev}(\hat{R}, y, I_r, I_w, X) =
-           \{
-              x \in X \mid y \in \textsf{relprod}(\hat{R}, x, I_r, I_w)
-           %   y[I_r = \hat{x}] \mid \textsf{project}(y, I_w) = \hat{y} \land
-           %   (\hat{x}, \hat{y}) \in \hat{R}
-           \}
+   The application of a projected relation to an unprojected state is defined using the function :math:`\textsf{relprod}`. The Sylvan function :math:`\textsf{relprod}` implements this, or something similar.
+
+.. admonition:: Definition
+
+   Let :math:`R` be a relation with read parameter indices :math:`I_r` and write parameter indices :math:`I_w`, let :math:`x \in S` and let
+   :math:`\hat{R} = \textsf{project}(R, I_r, I_w)`. Then we define
+
+   .. math::
+
+          \textsf{relprod}(\hat{R}, x, I_r, I_w) =
+              \{
+                x[I_w = \hat{y}] \mid \textsf{project}(x, I_r) = \hat{x} \land
+                (\hat{x}, \hat{y}) \in \hat{R}
+              \}
+
+
+   .. math::
+
+          \textsf{relprev}(\hat{R}, y, I_r, I_w, X) =
+              \{
+                 x \in X \mid y \in \textsf{relprod}(\hat{R}, x, I_r, I_w)
+              %   y[I_r = \hat{x}] \mid \textsf{project}(y, I_w) = \hat{y} \land
+              %   (\hat{x}, \hat{y}) \in \hat{R}
+              \}
 
 
 
@@ -500,32 +507,34 @@ If two or more of the relations :math:`R_i` have approximately the same set of r
 In order to
 determine how well two relations match, we define a bit pattern for a relation that contains the read and write information of the parameters.
 
-**Definition.**
-The read write pattern of a relation :math:`R` is defined as
+.. admonition:: Definition
 
-.. math::
+   The read write pattern of a relation :math:`R` is defined as
 
-   \textsf{read\_write\_pattern}(R) = [r_1, w_1, \ldots, r_m, w_m]
+   .. math::
 
-with
+      \textsf{read\_write\_pattern}(R) = [r_1, w_1, \ldots, r_m, w_m]
 
-.. math::
+   with
 
-     r_i = \textsf{read}(R, i) \text{ and } w_i = \textsf{write}(R, i) \hspace{1cm} (1 \leq i \leq m)
+   .. math::
+
+        r_i = \textsf{read}(R, i) \text{ and } w_i = \textsf{write}(R, i) \hspace{1cm} (1 \leq i \leq m)
 
 
-For two read write patterns :math:`p` and :math:`q`, we define :math:`p \lor q` as the bitwise or of both patterns. In other words, if :math:`r = p \lor q`, then :math:`r_i = p_i \lor q_i ~ (1 \leq i \leq 2m)`. Similarly we say that :math:`p \leq q` iff :math:`p_i \leq q_i` for :math:`1 \leq i \leq 2m`.
+   For two read write patterns :math:`p` and :math:`q`, we define :math:`p \lor q` as the bitwise or of both patterns. In other words, if :math:`r = p \lor q`, then :math:`r_i = p_i \lor q_i ~ (1 \leq i \leq 2m)`. Similarly we say that :math:`p \leq q` iff :math:`p_i \leq q_i` for :math:`1 \leq i \leq 2m`.
 
-**Example.**
-Let :math:`S = \mathbb{N} \times \mathbb{N}` and let :math:`T` and :math:`U` be relations on the variables :math:`x`, :math:`y`. Let :math:`T` be defined by
-:math:`(x,y) \rightarrow (x + 1, x)`
-and let :math:`U` be defined by
-:math:`x, y := x + 2, y`.
-In this case :math:`x` is a read independent parameter in both :math:`T` and :math:`U`, but according to the definition :math:`x` is not a read independent parameter of
-:math:`T \cup U`.
-Hence :math:`\textsf{read\_write\_pattern}(T) = 1101`,
-:math:`\textsf{read\_write\_pattern}(U) = 1100`, and
-:math:`\textsf{read\_write\_pattern}(T \cup U) = 1111`.
+.. admonition:: Example
+
+   Let :math:`S = \mathbb{N} \times \mathbb{N}` and let :math:`T` and :math:`U` be relations on the variables :math:`x`, :math:`y`. Let :math:`T` be defined by
+   :math:`(x,y) \rightarrow (x + 1, x)`
+   and let :math:`U` be defined by
+   :math:`x, y := x + 2, y`.
+   In this case :math:`x` is a read independent parameter in both :math:`T` and :math:`U`, but according to the definition :math:`x` is not a read independent parameter of
+   :math:`T \cup U`.
+   Hence :math:`\textsf{read\_write\_pattern}(T) = 1101`,
+   :math:`\textsf{read\_write\_pattern}(U) = 1100`, and
+   :math:`\textsf{read\_write\_pattern}(T \cup U) = 1111`.
 
 
 Row subsumption
@@ -678,33 +687,35 @@ Application: PBES Reachability
 ==============================
 
 
-**Definition.**
-A parameterised Boolean equation system (PBES) is a sequence of equations as defined by the following grammar:
+.. admonition:: Definition
 
-.. math::
+   A parameterised Boolean equation system (PBES) is a sequence of equations as defined by the following grammar:
 
-   \mathcal{E} ::= \emptyset \mid (\mu X(d:D) = \varphi) \mathcal{E} \mid (\mu X(d:D) = \varphi) \mathcal{E}
+   .. math::
+
+      \mathcal{E} ::= \emptyset \mid (\mu X(d:D) = \varphi) \mathcal{E} \mid (\mu X(d:D) = \varphi) \mathcal{E}
 
 
-where :math:`\emptyset` is the empty PBES, :math:`\mu` and :math:`\nu` denote the least and greatest fixpoint operator, respectively, and :math:`X \in \chi` is a predicate
-variable of sort :math:`D \rightarrow B`. The right-hand side :math:`\varphi` is a syntactically monotone predicate formula. Lastly, :math:`d \in V` is a parameter of
-sort :math:`D`.
+   where :math:`\emptyset` is the empty PBES, :math:`\mu` and :math:`\nu` denote the least and greatest fixpoint operator, respectively, and :math:`X \in \chi` is a predicate
+   variable of sort :math:`D \rightarrow B`. The right-hand side :math:`\varphi` is a syntactically monotone predicate formula. Lastly, :math:`d \in V` is a parameter of
+   sort :math:`D`.
 
-**Definition.**
-Let :math:`\mathcal{E}` be a PBES. Then :math:`\mathcal{E}` is in standard recursive form (SRF) iff for all :math:`\sigma_i X_i(d:D) = \varphi) \in \mathcal{E}`, where
-:math:`\varphi` is either disjunctive or conjunctive, i.e., the equation for :math:`X_i` has the shape
+.. admonition:: Definition
 
-.. math::
+   Let :math:`\mathcal{E}` be a PBES. Then :math:`\mathcal{E}` is in standard recursive form (SRF) iff for all :math:`\sigma_i X_i(d:D) = \varphi) \in \mathcal{E}`, where
+   :math:`\varphi` is either disjunctive or conjunctive, i.e., the equation for :math:`X_i` has the shape
 
-     \sigma_i X_i(d:D) = \bigvee\limits_{j \in J_i} \exists e_j: E_j . f_{ij}(d,e_j) \land X_{g_{ij}}(h_{ij}(d, e_j))
+   .. math::
 
-or
+        \sigma_i X_i(d:D) = \bigvee\limits_{j \in J_i} \exists e_j: E_j . f_{ij}(d,e_j) \land X_{g_{ij}}(h_{ij}(d, e_j))
 
-.. math::
+   or
 
-     \sigma_i X_i(d:D) = \bigwedge\limits_{j \in J_i} \forall e_j: E_j . f_{ij}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j)),
+   .. math::
 
-where :math:`d = (d_1, \ldots, d_m)`.
+        \sigma_i X_i(d:D) = \bigwedge\limits_{j \in J_i} \forall e_j: E_j . f_{ij}(d,e_j) \implies X_{g_{ij}}(h_{ij}(d, e_j)),
+
+   where :math:`d = (d_1, \ldots, d_m)`.
 
 
 PBES Reachability
