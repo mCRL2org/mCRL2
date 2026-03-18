@@ -5,7 +5,7 @@
 .. _release: https://www.mcrl2.org/release/user_manual/download.html
 .. _version: download.html
 
-.. admonition:: Release
+.. release::
 
    This website was last updated on: |today|.
 
@@ -23,7 +23,7 @@ mCRL2 is a formal specification language with an associated toolset. The
 toolset can be used for modelling, validation and verification of
 concurrent systems and protocols. It can be run on Windows, Linux, Apple
 MacOS and FreeBSD.
-       
+
 The toolset supports a collection of tools for linearisation, simulation,
 state-space exploration and generation and tools to optimise and analyse
 specifications. Moreover, state spaces can be manipulated, visualised and
@@ -43,7 +43,7 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 .. note::
 
    The Coursera lectures are now freely available on Youtube, divided in four parts. It is intended
-   that the full course including exercises will soon be available on openlearnity.com. 
+   that the full course including exercises will soon be available on openlearnity.com.
 
    - `Automata and behavioural equivalences <https://www.youtube.com/watch?v=1brp80vNSy4&list=PLTlBz41EgXBTRm4jcsRwKWoTazWxiieNi>`_.
    - `Model process behaviour <https://www.youtube.com/watch?v=1yP9kMpkv38&list=PLTlBz41EgXBTmbFWpxMsZRT2vcnxxC6fF>`_.
@@ -64,14 +64,14 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
       :target: https://link.springer.com/book/10.1007/978-3-031-23008-0
 
    A new introductory book appeared, describing the mCRL2 specification language, the
-   modal mu-calculus and the extensive toolset around these. The book is full of examples, varying from 
+   modal mu-calculus and the extensive toolset around these. The book is full of examples, varying from
    games to distributed algorithms. It is shown how such games can be solved,
-   and how the (in)correctness of such algorithms can be understood. 
+   and how the (in)correctness of such algorithms can be understood.
 
 .. note::
 
-   FORTE 2022 Best Artefact Award: Process Algebra Can Save Lives: Static Analysis of XACML Access 
-   Control Policies using mCRL2. By Arshad, Horne, Johansen, Owe and Willemse. 
+   FORTE 2022 Best Artefact Award: Process Algebra Can Save Lives: Static Analysis of XACML Access
+   Control Policies using mCRL2. By Arshad, Horne, Johansen, Owe and Willemse.
 
 .. note::
   .. image:: /_static/tacas-ae.*
