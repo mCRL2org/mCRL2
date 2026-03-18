@@ -11,13 +11,5 @@ structures respectively. However, since these are all closely related we put the
 documentation together here.
 
 
-List Decision Diagrams
-----------------------
-
-See the document below for a pseudocode of algorithms for LDDs.
-
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Notes on list decision diagrams <latex/list_decision_diagrams.tex>`
-
+.. include:: list_decision_diagrams.rst
 .. include:: zielonka.rst
