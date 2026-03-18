@@ -256,13 +256,13 @@ You can open the state space in :ref:`tool-ltsgraph` if you want to study it::
 If you want to verify that one of the cans can eventually perform a ``done``
 action, you need to modify the modal formula to include a parameter.
 
-.. admonition:: Exercise
+.. exercise::
 
    Modify the µ-calculus formula in :download:`watercan2.mcf <files/watercan2.mcf>`
    such that the formula holds if a ``done(N)`` action is reachable for some
    name ``N``. Verify that the property holds for :file:`watercan3.mcrl2`.
    
-.. admonition:: Solution
+.. solution::
    :class: collapse
    
    The following formula (available as :download:`watercan3.mcf <files/watercan3.mcf>`)

@@ -16,7 +16,7 @@ An LDD represents a set of lists, as follows:
 
 In [MBvdP2008]_ an LDD is defined as
 
-.. admonition:: Definition (List decision diagram)
+.. definition:: List decision diagram
 
 	A List decision diagram (LDD) is a
 	directed acyclic graph with the following properties:
@@ -100,12 +100,12 @@ This computes the union of the represented sets of vectors.
 	  \EndFunction
 	  \end{algorithmic}
 
-.. admonition:: Lemma
+.. lemma::
 
 	 For all LDDs :math:`A` and :math:`B` it holds that
 	 :math:`\sem{ \textsc{union}(A, B) } = \sem{ A } \cup \sem{ B }`.
 
-.. admonition:: Proof
+.. proof::
 
 	 Pick arbitrary LDDs :math:`A` and :math:`B`. Proof by induction on the
 	 structure of :math:`A` and :math:`B`.
@@ -214,7 +214,7 @@ numbers :math:`x_0\,x_1,\cdots\,x_n`.
 	  \EndFunction
 	  \end{algorithmic}
 
-.. admonition:: Lemma
+.. lemma::
 
 	For all LDDs :math:`A` and sequences :math:`x_0\,x_1\,\cdots\,x_n` it holds
 	that :math:`\sem{ \textsc{project}(A, x_0\,\cdots\,x_n) }` is

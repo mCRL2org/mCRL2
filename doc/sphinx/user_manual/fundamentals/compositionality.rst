@@ -12,7 +12,7 @@ labelled transition systems using the *process algebra* mCRL2. To this
 end, we need to extend our definition of a labelled transition system a bit
 by adding a final state.
 
-.. admonition:: Definition (LTS)
+.. definition:: LTS
 
    A *labelled transition system* (LTS) is a tuple `\langle S, \act,
    \rightarrow, i, f \rangle`, where
@@ -201,7 +201,7 @@ on processes in mCRL2.
   behaves like ``Q`` otherwise. It is allowed to write ``C -> P`` for ``C -> P
   <> delta``. 
 
-  .. admonition:: Example
+  .. example::
 
      The process ``true -> coin <> coffee`` is bisimilar to ``coin``, and ``false
      -> coin <> coffee`` is bisimilar to ``coffee``.

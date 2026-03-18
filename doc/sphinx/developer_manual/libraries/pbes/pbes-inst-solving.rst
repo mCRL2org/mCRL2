@@ -22,7 +22,7 @@ A structure graph, see [KRW12]_, is a graph structure that captures BESs in thei
 
 .. _strcture-graph:
 
-.. admonition:: Definition (Structure graph)
+.. definition:: Structure graph
 
     A structure graph is a tuple `(V,E,d,r)` with `V` a set of nodes containing proposition variables, `E \subseteq V \times V` a set of edges, `r:V\rightarrow \mathbb{N}` a partial function that assigns a rank to each node, and `d:V\rightarrow \{\blacktriangle ,\blacktriangledown ,\top ,\bot \}` a partial function that assigns a decoration to each node. 
     A structure graph is formally defined using the following SOS rules, where `\mathtt{B}` is the BES and `\bnd(\mathtt{B})` its bound proposition variables, `X` is proposition variable, `f,f',g,g'` are proposition formulae and `\sigma \in \{\mu, \nu\}` is the fixpoint:
@@ -471,7 +471,7 @@ Function `SG^0` uses functions :ref:`decoration <decoration>` `\dec` and :ref:`r
 
 .. _decoration:
 
-.. admonition:: Definition (Decoration)
+.. definition:: Decoration
 
     Let `\varphi, \psi` and `\psi_i` for `0<i < n+1`, `\dec` is a partial function that assigns a decoration to a node in `V`, where `-` stands for undefined:
 
@@ -494,7 +494,7 @@ Function `SG^0` uses functions :ref:`decoration <decoration>` `\dec` and :ref:`r
 
 .. _rank:
 
-.. admonition:: Definition (Rank)
+.. definition:: Rank
 
   Every predicate variable bound in PBES `\E` is assigned a rank, where `\rnk_{\E}(X) \leq \rnk_{\E}(Y)` if `X` occurs before `Y` in `\E`, and `\rnk_{\E}(X)` is even is and only if `X` is labelled with a greatest fixpoint. 
   
@@ -504,7 +504,7 @@ Function `SG^0` is defined as follows:
 
 .. _sg0:
 
-.. admonition:: Definition (:math:`SG^0`)
+.. definition:: :math:`SG^0`
 
     .. math::
 
@@ -525,7 +525,7 @@ We define `SG^1` as follows:
 
 .. _sg1:
 
-.. admonition:: Definition (:math:`SG^1`)
+.. definition:: :math:`SG^1`
 
     .. math::
 
@@ -2203,7 +2203,7 @@ Before defining Algorithm :ref:`SolveRecursiveStrategies <ziel-expl-tau>` which 
 
 .. _strategy:
 
-.. admonition:: Definition (:math:`\tau(U)`) 
+.. definition:: :math:`\tau(U)` 
 
     Let `U \subseteq V`, we define the strategy for nodes in set `U`, denoted as `\tau(U)`, such that:
 
@@ -2218,7 +2218,7 @@ Before defining Algorithm :ref:`SolveRecursiveStrategies <ziel-expl-tau>` which 
 
 .. _priority:
 
-.. admonition:: Definition (:math:`f_1 \lceil f_2`)
+.. definition:: :math:`f_1 \lceil f_2`
 
     Let `f_1, f_2: S \rightarrow T` be partial functions and `x \in S`, we define the priority function `f_1 \lceil f_2` as follows:
 

@@ -34,7 +34,7 @@ behaviour by saying that the behaviour of a system can be described by a
 structures that have a convenient graphical representation, and we will use them
 to give a semantics to the mCRL2 processes we present.
 
-.. admonition:: Definition (LTS)
+.. definition:: LTS
 
    A *labelled transition system* (LTS) is a tuple `\langle S, \act,
    \rightarrow, i \rangle`, where
@@ -52,7 +52,7 @@ is marked by an incoming arrow that has no source state. For `s,s'\in S` and
 
 .. _example1:
    
-.. admonition:: Example
+.. example::
 
    Consider a simple coffee machine that accepts a single coin and then
    dispenses coffee. This system could be modelled by the LTS with 
@@ -181,7 +181,7 @@ a good time to note that ``.`` binds stronger than ``+``, so
 (``coin . good``). In the corresponding LTS, this choice is visualised
 as a state that has two outgoing arrows.
 
-.. admonition:: Exercise
+.. exercise::
 
    Give a specification for a machine that sells tea for 10¢ and coffee for 20¢.
 
@@ -200,7 +200,7 @@ always holds. Note that in particular this is true if the system cannot do an
 system is able to (as opposed to *must*) do an `\a{a}` action, after which
 `\varphi` holds.
 
-.. admonition:: Definition (Action formula)
+.. definition:: Action formula
 
    An action formula over a set of actions `\act` is an expression that
    adheres to the following syntax in pseudo-BNF, where `a\in \act`.
@@ -224,12 +224,12 @@ An action formula `A` over `\act` is associated with a set `\sem{A} \subseteq
    \sem{\overline{A}} &= \act \setminus \sem{A} \\
    \sem{A \cup B} &= \sem{A} \cup \sem{B}
 
-.. admonition:: Example
+.. example::
 
    Let `\act=\{a, b, c\}`. Then the formula `\overline{a}\cap\overline{b}`
    corresponds to `\{ c \}`.
 
-.. admonition:: Definition (HML)
+.. definition:: HML
 
    A *Hennessy-Milner logic* formula interpreted over an LTS with action labels
    `\act` adheres to the following syntax in pseudo-BNF, where `A` is an action
@@ -268,7 +268,7 @@ defined as follows.
 We say that `T` *satisfies* `\varphi`, denoted `T \models \varphi`, if and only
 if `i \in \sem{\varphi}_T`.
 
-.. admonition:: Example
+.. example::
 
    The formula `\mccan{\a{coin}}\mccan{\a{good}}\true` can be used to express
    that there is a possibility that a system dispenses good coffee after
@@ -276,14 +276,14 @@ if `i \in \sem{\varphi}_T`.
    :ref:`another coffee machine <coffee2>`, because when you insert one coin, the machine will only
    provide you with bad coffee. 
 
-.. admonition:: Example
+.. example::
 
    The formula `\mcall{\a{coin}}\mccan{\a{bad} \cup \a{coin}}\true` does hold
    for the machine in :ref:`another coffee machine <coffee2>`; it says that always after
    accepting a coin, the machine might (is able to) dispense bad coffee or
    accept another coin.
 
-.. admonition:: Exercises
+.. exercises::
 
    #. Show that an arbitrary LTS can never satisfy `\mccan{a}\false`, and that
       it will always satisfy `\mcall{a}\true`.
@@ -305,7 +305,7 @@ systems. In fact, it was shown that two systems are related by the equivalence
 described below if and only if there is no HML formula that is true for one and
 false for the other.
 
-.. admonition:: Definition (Strong bisimulation)
+.. definition:: Strong bisimulation
 
    Let `\langle S_1, \act, \rightarrow_1, i_1 \rangle` and `\langle S_2, \act, \rightarrow_2, i_2 \rangle` be labelled transition systems. A relation `{\R} \subseteq S_1\times S_2` is a strong bisimulation relation if and only if for `(s, s') \in {\R}` (also written `s \R s'`) we have for all `a \in \act`:
 
@@ -317,7 +317,7 @@ s'`, if there is a strong bisimulation relation `\R` such that `s \R s'`. Two
 LTSs are strongly bisimilar iff their initial states are bisimilar.
 
 .. _exercise-bisim:
-.. admonition:: Example
+.. example::
 
    In the following diagram, the dotted lines indicate the pairs of nodes that
    are related by a relation `R`.
@@ -374,7 +374,7 @@ only one state, thus giving rise to a natural *statespace reduction*: if in
 an LTS `T` we merge all states that are bisimilar, the resulting LTS `T'` is
 bisimilar to `T`.
 
-.. admonition:: Example
+.. example::
 
    In the following diagram, the dotted lines indicate the pairs of states that
    are related by a relation `R`.
@@ -417,7 +417,7 @@ bisimilar to `T`.
    smaller, bisimilar transition system (namely the left transition system of
    the :ref:`previous bisimulation example <exercise-bisim>`).
 
-.. admonition:: Exercise
+.. exercise::
 
    Are the following two process definitions bisimilar?
    ::
