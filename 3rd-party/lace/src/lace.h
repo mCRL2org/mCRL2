@@ -326,7 +326,7 @@ void lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head);
 
 #if LACE_PIE_TIMES
 /* High resolution timer */
-static inline uint64_t gethrtime()
+static inline uint64_t gethrtime(void)
 {
     uint32_t hi, lo;
     asm volatile ("rdtsc" : "=a"(lo), "=d"(hi) :: "memory");
@@ -335,7 +335,7 @@ static inline uint64_t gethrtime()
 #endif
 
 #if LACE_COUNT_EVENTS
-void lace_count_reset();
+void lace_count_reset(void);
 void lace_count_report_file(FILE *file);
 #endif
 
@@ -771,7 +771,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                 
 }                                                                                     \
                                                                                       \
 static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
-RTYPE NAME##_NEWFRAME()                                                               \
+RTYPE NAME##_NEWFRAME(void)                                                           \
 {                                                                                     \
     Task _t;                                                                          \
     TD_##NAME *t = (TD_##NAME *)&_t;                                                  \
@@ -783,7 +783,7 @@ RTYPE NAME##_NEWFRAME()                                                         
 }                                                                                     \
                                                                                       \
 static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
-void NAME##_TOGETHER()                                                                \
+void NAME##_TOGETHER(void)                                                            \
 {                                                                                     \
     Task _t;                                                                          \
     TD_##NAME *t = (TD_##NAME *)&_t;                                                  \
@@ -794,7 +794,7 @@ void NAME##_TOGETHER()                                                          
 }                                                                                     \
                                                                                       \
 static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
-RTYPE NAME##_RUN()                                                                    \
+RTYPE NAME##_RUN(void)                                                                \
 {                                                                                     \
     Task _t;                                                                          \
     TD_##NAME *t = (TD_##NAME *)&_t;                                                  \
@@ -806,7 +806,7 @@ RTYPE NAME##_RUN()                                                              
 }                                                                                     \
                                                                                       \
 static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
-RTYPE NAME##_RUNEX()                                                                  \
+RTYPE NAME##_RUNEX(void)                                                              \
 {                                                                                     \
     Task _t;                                                                          \
     TD_##NAME *t = (TD_##NAME *)&_t;                                                  \
@@ -873,6 +873,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head );                                            \
 }                                                                                     \
                                                                                       \
@@ -946,7 +947,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                 
 }                                                                                     \
                                                                                       \
 static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
-void NAME##_NEWFRAME()                                                                \
+void NAME##_NEWFRAME(void)                                                            \
 {                                                                                     \
     Task _t;                                                                          \
     TD_##NAME *t = (TD_##NAME *)&_t;                                                  \
@@ -958,7 +959,7 @@ void NAME##_NEWFRAME()                                                          
 }                                                                                     \
                                                                                       \
 static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
-void NAME##_TOGETHER()                                                                \
+void NAME##_TOGETHER(void)                                                            \
 {                                                                                     \
     Task _t;                                                                          \
     TD_##NAME *t = (TD_##NAME *)&_t;                                                  \
@@ -969,7 +970,7 @@ void NAME##_TOGETHER()                                                          
 }                                                                                     \
                                                                                       \
 static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
-void NAME##_RUN()                                                                     \
+void NAME##_RUN(void)                                                                 \
 {                                                                                     \
     Task _t;                                                                          \
     TD_##NAME *t = (TD_##NAME *)&_t;                                                  \
@@ -981,7 +982,7 @@ void NAME##_RUN()                                                               
 }                                                                                     \
                                                                                       \
 static inline __attribute__((unused)) LACE_NO_SANITIZE_THREAD                         \
-void NAME##_RUNEX()                                                                   \
+void NAME##_RUNEX(void)                                                               \
 {                                                                                     \
     Task _t;                                                                          \
     TD_##NAME *t = (TD_##NAME *)&_t;                                                  \
@@ -1048,6 +1049,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head );                                                      \
 }                                                                                     \
                                                                                       \
@@ -1226,6 +1228,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1);                           \
 }                                                                                     \
                                                                                       \
@@ -1401,6 +1404,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1);                                     \
 }                                                                                     \
                                                                                       \
@@ -1579,6 +1583,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2);          \
 }                                                                                     \
                                                                                       \
@@ -1754,6 +1759,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2);                    \
 }                                                                                     \
                                                                                       \
@@ -1932,6 +1938,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3);\
 }                                                                                     \
                                                                                       \
@@ -2107,6 +2114,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3);   \
 }                                                                                     \
                                                                                       \
@@ -2285,6 +2293,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4);\
 }                                                                                     \
                                                                                       \
@@ -2460,6 +2469,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4);\
 }                                                                                     \
                                                                                       \
@@ -2638,6 +2648,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5);\
 }                                                                                     \
                                                                                       \
@@ -2813,6 +2824,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5);\
 }                                                                                     \
                                                                                       \
@@ -2991,6 +3003,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6);\
 }                                                                                     \
                                                                                       \
@@ -3166,6 +3179,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6);\
 }                                                                                     \
                                                                                       \
@@ -3344,6 +3358,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7);\
 }                                                                                     \
                                                                                       \
@@ -3519,6 +3534,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7);\
 }                                                                                     \
                                                                                       \
@@ -3697,6 +3713,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8);\
 }                                                                                     \
                                                                                       \
@@ -3872,6 +3889,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8);\
 }                                                                                     \
                                                                                       \
@@ -4050,6 +4068,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9);\
 }                                                                                     \
                                                                                       \
@@ -4225,6 +4244,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9);\
 }                                                                                     \
                                                                                       \
@@ -4403,6 +4423,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
     t->d.res = NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10);\
 }                                                                                     \
                                                                                       \
@@ -4578,6 +4599,7 @@ LACE_NO_SANITIZE_THREAD                                                         
 void NAME##_WRAP(WorkerP *w, Task *__dq_head, Task *task)                             \
 {                                                                                     \
     TD_##NAME *t = (TD_##NAME*)task;                                                  \
+    (void)t;                                                                          \
      NAME##_CALL(w, __dq_head , t->d.args.arg_1, t->d.args.arg_2, t->d.args.arg_3, t->d.args.arg_4, t->d.args.arg_5, t->d.args.arg_6, t->d.args.arg_7, t->d.args.arg_8, t->d.args.arg_9, t->d.args.arg_10);\
 }                                                                                     \
                                                                                       \

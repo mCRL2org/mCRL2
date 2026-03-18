@@ -52,8 +52,7 @@ if(SYLVAN_GMP)
 endif()
 
 set_target_properties(sylvan PROPERTIES VERSION ${sylvan_VERSION} SOVERSION ${sylvan_VERSION_MAJOR})
-# ML: Disabled public headers, not necessary for us.
-# set_target_properties(sylvan PROPERTIES PUBLIC_HEADER "${SYLVAN_HDRS}")
+set_target_properties(sylvan PROPERTIES PUBLIC_HEADER "${SYLVAN_HDRS}")
 
 option(SYLVAN_ENABLE_PIC "Build Sylvan with -fPIC (e.g. for linking into shared libs)" OFF)
 set_target_properties(sylvan PROPERTIES POSITION_INDEPENDENT_CODE ${SYLVAN_ENABLE_PIC})
@@ -197,10 +196,4 @@ if(SYLVAN_GMP)
     install(FILES ${PROJECT_SOURCE_DIR}/cmake/FindGMP.cmake
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sylvan)
 endif()
-
-# ML: This breaks because lace is not exported.
-# export(EXPORT sylvan-targets
-#     FILE ${CMAKE_CURRENT_BINARY_DIR}/cmake/sylvan-targets.cmake
-#     NAMESPACE sylvan::
-# )
 

@@ -276,6 +276,18 @@ mtbdd_refs_init_key(void)
     SET_THREAD_LOCAL(mtbdd_refs_key, s);
 }
 
+VOID_TASK_0(mtbdd_refs_free)
+{
+    LOCALIZE_THREAD_LOCAL(mtbdd_refs_key, mtbdd_refs_internal_t);
+    if (mtbdd_refs_key != NULL) {
+        free(mtbdd_refs_key->pbegin);
+        free(mtbdd_refs_key->rbegin);
+        free(mtbdd_refs_key->sbegin);
+        free(mtbdd_refs_key);
+        SET_THREAD_LOCAL(mtbdd_refs_key, NULL);
+    }
+}
+
 VOID_TASK_0(mtbdd_refs_init_task)
 {
     mtbdd_refs_init_key();
@@ -321,13 +333,9 @@ void __attribute__((unused))
 mtbdd_refs_pushptr(const MTBDD *ptr)
 {
     LOCALIZE_THREAD_LOCAL(mtbdd_refs_key, mtbdd_refs_internal_t);
-    if (mtbdd_refs_key == 0) {
-        mtbdd_refs_init_key();
-        mtbdd_refs_pushptr(ptr);
-    } else {
-        *mtbdd_refs_key->pcur++ = ptr;
-        if (mtbdd_refs_key->pcur == mtbdd_refs_key->pend) mtbdd_refs_ptrs_up(mtbdd_refs_key);
-    }
+    // If you get a segfault here (null dereference) then you're running this from outside Lace threads
+    *mtbdd_refs_key->pcur++ = ptr;
+    if (mtbdd_refs_key->pcur == mtbdd_refs_key->pend) mtbdd_refs_ptrs_up(mtbdd_refs_key);
 }
 
 void __attribute__((unused))
@@ -341,14 +349,10 @@ MTBDD __attribute__((unused))
 mtbdd_refs_push(MTBDD mtbdd)
 {
     LOCALIZE_THREAD_LOCAL(mtbdd_refs_key, mtbdd_refs_internal_t);
-    if (mtbdd_refs_key == 0) {
-        mtbdd_refs_init_key();
-        return mtbdd_refs_push(mtbdd);
-    } else {
-        *(mtbdd_refs_key->rcur++) = mtbdd;
-        if (mtbdd_refs_key->rcur == mtbdd_refs_key->rend) return mtbdd_refs_refs_up(mtbdd_refs_key, mtbdd);
-        else return mtbdd;
-    }
+    // If you get a segfault here (null dereference) then you're running this from outside Lace threads
+    *(mtbdd_refs_key->rcur++) = mtbdd;
+    if (mtbdd_refs_key->rcur == mtbdd_refs_key->rend) return mtbdd_refs_refs_up(mtbdd_refs_key, mtbdd);
+    else return mtbdd;
 }
 
 void __attribute__((unused))
@@ -383,8 +387,9 @@ mtbdd_refs_sync(MTBDD result)
 static int mtbdd_initialized = 0;
 
 static void
-mtbdd_quit()
+mtbdd_quit(void)
 {
+    TOGETHER(mtbdd_refs_free);
     refs_free(&mtbdd_refs);
     if (mtbdd_protected_created) {
         protect_free(&mtbdd_protected);
@@ -395,7 +400,7 @@ mtbdd_quit()
 }
 
 void
-sylvan_init_mtbdd()
+sylvan_init_mtbdd(void)
 {
     sylvan_init_mt();
 
