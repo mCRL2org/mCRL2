@@ -1,12 +1,51 @@
 List Decision Diagrams
 ----------------------
 
-It can be compactly represented using an LDD, see the figure below. For our
-applications we use the LDD implementation that is part of the Sylvan multi-core
-framework for decision diagrams, see [DijkP17]_.
+A List Decision Diagram (LDD) is a DAG. It has two types of leaf nodes, :math:`\textsf{false}` and :math:`\textsf{true}`, or 0 and 1. The third type of node has a label :math:`a` and two successors \var{down} and \var{right}, or :math:`=` and :math:`>`.
+An LDD represents a set of lists, as follows:
+
+.. math::
+
+   \begin{array}{lll}
+       \sem{\textsf{false}} & = & \emptyset \\
+       \sem{\textsf{true}} & = & \{ \emptylist \} \\
+       \sem{\textsf{node}(v, \var{down}, \var{right})} & = &
+          \{ vx \mid x \in \sem{\var{down}} \} \cup \sem{\var{right}}
+   \end{array}
+
+
+In [MBvdP2008]_ an LDD is defined as
+
+.. admonition:: Definition (List decision diagram)
+
+	A List decision diagram (LDD) is a
+	directed acyclic graph with the following properties:
+
+	1. There is a single root node and two terminal nodes 0 and 1.
+	2. Each non-terminal node :math:`p` is labeled with a value :math:`v`, denoted by :math:`val(p) = v`,
+		and has two outgoing edges labeled :math:`=` and :math:`>` that point to nodes denoted by
+		:math:`p[x_i = v]` and :math:`p[x_i > v]`.
+	3. For all non-terminal nodes :math:`p`, :math:`p[x_i = v] \neq 0` and :math:`p[x_i > v] \neq 1`.
+	4. For all non-terminal nodes :math:`p`, :math:`val(p[x_i > v]) > v`.
+	5. There are no duplicate nodes.
+
+
+LDDs are well suited to store lists that differ in only a few positions.
+Consider the transition relation :math:`R` on :math:`S = \mathbb{N}^{10}` with initial state
+:math:`x = [0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0]`, that is defined by
+
+.. math::
+
+   \textsf{if } x_5 > 0 \textsf{ then begin } x_5 := x_5 - 1; x_6 := x_6 + 1 \textsf{ end}
+
+
+Clearly this is a sparse relation with :math:`\textsf{used}(R) = \{ 5, 6 \}`. The state space
+consists of 11 states that differ only in the 5th and 6th parameter. It can be compactly
+represented using an LDD, see the figure below. For our applications we use the LDD implementation that is part of the Sylvan multi-core framework for decision diagrams, see
+[vDvdP2017]_.
 
 .. figure:: latex/ldd_if_then.png
-	:width: 15cm
+   :width: 15cm
 
 For an LDD :math:`A` we use :math:`\mathit{down}(A)` to denote
 :math:`A[x_i = v]` and :math:`\mathit{right}(A)` to denote :math:`A[x_i > v]`.
@@ -61,68 +100,70 @@ This computes the union of the represented sets of vectors.
 	  \EndFunction
 	  \end{algorithmic}
 
-**Lemma.**
-For all LDDs :math:`A` and :math:`B` it holds that
-:math:`\sem{ \textsc{union}(A, B) } = \sem{ A } \cup \sem{ B }`.
+.. admonition:: Lemma
 
-**Proof.**
-Pick arbitrary LDDs :math:`A` and :math:`B`. Proof by induction on the
-structure of :math:`A` and :math:`B`.
-For all LDDs :math:`A'` and :math:`B'` we assume that
-:math:`\sem{ \textsc{union}(A', right(B')) } = \sem{ A' } \cup \sem{ right(B') }`
-and
-:math:`\sem{ \textsc{union}(A', down(B')) } = \sem{ A' } \cup \sem{ down(B') }`.
-Furthermore,
-:math:`\sem{ \textsc{union}(\mathit{right}(A'), B') } = \sem{ \mathit{right}(A') } \cup \sem{ B' }`
-and
-:math:`\sem{ \textsc{union}(down(A'), B') } = \sem{ \mathit{down}(A') } \cup \sem{ B' }`.
+	 For all LDDs :math:`A` and :math:`B` it holds that
+	 :math:`\sem{ \textsc{union}(A, B) } = \sem{ A } \cup \sem{ B }`.
 
-Base case.
-The LDD :math:`A` is either :math:`\textsf{true}` or :math:`\textsf{false}`.
-Then :math:`B` is either :math:`\textsf{true}` or :math:`\textsf{false}` due to
-the equal height assumption. In both cases t he terminal conditions ensure
-correctness. For example
-:math:`\sem{ \textsc{union}(\textsf{true}, \textsf{false}) } = \sem{ \textsf{true} }`
-and :math:`\{[]\} \cup \emptyset = \{[]\}`. Similarly, for the case where
-:math:`B` is either :math:`\textsf{true}` or :math:`\textsf{false}`.
+.. admonition:: Proof
 
-Inductive step.
+	 Pick arbitrary LDDs :math:`A` and :math:`B`. Proof by induction on the
+	 structure of :math:`A` and :math:`B`.
+	 For all LDDs :math:`A'` and :math:`B'` we assume that
+	 :math:`\sem{ \textsc{union}(A', right(B')) } = \sem{ A' } \cup \sem{ right(B') }`
+	 and
+	 :math:`\sem{ \textsc{union}(A', down(B')) } = \sem{ A' } \cup \sem{ down(B') }`.
+	 Furthermore,
+	 :math:`\sem{ \textsc{union}(\mathit{right}(A'), B') } = \sem{ \mathit{right}(A') } \cup \sem{ B' }`
+	 and
+	 :math:`\sem{ \textsc{union}(down(A'), B') } = \sem{ \mathit{down}(A') } \cup \sem{ B' }`.
 
-* Case :math:`val(A) < val(B)`.
+	 Base case.
+	 The LDD :math:`A` is either :math:`\textsf{true}` or :math:`\textsf{false}`.
+	 Then :math:`B` is either :math:`\textsf{true}` or :math:`\textsf{false}` due to
+	 the equal height assumption. In both cases t he terminal conditions ensure
+	 correctness. For example
+	 :math:`\sem{ \textsc{union}(\textsf{true}, \textsf{false}) } = \sem{ \textsf{true} }`
+	 and :math:`\{[]\} \cup \emptyset = \{[]\}`. Similarly, for the case where
+	 :math:`B` is either :math:`\textsf{true}` or :math:`\textsf{false}`.
 
-  Since :math:`A` is an LDD we know that
-  :math:`\mathit{val}(A) < \mathit{val}(\mathit{right}(A))`. Therefore, we know
-  that
-  :math:`\sem{ node(val(A), down(A), \textsc{union}(right(A), B)) }`
-  is equal to
-  :math:`\{val(A)\,x \mid x \in \sem{ down(A) }\} \cup \sem{ \textsc{union}(right(A), B) }`.
-  It follows that
-  :math:`\sem{ \textsc{union}(right(A), B) }` is equal to
-  :math:`\sem{ right(A) } \cup \sem{ B }`.
-  From which we can derive
-  :math:`\sem{ A } \cup \sem{ B }`.
+	 Inductive step.
 
-* Case :math:`val(A) = val(B)`.
+	 * Case :math:`val(A) < val(B)`.
 
-  Since :math:`A` is an LDD we know that
-  :math:`\mathit{val}(A) < \mathit{val}(\mathit{right}(A))` and similarly
-  because :math:`B` is an LDD we know that
-  :math:`\mathit{val}(A) < \mathit{val}(\mathit{right}(B))`.
-  Therefore, the following node is valid and
-  :math:`\sem{ node(val(A), \textsc{union}(down(A), down(B)), \textsc{union}(right(A), \mathit{right}(B))) }`
-  is equal to
-  :math:`\{val(A)\,x \mid x \in \sem{ \textsc{union}(down(A), down(B)) } \}`:math:`\cup \sem{ \textsc{union}(right(A), right(B)) }` .
-  It follows that the interpretation
-  :math:`\{val(A)\,x \mid x \in \sem{ \textsc{union}(down(A), down(B)) }\}`
-  is equal to
-  :math:`\{val(A)\,x \mid x \in \sem{ down(A) }\} \cup \{val(A)\,x \mid x \in \sem{ down(B) }\}`
-  and
-  :math:`\sem{ \textsc{union}(right(A), right(B)) }` is equal to
-  :math:`\sem{ (right(A) } \cup \sem{ right(B)) }`.
+		 Since :math:`A` is an LDD we know that
+		 :math:`\mathit{val}(A) < \mathit{val}(\mathit{right}(A))`. Therefore, we know
+		 that
+		 :math:`\sem{ node(val(A), down(A), \textsc{union}(right(A), B)) }`
+		 is equal to
+		 :math:`\{val(A)\,x \mid x \in \sem{ down(A) }\} \cup \sem{ \textsc{union}(right(A), B) }`.
+		 It follows that
+		 :math:`\sem{ \textsc{union}(right(A), B) }` is equal to
+		 :math:`\sem{ right(A) } \cup \sem{ B }`.
+		 From which we can derive
+		 :math:`\sem{ A } \cup \sem{ B }`.
 
-* Case :math:`val(A) > val(B)`.
+	 * Case :math:`val(A) = val(B)`.
 
-  Similar to the :math:`val(A) < val(B)` case.
+		 Since :math:`A` is an LDD we know that
+		 :math:`\mathit{val}(A) < \mathit{val}(\mathit{right}(A))` and similarly
+		 because :math:`B` is an LDD we know that
+		 :math:`\mathit{val}(A) < \mathit{val}(\mathit{right}(B))`.
+		 Therefore, the following node is valid and
+		 :math:`\sem{ node(val(A), \textsc{union}(down(A), down(B)), \textsc{union}(right(A), \mathit{right}(B))) }`
+		 is equal to
+		 :math:`\{val(A)\,x \mid x \in \sem{ \textsc{union}(down(A), down(B)) } \}`:math:`\cup \sem{ \textsc{union}(right(A), right(B)) }` .
+		 It follows that the interpretation
+		 :math:`\{val(A)\,x \mid x \in \sem{ \textsc{union}(down(A), down(B)) }\}`
+		 is equal to
+		 :math:`\{val(A)\,x \mid x \in \sem{ down(A) }\} \cup \{val(A)\,x \mid x \in \sem{ down(B) }\}`
+		 and
+		 :math:`\sem{ \textsc{union}(right(A), right(B)) }` is equal to
+		 :math:`\sem{ (right(A) } \cup \sem{ right(B)) }`.
+
+	 * Case :math:`val(A) > val(B)`.
+
+		 Similar to the :math:`val(A) < val(B)` case.
 
 We can show that :math:`|\textsc{union}(A, B)|` for any LDDs :math:`A` and
 :math:`B` is at most :math:`|A| + |B|`.
@@ -173,11 +214,12 @@ numbers :math:`x_0\,x_1,\cdots\,x_n`.
 	  \EndFunction
 	  \end{algorithmic}
 
-**Lemma.**
-For all LDDs :math:`A` and sequences :math:`x_0\,x_1\,\cdots\,x_n` it holds
-that :math:`\sem{ \textsc{project}(A, x_0\,\cdots\,x_n) }` is
-equal to
-:math:`\{\mathit{project}(v, x_0\,\cdots\,x_n) \in \sem{ A }\}`.
+.. admonition:: Lemma
+
+	For all LDDs :math:`A` and sequences :math:`x_0\,x_1\,\cdots\,x_n` it holds
+	that :math:`\sem{ \textsc{project}(A, x_0\,\cdots\,x_n) }` is
+	equal to
+	:math:`\{\mathit{project}(v, x_0\,\cdots\,x_n) \in \sem{ A }\}`.
 
 Note that for a sequence of :math:`|A|` zeroes
 :math:`\textsc{project}(A, 0\,\cdots\,0)` is equal to :math:`\textsf{true}` and

@@ -211,54 +211,6 @@ For such a summand [MKBvdP2014]_ defines the following approximations of read an
 Indeed we have :math:`\textsf{read}_s(P, i) \Rightarrow \textsf{read}(P, i)` and
 :math:`\textsf{write}_s(P, i) \Rightarrow \textsf{write}(P, i)`.
 
-List Decision Diagrams
-======================
-
-
-A List Decision Diagram (LDD) is a DAG. It has two types of leaf nodes, :math:`\textsf{false}` and :math:`\textsf{true}`, or 0 and 1. The third type of node has a label :math:`a` and two successors \var{down} and \var{right}, or :math:`=` and :math:`>`.
-An LDD represents a set of lists, as follows:
-
-.. math::
-
-   \begin{array}{lll}
-       \sem{\textsf{false}} & = & \emptyset \\
-       \sem{\textsf{true}} & = & \{ \emptylist \} \\
-       \sem{\textsf{node}(v, \var{down}, \var{right})} & = &
-          \{ vx \mid x \in \sem{\var{down}} \} \cup \sem{\var{right}}
-   \end{array}
-
-
-In [MBvdP2008]_ an LDD is defined as
-
-**Definition.**
-A List decision diagram (LDD) is a
-directed acyclic graph with the following properties:
-
-1. There is a single root node and two terminal nodes 0 and 1.
-2. Each non-terminal node :math:`p` is labeled with a value :math:`v`, denoted by :math:`val(p) = v`,
-   and has two outgoing edges labeled :math:`=` and :math:`>` that point to nodes denoted by
-   :math:`p[x_i = v]` and :math:`p[x_i > v]`.
-3. For all non-terminal nodes :math:`p`, :math:`p[x_i = v] \neq 0` and :math:`p[x_i > v] \neq 1`.
-4. For all non-terminal nodes :math:`p`, :math:`val(p[x_i > v]) > v`.
-5. There are no duplicate nodes.
-
-
-LDDs are well suited to store lists that differ in only a few positions.
-Consider the transition relation :math:`R` on :math:`S = \mathbb{N}^{10}` with initial state
-:math:`x = [0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0]`, that is defined by
-
-.. math::
-
-   \textsf{if } x_5 > 0 \textsf{ then begin } x_5 := x_5 - 1; x_6 := x_6 + 1 \textsf{ end}
-
-
-Clearly this is a sparse relation with :math:`\textsf{used}(R) = \{ 5, 6 \}`. The state space
-consists of 11 states that differ only in the 5th and 6th parameter. It can be compactly
-represented using an LDD, see the figure below. For our applications we use the LDD implementation that is part of the Sylvan multi-core framework for decision diagrams, see
-[vDvdP2017]_.
-
-.. figure:: latex/ldd_if_then.png
-   :width: 15cm
 
 Reachability
 ============
