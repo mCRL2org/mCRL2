@@ -53,24 +53,108 @@ div.dparser .admonition-title {
   font-family: monospace;
 }
 
-.admonition .admonition-title { background-color: var(--mcrl2-title); }
-.rst-content .admonition { background: var(--mcrl2-light); }
-
 .rst-content .toctree-wrapper ul li > * {
   margin-top: 0px;
 }
 
-.admonition.admonition-release .admonition-title { display: none; }
-.admonition.admonition-release { margin: 1em 0; font-family: sans-serif; text-align: center; background-color:var(--mcrl2-light); }
+.admonition.admonition-release .admonition-title,
+.admonition.mcrl2-release .admonition-title {
+  display: none;
+}
 
-.admonition.admonition-exercise .admonition-title { background-color: var(--mcrl2-title); }
-.admonition.admonition-exercise { background-color: var(--mcrl2-light); }
+.admonition.admonition-release,
+.admonition.mcrl2-release {
+  margin: 1em 0;
+  font-family: sans-serif;
+  text-align: center;
+  background-color: var(--mcrl2-light);
+}
 
-.admonition.admonition-example .admonition-title { background-color: var(--mcrl2-title); }
-.admonition.admonition-example { background-color: var(--mcrl2-light); }
+/* Retain custom mCRL2 colors for domain-specific admonitions */
+.admonition.admonition-exercise .admonition-title,
+.admonition.mcrl2-exercise .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.admonition-exercise,
+.admonition.mcrl2-exercise {
+  background-color: var(--mcrl2-light);
+}
 
-.admonition.admonition-definition-lts .admonition-title { background-color: var(--mcrl2-title); }
-.admonition.admonition-definition-lts { background-color: var(--mcrl2-light); }
+.admonition.admonition-example .admonition-title,
+.admonition.mcrl2-example .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.admonition-example,
+.admonition.mcrl2-example {
+  background-color: var(--mcrl2-light);
+}
+
+.admonition.admonition-definition .admonition-title,
+.admonition.mcrl2-definition .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.admonition-definition,
+.admonition.mcrl2-definition {
+  background-color: var(--mcrl2-light);
+}
+
+.admonition.admonition-lemma .admonition-title,
+.admonition.mcrl2-lemma .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.admonition-lemma,
+.admonition.mcrl2-lemma {
+  background-color: var(--mcrl2-light);
+}
+
+.admonition.admonition-proof .admonition-title,
+.admonition.mcrl2-proof .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.admonition-proof,
+.admonition.mcrl2-proof {
+  background-color: var(--mcrl2-light);
+}
+
+.admonition.admonition-definition-lts .admonition-title,
+.admonition.mcrl2-definition-lts .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.admonition-definition-lts,
+.admonition.mcrl2-definition-lts {
+  background-color: var(--mcrl2-light);
+}
+
+/* mCRL2 custom admonitions without legacy counterparts */
+.admonition.mcrl2-solution .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.mcrl2-solution {
+  background-color: var(--mcrl2-light);
+}
+
+.admonition.mcrl2-remark .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.mcrl2-remark {
+  background-color: var(--mcrl2-light);
+}
+
+.admonition.mcrl2-exercises .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.mcrl2-exercises {
+  background-color: var(--mcrl2-light);
+}
+
+.admonition.mcrl2-disclaimer .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.mcrl2-disclaimer {
+  background-color: var(--mcrl2-light);
+}
+
+
 
 .invisible {
     display: none;
@@ -104,13 +188,6 @@ img.frontpage-logo { margin-top: 1.5em; }
   white-space: nowrap;
 }
 
-.rst-content .note {
-  background: var(--mcrl2-light);
-}
-.rst-content .note .admonition-title {
-  background: var(--mcrl2-title);
-}
-
 /* Customise the side bars */
 .wy-menu-vertical p.caption {
   color: var(--mcrl2-title);
@@ -126,7 +203,7 @@ img.frontpage-logo { margin-top: 1.5em; }
 
 /*.admonition.admonition-ex .admonition-title { background-color: var(--mcrl2-title); }
 .admonition.admonition-ex { background-color: var(--mcrl2-light-yellow); }*/
-  
+
 /* this is used to add some space below tikz */
 .math.math-tikz {
   text-align: center;

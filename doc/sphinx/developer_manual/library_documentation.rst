@@ -3,10 +3,10 @@ mCRL2 library documentation
 
 Atermpp
 =========
-     
+
 .. toctree::
    :maxdepth: 1
-   
+
    libraries/atermpp/aterm_library
 
 
@@ -16,13 +16,13 @@ Atermpp
 
 Core
 ======
-     
+
 .. toctree::
    :maxdepth: 1
-   
+
    libraries/core/core_library
    libraries/core/common_functionality
-   
+
 
 *PDF documentation*
 
@@ -30,10 +30,10 @@ Core
 
 Data
 ======
-     
+
 .. toctree::
    :maxdepth: 1
-   
+
    libraries/data/data_library
 
 
@@ -51,7 +51,7 @@ GUI
 
 .. toctree::
    :maxdepth: 1
-   
+
    libraries/gui/gui_library
 
 
@@ -61,10 +61,10 @@ GUI
 
 LPS
 ======
-     
+
 .. toctree::
    :maxdepth: 1
-   
+
    libraries/lps/lps_library
 
 
@@ -82,10 +82,10 @@ LPS
 
 LTS
 =====
-     
+
 .. toctree::
    :maxdepth: 1
-   
+
    libraries/lts/lts_library
 
 
@@ -97,18 +97,18 @@ LTS
 
 Modal formula
 ================
-     
+
 .. toctree::
    :maxdepth: 1
-   
+
    libraries/modal_formula/modal_formulas_library
 
 PBES
 ======
-     
+
 .. toctree::
    :maxdepth: 1
-   
+
    libraries/pbes/pbes_library
    libraries/pbes/pbes-inst-solving
 
@@ -124,10 +124,10 @@ PBES
 
 Process
 =========
-     
+
 .. toctree::
    :maxdepth: 1
-   
+
    libraries/process/process_library
 
 
@@ -138,7 +138,7 @@ Process
 
 SMT
 ======
-     
+
 .. toctree::
    :maxdepth: 1
 
@@ -146,15 +146,15 @@ SMT
 
 Utilities
 ===========
-          
+
 .. toctree::
    :maxdepth: 1
 
    libraries/utilities/utilities_library
-   
+
 Symbolic
 ===========
-          
+
 .. toctree::
    :maxdepth: 1
 
@@ -164,7 +164,7 @@ Source code reference
 =====================
 
 We generate the complete source code reference using Doxygen, which can be viewed `here <../doxygen/index.html>`_.
-   
+
 Code generation
 ===============
 A substantial part of the mCRL2 code is generated using scripts. This section gives an overview of the scripts and their purpose.
