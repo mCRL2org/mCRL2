@@ -12,4 +12,14 @@ documentation together here.
 
 
 .. include:: list_decision_diagrams.rst
-.. include:: zielonka.rst
+
+Symbolic Reachability
+---------------------
+
+See :doc:`symbolic-reachability`.
+
+.. toctree::
+	:maxdepth: 1
+
+	symbolic-reachability
+	zielonka
