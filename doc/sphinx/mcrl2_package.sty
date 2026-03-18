@@ -11,12 +11,16 @@
 % Used by parity game algorithms
 \newcommand{\attrsym}{\ensuremath{\textit{Attr}}}
 \newcommand{\attr}[3][]{\ensuremath{\attrsym^{#1}_{#2}(#3)}}
+\newcommand{\pre}[3][]{\ensuremath{\textsf{pre}(#2,#3)}}
+\newcommand{\cpre}[4][]{\ensuremath{\textsf{cpre}_{#2}(#3,#4)}}
+\newcommand{\spre}[4][]{\ensuremath{\textsf{spre}_{#2}(#3,#4)}}
 
 
 \newcommand{\seq}{\cdot}
 \newcommand{\alt}{+}
 \newcommand{\nat}{\mathbb{N}}
 \newcommand{\bool}{\mathbb{B}}
+\newcommand{\var}[1]{\textit{#1}}
 \newcommand{\true}{\mathbf{true}}
 \newcommand{\false}{\mathbf{false}}
 \renewcommand{\a}[1]{\textit{#1}}
@@ -26,6 +30,9 @@
 \newcommand{\mcall}[1]{[ #1 ]}
 
 \newcommand{\sem}[1]{[\![ #1 ]\!]}
+\providecommand{\interpret}[1]{\sem{#1}}
+\providecommand{\emptylist}{[\:]}
+\providecommand{\pnot}[1]{\bar{#1}}
 
 % Bisimulation
 \newcommand{\R}{\mathrel{R}}
