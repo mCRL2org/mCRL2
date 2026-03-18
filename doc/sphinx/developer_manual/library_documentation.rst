@@ -160,11 +160,6 @@ Symbolic
 
    libraries/symbolic/symbolic_library
 
-
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Symbolic Reachability using LDDs <libraries/symbolic/latex/symbolic-reachability.tex>`
-
 Source code reference
 =====================
 
