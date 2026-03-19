@@ -468,33 +468,36 @@ class explorer: public abortable
         id_generator.clear();
       }
 
-      if (m_options.use_projections && !summand.I_r.empty())
+      if constexpr (ProjectionPolicy::enabled)
       {
-        // Compute the projected state p
-        lps::state p;
-        lps::make_state(
-          p,
-          summand.I_r.begin(),
-          summand.I_r.size(),
-          [&](data::data_expression& target, std::size_t j)
+        if (m_options.use_projections && !summand.I_r.empty())
+        {
+          // Compute the projected state p
+          lps::state p;
+          lps::make_state(
+            p,
+            summand.I_r.begin(),
+            summand.I_r.size(),
+            [&](data::data_expression& target, std::size_t j)
+            {
+              sigma.apply(m_process_parameters[j], target);
+            }
+          );
+
+          auto it = summand.projection_cache.find(p);
+          if (it == summand.projection_cache.end())
           {
-            sigma.apply(m_process_parameters[j], target);
+            // Fill the cache with projected transitions
+            std::vector<projected_transition> projected;
+            enumerate_projected(projected);
+            it = summand.projection_cache.emplace(p, std::move(projected)).first;
           }
-        );
 
-        auto it = summand.projection_cache.find(p);
-        if (it == summand.projection_cache.end())
-        {
-          // Fill the cache with projected transitions
-          std::vector<projected_transition> projected;
-          enumerate_projected(projected);
-          it = summand.projection_cache.emplace(p, std::move(projected)).first;
-        }
-
-        // Consume the cached projected transitions
-        for (const projected_transition& t: it->second)
-        {
-          consume_projected(t);
+          // Consume the cached projected transitions
+          for (const projected_transition& t: it->second)
+          {
+            consume_projected(t);
+          }
         }
       }
       else if (summand.cache_strategy == caching::none)
