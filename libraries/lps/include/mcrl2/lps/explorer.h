@@ -27,6 +27,7 @@
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/explorer_options.h"
+#include "mcrl2/lps/explorer_read_write_projections.h"
 #include "mcrl2/lps/explorer_todo_set.h"
 #include "mcrl2/lps/explorer_utilities.h"
 #include "mcrl2/lps/find_representative.h"
@@ -38,7 +39,21 @@
 
 namespace mcrl2::lps {
 
-template <bool Stochastic, bool Timed, typename Specification>
+// This is used to add projections to the explorer class without impact on the current version.
+struct no_projection
+{
+  static constexpr bool enabled = false;
+};
+
+struct with_projection
+{
+  static constexpr bool enabled = true;
+};
+
+template <bool Stochastic,
+          bool Timed,
+          typename Specification,
+          typename ProjectionPolicy = no_projection>
 class explorer: public abortable
 {
   public:
@@ -188,6 +203,67 @@ class explorer: public abortable
       }
     }
 
+    template <typename DataExpressionSequence, typename IndexSequence>
+    void compute_projected_state(
+        lps::state& result,
+        const DataExpressionSequence& next_state,
+        const IndexSequence& I_w,
+        data::mutable_indexed_substitution<>& sigma,
+        const data::rewriter& rewr) const
+    {
+      lps::make_state(
+        result,
+        I_w.begin(),
+        I_w.size(),
+        [&](data::data_expression& target, std::size_t i)
+        {
+          rewr(target, next_state[i], sigma);
+        }
+      );
+    }
+
+    template <typename DataExpressionSequence, typename IndexSequence>
+    void compute_stochastic_projected_state(
+        stochastic_state& result,
+        const stochastic_distribution& distribution,
+        const DataExpressionSequence& next_state,
+        const IndexSequence& I_w,
+        data::mutable_indexed_substitution<>& sigma,
+        const data::rewriter& rewr,
+        data::enumerator_algorithm<>& enumerator) const
+    {
+      result.clear();
+      if (distribution.is_defined())
+      {
+        enumerator.enumerate<enumerator_element>(
+          distribution.variables(),
+          distribution.distribution(),
+          sigma,
+          [&](const enumerator_element& p)
+          {
+            p.add_assignments(distribution.variables(), sigma, rewr);
+            result.probabilities.push_back(p.expression());
+            result.states.emplace_back();
+            compute_projected_state(result.states.back(), next_state, I_w, sigma, rewr);
+            return false;
+          },
+          [](const data::data_expression& x) { return x == data::sort_real::real_zero(); }
+        );
+        data::remove_assignments(sigma, distribution.variables());
+
+        if (m_options.check_probabilities)
+        {
+          check_stochastic_state(result, rewr);
+        }
+      }
+      else
+      {
+        result.probabilities.push_back(data::sort_real::real_one());
+        result.states.emplace_back();
+        compute_projected_state(result.states.back(), next_state, I_w, sigma, rewr);
+      }
+    }
+
     /// Rewrite action a, and put it back in place.
     lps::multi_action rewrite_action(
                              const lps::multi_action& a,
@@ -240,6 +316,45 @@ class explorer: public abortable
       }
     }
 
+    template <typename EmitSolution>
+    void enumerate_solutions(
+      const explorer_summand& summand,
+      data::mutable_indexed_substitution<>& sigma,
+      data::rewriter& rewr,
+      data::data_expression& condition,
+      data::enumerator_algorithm<>& enumerator,
+      EmitSolution emit_solution
+    )
+    {
+      rewr(condition, summand.condition, sigma);
+      if (data::is_false(condition))
+      {
+        return;
+      }
+
+      if (summand.variables.empty())
+      {
+        // No enumeration needed
+        check_enumerator_solution(condition, summand, sigma, rewr);
+        emit_solution(data::data_expression_list{});
+      }
+      else
+      {
+        enumerator.enumerate<enumerator_element>(
+          summand.variables,
+          condition,
+          sigma,
+          [&](const enumerator_element& p)
+          {
+            check_enumerator_solution(p.expression(), summand, sigma, rewr);
+            emit_solution(p.assign_expressions(summand.variables, rewr));
+            return false;
+          },
+          data::is_false
+        );
+      }
+    }
+
     // Generates outgoing transitions for a summand, and reports them via the callback function report_transition.
     // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
     template <typename SummandSequence, typename ReportTransition = utilities::skip>
@@ -257,11 +372,132 @@ class explorer: public abortable
     )
     {
       bool variables_are_assigned_to_sigma=false;
+
+      auto enumerate_projected =
+        [&](std::vector<projected_transition>& out)
+        {
+          enumerate_solutions(
+            summand, sigma, rewr, condition, enumerator,
+            [&](const data::data_expression_list& e)
+            {
+              data::add_assignments(sigma, summand.variables, e);
+              lps::multi_action a = m_options.rewrite_actions ? rewrite_action(summand.multi_action, sigma, rewr) : summand.multi_action;
+
+              if constexpr (Stochastic)
+              {
+                // lps::stochastic_state q;
+                // compute_stochastic_projected_state(q, summand.distribution, summand.next_state, summand.I_w, sigma, rewr, enumerator);
+                // out.emplace_back(a, q);
+                throw mcrl2::runtime_error("A stochastic projection cache has not been implemented yet");
+              }
+              else
+              {
+                lps::state q;
+                compute_projected_state(q, summand.next_state, summand.I_w, sigma, rewr);
+                out.emplace_back(a, q);
+              }
+
+              data::remove_assignments(sigma, summand.variables);
+            }
+          );
+        };
+
+      auto consume_projected =
+        [&](const projected_transition& t)
+        {
+          const lps::multi_action& a = t.first;
+          const lps::state& q = t.second;
+
+          // reconstruct full state from sigma and the projected write values q
+          state s_y;
+          std::size_t j = 0;
+          lps::make_state(
+            s_y,
+            counting_iterator(0),
+            m_n, // total number of process parameters
+            [&](data::data_expression& r, std::size_t i)
+            {
+              if (j < summand.I_w.size() && summand.I_w[j] == i)
+              {
+                r = q[j++];
+              }
+              else
+              {
+                // reconstruct x[i] from the substitution sigma
+                rewr(r, m_process_parameters[i], sigma);
+              }
+            }
+          );
+
+          if constexpr (!Stochastic)
+          {
+            state_type y = s_y;
+            if (!confluent_summands.empty())
+            {
+              y = find_representative(y, confluent_summands, sigma, rewr, enumerator, id_generator);
+            }
+            if constexpr (utilities::is_applicable<ReportTransition, state_type, void>::value)
+            {
+              report_transition(y);
+            }
+            else
+            {
+              report_transition(a, y);
+            }
+          }
+          else
+          {
+            // Convert reconstructed state to a Dirac stochastic state.
+            state_type y;
+            y.clear();
+            y.probabilities.push_back(data::sort_real::real_one());
+            y.states.push_back(s_y);
+            if constexpr (utilities::is_applicable<ReportTransition, state_type, void>::value)
+            {
+              report_transition(y);
+            }
+            else
+            {
+              report_transition(a, y);
+            }
+          }
+        };
+
       if (!m_recursive)
       {
         id_generator.clear();
       }
-      if (summand.cache_strategy == caching::none)
+
+      if (m_options.use_projections && !summand.I_r.empty())
+      {
+        // Compute the projected state p
+        lps::state p;
+        lps::make_state(
+          p,
+          summand.I_r.begin(),
+          summand.I_r.size(),
+          [&](data::data_expression& target, std::size_t j)
+          {
+            sigma.apply(m_process_parameters[j], target);
+          }
+        );
+
+        auto it = summand.projection_cache.find(p);
+        if (it == summand.projection_cache.end())
+        {
+          // Fill the cache with projected transitions
+          std::vector<projected_transition> projected;
+          enumerate_projected(projected);
+          it = summand.projection_cache.emplace(p, std::move(projected)).first;
+        }
+
+        // Consume the cached projected transitions
+        for (const projected_transition& t: it->second)
+        {
+          consume_projected(t);
+        }
+      }
+      else if (summand.cache_strategy == caching::none)
       {
         rewr(condition, summand.condition, sigma);
         if (!data::is_false(condition))
@@ -311,7 +547,6 @@ class explorer: public abortable
                           check_enumerator_solution(p.expression(), summand, sigma, rewr);
                           p.add_assignments(summand.variables, sigma, rewr);
                           variables_are_assigned_to_sigma=true;
-                          state_type s1;
                           if constexpr (Stochastic)
                           {
                             compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
@@ -426,7 +661,6 @@ class explorer: public abortable
             }
           }
         }
-        
       }
       if (!m_recursive && variables_are_assigned_to_sigma)
       {
@@ -599,6 +833,16 @@ private:
         else
         {
           m_regular_summands.emplace_back(summand, i, m_global_lpsspec.process().process_parameters(), cache_strategy);
+        }
+      }
+
+      // Initialize the read/write projections
+      if (m_options.use_projections)
+      {
+        auto [R, W] = compute_read_write_patterns_separated(lpsspec);
+        for (std::size_t i = 0; i < m_regular_summands.size(); ++i)
+        {
+          m_regular_summands[i].set_projection_attributes(R[i], W[i]);
         }
       }
     }

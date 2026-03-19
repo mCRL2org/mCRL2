@@ -18,7 +18,7 @@
 
 namespace mcrl2::lps
 {
-  template <bool Stochastic, bool Timed, typename Specification>
+  template <bool Stochastic, bool Timed, typename Specification, typename ProjectionPolicy>
   template <
       typename SummandSequence,
       typename DiscoverState,
@@ -28,7 +28,7 @@ namespace mcrl2::lps
       typename ForwardOrCrossEdge,
       typename FinishState
     >
-    void explorer<Stochastic, Timed, Specification>::generate_state_space_dfs_recursive(
+    void explorer<Stochastic, Timed, Specification, ProjectionPolicy>::generate_state_space_dfs_recursive(
       const state& s0,
       std::unordered_set<state> gray,
       std::unordered_set<state>& discovered,
@@ -100,7 +100,7 @@ namespace mcrl2::lps
       finish_state(0, s0); // TODO MAKE THREAD SAFE
     }
 
-    template <bool Stochastic, bool Timed, typename Specification>
+    template <bool Stochastic, bool Timed, typename Specification, typename ProjectionPolicy>
     template <
       typename DiscoverState,
       typename ExamineTransition,
@@ -109,7 +109,7 @@ namespace mcrl2::lps
       typename ForwardOrCrossEdge,
       typename FinishState
     >
-    void explorer<Stochastic, Timed, Specification>::generate_state_space_dfs_recursive(
+    void explorer<Stochastic, Timed, Specification, ProjectionPolicy>::generate_state_space_dfs_recursive(
       bool recursive,
       DiscoverState discover_state,
       ExamineTransition examine_transition,
@@ -137,7 +137,7 @@ namespace mcrl2::lps
       m_recursive = false;
     }
 
-    template <bool Stochastic, bool Timed, typename Specification>
+    template <bool Stochastic, bool Timed, typename Specification, typename ProjectionPolicy>
     template <
       typename SummandSequence,
       typename DiscoverState,
@@ -147,7 +147,7 @@ namespace mcrl2::lps
       typename ForwardOrCrossEdge,
       typename FinishState
     >
-    void explorer<Stochastic, Timed, Specification>::generate_state_space_dfs_iterative(
+    void explorer<Stochastic, Timed, Specification, ProjectionPolicy>::generate_state_space_dfs_iterative(
       const state& s0,
       std::unordered_set<state>& discovered,
       const SummandSequence& regular_summands,
@@ -228,7 +228,7 @@ namespace mcrl2::lps
       m_must_abort = false;
     }
 
-    template <bool Stochastic, bool Timed, typename Specification>
+    template <bool Stochastic, bool Timed, typename Specification, typename ProjectionPolicy>
     template <
       typename DiscoverState,
       typename ExamineTransition,
@@ -237,7 +237,7 @@ namespace mcrl2::lps
       typename ForwardOrCrossEdge,
       typename FinishState
     >
-    void explorer<Stochastic, Timed, Specification>::generate_state_space_dfs_iterative(
+    void explorer<Stochastic, Timed, Specification, ProjectionPolicy>::generate_state_space_dfs_iterative(
       bool recursive,
       DiscoverState discover_state,
       ExamineTransition examine_transition,

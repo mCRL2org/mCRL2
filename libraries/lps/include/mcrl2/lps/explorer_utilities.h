@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/explorer_todo_set.h
+/// \file mcrl2/lps/explorer_utilities.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_LPS_EXPLORER_UTILITIES_H
@@ -167,6 +167,10 @@ using summand_cache_map = atermpp::utilities::unordered_map<atermpp::aterm,
     std::allocator<std::pair<atermpp::aterm, atermpp::term_list<data::data_expression_list>>>,
     true>;
 
+//--- projections ---//
+using projected_transition = std::pair<lps::multi_action, lps::state>;
+using projection_cache_map = std::unordered_map<lps::state, std::vector<projected_transition>>;
+
 struct explorer_summand
 {
   data::variable_list variables;
@@ -181,6 +185,22 @@ struct explorer_summand
   std::vector<data::variable> gamma;
   atermpp::function_symbol f_gamma;
   mutable summand_cache_map local_cache;
+
+  //--- projections ---//
+  // attributes for projections (these are not initialized during construction!)
+  std::vector<std::size_t> I_r;  // indices of read parameters
+  std::vector<std::size_t> I_w;  // indices of write parameters
+  mutable projection_cache_map projection_cache;
+
+  void set_projection_attributes(const std::vector<std::size_t>& Ir, const std::vector<std::size_t>& Iw)
+  {
+    mCRL2log(log::verbose) << "Setting projection attributes I_r = " << core::detail::print_list(Ir) << " I_w = " << core::detail::print_list(Iw) << std::endl;
+    if (!Ir.empty())
+    {
+      I_r = Ir;
+      I_w = Iw;
+    }
+  }
 
   template <typename ActionSummand>
   explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)

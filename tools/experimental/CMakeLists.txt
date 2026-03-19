@@ -1,4 +1,5 @@
 add_subdirectory(besconvert)
+add_subdirectory(lps2ltsproject)
 add_subdirectory(lpscleave)
 add_subdirectory(lpscombine)
 add_subdirectory(lpsrealelm)
