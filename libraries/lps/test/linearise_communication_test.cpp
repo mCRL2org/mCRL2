@@ -9,6 +9,7 @@
 /// \file linearise_communication_test.cpp
 /// \brief Test for applying communication operator
 
+#include "mcrl2/lps/linearise_allow_block.h"
 #define BOOST_TEST_MODULE linearise_communication_test
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/test/included/unit_test.hpp>
@@ -34,10 +35,11 @@ BOOST_GLOBAL_FIXTURE(LogDebug);
 inline
 lps::detail::tuple_list filter_allow(const lps::detail::tuple_list& l, const action_name_multiset_list& allowed)
 {
+  lps::detail::allow_list_cache allow_cache = lps::detail::make_allow_list_cache(allowed);
   lps::detail::tuple_list result;
   for (std::size_t i = 0; i < l.size(); ++i)
   {
-    if (allow_(allowed, l.actions[i], action(action_label("Terminate", data::sort_expression_list()), data::data_expression_list())))
+    if (allow_(allow_cache, l.actions[i], action(action_label("Terminate", data::sort_expression_list()), data::data_expression_list())))
     {
       result.conditions.push_back(l.conditions[i]);
       result.actions.push_back(l.actions[i]);
