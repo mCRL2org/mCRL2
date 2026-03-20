@@ -44,41 +44,63 @@ process::action make_action(const std::string& name, const data::data_expression
 }
 
 inline
-action_name_multiset allow_ab()
+detail::allow_list_cache allow_ab()
 {
   core::identifier_string_list result;
   result.push_front(core::identifier_string("b"));
   result.push_front(core::identifier_string("a"));
-  return action_name_multiset(result);
+  process::action_name_multiset_list multiset_list;
+  multiset_list.push_front(process::action_name_multiset(result));
+  return detail::make_allow_list_cache(multiset_list);
 }
 
 inline
-action_name_multiset allow_abb()
+detail::allow_list_cache allow_abb()
 {
   core::identifier_string_list result;
   result.push_front(core::identifier_string("b"));
   result.push_front(core::identifier_string("b"));
   result.push_front(core::identifier_string("a"));
-  return action_name_multiset(result);
+  process::action_name_multiset_list multiset_list;
+  multiset_list.push_front(process::action_name_multiset(result));
+  return detail::make_allow_list_cache(multiset_list);
 }
 
 inline
-action_name_multiset allow_cd()
+detail::allow_list_cache allow_cd()
 {
   core::identifier_string_list result;
   result.push_front(core::identifier_string("d"));
   result.push_front(core::identifier_string("c"));
-  return action_name_multiset(result);
+  process::action_name_multiset_list multiset_list;
+  multiset_list.push_front(process::action_name_multiset(result));
+  return detail::make_allow_list_cache(multiset_list);
 }
 
 inline
-action_name_multiset_list allow_ab_abb_cd()
+detail::allow_list_cache allow_ab_abb_cd()
 {
-  action_name_multiset_list result;
-  result.push_front(allow_cd());
-  result.push_front(allow_abb());
-  result.push_front(allow_ab());
-  return result;
+  process::action_name_multiset_list result;
+
+  // Create multisets for each allowed action
+  core::identifier_string_list ab;
+  ab.push_front(core::identifier_string("b"));
+  ab.push_front(core::identifier_string("a"));
+
+  core::identifier_string_list abb;
+  abb.push_front(core::identifier_string("b"));
+  abb.push_front(core::identifier_string("b"));
+  abb.push_front(core::identifier_string("a"));
+
+  core::identifier_string_list cd;
+  cd.push_front(core::identifier_string("d"));
+  cd.push_front(core::identifier_string("c"));
+
+  result.push_front(process::action_name_multiset(cd));
+  result.push_front(process::action_name_multiset(abb));
+  result.push_front(process::action_name_multiset(ab));
+
+  return detail::make_allow_list_cache(result);
 }
 
 BOOST_AUTO_TEST_CASE(test_single_allow)
