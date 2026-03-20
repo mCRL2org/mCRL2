@@ -281,7 +281,7 @@ class specification_basic_type
     {
       if (objectdata.count(o)==0)
       {
-        throw mcrl2::runtime_error("Fail to recognize " + process::pp(o) + 
+        throw mcrl2::runtime_error("Fail to recognize " + process::pp(o) +
                                    ". Most likely due to unguarded recursion in a process equation. ");
       }
     }
@@ -1467,8 +1467,8 @@ class specification_basic_type
     std::set< variable > find_free_variables_process(const process_expression& p)
     {
       std::set<variable> free_variables_in_p_new;
-      free_variables_in_p_new=process::find_free_variables(p); 
-      return free_variables_in_p_new; 
+      free_variables_in_p_new=process::find_free_variables(p);
+      return free_variables_in_p_new;
     }
 
     /* Remove assignments that do not appear in the parameter list. */
@@ -1806,7 +1806,7 @@ class specification_basic_type
       }
 
       throw mcrl2::runtime_error("Internal error: expect a pCRL process (2) " + process::pp(p));
-      return process_expression(); 
+      return process_expression();
     }
 
 
@@ -3989,7 +3989,7 @@ class specification_basic_type
     /**************** Collectparameterlist ******************************/
 
     bool alreadypresent(variable& var,
-                        const variable_list& vl, 
+                        const variable_list& vl,
                         mutable_indexed_substitution<>& parameter_renaming)
     {
       /* Note: variables can be different, although they have the
@@ -4004,9 +4004,9 @@ class specification_basic_type
         {
           if (v.sort()==var.sort())
           {
-            return true; // The variable is present. 
+            return true; // The variable is present.
           }
-          else 
+          else
           {
             if (parameter_renaming(v)==v)
             {
@@ -4017,14 +4017,14 @@ class specification_basic_type
             }
             else
             {
-              // The variable var is renamed, and the renaming was already present. 
-              var=atermpp::down_cast<variable>(parameter_renaming(v)); 
+              // The variable var is renamed, and the renaming was already present.
+              var=atermpp::down_cast<variable>(parameter_renaming(v));
               return true;
             }
           }
         }
       }
-      return false; // The variable var is not present. 
+      return false; // The variable var is not present.
     }
 
     variable_list joinparameters(const variable_list& par1,
@@ -4049,9 +4049,9 @@ class specification_basic_type
       return result;
     }
 
-    // While collecting the parameter list the process parameters that are part of the process identifiers may change. 
-    // This means the list pCRLprocs may change. 
-    variable_list collectparameterlist(std::set<process_identifier>& pCRLprocs) 
+    // While collecting the parameter list the process parameters that are part of the process identifiers may change.
+    // This means the list pCRLprocs may change.
+    variable_list collectparameterlist(std::set<process_identifier>& pCRLprocs)
                                        // mutable_indexed_substitution<>& parameter_renaming)
     {
       mutable_indexed_substitution<> parameter_renaming;  // Used to rename variables with the same name but different sorts.
@@ -4061,7 +4061,7 @@ class specification_basic_type
         const objectdatatype& object=objectIndex(p);
         parameters=joinparameters(parameters,object.parameters, parameter_renaming);
       }
-      // Apply the parameter renaming. 
+      // Apply the parameter renaming.
       std::set<process_identifier> new_pCRLprocs;
       for (const process_identifier& p: pCRLprocs)
       {
@@ -5078,7 +5078,7 @@ class specification_basic_type
       const bool regular,
       const bool singlestate,
       const variable_list& process_parameters)
-      
+
     {
       data_expression atTime;
       action_list multiAction;
@@ -7595,6 +7595,11 @@ class specification_basic_type
       const bool is_block,
       stochastic_action_summand_vector& action_summands)
     {
+      lps::detail::allow_list_cache allow_cache;
+      if(is_allow)
+      {
+        allow_cache = lps::detail::make_allow_list_cache(allowlist);
+      }
       for (const stochastic_action_summand& summand1: action_summands1)
       {
         variable_list sumvars=ultimate_delay_condition.variables();
@@ -7612,7 +7617,7 @@ class specification_basic_type
 
         if (multiaction1 != action_list({ terminationAction }))
         {
-          if (is_allow && !allow_(allowlist,multiaction1,terminationAction))
+          if (is_allow && !allow_(allow_cache,multiaction1,terminationAction))
           {
             continue;
           }
@@ -7801,6 +7806,12 @@ class specification_basic_type
           const bool is_block,
           stochastic_action_summand_vector& action_summands)
     {
+      lps::detail::allow_list_cache allow_cache;
+      if(is_allow)
+      {
+        allow_cache = lps::detail::make_allow_list_cache(allowlist);
+      }
+
       // First combine the action summands.
       for (const stochastic_action_summand& summand1: action_summands1)
       {
@@ -7832,7 +7843,7 @@ class specification_basic_type
               multiaction3=linMergeMultiActionList(multiaction1,multiaction2);
             }
 
-            if (is_allow && !allow_(allowlist,multiaction3,terminationAction))
+            if (is_allow && !allow_(allow_cache,multiaction3,terminationAction))
             {
               continue;
             }

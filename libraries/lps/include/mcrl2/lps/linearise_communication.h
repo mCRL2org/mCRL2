@@ -371,6 +371,7 @@ public:
         m_data_rewriter(data_rewriter),
         m_communications(sort_communications(communications)),
         m_allowlist(sort_multi_action_labels(allowlist)),
+        m_allow_cache(is_allow ? detail::make_allow_list_cache(allowlist) : detail::allow_list_cache()),
         m_blocked_actions(is_block ? get_actions(allowlist) : std::vector<core::identifier_string>()),
         m_allowed_actions(init_allowed_actions(is_allow, allowlist, termination_action)),
         m_comm_table(m_communications),
@@ -512,7 +513,7 @@ public:
       {
         const process::action_list& multiaction = multiactionconditionlist.actions[i];
 
-        if (m_is_allow && !allow_(m_allowlist, multiaction, m_terminationAction))
+        if (m_is_allow && !allow_(m_allow_cache, multiaction, m_terminationAction))
         {
           if constexpr (EnableLineariseStatistics) {
             ++disallowed_summands;
@@ -590,6 +591,7 @@ protected:
   DataRewriter& m_data_rewriter;
   const process::communication_expression_list m_communications;
   const process::action_name_multiset_list m_allowlist;         // This is a list of list of identifierstring.
+  const detail::allow_list_cache m_allow_cache; // This is a cache for allowlist, used to speed up lookups in allowlist. It contains the same information as allowlist, but in a different format that allows for faster lookups.
   const std::vector<core::identifier_string> m_blocked_actions; // used only if m_is_block is set
   const std::vector<core::identifier_string> m_allowed_actions; // used only if m_is_allow is set
   comm_entry m_comm_table;
