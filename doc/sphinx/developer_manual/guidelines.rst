@@ -18,7 +18,7 @@ Organisation of libraries:
   ============= =========================================================
   example	      Sample program files
   include	      Header files
-  src	          Source files which must be compiled to build the library
+  source	      Source files which must be compiled to build the library
   test	        Regression or other test programs or scripts
   ============= =========================================================
 

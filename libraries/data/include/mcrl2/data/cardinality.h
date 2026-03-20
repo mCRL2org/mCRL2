@@ -9,8 +9,8 @@
 /// \file mcrl2/data/cardinality.h
 /// \brief This file provides a class that can determine the cardinality of a sort in a datatype
 
-#ifndef MCRL2_DATA_CARDINALIY_H
-#define MCRL2_DATA_CARDINALIY_H
+#ifndef MCRL2_DATA_CARDINALITY_H
+#define MCRL2_DATA_CARDINALITY_H
 
 #include "mcrl2/data/enumerator.h"
 

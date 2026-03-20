@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MCRL2_LTSGRAPH_SETTINGSMANAGER_H
+#define MCRL2_LTSGRAPH_SETTINGSMANAGER_H
 
 #include <mcrl2/utilities/logger.h>
 #include <QHash>
@@ -230,3 +231,5 @@ class SettingsManager
   Settings* _getSettings(QString class_name);
   void _addSettings(QString class_name);
 };
+
+#endif // MCRL2_LTSGRAPH_SETTINGSMANAGER_H

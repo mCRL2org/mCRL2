@@ -7,7 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#pragma once
+#ifndef MCRL2_ATERMPP_CONCEPTS_H
+#define MCRL2_ATERMPP_CONCEPTS_H
 
 #include "mcrl2/atermpp/aterm_core.h"
 #include <type_traits>
@@ -41,3 +42,5 @@ static_assert(atermpp::IsATerm<unprotected_aterm_core>, "unprotected_aterm_core 
 static_assert(atermpp::IsATerm<aterm_core>, "aterm_core must be an aterm");
 
 } // namespace atermpp
+
+#endif // MCRL2_ATERMPP_CONCEPTS_H

@@ -7,9 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MCRL2_ATERMPP_ATERM_IMPLEMENTATION_H
-#define MCRL2_ATERMPP_ATERM_IMPLEMENTATION_H
-#pragma once
+#ifndef MCRL2_ATERMPP_DETAIL_ATERM_IMPLEMENTATION_H
+#define MCRL2_ATERMPP_DETAIL_ATERM_IMPLEMENTATION_H
 
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
 #include "mcrl2/atermpp/detail/aterm_container.h"
@@ -128,4 +127,4 @@ inline aterm_core& aterm_core::operator=(aterm_core&& other) noexcept
 
 } // namespace atermpp
 
-#endif // MCRL2_ATERMPP_TERM_IMPLEMENTATION_H
+#endif // MCRL2_ATERMPP_DETAIL_ATERM_IMPLEMENTATION_H

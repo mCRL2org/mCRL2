@@ -46,7 +46,7 @@ MpiTermination::MpiTermination(
     reqs_[0] = MPI::COMM_WORLD.Recv_init( probe_val_, 2, MPI_INT,
                                           MPI::ANY_SOURCE, probe_tag_);
 
-    reqs_[1] = MPI::COMM_WORLD.Recv_init( NULL, 0, MPI_INT, 0, term_tag_ );
+    reqs_[1] = MPI::COMM_WORLD.Recv_init( nullptr, 0, MPI_INT, 0, term_tag_ );
 
     reqs_[2] = MPI::COMM_WORLD.Recv_init( data_buf, data_count_, data_type_,
                                           MPI::ANY_SOURCE, data_tag_ );

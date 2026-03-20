@@ -240,4 +240,4 @@ inline std::size_t get_direct_arity(const data::function_symbol& op)
 
 
 
-#endif
+#endif // MCRL2_DATA_DETAIL_REWRITE_H

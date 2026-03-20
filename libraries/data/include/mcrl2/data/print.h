@@ -2587,4 +2587,4 @@ std::string pp(const T& x, bool precendence_aware = true)
 
 } // namespace mcrl2::data
 
-#endif
+#endif // MCRL2_DATA_PRINT_H

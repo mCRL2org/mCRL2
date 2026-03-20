@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef MCRL2_UTILITIES_QT_TOOL_H
-#define MCRL2_UTILITIES_QT_TOOL_H
+#ifndef MCRL2_GUI_QT_TOOL_H
+#define MCRL2_GUI_QT_TOOL_H
 
 #include <memory>
 #include <QAction>
@@ -199,4 +199,4 @@ class qt_tool: public Tool
 
 } // namespace mcrl2::gui::qt
 
-#endif // MCRL2_UTILITIES_QT_TOOL_H
+#endif // MCRL2_GUI_QT_TOOL_H

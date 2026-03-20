@@ -96,4 +96,4 @@ inline void make_list_forward(term_list<Term>& result, Iter first, Iter last, AT
 
 } // namespace atermpp
 
-#endif // MCRL2_ATERMPP_DETAIL_ATERM_INT_H
+#endif // MCRL2_ATERMPP_DETAIL_ATERM_LIST_H

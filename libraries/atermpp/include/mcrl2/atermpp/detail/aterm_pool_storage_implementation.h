@@ -7,9 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MCRL2_ATERMPP_ATERM_POOL_STORAGE_IMPLEMENTION_H
-#define MCRL2_ATERMPP_ATERM_POOL_STORAGE_IMPLEMENTION_H
-#pragma once
+#ifndef MCRL2_ATERMPP_DETAIL_ATERM_POOL_STORAGE_IMPLEMENTATION_H
+#define MCRL2_ATERMPP_DETAIL_ATERM_POOL_STORAGE_IMPLEMENTATION_H
 
 #include "mcrl2/utilities/stack_array.h"
 #include "mcrl2/atermpp/detail/aterm_pool.h"
@@ -455,4 +454,4 @@ bool ATERM_POOL_STORAGE::verify_term(const _aterm& term)
 } // namespace atermpp::detail
 
 
-#endif
+#endif // MCRL2_ATERMPP_DETAIL_ATERM_POOL_STORAGE_IMPLEMENTATION_H

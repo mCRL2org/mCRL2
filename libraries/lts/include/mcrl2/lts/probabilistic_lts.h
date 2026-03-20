@@ -206,4 +206,4 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 }
 
 
-#endif // MCRL2_LTS_LTS_H
+#endif // MCRL2_LTS_PROBABILISTIC_LTS_H

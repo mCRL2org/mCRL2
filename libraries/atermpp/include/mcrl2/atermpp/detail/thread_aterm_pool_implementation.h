@@ -7,9 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef ATERMPP_DETAIL_THREAD_ATERM_POOL_IMPLEMENTATION_H
-#define ATERMPP_DETAIL_THREAD_ATERM_POOL_IMPLEMENTATION_H
-#pragma once
+#ifndef MCRL2_ATERMPP_DETAIL_THREAD_ATERM_POOL_IMPLEMENTATION_H
+#define MCRL2_ATERMPP_DETAIL_THREAD_ATERM_POOL_IMPLEMENTATION_H
 
 #include <chrono>
 
@@ -226,4 +225,4 @@ std::size_t thread_aterm_pool::protection_set_size() const
 } // namespace atermpp::detail
 
 
-#endif // ATERMPP_DETAIL_ATERM_POOL_IMPLEMENTATION_H
+#endif // MCRL2_ATERMPP_DETAIL_THREAD_ATERM_POOL_IMPLEMENTATION_H
