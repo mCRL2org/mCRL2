@@ -1,4 +1,4 @@
-# Author: Wieger Wesselink
+# Author: Wieger Wesselink, Jeroen Keiren
 # Copyright: see the accompanying file COPYING or copy at
 # https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 #
@@ -27,8 +27,13 @@ add_library(sylvan
 
 target_include_directories(sylvan PUBLIC .)
 target_link_libraries(sylvan pthread)
-set_target_properties(sylvan 
-  PROPERTIES 
+set_target_properties(sylvan
+  PROPERTIES
   POSITION_INDEPENDENT_CODE TRUE)
+
+option(SYLVAN_STATS "Collect Sylvan statistics" OFF)
+if(SYLVAN_STATS)
+  set_target_properties(sylvan PROPERTIES COMPILE_DEFINITIONS "SYLVAN_STATS")
+endif()
 
 set(sylvan_include ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
