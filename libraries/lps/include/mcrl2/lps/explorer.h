@@ -499,8 +499,15 @@ class explorer: public abortable
             consume_projected(t);
           }
         }
+
+        if (!m_recursive && variables_are_assigned_to_sigma)
+        {
+          data::remove_assignments(sigma, summand.variables);
+        }
+        return;
       }
-      else if (summand.cache_strategy == caching::none)
+
+      if (summand.cache_strategy == caching::none)
       {
         rewr(condition, summand.condition, sigma);
         if (!data::is_false(condition))

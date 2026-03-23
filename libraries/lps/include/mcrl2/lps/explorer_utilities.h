@@ -177,7 +177,7 @@ using projection_cache_map = atermpp::utilities::unordered_map<lps::state,
     std::hash<lps::state>,
     std::equal_to<>,
     std::allocator<std::pair<lps::state, std::vector<projected_transition>>>,
-    false>;
+    true>;
 
 struct explorer_summand
 {
