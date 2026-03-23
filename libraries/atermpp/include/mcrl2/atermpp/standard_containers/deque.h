@@ -29,13 +29,13 @@ namespace atermpp
 {
 
 /// \brief A deque class in which aterms can be stored. 
-template < class T, class Alloc = std::allocator<detail::reference_aterm<T> > > 
-class deque : public std::deque< detail::reference_aterm<T>, Alloc >              
+template < class T, class Alloc = std::allocator<detail::markable_aterm<T> > > 
+class deque : public std::deque< detail::markable_aterm<T>, Alloc >              
 {
 protected:
-  using super = std::deque<detail::reference_aterm<T>, Alloc>;
+  using super = std::deque<detail::markable_aterm<T>, Alloc>;
 
-  detail::generic_aterm_container<std::deque<detail::reference_aterm<T>, Alloc>> container_wrapper;
+  detail::generic_aterm_container<std::deque<detail::markable_aterm<T>, Alloc>> container_wrapper;
 
 public:
   
@@ -67,7 +67,7 @@ public:
 
   /// \brief Constructor.
   deque(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
-   : super::deque(n, detail::reference_aterm(val), alloc),
+   : super::deque(n, detail::markable_aterm<T>(val), alloc),
      container_wrapper(*this)    
   {}
 
