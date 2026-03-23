@@ -39,21 +39,7 @@
 
 namespace mcrl2::lps {
 
-// This is used to add projections to the explorer class without impact on the current version.
-struct no_projection
-{
-  static constexpr bool enabled = false;
-};
-
-struct with_projection
-{
-  static constexpr bool enabled = true;
-};
-
-template <bool Stochastic,
-          bool Timed,
-          typename Specification,
-          typename ProjectionPolicy = no_projection>
+template <bool Stochastic, bool Timed, typename Specification>
 class explorer: public abortable
 {
   public:
@@ -468,45 +454,38 @@ class explorer: public abortable
         id_generator.clear();
       }
 
-      if constexpr (ProjectionPolicy::enabled)
+#ifdef MCRL2_USE_PROJECTIONS
+      if (m_options.use_projections && !summand.I_r.empty())
       {
-        if (m_options.use_projections && !summand.I_r.empty())
+        // Compute the projected state p
+        lps::state p;
+        lps::make_state(
+          p,
+          summand.I_r.begin(),
+          summand.I_r.size(),
+          [&](data::data_expression& target, std::size_t j)
+          {
+            sigma.apply(m_process_parameters[j], target);
+          }
+        );
+
+        auto it = summand.projection_cache.find(p);
+        if (it == summand.projection_cache.end())
         {
-          // Compute the projected state p
-          lps::state p;
-          lps::make_state(
-            p,
-            summand.I_r.begin(),
-            summand.I_r.size(),
-            [&](data::data_expression& target, std::size_t j)
-            {
-              sigma.apply(m_process_parameters[j], target);
-            }
-          );
-
-          auto it = summand.projection_cache.find(p);
-          if (it == summand.projection_cache.end())
-          {
-            // Fill the cache with projected transitions
-            std::vector<projected_transition> projected;
-            enumerate_projected(projected);
-            it = summand.projection_cache.emplace(p, std::move(projected)).first;
-          }
-
-          // Consume the cached projected transitions
-          for (const projected_transition& t: it->second)
-          {
-            consume_projected(t);
-          }
+          // Fill the cache with projected transitions
+          std::vector<projected_transition> projected;
+          enumerate_projected(projected);
+          it = summand.projection_cache.emplace(p, std::move(projected)).first;
         }
 
-        if (!m_recursive && variables_are_assigned_to_sigma)
+        // Consume the cached projected transitions
+        for (const projected_transition& t: it->second)
         {
-          data::remove_assignments(sigma, summand.variables);
+          consume_projected(t);
         }
-        return;
       }
-
+      else
+#endif
       if (summand.cache_strategy == caching::none)
       {
         rewr(condition, summand.condition, sigma);

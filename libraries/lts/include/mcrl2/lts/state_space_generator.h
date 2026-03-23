@@ -647,10 +647,10 @@ class progress_monitor
 } // namespace detail
 
 
-template <bool Stochastic, bool Timed, typename Specification, typename ProjectionPolicy = lps::no_projection>
+template <bool Stochastic, bool Timed, typename Specification>
 struct state_space_generator
 {
-  using explorer_type = lps::explorer<Stochastic, Timed, Specification, ProjectionPolicy>;
+  using explorer_type = lps::explorer<Stochastic, Timed, Specification>;
   using state_type = typename explorer_type::state_type;
 
   const lps::explorer_options& options;

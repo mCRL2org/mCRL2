@@ -18,7 +18,7 @@
 
 namespace mcrl2::lps
 {
-    template <bool Stochastic, bool Timed, typename Specification, typename ProjectionPolicy>
+    template <bool Stochastic, bool Timed, typename Specification>
     template <
       typename StateType,
       typename SummandSequence,
@@ -28,7 +28,7 @@ namespace mcrl2::lps
       typename FinishState,
       typename DiscoverInitialState
     >
-    void explorer<Stochastic, Timed, Specification, ProjectionPolicy>::generate_state_space_thread(
+    void explorer<Stochastic, Timed, Specification>::generate_state_space_thread(
       std::unique_ptr<todo_set>& todo,
       const std::size_t thread_index,
       std::atomic<std::size_t>& number_of_active_processes,
@@ -224,7 +224,7 @@ namespace mcrl2::lps
 
     }  // end generate_state_space_thread.
 
-    template <bool Stochastic, bool Timed, typename Specification, typename ProjectionPolicy>
+    template <bool Stochastic, bool Timed, typename Specification>
     template <
       typename StateType,
       typename SummandSequence,
@@ -234,7 +234,7 @@ namespace mcrl2::lps
       typename FinishState,
       typename DiscoverInitialState
     >
-    void explorer<Stochastic, Timed, Specification, ProjectionPolicy>::generate_state_space(
+    void explorer<Stochastic, Timed, Specification>::generate_state_space(
       bool recursive,
       const StateType& s0,
       const SummandSequence& regular_summands,
@@ -328,7 +328,7 @@ namespace mcrl2::lps
       m_must_abort = false;
     }
 
-    template <bool Stochastic, bool Timed, typename Specification, typename ProjectionPolicy>
+    template <bool Stochastic, bool Timed, typename Specification>
     template <
       typename DiscoverState,
       typename ExamineTransition,
@@ -336,7 +336,7 @@ namespace mcrl2::lps
       typename FinishState,
       typename DiscoverInitialState
     >
-    void explorer<Stochastic, Timed, Specification, ProjectionPolicy>::generate_state_space(
+    void explorer<Stochastic, Timed, Specification>::generate_state_space(
       bool recursive,
       DiscoverState discover_state,
       ExamineTransition examine_transition,
