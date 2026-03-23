@@ -13,6 +13,7 @@
 #define MCRL2_LPS_EXPLORER_UTILITIES_H
 
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
+#include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/explorer_utilities.h"
@@ -169,7 +170,14 @@ using summand_cache_map = atermpp::utilities::unordered_map<atermpp::aterm,
 
 //--- projections ---//
 using projected_transition = std::pair<lps::multi_action, lps::state>;
-using projection_cache_map = std::unordered_map<lps::state, std::vector<projected_transition>>;
+// using projection_cache_map = std::unordered_map<lps::state, std::vector<projected_transition>>;
+
+using projection_cache_map = atermpp::utilities::unordered_map<lps::state,
+    std::vector<projected_transition>,
+    std::hash<lps::state>,
+    std::equal_to<>,
+    std::allocator<std::pair<lps::state, std::vector<projected_transition>>>,
+    false>;
 
 struct explorer_summand
 {

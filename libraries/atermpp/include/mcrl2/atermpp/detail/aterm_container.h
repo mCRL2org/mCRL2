@@ -395,7 +395,153 @@ public:
       reference_aterm<typename T::second_type>(super::second).mark(todo);
     }
   }
-}; 
+};
+
+///--- std::vector ---//
+template<class T>
+struct is_vector_helper : public std::false_type
+{};
+
+template<class T, class Alloc>
+struct is_vector_helper<std::vector<T, Alloc>> : public std::true_type
+{};
+
+template<class T>
+struct is_vector : public is_vector_helper<std::decay_t<T>>
+{};
+
+template<typename T>
+class reference_aterm<T, std::enable_if_t<is_vector<T>::value>>
+  : public std::vector<
+      std::conditional_t<
+        is_reference_aterm<typename T::value_type>::value,
+        typename T::value_type,
+        reference_aterm<typename T::value_type>
+      >,
+      typename std::allocator_traits<typename T::allocator_type>::template rebind_alloc<
+        std::conditional_t<
+          is_reference_aterm<typename T::value_type>::value,
+          typename T::value_type,
+          reference_aterm<typename T::value_type>
+        >
+      >
+    >
+{
+protected:
+  using value_type = typename T::value_type;
+
+  using stored_value_type =
+    std::conditional_t<
+      is_reference_aterm<value_type>::value,
+      value_type,
+      reference_aterm<value_type>
+    >;
+
+  using allocator_type =
+    typename std::allocator_traits<typename T::allocator_type>::template rebind_alloc<
+      stored_value_type
+    >;
+
+  using super = std::vector<stored_value_type, allocator_type>;
+
+public:
+  reference_aterm() = default;
+
+  reference_aterm(const T& other)
+  {
+    this->reserve(other.size());
+    for (const auto& v : other)
+    {
+      if constexpr (is_reference_aterm<value_type>::value)
+      {
+        this->push_back(v);
+      }
+      else
+      {
+        this->emplace_back(v);
+      }
+    }
+  }
+
+  reference_aterm(T&& other)
+  {
+    this->reserve(other.size());
+    for (auto& v : other)
+    {
+      if constexpr (is_reference_aterm<value_type>::value)
+      {
+        this->push_back(std::move(v));
+      }
+      else
+      {
+        this->emplace_back(std::move(v));
+      }
+    }
+  }
+
+  reference_aterm& operator=(const T& other)
+  {
+    this->clear();
+    this->reserve(other.size());
+    for (const auto& v : other)
+    {
+      if constexpr (is_reference_aterm<value_type>::value)
+      {
+        this->push_back(v);
+      }
+      else
+      {
+        this->emplace_back(v);
+      }
+    }
+    return *this;
+  }
+
+  reference_aterm& operator=(T&& other)
+  {
+    this->clear();
+    this->reserve(other.size());
+    for (auto& v : other)
+    {
+      if constexpr (is_reference_aterm<value_type>::value)
+      {
+        this->push_back(std::move(v));
+      }
+      else
+      {
+        this->emplace_back(std::move(v));
+      }
+    }
+    return *this;
+  }
+
+  /// Transparent conversion back to std::vector<T>
+  operator T&()
+  {
+    return *reinterpret_cast<T*>(this);
+  }
+
+  operator const T&() const
+  {
+    return *reinterpret_cast<const T*>(this);
+  }
+
+  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
+  {
+    for (const auto& element : *this)
+    {
+      if constexpr (is_reference_aterm<value_type>::value)
+      {
+        element.mark(todo);
+      }
+      else
+      {
+        reference_aterm<value_type>(element).mark(todo);
+      }
+    }
+  }
+};
+///--- std::vector ---//
 
 template<typename T, typename Allocator>
 class aterm_allocator
