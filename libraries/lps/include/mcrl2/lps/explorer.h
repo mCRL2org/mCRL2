@@ -467,10 +467,6 @@ class explorer: public abortable
           if constexpr (!Stochastic)
           {
             state_type y = s_y;
-            if (!confluent_summands.empty())
-            {
-              y = find_representative(y, confluent_summands, sigma, rewr, enumerator, id_generator);
-            }
             if constexpr (utilities::is_applicable<ReportTransition, state_type, void>::value)
             {
               report_transition(y);
@@ -519,13 +515,18 @@ class explorer: public abortable
           }
         );
 
+        utilities::shared_guard g = atermpp::detail::g_thread_term_pool().lock_shared();
         auto it = summand.projection_cache.find(p);
         if (it == summand.projection_cache.end())
         {
-          // Fill the cache with projected transitions
+          g.unlock_shared();
           std::vector<projected_transition> projected;
           enumerate_projected(projected);
           it = summand.projection_cache.emplace(p, std::move(projected)).first;
+        }
+        else
+        {
+          g.unlock_shared();
         }
 
         // Consume the cached projected transitions
