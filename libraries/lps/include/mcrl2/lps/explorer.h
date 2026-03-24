@@ -359,6 +359,55 @@ class explorer: public abortable
     {
       bool variables_are_assigned_to_sigma=false;
 
+#ifdef MCRL2_LPS2LTS_NEW_STRUCTURE
+      auto consume_solution =
+        [&](const data::data_expression_list* assignments)
+        {
+          if (assignments)
+          {
+            data::add_assignments(sigma, summand.variables, *assignments);
+            variables_are_assigned_to_sigma = true;
+          }
+
+          if constexpr (Stochastic)
+          {
+            compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
+          }
+          else
+          {
+            compute_state(s1, summand.next_state, sigma, rewr);
+            if (!confluent_summands.empty())
+            {
+              s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
+            }
+          }
+
+          if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
+          {
+            report_transition(s1);
+          }
+          else
+          {
+            if (m_options.rewrite_actions)
+            {
+              lps::multi_action a = rewrite_action(summand.multi_action, sigma, rewr);
+              report_transition(a, s1);
+            }
+            else
+            {
+              report_transition(summand.multi_action, s1);
+            }
+          }
+
+          if (m_recursive && variables_are_assigned_to_sigma)
+          {
+            data::remove_assignments(sigma, summand.variables);
+            variables_are_assigned_to_sigma = false;
+          }
+        };
+#endif
+
+#ifdef MCRL2_USE_PROJECTIONS
       auto enumerate_projected =
         [&](std::vector<projected_transition>& out)
         {
@@ -448,6 +497,7 @@ class explorer: public abortable
             }
           }
         };
+#endif
 
       if (!m_recursive)
       {
@@ -486,6 +536,48 @@ class explorer: public abortable
       }
       else
 #endif
+#ifdef MCRL2_LPS2LTS_NEW_STRUCTURE
+        if (summand.cache_strategy == caching::none)
+        {
+          enumerate_solutions(
+            summand, sigma, rewr, condition, enumerator,
+            [&](const data::data_expression_list& e)
+            {
+              consume_solution(&e);
+            }
+          );
+        }
+        else
+        {
+          summand_cache_map& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
+          utilities::shared_guard g = atermpp::detail::g_thread_term_pool().lock_shared();
+
+          auto q = cache.find(detail::cheap_cache_key(sigma, summand.gamma));
+          if (q == cache.end())
+          {
+            g.unlock_shared();
+            atermpp::term_list<data::data_expression_list> solutions;
+            enumerate_solutions(
+              summand, sigma, rewr, condition, enumerator,
+              [&](const data::data_expression_list& e)
+              {
+                solutions.push_front(e);
+              }
+            );
+            summand.compute_key(key, sigma);
+            q = cache.insert({key, solutions}).first;
+          }
+          else
+          {
+            g.unlock_shared();
+          }
+
+          for (const auto& e: static_cast<atermpp::term_list<data::data_expression_list>&>(q->second))
+          {
+            consume_solution(e.empty() ? nullptr : &e);
+          }
+        }
+#else
       if (summand.cache_strategy == caching::none)
       {
         rewr(condition, summand.condition, sigma);
@@ -651,6 +743,7 @@ class explorer: public abortable
           }
         }
       }
+#endif
       if (!m_recursive && variables_are_assigned_to_sigma)
       {
         data::remove_assignments(sigma, summand.variables);
