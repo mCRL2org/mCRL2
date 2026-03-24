@@ -586,6 +586,7 @@ struct pbeschain_pbes_backward_substituter
       if (pvi_set.size() > 0 && options.srf_factor > 0)
       {
         // Use the same SRF form as pbessolvesymbolic
+#ifdef MCRL2_ENABLE_SYLVAN
         symbolic_reachability_options opts;
         pbes_system::srf_pbes_with_ce result_presrf_pbes = preprocess(p, opts);
         pbes result_srf_pbes = pre_srf2srfpbes(result_presrf_pbes).to_pbes();
@@ -617,6 +618,7 @@ struct pbeschain_pbes_backward_substituter
           (*i).formula() = original_eq.formula();
           pvi_set = find_propositional_variable_instantiations((*i).formula());
         }
+#endif // MCRL2_ENABLE_SYLVAN
       }
 
       mCRL2log(log::verbose) << "How many unique PVI are left? " << pvi_set.size() << "\n";
