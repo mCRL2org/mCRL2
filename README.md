@@ -24,7 +24,7 @@ Please include the version number from `mcrl22lps --version`, and a complete,
 self-contained test case in each bug report.
 
 Contributions in the form of a pull request are welcome. For more details, see
-the [documentation](https://mcrl2.org/web/developer_manual/repository.html).
+the [documentation](https://mcrl2.org/web/developer_manual/contributing.html).
 
 If you have questions about using the mCRL2 toolset which the documentation does
 not answer, send a mail to <mcrl2-users@listserver.tue.nl> or open an issue.

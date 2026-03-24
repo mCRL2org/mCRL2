@@ -25,7 +25,7 @@ spaces it helps to avoid enumerating these quantifiers. Symbolic manipulation of
 easier if quantifiers are removed. 
 
 A specification of the one point rule rewriter can be found in the
-`developers documentation <https://mcrl2.org/web/developer_manual/developer.html>`_ 
-in the `PBES rewriters <https://mcrl2.org/web/_downloads/fd0ada340742729e33a70a3666632073/pbes-rewriters.pdf>`_ document.
+`developers documentation <https://mcrl2.org/web/developer_manual/library_documentation.html>`_ 
+in the `PBES rewriters <https://mcrl2.org/web/_downloads/578e6457db1b2c023374fd8c0ade9160/pbes-rewriters.pdf>`_ document.
 
 .. mcrl2_manual:: lpsrewr
