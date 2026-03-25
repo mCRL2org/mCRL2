@@ -19,14 +19,16 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/iteration_builders.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/resolve_name_clashes.h"
 #include "mcrl2/pbes/srf_pbes.h"
+#include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/logger.h"
 #include <chrono>
 #include <cstddef>
