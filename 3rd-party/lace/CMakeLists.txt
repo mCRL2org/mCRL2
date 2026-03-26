@@ -34,6 +34,15 @@ if(lace_is_top_level)
     option(LACE_SANITIZE_UB      "Enable UndefinedBehaviorSanitizer"  OFF)
 endif()
 
+mark_as_advanced(
+  LACE_PIE_TIMES
+  LACE_COUNT_TASKS
+  LACE_COUNT_STEALS
+  LACE_COUNT_SPLITS
+  LACE_USE_HWLOC
+  LACE_USE_MMAP
+  )
+
 find_package(Threads REQUIRED)
 
 if(LACE_USE_MMAP)
