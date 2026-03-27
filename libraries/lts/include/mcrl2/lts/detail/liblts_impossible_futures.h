@@ -214,12 +214,15 @@ write_counter_example(const LTS& lts, std::ostream& stream, const trace& initial
 
       if (!first_action)
       {
-        stream << " . ";
+        stream << " . tau* . ";
+      }
+      else
+      {
+        stream << "tau* . ";
+        first_action = false;
       }
 
       stream << action;
-
-      first_action = false;
     }
 
     // Deal with the empty case.
