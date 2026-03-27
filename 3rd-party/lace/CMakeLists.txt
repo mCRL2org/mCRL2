@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(lace
-    VERSION 1.5.3
+    VERSION 1.5.4
     DESCRIPTION "Lace, a work-stealing framework for multi-core fork-join parallelism"
     HOMEPAGE_URL "https://github.com/trolando/lace"
     LANGUAGES C CXX
@@ -101,7 +101,7 @@ foreach(_target lace lace14)
 
     target_compile_options(${_target} PRIVATE
         $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:GNU>>:
-            -pipe -march=native
+            -pipe -march=native -Wstrict-prototypes
             $<$<CONFIG:Debug>:-O0 -Wall -Wextra -Wpedantic>>
         $<$<C_COMPILER_ID:MSVC>:
             $<$<CONFIG:Debug>:/Od /Wall /Zi>>
