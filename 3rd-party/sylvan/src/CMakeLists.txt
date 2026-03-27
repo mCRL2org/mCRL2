@@ -168,9 +168,9 @@ endif()
 string(REPLACE ";" " " PKGC_LIBS_PRIVATE "${PKGC_LIBS_PRIVATE}")
 
 install(CODE "
-  file(MAKE_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig\")
-  file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig/sylvan.pc\" \"
-prefix=\${CMAKE_INSTALL_PREFIX}
+  file(MAKE_DIRECTORY \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig\")
+  file(WRITE \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig/sylvan.pc\" \"
+prefix=\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
 exec_prefix=\\\${prefix}
 libdir=\\\${prefix}/${CMAKE_INSTALL_LIBDIR}
 includedir=\\\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}
