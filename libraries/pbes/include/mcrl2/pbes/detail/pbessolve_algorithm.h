@@ -108,7 +108,7 @@ class pbessolve_tool
 
     pbessolve_options options;
     int m_short_strategy = 0;
-    partial_solve_strategy m_long_strategy = partial_solve_strategy::no_optimisation;
+    partial_solve_strategy m_long_strategy = partial_solve_strategy::none;
     std::string lpsfile;
     std::string ltsfile;
     std::string evidence_file;
@@ -448,7 +448,7 @@ class pbessolve_tool
     }
 
     // Handle tool options here because now we know whether the PBES has counter example information.
-    if (m_long_strategy > partial_solve_strategy::no_optimisation)
+    if (m_long_strategy > partial_solve_strategy::none)
     {
       options.optimization = m_long_strategy;
     }

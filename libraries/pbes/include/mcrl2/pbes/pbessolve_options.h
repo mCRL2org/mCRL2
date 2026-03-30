@@ -20,7 +20,8 @@
 namespace mcrl2::pbes_system {
 
 ///  \brief Enumeration of partial strategies for solving PBESs.
-enum class partial_solve_strategy {
+enum class partial_solve_strategy: int {
+  none = -1,
   no_optimisation = 0,
   remove_self_loops = 1,
   propagate_solved_equations_using_substitution = 2,
