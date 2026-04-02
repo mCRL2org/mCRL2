@@ -253,7 +253,7 @@ if(NOT MSVC)
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/lace.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/lace.pc" @ONLY)
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/lace14.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/lace14.pc" @ONLY)
 
-    message(STATUS "Generated EXTRA_LIBS for .pc = \"${PC_EXTRA_LIBS}\"")
+    # message(STATUS "Generated EXTRA_LIBS for .pc = \"${PC_EXTRA_LIBS}\"")
 
     install(
         FILES
@@ -264,24 +264,34 @@ if(NOT MSVC)
 endif()
 
 # Summary
-message(STATUS "")
-message(STATUS "Lace ${PROJECT_VERSION} configuration summary:")
-message(STATUS "  Build type        : ${CMAKE_BUILD_TYPE}")
-message(STATUS "  Shared libraries  : ${BUILD_SHARED_LIBS}")
-message(STATUS "  Top-level project : ${lace_is_top_level}")
-message(STATUS "  Use HWLOC         : ${LACE_USE_HWLOC}")
-message(STATUS "  Use -march=native : ${LACE_NATIVE_OPT}")
-message(STATUS "  Use -fPIC         : ${LACE_ENABLE_PIC}")
-message(STATUS "  Backoff when idle : ${LACE_BACKOFF}")
-message(STATUS "  Count tasks       : ${LACE_COUNT_TASKS}")
-message(STATUS "  Count steals      : ${LACE_COUNT_STEALS}")
-message(STATUS "  Count splits      : ${LACE_COUNT_SPLITS}")
-message(STATUS "  Record PIE times  : ${LACE_PIE_TIMES}")
-if(lace_is_top_level)
-    message(STATUS "  Build tests       : ${LACE_BUILD_TESTS}")
-    message(STATUS "  Build benchmarks  : ${LACE_BUILD_BENCHMARKS}")
-    message(STATUS "  Sanitize address  : ${LACE_SANITIZE_ADDRESS}")
-    message(STATUS "  Sanitize thread   : ${LACE_SANITIZE_THREAD}")
-    message(STATUS "  Sanitize UB       : ${LACE_SANITIZE_UB}")
-endif()
-message(STATUS "")
+# message(STATUS "")
+# message(STATUS "Lace ${PROJECT_VERSION} configuration summary:")
+# message(STATUS "  Build type        : ${CMAKE_BUILD_TYPE}")
+# message(STATUS "  Shared libraries  : ${BUILD_SHARED_LIBS}")
+# message(STATUS "  Top-level project : ${lace_is_top_level}")
+# message(STATUS "  Use HWLOC         : ${LACE_USE_HWLOC}")
+# message(STATUS "  Use -march=native : ${LACE_NATIVE_OPT}")
+# message(STATUS "  Use -fPIC         : ${LACE_ENABLE_PIC}")
+# message(STATUS "  Backoff when idle : ${LACE_BACKOFF}")
+# message(STATUS "  Count tasks       : ${LACE_COUNT_TASKS}")
+# message(STATUS "  Count steals      : ${LACE_COUNT_STEALS}")
+# message(STATUS "  Count splits      : ${LACE_COUNT_SPLITS}")
+# message(STATUS "  Record PIE times  : ${LACE_PIE_TIMES}")
+# if(lace_is_top_level)
+#     message(STATUS "  Build tests       : ${LACE_BUILD_TESTS}")
+#     message(STATUS "  Build benchmarks  : ${LACE_BUILD_BENCHMARKS}")
+#     message(STATUS "  Sanitize address  : ${LACE_SANITIZE_ADDRESS}")
+#     message(STATUS "  Sanitize thread   : ${LACE_SANITIZE_THREAD}")
+#     message(STATUS "  Sanitize UB       : ${LACE_SANITIZE_UB}")
+# endif()
+# message(STATUS "")
+
+# JFG: Avoid showing lace options in ccmake.
+mark_as_advanced(
+  LACE_PIE_TIMES
+  LACE_COUNT_TASKS
+  LACE_COUNT_STEALS
+  LACE_COUNT_SPLITS
+  LACE_USE_HWLOC
+  LACE_USE_MMAP
+)

@@ -493,59 +493,59 @@ TASK_DECL_3(MTBDD, mtbdd_abstract_op_max, MTBDD, MTBDD, int);
  * Compute -a
  * (negation, where 0 stays 0, and x into -x)
  */
-#define mtbdd_negate(a) mtbdd_uapply(a, TASK(mtbdd_op_negate), 0)
+#define mtbdd_negate(a) mtbdd_uapply(a, mtbdd_op_negate_CALL, 0)
 
 /**
  * Compute ~a for partial MTBDDs.
  * Does not negate Boolean True/False.
  * (complement, where 0 is turned into 1, and non-0 into 0)
  */
-#define mtbdd_cmpl(a) mtbdd_uapply(a, TASK(mtbdd_op_cmpl), 0)
+#define mtbdd_cmpl(a) mtbdd_uapply(a, mtbdd_op_cmpl_CALL, 0)
 
 /**
  * Compute a + b
  */
-#define mtbdd_plus(a, b) mtbdd_apply(a, b, TASK(mtbdd_op_plus))
+#define mtbdd_plus(a, b) mtbdd_apply(a, b, mtbdd_op_plus_CALL)
 
 /**
  * Compute a - b
  */
-#define mtbdd_minus(a, b) mtbdd_apply(a, b, TASK(mtbdd_op_minus))
+#define mtbdd_minus(a, b) mtbdd_apply(a, b, mtbdd_op_minus_CALL)
 
 /**
  * Compute a * b
  */
-#define mtbdd_times(a, b) mtbdd_apply(a, b, TASK(mtbdd_op_times))
+#define mtbdd_times(a, b) mtbdd_apply(a, b, mtbdd_op_times_CALL)
 
 /**
  * Compute min(a, b)
  */
-#define mtbdd_min(a, b) mtbdd_apply(a, b, TASK(mtbdd_op_min))
+#define mtbdd_min(a, b) mtbdd_apply(a, b, mtbdd_op_min_CALL)
 
 /**
  * Compute max(a, b)
  */
-#define mtbdd_max(a, b) mtbdd_apply(a, b, TASK(mtbdd_op_max))
+#define mtbdd_max(a, b) mtbdd_apply(a, b, mtbdd_op_max_CALL)
 
 /**
  * Abstract the variables in <v> from <a> by taking the sum of all values
  */
-#define mtbdd_abstract_plus(dd, v) mtbdd_abstract(dd, v, TASK(mtbdd_abstract_op_plus))
+#define mtbdd_abstract_plus(dd, v) mtbdd_abstract(dd, v, mtbdd_abstract_op_plus_CALL)
 
 /**
  * Abstract the variables in <v> from <a> by taking the product of all values
  */
-#define mtbdd_abstract_times(dd, v) mtbdd_abstract(dd, v, TASK(mtbdd_abstract_op_times))
+#define mtbdd_abstract_times(dd, v) mtbdd_abstract(dd, v, mtbdd_abstract_op_times_CALL)
 
 /**
  * Abstract the variables in <v> from <a> by taking the minimum of all values
  */
-#define mtbdd_abstract_min(dd, v) mtbdd_abstract(dd, v, TASK(mtbdd_abstract_op_min))
+#define mtbdd_abstract_min(dd, v) mtbdd_abstract(dd, v, mtbdd_abstract_op_min_CALL)
 
 /**
  * Abstract the variables in <v> from <a> by taking the maximum of all values
  */
-#define mtbdd_abstract_max(dd, v) mtbdd_abstract(dd, v, TASK(mtbdd_abstract_op_max))
+#define mtbdd_abstract_max(dd, v) mtbdd_abstract(dd, v, mtbdd_abstract_op_max_CALL)
 
 /**
  * Compute IF <f> THEN <g> ELSE <h>.
@@ -729,7 +729,7 @@ VOID_TASK_DECL_3(mtbdd_enum_par, MTBDD, mtbdd_enum_cb, void*);
  * Usage:
  * TASK_2(MTBDD, g, MTBDD, in) { ... return g of <in> ... }
  * MTBDD x_vars = ...;  // the cube of variables x
- * MTBDD result = mtbdd_eval_compose(dd, x_vars, TASK(g));
+ * MTBDD result = mtbdd_eval_compose(dd, x_vars, g_CALL);
  */
 LACE_TYPEDEF_CB(MTBDD, mtbdd_eval_compose_cb, MTBDD);
 TASK_DECL_3(MTBDD, mtbdd_eval_compose, MTBDD, MTBDD, mtbdd_eval_compose_cb);

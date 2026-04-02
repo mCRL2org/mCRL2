@@ -238,7 +238,7 @@ VOID_TASK_0(lddmc_refs_init)
 {
     INIT_THREAD_LOCAL(lddmc_refs_key);
     TOGETHER(lddmc_refs_init_task);
-    sylvan_gc_add_mark(TASK(lddmc_refs_mark));
+    sylvan_gc_add_mark(lddmc_refs_mark_CALL);
 }
 
 void
@@ -342,9 +342,9 @@ void
 sylvan_init_ldd(void)
 {
     sylvan_register_quit(lddmc_quit);
-    sylvan_gc_add_mark(TASK(lddmc_gc_mark_external_refs));
-    sylvan_gc_add_mark(TASK(lddmc_gc_mark_protected));
-    sylvan_gc_add_mark(TASK(lddmc_gc_mark_serialize));
+    sylvan_gc_add_mark(lddmc_gc_mark_external_refs_CALL);
+    sylvan_gc_add_mark(lddmc_gc_mark_protected_CALL);
+    sylvan_gc_add_mark(lddmc_gc_mark_serialize_CALL);
 
     refs_create(&lddmc_refs, 1024);
     if (!lddmc_protected_created) {

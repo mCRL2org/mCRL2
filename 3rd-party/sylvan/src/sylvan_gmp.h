@@ -87,62 +87,62 @@ TASK_DECL_2(MTBDD, gmp_op_abs, MTBDD, size_t);
 /**
  * Compute a + b
  */
-#define gmp_plus(a, b) mtbdd_apply(a, b, TASK(gmp_op_plus))
+#define gmp_plus(a, b) mtbdd_apply(a, b, gmp_op_plus_CALL)
 
 /**
  * Compute a + b
  */
-#define gmp_minus(a, b) mtbdd_apply(a, b, TASK(gmp_op_minus))
+#define gmp_minus(a, b) mtbdd_apply(a, b, gmp_op_minus_CALL)
 
 /**
  * Compute a * b
  */
-#define gmp_times(a, b) mtbdd_apply(a, b, TASK(gmp_op_times))
+#define gmp_times(a, b) mtbdd_apply(a, b, gmp_op_times_CALL)
 
 /**
  * Compute a * b
  */
-#define gmp_divide(a, b) mtbdd_apply(a, b, TASK(gmp_op_divide))
+#define gmp_divide(a, b) mtbdd_apply(a, b, gmp_op_divide_CALL)
 
 /**
  * Compute min(a, b)
  */
-#define gmp_min(a, b) mtbdd_apply(a, b, TASK(gmp_op_min))
+#define gmp_min(a, b) mtbdd_apply(a, b, gmp_op_min_CALL)
 
 /**
  * Compute max(a, b)
  */
-#define gmp_max(a, b) mtbdd_apply(a, b, TASK(gmp_op_max))
+#define gmp_max(a, b) mtbdd_apply(a, b, gmp_op_max_CALL)
 
 /**
  * Compute -a
  */
-#define gmp_neg(a) mtbdd_uapply(a, TASK(gmp_op_neg), 0);
+#define gmp_neg(a) mtbdd_uapply(a, gmp_op_neg_CALL, 0);
 
 /**
  * Compute abs(a)
  */
-#define gmp_abs(a) mtbdd_uapply(a, TASK(gmp_op_abs), 0);
+#define gmp_abs(a) mtbdd_uapply(a, gmp_op_abs_CALL, 0);
 
 /**
  * Abstract the variables in <v> from <a> by taking the sum of all values
  */
-#define gmp_abstract_plus(dd, v) mtbdd_abstract(dd, v, TASK(gmp_abstract_op_plus))
+#define gmp_abstract_plus(dd, v) mtbdd_abstract(dd, v, gmp_abstract_op_plus_CALL)
 
 /**
  * Abstract the variables in <v> from <a> by taking the product of all values
  */
-#define gmp_abstract_times(dd, v) mtbdd_abstract(dd, v, TASK(gmp_abstract_op_times))
+#define gmp_abstract_times(dd, v) mtbdd_abstract(dd, v, gmp_abstract_op_times_CALL)
 
 /**
  * Abstract the variables in <v> from <a> by taking the minimum of all values
  */
-#define gmp_abstract_min(dd, v) mtbdd_abstract(dd, v, TASK(gmp_abstract_op_min))
+#define gmp_abstract_min(dd, v) mtbdd_abstract(dd, v, gmp_abstract_op_min_CALL)
 
 /**
  * Abstract the variables in <v> from <a> by taking the maximum of all values
  */
-#define gmp_abstract_max(dd, v) mtbdd_abstract(dd, v, TASK(gmp_abstract_op_max))
+#define gmp_abstract_max(dd, v) mtbdd_abstract(dd, v, gmp_abstract_op_max_CALL)
 
 /**
  * Multiply <a> and <b>, and abstract variables <vars> using summation.
@@ -163,14 +163,14 @@ TASK_DECL_3(MTBDD, gmp_and_abstract_max, MTBDD, MTBDD, MTBDD);
  * Parameter <dd> is the MTBDD to convert; parameter <value> is an GMP mpq leaf
  */
 TASK_DECL_2(MTBDD, gmp_op_threshold, MTBDD*, MTBDD*);
-#define gmp_threshold(dd, value) mtbdd_apply(dd, value, TASK(gmp_op_threshold));
+#define gmp_threshold(dd, value) mtbdd_apply(dd, value, gmp_op_threshold_CALL);
 
 /**
  * Convert to a Boolean MTBDD, translate terminals > value to 1 and to 0 otherwise;
  * Parameter <dd> is the MTBDD to convert; parameter <value> is an GMP mpq leaf
  */
 TASK_DECL_2(MTBDD, gmp_op_strict_threshold, MTBDD*, MTBDD*);
-#define gmp_strict_threshold(dd, value) mtbdd_apply(dd, value, TASK(gmp_op_strict_threshold));
+#define gmp_strict_threshold(dd, value) mtbdd_apply(dd, value, gmp_op_strict_threshold_CALL);
 
 /**
  * Convert to a Boolean MTBDD, translate terminals >= value to 1 and to 0 otherwise;

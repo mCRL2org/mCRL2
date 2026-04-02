@@ -434,12 +434,12 @@ TASK_IMPL_2(MTBDD, gmp_op_abs, MTBDD, dd, size_t, p)
 TASK_IMPL_3(MTBDD, gmp_abstract_op_plus, MTBDD, a, MTBDD, b, int, k)
 {
     if (k==0) {
-        return mtbdd_apply(a, b, TASK(gmp_op_plus));
+        return mtbdd_apply(a, b, gmp_op_plus_CALL);
     } else {
         MTBDD res = a;
         for (int i=0; i<k; i++) {
             mtbdd_refs_push(res);
-            res = mtbdd_apply(res, res, TASK(gmp_op_plus));
+            res = mtbdd_apply(res, res, gmp_op_plus_CALL);
             mtbdd_refs_pop(1);
         }
         return res;
@@ -449,12 +449,12 @@ TASK_IMPL_3(MTBDD, gmp_abstract_op_plus, MTBDD, a, MTBDD, b, int, k)
 TASK_IMPL_3(MTBDD, gmp_abstract_op_times, MTBDD, a, MTBDD, b, int, k)
 {
     if (k==0) {
-        return mtbdd_apply(a, b, TASK(gmp_op_times));
+        return mtbdd_apply(a, b, gmp_op_times_CALL);
     } else {
         MTBDD res = a;
         for (int i=0; i<k; i++) {
             mtbdd_refs_push(res);
-            res = mtbdd_apply(res, res, TASK(gmp_op_times));
+            res = mtbdd_apply(res, res, gmp_op_times_CALL);
             mtbdd_refs_pop(1);
         }
         return res;
@@ -464,7 +464,7 @@ TASK_IMPL_3(MTBDD, gmp_abstract_op_times, MTBDD, a, MTBDD, b, int, k)
 TASK_IMPL_3(MTBDD, gmp_abstract_op_min, MTBDD, a, MTBDD, b, int, k)
 {
     if (k == 0) {
-        return mtbdd_apply(a, b, TASK(gmp_op_min));
+        return mtbdd_apply(a, b, gmp_op_min_CALL);
     } else {
         // nothing to do: min(a, a) = a
         return a;
@@ -474,7 +474,7 @@ TASK_IMPL_3(MTBDD, gmp_abstract_op_min, MTBDD, a, MTBDD, b, int, k)
 TASK_IMPL_3(MTBDD, gmp_abstract_op_max, MTBDD, a, MTBDD, b, int, k)
 {
     if (k == 0) {
-        return mtbdd_apply(a, b, TASK(gmp_op_max));
+        return mtbdd_apply(a, b, gmp_op_max_CALL);
     } else {
         // nothing to do: max(a, a) = a
         return a;
@@ -523,12 +523,12 @@ TASK_2(MTBDD, gmp_op_strict_threshold_d, MTBDD, a, size_t, svalue)
 
 TASK_IMPL_2(MTBDD, gmp_threshold_d, MTBDD, dd, double, d)
 {
-    return mtbdd_uapply(dd, TASK(gmp_op_threshold_d), *(size_t*)&d);
+    return mtbdd_uapply(dd, gmp_op_threshold_d_CALL, *(size_t*)&d);
 }
 
 TASK_IMPL_2(MTBDD, gmp_strict_threshold_d, MTBDD, dd, double, d)
 {
-    return mtbdd_uapply(dd, TASK(gmp_op_strict_threshold_d), *(size_t*)&d);
+    return mtbdd_uapply(dd, gmp_op_strict_threshold_d_CALL, *(size_t*)&d);
 }
 
 /**
@@ -588,7 +588,7 @@ TASK_IMPL_3(MTBDD, gmp_and_abstract_plus, MTBDD, a, MTBDD, b, MTBDD, v)
     /* Check terminal cases */
 
     /* If v == true, then <vars> is an empty set */
-    if (v == mtbdd_true) return mtbdd_apply(a, b, TASK(gmp_op_times));
+    if (v == mtbdd_true) return mtbdd_apply(a, b, gmp_op_times_CALL);
 
     /* Try the times operator on a and b */
     MTBDD result = CALL(gmp_op_times, &a, &b);
@@ -596,7 +596,7 @@ TASK_IMPL_3(MTBDD, gmp_and_abstract_plus, MTBDD, a, MTBDD, b, MTBDD, v)
         /* Times operator successful, store reference (for garbage collection) */
         mtbdd_refs_push(result);
         /* ... and perform abstraction */
-        result = mtbdd_abstract(result, v, TASK(gmp_abstract_op_plus));
+        result = mtbdd_abstract(result, v, gmp_abstract_op_plus_CALL);
         mtbdd_refs_pop(1);
         /* Note that the operation cache is used in mtbdd_abstract */
         return result;
@@ -632,7 +632,7 @@ TASK_IMPL_3(MTBDD, gmp_and_abstract_plus, MTBDD, a, MTBDD, b, MTBDD, v)
         /* Recursive, then abstract result */
         result = CALL(gmp_and_abstract_plus, a, b, node_gethigh(v, nv));
         mtbdd_refs_push(result);
-        result = mtbdd_apply(result, result, TASK(gmp_op_plus));
+        result = mtbdd_apply(result, result, gmp_op_plus_CALL);
         mtbdd_refs_pop(1);
     } else {
         /* Get cofactors */
@@ -647,7 +647,7 @@ TASK_IMPL_3(MTBDD, gmp_and_abstract_plus, MTBDD, a, MTBDD, b, MTBDD, v)
             mtbdd_refs_spawn(SPAWN(gmp_and_abstract_plus, ahigh, bhigh, node_gethigh(v, nv)));
             MTBDD low = mtbdd_refs_push(CALL(gmp_and_abstract_plus, alow, blow, node_gethigh(v, nv)));
             MTBDD high = mtbdd_refs_push(mtbdd_refs_sync(SYNC(gmp_and_abstract_plus)));
-            result = CALL(mtbdd_apply, low, high, TASK(gmp_op_plus));
+            result = CALL(mtbdd_apply, low, high, gmp_op_plus_CALL);
             mtbdd_refs_pop(2);
         } else /* vv > v */ {
             /* Recursive, then create node */
@@ -675,7 +675,7 @@ TASK_IMPL_3(MTBDD, gmp_and_abstract_max, MTBDD, a, MTBDD, b, MTBDD, v)
     /* Check terminal cases */
 
     /* If v == true, then <vars> is an empty set */
-    if (v == mtbdd_true) return mtbdd_apply(a, b, TASK(gmp_op_times));
+    if (v == mtbdd_true) return mtbdd_apply(a, b, gmp_op_times_CALL);
 
     /* Try the times operator on a and b */
     MTBDD result = CALL(gmp_op_times, &a, &b);
@@ -683,7 +683,7 @@ TASK_IMPL_3(MTBDD, gmp_and_abstract_max, MTBDD, a, MTBDD, b, MTBDD, v)
         /* Times operator successful, store reference (for garbage collection) */
         mtbdd_refs_push(result);
         /* ... and perform abstraction */
-        result = mtbdd_abstract(result, v, TASK(gmp_abstract_op_max));
+        result = mtbdd_abstract(result, v, gmp_abstract_op_max_CALL);
         mtbdd_refs_pop(1);
         /* Note that the operation cache is used in mtbdd_abstract */
         return result;
@@ -706,7 +706,7 @@ TASK_IMPL_3(MTBDD, gmp_and_abstract_max, MTBDD, a, MTBDD, b, MTBDD, v)
     while (vv < var) {
         /* we can skip variables, because max(r,r) = r */
         v = node_high(v, nv);
-        if (v == mtbdd_true) return mtbdd_apply(a, b, TASK(gmp_op_times));
+        if (v == mtbdd_true) return mtbdd_apply(a, b, gmp_op_times_CALL);
         nv = MTBDD_GETNODE(v);
         vv = mtbddnode_getvariable(nv);
     }
@@ -735,7 +735,7 @@ TASK_IMPL_3(MTBDD, gmp_and_abstract_max, MTBDD, a, MTBDD, b, MTBDD, v)
         mtbdd_refs_spawn(SPAWN(gmp_and_abstract_max, ahigh, bhigh, node_gethigh(v, nv)));
         MTBDD low = mtbdd_refs_push(CALL(gmp_and_abstract_max, alow, blow, node_gethigh(v, nv)));
         MTBDD high = mtbdd_refs_push(mtbdd_refs_sync(SYNC(gmp_and_abstract_max)));
-        result = CALL(mtbdd_apply, low, high, TASK(gmp_op_max));
+        result = CALL(mtbdd_apply, low, high, gmp_op_max_CALL);
         mtbdd_refs_pop(2);
     } else /* vv > v */ {
         /* Recursive, then create node */

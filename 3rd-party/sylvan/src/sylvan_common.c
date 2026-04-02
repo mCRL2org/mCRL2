@@ -371,9 +371,9 @@ sylvan_init_package(void)
     /* Initialize garbage collection */
     gc = 0;
 #if SYLVAN_AGGRESSIVE_RESIZE
-    main_hook = TASK(sylvan_gc_aggressive_resize);
+    main_hook = sylvan_gc_aggressive_resize_CALL;
 #else
-    main_hook = TASK(sylvan_gc_normal_resize);
+    main_hook = sylvan_gc_normal_resize_CALL;
 #endif
 
     sylvan_stats_init();

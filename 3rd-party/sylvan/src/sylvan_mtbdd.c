@@ -297,7 +297,7 @@ VOID_TASK_0(mtbdd_refs_init)
 {
     INIT_THREAD_LOCAL(mtbdd_refs_key);
     TOGETHER(mtbdd_refs_init_task);
-    sylvan_gc_add_mark(TASK(mtbdd_refs_mark));
+    sylvan_gc_add_mark(mtbdd_refs_mark_CALL);
 }
 
 void
@@ -408,8 +408,8 @@ sylvan_init_mtbdd(void)
     mtbdd_initialized = 1;
 
     sylvan_register_quit(mtbdd_quit);
-    sylvan_gc_add_mark(TASK(mtbdd_gc_mark_external_refs));
-    sylvan_gc_add_mark(TASK(mtbdd_gc_mark_protected));
+    sylvan_gc_add_mark(mtbdd_gc_mark_external_refs_CALL);
+    sylvan_gc_add_mark(mtbdd_gc_mark_protected_CALL);
 
     refs_create(&mtbdd_refs, 1024);
     if (!mtbdd_protected_created) {
@@ -978,31 +978,31 @@ TASK_2(MTBDD, mtbdd_uop_pow_uint, MTBDD, a, size_t, k)
 TASK_IMPL_3(MTBDD, mtbdd_abstract_op_plus, MTBDD, a, MTBDD, b, int, k)
 {
     if (k==0) {
-        return mtbdd_apply(a, b, TASK(mtbdd_op_plus));
+        return mtbdd_apply(a, b, mtbdd_op_plus_CALL);
     } else {
         uint64_t factor = 1ULL<<k; // skip 1,2,3,4: times 2,4,8,16
-        return mtbdd_uapply(a, TASK(mtbdd_uop_times_uint), factor);
+        return mtbdd_uapply(a, mtbdd_uop_times_uint_CALL, factor);
     }
 }
 
 TASK_IMPL_3(MTBDD, mtbdd_abstract_op_times, MTBDD, a, MTBDD, b, int, k)
 {
     if (k==0) {
-        return mtbdd_apply(a, b, TASK(mtbdd_op_times));
+        return mtbdd_apply(a, b, mtbdd_op_times_CALL);
     } else {
         uint64_t squares = 1ULL<<k; // square k times, ie res^(2^k): 2,4,8,16
-        return mtbdd_uapply(a, TASK(mtbdd_uop_pow_uint), squares);
+        return mtbdd_uapply(a, mtbdd_uop_pow_uint_CALL, squares);
     }
 }
 
 TASK_IMPL_3(MTBDD, mtbdd_abstract_op_min, MTBDD, a, MTBDD, b, int, k)
 {
-    return k == 0 ? mtbdd_apply(a, b, TASK(mtbdd_op_min)) : a;
+    return k == 0 ? mtbdd_apply(a, b, mtbdd_op_min_CALL) : a;
 }
 
 TASK_IMPL_3(MTBDD, mtbdd_abstract_op_max, MTBDD, a, MTBDD, b, int, k)
 {
-    return k == 0 ? mtbdd_apply(a, b, TASK(mtbdd_op_max)) : a;
+    return k == 0 ? mtbdd_apply(a, b, mtbdd_op_max_CALL) : a;
 }
 
 /**
@@ -1565,12 +1565,12 @@ TASK_IMPL_2(MTBDD, mtbdd_op_strict_threshold_double, MTBDD, a, size_t, svalue)
 
 TASK_IMPL_2(MTBDD, mtbdd_threshold_double, MTBDD, dd, double, d)
 {
-    return mtbdd_uapply(dd, TASK(mtbdd_op_threshold_double), *(size_t*)&d);
+    return mtbdd_uapply(dd, mtbdd_op_threshold_double_CALL, *(size_t*)&d);
 }
 
 TASK_IMPL_2(MTBDD, mtbdd_strict_threshold_double, MTBDD, dd, double, d)
 {
-    return mtbdd_uapply(dd, TASK(mtbdd_op_strict_threshold_double), *(size_t*)&d);
+    return mtbdd_uapply(dd, mtbdd_op_strict_threshold_double_CALL, *(size_t*)&d);
 }
 
 /**
@@ -2120,11 +2120,11 @@ TASK_IMPL_2(MTBDD, mtbdd_greater, MTBDD, a, MTBDD, b)
 TASK_IMPL_3(MTBDD, mtbdd_and_abstract_plus, MTBDD, a, MTBDD, b, MTBDD, v)
 {
     /* Check terminal case */
-    if (v == mtbdd_true) return mtbdd_apply(a, b, TASK(mtbdd_op_times));
+    if (v == mtbdd_true) return mtbdd_apply(a, b, mtbdd_op_times_CALL);
     MTBDD result = CALL(mtbdd_op_times, &a, &b);
     if (result != mtbdd_invalid) {
         mtbdd_refs_push(result);
-        result = mtbdd_abstract(result, v, TASK(mtbdd_abstract_op_plus));
+        result = mtbdd_abstract(result, v, mtbdd_abstract_op_plus_CALL);
         mtbdd_refs_pop(1);
         return result;
     }
@@ -2159,7 +2159,7 @@ TASK_IMPL_3(MTBDD, mtbdd_and_abstract_plus, MTBDD, a, MTBDD, b, MTBDD, v)
         /* Recursive, then abstract result */
         result = CALL(mtbdd_and_abstract_plus, a, b, node_gethigh(v, nv));
         mtbdd_refs_push(result);
-        result = mtbdd_apply(result, result, TASK(mtbdd_op_plus));
+        result = mtbdd_apply(result, result, mtbdd_op_plus_CALL);
         mtbdd_refs_pop(1);
     } else {
         /* Get cofactors */
@@ -2174,7 +2174,7 @@ TASK_IMPL_3(MTBDD, mtbdd_and_abstract_plus, MTBDD, a, MTBDD, b, MTBDD, v)
             mtbdd_refs_spawn(SPAWN(mtbdd_and_abstract_plus, ahigh, bhigh, node_gethigh(v, nv)));
             MTBDD low = mtbdd_refs_push(CALL(mtbdd_and_abstract_plus, alow, blow, node_gethigh(v, nv)));
             MTBDD high = mtbdd_refs_push(mtbdd_refs_sync(SYNC(mtbdd_and_abstract_plus)));
-            result = CALL(mtbdd_apply, low, high, TASK(mtbdd_op_plus));
+            result = CALL(mtbdd_apply, low, high, mtbdd_op_plus_CALL);
             mtbdd_refs_pop(2);
         } else /* vv > v */ {
             /* Recursive, then create node */
@@ -2200,11 +2200,11 @@ TASK_IMPL_3(MTBDD, mtbdd_and_abstract_plus, MTBDD, a, MTBDD, b, MTBDD, v)
 TASK_IMPL_3(MTBDD, mtbdd_and_abstract_max, MTBDD, a, MTBDD, b, MTBDD, v)
 {
     /* Check terminal case */
-    if (v == mtbdd_true) return mtbdd_apply(a, b, TASK(mtbdd_op_times));
+    if (v == mtbdd_true) return mtbdd_apply(a, b, mtbdd_op_times_CALL);
     MTBDD result = CALL(mtbdd_op_times, &a, &b);
     if (result != mtbdd_invalid) {
         mtbdd_refs_push(result);
-        result = mtbdd_abstract(result, v, TASK(mtbdd_abstract_op_max));
+        result = mtbdd_abstract(result, v, mtbdd_abstract_op_max_CALL);
         mtbdd_refs_pop(1);
         return result;
     }
@@ -2226,7 +2226,7 @@ TASK_IMPL_3(MTBDD, mtbdd_and_abstract_max, MTBDD, a, MTBDD, b, MTBDD, v)
     while (vv < var) {
         /* we can skip variables, because max(r,r) = r */
         v = node_gethigh(v, nv);
-        if (v == mtbdd_true) return mtbdd_apply(a, b, TASK(mtbdd_op_times));
+        if (v == mtbdd_true) return mtbdd_apply(a, b, mtbdd_op_times_CALL);
         nv = MTBDD_GETNODE(v);
         vv = mtbddnode_getvariable(nv);
     }
@@ -2255,7 +2255,7 @@ TASK_IMPL_3(MTBDD, mtbdd_and_abstract_max, MTBDD, a, MTBDD, b, MTBDD, v)
         mtbdd_refs_spawn(SPAWN(mtbdd_and_abstract_max, ahigh, bhigh, node_gethigh(v, nv)));
         MTBDD low = mtbdd_refs_push(CALL(mtbdd_and_abstract_max, alow, blow, node_gethigh(v, nv)));
         MTBDD high = mtbdd_refs_push(mtbdd_refs_sync(SYNC(mtbdd_and_abstract_max)));
-        result = CALL(mtbdd_apply, low, high, TASK(mtbdd_op_max));
+        result = CALL(mtbdd_apply, low, high, mtbdd_op_max_CALL);
         mtbdd_refs_pop(2);
     } else /* vv > v */ {
         /* Recursive, then create node */
@@ -2775,7 +2775,7 @@ VOID_TASK_IMPL_3(mtbdd_enum_par, MTBDD, dd, mtbdd_enum_cb, cb, void*, context)
  * Usage:
  * TASK_2(MTBDD, g, MTBDD, in) { ... return g of <in> ... }
  * MTBDD x_vars = ...;  // the cube of variables x
- * MTBDD result = mtbdd_eval_compose(dd, x_vars, TASK(g));
+ * MTBDD result = mtbdd_eval_compose(dd, x_vars, g_CALL);
  */
 TASK_IMPL_3(MTBDD, mtbdd_eval_compose, MTBDD, dd, MTBDD, vars, mtbdd_eval_compose_cb, cb)
 {
@@ -3218,7 +3218,7 @@ mtbdd_writer_start()
 
 VOID_TASK_IMPL_2(mtbdd_writer_add, sylvan_skiplist_t, sl, MTBDD, dd)
 {
-    mtbdd_visit_seq(dd, (mtbdd_visit_pre_cb)TASK(mtbdd_writer_add_visitor_pre), (mtbdd_visit_post_cb)TASK(mtbdd_writer_add_visitor_post), (void*)sl);
+    mtbdd_visit_seq(dd, (mtbdd_visit_pre_cb)mtbdd_writer_add_visitor_pre_CALL, (mtbdd_visit_post_cb)mtbdd_writer_add_visitor_post_CALL, (void*)sl);
 }
 
 void

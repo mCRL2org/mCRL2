@@ -396,8 +396,8 @@ sylvan_init_zdd(void)
     zdd_initialized = 1;
 
     sylvan_register_quit(zdd_quit);
-    sylvan_gc_add_mark(TASK(zdd_gc_mark_protected));
-    sylvan_gc_add_mark(TASK(zdd_refs_mark));
+    sylvan_gc_add_mark(zdd_gc_mark_protected_CALL);
+    sylvan_gc_add_mark(zdd_refs_mark_CALL);
 
     if (!zdd_protected_created) {
         protect_create(&zdd_protected, 4096);
@@ -1950,7 +1950,7 @@ zdd_writer_start()
 
 VOID_TASK_IMPL_2(zdd_writer_add, sylvan_skiplist_t, sl, ZDD, dd)
 {
-    zdd_visit_seq(dd, (zdd_visit_pre_cb)TASK(zdd_writer_add_visitor_pre), (zdd_visit_post_cb)TASK(zdd_writer_add_visitor_post), (void*)sl);
+    zdd_visit_seq(dd, (zdd_visit_pre_cb)zdd_writer_add_visitor_pre_CALL, (zdd_visit_post_cb)zdd_writer_add_visitor_post_CALL, (void*)sl);
 }
 
 void
