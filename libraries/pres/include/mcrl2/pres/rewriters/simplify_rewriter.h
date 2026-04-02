@@ -608,7 +608,7 @@ struct simplify_data_rewriter_builder : public add_data_rewriter < pres_system::
   using super = add_data_rewriter<pres_system::detail::simplify_builder, Derived, DataRewriter, Substitution >;
 
   using super::apply;
-  const data::data_specification m_data_spec;
+  const data::data_specification& m_data_spec;
 
   using substitution_administration_type = data::detail::substitution_updater_with_an_identifier_generator<Substitution,
                                                                   data::enumerator_identifier_generator>;

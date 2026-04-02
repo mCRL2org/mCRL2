@@ -884,7 +884,7 @@ inline pres_expression solve_fixed_point_inner(const propositional_variable& v,
   /* Here is is assumed that t is a disjunction of terms */
   collect_lines(lines, v, t, minimal_fixed_point);
  
-  pres_expression m = false_();;
+  pres_expression m = false_();
   std::vector< linear_fixed_point_equation > shallow_lines;     // lines with gradient between 0 and 1. 
   std::vector< linear_fixed_point_equation > steep_lines;       // lines with gradient >=1.
   std::vector< linear_fixed_point_equation > flat_lines;        // lines with gradient 0. eqninf(v) term is present. 
@@ -936,6 +936,14 @@ inline const pres_expression solve_single_equation(const fixpoint_symbol& f,
     const data::data_specification& dataspec,
     const data::rewriter& rewriter)
 {
+  { 
+    //  First check whether v does occur in t. If not, nothing needs to be solved.
+    std::set<propositional_variable_instantiation> s=pres_system::find_propositional_variable_instantiations(t);
+    if (s.contains(propositional_variable_instantiation(v.name(),data::data_expression_list()))==0)  // v does not occur in t, so nothing needs to be solved.
+    {
+      return t;
+    }
+  }
   pres_expression aux;
   if (is_condsm(t) && f==pbes_system::fixpoint_symbol::mu())
   { 
