@@ -15,109 +15,132 @@
  * limitations under the License.
  */
 
+
+#if defined(__GLIBC__)
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
+#endif
+
+#include <lace14.h>
+
 #include <errno.h> // for errno
-#include <sched.h> // for sched_getaffinity
+#include <inttypes.h> // for PRIu64
 #include <stddef.h> // for size_t
 #include <stdio.h>  // for fprintf
 #include <stdlib.h> // for memalign, malloc
 #include <string.h> // for memset
 #include <time.h> // for clock_gettime
-#include <pthread.h> // for POSIX threading
-#include <stdatomic.h>
 
-#ifndef _WIN32
+#if LACE_MSVC
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <processthreadsapi.h>
+#include <process.h>
+#include <synchapi.h>
+#include <profileapi.h>
+#include <malloc.h>
+#else
+#include <sched.h>
+#include <unistd.h>
+#include <pthread.h>
+
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h> // still get windows...
+#else
 #include <sys/resource.h> // for getrlimit
 #endif
-
-#ifdef _WIN32
-#include <windows.h> // to use GetSystemInfo
-#undef NEWFRAME // otherwise we can't use NEWFRAME Lace macro
 #endif
 
-#if defined(__APPLE__)
-/* Mac OS X defines sem_init but actually does not implement them */
-#include <mach/mach.h>
-
-typedef semaphore_t sem_t;
-#define sem_init(sem, x, value)	semaphore_create(mach_task_self(), sem, SYNC_POLICY_FIFO, value)
-#define sem_wait(sem)           semaphore_wait(*sem)
-#define sem_post(sem)           semaphore_signal(*sem)
-#define sem_destroy(sem)        semaphore_destroy(mach_task_self(), *sem)
+#ifdef __STDC_NO_ATOMICS__
+#if LACE_MSVC
+#error "C atomic support is not enabled; try /std:c11 and /experimental:c11atomics"
 #else
-#include <semaphore.h> // for sem_*
+#error "C atomic support is not enabled"
+#endif
 #endif
 
-#include <lace14.h>
-
-#if LACE_USE_MMAP
-#include <sys/mman.h> // for mmap, etc
-#endif
+#include <stdatomic.h>
 
 #if LACE_USE_HWLOC
 #include <hwloc.h>
 
-/**
- * HWLOC information
- */
+ /**
+  * HWLOC information
+  */
 static hwloc_topology_t topo;
-static hwloc_cpuset_t *cpusets;
+static hwloc_cpuset_t* cpusets;
 static unsigned int n_nodes, n_cores, n_pus;
+#else
+static unsigned int n_pus;
+#endif
+
+#if !defined(_WIN32)
+#include <sys/mman.h>
+#ifndef MAP_NORESERVE
+#define MAP_NORESERVE 0
+#endif
 #endif
 
 /**
  * Little helper to get cache line size
  */
-#if defined(_WIN32) || defined(_WIN64)
-#include <windows.h>
-#include <stdlib.h>
-
+#if LACE_MSVC
 size_t get_cache_line_size(void)
 {
-    DWORD buffer_size = 0;
-    GetLogicalProcessorInformation(NULL, &buffer_size);
-    SYSTEM_LOGICAL_PROCESSOR_INFORMATION *buffer = malloc(buffer_size);
-    if (!buffer) return 64;
+    DWORD bytes = 0;
+    GetLogicalProcessorInformation(NULL, &bytes);
+    if (bytes == 0) return 64;
 
-    if (!GetLogicalProcessorInformation(buffer, &buffer_size)) {
-        free(buffer);
+    SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buf =
+        (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*)malloc(bytes);
+    if (!buf) return 64;
+
+    if (!GetLogicalProcessorInformation(buf, &bytes)) {
+        free(buf);
         return 64;
     }
 
-    size_t line_size = 0;
-    for (DWORD i = 0; i < buffer_size / sizeof(*buffer); i++) {
-        if (buffer[i].Relationship == RelationCache &&
-            buffer[i].Cache.Level == 1) {
-            line_size = buffer[i].Cache.LineSize;
+    size_t line = 0;
+    DWORD count = bytes / (DWORD)sizeof(*buf);
+    for (DWORD i = 0; i < count; i++) {
+        if (buf[i].Relationship == RelationCache &&
+            buf[i].Cache.Level == 1 &&
+            buf[i].Cache.LineSize != 0) {
+            line = (size_t)buf[i].Cache.LineSize;
             break;
         }
     }
 
-    free(buffer);
-    return line_size ? line_size : 64;
+    free(buf);
+    return line ? line : 64;
 }
-#elif defined(__APPLE__)
-size_t get_cache_line_size(void)
-{
-    #include <sys/sysctl.h>
 
-    size_t line_size = 0;
-    size_t size = sizeof(line_size);
-    if (sysctlbyname("hw.cachelinesize", &line_size, &size, NULL, 0) == 0 && line_size != 0) {
-        return line_size;
-    }
+#elif defined(__APPLE__)
+#include <sys/sysctl.h>
+
+static size_t get_cache_line_size(void)
+{
+    size_t line = 0;
+    size_t sz = sizeof(line);
+    if (sysctlbyname("hw.cachelinesize", &line, &sz, NULL, 0) == 0 && line != 0)
+        return line;
     return 64;
 }
+
 #elif defined(__linux__)
-size_t get_cache_line_size(void)
+static size_t get_cache_line_size(void)
 {
-    long line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
-    return (line_size > 0) ? (size_t)line_size : 64;
+    long line = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+    return (line > 0) ? (size_t)line : 64;
 }
+
 #else
-size_t get_cache_line_size(void)
+static size_t get_cache_line_size(void)
 {
-    // Unknown platform, fall back to a safe default
     return 64;
 }
 #endif
@@ -127,7 +150,20 @@ static size_t cache_line_size;
 /**
  * Thread handles
  */
-pthread_t *handles = NULL;
+#if !LACE_MSVC
+static pthread_t* handles = NULL;
+#else
+static HANDLE* handles = NULL;
+#endif
+
+/**
+ * Worker thread program stacks
+ */
+#if LACE_USE_HWLOC || !defined(_WIN32)
+static void** worker_stacks = NULL;
+static size_t worker_stack_size = 0;
+static size_t worker_stack_page_size = 0;
+#endif
 
 /**
  * (public) Worker data
@@ -135,13 +171,14 @@ pthread_t *handles = NULL;
 static Worker **workers = NULL;
 
 /**
- * Default sizes for program stack and task deque
+ * Size of the task deque
  */
-static size_t stacksize = 0; // 0 means just take default
-static size_t default_dqsize = 100000;
+static size_t dqsize = 1048576; // 1M entries, virtual only, should be sufficient... (famous last words)
 
-static void** worker_stacks = NULL;
-static size_t worker_stack_size = 0;
+/**
+ * Size of the program stack of each Lace worker
+ */
+static size_t stacksize = 0;
 
 /**
  * Verbosity flag, set with lace_set_verbosity
@@ -159,13 +196,20 @@ static unsigned int n_workers = 0;
  * - then private cachelines
  * - then the deque array
  */
+#if LACE_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4324)
+#endif
+
 typedef struct {
     Worker worker_public;
-    char pad1[PAD(sizeof(Worker), PADDING_TARGET)];
-    WorkerP worker_private;
-    char pad2[PAD(sizeof(WorkerP), PADDING_TARGET)];
-    Task deque[];
+    alignas(LACE_PADDING_TARGET) WorkerP worker_private;
+    alignas(LACE_PADDING_TARGET) Task deque[];
 } worker_data;
+
+#if LACE_MSVC
+#pragma warning(pop)
+#endif
 
 /**
  * (Secret) holds pointers to the memory block allocated for each worker
@@ -186,16 +230,16 @@ static WorkerP **workers_p;
  * Flag to signal all workers to quit.
  */
 static atomic_int lace_quits = 0;
-static atomic_uint workers_running = 0;
+
+/**
+ * Flag whether lace is running
+ */
+static int is_running = 0;
 
 /**
  * Thread-specific mechanism to access current worker data
  */
-#ifdef __linux__
-static __thread WorkerP *current_worker;
-#else
-static pthread_key_t current_worker_key;
-#endif
+LACE_TLS WorkerP* current_worker = NULL;
 
 /**
  * Global newframe variable used for the implementation of NEWFRAME and TOGETHER
@@ -206,7 +250,7 @@ lace_newframe_t lace_newframe;
  * Retrieve whether we are running as a Lace worker
  */
 int
-lace_is_worker()
+lace_is_worker(void)
 {
     return lace_get_worker() != NULL ? 1 : 0;
 }
@@ -215,13 +259,9 @@ lace_is_worker()
  * Get the private Worker data of the current thread
  */
 WorkerP*
-lace_get_worker()
+lace_get_worker(void)
 {
-#ifdef __linux__
     return current_worker;
-#else
-    return (WorkerP*)pthread_getspecific(current_worker_key);
-#endif
 }
 
 /**
@@ -233,19 +273,19 @@ lace_get_head(WorkerP *self)
     Task *dq = self->dq;
 
     /* First check the first tasks linearly */
-    if (dq[0].thief == 0) return dq;
-    if (dq[1].thief == 0) return dq+1;
-    if (dq[2].thief == 0) return dq+2;
-    if (dq[3].thief == 0) return dq+3;
+    if (atomic_load_explicit(&dq[0].thief, memory_order_relaxed) == 0) return dq;
+    if (atomic_load_explicit(&dq[1].thief, memory_order_relaxed) == 0) return dq+1;
+    if (atomic_load_explicit(&dq[2].thief, memory_order_relaxed) == 0) return dq+2;
+    if (atomic_load_explicit(&dq[3].thief, memory_order_relaxed) == 0) return dq+3;
 
     /* Then fast search for a low/high bound using powers of 2: 4, 8, 16... */
-    size_t low = 2;
-    size_t high = self->end - self->dq;
+    ptrdiff_t low = 2;
+    ptrdiff_t high = self->end - self->dq;
 
     for (;;) {
         if (low*2 >= high) {
             break;
-        } else if (dq[low*2].thief == 0) {
+        } else if (atomic_load_explicit(&dq[low*2].thief, memory_order_relaxed) == 0) {
             high=low*2;
             break;
         } else {
@@ -255,8 +295,8 @@ lace_get_head(WorkerP *self)
 
     /* Finally zoom in using binary search */
     while (low < high) {
-        size_t mid = low + (high-low)/2;
-        if (dq[mid].thief == 0) high = mid;
+        ptrdiff_t mid = low + (high-low)/2;
+        if (atomic_load_explicit(&dq[mid].thief, memory_order_relaxed) == 0) high = mid;
         else low = mid + 1;
     }
 
@@ -267,7 +307,7 @@ lace_get_head(WorkerP *self)
  * Get the number of workers
  */
 unsigned int
-lace_workers()
+lace_workers(void)
 {
     return n_workers;
 }
@@ -276,64 +316,95 @@ lace_workers()
  * Get the default stack size (or 0 for automatically determine)
  */
 size_t
-lace_get_stacksize()
+lace_get_stacksize(void)
 {
     return stacksize;
 }
 
+
 /**
  * If we are collecting PIE times, then we need some helper functions.
  */
-#if LACE_PIE_TIMES
-static uint64_t count_at_start, count_at_end;
+static uint64_t count_at_start;
 static uint64_t us_elapsed_timer;
 
-static void
-us_elapsed_start(void)
+static inline uint64_t lace_now_us(void)
 {
+#if defined(_WIN32)
+    /* Windows: QueryPerformanceCounter -> microseconds */
+    LARGE_INTEGER t, f;
+    QueryPerformanceCounter(&t);
+    QueryPerformanceFrequency(&f);
+    /* avoid overflow: (t * 1e6) / f  */
+    return (uint64_t)(((uint64_t)t.QuadPart * 1000000ULL) / (uint64_t)f.QuadPart);
+
+#elif defined(__APPLE__)
+    return lace_macos_now_ns() / 1000ULL;
+
+#else
+    /* POSIX: clock_gettime -> microseconds */
     struct timespec ts_now;
+#if defined(CLOCK_MONOTONIC_RAW)
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts_now);
+#else
     clock_gettime(CLOCK_MONOTONIC, &ts_now);
-    us_elapsed_timer = ts_now.tv_sec * 1000000LL + ts_now.tv_nsec/1000;
+#endif
+    return (uint64_t)ts_now.tv_sec * 1000000ULL + (uint64_t)ts_now.tv_nsec / 1000ULL;
+#endif
 }
 
-static long long unsigned
-us_elapsed(void)
+static void us_elapsed_start(void)
 {
-    struct timespec ts_now;
-    clock_gettime(CLOCK_MONOTONIC, &ts_now);
-    uint64_t t = ts_now.tv_sec * 1000000LL + ts_now.tv_nsec/1000;
-    return t - us_elapsed_timer;
+    us_elapsed_timer = lace_now_us();
 }
-#endif
+
+LACE_UNUSED
+static unsigned long long us_elapsed(void)
+{
+    return (unsigned long long)(lace_now_us() - us_elapsed_timer);
+}
 
 /**
  * Lace barrier implementation, that synchronizes on all workers.
  */
+#if LACE_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4324)
+#endif
+
 typedef struct {
-    atomic_int __attribute__((aligned(PADDING_TARGET))) count;
-    atomic_int __attribute__((aligned(PADDING_TARGET))) leaving;
-    atomic_int __attribute__((aligned(PADDING_TARGET))) wait;
+    LACE_ALIGN(LACE_PADDING_TARGET) atomic_int count;
+    LACE_ALIGN(LACE_PADDING_TARGET) atomic_int leaving;
+    LACE_ALIGN(LACE_PADDING_TARGET) atomic_int wait;
 } barrier_t;
 
-barrier_t lace_bar;
+#if LACE_MSVC
+#pragma warning(pop)
+#endif
+
+static barrier_t lace_bar;
 
 /**
  * Enter the Lace barrier and wait until all workers have entered the Lace barrier.
  */
 void
-lace_barrier()
+lace_barrier(void)
 {
-    int wait = lace_bar.wait;
-    if ((int)n_workers == 1+(atomic_fetch_add_explicit(&lace_bar.count, 1, memory_order_relaxed))) {
-        // we know for sure no other thread can be here
+    int wait = atomic_load_explicit(&lace_bar.wait, memory_order_relaxed);
+    if ((int)n_workers == 1 + atomic_fetch_add_explicit(&lace_bar.count, 1, memory_order_acq_rel)) {
+        // This thread is the last to arrive (the leader)
         atomic_store_explicit(&lace_bar.count, 0, memory_order_relaxed);
-        atomic_store_explicit(&lace_bar.leaving, n_workers, memory_order_relaxed);
-        // flip wait
-        atomic_store_explicit(&lace_bar.wait, 1-wait, memory_order_relaxed);
-    } else {
-        while (wait == lace_bar.wait) {} // wait
+        atomic_store_explicit(&lace_bar.leaving, (int)n_workers, memory_order_relaxed);
+        atomic_fetch_xor_explicit(&lace_bar.wait, 1, memory_order_acq_rel);
     }
-    lace_bar.leaving -= 1;
+    else {
+        // Wait until leader flips the wait value
+        while (atomic_load_explicit(&lace_bar.wait, memory_order_acquire) == wait) {
+            // possibly pause/yield
+        }
+    }
+    // Needed for lace_barrier_destroy to observe all threads have exited
+    atomic_fetch_sub_explicit(&lace_bar.leaving, 1, memory_order_release);
 }
 
 /**
@@ -342,7 +413,9 @@ lace_barrier()
 static void
 lace_barrier_init(void)
 {
-    memset(&lace_bar, 0, sizeof(barrier_t));
+    atomic_init(&lace_bar.count, 0);
+    atomic_init(&lace_bar.leaving, 0);
+    atomic_init(&lace_bar.wait, 0);
 }
 
 /**
@@ -351,14 +424,15 @@ lace_barrier_init(void)
 static void
 lace_barrier_destroy(void)
 {
-    // wait for all to exit
-    while (lace_bar.leaving != 0) continue;
+    while (atomic_load_explicit(&lace_bar.leaving, memory_order_acquire) > 0) {
+        // possibly pause/yield
+    }
 }
 
 /**
  * For debugging purposes, check if memory is allocated on the correct memory nodes.
  */
-static void __attribute__((unused))
+static void LACE_UNUSED
 lace_check_memory(void)
 {
 #if LACE_USE_HWLOC
@@ -399,7 +473,7 @@ lace_check_memory(void)
 #endif
 }
 
-void
+static void
 lace_pin_worker(void)
 {
 #if LACE_USE_HWLOC
@@ -430,55 +504,62 @@ lace_pin_worker(void)
 #endif
 }
 
+static inline uint64_t lace_splitmix64(uint64_t* x)
+{
+    uint64_t z = (*x += 0x9e3779b97f4a7c15ULL);
+    z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    z = (z ^ (z >> 27)) * 0x94d049bb133111ebULL;
+    return z ^ (z >> 31);
+}
+
+static inline void lace_rng_seed(WorkerP* w, uint64_t seed)
+{
+    uint64_t x = seed ? seed : 0x123456789abcdefULL;
+    w->rng.s0 = lace_splitmix64(&x);
+    w->rng.s1 = lace_splitmix64(&x);
+    if ((w->rng.s0 | w->rng.s1) == 0) w->rng.s1 = 1;
+}
+
 LACE_NO_SANITIZE_THREAD
-void
+static void
 lace_init_worker(unsigned int worker)
 {
     // Allocate our memory
-#if LACE_USE_MMAP
-    workers_memory[worker] = mmap(NULL, workers_memory_size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+#if defined(_WIN32)
+    workers_memory[worker] = (worker_data*)VirtualAlloc(NULL, workers_memory_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    if (workers_memory[worker] == NULL) {
+        fprintf(stderr, "Lace error: Unable to allocate VirtualAlloc memory for the Lace worker!\n");
+        exit(1);
+    }
+#else
+    workers_memory[worker] = mmap(NULL, workers_memory_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0);
     if (workers_memory[worker] == MAP_FAILED) {
         fprintf(stderr, "Lace error: Unable to allocate mmapped memory for the Lace worker!\n");
         exit(1);
     }
-#else
-#if defined(_MSC_VER) || defined(__MINGW64_VERSION_MAJOR)
-    workers_memory[worker] = _aligned_malloc(workers_memory_size, cache_line_size);
-#elif defined(__MINGW32__)
-    workers_memory[worker] = __mingw_aligned_malloc(workers_memory_size, cache_line_size);
-#else
-    workers_memory[worker] = aligned_alloc(cache_line_size, workers_memory_size);
-#endif
-    if (workers_memory[worker] == 0) {
-        fprintf(stderr, "Lace error: Unable to allocate memory for the Lace worker!\n");
-        exit(1);
-    }
-    memset(workers_memory[worker], 0, workers_memory_size);
 #endif
 
     // Set pointers
     Worker *wt = workers[worker] = &workers_memory[worker]->worker_public;
     WorkerP *w = workers_p[worker] = &workers_memory[worker]->worker_private;
     w->dq = workers_memory[worker]->deque;
-#ifdef __linux__
     current_worker = w;
-#else
-    pthread_setspecific(current_worker_key, w);
-#endif
 
     // Initialize public worker data
     wt->dq = w->dq;
-    wt->ts.v = 0;
+    atomic_store_explicit(&wt->ts.v, 0, memory_order_relaxed);
     wt->allstolen = 0;
     wt->movesplit = 0;
 
     // Initialize private worker data
     w->_public = wt;
-    w->end = w->dq + default_dqsize;
+    w->end = w->dq + dqsize;
     w->split = w->dq;
     w->allstolen = 0;
-    w->worker = worker;
-    w->rng = (((uint64_t)rand())<<32 | rand());
+    w->worker = (uint16_t)worker;
+
+    uint64_t seed = ((uint64_t)(uint32_t)rand() << 32) ^ (uint32_t)rand();
+    lace_rng_seed(w, seed);
 
 #if LACE_COUNT_EVENTS
     // Initialize counters
@@ -486,220 +567,94 @@ lace_init_worker(unsigned int worker)
 #endif
 
 #if LACE_PIE_TIMES
-    w->time = gethrtime();
+    w->time = lace_gethrtime();
     w->level = 0;
 #endif
-}
-
-static atomic_int must_suspend = 0;
-static sem_t suspend_semaphore;
-static atomic_int lace_awaken_count = 0;
-
-void
-lace_suspend()
-{
-    while (1) {
-        int state = atomic_load_explicit(&lace_awaken_count, memory_order_consume);
-        // state "should" be >= 1 !!
-        if (state <= 0) {
-            continue; // ???
-        } else if (state == 1) {
-            int next = -1; // intermediate state
-            if (atomic_compare_exchange_weak(&lace_awaken_count, &state, next) == 1) {
-                while (workers_running != n_workers) {} // they must first run, to avoid rare condition
-                atomic_thread_fence(memory_order_seq_cst);
-                atomic_store_explicit(&must_suspend, 1, memory_order_relaxed);
-                while (workers_running != 0) {}
-                atomic_thread_fence(memory_order_seq_cst);
-                atomic_store_explicit(&must_suspend, 0, memory_order_relaxed);
-                atomic_store_explicit(&lace_awaken_count, 0, memory_order_release);
-                break;
-            }
-        } else {
-            int next = state - 1;
-            if (atomic_compare_exchange_weak(&lace_awaken_count, &state, next) == 1) break;
-        }
-    }
-}
-
-void
-lace_resume()
-{
-    while (1) {
-        int state = atomic_load_explicit(&lace_awaken_count, memory_order_consume);
-        if (state < 0) {
-            continue; // wait until suspending is done
-        } else if (state == 0) {
-            int next = -1; // intermediate state
-            if (atomic_compare_exchange_weak(&lace_awaken_count, &state, next) == 1) {
-                for (unsigned int i=0; i<n_workers; i++) sem_post(&suspend_semaphore);
-                atomic_store_explicit(&lace_awaken_count, 1, memory_order_release);
-                break;
-            }
-        } else {
-            int next = state + 1;
-            if (atomic_compare_exchange_weak(&lace_awaken_count, &state, next) == 1) break;
-        }
-    }
-}
-
-/**
- * Simple random number generated (like rand) using the given seed.
- * (Used for thread-specific (scalable) random number generation.
- */
-static inline uint32_t
-rng(uint32_t *seed, int max)
-{
-    uint32_t next = *seed;
-
-    next *= 1103515245;
-    next += 12345;
-
-    *seed = next;
-
-    return next % max;
 }
 
 /**
  * "External" task management
  */
 
-/**
- * Global "external" task
- */
-typedef struct _ExtTask {
-    Task *task;
-    sem_t sem;
+ /**
+  * Global "external" task
+  */
+typedef struct ext_lace_task {
+    Task* task;
+    lace_sem_t sem;
 } ExtTask;
 
-static _Atomic(ExtTask*) external_task = NULL;
-
-static pthread_mutex_t external_task_lock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t external_task_cond = PTHREAD_COND_INITIALIZER;
-
-static int external_task_counter = 0;
-static int external_task_exclusive = 0;
+#define LACE_EXT_SLOTS 64
+static _Atomic(ExtTask*)external_tasks[LACE_EXT_SLOTS];
+static atomic_int external_task_count = 0;
 
 void
-lace_run_task(Task *task)
+lace_run_task(Task* task)
 {
     // check if we are really not in a Lace thread
     WorkerP* self = lace_get_worker();
     if (self != 0) {
         task->f(self, lace_get_head(self), task);
-    } else {
-        // if needed, wake up the workers
-        lace_resume();
-
-        ExtTask et;
-        et.task = task;
-        atomic_store_explicit(&et.task->thief, 0, memory_order_relaxed);
-        sem_init(&et.sem, 0, 0);
-
-        pthread_mutex_lock(&external_task_lock);
-        while (external_task_exclusive) {
-            // if "exclusive" is set, then we wait until we can continue
-            pthread_cond_wait(&external_task_cond, &external_task_lock);
-        }
-        external_task_counter++;
-        pthread_mutex_unlock(&external_task_lock);
-
-        ExtTask *exp = 0;
-        while (atomic_compare_exchange_weak(&external_task, &exp, &et) != 1) {}
-
-        sem_wait(&et.sem);
-        sem_destroy(&et.sem);
-
-        pthread_mutex_lock(&external_task_lock);
-        external_task_counter--;
-        if (external_task_exclusive && external_task_counter == 0) {
-            // if counter is 0 and exclusive is set, then we should wake up the threads
-            pthread_cond_broadcast(&external_task_cond);
-        }
-        pthread_mutex_unlock(&external_task_lock);
-
-        // allow Lace workers to sleep again
-        lace_suspend();
+        return;
     }
-}
 
-void
-lace_run_task_exclusive(Task *task)
-{
-    // check if we are really not in a Lace thread
-    WorkerP* self = lace_get_worker();
-    if (self != 0) {
-        task->f(self, lace_get_head(self), task);
-    } else {
-        // if needed, wake up the workers
-        lace_resume();
-
-        ExtTask et;
-        et.task = task;
-        atomic_store_explicit(&et.task->thief, 0, memory_order_relaxed);
-        sem_init(&et.sem, 0, 0);
-
-        pthread_mutex_lock(&external_task_lock);
-        while (external_task_exclusive) {
-            // if "exclusive" is set, then we wait until we can continue
-            pthread_cond_wait(&external_task_cond, &external_task_lock);
-        }
-        external_task_exclusive = 1;
-        while (external_task_counter > 0) {
-            // wait until all other tasks are done
-            pthread_cond_wait(&external_task_cond, &external_task_lock);
-        }
-        pthread_mutex_unlock(&external_task_lock);
-
-        ExtTask *exp = 0;
-        while (atomic_compare_exchange_weak(&external_task, &exp, &et) != 1) {}
-
-        sem_wait(&et.sem);
-        sem_destroy(&et.sem);
-
-        pthread_mutex_lock(&external_task_lock);
-        external_task_exclusive = 0;
-        // wake up any waiters
-        pthread_cond_broadcast(&external_task_cond);
-        pthread_mutex_unlock(&external_task_lock);
-
-        // allow Lace workers to sleep again
-        lace_suspend();
+    ExtTask et;
+    et.task = task;
+    atomic_store_explicit(&et.task->thief, 0, memory_order_relaxed);
+    if (lace_sem_init(&et.sem, 0) != 0) {
+        fprintf(stderr, "Lace error: unable to create semaphore for external task!\n");
+        exit(1);
     }
+
+    // Push into any empty slot
+    while (1) {
+        for (int i = 0; i < LACE_EXT_SLOTS; i++) {
+            ExtTask* expected = NULL;
+            if (atomic_compare_exchange_weak_explicit(&external_tasks[i],
+                &expected, &et, memory_order_release, memory_order_relaxed)) {
+                atomic_fetch_add_explicit(&external_task_count, 1, memory_order_release);
+                goto pushed;
+            }
+        }
+        lace_sleep_us(1);
+    }
+pushed:
+
+    lace_sem_wait(&et.sem);
+    lace_sem_destroy(&et.sem);
 }
 
 static inline void
-lace_steal_external(WorkerP *self, Task *dq_head) 
+lace_steal_external(WorkerP* self, Task* head)
 {
-    ExtTask *stolen_task = atomic_exchange(&external_task, NULL);
-    if (stolen_task != 0) {
-        // execute task
-        stolen_task->task->thief = self->_public;
-        atomic_store_explicit(&stolen_task->task->thief, self->_public, memory_order_relaxed);
-        lace_time_event(self, 1);
-        // atomic_thread_fence(memory_order_relaxed);
-        stolen_task->task->f(self, dq_head, stolen_task->task);
-        // atomic_thread_fence(memory_order_relaxed);
-        lace_time_event(self, 2);
-        // atomic_thread_fence(memory_order_relaxed);
-        atomic_store_explicit(&stolen_task->task->thief, THIEF_COMPLETED, memory_order_relaxed);
-        // atomic_thread_fence(memory_order_relaxed);
-        sem_post(&stolen_task->sem);
-        lace_time_event(self, 8);
+    for (int i = 0; i < LACE_EXT_SLOTS; i++) {
+        ExtTask* stolen = atomic_exchange_explicit(&external_tasks[i], NULL, memory_order_acquire);
+        if (stolen != NULL) {
+            // execute task
+            atomic_fetch_sub_explicit(&external_task_count, 1, memory_order_relaxed);
+            atomic_store_explicit(&stolen->task->thief, self->_public, memory_order_relaxed);
+            lace_time_event(self, 1);
+            stolen->task->f(self, head, stolen->task);
+            lace_time_event(self, 2);
+            atomic_store_explicit(&stolen->task->thief, THIEF_COMPLETED, memory_order_relaxed);
+            lace_sem_post(&stolen->sem);
+            lace_time_event(self, 8);
+            return;
+        }
     }
 }
 
 /**
  * (Try to) steal and execute a task from a random worker.
  */
-VOID_TASK_0(lace_steal_random)
+TASK(void, lace_steal_random)
 {
     YIELD_NEWFRAME();
 
-    if (unlikely(atomic_load_explicit(&external_task, memory_order_acquire) != 0)) {
+    if (LACE_UNLIKELY(atomic_load_explicit(&external_task_count, memory_order_acquire) > 0)) {
         lace_steal_external(__lace_worker, __lace_dq_head);
     } else if (n_workers > 1) {
-        Worker *victim = workers[(__lace_worker->worker + 1 + rng(&__lace_worker->seed, n_workers-1)) % n_workers];
+        Worker* victim = workers[(__lace_worker->worker + 1U + (lace_rng(__lace_worker) % (n_workers - 1))) % n_workers];
 
         PR_COUNTSTEALS(__lace_worker, CTR_steal_tries);
         Worker *res = lace_steal(__lace_worker, __lace_dq_head, victim);
@@ -715,7 +670,8 @@ VOID_TASK_0(lace_steal_random)
  * Main Lace worker implementation.
  * Steal from random victims until "quit" is set.
  */
-VOID_TASK_1(lace_steal_loop, atomic_int*, quit)
+LACE_NO_SANITIZE_THREAD
+TASK(void, lace_steal_loop, atomic_int*, quit)
 {
     // Determine who I am
     const int worker_id = __lace_worker->worker;
@@ -725,48 +681,64 @@ VOID_TASK_1(lace_steal_loop, atomic_int*, quit)
     Worker ** victim = self;
 
 #if LACE_PIE_TIMES
-    __lace_worker->time = gethrtime();
+    __lace_worker->time = lace_gethrtime();
 #endif
 
-    uint32_t seed = worker_id;
     unsigned int n = n_workers;
-    int i=0;
+#if LACE_BACKOFF
+    unsigned int backoff = 0;
+#endif
 
-    while(*quit == 0) {
+    while (1) {
+#if LACE_BACKOFF
+        backoff++;
+#endif
         if (n > 1) {
-            // Select victim
-            if( i>0 ) {
-                i--;
-                victim++;
-                if (victim == self) victim++;
-                if (victim >= workers + n) victim = workers;
-                if (victim == self) victim++;
-            } else {
-                i = rng(&seed, 40); // compute random i 0..40
-                victim = workers + (rng(&seed, n-1) + worker_id + 1) % n;
-            }
+            victim = workers + ((lace_rng(__lace_worker) % (n - 1)) + (uint64_t)worker_id + 1) % n;
 
             PR_COUNTSTEALS(__lace_worker, CTR_steal_tries);
-            Worker *res = lace_steal(__lace_worker, __lace_dq_head, *victim);
+            Worker* res = lace_steal(__lace_worker, __lace_dq_head , *victim);
             if (res == LACE_STOLEN) {
                 PR_COUNTSTEALS(__lace_worker, CTR_steals);
-            } else if (res == LACE_BUSY) {
+#if LACE_BACKOFF
+                backoff = 0;
+#endif
+            }
+            else if (res == LACE_BUSY) {
                 PR_COUNTSTEALS(__lace_worker, CTR_steal_busy);
+#if LACE_BACKOFF
+                backoff = 0;
+#endif
+            }
+            else { // LACE_NOWORK
             }
         }
 
         YIELD_NEWFRAME();
 
-        if (unlikely(atomic_load_explicit(&external_task, memory_order_acquire) != 0)) {
+        if (LACE_UNLIKELY(atomic_load_explicit(&external_task_count, memory_order_acquire) > 0)) {
             lace_steal_external(__lace_worker, __lace_dq_head);
+#if LACE_BACKOFF
+            backoff = 0;
+#endif
+            continue;
         }
 
-        if (unlikely(atomic_load_explicit(&must_suspend, memory_order_acquire))) {
-            workers_running -= 1;
-            sem_wait(&suspend_semaphore);
-            lace_barrier(); // ensure we're all back before continuing
-            workers_running += 1;
+#if LACE_BACKOFF
+        if (backoff > 1000) { // only back off after 1000 attempts
+            int64_t delay_us = ((int64_t)1) << ((backoff - 1000) / 50);
+            if (delay_us > 1000) delay_us = 1000; // cap at 1ms
+#if LACE_PIE_TIMES
+            uint64_t prev = lace_gethrtime();
+#endif
+            lace_sleep_us(delay_us);
+#if LACE_PIE_TIMES
+            PR_ADD(__lace_worker, CTR_backoff, lace_gethrtime() - prev);
+#endif
         }
+#endif
+
+        if (atomic_load_explicit(quit, memory_order_relaxed)) break;
     }
 }
 
@@ -777,19 +749,13 @@ VOID_TASK_1(lace_steal_loop, atomic_int*, quit)
 static void*
 lace_worker_thread(void* arg)
 {
-    int worker = (int)(size_t)arg;
+    unsigned int worker = (unsigned int)(size_t)arg;
 
     // Initialize data structures
     lace_init_worker(worker);
 
     // Pin CPU
     lace_pin_worker();
-
-    // Wait for the first time we are resumed
-    sem_wait(&suspend_semaphore);
-
-    // Signal that we are running
-    workers_running += 1;
 
     // Run the steal loop
     WorkerP *__lace_worker = lace_get_worker();
@@ -799,11 +765,16 @@ lace_worker_thread(void* arg)
     // Time worker exit event
     lace_time_event(__lace_worker, 9);
 
-    // Signal that we stopped
-    workers_running -= 1;
-
     return NULL;
 }
+
+#if LACE_MSVC
+static unsigned __stdcall lace_worker_thread_win(void* arg)
+{
+    lace_worker_thread(arg);   // ignore return value
+    return 0;
+}
+#endif
 
 /**
  * Set the verbosity of Lace.
@@ -826,19 +797,38 @@ lace_set_stacksize(size_t new_stacksize)
 unsigned int
 lace_get_pu_count(void)
 {
-#ifdef WIN32
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
-    unsigned int n_pus = sysinfo.dwNumberOfProcessors;
-#elif defined(sched_getaffinity)
+    unsigned int N;
+#if defined(_WIN32)
+    DWORD_PTR processMask = 0, systemMask = 0;
+    if (GetProcessAffinityMask(GetCurrentProcess(), &processMask, &systemMask) && processMask) {
+        unsigned count = 0;
+        DWORD_PTR m = processMask;
+        while (m) { m &= (m - 1); count++; }      // popcount
+        N = count ? count : 1;
+    }
+    else {
+        SYSTEM_INFO sysinfo;
+        GetSystemInfo(&sysinfo);
+        N = (unsigned)sysinfo.dwNumberOfProcessors;
+    }
+
+#elif defined(HAVE_SCHED_GETAFFINITY) && HAVE_SCHED_GETAFFINITY
     cpu_set_t cs;
     CPU_ZERO(&cs);
-    sched_getaffinity(0, sizeof(cs), &cs);
-    unsigned int n_pus = CPU_COUNT(&cs);
+    if (sched_getaffinity(0, sizeof(cs), &cs) == 0) {
+        N = (unsigned)CPU_COUNT(&cs);
+    }
+    else {
+        N = (unsigned)sysconf(_SC_NPROCESSORS_ONLN);
+    }
+
+#elif defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+    N = (unsigned)sysconf(_SC_NPROCESSORS_ONLN);
+
 #else
-    unsigned int n_pus = sysconf(_SC_NPROCESSORS_ONLN);
+    N = 1;
 #endif
-    return n_pus;
+    return N;
 }
 
 /**
@@ -846,18 +836,28 @@ lace_get_pu_count(void)
  * each worker gets a task deque with <dqsize> elements.
  */
 void
-lace_start(unsigned int _n_workers, size_t dqsize)
+lace_start(unsigned int _n_workers, size_t dequesize)
 {
 #if LACE_USE_HWLOC
     // Initialize topology and information about cpus
     hwloc_topology_init(&topo);
     hwloc_topology_load(topo);
 
-    n_nodes = hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_NODE);
-    n_cores = hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_CORE);
-    n_pus = hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU);
+    n_nodes = (unsigned int)hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_NODE);
+    n_cores = (unsigned int)hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_CORE);
+
+    // Allowed CPUs for this process/thread
+    hwloc_cpuset_t allowed = hwloc_bitmap_alloc();
+    if (allowed && hwloc_get_cpubind(topo, allowed, HWLOC_CPUBIND_PROCESS) == 0) {
+        int cnt = hwloc_bitmap_weight(allowed);
+        n_pus = (cnt > 0) ? (unsigned)cnt : (unsigned)hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU);
+    }
+    else {
+        n_pus = (unsigned)hwloc_get_nbobjs_by_type(topo, HWLOC_OBJ_PU);
+    }
+    if (allowed) hwloc_bitmap_free(allowed); 
 #else
-    unsigned int n_pus = lace_get_pu_count();
+    n_pus = lace_get_pu_count();
 #endif
 
     // Check task size vs cache line size
@@ -876,10 +876,8 @@ lace_start(unsigned int _n_workers, size_t dqsize)
 
     // Initialize globals
     n_workers = _n_workers == 0 ? n_pus : _n_workers;
-    if (dqsize != 0) default_dqsize = dqsize;
-    else dqsize = default_dqsize;
-    lace_quits = 0;
-    atomic_store_explicit(&workers_running, 0, memory_order_relaxed);
+    dqsize = dequesize > 0 ? dequesize : 1048576;
+    atomic_store_explicit(&lace_quits, 0, memory_order_relaxed);
 
 #if LACE_USE_HWLOC
     // Distribute workers over cores.
@@ -931,16 +929,6 @@ lace_start(unsigned int _n_workers, size_t dqsize)
     // Initialize Lace barrier
     lace_barrier_init();
 
-    // Create suspend semaphore
-    memset(&suspend_semaphore, 0, sizeof(sem_t));
-    if (sem_init(&suspend_semaphore, 0, 0) != 0) {
-        fprintf(stderr, "Lace error: unable to create semaphore!\n");
-        exit(1);
-    }
-
-    must_suspend = 0;
-    lace_awaken_count = 0;
-
     // Allocate array with all workers
     // first make sure that the amount to allocate (n_workers times pointer) is a multiple of cache_line_size
     size_t to_allocate = n_workers * sizeof(void*);
@@ -969,31 +957,29 @@ lace_start(unsigned int _n_workers, size_t dqsize)
     // Compute memory size for each worker
     workers_memory_size = sizeof(worker_data) + sizeof(Task) * dqsize;
 
-#ifndef __linux__
-    // Create pthread key
-    if (pthread_key_create(&current_worker_key, NULL) != 0) {
-        fprintf(stderr, "Lace error: unable to create thread-local key!\n");
-        exit(1);
-    }
-#endif
-
+#if LACE_MSVC
+    // Windows MSVC: stack size is passed to thread creation directly.
+    if (stacksize == 0) stacksize = 16777216;
+    if (stacksize < 16777216) stacksize = 16777216;
+    if (stacksize > 67108864) stacksize = 67108864;
+#else
     // Prepare structures for thread creation
     pthread_attr_t worker_attr;
-    pthread_attr_init(&worker_attr);
+    if (pthread_attr_init(&worker_attr) != 0) {
+        fprintf(stderr, "Lace error: unable to initialize thread attributes!\n");
+        exit(1);
+    }
 
     // Compute the stack size
     if (stacksize == 0) {
 #ifndef _WIN32
         struct rlimit lim;
-        size_t size = 0;
-        if (getrlimit(RLIMIT_STACK, &lim) == 0) size = lim.rlim_cur;
-        if (size < 16 * 1024 * 1024) size = 16 * 1024 * 1024;
-        if (size > 64 * 1024 * 1024) size = 64 * 1024 * 1024;
-#else
-        size_t size = 16 * 1024 * 1024;
+        if (getrlimit(RLIMIT_STACK, &lim) == 0) stacksize = (size_t)lim.rlim_cur;
+        if (stacksize > 67108864) stacksize = 67108864;
 #endif
-        stacksize = size;
     }
+    if (stacksize < 16777216) stacksize = 16777216;
+    if (stacksize > 67108864) stacksize = 67108864;
 
 #if LACE_USE_HWLOC
     // Use hwloc to allocate stacks bound to the correct NUMA node
@@ -1002,6 +988,7 @@ lace_start(unsigned int _n_workers, size_t dqsize)
         size_t page_size = (ps > 0) ? (size_t)ps : 4096;
         stacksize = (stacksize + page_size - 1) & ~(page_size - 1);
         worker_stack_size = stacksize + page_size;
+        worker_stack_page_size = page_size;
 
         worker_stacks = malloc(n_workers * sizeof(void*));
         if (worker_stacks == NULL) {
@@ -1024,23 +1011,20 @@ lace_start(unsigned int _n_workers, size_t dqsize)
                 exit(1);
             }
 
-            // Guard page at the low end
-#ifndef _WIN32
+            // Guard page at the low end (stacks grow downward)
+#if defined(_WIN32)
+            DWORD old_protect;
+            if (!VirtualProtect(stack, page_size, PAGE_NOACCESS, &old_protect)) {
+#else
             if (mprotect(stack, page_size, PROT_NONE) != 0) {
+#endif
                 fprintf(stderr, "Lace error: unable to set guard page for worker %u: %s\n",
                     i, strerror(errno));
                 exit(1);
             }
-#else
-            DWORD old_protect;
-            if (!VirtualProtect(stack, page_size, PAGE_NOACCESS, &old_protect)) {
-                fprintf(stderr, "Lace error: unable to set guard page for worker %u!\n", i);
-                exit(1);
-            }
-#endif
             worker_stacks[i] = stack;
+            }
         }
-    }
 #elif !defined(_WIN32)
     // Use mmap so first-touch places pages on the right NUMA node after pinning
     {
@@ -1048,10 +1032,8 @@ lace_start(unsigned int _n_workers, size_t dqsize)
         size_t page_size = (ps > 0) ? (size_t)ps : 4096;
         stacksize = (stacksize + page_size - 1) & ~(page_size - 1);
         worker_stack_size = stacksize + page_size;
+        worker_stack_page_size = page_size;
 
-#ifndef MAP_NORESERVE
-#define MAP_NORESERVE 0
-#endif
         worker_stacks = malloc(n_workers * sizeof(void*));
         if (worker_stacks == NULL) {
             fprintf(stderr, "Lace error: unable to allocate stack pointer array!\n");
@@ -1077,12 +1059,13 @@ lace_start(unsigned int _n_workers, size_t dqsize)
         }
     }
 #else
-    // Windows without HWLOC: let pthreads handle stack allocation
+    // _WIN32 without HWLOC: just set stack size, let the OS handle it
     if (pthread_attr_setstacksize(&worker_attr, stacksize) != 0) {
         fprintf(stderr, "Lace error: unable to set stack size to %zu bytes!\n", stacksize);
         exit(1);
     }
 #endif
+#endif /* !LACE_MSVC */
 
     if (verbosity) {
 #if LACE_USE_HWLOC
@@ -1090,12 +1073,16 @@ lace_start(unsigned int _n_workers, size_t dqsize)
         // Print resulting CPU sets
         if (verbosity != 0) {
             for (unsigned int i = 0; i < n_workers; ++i) {
-                unsigned int id;
+                int id;
                 hwloc_bitmap_foreach_begin(id, cpusets[i]);
-                hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(topo, id);
+                hwloc_obj_t pu = hwloc_get_pu_obj_by_os_index(topo, (unsigned int)id);
                 // find the core
-                hwloc_obj_t core = hwloc_get_ancestor_obj_by_type(topo, HWLOC_OBJ_CORE, pu);
-                printf("Lace startup: will pin worker thread %d to pu %u (on core %u)\n", i, pu->logical_index, core->logical_index);
+                if (pu != 0) {
+                    hwloc_obj_t core = hwloc_get_ancestor_obj_by_type(topo, HWLOC_OBJ_CORE, pu);
+                    if (core != 0) {
+                        printf("Lace startup: will pin worker thread %u to pu %u (on core %u)\n", i, pu->logical_index, core->logical_index);
+                    }
+                }
                 hwloc_bitmap_foreach_end();
             }
         }
@@ -1107,22 +1094,28 @@ lace_start(unsigned int _n_workers, size_t dqsize)
     // Prepare lace_init structure
     atomic_store_explicit(&lace_newframe.t, NULL, memory_order_relaxed);
 
-#if LACE_PIE_TIMES
     // Initialize counters for pie times
     us_elapsed_start();
-    count_at_start = gethrtime();
-#endif
+    count_at_start = lace_gethrtime();
 
     /* Report startup if verbose */
     if (verbosity) {
         fprintf(stdout, "Lace startup: creating %d worker threads with program stack %zu bytes.\n", n_workers, stacksize);
     }
 
-    /* Spawn all workers */
+#if !LACE_MSVC
     handles = (pthread_t*)malloc(n_workers * sizeof(*handles));
+#else
+    handles = (HANDLE*)malloc(n_workers * sizeof(*handles));
+#endif
+
+    /* Spawn all workers */
     for (unsigned int i = 0; i < n_workers; i++) {
+#if !LACE_MSVC
 #if LACE_USE_HWLOC || !defined(_WIN32)
-        if (pthread_attr_setstack(&worker_attr, worker_stacks[i], worker_stack_size) != 0) {
+        if (pthread_attr_setstack(&worker_attr,
+            (char*)worker_stacks[i] + worker_stack_page_size,
+            worker_stack_size - worker_stack_page_size) != 0) {
             fprintf(stderr, "Lace error: unable to set stack for worker %u: %s\n",
                 i, strerror(errno));
             exit(1);
@@ -1133,12 +1126,29 @@ lace_start(unsigned int _n_workers, size_t dqsize)
             fprintf(stderr, "Lace error: unable to create worker thread %u: %s\n", i, strerror(rc));
             exit(1);
         }
+#else
+        unsigned thread_id;
+        handles[i] = (HANDLE)_beginthreadex(
+            NULL, (unsigned)stacksize, lace_worker_thread_win,
+            (void*)(size_t)i, 0, &thread_id);
+        if (handles[i] == 0) {
+            fprintf(stderr, "Lace error: failed to create worker thread %u\n", i);
+            exit(1);
+        }
+#endif
     }
 
-    /* Make sure we start resumed */
-    lace_resume();
-
+#if !LACE_MSVC
     pthread_attr_destroy(&worker_attr);
+#endif
+
+	is_running = 1;
+}
+
+
+int lace_is_running(void)
+{
+    return is_running;
 }
 
 
@@ -1156,20 +1166,20 @@ lace_count_reset(void)
     unsigned int i;
     size_t j;
 
-    for (i=0;i<n_workers;i++) {
-        for (j=0;j<CTR_MAX;j++) {
+    for (i = 0; i < n_workers; i++) {
+        for (j = 0; j < CTR_MAX; j++) {
             workers_p[i]->ctr[j] = 0;
         }
     }
 
 #if LACE_PIE_TIMES
-    for (i=0;i<n_workers;i++) {
-        workers_p[i]->time = gethrtime();
+    for (i = 0; i < n_workers; i++) {
+        workers_p[i]->time = lace_gethrtime();
         if (i != 0) workers_p[i]->level = 0;
     }
 
     us_elapsed_start();
-    count_at_start = gethrtime();
+    count_at_start = lace_gethrtime();
 #endif
 #endif
 }
@@ -1178,36 +1188,36 @@ lace_count_reset(void)
  * Report counters to the given file.
  */
 void
-lace_count_report_file(FILE *file)
+lace_count_report_file(FILE* file)
 {
 #if LACE_COUNT_EVENTS
     unsigned int i;
     size_t j;
 
-    for (j=0;j<CTR_MAX;j++) ctr_all[j] = 0;
-    for (i=0;i<n_workers;i++) {
-        uint64_t *wctr = workers_p[i]->ctr;
-        for (j=0;j<CTR_MAX;j++) {
+    for (j = 0; j < CTR_MAX; j++) ctr_all[j] = 0;
+    for (i = 0; i < n_workers; i++) {
+        uint64_t* wctr = workers_p[i]->ctr;
+        for (j = 0; j < CTR_MAX; j++) {
             ctr_all[j] += wctr[j];
         }
     }
 
 #if LACE_COUNT_TASKS
-    for (i=0;i<n_workers;i++) {
-        fprintf(file, "Tasks (%d): %zu\n", i, workers_p[i]->ctr[CTR_tasks]);
+    for (i = 0; i < n_workers; i++) {
+        fprintf(file, "Tasks (%u): %" PRIu64 "\n", i, workers_p[i]->ctr[CTR_tasks]);
     }
-    fprintf(file, "Tasks (sum): %zu\n", ctr_all[CTR_tasks]);
+    fprintf(file, "Tasks (sum): %" PRIu64 "\n", ctr_all[CTR_tasks]);
     fprintf(file, "\n");
 #endif
 
 #if LACE_COUNT_STEALS
-    for (i=0;i<n_workers;i++) {
-        fprintf(file, "Steals (%d): %zu good/%zu busy of %zu tries; leaps: %zu good/%zu busy of %zu tries\n", i,
+    for (i = 0; i < n_workers; i++) {
+        fprintf(file, "Steals (%u): %" PRIu64 " good/%" PRIu64 " busy of %" PRIu64 " tries; leaps: %" PRIu64 " good/%" PRIu64 " busy of %" PRIu64 " tries\n", i,
             workers_p[i]->ctr[CTR_steals], workers_p[i]->ctr[CTR_steal_busy],
             workers_p[i]->ctr[CTR_steal_tries], workers_p[i]->ctr[CTR_leaps],
             workers_p[i]->ctr[CTR_leap_busy], workers_p[i]->ctr[CTR_leap_tries]);
     }
-    fprintf(file, "Steals (sum): %zu good/%zu busy of %zu tries; leaps: %zu good/%zu busy of %zu tries\n", 
+    fprintf(file, "Steals (sum): %" PRIu64 " good/%" PRIu64 " busy of %" PRIu64 " tries; leaps: %" PRIu64 " good/%" PRIu64 " busy of %" PRIu64 " tries\n",
         ctr_all[CTR_steals], ctr_all[CTR_steal_busy],
         ctr_all[CTR_steal_tries], ctr_all[CTR_leaps],
         ctr_all[CTR_leap_busy], ctr_all[CTR_leap_tries]);
@@ -1215,96 +1225,89 @@ lace_count_report_file(FILE *file)
 #endif
 
 #if LACE_COUNT_STEALS && LACE_COUNT_TASKS
-    for (i=0;i<n_workers;i++) {
-        if ((workers_p[i]->ctr[CTR_steals]+workers_p[i]->ctr[CTR_leaps]) > 0) {
-            fprintf(file, "Tasks per steal (%d): %zu\n", i,
-                workers_p[i]->ctr[CTR_tasks]/(workers_p[i]->ctr[CTR_steals]+workers_p[i]->ctr[CTR_leaps]));
+    for (i = 0; i < n_workers; i++) {
+        if ((workers_p[i]->ctr[CTR_steals] + workers_p[i]->ctr[CTR_leaps]) > 0) {
+            fprintf(file, "Tasks per steal (%u): %" PRIu64 "\n", i,
+                workers_p[i]->ctr[CTR_tasks] / (workers_p[i]->ctr[CTR_steals] + workers_p[i]->ctr[CTR_leaps]));
         }
     }
-    if ((ctr_all[CTR_steals]+ctr_all[CTR_leaps]) > 0) {
-        fprintf(file, "Tasks per steal (sum): %zu\n", ctr_all[CTR_tasks]/(ctr_all[CTR_steals]+ctr_all[CTR_leaps]));
+    if ((ctr_all[CTR_steals] + ctr_all[CTR_leaps]) > 0) {
+        fprintf(file, "Tasks per steal (sum): %" PRIu64 "\n", ctr_all[CTR_tasks] / (ctr_all[CTR_steals] + ctr_all[CTR_leaps]));
     }
     fprintf(file, "\n");
 #endif
 
 #if LACE_COUNT_SPLITS
-    for (i=0;i<n_workers;i++) {
-        fprintf(file, "Splits (%d): %zu shrinks, %zu grows, %zu outgoing requests\n", i,
+    for (i = 0; i < n_workers; i++) {
+        fprintf(file, "Splits (%u): %" PRIu64 " shrinks, %" PRIu64 " grows, %" PRIu64 " outgoing requests\n", i,
             workers_p[i]->ctr[CTR_split_shrink], workers_p[i]->ctr[CTR_split_grow], workers_p[i]->ctr[CTR_split_req]);
     }
-    fprintf(file, "Splits (sum): %zu shrinks, %zu grows, %zu outgoing requests\n",
+    fprintf(file, "Splits (sum): %" PRIu64 " shrinks, %" PRIu64 " grows, %" PRIu64 " outgoing requests\n",
         ctr_all[CTR_split_shrink], ctr_all[CTR_split_grow], ctr_all[CTR_split_req]);
     fprintf(file, "\n");
 #endif
 
 #if LACE_PIE_TIMES
-    count_at_end = gethrtime();
-
-    uint64_t count_per_ms = (count_at_end - count_at_start) / (us_elapsed() / 1000);
+    uint64_t count_at_end = lace_gethrtime();
+    double ms = (double)us_elapsed() / 1000.0;
+    double count_per_ms = (double)(count_at_end - count_at_start) / ms;
     double dcpm = (double)count_per_ms;
 
     uint64_t sum_count;
     sum_count = ctr_all[CTR_init] + ctr_all[CTR_wapp] + ctr_all[CTR_lapp] + ctr_all[CTR_wsteal] + ctr_all[CTR_lsteal]
-              + ctr_all[CTR_close] + ctr_all[CTR_wstealsucc] + ctr_all[CTR_lstealsucc] + ctr_all[CTR_wsignal]
-              + ctr_all[CTR_lsignal];
+        + ctr_all[CTR_close] + ctr_all[CTR_wstealsucc] + ctr_all[CTR_lstealsucc] + ctr_all[CTR_wsignal]
+        + ctr_all[CTR_lsignal];
 
     fprintf(file, "Measured clock (tick) frequency: %.2f GHz\n", count_per_ms / 1000000.0);
-    fprintf(file, "Aggregated time per pie slice, total time: %.2f CPU seconds\n\n", sum_count / (1000*dcpm));
+    fprintf(file, "Aggregated time per pie slice, total time: %.2f CPU seconds\n\n", (double)sum_count / (1000 * dcpm));
 
-    for (i=0;i<n_workers;i++) {
-        fprintf(file, "Startup time (%d):    %10.2f ms\n", i, workers_p[i]->ctr[CTR_init] / dcpm);
-        fprintf(file, "Steal work (%d):      %10.2f ms\n", i, workers_p[i]->ctr[CTR_wapp] / dcpm);
-        fprintf(file, "Leap work (%d):       %10.2f ms\n", i, workers_p[i]->ctr[CTR_lapp] / dcpm);
-        fprintf(file, "Steal overhead (%d):  %10.2f ms\n", i, (workers_p[i]->ctr[CTR_wstealsucc]+workers_p[i]->ctr[CTR_wsignal]) / dcpm);
-        fprintf(file, "Leap overhead (%d):   %10.2f ms\n", i, (workers_p[i]->ctr[CTR_lstealsucc]+workers_p[i]->ctr[CTR_lsignal]) / dcpm);
-        fprintf(file, "Steal search (%d):    %10.2f ms\n", i, (workers_p[i]->ctr[CTR_wsteal]-workers_p[i]->ctr[CTR_wstealsucc]-workers_p[i]->ctr[CTR_wsignal]) / dcpm);
-        fprintf(file, "Leap search (%d):     %10.2f ms\n", i, (workers_p[i]->ctr[CTR_lsteal]-workers_p[i]->ctr[CTR_lstealsucc]-workers_p[i]->ctr[CTR_lsignal]) / dcpm);
-        fprintf(file, "Exit time (%d):       %10.2f ms\n", i, workers_p[i]->ctr[CTR_close] / dcpm);
+    for (i = 0; i < n_workers; i++) {
+        fprintf(file, "Startup time (%d):    %10.2f ms\n", i, (double)workers_p[i]->ctr[CTR_init] / dcpm);
+        fprintf(file, "Steal work (%d):      %10.2f ms\n", i, (double)workers_p[i]->ctr[CTR_wapp] / dcpm);
+        fprintf(file, "Leap work (%d):       %10.2f ms\n", i, (double)workers_p[i]->ctr[CTR_lapp] / dcpm);
+        fprintf(file, "Steal overhead (%d):  %10.2f ms\n", i, (double)(workers_p[i]->ctr[CTR_wstealsucc] + workers_p[i]->ctr[CTR_wsignal]) / dcpm);
+        fprintf(file, "Leap overhead (%d):   %10.2f ms\n", i, (double)(workers_p[i]->ctr[CTR_lstealsucc] + workers_p[i]->ctr[CTR_lsignal]) / dcpm);
+        fprintf(file, "Steal search (%d):    %10.2f ms\n", i, (double)(workers_p[i]->ctr[CTR_wsteal] - workers_p[i]->ctr[CTR_wstealsucc] - workers_p[i]->ctr[CTR_wsignal]) / dcpm);
+        fprintf(file, "Leap search (%d):     %10.2f ms\n", i, (double)(workers_p[i]->ctr[CTR_lsteal] - workers_p[i]->ctr[CTR_lstealsucc] - workers_p[i]->ctr[CTR_lsignal]) / dcpm);
+        fprintf(file, "Backoff time (%d):    %10.2f ms\n", i, (double)workers_p[i]->ctr[CTR_backoff] / dcpm);
+        fprintf(file, "Exit time (%d):       %10.2f ms\n", i, (double)workers_p[i]->ctr[CTR_close] / dcpm);
         fprintf(file, "\n");
     }
 
-    fprintf(file, "Startup time (sum):    %10.2f ms\n", ctr_all[CTR_init] / dcpm);
-    fprintf(file, "Steal work (sum):      %10.2f ms\n", ctr_all[CTR_wapp] / dcpm);
-    fprintf(file, "Leap work (sum):       %10.2f ms\n", ctr_all[CTR_lapp] / dcpm);
-    fprintf(file, "Steal overhead (sum):  %10.2f ms\n", (ctr_all[CTR_wstealsucc]+ctr_all[CTR_wsignal]) / dcpm);
-    fprintf(file, "Leap overhead (sum):   %10.2f ms\n", (ctr_all[CTR_lstealsucc]+ctr_all[CTR_lsignal]) / dcpm);
-    fprintf(file, "Steal search (sum):    %10.2f ms\n", (ctr_all[CTR_wsteal]-ctr_all[CTR_wstealsucc]-ctr_all[CTR_wsignal]) / dcpm);
-    fprintf(file, "Leap search (sum):     %10.2f ms\n", (ctr_all[CTR_lsteal]-ctr_all[CTR_lstealsucc]-ctr_all[CTR_lsignal]) / dcpm);
-    fprintf(file, "Exit time (sum):       %10.2f ms\n", ctr_all[CTR_close] / dcpm);
-    fprintf(file, "\n" );
+    fprintf(file, "Startup time (sum):    %10.2f ms\n", (double)ctr_all[CTR_init] / dcpm);
+    fprintf(file, "Steal work (sum):      %10.2f ms\n", (double)ctr_all[CTR_wapp] / dcpm);
+    fprintf(file, "Leap work (sum):       %10.2f ms\n", (double)ctr_all[CTR_lapp] / dcpm);
+    fprintf(file, "Steal overhead (sum):  %10.2f ms\n", (double)(ctr_all[CTR_wstealsucc] + ctr_all[CTR_wsignal]) / dcpm);
+    fprintf(file, "Leap overhead (sum):   %10.2f ms\n", (double)(ctr_all[CTR_lstealsucc] + ctr_all[CTR_lsignal]) / dcpm);
+    fprintf(file, "Steal search (sum):    %10.2f ms\n", (double)(ctr_all[CTR_wsteal] - ctr_all[CTR_wstealsucc] - ctr_all[CTR_wsignal]) / dcpm);
+    fprintf(file, "Leap search (sum):     %10.2f ms\n", (double)(ctr_all[CTR_lsteal] - ctr_all[CTR_lstealsucc] - ctr_all[CTR_lsignal]) / dcpm);
+    fprintf(file, "Backoff time (sum):    %10.2f ms\n", (double)ctr_all[CTR_backoff] / dcpm);
+    fprintf(file, "Exit time (sum):       %10.2f ms\n", (double)ctr_all[CTR_close] / dcpm);
+    fprintf(file, "\n");
 #endif
 #endif
-    return;
     (void)file;
+    return;
 }
 
 /**
  * End Lace. All Workers are signaled to quit.
  * This function waits until all threads are done, then returns.
  */
-void lace_stop()
+void lace_stop(void)
 {
-    // Workers need to be awake for this
-    lace_resume();
+    atomic_store_explicit(&lace_quits, 1, memory_order_relaxed);
 
-    // Do not stop if not all workers are running yet
-    while (workers_running != n_workers) {}
-
-    lace_quits = 1;
-
-    for (unsigned int i=0; i<n_workers; i++) {
+    for (unsigned int i = 0; i < n_workers; i++) {
+#if !LACE_MSVC
         pthread_join(handles[i], NULL);
+#else
+        WaitForSingleObject(handles[i], INFINITE);
+        CloseHandle(handles[i]);
+#endif
     }
 
     free(handles);
-
-#if LACE_COUNT_EVENTS
-    lace_count_report_file(stdout);
-#endif
-
-    // finally, destroy the barriers
-    lace_barrier_destroy();
-    sem_destroy(&suspend_semaphore);
 
 #if LACE_USE_HWLOC
     if (worker_stacks != NULL) {
@@ -1324,15 +1327,18 @@ void lace_stop()
     }
 #endif
 
-    for (unsigned int i=0; i<n_workers; i++) {
-#if LACE_USE_MMAP
-        munmap(workers_memory[i], workers_memory_size);
-#elif defined(_MSC_VER) || defined(__MINGW64_VERSION_MAJOR)
-	_aligned_free(workers_memory[i]);
-#elif defined(__MINGW32__)
-	__mingw_aligned_free(workers_memory[i]);
+#if LACE_COUNT_EVENTS
+    lace_count_report_file(stdout);
+#endif
+
+    // finally, destroy the barriers
+    lace_barrier_destroy();
+
+    for (unsigned int i = 0; i < n_workers; i++) {
+#if defined(_WIN32)
+        VirtualFree(workers_memory[i], 0, MEM_RELEASE);
 #else
-        free(workers_memory[i]);
+        munmap(workers_memory[i], workers_memory_size);
 #endif
     }
 
@@ -1353,6 +1359,8 @@ void lace_stop()
     workers = 0;
     workers_p = 0;
     workers_memory = 0;
+
+    is_running = 0;
 }
 
 /**
@@ -1363,7 +1371,7 @@ void lace_stop()
  * 4) LACE BARRIER
  * 5) Restore the old frame
  */
-void
+static void
 lace_exec_in_new_frame(WorkerP *__lace_worker, Task *__lace_dq_head, Task *root)
 {
     TailSplitNA old;
@@ -1375,15 +1383,15 @@ lace_exec_in_new_frame(WorkerP *__lace_worker, Task *__lace_dq_head, Task *root)
 
         old_as = wt->allstolen;
         wt->allstolen = 1;
-        old.ts.split = wt->ts.ts.split;
-        wt->ts.ts.split = 0;
+        old.ts.split = atomic_load_explicit(&wt->ts.ts.split, memory_order_relaxed);
+        atomic_store_explicit(&wt->ts.ts.split, 0, memory_order_relaxed);
         atomic_thread_fence(memory_order_seq_cst);
-        old.ts.tail = wt->ts.ts.tail;
+        old.ts.tail = atomic_load_explicit(&wt->ts.ts.tail, memory_order_relaxed);
 
         TailSplitNA ts_new;
-        ts_new.ts.tail = __lace_dq_head - __lace_worker->dq;
-        ts_new.ts.split = __lace_dq_head - __lace_worker->dq;
-        wt->ts.v = ts_new.v;
+        ts_new.ts.tail = (uint32_t)(__lace_dq_head - __lace_worker->dq);
+        ts_new.ts.split = (uint32_t)(__lace_dq_head - __lace_worker->dq);
+        atomic_store_explicit(&wt->ts.v, ts_new.v, memory_order_relaxed);
 
         __lace_worker->split = __lace_dq_head;
         __lace_worker->allstolen = 1;
@@ -1402,7 +1410,7 @@ lace_exec_in_new_frame(WorkerP *__lace_worker, Task *__lace_dq_head, Task *root)
     {
         Worker *wt = __lace_worker->_public;
         wt->allstolen = old_as;
-        wt->ts.v = old.v;
+        atomic_store_explicit(&wt->ts.v, old.v, memory_order_relaxed);
         __lace_worker->split = __lace_worker->dq + old.ts.split;
         __lace_worker->allstolen = old_as;
     }
@@ -1417,7 +1425,7 @@ lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head)
 {
     // make a local copy of the task
     Task _t;
-    memcpy(&_t, lace_newframe.t, sizeof(Task));
+    memcpy(&_t, atomic_load_explicit(&lace_newframe.t, memory_order_relaxed), sizeof(Task));
 
     // wait until all workers have made a local copy
     lace_barrier();
@@ -1429,22 +1437,22 @@ lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head)
  * Root task for the TOGETHER method.
  * Ensures after executing, to steal random tasks until done.
  */
-VOID_TASK_2(lace_together_root, Task*, t, atomic_int*, finished)
+TASK(void, lace_together_root, Task*, t, atomic_int*, finished)
 {
     // run the root task
     t->f(__lace_worker, __lace_dq_head, t);
 
     // signal out completion
-    *finished -= 1;
+    atomic_fetch_sub_explicit(finished, 1, memory_order_relaxed);
 
     // while threads aren't done, steal randomly
-    while (*finished != 0) STEAL_RANDOM();
+    while (atomic_load_explicit(finished, memory_order_relaxed) != 0) STEAL_RANDOM();
 }
 
-VOID_TASK_1(lace_wrap_together, Task*, task)
+TASK(void, lace_wrap_together, Task*, task)
 {
     /* synchronization integer (decrease by 1 when done...) */
-    atomic_int done = n_workers;
+    atomic_int done = (int)n_workers;
 
     /* wrap task in lace_together_root */
     Task _t2;
@@ -1453,6 +1461,7 @@ VOID_TASK_1(lace_wrap_together, Task*, task)
     atomic_store_explicit(&t2->thief, THIEF_TASK, memory_order_relaxed);
     t2->d.args.arg_1 = task;
     t2->d.args.arg_2 = &done;
+    atomic_thread_fence(memory_order_release); // no StoreStore reordering
 
     /* now try to be the one who sets it! */
     while (1) {
@@ -1470,13 +1479,14 @@ VOID_TASK_1(lace_wrap_together, Task*, task)
     lace_exec_in_new_frame(__lace_worker, __lace_dq_head, &_t2);
 }
 
-VOID_TASK_2(lace_newframe_root, Task*, t, atomic_int*, done)
+TASK(void, lace_newframe_root, Task*, t, atomic_int*, done)
 {
     t->f(__lace_worker, __lace_dq_head, t);
-    *done = 1;
+    atomic_thread_fence(memory_order_release); // no StoreStore reordering
+    atomic_store_explicit(done, 1, memory_order_relaxed);
 }
 
-VOID_TASK_1(lace_wrap_newframe, Task*, task)
+TASK(void, lace_wrap_newframe, Task*, task)
 {
     /* synchronization integer (set to 1 when done...) */
     atomic_int done = 0;
@@ -1487,6 +1497,7 @@ VOID_TASK_1(lace_wrap_newframe, Task*, task)
     s->f = &lace_steal_loop_WRAP;
     atomic_store_explicit(&s->thief, THIEF_TASK, memory_order_relaxed);
     s->d.args.arg_1 = &done;
+    atomic_thread_fence(memory_order_release); // no StoreStore reordering
 
     /* now try to be the one who sets it! */
     while (1) {
@@ -1543,3 +1554,67 @@ lace_abort_stack_overflow(void)
     fprintf(stderr, "Lace fatal error: Task stack overflow! Aborting.\n");
     exit(-1);
 }
+
+#if defined(_WIN32)
+void lace_sleep_us(int64_t microseconds)
+{
+    if (microseconds <= 0) return;
+
+    // Cache QPC frequency once
+    static LARGE_INTEGER qpc_freq;
+    static LONG qpc_init = 0;
+    if (qpc_init == 0) {
+        LARGE_INTEGER f;
+        QueryPerformanceFrequency(&f);
+        qpc_freq = f;
+        InterlockedExchange(&qpc_init, 1);
+    }
+
+    // For very short waits, a spin is usually better than Sleep()/timers.
+    const uint32_t SPIN_THRESHOLD_US = 300;
+
+    if (microseconds > SPIN_THRESHOLD_US) {
+        // Reuse a per-thread waitable timer to avoid Create/Close per call
+        static LACE_TLS HANDLE tls_timer = NULL;
+
+        if (tls_timer == NULL) {
+            tls_timer = CreateWaitableTimerExW(
+                NULL, NULL,
+                0, /* optionally CREATE_WAITABLE_TIMER_HIGH_RESOLUTION if you want to try */
+                TIMER_MODIFY_STATE | SYNCHRONIZE
+            );
+        }
+
+        if (tls_timer) {
+            // Clamp to avoid signed overflow in 100ns units
+            uint64_t us = (uint64_t)microseconds;
+            if (us > (uint64_t)(INT64_MAX / 10)) us = (uint64_t)(INT64_MAX / 10);
+
+            LARGE_INTEGER due;
+            due.QuadPart = -(LONGLONG)(10ULL * us); // relative, 100ns units
+            if (SetWaitableTimer(tls_timer, &due, 0, NULL, NULL, FALSE)) {
+                WaitForSingleObject(tls_timer, INFINITE);
+                return;
+            }
+        }
+
+        // Fallback
+        Sleep((DWORD)((microseconds + 999) / 1000));
+        return;
+    }
+
+    // Spin-wait using QPC for sub-ms delays
+    LARGE_INTEGER start, now;
+    QueryPerformanceCounter(&start);
+
+    const int64_t target_ticks =
+        ((int64_t)microseconds * (int64_t)qpc_freq.QuadPart) / 1000000LL;
+
+    const int64_t deadline = start.QuadPart + target_ticks;
+
+    do {
+        YieldProcessor();
+        QueryPerformanceCounter(&now);
+    } while (now.QuadPart < deadline);
+}
+#endif
