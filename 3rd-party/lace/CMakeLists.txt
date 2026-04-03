@@ -29,7 +29,7 @@ option(LACE_COUNT_STEALS "Let Lace count #steals and #leaps"                    
 option(LACE_COUNT_SPLITS "Let Lace count #splits"                                    OFF)
 option(LACE_USE_HWLOC    "Let Lace pin threads/memory using libhwloc"                OFF)
 option(LACE_BACKOFF      "Let idle threads sleep if there is no work"                ON)
-option(LACE_NATIVE_OPT   "Enable -march=native for compiler optimizations"           ON)
+option(LACE_NATIVE_OPT   "Enable -march=native for compiler optimizations"           OFF)
 option(LACE_ENABLE_PIC   "Build Lace with -fPIC (e.g. for linking into shared libs)" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static"                  OFF)
 
