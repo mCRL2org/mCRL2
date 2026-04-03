@@ -71,7 +71,10 @@ mcrl2_add_cxx_debug_flag(-ftrapv)
 mcrl2_add_cxx_flag(-ftls-model=initial-exec)
 
 # Disable the procedure linkage table, which is used for lazy loading.
-mcrl2_add_cxx_flag(-fno-plt)
+# This flag leads to warnings/errors if used without arguments on Apple compiling with the Clang compiler from April 2026.
+if(NOT APPLE)
+  mcrl2_add_cxx_flag(-fno-plt)
+endif()
 
 if(NOT ${MCRL2_IS_CLANG})
   # Disable interposition, which allows inlining external definitions.
@@ -140,7 +143,10 @@ endif()
 
 mcrl2_add_c_flag(-pipe)
 mcrl2_add_c_flag(-ftls-model=initial-exec)
-mcrl2_add_c_flag(-fno-plt)
+# This flag leads to warnings/errors if used without arguments on Apple compiling with the Clang compiler from April 2026.
+if(NOT APPLE)
+  mcrl2_add_c_flag(-fno-plt)
+endif()
 mcrl2_add_c_flag(-ftrapv)
 
 # Explicitly disable some warnings for C third party libraries
