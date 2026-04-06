@@ -374,7 +374,7 @@ struct BLC_indicators_lb
 
   /// \brief iterator pointing to the first marked transition
   /// \details If the BLC indicator is regarded as stable, this pointer is
-  /// `nullptr`.  Otherwise, marked transitions are used during `stabilise()`
+  /// `nullptr`.  Otherwise, marked transitions are used during `stabilizeB()`
   /// to indicate transitions that can be visited before the coroutines in
   /// `four_way_splitB()` start.  Typically, this are the transitions starting
   /// in new bottom states.
@@ -2582,10 +2582,10 @@ class bisim_partitioner_gj_lazy_BLC
     ///   `new_constellation` are included.  Main splitter BLC sets (with
     ///   target constellation==new_constellation) follow immediately after
     ///   co-splitter BLC sets (with target constellation==old_constellation).
-    /// - or as part of `stabiliseB()`, namely in lines 5.6 or 5.42, when a
+    /// - or as part of `stabilizeB()`, namely in lines 5.6 or 5.42, when a
     ///   large subblock with new bottom states has been found.  In this case,
     ///   transitions may be marked, but there is no need to keep the order of
-    ///   small / large splitter, as `stabiliseB()` does not stabilise under
+    ///   small / large splitter, as `stabilizeB()` does not stabilize under
     ///   two splitters together.
     ///   In this case, we can simplify the marking of a new BLC set that is
     ///   split off from an unstable BLC set: all transitions can be marked.
@@ -2915,10 +2915,10 @@ class bisim_partitioner_gj_lazy_BLC
     ///   `new_constellation` are included.  Main splitter BLC sets (with
     ///   target constellation==new_constellation) follow immediately after
     ///   co-splitter BLC sets (with target constellation==old_constellation).
-    /// - or as part of `stabiliseB()`, namely in lines 5.6 or 5.42, when a
+    /// - or as part of `stabilizeB()`, namely in lines 5.6 or 5.42, when a
     ///   large subblock with new bottom states has been found.  In this case,
     ///   transitions may be marked, but there is no need to keep the order of
-    ///   small / large splitter, as `stabiliseB()` does not stabilise under
+    ///   small / large splitter, as `stabilizeB()` does not stabilize under
     ///   two splitters together.
     ///   In this case, we can simplify the marking of a new BLC set that is
     ///   split off from an unstable BLC set: all transitions can be marked.
@@ -2933,6 +2933,7 @@ class bisim_partitioner_gj_lazy_BLC
 //<< ',' << mark_all_transitions_in_instable_BLC_sets << ", ...)\n";
       BLC_source_type& BLC_source = *block_index.block_BLC_source;              assert(BLC_source.start_BLC_source <= block_index.start_bottom_states);
                                                                                 assert(block_index.end_states <= BLC_source.end_BLC_source);
+                                                                                assert(m_branching);
       if (state_index first_part_size = std::distance
                 (BLC_source.start_BLC_source, block_index.start_bottom_states);
           0 == first_part_size)
@@ -6591,7 +6592,7 @@ class bisim_partitioner_gj_lazy_BLC
           // Algorithm 1, Line 1.4
           refine_super_BLC(*blc_it);
         }
-      }
+      }                                                                         assert(1==no_of_BLC_source_sets);
                                                                                 assert(check_data_structures("After initial reading before splitting in the initialisation", false));
                                                                                 #ifndef NDEBUG
       /* Algorithm 1, line 1.5                                               */   print_data_structures("End initialisation");
