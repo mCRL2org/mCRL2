@@ -14,6 +14,7 @@
 
 #include "lts_combine.h"
 
+#include "mcrl2/process/action_label.h"
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/xinput_output_tool.h"
 
@@ -52,6 +53,22 @@ public:
       new_lts.load(filename);
       lts.push_back(new_lts);
     }
+
+    // Ensure that block and hide sets are sorted
+    std::sort(blocks.begin(), blocks.end(), process::action_name_compare());
+    std::sort(hiden.begin(), hiden.end(), process::action_name_compare());
+    // Ensure that each of the multi actions names in the allow set is sorted.
+    std::for_each(allow.begin(), allow.end(), [](core::identifier_string_list& multi_action_name)
+    {
+      std::function<bool(const core::identifier_string&, const core::identifier_string&)> compare = process::action_name_compare();
+      multi_action_name = atermpp::sort_list(multi_action_name,compare);
+    });
+    // Ensure that the left-hand sides of the synchronisation rules are sorted.
+    std::for_each(syncs.begin(), syncs.end(), [](core::identifier_string_list& multi_action_name)
+    {
+      std::function<bool(const core::identifier_string&, const core::identifier_string&)> compare = process::action_name_compare();
+      multi_action_name = atermpp::sort_list(multi_action_name,compare);
+    });
 
     // Generate and output resulting LTS
     combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, output_filename(), save_at_end, nr_of_threads);

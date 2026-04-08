@@ -79,13 +79,13 @@ std::vector<core::identifier_string> parse_action_name_set(std::istream& input)
 }
 
 /// \brief Combine two LTSs and apply the comm, block, allow and hide operators.
-void combine_lts(std::vector<lts::lts_lts_t> & ltss,
-std::vector<core::identifier_string_list> & syncs,
-std::vector<core::identifier_string> & resulting_actions,
-std::vector<core::identifier_string> & blocks,
-std::vector<core::identifier_string> & hiden,
-std::vector<core::identifier_string_list> & allow,
-std::string filename,
+void combine_lts(const std::vector<lts::lts_lts_t> & ltss,
+const std::vector<core::identifier_string_list> & syncs,
+const std::vector<core::identifier_string> & resulting_actions,
+const std::vector<core::identifier_string> & blocks,
+const std::vector<core::identifier_string> & hiden,
+const std::vector<core::identifier_string_list> & allow,
+const std::string& filename,
 bool save_at_end,
 std::size_t nr_of_threads = 1);
 } // namespace mcrl2
