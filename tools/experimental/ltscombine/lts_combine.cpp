@@ -11,6 +11,7 @@
 #include "lts_combine.h"
 
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_builder.h"
@@ -27,6 +28,12 @@
 using state_t = std::size_t;
 
 using namespace mcrl2;
+
+inline
+core::identifier_string_list get_action_names(const process::action_list& actions)
+{
+  return core::identifier_string_list(actions.begin(), actions.end(), [](const process::action& a) { return a.label().name(); });
+}
 
 class identifier_string_compare
 {
@@ -63,22 +70,6 @@ size_t get_sync(const std::vector<core::identifier_string_list>& syncs, const co
   }
 
   return std::numeric_limits<std::size_t>::max();
-}
-
-/// \brief Convert and sort an action_list to an
-/// identifier_string_list of names of the actions in the list.
-///
-/// \param actions The input list of actions.
-/// \returns The sorted list of identifier strings.
-core::identifier_string_list sorted_action_name_list(const process::action_list& actions)
-{
-  std::multiset<core::identifier_string> names;
-  for (auto& action : actions)
-  {
-    names.insert(action.label().name());
-  }
-
-  return core::identifier_string_list(names.begin(), names.end());
 }
 
 /// \brief Checks if the given action list contains one of the blocked actions.
@@ -157,7 +148,7 @@ void hide_actions(const std::vector<core::identifier_string>& tau_actions, lps::
       new_multi_action.push_back(a);
     }
   }
-  
+
   label = lps::multi_action(process::action_list(new_multi_action.begin(), new_multi_action.end()));
 }
 
@@ -231,13 +222,13 @@ public:
 class state_thread
 {
 public:
-  state_thread(std::vector<lts::lts_lts_t>& lts,
-      std::vector<core::identifier_string_list>& syncs,
-      std::vector<core::identifier_string>& resulting_actions,
-      std::vector<core::identifier_string>& blocks,
-      std::vector<core::identifier_string>& hiden,
-      std::vector<core::identifier_string_list>& allow,
-      std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
+  state_thread(const std::vector<lts::lts_lts_t>& lts,
+      const std::vector<core::identifier_string_list>& syncs,
+      const std::vector<core::identifier_string>& resulting_actions,
+      const std::vector<core::identifier_string>& blocks,
+      const std::vector<core::identifier_string>& hiden,
+      const std::vector<core::identifier_string_list>& allow,
+      const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
       : lts(lts),
         syncs(syncs),
         resulting_actions(resulting_actions),
@@ -262,7 +253,7 @@ public:
     while (true)
     {
       std::unique_lock<std::mutex> queue_lock(queue_mutex);
-      
+
       // Wait if queue is empty but threads are still working
       while (queue.empty())
       {
@@ -278,7 +269,7 @@ public:
           return;
         }
       }
-      
+
       busy++;
 
       // Process the state
@@ -302,7 +293,7 @@ private:
   const std::vector<core::identifier_string>& hiden;
   const std::vector<core::identifier_string_list>& allow;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
-  
+
   /// \returns True iff at least one state was computed.
   void compute_state(lts::lts_builder* lts_builder,
       std::queue<std::size_t>& queue,
@@ -318,7 +309,7 @@ private:
     std::size_t state_index = queue.front();
 
     std::unique_lock state_lock(states_mutex);
-    std::vector<state_t> state = states[state_index];    
+    std::vector<state_t> state = states[state_index];
     state_lock.unlock();
 
     queue.pop();
@@ -408,7 +399,7 @@ private:
       mCRL2log(log::debug) << lps::pp(combo.first) << std::endl;
 
       size_t sync_index;
-      core::identifier_string_list action_names = sorted_action_name_list(combo.first.actions());
+      const core::identifier_string_list action_names = get_action_names(combo.first.actions());
 
       mCRL2log(log::debug) << core::pp(action_names) << std::endl;
 
@@ -432,7 +423,7 @@ private:
             lps::multi_action(process::action(process::action_label(result_action, sorts), arguments)));
 
         // Check if new transition is blocked or not allowed
-        core::identifier_string_list new_action_names = sorted_action_name_list(new_label.actions());
+        const core::identifier_string_list new_action_names = get_action_names(new_label.actions());
         if (is_blocked(blocks, new_label.actions()) || !is_allowed(allow, new_action_names))
         {
           mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
@@ -449,7 +440,7 @@ private:
 
         if (inserted)
         {
-          queue_lock.lock();          
+          queue_lock.lock();
           queue.push(new_state);
           queue_lock.unlock();
         }
@@ -501,15 +492,15 @@ private:
   }
 };
 
-void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
-    std::vector<core::identifier_string_list>& syncs,
-    std::vector<core::identifier_string>& resulting_actions,
-    std::vector<core::identifier_string>& blocks,
-    std::vector<core::identifier_string>& hiden,
-    std::vector<core::identifier_string_list>& allow,
-    std::string filename,
-    bool save_at_end,
-    std::size_t nr_of_threads)
+void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
+    const std::vector<core::identifier_string_list>& syncs,
+    const std::vector<core::identifier_string>& resulting_actions,
+    const std::vector<core::identifier_string>& blocks,
+    const std::vector<core::identifier_string>& hiden,
+    const std::vector<core::identifier_string_list>& allow,
+    const std::string& filename,
+    const bool save_at_end,
+    const std::size_t nr_of_threads)
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
