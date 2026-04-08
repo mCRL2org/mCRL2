@@ -35,18 +35,6 @@ core::identifier_string_list get_action_names(const process::action_list& action
   return core::identifier_string_list(actions.begin(), actions.end(), [](const process::action& a) { return a.label().name(); });
 }
 
-class identifier_string_compare
-{
-  core::identifier_string m_str;
-
-public:
-  identifier_string_compare(core::identifier_string str)
-      : m_str(str)
-  {}
-
-  bool operator()(core::identifier_string str) { return str == m_str; }
-};
-
 /// \brief Utility function that returns the index of the synchronisation for which
 ///        the action_list actions matches the list of strings in syncs.second.
 ///
@@ -140,9 +128,9 @@ void hide_actions(const std::vector<core::identifier_string>& tau_actions, lps::
   process::action_vector new_multi_action;
   for (const process::action& a : label.actions())
   {
-    if (std::find_if(tau_actions.begin(),
+    if (std::find(tau_actions.begin(),
             tau_actions.end(),
-            identifier_string_compare(a.label().name()))
+            a.label().name())
         == tau_actions.end()) // this action must not be hidden.
     {
       new_multi_action.push_back(a);
