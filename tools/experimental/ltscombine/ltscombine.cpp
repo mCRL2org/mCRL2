@@ -89,6 +89,73 @@ protected:
         "This option only applies to .aut and .lts files, which are by default saved on the fly.");
   }
 
+  void parse_comm(const utilities::command_line_parser& parser)
+  {
+    std::string filename = parser.option_argument("comm");
+    std::stringstream stringstream(filename);
+    mCRL2log(log::debug) << "Reading synchronisation actions from " << filename << std::endl;
+    std::ifstream file_input(filename.c_str());
+    std::istream* syncs_inputs = &file_input;
+    if (!file_input.good())
+    {
+      // File doesn't exist, read directly from input.
+      syncs_inputs = &stringstream;
+    }
+    std::tie(syncs, resulting_actions) = parse_comm_set(*syncs_inputs);
+  }
+
+  void parse_block(const utilities::command_line_parser& parser)
+  {
+    std::string filename = parser.option_argument("block");
+    std::istringstream stringstream(filename);
+    std::ifstream file_input(filename.c_str());
+    std::istream* block_input = &file_input;
+    if (!file_input.good())
+    {
+      // File doesn't exist
+      block_input = &stringstream;
+      mCRL2log(log::debug) << "Reading blocked actions from input" << std::endl;
+    }
+    else
+    {
+      mCRL2log(log::debug) << "Reading blocked actions from file " << filename << std::endl;
+    }
+
+    blocks = parse_action_name_set(*block_input);
+  }
+
+  void parse_allow(const utilities::command_line_parser& parser)
+  {
+    std::string filename = parser.option_argument("allow");
+    std::stringstream stringstream(filename);
+    mCRL2log(log::debug) << "Reading allowed multi-actions from file " << filename << std::endl;
+    std::ifstream file_input(filename.c_str());
+    std::istream* allow_input = &file_input;
+    if (!file_input.good())
+    {
+      // File doesn't exist
+      allow_input = &stringstream;
+    }
+
+    allow = parse_multi_action_name_set(*allow_input);
+  }
+
+  void parse_hide(const utilities::command_line_parser& parser)
+  {
+    std::string filename = parser.option_argument("hide");
+    std::stringstream stringstream(filename);
+    mCRL2log(log::debug) << "Reading hidden actions from file " << filename << std::endl;
+    std::ifstream file_input(filename.c_str());
+    std::istream* hide_input = &file_input;
+    if (!file_input.good())
+    {
+      // File doesn't exist
+      hide_input = &stringstream;
+    }
+
+    hiden = parse_action_name_set(*hide_input);
+  }
+
   void parse_options(const utilities::command_line_parser& parser) override
   {
     super::parse_options(parser);
@@ -98,178 +165,22 @@ protected:
 
     if (parser.options.count("comm") > 0)
     {
-      std::string filename = parser.option_argument("comm");
-      std::stringstream stringstream(filename);
-      mCRL2log(log::debug) << "Reading synchronisation actions from " << filename << std::endl;
-      std::ifstream file_input(filename.c_str());
-      std::istream* syncs_inputs = &file_input;
-      if (!file_input.good())
-      {
-        // File doesn't exist
-        syncs_inputs = &stringstream;
-      }
-      std::string line;
-
-      // Read synchronisation statements seperated by commas
-      while (std::getline(*syncs_inputs, line, ','))
-      {
-        std::istringstream iss(line);
-        std::multiset<core::identifier_string> labels{};
-        std::string label;
-        std::size_t delim = line.find('|');
-        std::size_t prev_delim = 0;
-
-        // Read multi-action consisting of actions seperated by bars
-        while (delim != std::string::npos)
-        {
-          label = line.substr(prev_delim, delim - prev_delim);
-          trim(label);
-          labels.insert(label);
-
-          prev_delim = delim + 1;
-          delim = line.find('|', prev_delim);
-        }
-
-        // Find ->, which signals the resulting action
-        delim = line.find('-', prev_delim + 1);
-        if (delim != std::string::npos && line[delim + 1] == '>')
-        {
-          // Add last action of multi-action to list
-          label = line.substr(prev_delim, delim - prev_delim);
-          trim(label);
-          labels.insert(label);
-
-          if (labels.size() < 2)
-          {
-            // Syntax error, communication must contain two or more action labels
-            mCRL2log(log::error)
-                << "Syntax error in communications, left hand size must contain two or more action labels: '" << line
-                << "'." << std::endl;
-            throw mcrl2::runtime_error("Could not parse file " + filename + ".");
-          }
-
-          syncs.emplace_back(labels.begin(), labels.end());
-
-          // Add multi-action and resulting action to list of sychronisations
-          label = line.substr(delim + 2);
-          trim(label);
-          resulting_actions.emplace_back(label);
-        }
-        else
-        {
-          // Syntax error, -> not found
-          mCRL2log(log::error) << "Syntax error in communications, -> not found for '" << line << "'." << std::endl;
-          throw mcrl2::runtime_error("Could not parse file " + filename + ".");
-        }
-      }
+      parse_comm(parser);
     }
 
     if (parser.options.count("block") > 0)
     {
-      std::string filename = parser.option_argument("block");
-      std::istringstream stringstream(filename);
-      std::ifstream file_input(filename.c_str());
-      std::istream* block_input = &file_input;
-      if (!file_input.good())
-      {
-        // File doesn't exist
-        block_input = &stringstream;
-        mCRL2log(log::debug) << "Reading blocked actions from input" << std::endl;
-      }
-      else
-      {
-        mCRL2log(log::debug) << "Reading blocked actions from file " << filename << std::endl;
-      }
-      std::string action_label;
-
-      // Read list of blocked actions seperated by commas
-      while (std::getline(*block_input, action_label, ','))
-      {
-        if (action_label.find('|') != std::string::npos)
-        {
-          // Syntax error, multi-actions cannot be blocked
-          mCRL2log(log::error) << "List of blocked action contains multi-action '" << action_label << "'." << std::endl;
-          throw mcrl2::runtime_error("Could not parse file " + filename + ".");
-        }
-
-        // Trim action and add to list of blocked actions
-        trim(action_label);
-        blocks.emplace_back(action_label);
-      }
+      parse_block(parser);
     }
 
     if (parser.options.count("allow") > 0)
     {
-      std::string filename = parser.option_argument("allow");
-      std::stringstream stringstream(filename);
-      mCRL2log(log::debug) << "Reading allowed multi-actions from file " << filename << std::endl;
-      std::ifstream file_input(filename.c_str());
-      std::istream* allow_input = &file_input;
-      if (!file_input.good())
-      {
-        // File doesn't exist
-        allow_input = &stringstream;
-      }
-      std::string action_label;
-
-      // Read list of allowed multi-actions seperated by commas
-      while (std::getline(*allow_input, action_label, ','))
-      {
-        std::istringstream iss(action_label);
-        std::multiset<core::identifier_string> labels;
-        std::string label;
-        std::size_t delim = action_label.find('|');
-        std::size_t prev_delim = 0;
-
-        // Read all actions seperated by bars
-        while (delim != std::string::npos)
-        {
-          label = action_label.substr(prev_delim, delim - prev_delim);
-          trim(label);
-          labels.insert(label);
-
-          prev_delim = delim + 1;
-          delim = action_label.find('|', delim + 1);
-        }
-
-        // Read last action of multi-action
-        label = action_label.substr(prev_delim);
-        trim(label);
-        labels.insert(label);
-
-        // Add multi-action to the list of allowed actions
-        allow.emplace_back(labels.begin(), labels.end());
-      }
+      parse_allow(parser);
     }
 
     if (parser.options.count("hide") > 0)
     {
-      std::string filename = parser.option_argument("hide");
-      std::stringstream stringstream(filename);
-      mCRL2log(log::debug) << "Reading hidden actions from file " << filename << std::endl;
-      std::ifstream file_input(filename.c_str());
-      std::istream* hide_input = &file_input;
-      if (!file_input.good())
-      {
-        // File doesn't exist
-        hide_input = &stringstream;
-      }
-      std::string action_label;
-
-      // Read list of hiden actions seperated by commas
-      while (std::getline(*hide_input, action_label, ','))
-      {
-        if (action_label.find('|') != std::string::npos)
-        {
-          // Syntax error, multi-actions cannot be hiden
-          mCRL2log(log::error) << "List of hide actions contains multi-action '" << action_label << "'." << std::endl;
-          throw mcrl2::runtime_error("Could not parse file " + filename + ".");
-        }
-
-        // Trim action and add to list of hiden actions
-        trim(action_label);
-        hiden.emplace_back(action_label);
-      }
+      parse_hide(parser);
     }
   }
 
