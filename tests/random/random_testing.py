@@ -572,7 +572,7 @@ available_tests = {
 
 available_experimental_tests = {
     # ML: Disable until the tests pass.
-    # 'ltscombine'                                  : lambda name, settings: LtsCombineTest(name, False, settings)                                       ,
+    'ltscombine'                                  : lambda name, settings: LtsCombineTest(name, False, settings)                                       ,
     # 'ltscombine-parallel'                         : lambda name, settings: LtsCombineTest(name, True, settings)                                        ,
     'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                              ,
     'pressolve'                                   : lambda name, settings: Pres2boolTest(name, settings)                                               ,
