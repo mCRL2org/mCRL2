@@ -56,13 +56,13 @@ public:
 
     // Ensure that block and hide sets are sorted
     std::function<bool(const core::identifier_string&, const core::identifier_string&)> action_name_compare = process::action_name_compare();
-    blocks = atermpp::sort_list(blocks, action_name_compare);
+    block_set = atermpp::sort_list(block_set, action_name_compare);
 
-    hiden = atermpp::sort_list(hiden, action_name_compare);
+    hide_set = atermpp::sort_list(hide_set, action_name_compare);
     // Ensure that each of the multi actions names in the allow set is sorted.
-    allow = process::action_name_multiset_list(
-      allow.begin(),
-      allow.end(),
+    allow_set = process::action_name_multiset_list(
+      allow_set.begin(),
+      allow_set.end(),
       [&action_name_compare](const process::action_name_multiset& multi_action_name)
       {
         return process::action_name_multiset(atermpp::sort_list(multi_action_name.names(), action_name_compare));
@@ -73,10 +73,10 @@ public:
     {
       multi_action_name = atermpp::sort_list(multi_action_name, action_name_compare);
     });
-    allow_cache = lps::detail::make_allow_list_cache(allow);
+    allow_cache = lps::detail::make_allow_list_cache(allow_set);
 
     // Generate and output resulting LTS
-    combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, allow_cache, output_filename(), save_at_end, nr_of_threads);
+    combine_lts(lts, syncs, resulting_actions, block_set, hide_set, allow_set, allow_cache, output_filename(), save_at_end, nr_of_threads);
 
     return true;
   }
@@ -143,7 +143,7 @@ protected:
       mCRL2log(log::debug) << "Reading blocked actions from file " << filename << std::endl;
     }
 
-    blocks = parse_action_name_set(*block_input);
+    block_set = parse_action_name_set(*block_input);
   }
 
   void parse_allow(const utilities::command_line_parser& parser)
@@ -159,7 +159,7 @@ protected:
       allow_input = &stringstream;
     }
 
-    allow = parse_multi_action_name_set(*allow_input);
+    allow_set = parse_multi_action_name_set(*allow_input);
   }
 
   void parse_hide(const utilities::command_line_parser& parser)
@@ -175,7 +175,7 @@ protected:
       hide_input = &stringstream;
     }
 
-    hiden = parse_action_name_set(*hide_input);
+    hide_set = parse_action_name_set(*hide_input);
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
@@ -207,30 +207,10 @@ protected:
   }
 
 private:
-  // trim from start (in place)
-  inline void ltrim(std::string& s)
-  {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-  }
-
-  // trim from end (in place)
-  inline void rtrim(std::string& s)
-  {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
-  }
-
-  // trim from both ends (in place)
-  inline void trim(std::string& s)
-  {
-    rtrim(s);
-    ltrim(s);
-  }
-
-  core::identifier_string_list blocks;
-  std::unordered_set<core::identifier_string_list> allow_set;
-  process::action_name_multiset_list allow;
+  core::identifier_string_list block_set;
+  process::action_name_multiset_list allow_set;
   lps::detail::allow_list_cache allow_cache;
-  core::identifier_string_list hiden;
+  core::identifier_string_list hide_set;
   std::vector<core::identifier_string_list> syncs;
   std::vector<core::identifier_string> resulting_actions;
 
