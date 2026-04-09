@@ -45,9 +45,10 @@
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/linearise_allow_block.h"
-#include "mcrl2/lps/linearise_utility.h"
-#include "mcrl2/lps/linearise_rename.h"
 #include "mcrl2/lps/linearise_communication.h"
+#include "mcrl2/lps/linearise_hide.h"
+#include "mcrl2/lps/linearise_rename.h"
+#include "mcrl2/lps/linearise_utility.h"
 #include "mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h"
 #include "mcrl2/lps/sumelm.h"
 
@@ -7045,69 +7046,6 @@ class specification_basic_type
     }
 
 
-    /**************** hiding *****************************************/
-
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-    static
-    std::string log_hide_application(const lps_statistics_t& lps_statistics_before,
-                                     const lps_statistics_t& lps_statistics_after,
-                                     const std::size_t num_hidden_actions,
-                                     size_t indent = 0)
-    {
-      std::string indent_str(indent, ' ');
-      std::ostringstream os;
-
-      os << indent_str << "- operator: hide" << std::endl;
-
-      indent += 2;
-      indent_str = std::string(indent, ' ');
-      os << indent_str << "number of hidden actions: " << num_hidden_actions << std::endl
-         << indent_str << "before:" << std::endl << print(lps_statistics_before, indent+2)
-         << indent_str << "after:" << std::endl << print(lps_statistics_after, indent+2);
-
-      return os.str();
-    }
-#endif // MCRL2_LOG_LPS_LINEARISE_STATISTICS
-
-    static
-    action_list hide_(const identifier_string_list& hidelist, const action_list& multiaction)
-    {
-      action_list resultactionlist;
-
-      for (const action& a: multiaction)
-      {
-        if (std::find(hidelist.begin(),hidelist.end(),a.label().name())==hidelist.end())
-        {
-          resultactionlist.push_front(a);
-        }
-      }
-
-      /* reverse the actionlist to maintain the ordering */
-      resultactionlist = reverse(resultactionlist);
-      return resultactionlist;
-    }
-
-    static
-    void hidecomposition(const identifier_string_list& hidelist, stochastic_action_summand_vector& action_summands)
-    {
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-      lps_statistics_t lps_statistics_before = get_statistics(action_summands);
-#endif
-      for (auto & action_summand : action_summands)
-      {
-        const action_list acts=hide_(hidelist,action_summand.multi_action().actions());
-        action_summand=stochastic_action_summand(action_summand.summation_variables(),
-                          action_summand.condition(),
-                          action_summand.has_time()?multi_action(acts,action_summand.multi_action().time()):multi_action(acts),
-                          action_summand.assignments(),
-                          action_summand.distribution());
-      }
-
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-      lps_statistics_t lps_statistics_after = get_statistics(action_summands);
-      std::cout << log_hide_application(lps_statistics_before, lps_statistics_after, hidelist.size());
-#endif
-    }
 
     /**************** equalargs ****************************************/
 
