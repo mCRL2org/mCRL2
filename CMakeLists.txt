@@ -145,8 +145,15 @@ if(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory(3rd-party/tr)
 endif()
 if (MCRL2_ENABLE_SYLVAN)
+  # This is necessary since we only want to link Sylvan and lace statically.
+  set(_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+  set(BUILD_SHARED_LIBS OFF)
+
   add_subdirectory(3rd-party/lace/)
   add_subdirectory(3rd-party/sylvan/)
+
+  set(BUILD_SHARED_LIBS ${_BUILD_SHARED_LIBS})
+  unset(_BUILD_SHARED_LIBS)
 
   # Enable position independent code for Sylvan to avoid linker errors.
   set_target_properties(sylvan PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
