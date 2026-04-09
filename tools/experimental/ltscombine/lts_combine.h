@@ -16,29 +16,31 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/lps/linearise_allow_block.h"
 #include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/process/action_label.h"
+#include "mcrl2/process/communication_expression.h"
 #include "mcrl2/process/detail/alphabet_parse.h"
+#include "mcrl2/process/process_expression.h"
 
 namespace mcrl2
 {
 
 inline
-std::pair<std::vector<core::identifier_string_list>, std::vector<core::identifier_string>>parse_comm_set(const std::string& text)
+process::communication_expression_list parse_comm_set(const std::string& text)
 {
-  std::pair<std::vector<core::identifier_string_list>, std::vector<core::identifier_string>> result;
-
   const std::vector<std::string> set_elements = utilities::regex_split(text, "\\s*,\\s*");
-  for (const std::string& word: set_elements)
-  {
-    auto [lhs, rhs] = process::detail::split_arrow(word);
-    result.first.emplace_back(process::detail::make_identifier_string_list(process::detail::split_bar(lhs)));
-    result.second.emplace_back(rhs);
-  }
-
-  return result;
+  return process::communication_expression_list(
+    set_elements.begin(),
+    set_elements.end(),
+    [](const std::string& word)
+    {
+      const auto [lhs, rhs] = process::detail::split_arrow(word);
+      return process::communication_expression(
+        process::action_name_multiset(process::detail::make_identifier_string_list(process::detail::split_bar(lhs))),
+        core::identifier_string(rhs));
+    });
 }
 
-inline std::pair<std::vector<core::identifier_string_list>, std::vector<core::identifier_string>> parse_comm_set(
-  std::istream& input)
+inline process::communication_expression_list parse_comm_set(std::istream& input)
 {
   return parse_comm_set(utilities::read_text(input));
 }
@@ -77,8 +79,7 @@ core::identifier_string_list parse_action_name_set(std::istream& input)
 
 /// \brief Combine two LTSs and apply the comm, block, allow and hide operators.
 void combine_lts(const std::vector<lts::lts_lts_t>& ltss,
-  const std::vector<core::identifier_string_list>& syncs,
-  const std::vector<core::identifier_string>& resulting_actions,
+  const process::communication_expression_list& comm_set,
   const core::identifier_string_list& blocks,
   const core::identifier_string_list& hiden,
   const lps::detail::allow_list_cache& allow_cache,
