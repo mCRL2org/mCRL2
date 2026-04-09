@@ -167,7 +167,6 @@ public:
     const std::vector<core::identifier_string>& resulting_actions,
     const core::identifier_string_list& blocks,
     const core::identifier_string_list& hiden,
-    const process::action_name_multiset_list& allow,
     const lps::detail::allow_list_cache& allow_cache,
     const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
     : lts(lts),
@@ -175,7 +174,6 @@ public:
       resulting_actions(resulting_actions),
       blocks(blocks),
       hiden(hiden),
-      allow(allow),
       allow_cache(allow_cache),
       outgoing_transitions(outgoing_transitions)
   {}
@@ -233,7 +231,6 @@ private:
   const std::vector<core::identifier_string>& resulting_actions;
   const core::identifier_string_list& blocks;
   const core::identifier_string_list& hiden;
-  const process::action_name_multiset_list& allow;
   const lps::detail::allow_list_cache& allow_cache;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
 
@@ -439,7 +436,6 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
   const std::vector<core::identifier_string>& resulting_actions,
   const core::identifier_string_list& blocks,
   const core::identifier_string_list& hiden,
-  const process::action_name_multiset_list& allow,
   const lps::detail::allow_list_cache& allow_cache,
   const std::string& filename,
   const bool save_at_end,
@@ -503,7 +499,7 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
 
   for (size_t i = 0; i < nr_of_threads; i++)
   {
-    state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow, allow_cache, outgoing_transitions);
+    state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow_cache, outgoing_transitions);
     threads.emplace_back(
         [&]
         {
