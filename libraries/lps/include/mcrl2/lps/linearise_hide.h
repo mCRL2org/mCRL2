@@ -44,19 +44,13 @@ std::string log_hide_application(const lps_statistics_t& lps_statistics_before,
 inline
 process::action_list hide_(const core::identifier_string_list& hidelist, const process::action_list& multiaction)
 {
-  process::action_list resultactionlist;
-
-  for (const process::action& a: multiaction)
-  {
-    if (std::find(hidelist.begin(), hidelist.end(), a.label().name()) == hidelist.end())
-    {
-      resultactionlist.push_front(a);
-    }
-  }
-
-  /* reverse the actionlist to maintain the ordering */
-  resultactionlist = reverse(resultactionlist);
-  return resultactionlist;
+  return process::action_list(
+    multiaction.begin(),
+    multiaction.end(),
+    [](const process::action& a) { return a; },
+    [&hidelist](const process::action& a) {
+      return std::find(hidelist.begin(), hidelist.end(), a.label().name()) == hidelist.end();
+    });
 }
 
 inline
