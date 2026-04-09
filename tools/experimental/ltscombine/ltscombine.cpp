@@ -55,19 +55,19 @@ public:
     }
 
     // Ensure that block and hide sets are sorted
-    std::sort(blocks.begin(), blocks.end(), process::action_name_compare());
-    std::sort(hiden.begin(), hiden.end(), process::action_name_compare());
+    std::function<bool(const core::identifier_string&, const core::identifier_string&)> action_name_compare = process::action_name_compare();
+    blocks = atermpp::sort_list(blocks, action_name_compare);
+
+    hiden = atermpp::sort_list(hiden, action_name_compare);
     // Ensure that each of the multi actions names in the allow set is sorted.
-    std::for_each(allow.begin(), allow.end(), [](core::identifier_string_list& multi_action_name)
+    std::for_each(allow.begin(), allow.end(), [action_name_compare](core::identifier_string_list& multi_action_name)
     {
-      std::function<bool(const core::identifier_string&, const core::identifier_string&)> compare = process::action_name_compare();
-      multi_action_name = atermpp::sort_list(multi_action_name,compare);
+      multi_action_name = atermpp::sort_list(multi_action_name, action_name_compare);
     });
     // Ensure that the left-hand sides of the synchronisation rules are sorted.
-    std::for_each(syncs.begin(), syncs.end(), [](core::identifier_string_list& multi_action_name)
+    std::for_each(syncs.begin(), syncs.end(), [action_name_compare](core::identifier_string_list& multi_action_name)
     {
-      std::function<bool(const core::identifier_string&, const core::identifier_string&)> compare = process::action_name_compare();
-      multi_action_name = atermpp::sort_list(multi_action_name,compare);
+      multi_action_name = atermpp::sort_list(multi_action_name, action_name_compare);
     });
 
     // Generate and output resulting LTS
@@ -221,10 +221,10 @@ private:
     ltrim(s);
   }
 
-  std::vector<core::identifier_string> blocks;
+  core::identifier_string_list blocks;
   std::unordered_set<core::identifier_string_list> allow_set;
   std::vector<core::identifier_string_list> allow;
-  std::vector<core::identifier_string> hiden;
+  core::identifier_string_list hiden;
   std::vector<core::identifier_string_list> syncs;
   std::vector<core::identifier_string> resulting_actions;
 
