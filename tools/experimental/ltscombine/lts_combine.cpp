@@ -13,6 +13,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/merge_data_specifications.h"
+#include "mcrl2/lps/linearise_allow_block.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/lts_io.h"
@@ -123,7 +124,7 @@ bool is_allowed(const std::vector<core::identifier_string_list>& allowed, const 
 ///
 /// \param tau_actions The action names to be hidden.
 /// \param label The existing action label.
-void hide_actions(const std::vector<core::identifier_string>& tau_actions, lps::multi_action& label)
+void hide_actions(const core::identifier_string_list& tau_actions, lps::multi_action& label)
 {
   process::action_vector new_multi_action;
   for (const process::action& a : label.actions())
@@ -213,8 +214,8 @@ public:
   state_thread(const std::vector<lts::lts_lts_t>& lts,
       const std::vector<core::identifier_string_list>& syncs,
       const std::vector<core::identifier_string>& resulting_actions,
-      const std::vector<core::identifier_string>& blocks,
-      const std::vector<core::identifier_string>& hiden,
+      const core::identifier_string_list& blocks,
+      const core::identifier_string_list& hiden,
       const std::vector<core::identifier_string_list>& allow,
       const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
       : lts(lts),
@@ -277,8 +278,8 @@ private:
   const std::vector<lts::lts_lts_t>& lts;
   const std::vector<core::identifier_string_list>& syncs;
   const std::vector<core::identifier_string>& resulting_actions;
-  const std::vector<core::identifier_string>& blocks;
-  const std::vector<core::identifier_string>& hiden;
+  const core::identifier_string_list& blocks;
+  const core::identifier_string_list& hiden;
   const std::vector<core::identifier_string_list>& allow;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
 
@@ -412,7 +413,7 @@ private:
 
         // Check if new transition is blocked or not allowed
         const core::identifier_string_list new_action_names = get_action_names(new_label.actions());
-        if (is_blocked(blocks, new_label.actions()) || !is_allowed(allow, new_action_names))
+        if (lps::encap(blocks, new_label.actions()) || !is_allowed(allow, new_action_names))
         {
           mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
           continue;
@@ -447,7 +448,7 @@ private:
         mCRL2log(log::debug) << "Multi action" << std::endl;
 
         // Check if the transition is blocked or not allowed
-        if (is_blocked(blocks, combo.first.actions()) || !is_allowed(allow, action_names))
+        if (lps::encap(blocks, combo.first.actions()) || !is_allowed(allow, action_names))
         {
           mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
           continue;
@@ -483,8 +484,8 @@ private:
 void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
     const std::vector<core::identifier_string_list>& syncs,
     const std::vector<core::identifier_string>& resulting_actions,
-    const std::vector<core::identifier_string>& blocks,
-    const std::vector<core::identifier_string>& hiden,
+    const core::identifier_string_list& blocks,
+    const core::identifier_string_list& hiden,
     const std::vector<core::identifier_string_list>& allow,
     const std::string& filename,
     const bool save_at_end,

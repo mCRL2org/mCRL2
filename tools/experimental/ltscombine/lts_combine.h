@@ -61,19 +61,14 @@ std::vector<core::identifier_string_list> parse_multi_action_name_set(std::istre
 }
 
 inline
-std::vector<core::identifier_string> parse_action_name_set(const std::string& text)
+core::identifier_string_list parse_action_name_set(const std::string& text)
 {
-  std::vector<core::identifier_string> result;
   const std::vector<std::string> set_elements = utilities::regex_split(text, "\\s*,\\s*");
-  for (const std::string& word: set_elements)
-  {
-    result.emplace_back(word);
-  }
-  return result;
+  return core::identifier_string_list(set_elements.begin(), set_elements.end());
 }
 
 inline
-std::vector<core::identifier_string> parse_action_name_set(std::istream& input)
+core::identifier_string_list parse_action_name_set(std::istream& input)
 {
   return parse_action_name_set(utilities::read_text(input));
 }
@@ -82,8 +77,8 @@ std::vector<core::identifier_string> parse_action_name_set(std::istream& input)
 void combine_lts(const std::vector<lts::lts_lts_t> & ltss,
 const std::vector<core::identifier_string_list> & syncs,
 const std::vector<core::identifier_string> & resulting_actions,
-const std::vector<core::identifier_string> & blocks,
-const std::vector<core::identifier_string> & hiden,
+const core::identifier_string_list & blocks,
+const core::identifier_string_list & hiden,
 const std::vector<core::identifier_string_list> & allow,
 const std::string& filename,
 bool save_at_end,
