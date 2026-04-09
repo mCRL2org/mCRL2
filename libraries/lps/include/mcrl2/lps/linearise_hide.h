@@ -20,8 +20,8 @@
 namespace mcrl2::lps
 {
 
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-static std::string log_hide_application(const lps_statistics_t& lps_statistics_before,
+inline
+std::string log_hide_application(const lps_statistics_t& lps_statistics_before,
   const lps_statistics_t& lps_statistics_after,
   const std::size_t num_hidden_actions,
   size_t indent = 0)
@@ -40,7 +40,6 @@ static std::string log_hide_application(const lps_statistics_t& lps_statistics_b
 
   return os.str();
 }
-#endif // MCRL2_LOG_LPS_LINEARISE_STATISTICS
 
 inline
 process::action_list hide_(const core::identifier_string_list& hidelist, const process::action_list& multiaction)
@@ -63,9 +62,9 @@ process::action_list hide_(const core::identifier_string_list& hidelist, const p
 inline
 void hidecomposition(const core::identifier_string_list& hidelist, stochastic_action_summand_vector& action_summands)
 {
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
+  [[maybe_unused]]
   lps_statistics_t lps_statistics_before = get_statistics(action_summands);
-#endif
+
   for (auto& action_summand: action_summands)
   {
     const process::action_list acts = hide_(hidelist, action_summand.multi_action().actions());
@@ -76,10 +75,11 @@ void hidecomposition(const core::identifier_string_list& hidelist, stochastic_ac
       action_summand.distribution());
   }
 
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-  lps_statistics_t lps_statistics_after = get_statistics(action_summands);
-  std::cout << log_hide_application(lps_statistics_before, lps_statistics_after, hidelist.size());
-#endif
+  if constexpr (detail::EnableLineariseStatistics)
+  {
+    lps_statistics_t lps_statistics_after = get_statistics(action_summands);
+    std::cout << log_hide_application(lps_statistics_before, lps_statistics_after, hidelist.size());
+  }
 }
 
 } // namespace mcrl2::lps
