@@ -14,6 +14,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/lps/linearise_allow_block.h"
+#include "mcrl2/lps/linearise_hide.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/lts_io.h"
@@ -117,28 +118,6 @@ bool is_allowed(const std::vector<core::identifier_string_list>& allowed, const 
   }
 
   return false;
-}
-
-/// \brief Returns a new action label for which
-/// the given actions are hidden.
-///
-/// \param tau_actions The action names to be hidden.
-/// \param label The existing action label.
-void hide_actions(const core::identifier_string_list& tau_actions, lps::multi_action& label)
-{
-  process::action_vector new_multi_action;
-  for (const process::action& a : label.actions())
-  {
-    if (std::find(tau_actions.begin(),
-            tau_actions.end(),
-            a.label().name())
-        == tau_actions.end()) // this action must not be hidden.
-    {
-      new_multi_action.push_back(a);
-    }
-  }
-
-  label = lps::multi_action(process::action_list(new_multi_action.begin(), new_multi_action.end()));
 }
 
 /// \brief Checks whether the arguments of each of the actions of the
@@ -420,7 +399,7 @@ private:
         }
 
         // Hide actions in transition label
-        hide_actions(hiden, new_label);
+        lps::hide_(hiden, new_label);
 
         std::unique_lock state_lock(states_mutex);
         // Add new state
@@ -455,7 +434,7 @@ private:
         }
 
         // Hide actions in transition label
-        hide_actions(hiden, combo.first);
+        lps::hide_(hiden, combo.first);
 
         // Add new state
         states_mutex.lock();
