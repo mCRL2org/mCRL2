@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPS_LINEARISE_HIDE_H
 #define MCRL2_LPS_LINEARISE_HIDE_H
 
+#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/lps/linearise_utility.h"
 #include "mcrl2/lps/detail/configuration.h"
@@ -54,20 +55,35 @@ process::action_list hide_(const core::identifier_string_list& hidelist, const p
 }
 
 inline
+multi_action hide_(const core::identifier_string_list& hidelist, const multi_action& label)
+{
+  return multi_action(hide_(hidelist, label.actions()), label.time());
+}
+
+inline
+stochastic_action_summand hide_(const core::identifier_string_list& hidelist, const stochastic_action_summand& summand)
+{
+  return stochastic_action_summand(
+    summand.summation_variables(),
+    summand.condition(),
+    hide_(hidelist, summand.multi_action()),
+    summand.assignments(),
+    summand.distribution());
+}
+
+inline
 void hidecomposition(const core::identifier_string_list& hidelist, stochastic_action_summand_vector& action_summands)
 {
   [[maybe_unused]]
   lps_statistics_t lps_statistics_before = get_statistics(action_summands);
 
-  for (auto& action_summand: action_summands)
-  {
-    const process::action_list acts = hide_(hidelist, action_summand.multi_action().actions());
-    action_summand = stochastic_action_summand(action_summand.summation_variables(),
-      action_summand.condition(),
-      action_summand.has_time() ? multi_action(acts, action_summand.multi_action().time()) : multi_action(acts),
-      action_summand.assignments(),
-      action_summand.distribution());
-  }
+  std::for_each(
+    action_summands.begin(),
+    action_summands.end(),
+    [&hidelist](stochastic_action_summand& action_summand)
+    {
+      action_summand = hide_(hidelist, action_summand);
+    });
 
   if constexpr (detail::EnableLineariseStatistics)
   {
