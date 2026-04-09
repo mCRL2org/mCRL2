@@ -19,7 +19,9 @@
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/state_space_generator.h"
+#include "mcrl2/process/communication_expression.h"
 #include "mcrl2/process/merge_action_specifications.h"
+#include "mcrl2/process/process_expression.h"
 
 #include <condition_variable>
 #include <chrono>
@@ -43,53 +45,30 @@ core::identifier_string_list get_action_names(const process::action_list& action
 /// \param syncs The list of synchronisations
 /// \param actions The list of actions to be matched.
 /// \returns The index of the matching synchronisation, or max value when no matching synchronisation is found.
-size_t get_sync(const std::vector<core::identifier_string_list>& syncs, const core::identifier_string_list& action_names)
+process::communication_expression get_sync(const process::communication_expression_list& comm_set, const core::identifier_string_list& action_names)
 {
   // A synchronising action must consist of two or more action labels
   if (action_names.size() < 2)
   {
-    return std::numeric_limits<std::size_t>::max();
+    return process::communication_expression();
   }
 
-  for (auto it = syncs.begin(); it != syncs.end(); it++)
+  auto it = std::find_if(
+    comm_set.begin(),
+    comm_set.end(),
+    [&action_names](const process::communication_expression& comm)
   {
-    if (*it == action_names)
-    {
-      return it - syncs.begin();
-    }
-  }
+    return comm.action_name().names() == action_names;
+  });
 
-  return std::numeric_limits<std::size_t>::max();
-}
-
-/// \brief Checks if the given action list contains one of the blocked actions.
-///
-/// \param blocks The list of blocked actions.
-/// \param actions The list of actions to be checked.
-/// \returns Whether the list of actions contains a blocked action.
-bool is_blocked(const std::vector<core::identifier_string>& blocks, const process::action_list& actions)
-{
-  // tau actions can not be blocked
-  if (actions.empty() || blocks.empty())
+  if (it != comm_set.end())
   {
-    return false;
+    return *it;
   }
-
-  for (const process::action& action : actions)
+  else
   {
-    core::identifier_string action_name = action.label().name();
-
-    for (const auto& it : blocks)
-    {
-      if (it == action_name)
-      {
-        return true;
-      }
-    }
+    return process::communication_expression();
   }
-
-  // No matching blocked action could be found
-  return false;
 }
 
 /// \brief Checks whether the arguments of each of the actions of the
@@ -98,18 +77,16 @@ bool is_blocked(const std::vector<core::identifier_string>& blocks, const proces
 /// \param label The label to check.
 /// \returns Whether all arguments of each action of the label
 ///          are equal.
-bool can_sync(const lps::multi_action& label)
+inline
+bool equal_arguments(const lps::multi_action& multi_action)
 {
-  // Check if each action's arguments are equal to the first action's arguments
-  for (auto& action : label.actions())
-  {
-    if (action.arguments() != label.actions().front().arguments())
-    {
-      return false;
-    }
-  }
-
-  return true;
+  return multi_action.actions().empty() ||
+    std::all_of(
+      std::next(multi_action.actions().begin()),
+      multi_action.actions().end(),
+      [&](const process::action& a) {
+        return a.arguments() == multi_action.actions().front().arguments();
+      });
 }
 
 struct combined_lts_builder
@@ -163,15 +140,13 @@ class state_thread
 {
 public:
   state_thread(const std::vector<lts::lts_lts_t>& lts,
-    const std::vector<core::identifier_string_list>& syncs,
-    const std::vector<core::identifier_string>& resulting_actions,
+    const process::communication_expression_list& comm_set,
     const core::identifier_string_list& blocks,
     const core::identifier_string_list& hiden,
     const lps::detail::allow_list_cache& allow_cache,
     const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
     : lts(lts),
-      syncs(syncs),
-      resulting_actions(resulting_actions),
+      comm_set(comm_set),
       blocks(blocks),
       hiden(hiden),
       allow_cache(allow_cache),
@@ -227,8 +202,7 @@ public:
 
 private:
   const std::vector<lts::lts_lts_t>& lts;
-  const std::vector<core::identifier_string_list>& syncs;
-  const std::vector<core::identifier_string>& resulting_actions;
+  const process::communication_expression_list& comm_set;
   const core::identifier_string_list& blocks;
   const core::identifier_string_list& hiden;
   const lps::detail::allow_list_cache& allow_cache;
@@ -338,15 +312,15 @@ private:
     {
       mCRL2log(log::debug) << lps::pp(combo.first) << std::endl;
 
-      size_t sync_index;
+      process::communication_expression comm_expr;
       const core::identifier_string_list action_names = get_action_names(combo.first.actions());
 
       mCRL2log(log::debug) << core::pp(action_names) << std::endl;
 
-      if (can_sync(combo.first) && (sync_index = get_sync(syncs, action_names)) != std::numeric_limits<std::size_t>::max())
+      if (equal_arguments(combo.first) && (comm_expr = get_sync(comm_set, action_names)) != process::communication_expression())
       {
         // Synchronise
-        core::identifier_string result_action = resulting_actions[sync_index];
+        const core::identifier_string& result_action = comm_expr.name();
         mCRL2log(log::debug) << "Sync: " << result_action << std::endl;
 
         data::data_expression_list arguments;
@@ -432,8 +406,7 @@ private:
 };
 
 void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
-  const std::vector<core::identifier_string_list>& syncs,
-  const std::vector<core::identifier_string>& resulting_actions,
+  const process::communication_expression_list& comm_set,
   const core::identifier_string_list& blocks,
   const core::identifier_string_list& hiden,
   const lps::detail::allow_list_cache& allow_cache,
@@ -499,7 +472,7 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
 
   for (size_t i = 0; i < nr_of_threads; i++)
   {
-    state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow_cache, outgoing_transitions);
+    state_thread thread(lts, comm_set, blocks, hiden, allow_cache, outgoing_transitions);
     threads.emplace_back(
         [&]
         {

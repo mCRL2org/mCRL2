@@ -69,14 +69,20 @@ public:
       });
 
     // Ensure that the left-hand sides of the synchronisation rules are sorted.
-    std::for_each(syncs.begin(), syncs.end(), [&action_name_compare](core::identifier_string_list& multi_action_name)
-    {
-      multi_action_name = atermpp::sort_list(multi_action_name, action_name_compare);
-    });
+    comm_set = process::communication_expression_list(
+      comm_set.begin(),
+      comm_set.end(),
+      [&action_name_compare](const process::communication_expression& comm)
+      {
+        return process::communication_expression(
+          process::action_name_multiset(atermpp::sort_list(comm.action_name().names(), action_name_compare)),
+          comm.name());
+      });
+
     allow_cache = lps::detail::make_allow_list_cache(allow_set);
 
     // Generate and output resulting LTS
-    combine_lts(lts, syncs, resulting_actions, block_set, hide_set, allow_cache, output_filename(), save_at_end, nr_of_threads);
+    combine_lts(lts, comm_set, block_set, hide_set, allow_cache, output_filename(), save_at_end, nr_of_threads);
 
     return true;
   }
@@ -123,7 +129,7 @@ protected:
       // File doesn't exist, read directly from input.
       syncs_inputs = &stringstream;
     }
-    std::tie(syncs, resulting_actions) = parse_comm_set(*syncs_inputs);
+    comm_set = parse_comm_set(*syncs_inputs);
   }
 
   void parse_block(const utilities::command_line_parser& parser)
@@ -211,8 +217,7 @@ private:
   process::action_name_multiset_list allow_set;
   lps::detail::allow_list_cache allow_cache;
   core::identifier_string_list hide_set;
-  std::vector<core::identifier_string_list> syncs;
-  std::vector<core::identifier_string> resulting_actions;
+  process::communication_expression_list comm_set;
 
   bool save_at_end = false;
   std::size_t nr_of_threads = 0UL;
