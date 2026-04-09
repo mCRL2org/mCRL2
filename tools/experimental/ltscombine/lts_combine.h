@@ -14,6 +14,7 @@
 #define MCRL2_LTS_COMBINE_H_
 
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/lps/linearise_allow_block.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/process/detail/alphabet_parse.h"
 
@@ -43,19 +44,20 @@ inline std::pair<std::vector<core::identifier_string_list>, std::vector<core::id
 }
 
 inline
-std::vector<core::identifier_string_list> parse_multi_action_name_set(const std::string& text)
+process::action_name_multiset_list parse_multi_action_name_set(const std::string& text)
 {
-  std::vector<core::identifier_string_list> result;
   const std::vector<std::string> set_elements = utilities::regex_split(text, "\\s*,\\s*");
-  for (const std::string& word: set_elements)
-  {
-    result.emplace_back(process::detail::make_identifier_string_list(process::detail::split_bar(word)));
-  }
-  return result;
+  return process::action_name_multiset_list(
+    set_elements.begin(),
+    set_elements.end(),
+    [](const std::string& word)
+    {
+        return process::action_name_multiset(process::detail::make_identifier_string_list(process::detail::split_bar(word)));
+    });
 }
 
 inline
-std::vector<core::identifier_string_list> parse_multi_action_name_set(std::istream& input)
+process::action_name_multiset_list parse_multi_action_name_set(std::istream& input)
 {
   return parse_multi_action_name_set(utilities::read_text(input));
 }
@@ -74,15 +76,16 @@ core::identifier_string_list parse_action_name_set(std::istream& input)
 }
 
 /// \brief Combine two LTSs and apply the comm, block, allow and hide operators.
-void combine_lts(const std::vector<lts::lts_lts_t> & ltss,
-const std::vector<core::identifier_string_list> & syncs,
-const std::vector<core::identifier_string> & resulting_actions,
-const core::identifier_string_list & blocks,
-const core::identifier_string_list & hiden,
-const std::vector<core::identifier_string_list> & allow,
-const std::string& filename,
-bool save_at_end,
-std::size_t nr_of_threads = 1);
+void combine_lts(const std::vector<lts::lts_lts_t>& ltss,
+  const std::vector<core::identifier_string_list>& syncs,
+  const std::vector<core::identifier_string>& resulting_actions,
+  const core::identifier_string_list& blocks,
+  const core::identifier_string_list& hiden,
+  const process::action_name_multiset_list& allow,
+  const lps::detail::allow_list_cache& allow_cache,
+  const std::string& filename,
+  bool save_at_end,
+  std::size_t nr_of_threads = 1);
 } // namespace mcrl2
 
 #endif // MCRL2_LTS_COMBINE_H_

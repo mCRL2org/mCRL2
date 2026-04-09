@@ -92,34 +92,6 @@ bool is_blocked(const std::vector<core::identifier_string>& blocks, const proces
   return false;
 }
 
-/// \brief Checks if the given action list matches one of the allowed
-/// multi-actions. A match can only occur when the list of actions and allowed
-/// multi-action are equal. If the list is empty, all actions are allowed.
-///
-/// \param allowed The list of allowed multi-actions.
-/// \param actions The list of actions to be matched.
-/// \returns Whether the list of actions is matched by an allowed multi-action
-///          from the list of allowed multi-actions.
-bool is_allowed(const std::vector<core::identifier_string_list>& allowed, const core::identifier_string_list& action_names)
-{
-  // If the list is empty, all actions are allowed
-  // tau actions are always allowed
-  if (allowed.empty() || action_names.empty())
-  {
-    return true;
-  }
-
-  for (const atermpp::term_list<atermpp::aterm_string>& action: allowed)
-  {
-    if (action == action_names)
-    {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 /// \brief Checks whether the arguments of each of the actions of the
 ///        action_label are equal.
 ///
@@ -191,19 +163,21 @@ class state_thread
 {
 public:
   state_thread(const std::vector<lts::lts_lts_t>& lts,
-      const std::vector<core::identifier_string_list>& syncs,
-      const std::vector<core::identifier_string>& resulting_actions,
-      const core::identifier_string_list& blocks,
-      const core::identifier_string_list& hiden,
-      const std::vector<core::identifier_string_list>& allow,
-      const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
-      : lts(lts),
-        syncs(syncs),
-        resulting_actions(resulting_actions),
-        blocks(blocks),
-        hiden(hiden),
-        allow(allow),
-        outgoing_transitions(outgoing_transitions)
+    const std::vector<core::identifier_string_list>& syncs,
+    const std::vector<core::identifier_string>& resulting_actions,
+    const core::identifier_string_list& blocks,
+    const core::identifier_string_list& hiden,
+    const process::action_name_multiset_list& allow,
+    const lps::detail::allow_list_cache& allow_cache,
+    const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
+    : lts(lts),
+      syncs(syncs),
+      resulting_actions(resulting_actions),
+      blocks(blocks),
+      hiden(hiden),
+      allow(allow),
+      allow_cache(allow_cache),
+      outgoing_transitions(outgoing_transitions)
   {}
 
   void operator()(lts::lts_builder* lts_builder,
@@ -259,7 +233,8 @@ private:
   const std::vector<core::identifier_string>& resulting_actions;
   const core::identifier_string_list& blocks;
   const core::identifier_string_list& hiden;
-  const std::vector<core::identifier_string_list>& allow;
+  const process::action_name_multiset_list& allow;
+  const lps::detail::allow_list_cache& allow_cache;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
 
   /// \returns True iff at least one state was computed.
@@ -391,8 +366,7 @@ private:
             lps::multi_action(process::action(process::action_label(result_action, sorts), arguments)));
 
         // Check if new transition is blocked or not allowed
-        const core::identifier_string_list new_action_names = get_action_names(new_label.actions());
-        if (lps::encap(blocks, new_label.actions()) || !is_allowed(allow, new_action_names))
+        if (lps::encap(blocks, new_label.actions()) || !lps::allow_(allow_cache, new_label.actions(), process::action()))
         {
           mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
           continue;
@@ -427,7 +401,7 @@ private:
         mCRL2log(log::debug) << "Multi action" << std::endl;
 
         // Check if the transition is blocked or not allowed
-        if (lps::encap(blocks, combo.first.actions()) || !is_allowed(allow, action_names))
+        if (lps::encap(blocks, combo.first.actions()) || !lps::allow_(allow_cache, combo.first.actions(), process::action()))
         {
           mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
           continue;
@@ -461,14 +435,15 @@ private:
 };
 
 void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
-    const std::vector<core::identifier_string_list>& syncs,
-    const std::vector<core::identifier_string>& resulting_actions,
-    const core::identifier_string_list& blocks,
-    const core::identifier_string_list& hiden,
-    const std::vector<core::identifier_string_list>& allow,
-    const std::string& filename,
-    const bool save_at_end,
-    const std::size_t nr_of_threads)
+  const std::vector<core::identifier_string_list>& syncs,
+  const std::vector<core::identifier_string>& resulting_actions,
+  const core::identifier_string_list& blocks,
+  const core::identifier_string_list& hiden,
+  const process::action_name_multiset_list& allow,
+  const lps::detail::allow_list_cache& allow_cache,
+  const std::string& filename,
+  const bool save_at_end,
+  const std::size_t nr_of_threads)
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
@@ -528,7 +503,7 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
 
   for (size_t i = 0; i < nr_of_threads; i++)
   {
-    state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow, outgoing_transitions);
+    state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow, allow_cache, outgoing_transitions);
     threads.emplace_back(
         [&]
         {

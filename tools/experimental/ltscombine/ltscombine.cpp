@@ -60,18 +60,23 @@ public:
 
     hiden = atermpp::sort_list(hiden, action_name_compare);
     // Ensure that each of the multi actions names in the allow set is sorted.
-    std::for_each(allow.begin(), allow.end(), [action_name_compare](core::identifier_string_list& multi_action_name)
-    {
-      multi_action_name = atermpp::sort_list(multi_action_name, action_name_compare);
-    });
+    allow = process::action_name_multiset_list(
+      allow.begin(),
+      allow.end(),
+      [&action_name_compare](const process::action_name_multiset& multi_action_name)
+      {
+        return process::action_name_multiset(atermpp::sort_list(multi_action_name.names(), action_name_compare));
+      });
+
     // Ensure that the left-hand sides of the synchronisation rules are sorted.
-    std::for_each(syncs.begin(), syncs.end(), [action_name_compare](core::identifier_string_list& multi_action_name)
+    std::for_each(syncs.begin(), syncs.end(), [&action_name_compare](core::identifier_string_list& multi_action_name)
     {
       multi_action_name = atermpp::sort_list(multi_action_name, action_name_compare);
     });
+    allow_cache = lps::detail::make_allow_list_cache(allow);
 
     // Generate and output resulting LTS
-    combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, output_filename(), save_at_end, nr_of_threads);
+    combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, allow_cache, output_filename(), save_at_end, nr_of_threads);
 
     return true;
   }
@@ -223,7 +228,8 @@ private:
 
   core::identifier_string_list blocks;
   std::unordered_set<core::identifier_string_list> allow_set;
-  std::vector<core::identifier_string_list> allow;
+  process::action_name_multiset_list allow;
+  lps::detail::allow_list_cache allow_cache;
   core::identifier_string_list hiden;
   std::vector<core::identifier_string_list> syncs;
   std::vector<core::identifier_string> resulting_actions;
