@@ -24,31 +24,15 @@
 namespace mcrl2
 {
 
-inline
-process::communication_expression_list parse_comm_set(const std::string& text)
-{
-  const std::vector<std::string> set_elements = utilities::regex_split(text, "\\s*,\\s*");
-  return process::communication_expression_list(
-    set_elements.begin(),
-    set_elements.end(),
-    [](const std::string& word)
-    {
-      const auto [lhs, rhs] = process::detail::split_arrow(word);
-      return process::communication_expression(
-        process::action_name_multiset(process::detail::make_identifier_string_list(process::detail::split_bar(lhs))),
-        core::identifier_string(rhs));
-    });
-}
-
 inline process::communication_expression_list parse_comm_set(std::istream& input)
 {
-  return parse_comm_set(utilities::read_text(input));
+  return process::detail::parse_comm_set(utilities::read_text(input));
 }
 
 inline
 process::action_name_multiset_list parse_multi_action_name_set(const std::string& text)
 {
-  const std::vector<std::string> set_elements = utilities::regex_split(text, "\\s*,\\s*");
+  const std::vector<std::string> set_elements = process::detail::set_elements(text);
   return process::action_name_multiset_list(
     set_elements.begin(),
     set_elements.end(),
@@ -67,8 +51,7 @@ process::action_name_multiset_list parse_multi_action_name_set(std::istream& inp
 inline
 core::identifier_string_list parse_action_name_set(const std::string& text)
 {
-  const std::vector<std::string> set_elements = utilities::regex_split(text, "\\s*,\\s*");
-  return core::identifier_string_list(set_elements.begin(), set_elements.end());
+  return process::detail::make_identifier_string_list(process::detail::set_elements(text));
 }
 
 inline
