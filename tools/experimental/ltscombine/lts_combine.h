@@ -49,15 +49,14 @@ process::action_name_multiset_list parse_multi_action_name_set(std::istream& inp
 }
 
 inline
-core::identifier_string_list parse_action_name_set(const std::string& text)
+core::identifier_string_list parse_block_set(std::istream& input)
 {
-  return process::detail::make_identifier_string_list(process::detail::set_elements(text));
+  return process::detail::parse_block_set(utilities::read_text(input));
 }
 
-inline
-core::identifier_string_list parse_action_name_set(std::istream& input)
+inline core::identifier_string_list parse_hide_set(std::istream& input)
 {
-  return parse_action_name_set(utilities::read_text(input));
+  return process::detail::parse_hide_set(utilities::read_text(input));
 }
 
 /// \brief Combine two LTSs and apply the comm, block, allow and hide operators.
