@@ -149,7 +149,7 @@ protected:
       mCRL2log(log::debug) << "Reading blocked actions from file " << filename << std::endl;
     }
 
-    block_set = parse_action_name_set(*block_input);
+    block_set = parse_block_set(*block_input);
   }
 
   void parse_allow(const utilities::command_line_parser& parser)
@@ -181,7 +181,7 @@ protected:
       hide_input = &stringstream;
     }
 
-    hide_set = parse_action_name_set(*hide_input);
+    hide_set = parse_hide_set(*hide_input);
   }
 
   void parse_options(const utilities::command_line_parser& parser) override
