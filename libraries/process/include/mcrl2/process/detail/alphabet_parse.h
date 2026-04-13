@@ -189,6 +189,11 @@ core::identifier_string_list parse_block_set(const std::string& text)
   return make_identifier_string_list(set_elements(text));
 }
 
+inline core::identifier_string_list parse_hide_set(const std::string& text)
+{
+  return make_identifier_string_list(set_elements(text));
+}
+
 inline
 communication_expression_list parse_comm_set(const std::string& text)
 {
