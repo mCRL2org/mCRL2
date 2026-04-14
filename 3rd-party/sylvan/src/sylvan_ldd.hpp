@@ -572,12 +572,14 @@ ldd fix_first_element(const ldd& X, std::uint32_t value)
 }
 
 // Initialise caches for custom LDD operations.
+inline
 void initialise() {
   cache_merge_id = cache_next_opid();
 }
 
 /// Returns the height of the LDD assuming that all branches are the same
 /// height, which is an invariant of LDDs.
+inline
 std::uint32_t height(ldd a) {
   assert(a != empty_set());
   if (a == empty_list())
@@ -593,6 +595,7 @@ std::uint32_t height(ldd a) {
 /// Requires that a and b are the same height.
 ///
 /// merge(A, B) = { a_0b_0a_1b_1... | a in A, b in B }
+inline
 ldd merge(ldd a, ldd b) {
   if (a == ldds::empty_list()) {
     return b;
