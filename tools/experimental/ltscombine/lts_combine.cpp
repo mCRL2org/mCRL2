@@ -324,16 +324,16 @@ private:
 
 
     // Finished generating all new transitions, add them to the LTS
-    for (auto& combo : new_outgoing_transitions)
+    for (auto& [label, target_state] : new_outgoing_transitions)
     {
-      mCRL2log(log::debug) << lps::pp(combo.first) << std::endl;
+      mCRL2log(log::debug) << lps::pp(label) << std::endl;
 
       process::communication_expression comm_expr;
-      const core::identifier_string_list action_names = get_action_names(combo.first.actions());
+      const core::identifier_string_list action_names = get_action_names(label.actions());
 
       mCRL2log(log::debug) << core::pp(action_names) << std::endl;
 
-      if (equal_arguments(combo.first) && (comm_expr = get_sync(input.comm_set, action_names)) != process::communication_expression())
+      if (equal_arguments(label) && (comm_expr = get_sync(input.comm_set, action_names)) != process::communication_expression())
       {
         // Synchronise
         const core::identifier_string& result_action = comm_expr.name();
@@ -341,34 +341,34 @@ private:
 
         data::data_expression_list arguments;
         data::sort_expression_list sorts;
-        if (!combo.first.actions().empty())
+        if (!label.actions().empty())
         {
           // Only use arguments and sorts if the action is not a tau action
-          arguments = combo.first.actions().front().arguments();
-          sorts = combo.first.actions().front().label().sorts();
+          arguments = label.actions().front().arguments();
+          sorts = label.actions().front().label().sorts();
         }
 
         // Create new label from the synchronisation
-        lts::action_label_lts new_label(
-            lps::multi_action(process::action(process::action_label(result_action, sorts), arguments)));
+
+        label = lps::multi_action(process::action(process::action_label(result_action, sorts), arguments));
 
         // Check if new transition is blocked or not allowed
-        if (lps::encap(input.blocks, new_label.actions()) || !lps::allow_(input.allow_cache, new_label.actions(), process::action()))
+        if (lps::encap(input.blocks, label.actions()) || !lps::allow_(input.allow_cache,  label.actions(), process::action()))
         {
-          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
+          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(label) << std::endl;
           continue;
         }
 
         // Hide actions in transition label
-        lps::hide_(input.hiden, new_label);
+        lps::hide_(input.hiden, label);
 
-        auto [new_state, inserted] = insert_state(combo.second);
+        auto [new_state, inserted] = insert_state(target_state);
         if (inserted)
         {
           queue_state(new_state);
         }
         examine_transition();
-        add_transition(state_index, new_label, new_state);
+        add_transition(state_index, label, new_state);
       }
       else
       {
@@ -376,22 +376,22 @@ private:
         mCRL2log(log::debug) << "Multi action" << std::endl;
 
         // Check if the transition is blocked or not allowed
-        if (lps::encap(input.blocks, combo.first.actions()) || !lps::allow_(input.allow_cache, combo.first.actions(), process::action()))
+        if (lps::encap(input.blocks, label.actions()) || !lps::allow_(input.allow_cache, label.actions(), process::action()))
         {
-          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
+          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(label) << std::endl;
           continue;
         }
 
         // Hide actions in transition label
-        lps::hide_(input.hiden, combo.first);
+        lps::hide_(input.hiden, label);
 
-        auto [new_state, inserted] = insert_state(combo.second);
+        auto [new_state, inserted] = insert_state(target_state);
         if (inserted)
         {
           queue_state(new_state);
         }
         examine_transition();
-        add_transition(state_index, combo.first, new_state);
+        add_transition(state_index, label, new_state);
       }
     }
   }
