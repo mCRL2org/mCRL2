@@ -136,6 +136,21 @@ public:
   }
 };
 
+struct thread_context_t
+{
+  lts::lts_builder* lts_builder;
+  std::queue<std::size_t>& queue;
+  lts::detail::progress_monitor& progress_monitor;
+  mcrl2::utilities::indexed_set<std::vector<state_t>>& states;
+  std::size_t number_of_threads;
+  std::mutex& lts_builder_mutex;
+  std::mutex& queue_mutex;
+  std::mutex& progress_mutex;
+  std::mutex& states_mutex;
+  std::condition_variable& queue_cond;
+  std::size_t& busy;
+};
+
 /// \brief A thread that computes the states of the LTS.
 class state_thread
 {
@@ -146,30 +161,20 @@ public:
       outgoing_transitions(outgoing_transitions)
   {}
 
-  void operator()(lts::lts_builder* lts_builder,
-      std::queue<std::size_t>& queue,
-      lts::detail::progress_monitor& progress_monitor,
-      mcrl2::utilities::indexed_set<std::vector<state_t>>& states,
-      std::size_t number_of_threads,
-      std::mutex& lts_builder_mutex,
-      std::mutex& queue_mutex,
-      std::mutex& progress_mutex,
-      std::mutex& states_mutex,
-      std::condition_variable& queue_cond,
-      std::size_t& busy)
+  void operator()(thread_context_t& context)
   {
     while (true)
     {
-      std::unique_lock<std::mutex> queue_lock(queue_mutex);
+      std::unique_lock<std::mutex> queue_lock(context.queue_mutex);
 
       // Wait if queue is empty but threads are still working
-      while (queue.empty())
+      while (context.queue.empty())
       {
-        busy--;
-        if (busy > 0)
+        context.busy--;
+        if (context.busy > 0)
         {
           // Some threads are still busy, wait for them to add work
-          queue_cond.wait(queue_lock);
+          context.queue_cond.wait(queue_lock);
         }
         else
         {
@@ -178,18 +183,10 @@ public:
         }
       }
 
-      busy++;
+      context.busy++;
 
       // Process the state
-      compute_state(lts_builder,
-              queue,
-              progress_monitor,
-              states,
-              number_of_threads,
-              lts_builder_mutex,
-              queue_lock,
-              progress_mutex,
-              states_mutex);
+      compute_state(context, queue_lock);
     }
   }
 
@@ -198,24 +195,17 @@ private:
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
 
   /// \returns True iff at least one state was computed.
-  void compute_state(lts::lts_builder* lts_builder,
-      std::queue<std::size_t>& queue,
-      lts::detail::progress_monitor& progress_monitor,
-      mcrl2::utilities::indexed_set<std::vector<state_t>>& states,
-      const std::size_t& number_of_threads,
-      std::mutex& lts_builder_mutex,
-      std::unique_lock<std::mutex>& queue_lock,
-      std::mutex& progress_mutex,
-      std::mutex& states_mutex)
+  void compute_state(thread_context_t& context,
+      std::unique_lock<std::mutex>& queue_lock)
   {
     // Take the next pair from the queue.
-    std::size_t state_index = queue.front();
+    std::size_t state_index = context.queue.front();
 
-    std::unique_lock state_lock(states_mutex);
-    std::vector<state_t> state = states[state_index];
+    std::unique_lock state_lock(context.states_mutex);
+    std::vector<state_t> state = context.states[state_index];
     state_lock.unlock();
 
-    queue.pop();
+    context.queue.pop();
     queue_lock.unlock();
 
     // List of new outgoing transitions from this state, combined from the states
@@ -335,25 +325,25 @@ private:
         // Hide actions in transition label
         lps::hide_(input.hiden, new_label);
 
-        std::unique_lock state_lock(states_mutex);
+        std::unique_lock state_lock(context.states_mutex);
         // Add new state
-        const auto [new_state, inserted] = states.insert(combo.second);
+        const auto [new_state, inserted] = context.states.insert(combo.second);
         state_lock.unlock();
 
         if (inserted)
         {
           queue_lock.lock();
-          queue.push(new_state);
+          context.queue.push(new_state);
           queue_lock.unlock();
         }
 
         // Add the transition with the remaining actions
-        std::unique_lock progress_lock(progress_mutex);
-        progress_monitor.examine_transition();
+        std::unique_lock progress_lock(context.progress_mutex);
+        context.progress_monitor.examine_transition();
         progress_lock.unlock();
 
-        std::unique_lock builder_lock(lts_builder_mutex);
-        lts_builder->add_transition(state_index, new_label, new_state, number_of_threads);
+        std::unique_lock builder_lock(context.lts_builder_mutex);
+        context.lts_builder->add_transition(state_index, new_label, new_state, context.number_of_threads);
       }
       else
       {
@@ -371,24 +361,24 @@ private:
         lps::hide_(input.hiden, combo.first);
 
         // Add new state
-        states_mutex.lock();
-        const auto [new_state, inserted] = states.insert(combo.second);
-        states_mutex.unlock();
+        context.states_mutex.lock();
+        const auto [new_state, inserted] = context.states.insert(combo.second);
+        context.states_mutex.unlock();
         if (inserted)
         {
           queue_lock.lock();
-          queue.push(new_state);
+          context.queue.push(new_state);
           queue_lock.unlock();
         }
 
         // Add the transition with the remaining actions
-        progress_mutex.lock();
-        progress_monitor.examine_transition();
-        progress_mutex.unlock();
+        context.progress_mutex.lock();
+        context.progress_monitor.examine_transition();
+        context.progress_mutex.unlock();
 
-        lts_builder_mutex.lock();
-        lts_builder->add_transition(state_index, combo.first, new_state, number_of_threads);
-        lts_builder_mutex.unlock();
+        context.lts_builder_mutex.lock();
+        context.lts_builder->add_transition(state_index, combo.first, new_state, context.number_of_threads);
+        context.lts_builder_mutex.unlock();
       }
     }
   }
@@ -450,26 +440,29 @@ void mcrl2::combine_lts(const combine_lts_input& input)
   std::condition_variable queue_cond;
   std::size_t busy = input.nr_of_threads;
 
+  thread_context_t context{
+      lts_builder,
+      queue,
+      progress_monitor,
+      states,
+      input.nr_of_threads,
+      builder_mutex,
+      queue_mutex,
+      progress_mutex,
+      states_mutex,
+      queue_cond,
+      busy};
+
   std::vector<std::thread> threads;
+
+  state_thread thread(input, outgoing_transitions);
 
   for (size_t i = 0; i < input.nr_of_threads; i++)
   {
-    state_thread thread(input, outgoing_transitions);
-    threads.emplace_back(
-        [&]
-        {
-          thread(lts_builder,
-            queue,
-            progress_monitor,
-            states,
-            input.nr_of_threads,
-            builder_mutex,
-            queue_mutex,
-            progress_mutex,
-            states_mutex,
-            queue_cond,
-            busy);
-        });
+    threads.emplace_back([&thread, &context]()
+    {
+      thread(context);
+    });
   }
 
   for (size_t i = 0; i < input.nr_of_threads; i++)
