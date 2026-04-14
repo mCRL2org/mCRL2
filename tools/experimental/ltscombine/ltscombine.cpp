@@ -82,7 +82,8 @@ public:
     allow_cache = lps::detail::make_allow_list_cache(allow_set);
 
     // Generate and output resulting LTS
-    combine_lts(lts, comm_set, block_set, hide_set, allow_cache, output_filename(), save_at_end, nr_of_threads);
+    combine_lts_input input{lts, comm_set, block_set, hide_set, allow_cache, output_filename(), save_at_end, nr_of_threads};
+    combine_lts(input);
 
     return true;
   }
