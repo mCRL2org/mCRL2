@@ -234,15 +234,10 @@ private:
     context.lts_builder->add_transition(from_state, label, to_state, context.number_of_threads);
   }
 
-  /// \returns True iff at least one state was computed.
-  void compute_state(std::size_t state_index)
+  /// \brief Compute the outgoing transitions for the combined state and write them to output.
+  void compute_outgoing_transitions(const std::vector<state_t>& state,
+    std::vector<std::pair<lps::multi_action, std::vector<state_t>>>& output)
   {
-    std::vector<state_t> state = get_state(state_index);
-
-    // List of new outgoing transitions from this state, combined from the states
-    // state[0] to state[i]
-    std::vector<std::pair<lps::multi_action, std::vector<state_t>>> combos;
-
     // Loop over the old states contained in the new state
     for (size_t i = 0; i < state.size(); ++i)
     {
@@ -254,7 +249,7 @@ private:
 
       // Loop over the outgoing transitions from the old state
       for (state_t t = outgoing_transitions[i].lowerbound(old_state); t < outgoing_transitions[i].upperbound(old_state);
-           ++t)
+        ++t)
       {
         const lts::outgoing_pair_t& transition = outgoing_transitions[i].get_transitions()[t];
         const lts::action_label_lts& label = input.ltss[i].action_label(lts::label(transition));
@@ -271,7 +266,7 @@ private:
         new_combos.emplace_back(label, old_states);
 
         // Add transition t to the existing multi-action from each combo
-        for (auto& combo : combos)
+        for (auto& combo: output)
         {
           // The new state of the combo already contains this state
           if (combo.second.size() >= i + 1)
@@ -281,7 +276,7 @@ private:
 
           // Copy states from combo to new state list
           std::vector<state_t> new_states;
-          for (state_t s : combo.second)
+          for (state_t s: combo.second)
           {
             new_states.push_back(s);
           }
@@ -298,7 +293,7 @@ private:
 
       // For each existing multi-action, add the old state of state i
       // to simulate no transition being taken
-      for (auto& combo : combos)
+      for (auto& combo: output)
       {
         // The new state of the combo already contains this state
         if (combo.second.size() >= i + 1)
@@ -311,14 +306,25 @@ private:
       }
 
       // Finished state i
-      for (auto& combo : new_combos)
+      for (auto& combo: new_combos)
       {
-        combos.push_back(combo);
+        output.push_back(combo);
       }
     }
+  }
+
+  /// \returns True iff at least one state was computed.
+  void compute_state(std::size_t state_index)
+  {
+    std::vector<state_t> state = get_state(state_index);
+    // List of new outgoing transitions from this state, combined from the states
+    // state[0] to state[i]
+    std::vector<std::pair<lps::multi_action, std::vector<state_t>>> new_outgoing_transitions;
+    compute_outgoing_transitions(state, new_outgoing_transitions);
+
 
     // Finished generating all new transitions, add them to the LTS
-    for (auto& combo : combos)
+    for (auto& combo : new_outgoing_transitions)
     {
       mCRL2log(log::debug) << lps::pp(combo.first) << std::endl;
 
