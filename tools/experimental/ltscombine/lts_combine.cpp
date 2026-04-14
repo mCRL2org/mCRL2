@@ -45,6 +45,7 @@ core::identifier_string_list get_action_names(const process::action_list& action
 /// \param syncs The list of synchronisations
 /// \param actions The list of actions to be matched.
 /// \returns The index of the matching synchronisation, or max value when no matching synchronisation is found.
+inline
 process::communication_expression get_sync(const process::communication_expression_list& comm_set, const core::identifier_string_list& action_names)
 {
   // A synchronising action must consist of two or more action labels
@@ -139,17 +140,9 @@ public:
 class state_thread
 {
 public:
-  state_thread(const std::vector<lts::lts_lts_t>& lts,
-    const process::communication_expression_list& comm_set,
-    const core::identifier_string_list& blocks,
-    const core::identifier_string_list& hiden,
-    const lps::detail::allow_list_cache& allow_cache,
+  state_thread(const combine_lts_input& input,
     const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
-    : lts(lts),
-      comm_set(comm_set),
-      blocks(blocks),
-      hiden(hiden),
-      allow_cache(allow_cache),
+    : input(input),
       outgoing_transitions(outgoing_transitions)
   {}
 
@@ -201,11 +194,7 @@ public:
   }
 
 private:
-  const std::vector<lts::lts_lts_t>& lts;
-  const process::communication_expression_list& comm_set;
-  const core::identifier_string_list& blocks;
-  const core::identifier_string_list& hiden;
-  const lps::detail::allow_list_cache& allow_cache;
+  const combine_lts_input& input;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
 
   /// \returns True iff at least one state was computed.
@@ -247,7 +236,7 @@ private:
            ++t)
       {
         const lts::outgoing_pair_t& transition = outgoing_transitions[i].get_transitions()[t];
-        const lts::action_label_lts& label = lts[i].action_label(lts::label(transition));
+        const lts::action_label_lts& label = input.ltss[i].action_label(lts::label(transition));
 
         // Add transition t, from state to [state[0], ..., state[i-1], to(state[i])]
         std::vector<state_t> old_states;
@@ -317,7 +306,7 @@ private:
 
       mCRL2log(log::debug) << core::pp(action_names) << std::endl;
 
-      if (equal_arguments(combo.first) && (comm_expr = get_sync(comm_set, action_names)) != process::communication_expression())
+      if (equal_arguments(combo.first) && (comm_expr = get_sync(input.comm_set, action_names)) != process::communication_expression())
       {
         // Synchronise
         const core::identifier_string& result_action = comm_expr.name();
@@ -337,14 +326,14 @@ private:
             lps::multi_action(process::action(process::action_label(result_action, sorts), arguments)));
 
         // Check if new transition is blocked or not allowed
-        if (lps::encap(blocks, new_label.actions()) || !lps::allow_(allow_cache, new_label.actions(), process::action()))
+        if (lps::encap(input.blocks, new_label.actions()) || !lps::allow_(input.allow_cache, new_label.actions(), process::action()))
         {
           mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
           continue;
         }
 
         // Hide actions in transition label
-        lps::hide_(hiden, new_label);
+        lps::hide_(input.hiden, new_label);
 
         std::unique_lock state_lock(states_mutex);
         // Add new state
@@ -372,14 +361,14 @@ private:
         mCRL2log(log::debug) << "Multi action" << std::endl;
 
         // Check if the transition is blocked or not allowed
-        if (lps::encap(blocks, combo.first.actions()) || !lps::allow_(allow_cache, combo.first.actions(), process::action()))
+        if (lps::encap(input.blocks, combo.first.actions()) || !lps::allow_(input.allow_cache, combo.first.actions(), process::action()))
         {
           mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
           continue;
         }
 
         // Hide actions in transition label
-        lps::hide_(hiden, combo.first);
+        lps::hide_(input.hiden, combo.first);
 
         // Add new state
         states_mutex.lock();
@@ -405,20 +394,13 @@ private:
   }
 };
 
-void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
-  const process::communication_expression_list& comm_set,
-  const core::identifier_string_list& blocks,
-  const core::identifier_string_list& hiden,
-  const lps::detail::allow_list_cache& allow_cache,
-  const std::string& filename,
-  const bool save_at_end,
-  const std::size_t nr_of_threads)
+void mcrl2::combine_lts(const combine_lts_input& input)
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
-  for (const lts::lts_lts_t& input : lts)
+  for (const lts::lts_lts_t& lts_input: input.ltss)
   {
-    outgoing_transitions.emplace_back(input.get_transitions(), input.num_states(), true);
+    outgoing_transitions.emplace_back(lts_input.get_transitions(), lts_input.num_states(), true);
   }
 
   // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).
@@ -427,7 +409,7 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
   process::action_label_list action_decls;
   data::data_specification data_spec;
   data::variable_list proc_params;
-  for (auto& lts : lts)
+  for (const auto& lts: input.ltss)
   {
     initial_states.push_back(lts.initial_state());
     action_decls = process::merge_action_specifications(action_decls, lts.action_label_declarations());
@@ -445,7 +427,7 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
 
   combined_lts_builder* combined_lts_builder;
   lts::lts_builder* lts_builder;
-  if (save_at_end)
+  if (input.save_at_end)
   {
     combined_lts_lts_builder* lts_lts_builder = new combined_lts_lts_builder(data_spec, action_decls, proc_params);
     lts_builder = lts_lts_builder;
@@ -454,7 +436,7 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
   else
   {
     combined_lts_disk_builder* lts_disk_builder
-        = new combined_lts_disk_builder(filename, data_spec, action_decls, proc_params);
+        = new combined_lts_disk_builder(input.filename, data_spec, action_decls, proc_params);
     lts_builder = lts_disk_builder;
     combined_lts_builder = lts_disk_builder;
   }
@@ -466,13 +448,13 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
 
   // Used to signal busy and empty queue.
   std::condition_variable queue_cond;
-  std::size_t busy = nr_of_threads;
+  std::size_t busy = input.nr_of_threads;
 
   std::vector<std::thread> threads;
 
-  for (size_t i = 0; i < nr_of_threads; i++)
+  for (size_t i = 0; i < input.nr_of_threads; i++)
   {
-    state_thread thread(lts, comm_set, blocks, hiden, allow_cache, outgoing_transitions);
+    state_thread thread(input, outgoing_transitions);
     threads.emplace_back(
         [&]
         {
@@ -480,7 +462,7 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
             queue,
             progress_monitor,
             states,
-            nr_of_threads,
+            input.nr_of_threads,
             builder_mutex,
             queue_mutex,
             progress_mutex,
@@ -490,15 +472,15 @@ void mcrl2::combine_lts(const std::vector<lts::lts_lts_t>& lts,
         });
   }
 
-  for (size_t i = 0; i < nr_of_threads; i++)
+  for (size_t i = 0; i < input.nr_of_threads; i++)
   {
     threads[i].join();
   }
 
-  progress_monitor.finish_exploration(states.size(), nr_of_threads);
+  progress_monitor.finish_exploration(states.size(), input.nr_of_threads);
 
   // Write the initial state and the state labels.
   combined_lts_builder->finalize_combined(states.size());
-  lts_builder->save(filename);
+  lts_builder->save(input.filename);
   delete lts_builder;
 }

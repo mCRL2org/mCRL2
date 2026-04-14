@@ -59,15 +59,20 @@ inline core::identifier_string_list parse_hide_set(std::istream& input)
   return process::detail::parse_hide_set(utilities::read_text(input));
 }
 
+struct combine_lts_input
+{
+  const std::vector<lts::lts_lts_t>& ltss;
+  const process::communication_expression_list& comm_set;
+  const core::identifier_string_list& blocks;
+  const core::identifier_string_list& hiden;
+  const lps::detail::allow_list_cache& allow_cache;
+  const std::string& filename;
+  bool save_at_end;
+  std::size_t nr_of_threads = 1;
+};
+
 /// \brief Combine two LTSs and apply the comm, block, allow and hide operators.
-void combine_lts(const std::vector<lts::lts_lts_t>& ltss,
-  const process::communication_expression_list& comm_set,
-  const core::identifier_string_list& blocks,
-  const core::identifier_string_list& hiden,
-  const lps::detail::allow_list_cache& allow_cache,
-  const std::string& filename,
-  bool save_at_end,
-  std::size_t nr_of_threads = 1);
+void combine_lts(const combine_lts_input& input);
 } // namespace mcrl2
 
 #endif // MCRL2_LTS_COMBINE_H_
