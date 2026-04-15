@@ -365,7 +365,7 @@ private:
   /// \returns True iff at least one state was computed.
   void visit_state(std::size_t state_index)
   {
-    std::vector<state_t> state = get_state(state_index);
+    const std::vector<state_t> state = get_state(state_index);
     // List of new outgoing transitions from this state, combined from the states
     // state[0] to state[i]
     std::vector<std::pair<lps::multi_action, std::vector<state_t>>> new_outgoing_transitions;
@@ -380,17 +380,20 @@ private:
       label = apply_communication(label);
 
       // Check if new transition is blocked or not allowed
-      if (lps::encap(input.blocks, label.actions()) || !lps::allow_(input.allow_cache,  label.actions(), process::action()))
+      if (!lps::encap(input.blocks, label.actions()) && lps::allow_(input.allow_cache,  label.actions(), process::action()))
       {
-        mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(label) << std::endl;
-        continue;
+        mCRL2log(log::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
+
+        // Hide actions in transition label
+        lps::hide_(input.hiden, label);
+
+        const std::size_t new_state = report_state(target_state);
+        report_transition(state_index, label, new_state);
       }
-
-      // Hide actions in transition label
-      lps::hide_(input.hiden, label);
-
-      const std::size_t new_state = report_state(target_state);
-      report_transition(state_index, label, new_state);
+      else
+      {
+        mCRL2log(log::trace) << "Multi-action is blocked or not allowed: " << lps::pp(label) << std::endl;
+      }
     }
   }
 };
