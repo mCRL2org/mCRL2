@@ -365,40 +365,21 @@ private:
         }
 
         // Create new label from the synchronisation
-
         label = lps::multi_action(process::action(process::action_label(result_action, sorts), arguments));
-
-        // Check if new transition is blocked or not allowed
-        if (lps::encap(input.blocks, label.actions()) || !lps::allow_(input.allow_cache,  label.actions(), process::action()))
-        {
-          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(label) << std::endl;
-          continue;
-        }
-
-        // Hide actions in transition label
-        lps::hide_(input.hiden, label);
-
-        const std::size_t new_state = report_state(target_state);
-        report_transition(state_index, label, new_state);
       }
-      else
+
+      // Check if new transition is blocked or not allowed
+      if (lps::encap(input.blocks, label.actions()) || !lps::allow_(input.allow_cache,  label.actions(), process::action()))
       {
-        // Normal multi-action
-        mCRL2log(log::debug) << "Multi action" << std::endl;
-
-        // Check if the transition is blocked or not allowed
-        if (lps::encap(input.blocks, label.actions()) || !lps::allow_(input.allow_cache, label.actions(), process::action()))
-        {
-          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(label) << std::endl;
-          continue;
-        }
-
-        // Hide actions in transition label
-        lps::hide_(input.hiden, label);
-
-        const std::size_t new_state = report_state(target_state);
-        report_transition(state_index, label, new_state);
+        mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(label) << std::endl;
+        continue;
       }
+
+      // Hide actions in transition label
+      lps::hide_(input.hiden, label);
+
+      const std::size_t new_state = report_state(target_state);
+      report_transition(state_index, label, new_state);
     }
   }
 };
