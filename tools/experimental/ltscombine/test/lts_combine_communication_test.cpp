@@ -140,11 +140,5 @@ BOOST_AUTO_TEST_CASE(test_three_way_rule)
 
 BOOST_AUTO_TEST_CASE(test_tau_result_rule_is_rejected)
 {
-  const auto act_decls = declarations_no_data();
-  const data::data_specification data_spec;
-
-  const lps::multi_action input = parse_label("a|b", act_decls, data_spec);
-  const process::communication_expression_list comm_set = process::detail::parse_comm_set("{ a|b -> tau }");
-
-  BOOST_CHECK_THROW(mcrl2::apply_communication(input, comm_set), mcrl2::runtime_error);
+  BOOST_CHECK_THROW(process::detail::parse_comm_set("{ a|b -> tau }"), mcrl2::runtime_error);
 }
