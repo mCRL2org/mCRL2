@@ -482,19 +482,23 @@ class pbessolve_tool
       throw mcrl2::runtime_error("Invalid strategy " +
                                  std::to_string(static_cast<int>(options.optimization)));
     }
+    if (options.prune_todo_list && options.number_of_threads > 1)
+    {
+      throw mcrl2::runtime_error("Option --prune-todo-list cannot be used with multiple threads.\n");
+    }
     if (options.prune_todo_list && options.optimization < partial_solve_strategy::propagate_solved_equations_using_substitution)
     {
-      mCRL2log(log::warning) << "Option --prune-todo-list has no effect for "
-                                "strategies less than 2."
+      mCRL2log(log::warning) << "Option --prune-todo-list has no effect for " 
+                             << "strategies less than 2."
                              << std::endl;
     }
     if (options.optimization == partial_solve_strategy::detect_winning_loops_original && has_counter_example)
     {
-      throw mcrl2::runtime_error("optimisation 8 cannot be used with a PBES that has counter example information");
+      throw mcrl2::runtime_error("Optimisation detect_winning_loops_original cannot be used with a PBES that has counter example information.");
     }
     if (options.optimization == partial_solve_strategy::detect_winning_loops_original && options.number_of_threads > 1)
     {
-      throw mcrl2::runtime_error("optimisation 8 does not work correctly with multiple threads, using 1 thread instead.");
+      throw mcrl2::runtime_error("Optimisation detect_winning_loops_original (8) does not work correctly with multiple threads.");
     }
 
     mCRL2log(log::log_level_t::verbose) << "Using optimisation " << options.optimization << "\n";
