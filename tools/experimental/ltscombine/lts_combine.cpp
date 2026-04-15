@@ -90,6 +90,40 @@ bool equal_arguments(const lps::multi_action& multi_action)
       });
 }
 
+lps::multi_action mcrl2::apply_communication(const lps::multi_action& label,
+                                             const process::communication_expression_list& comm_set)
+{
+  process::communication_expression comm_expr;
+  const core::identifier_string_list action_names = get_action_names(label.actions());
+
+  mCRL2log(log::debug) << core::pp(action_names) << std::endl;
+
+  if (equal_arguments(label)
+      && (comm_expr = get_sync(comm_set, action_names)) != process::communication_expression())
+  {
+    // Synchronise
+    const core::identifier_string& result_action = comm_expr.name();
+    mCRL2log(log::debug) << "Sync: " << result_action << std::endl;
+
+    data::data_expression_list arguments;
+    data::sort_expression_list sorts;
+    if (!label.actions().empty())
+    {
+      // Only use arguments and sorts if the action is not a tau action
+      arguments = label.actions().front().arguments();
+      sorts = label.actions().front().label().sorts();
+    }
+
+    // Create new label from the synchronisation
+    return lps::multi_action(process::action(process::action_label(result_action, sorts), arguments));
+  }
+  else
+  {
+    // No synchronisation, return original label
+    return label;
+  }
+}
+
 struct combined_lts_builder
 {
   virtual ~combined_lts_builder() = default;
@@ -331,35 +365,7 @@ private:
 
   lps::multi_action apply_communication(const lps::multi_action& label)
   {
-    process::communication_expression comm_expr;
-    const core::identifier_string_list action_names = get_action_names(label.actions());
-
-    mCRL2log(log::debug) << core::pp(action_names) << std::endl;
-
-    if (equal_arguments(label)
-        && (comm_expr = get_sync(input.comm_set, action_names)) != process::communication_expression())
-    {
-      // Synchronise
-      const core::identifier_string& result_action = comm_expr.name();
-      mCRL2log(log::debug) << "Sync: " << result_action << std::endl;
-
-      data::data_expression_list arguments;
-      data::sort_expression_list sorts;
-      if (!label.actions().empty())
-      {
-        // Only use arguments and sorts if the action is not a tau action
-        arguments = label.actions().front().arguments();
-        sorts = label.actions().front().label().sorts();
-      }
-
-      // Create new label from the synchronisation
-      return lps::multi_action(process::action(process::action_label(result_action, sorts), arguments));
-    }
-    else
-    {
-      // No synchronisation, return original label
-      return label;
-    }
+    return mcrl2::apply_communication(label, input.comm_set);
   }
 
   /// \returns True iff at least one state was computed.
