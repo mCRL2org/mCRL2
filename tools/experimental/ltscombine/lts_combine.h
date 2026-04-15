@@ -71,6 +71,10 @@ struct combine_lts_input
   std::size_t nr_of_threads = 1;
 };
 
+/// \brief Apply the communication operator to a multi-action using the given communication set.
+lps::multi_action apply_communication(const lps::multi_action& label,
+                                      const process::communication_expression_list& comm_set);
+
 /// \brief Combine two LTSs and apply the comm, block, allow and hide operators.
 void combine_lts(const combine_lts_input& input);
 } // namespace mcrl2
