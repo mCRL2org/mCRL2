@@ -192,7 +192,7 @@ public:
       queue_lock.unlock();
 
       // Process the state
-      compute_state(state_index);
+      visit_state(state_index);
     }
   }
 
@@ -313,8 +313,24 @@ private:
     }
   }
 
+  std::size_t report_state(const std::vector<state_t>& state)
+  {
+    auto [new_state, inserted] = insert_state(state);
+    if (inserted)
+    {
+      queue_state(new_state);
+    }
+    return new_state;
+  }
+
+  void report_transition(std::size_t from_state, const lps::multi_action& label, std::size_t to_state)
+  {
+    examine_transition();
+    add_transition(from_state, label, to_state);
+  }
+
   /// \returns True iff at least one state was computed.
-  void compute_state(std::size_t state_index)
+  void visit_state(std::size_t state_index)
   {
     std::vector<state_t> state = get_state(state_index);
     // List of new outgoing transitions from this state, combined from the states
@@ -362,13 +378,8 @@ private:
         // Hide actions in transition label
         lps::hide_(input.hiden, label);
 
-        auto [new_state, inserted] = insert_state(target_state);
-        if (inserted)
-        {
-          queue_state(new_state);
-        }
-        examine_transition();
-        add_transition(state_index, label, new_state);
+        const std::size_t new_state = report_state(target_state);
+        report_transition(state_index, label, new_state);
       }
       else
       {
@@ -385,13 +396,8 @@ private:
         // Hide actions in transition label
         lps::hide_(input.hiden, label);
 
-        auto [new_state, inserted] = insert_state(target_state);
-        if (inserted)
-        {
-          queue_state(new_state);
-        }
-        examine_transition();
-        add_transition(state_index, label, new_state);
+        const std::size_t new_state = report_state(target_state);
+        report_transition(state_index, label, new_state);
       }
     }
   }
