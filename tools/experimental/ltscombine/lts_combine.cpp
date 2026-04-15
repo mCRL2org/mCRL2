@@ -329,6 +329,39 @@ private:
     add_transition(from_state, label, to_state);
   }
 
+  lps::multi_action apply_communication(const lps::multi_action& label)
+  {
+    process::communication_expression comm_expr;
+    const core::identifier_string_list action_names = get_action_names(label.actions());
+
+    mCRL2log(log::debug) << core::pp(action_names) << std::endl;
+
+    if (equal_arguments(label)
+        && (comm_expr = get_sync(input.comm_set, action_names)) != process::communication_expression())
+    {
+      // Synchronise
+      const core::identifier_string& result_action = comm_expr.name();
+      mCRL2log(log::debug) << "Sync: " << result_action << std::endl;
+
+      data::data_expression_list arguments;
+      data::sort_expression_list sorts;
+      if (!label.actions().empty())
+      {
+        // Only use arguments and sorts if the action is not a tau action
+        arguments = label.actions().front().arguments();
+        sorts = label.actions().front().label().sorts();
+      }
+
+      // Create new label from the synchronisation
+      return lps::multi_action(process::action(process::action_label(result_action, sorts), arguments));
+    }
+    else
+    {
+      // No synchronisation, return original label
+      return label;
+    }
+  }
+
   /// \returns True iff at least one state was computed.
   void visit_state(std::size_t state_index)
   {
@@ -344,29 +377,7 @@ private:
     {
       mCRL2log(log::debug) << lps::pp(label) << std::endl;
 
-      process::communication_expression comm_expr;
-      const core::identifier_string_list action_names = get_action_names(label.actions());
-
-      mCRL2log(log::debug) << core::pp(action_names) << std::endl;
-
-      if (equal_arguments(label) && (comm_expr = get_sync(input.comm_set, action_names)) != process::communication_expression())
-      {
-        // Synchronise
-        const core::identifier_string& result_action = comm_expr.name();
-        mCRL2log(log::debug) << "Sync: " << result_action << std::endl;
-
-        data::data_expression_list arguments;
-        data::sort_expression_list sorts;
-        if (!label.actions().empty())
-        {
-          // Only use arguments and sorts if the action is not a tau action
-          arguments = label.actions().front().arguments();
-          sorts = label.actions().front().label().sorts();
-        }
-
-        // Create new label from the synchronisation
-        label = lps::multi_action(process::action(process::action_label(result_action, sorts), arguments));
-      }
+      label = apply_communication(label);
 
       // Check if new transition is blocked or not allowed
       if (lps::encap(input.blocks, label.actions()) || !lps::allow_(input.allow_cache,  label.actions(), process::action()))
