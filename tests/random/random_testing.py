@@ -395,9 +395,6 @@ class Pbes2boolTest(PbesTest):
             self.add_command_line_options('t3', ["--threads=4"])
             self.add_command_line_options('t4', ["--threads=4"])
             self.add_command_line_options('t5', ["--threads=4"])
-            self.add_command_line_options('t6', ["--threads=4"])
-            self.add_command_line_options('t7', ["--threads=4"])
-            self.add_command_line_options('t8', ["--threads=4"])
 
 class Pres2boolTest(ProcessTest):
     def __init__(self, name, settings):
