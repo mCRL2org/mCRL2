@@ -344,84 +344,67 @@ private:
     context.lts_builder->add_transition(from_state, label, to_state, context.number_of_threads);
   }
 
-  /// \brief Compute the outgoing transitions for the combined state and write them to output.
-  void compute_outgoing_transitions(const std::vector<state_t>& state,
-    std::vector<std::pair<lps::multi_action, std::vector<state_t>>>& output)
+  /// \brief Compute the outgoing transitions for the combined state and report them via callback.
+  /// \details Generates all combinations of transitions (including stutters) across components
+  /// without explicitly generating the full set. Each candidate (label, target_state) pair is reported
+  /// via callback for early filtering, so we only store the transitions that pass the filter.
+  template <typename ReportCandidate>
+  void emit_outgoing_transitions(const std::vector<state_t>& state, ReportCandidate report_candidate)
   {
-    // Loop over the old states contained in the new state
-    for (size_t i = 0; i < state.size(); ++i)
+    // Generate all combinations recursively by expanding one component at a time.
+    std::vector<state_t> target_state;
+    target_state.reserve(state.size());
+    lps::multi_action current_label;
+
+    generate_outgoing_transition_combinations(state, 0, target_state, current_label, report_candidate);
+  }
+
+private:
+  /// \brief Recursively generate all combinations of transitions across components.
+  /// \details For each component, either take no transition (stutter) or one of the available
+  /// outgoing transitions. Generates combinations in depth-first order, reporting each complete
+  /// transition (reached all components) via the callback.
+  template <typename ReportCandidate>
+  void generate_outgoing_transition_combinations(const std::vector<state_t>& state,
+                           std::size_t component_index,
+                           std::vector<state_t>& target_state,
+                           lps::multi_action& current_label,
+                           ReportCandidate& report_candidate)
+  {
+    // Base case: all components have been processed, report the complete transition
+    if (component_index == state.size())
     {
-      state_t old_state = state[i];
+      report_candidate(current_label, target_state);
+      return;
+    }
 
-      // Seperate new transitions from this state such that transitions from this state
-      // don't combine with other transitions from this state
-      std::vector<std::pair<lps::multi_action, std::vector<state_t>>> new_combos;
+    const state_t& state_component_index = state[component_index];
 
-      // Loop over the outgoing transitions from the old state
-      for (state_t t = outgoing_transitions[i].lowerbound(old_state); t < outgoing_transitions[i].upperbound(old_state);
-        ++t)
-      {
-        const lts::outgoing_pair_t& transition = outgoing_transitions[i].get_transitions()[t];
-        const lts::action_label_lts& label = input.ltss[i].action_label(lts::label(transition));
+    // Option 1: stutter on this component (no transition)
+    target_state.push_back(state_component_index);
+    generate_outgoing_transition_combinations(state, component_index + 1, target_state, current_label, report_candidate);
+    target_state.pop_back();
 
-        // Add transition t, from state to [state[0], ..., state[i-1], to(state[i])]
-        std::vector<state_t> old_states;
-        // Preserve old states for states 0..i-1
-        for (size_t j = 0; j < i; ++j)
-        {
-          old_states.push_back(state[j]);
-        }
-        // Add new state for state i
-        old_states.push_back(lts::to(transition));
-        new_combos.emplace_back(label, old_states);
+    // Option 2: take each available outgoing transition from this component
+    for (state_t t = outgoing_transitions[component_index].lowerbound(state_component_index);
+         t < outgoing_transitions[component_index].upperbound(state_component_index);
+         ++t)
+    {
+      const lts::outgoing_pair_t& transition = outgoing_transitions[component_index].get_transitions()[t];
+      const lts::action_label_lts& label = input.ltss[component_index].action_label(lts::label(transition));
 
-        // Add transition t to the existing multi-action from each combo
-        for (auto& combo: output)
-        {
-          // The new state of the combo already contains this state
-          if (combo.second.size() >= i + 1)
-          {
-            continue;
-          }
+      // Extend the label and target state, then recurse to next component
+      target_state.push_back(lts::to(transition));
+      const lps::multi_action saved_label = current_label;
+      current_label = current_label + label;
 
-          // Copy states from combo to new state list
-          std::vector<state_t> new_states;
-          for (state_t s: combo.second)
-          {
-            new_states.push_back(s);
-          }
+      generate_outgoing_transition_combinations(state, component_index + 1, target_state, current_label, report_candidate);
 
-          // Add new state for state i
-          new_states.push_back(lts::to(transition));
-
-          // Create new action label from multi-action of combo and transition t
-          // lts::action_label_lts new_label(lps::multi_action(label.actions() + combo.first.actions()));
-
-          new_combos.emplace_back(label + combo.first, new_states);
-        }
-      }
-
-      // For each existing multi-action, add the old state of state i
-      // to simulate no transition being taken
-      for (auto& combo: output)
-      {
-        // The new state of the combo already contains this state
-        if (combo.second.size() >= i + 1)
-        {
-          continue;
-        }
-
-        // Add current state, thus no transition
-        combo.second.push_back(old_state);
-      }
-
-      // Finished state i
-      for (auto& combo: new_combos)
-      {
-        output.push_back(combo);
-      }
+      current_label = saved_label;
+      target_state.pop_back();
     }
   }
+
 
   std::size_t report_state(const std::vector<state_t>& state)
   {
@@ -444,25 +427,26 @@ private:
     return mcrl2::apply_communication(label, input.comm_set);
   }
 
-  /// \returns True iff at least one state was computed.
+  /// \brief Process one state from the combined state space.
+  /// \details Emits outgoing transitions via callback, applying communication and filter operators
+  /// (allow/block/hide) to each candidate immediately. Rejected candidates are not reported.
   void visit_state(std::size_t state_index)
   {
     const std::vector<state_t> state = get_state(state_index);
-    // List of new outgoing transitions from this state, combined from the states
-    // state[0] to state[i]
-    std::vector<std::pair<lps::multi_action, std::vector<state_t>>> new_outgoing_transitions;
-    compute_outgoing_transitions(state, new_outgoing_transitions);
 
-
-    // Finished generating all new transitions, add them to the LTS
-    for (auto& [label, target_state] : new_outgoing_transitions)
+    // Callback that filters and reports each candidate transition.
+    auto filter_and_report = [this, state_index](const lps::multi_action& candidate_label,
+                                                   const std::vector<state_t>& target_state)
     {
+      lps::multi_action label = candidate_label;
+
       mCRL2log(log::debug) << lps::pp(label) << std::endl;
 
+      // Apply communication rules
       label = apply_communication(label);
 
       // Check if new transition is blocked or not allowed
-      if (!lps::encap(input.blocks, label.actions()) && lps::allow_(input.allow_cache,  label.actions(), process::action()))
+      if (!lps::encap(input.blocks, label.actions()) && lps::allow_(input.allow_cache, label.actions(), process::action()))
       {
         mCRL2log(log::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
 
@@ -476,7 +460,10 @@ private:
       {
         mCRL2log(log::trace) << "Multi-action is blocked or not allowed: " << lps::pp(label) << std::endl;
       }
-    }
+    };
+
+    // Emit transitions via callback; filtering happens inside the lambda above.
+    emit_outgoing_transitions(state, filter_and_report);
   }
 };
 
