@@ -446,12 +446,12 @@ private:
       label = apply_communication(label);
 
       // Check if new transition is blocked or not allowed
-      if (!lps::encap(input.blocks, label.actions()) && lps::allow_(input.allow_cache, label.actions(), process::action()))
+      if (!lps::encap(input.block_set, label.actions()) && lps::allow_(input.allow_cache, label.actions(), process::action()))
       {
         mCRL2log(log::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
 
         // Hide actions in transition label
-        lps::hide_(input.hiden, label);
+        lps::hide_(input.hide_set, label);
 
         const std::size_t new_state = report_state(target_state);
         report_transition(state_index, label, new_state);
