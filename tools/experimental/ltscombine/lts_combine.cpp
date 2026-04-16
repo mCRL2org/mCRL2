@@ -1,4 +1,4 @@
-// Author(s): Willem Rietdijk
+// Author(s): Willem , Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -265,7 +265,7 @@ struct thread_context_t
 class state_thread_worker
 {
 public:
-  state_thread_worker(const combine_lts_input& input,
+  state_thread_worker(const combine_lts_static_context& input,
     const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions,
     thread_context_t& context)
     : input(input),
@@ -307,7 +307,7 @@ public:
   }
 
 private:
-  const combine_lts_input& input;
+  const combine_lts_static_context& input;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
   thread_context_t& context;
 
@@ -393,15 +393,27 @@ private:
       const lts::outgoing_pair_t& transition = outgoing_transitions[component_index].get_transitions()[t];
       const lts::action_label_lts& label = input.ltss[component_index].action_label(lts::label(transition));
 
-      // Extend the label and target state, then recurse to next component
-      target_state.push_back(lts::to(transition));
-      const lps::multi_action saved_label = current_label;
-      current_label = current_label + label;
+      // Optimization: if the names in the label of the transition does not occur
+      // in the inner allow set, we can skip generating this transition
+      // since it will be filtered out by the allow operator later anyway.
+      const process::action_list& actions = label.actions();
+      bool all_allowed = std::all_of(actions.begin(), actions.end(), [this](const process::action& action)
+      {
+        return input.inner_allowed_action_names.find(action.label().name()) != input.inner_allowed_action_names.end();
+      });
 
-      generate_outgoing_transition_combinations(state, component_index + 1, target_state, current_label, report_candidate);
+      if (all_allowed)
+      {
+        // Extend the label and target state, then recurse to next component
+        target_state.push_back(lts::to(transition));
+        const lps::multi_action saved_label = current_label;
+        current_label = current_label + label;
 
-      current_label = saved_label;
-      target_state.pop_back();
+        generate_outgoing_transition_combinations(state, component_index + 1, target_state, current_label, report_candidate);
+
+        current_label = saved_label;
+        target_state.pop_back();
+      }
     }
   }
 
@@ -467,7 +479,7 @@ private:
   }
 };
 
-void mcrl2::combine_lts(const combine_lts_input& input)
+void mcrl2::combine_lts(const combine_lts_static_context& input)
 {
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
