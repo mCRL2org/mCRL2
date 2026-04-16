@@ -1,4 +1,4 @@
-// Author(s): Willem Rietdijk
+// Author(s): Willem Rietdijk, Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -14,7 +14,10 @@
 
 #include "lts_combine.h"
 
+#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/process/action_label.h"
+#include "mcrl2/process/action_name_multiset.h"
+#include "mcrl2/process/action_names.h"
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/xinput_output_tool.h"
 
@@ -81,8 +84,20 @@ public:
 
     allow_cache = lps::detail::make_allow_list_cache(allow_set);
 
+    process::action_name_set used_actions;
+    get_action_names(lts, used_actions);
+    inner_allow_set = calculate_inner_allow_set(comm_set, used_actions, allow_set);
+
+    for (const process::action_name_multiset& allow: inner_allow_set)
+    {
+      for (const core::identifier_string& name: allow.names())
+      {
+        inner_allowed_action_names.insert(name);
+      }
+    }
+
     // Generate and output resulting LTS
-    combine_lts_input input{lts, comm_set, block_set, hide_set, allow_cache, output_filename(), save_at_end, nr_of_threads};
+    combine_lts_static_context input(lts, comm_set, block_set, hide_set, allow_cache, inner_allow_set, inner_allowed_action_names, output_filename(), save_at_end, nr_of_threads);
     combine_lts(input);
 
     return true;
@@ -213,12 +228,33 @@ protected:
     }
   }
 
+  void get_action_names(const lts::lts_lts_t& lts, process::action_name_set& action_names) const
+  {
+    for (const lts::action_label_lts& label: lts.action_labels())
+    {
+      for (const process::action& action: label.actions())
+      {
+        action_names.insert(action.label().name());
+      }
+    }
+  }
+
+  void get_action_names(const std::vector<lts::lts_lts_t>& ltss, process::action_name_set& action_names) const
+  {
+    for (const lts::lts_lts_t& lts: ltss)
+    {
+      get_action_names(lts, action_names);
+    }
+  }
+
 private:
   core::identifier_string_list block_set;
   process::action_name_multiset_list allow_set;
   lps::detail::allow_list_cache allow_cache;
   core::identifier_string_list hide_set;
   process::communication_expression_list comm_set;
+  process::action_name_multiset_list inner_allow_set;
+  std::unordered_set<core::identifier_string> inner_allowed_action_names;
 
   bool save_at_end = false;
   std::size_t nr_of_threads = 0UL;
