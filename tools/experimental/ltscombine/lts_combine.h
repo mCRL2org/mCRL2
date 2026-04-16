@@ -63,8 +63,8 @@ struct combine_lts_input
 {
   const std::vector<lts::lts_lts_t>& ltss;
   const process::communication_expression_list& comm_set;
-  const core::identifier_string_list& blocks;
-  const core::identifier_string_list& hiden;
+  const core::identifier_string_list& block_set;
+  const core::identifier_string_list& hide_set;
   const lps::detail::allow_list_cache& allow_cache;
   const std::string& filename;
   bool save_at_end;
