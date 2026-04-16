@@ -84,7 +84,7 @@ add_compile_definitions(BRANCH_BIS_EXPERIMENT_JFG)
 add_compile_definitions(QT_DEPRECATED_WARNINGS_SINCE=0x060200)
 
 # Avoid warnings about discarding the output of QFile::open.
-add_compile_definitions(QT_USE_NODISCARD_FILE_OPEN)
+add_compile_definitions(QT_NO_USE_NODISCARD_FILE_OPEN)
 
 # Enable all macros defined in the code used for debugging purposes.
 add_debug_compile_definitions(MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
