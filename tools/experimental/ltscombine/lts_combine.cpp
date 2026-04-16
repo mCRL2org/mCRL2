@@ -33,95 +33,171 @@ using state_t = std::size_t;
 
 using namespace mcrl2;
 
+/// \brief Converts an action list to a mutable vector for manipulation.
 inline
-core::identifier_string_list get_action_names(const process::action_list& actions)
+std::vector<process::action> make_action_vector(const process::action_list& actions)
 {
-  return core::identifier_string_list(actions.begin(), actions.end(), [](const process::action& a) { return a.label().name(); });
+  return std::vector<process::action>(actions.begin(), actions.end());
 }
 
-/// \brief Utility function that returns the index of the synchronisation for which
-///        the action_list actions matches the list of strings in syncs.second.
+/// \brief Attempts to match a sorted communication left-hand side for fixed arguments.
+/// \details Both actions and lhs_names are assumed to be sorted by action name. The match
+/// succeeds if each name in lhs_names occurs in actions with the given arguments.
 ///
-/// \param syncs The list of synchronisations
-/// \param actions The list of actions to be matched.
-/// \returns The index of the matching synchronisation, or max value when no matching synchronisation is found.
+/// \param actions The actions to match against, sorted by action name.
+/// \param lhs_names The names of the actions to match, sorted by action name.
+/// \param arguments The arguments to match for each action name.
+/// \param indices Output parameter containing the indices of the matching actions in the actions vector, if the match is successful.
+/// \pre actions and lhs_names are sorted by action name.
+/// \pre lhs_names is not empty.
 inline
-process::communication_expression get_sync(const process::communication_expression_list& comm_set, const core::identifier_string_list& action_names)
+bool match_sorted_lhs(const std::vector<process::action>& actions,
+                      const core::identifier_string_list& lhs_names,
+                      const data::data_expression_list& arguments,
+                      std::vector<std::size_t>& indices)
 {
-  // A synchronising action must consist of two or more action labels
-  if (action_names.size() < 2)
+  assert(std::is_sorted(actions.begin(), actions.end(), process::action_compare()));
+  assert(std::is_sorted(lhs_names.begin(), lhs_names.end(), process::action_name_compare()));
+  assert(!lhs_names.empty());
+
+  indices.clear();
+
+  auto lhs_it = lhs_names.begin();
+  for (std::size_t i = 0; i < actions.size() && lhs_it != lhs_names.end(); ++i)
   {
-    return process::communication_expression();
+    const core::identifier_string& action_name = actions[i].label().name();
+
+    if (*lhs_it < action_name)
+    {
+      return false;
+    }
+    else if (action_name == *lhs_it && actions[i].arguments() == arguments)
+    {
+      indices.push_back(i);
+      ++lhs_it;
+    }
+    // else (action_name < *lhs_it), continue searching for the same action name.
   }
 
-  auto it = std::find_if(
-    comm_set.begin(),
-    comm_set.end(),
-    [&action_names](const process::communication_expression& comm)
+  /// If we have matched all names in the left-hand side, the match is successful.
+  if (lhs_it == lhs_names.end())
   {
-    return comm.action_name().names() == action_names;
-  });
-
-  if (it != comm_set.end())
-  {
-    return *it;
+    return true;
   }
   else
   {
-    return process::communication_expression();
+    indices.clear();
+    return false;
   }
 }
 
-/// \brief Checks whether the arguments of each of the actions of the
-///        action_label are equal.
-///
-/// \param label The label to check.
-/// \returns Whether all arguments of each action of the label
-///          are equal.
+/// \brief Finds a subset of actions matching a communication rule's left-hand side.
+/// \details Tries each candidate argument list for the first action name and then matches the
+/// remaining names using a single forward pass over the sorted actions.
+/// \param actions The actions to match against, sorted by action name.
+/// \param lhs_names The names of the actions to match, sorted by action name.
+/// \param indices Output parameter containing the indices of the matching actions in the actions vector, if the match is successful.
+/// \pre actions and lhs_names are sorted by action name.
+/// \pre lhs_names is not empty.
 inline
-bool equal_arguments(const lps::multi_action& multi_action)
+bool find_matching_indices(const std::vector<process::action>& actions,
+                           const core::identifier_string_list& lhs_names,
+                           std::vector<std::size_t>& indices)
 {
-  return multi_action.actions().empty() ||
-    std::all_of(
-      std::next(multi_action.actions().begin()),
-      multi_action.actions().end(),
-      [&](const process::action& a) {
-        return a.arguments() == multi_action.actions().front().arguments();
-      });
+  assert(std::is_sorted(actions.begin(), actions.end(), process::action_compare()));
+  assert(std::is_sorted(lhs_names.begin(), lhs_names.end(), process::action_name_compare()));
+  assert(!lhs_names.empty());
+
+  const core::identifier_string& first_label = lhs_names.front();
+
+  // Try each candidate argument list for the first action name in the left-hand side,
+  // and then match the remaining names using a single forward pass over the sorted actions.
+  for (std::size_t i = 0; i < actions.size(); ++i)
+  {
+    const core::identifier_string& action_name = actions[i].label().name();
+    if (first_label < action_name)
+    {
+      /// Since actions and lhs_names are sorted, if the first label is smaller than the current action name, there is no match.
+      break;
+    }
+    else if (match_sorted_lhs(actions, lhs_names, actions[i].arguments(), indices))
+    {
+      return true;
+    }
+    // else (action_name < first_label), continue searching for the first label.
+  }
+
+  indices.clear();
+  return false;
 }
 
+/// \brief Removes actions at the specified indices from the action vector.
+inline
+void erase_indices(std::vector<process::action>& actions,
+                   const std::vector<std::size_t>& indices)
+{
+  std::vector<process::action> remaining;
+  remaining.reserve(actions.size() - indices.size());
+
+  auto index_it = indices.begin();
+  for (std::size_t i = 0; i < actions.size(); ++i)
+  {
+    if (index_it != indices.end() && *index_it == i)
+    {
+      ++index_it;
+    }
+    else
+    {
+      remaining.push_back(actions[i]);
+    }
+  }
+
+  actions = std::move(remaining);
+}
+
+/// \brief Applies communication rules to a multi-action label.
+/// \details For each communication rule, greedily matches and replaces subsets of actions
+/// with their communicated counterpart. Returns the resulting multi-action with unmatched
+/// actions preserved.
+/// \pre label.actions() is sorted by action name.
+/// \pre every communication expression in comm_set has a left-hand side that is sorted by action name.
+///      the left hand sides of communication expressions are disjoint.
 lps::multi_action mcrl2::apply_communication(const lps::multi_action& label,
                                              const process::communication_expression_list& comm_set)
 {
-  process::communication_expression comm_expr;
-  const core::identifier_string_list action_names = get_action_names(label.actions());
-
-  mCRL2log(log::debug) << core::pp(action_names) << std::endl;
-
-  if (equal_arguments(label)
-      && (comm_expr = get_sync(comm_set, action_names)) != process::communication_expression())
+  assert(std::is_sorted(label.actions().begin(), label.actions().end(), process::action_compare()));
+  assert(std::all_of(comm_set.begin(), comm_set.end(), [](const process::communication_expression& comm_expr)
   {
-    // Synchronise
-    const core::identifier_string& result_action = comm_expr.name();
-    mCRL2log(log::debug) << "Sync: " << result_action << std::endl;
+    return std::is_sorted(comm_expr.action_name().names().begin(), comm_expr.action_name().names().end(),
+                          process::action_name_compare());
+  }));
 
-    data::data_expression_list arguments;
-    data::sort_expression_list sorts;
-    if (!label.actions().empty())
+  // vector of actions that have not yet participated in a communication, sorted by action name
+  std::vector<process::action> remaining_actions = make_action_vector(label.actions());
+  // vector of actions that are the result of a communication
+  std::vector<process::action> communicated_actions;
+  // temporary vector for storing matching indices when applying a communication rule
+  std::vector<std::size_t> matching_indices;
+
+  // apply every communication expression in the communication set until
+  // no more matches can be found.
+  for (const process::communication_expression& comm_expr : comm_set)
+  {
+    while (find_matching_indices(remaining_actions, comm_expr.action_name().names(), matching_indices))
     {
-      // Only use arguments and sorts if the action is not a tau action
-      arguments = label.actions().front().arguments();
-      sorts = label.actions().front().label().sorts();
-    }
+      const process::action& representative = remaining_actions[matching_indices.front()];
+      communicated_actions.emplace_back(
+          process::action_label(comm_expr.name(), representative.label().sorts()),
+          representative.arguments());
 
-    // Create new label from the synchronisation
-    return lps::multi_action(process::action(process::action_label(result_action, sorts), arguments));
+      erase_indices(remaining_actions, matching_indices);
+    }
   }
-  else
-  {
-    // No synchronisation, return original label
-    return label;
-  }
+
+  remaining_actions.insert(remaining_actions.end(), communicated_actions.begin(), communicated_actions.end());
+  std::sort(remaining_actions.begin(), remaining_actions.end(), process::action_compare());
+
+  return lps::multi_action(process::action_list(remaining_actions.begin(), remaining_actions.end()), label.time());
 }
 
 struct combined_lts_builder
