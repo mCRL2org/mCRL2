@@ -270,7 +270,10 @@ public:
     thread_context_t& context)
     : input(input),
       outgoing_transitions(outgoing_transitions),
-      context(context)
+      context(context),
+      termination_action(process::action(
+          process::action_label(core::identifier_string("Terminate"), data::sort_expression_list()),
+          data::data_expression_list()))
   {}
 
   void operator()()
@@ -310,6 +313,7 @@ private:
   const combine_lts_static_context& input;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
   thread_context_t& context;
+  const process::action termination_action;
 
   std::vector<state_t> get_state(std::size_t state_index)
   {
@@ -458,7 +462,7 @@ private:
       label = apply_communication(label);
 
       // Check if new transition is blocked or not allowed
-      if (!lps::encap(input.block_set, label.actions()) && lps::allow_(input.allow_cache, label.actions(), process::action()))
+      if (!lps::encap(input.block_set, label.actions()) && lps::allow_(input.allow_cache, label.actions(), termination_action))
       {
         mCRL2log(log::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
 
