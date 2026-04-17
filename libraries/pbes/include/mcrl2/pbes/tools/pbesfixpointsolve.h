@@ -17,6 +17,7 @@
 
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/merge_data_specifications.h"
+// #include "mcrl2/data/rewrite.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/iteration_builders.h"
 #include "mcrl2/pbes/io.h"
@@ -25,11 +26,12 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
 #include "mcrl2/smt/solver.h"
+#include "mcrl2/utilities/logger.h"
 
 #include <map>
 #include <optional>
 
-
+using namespace mcrl2;
 
 namespace mcrl2::pbes_system
 {
@@ -225,7 +227,8 @@ inline void perform_iteration(pbes_equation& equation,
         replace_substituter,
     data::data_specification data_spec,
     pbesfixpointsolve_options options,
-    propositional_variable_instantiation initial_state)
+    propositional_variable_instantiation initial_state,
+    simplify_data_rewriter<data::rewriter> pbes_rewriter)
 {
   std::optional<smt::smt_solver> solv;
   std::optional<mcrl2::data::detail::BDD_Prover> f_bdd_prover;
@@ -259,10 +262,11 @@ inline void perform_iteration(pbes_equation& equation,
     substituter.set_name(equation.variable().name());
     pbes_expression p;
     substituter.apply(p, equation.formula());
+    p = pbes_rewrite(p, pbes_rewriter);
 
     // Check if the iteration has reached a fixpoint
     pbes_equation p_eq;
-    p_eq.formula() = p;
+    p_eq.formula() = pbes_rewrite(p, pbes_rewriter);
     p_eq.variable() = eq.variable();
     replace_substituter.reset_variable_list();
     data::data_expression eq_data = pbestodata(eq, replace_substituter);
@@ -392,12 +396,12 @@ struct pbesfixpointsolve_pbes_fixpoint_iterator
             p.global_variables());
         if (global_inv == InvResult::INV_FALSE)
         {
-          perform_iteration(*i, substituter, replace_substituter, p.data(), options, p.initial_state());
+          perform_iteration(*i, substituter, replace_substituter, p.data(), options, p.initial_state(), pbes_rewriter);
         }
       }
       else
       {
-        perform_iteration(*i, substituter, replace_substituter, p.data(), options, p.initial_state());
+        perform_iteration(*i, substituter, replace_substituter, p.data(), options, p.initial_state(), pbes_rewriter);
       }
 
       for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
