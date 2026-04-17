@@ -248,15 +248,21 @@ public:
 
 struct thread_context_t
 {
+  // Shared objects used by all worker threads.
   lts::lts_builder* lts_builder;
   std::queue<std::size_t>& queue;
   lts::detail::progress_monitor& progress_monitor;
   mcrl2::utilities::indexed_set<std::vector<state_t>>& states;
   std::size_t number_of_threads;
+
+  // Mutexes guard the corresponding shared objects.
   std::mutex& lts_builder_mutex;
   std::mutex& queue_mutex;
   std::mutex& progress_mutex;
   std::mutex& states_mutex;
+
+  // Condition variable and scheduler state for queue-based work distribution.
+  // Invariant: active_workers and stop are read/written while holding queue_mutex.
   std::condition_variable& queue_cond;
   std::size_t& active_workers;
   bool& stop;
@@ -290,6 +296,7 @@ public:
 
       if (context.stop && context.queue.empty())
       {
+        // Global shutdown: no queued work remains and exploration has ended.
         return;
       }
 
@@ -306,6 +313,10 @@ public:
 
       if (context.queue.empty() && context.active_workers == 0)
       {
+        // This worker observed that no work is queued, and no other workers are
+        // processing states; this means we have explored the entire state space.
+        // The worker publishes stop and wakes all
+        // waiters so every thread can terminate without depending on new work.
         context.stop = true;
         queue_lock.unlock();
         context.queue_cond.notify_all();
@@ -339,6 +350,8 @@ private:
     std::unique_lock<std::mutex> queue_lock(context.queue_mutex);
     context.queue.push(state_index);
     queue_lock.unlock();
+
+    // Wake exactly one worker: one new state was enqueued.
     context.queue_cond.notify_one();
   }
 
@@ -362,6 +375,8 @@ private:
 
   void finish_state()
   {
+    // Snapshot sizes under their own locks; report with progress_mutex only.
+    // This keeps long progress operations away from queue/states critical sections.
     const std::size_t states_size = this->states_size();
     const std::size_t queue_size = this->queue_size();
 
@@ -570,6 +585,8 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
   std::mutex states_mutex;
 
   // Shared worker scheduling state, protected by queue_mutex.
+  // active_workers counts threads that popped work but have not yet completed it.
+  // stop becomes true once all states have been processed.
   std::condition_variable queue_cond;
   std::size_t active_workers = 0;
   bool stop = false;
