@@ -24,8 +24,8 @@
 #include "mcrl2/process/process_expression.h"
 
 #include <condition_variable>
-#include <chrono>
 #include <cstddef>
+#include <memory>
 #include <mutex>
 #include <queue>
 
@@ -258,7 +258,8 @@ struct thread_context_t
   std::mutex& progress_mutex;
   std::mutex& states_mutex;
   std::condition_variable& queue_cond;
-  std::size_t& busy;
+  std::size_t& active_workers;
+  bool& stop;
 };
 
 /// \brief A worker that computes states of the combined LTS.
@@ -282,30 +283,36 @@ public:
     {
       std::unique_lock<std::mutex> queue_lock(context.queue_mutex);
 
-      // Wait if queue is empty but threads are still working
-      while (context.queue.empty())
+      context.queue_cond.wait(queue_lock, [this]()
       {
-        context.busy--;
-        if (context.busy > 0)
-        {
-          // Some threads are still busy, wait for them to add work
-          context.queue_cond.wait(queue_lock);
-        }
-        else
-        {
-          // All threads completed and queue is empty, exit
-          return;
-        }
-      }
+        return context.stop || !context.queue.empty();
+      });
 
-      context.busy++;
+      if (context.stop && context.queue.empty())
+      {
+        return;
+      }
 
       const std::size_t state_index = context.queue.front();
       context.queue.pop();
+      ++context.active_workers;
       queue_lock.unlock();
 
       // Process the state
       visit_state(state_index);
+
+      queue_lock.lock();
+      --context.active_workers;
+
+      if (context.queue.empty() && context.active_workers == 0)
+      {
+        context.stop = true;
+        queue_lock.unlock();
+        context.queue_cond.notify_all();
+        return;
+      }
+
+      queue_lock.unlock();
     }
   }
 
@@ -335,10 +342,31 @@ private:
     context.queue_cond.notify_one();
   }
 
+  std::size_t states_size()
+  {
+    std::lock_guard<std::mutex> states_lock(context.states_mutex);
+    return context.states.size();
+  }
+
+  std::size_t queue_size()
+  {
+    std::lock_guard<std::mutex> queue_lock(context.queue_mutex);
+    return context.queue.size();
+  }
+
   void examine_transition()
   {
     std::lock_guard<std::mutex> progress_lock(context.progress_mutex);
     context.progress_monitor.examine_transition();
+  }
+
+  void finish_state()
+  {
+    const std::size_t states_size = this->states_size();
+    const std::size_t queue_size = this->queue_size();
+
+    std::lock_guard<std::mutex> progress_lock(context.progress_mutex);
+    context.progress_monitor.finish_state(states_size, queue_size, input.nr_of_threads);
   }
 
   template <typename ActionLabel>
@@ -485,11 +513,13 @@ private:
 
     // Emit transitions via callback; filtering happens inside the lambda above.
     emit_outgoing_transitions(state, filter_and_report);
+    finish_state();
   }
 };
 
 void mcrl2::combine_lts(const combine_lts_static_context& input)
 {
+  mCRL2log(log::verbose) << "Combining " << input.ltss.size() << " LTSs with " << input.nr_of_threads << " threads." << std::endl;
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
   for (const lts::lts_lts_t& lts_input: input.ltss)
@@ -519,20 +549,19 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
   // Progress monitor.
   lts::detail::progress_monitor progress_monitor(lps::exploration_strategy::es_breadth);
 
-  combined_lts_builder* combined_lts_builder;
+  std::unique_ptr<combined_lts_builder> combined_lts_builder;
   lts::lts_builder* lts_builder;
   if (input.save_at_end)
   {
-    combined_lts_lts_builder* lts_lts_builder = new combined_lts_lts_builder(data_spec, action_decls, proc_params);
-    lts_builder = lts_lts_builder;
-    combined_lts_builder = lts_lts_builder;
+    auto lts_lts_builder = std::make_unique<combined_lts_lts_builder>(data_spec, action_decls, proc_params);
+    lts_builder = lts_lts_builder.get();
+    combined_lts_builder = std::move(lts_lts_builder);
   }
   else
   {
-    combined_lts_disk_builder* lts_disk_builder
-        = new combined_lts_disk_builder(input.filename, data_spec, action_decls, proc_params);
-    lts_builder = lts_disk_builder;
-    combined_lts_builder = lts_disk_builder;
+    auto lts_disk_builder = std::make_unique<combined_lts_disk_builder>(input.filename, data_spec, action_decls, proc_params);
+    lts_builder = lts_disk_builder.get();
+    combined_lts_builder = std::move(lts_disk_builder);
   }
 
   std::mutex builder_mutex;
@@ -540,9 +569,10 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
   std::mutex progress_mutex;
   std::mutex states_mutex;
 
-  // Used to signal busy and empty queue.
+  // Shared worker scheduling state, protected by queue_mutex.
   std::condition_variable queue_cond;
-  std::size_t busy = input.nr_of_threads;
+  std::size_t active_workers = 0;
+  bool stop = false;
 
   thread_context_t context{
       lts_builder,
@@ -555,7 +585,8 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
       progress_mutex,
       states_mutex,
       queue_cond,
-      busy};
+      active_workers,
+      stop};
 
   std::vector<std::thread> threads;
 
@@ -574,5 +605,4 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
   // Write the initial state and the state labels.
   combined_lts_builder->finalize_combined(states.size());
   lts_builder->save(input.filename);
-  delete lts_builder;
 }
