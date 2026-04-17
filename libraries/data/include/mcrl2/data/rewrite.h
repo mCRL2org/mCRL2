@@ -141,6 +141,64 @@ T rewrite(const T& x,
 }
 //--- end generated data rewrite code ---//
 
+// // \\brief Rewrites all embedded expressions in an object x
+// /// \\param x an object containing expressions
+// /// \\param R a rewriter
+// template <typename T, typename Rewriter>
+// void data_rewrite(T& x,
+//              Rewriter R
+//             )
+//   requires (!std::is_base_of_v<atermpp::aterm, T>)
+// {
+//   data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R).update(x);
+// }
+
+// /// \\brief Rewrites all embedded expressions in an object x
+// /// \\param x an object containing expressions
+// /// \\param R a rewriter
+// /// \\return the rewrite result
+// template <typename T, typename Rewriter>
+// T data_rewrite(const T& x,
+//           Rewriter R
+//          )
+//   requires std::is_base_of_v<atermpp::aterm, T>
+// {
+//   T result;
+//   data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R).apply(result, x);
+//   return result;
+// }
+
+// /// \\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
+// /// \\param x an object containing expressions
+// /// \\param R a rewriter
+// /// \\param sigma a substitution
+// template <typename T, typename Rewriter, typename Substitution>
+// void data_rewrite(T& x,
+//              Rewriter R,
+//              const Substitution& sigma
+//             )
+//   requires (!std::is_base_of_v<atermpp::aterm, T>)
+// {
+//   data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma).update(x);
+// }
+
+// /// \\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
+// /// \\param x an object containing expressions
+// /// \\param R a rewriter
+// /// \\param sigma a substitution
+// /// \\return the rewrite result
+// template <typename T, typename Rewriter, typename Substitution>
+// T data_rewrite(const T& x,
+//           Rewriter R,
+//           const Substitution& sigma
+//          )
+//   requires std::is_base_of_v<atermpp::aterm, T>
+// {
+//   T result; 
+//   data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma).apply(result, x);
+//   return result;
+// }
+
 } // namespace mcrl2::data
 
 
