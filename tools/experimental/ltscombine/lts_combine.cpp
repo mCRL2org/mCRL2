@@ -462,8 +462,8 @@ private:
       {
         mCRL2log(log::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
 
-        // Hide actions in transition label
-        lps::hide_(input.hide_set, label);
+        // Hide returns a new label; assign it back.
+        label = lps::hide_(input.hide_set, label);
 
         const std::size_t new_state = report_state(target_state);
         report_transition(state_index, label, new_state);
