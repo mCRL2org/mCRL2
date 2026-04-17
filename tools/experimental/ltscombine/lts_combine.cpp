@@ -360,7 +360,7 @@ private:
     target_state.reserve(state.size());
     lps::multi_action current_label;
 
-    generate_outgoing_transition_combinations(state, 0, target_state, current_label, report_candidate);
+    generate_outgoing_transition_combinations(state, 0, false, target_state, current_label, report_candidate);
   }
 
 private:
@@ -371,14 +371,19 @@ private:
   template <typename ReportCandidate>
   void generate_outgoing_transition_combinations(const std::vector<state_t>& state,
                            std::size_t component_index,
+                           bool has_taken_transition,
                            std::vector<state_t>& target_state,
                            lps::multi_action& current_label,
                            ReportCandidate& report_candidate)
   {
-    // Base case: all components have been processed, report the complete transition
+    // Base case: all components have been processed, report only if at least one
+    // component contributed a real transition (exclude pure global stutter).
     if (component_index == state.size())
     {
-      report_candidate(current_label, target_state);
+      if (has_taken_transition)
+      {
+        report_candidate(current_label, target_state);
+      }
       return;
     }
 
@@ -386,7 +391,7 @@ private:
 
     // Option 1: stutter on this component (no transition)
     target_state.push_back(state_component_index);
-    generate_outgoing_transition_combinations(state, component_index + 1, target_state, current_label, report_candidate);
+    generate_outgoing_transition_combinations(state, component_index + 1, has_taken_transition, target_state, current_label, report_candidate);
     target_state.pop_back();
 
     // Option 2: take each available outgoing transition from this component
@@ -413,7 +418,7 @@ private:
         const lps::multi_action saved_label = current_label;
         current_label = current_label + label;
 
-        generate_outgoing_transition_combinations(state, component_index + 1, target_state, current_label, report_candidate);
+      generate_outgoing_transition_combinations(state, component_index + 1, true, target_state, current_label, report_candidate);
 
         current_label = saved_label;
         target_state.pop_back();
