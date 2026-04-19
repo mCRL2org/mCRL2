@@ -41,7 +41,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
 
   const data::data_specification& m_dataspec;
 
-  /// If true, quantifier variables of infinite sort are enumerated.
+  /// If false, only quantifier variables over finite sorts are enumerated.
   bool m_enumerate_infinite_sorts;
 
   /// The enumerator
