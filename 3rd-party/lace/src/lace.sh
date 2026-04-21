@@ -902,9 +902,10 @@ typedef struct _WorkerP {
 #endif
 } WorkerP;
 
-#define LACE_STOLEN   ((Worker*)0)
-#define LACE_BUSY     ((Worker*)1)
-#define LACE_NOWORK   ((Worker*)2)
+#define LACE_STOLEN      ((Worker*)0)
+#define LACE_BUSY        ((Worker*)1)
+#define LACE_NOWORK      ((Worker*)2)
+#define LACE_STOLEN_LAST ((Worker*)3)
 
 LACE_NORETURN void lace_abort_stack_overflow(void);
 
@@ -1052,7 +1053,7 @@ Worker* lace_steal(WorkerP *self, Task *__dq_head, Worker *victim)
                 lace_time_event(self, 2);
                 atomic_store_explicit(&t->thief, THIEF_COMPLETED, memory_order_release);
                 lace_time_event(self, 8);
-                return LACE_STOLEN;
+                return ts_new.ts.tail < ts_new.ts.split ? LACE_STOLEN : LACE_STOLEN_LAST;
             }
  
             lace_time_event(self, 7);
