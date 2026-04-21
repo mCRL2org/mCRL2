@@ -12,14 +12,19 @@
 ///        simplifying the result, and keeping it when it can
 ///        eliminate PBES variables.
 
+// TODO: Function symbols. See abstraction_mapping_text in absinthe.h
+
 #ifndef MCRL2_PBES_TOOLS_PBESCEGAR_H
 #define MCRL2_PBES_TOOLS_PBESCEGAR_H
 
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
@@ -30,6 +35,7 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/pbesinst_lazy_counter_example.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/resolve_name_clashes.h"
@@ -55,299 +61,45 @@ struct pbescegar_options
 
 struct pbescegar_pbes_cegar_iterator
 {
-  // Helper to check if a sort is already defined as structured in the data specification
-  bool is_already_structured_in_spec(const data::sort_expression& sort, const data::data_specification& spec)
-  {
-    // Check if this sort is aliased to a structured sort
-    for (const auto& alias: spec.user_defined_aliases())
-    {
-      if (alias.name() == sort && data::is_structured_sort(alias.reference()))
-      {
-        return true;
-      }
-    }
-
-    // Also check if this sort IS a structured sort directly
-    if (data::is_structured_sort(sort))
-    {
-      return true;
-    }
-
-    return false;
-  }
-
-  struct A_cap_builder : public pbes_expression_builder<A_cap_builder>
-  {
-    using super = pbes_expression_builder<A_cap_builder>;
-    using super::apply;
-    using super::enter;
-    using super::leave;
-
-    std::map<data::sort_expression, data::function_symbol> m_abs_constructors;
-    std::map<data::sort_expression, data::sort_expression> m_sort_map;
-    std::map<core::identifier_string, data::variable_list> m_original_params;
-
-    // Override apply() for not_ expressions
-    template<class T>
-    void apply(T& result, const pbes_system::not_& x)
-    {
-      enter(x);
-      pbes_expression operand;
-      super::apply(operand, x.operand());
-      result = not_(operand);
-      leave(x);
-    }
-
-    // Override apply() for and_ expressions
-    template<class T>
-    void apply(T& result, const pbes_system::and_& x)
-    {
-      enter(x);
-      pbes_expression left;
-      pbes_expression right;
-      super::apply(left, x.left());
-      super::apply(right, x.right());
-      result = and_(left, right);
-      leave(x);
-    }
-
-    // Override apply() for or_ expressions
-    template<class T>
-    void apply(T& result, const pbes_system::or_& x)
-    {
-      enter(x);
-      pbes_expression left;
-      pbes_expression right;
-      super::apply(left, x.left());
-      super::apply(right, x.right());
-      result = or_(left, right);
-      leave(x);
-    }
-
-    // Override apply() for imp expressions
-    template<class T>
-    void apply(T& result, const pbes_system::imp& x)
-    {
-      enter(x);
-      pbes_expression left;
-      pbes_expression right;
-      super::apply(left, x.left());
-      super::apply(right, x.right());
-      result = imp(left, right);
-      leave(x);
-    }
-
-    // Override apply() for forall expressions
-    template<class T>
-    void apply(T& result, const pbes_system::forall& x)
-    {
-      enter(x);
-      data::variable_list new_vars;
-      for (const auto& v: x.variables())
-      {
-        auto it = m_sort_map.find(v.sort());
-        if (it != m_sort_map.end())
-        {
-          new_vars.push_front(data::variable(v.name(), it->second));
-        }
-        else
-        {
-          new_vars.push_front(v);
-        }
-      }
-      pbes_expression body;
-      super::apply(body, x.body());
-      result = forall(new_vars, body);
-      leave(x);
-    }
-
-    // Override apply() for exists expressions
-    template<class T>
-    void apply(T& result, const pbes_system::exists& x)
-    {
-      enter(x);
-      data::variable_list new_vars;
-      for (const auto& v: x.variables())
-      {
-        auto it = m_sort_map.find(v.sort());
-        if (it != m_sort_map.end())
-        {
-          new_vars.push_front(data::variable(v.name(), it->second));
-        }
-        else
-        {
-          new_vars.push_front(v);
-        }
-      }
-      pbes_expression body;
-      super::apply(body, x.body());
-      // For underapproximation (A_cap), exists becomes forall
-      // because abstraction reduces possibilities (fewer models)
-      result = forall(new_vars, body);
-      leave(x);
-    }
-
-    // Override apply() for propositional_variable_instantiation
-    template<class T>
-    void apply(T& result, const pbes_system::propositional_variable_instantiation& x)
-    {
-      enter(x);
-      const auto& name = x.name();
-      auto it = m_original_params.find(name);
-
-      data::data_expression_list new_params;
-      if (it != m_original_params.end())
-      {
-        const auto& orig_params = it->second;
-        auto param_it = x.parameters().begin();
-        auto var_it = orig_params.begin();
-
-        while (param_it != x.parameters().end() && var_it != orig_params.end())
-        {
-          const data::data_expression& param = *param_it;
-          const data::variable& var = *var_it;
-          auto sort_it = m_sort_map.find(var.sort());
-
-          if (sort_it != m_sort_map.end())
-          {
-            const auto& cons_it = m_abs_constructors.find(var.sort());
-            if (cons_it != m_abs_constructors.end())
-            {
-              new_params.push_front(cons_it->second);
-            }
-            else
-            {
-              new_params.push_front(param);
-            }
-          }
-          else
-          {
-            new_params.push_front(param);
-          }
-
-          ++param_it;
-          ++var_it;
-        }
-      }
-      else
-      {
-        // Variable not found in original params, just copy parameters
-        for (const auto& param: x.parameters())
-        {
-          new_params.push_front(param);
-        }
-      }
-
-      result = propositional_variable_instantiation(name, new_params);
-      leave(x);
-    }
-  };
-
-  pbes_expression apply_A_cap(const pbes_expression& expr,
-    const std::map<data::sort_expression, data::function_symbol>& abs_constructors,
-    const std::map<data::sort_expression, data::sort_expression>& sort_map,
-    const std::map<core::identifier_string, data::variable_list>& original_params)
-  {
-    A_cap_builder builder;
-    builder.m_abs_constructors = abs_constructors;
-    builder.m_sort_map = sort_map;
-    builder.m_original_params = original_params;
-
-    pbes_expression result;
-    builder.apply(result, expr);
-    return result;
-  }
-
-  // Analyzes the underapproximated PBES and prunes edges based on guard evaluation
-  void analyze_and_prune_edges(pbes& p,
-    const data::rewriter& rewriter,
-    const std::map<data::sort_expression, data::sort_expression>& sort_map)
-  {
-    // Implement edge pruning logic: evaluate guards of data expressions
-    // under the abstraction and detect obviously false guards
-    mCRL2log(log::verbose) << "Analyzing and pruning edges based on guard evaluation..." << std::endl;
-
-    std::size_t edges_analyzed = 0;
-    // Iterate through all equations and analyze their guards
-    for (auto& eq: p.equations())
-    {
-      mCRL2log(log::debug) << "Analyzing guards in equation: " << eq.variable().name() << std::endl;
-      edges_analyzed++;
-
-      // In an abstracted PBES, data guards often become constant expressions
-      // that can be evaluated. The rewriter would normally simplify these.
-      // For now, we log that analysis is complete and rely on the solver
-      // to handle guard evaluation. Full guard elimination would require
-      // SMT solving or more sophisticated abstract interpretation.
-    }
-
-    mCRL2log(log::verbose) << "Edge analysis completed: analyzed " << edges_analyzed << " equations" << std::endl;
-  }
-
   // Solves the underapproximated PBES using structure graph solving
-  bool solve_underapproximation(const pbes& p)
+  bool solve_underapproximation(pbes& p, pbescegar_options options)
   {
     mCRL2log(log::verbose) << "Solving underapproximated PBES using structure graph..." << std::endl;
 
     try
     {
-      // Make a copy to avoid modifying the input
-      pbes p_copy = p;
-
       // Normalize the PBES
-      algorithms::normalize(p_copy);
+      algorithms::normalize(p);
 
-      // Try structure graph v2 first
-      try
+      pbessolve_options options2;
+      options2.rewrite_strategy = options.rewrite_strategy;
+
+      // Build the structure graph from the PBES
+      data::mutable_map_substitution<> sigma;
+      sigma = pbes_system::detail::instantiate_global_variables(p);
+      pbes_system::detail::replace_global_variables(p, sigma);
+
+      mCRL2log(log::verbose) << "=== SIGMA === " << std::endl;
+      mCRL2log(log::verbose) << (sigma.to_string()) << std::endl;
+      structure_graph G;
+      mCRL2log(log::verbose) << "=== PBES === " << std::endl;
+      mCRL2log(log::verbose) << pp(p) << std::endl;
+      pbesinst_structure_graph_algorithm algorithm(options2, p, G);
+      algorithm.run();
+
+      // Solve the structure graph
+      bool result = solve_structure_graph(G);
+
+      if (result)
       {
-        structure_graph G;
-        pbessolve_options options;
-        options.rewrite_strategy = data::rewrite_strategy::jitty;
-
-        // Build the structure graph from the PBES
-        pbesinst_structure_graph_algorithm algorithm(options, p_copy, G);
-        algorithm.run();
-
-        // Solve the structure graph
-        bool result = solve_structure_graph(G);
-
-        if (result)
-        {
-          mCRL2log(log::verbose) << "Structure graph solver returned TRUE" << std::endl;
-        }
-        else
-        {
-          mCRL2log(log::verbose) << "Structure graph solver returned FALSE" << std::endl;
-        }
-
-        return result;
+        mCRL2log(log::verbose) << "Structure graph solver returned TRUE" << std::endl;
       }
-      catch (const std::exception& e)
+      else
       {
-        mCRL2log(log::debug) << "Structure graph v2 failed: " << e.what() << std::endl;
-        mCRL2log(log::debug) << "Attempting structure graph v1..." << std::endl;
-
-        // Try structure graph v1
-        try
-        {
-          structure_graph G;
-          pbessolve_options options;
-          options.rewrite_strategy = data::rewrite_strategy::jitty;
-
-          // Build the structure graph from the PBES using v1
-          pbesinst_structure_graph_algorithm algorithm(options, p_copy, G);
-          algorithm.run();
-
-          // Solve the structure graph
-          bool result = solve_structure_graph(G);
-          return result;
-        }
-        catch (const std::exception& e2)
-        {
-          mCRL2log(log::warning) << "Both solvers failed. V1 error: " << e2.what() << std::endl;
-          throw;
-        }
+        mCRL2log(log::verbose) << "Structure graph solver returned FALSE" << std::endl;
       }
+
+      return result;
     }
     catch (const std::exception& e)
     {
@@ -370,7 +122,7 @@ struct pbescegar_pbes_cegar_iterator
       mCRL2log(log::verbose) << "Currently abstracting " << sorts_to_abstract.size() << " sorts" << std::endl;
 
       // Solve current underapproximation
-      bool result = solve_underapproximation(p);
+      bool result = solve_underapproximation(p, options);
 
       if (result)
       {
@@ -406,6 +158,13 @@ struct pbescegar_pbes_cegar_iterator
     mCRL2log(log::verbose) << "Maximum iterations reached" << std::endl;
   }
 
+  std::string tolower(const std::string& str)
+  {
+    std::string result = str;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    return result;
+  }
+
   void run(pbes& p, pbescegar_options options)
   {
     mCRL2log(log::verbose) << "=== CEGAR RUN STARTING ===" << std::endl;
@@ -439,9 +198,10 @@ struct pbescegar_pbes_cegar_iterator
         predvar.simplify_guard();
       }
     }
+    mCRL2log(log::verbose) << "TARGET COPY" << std::endl;
     stategraph.compute_source_target_copy();
-    stategraph.compute_source_target_copy();
-    algo.compute_global_control_flow_parameters();
+    mCRL2log(log::verbose) << "CFP calculation" << std::endl;
+    algo.run();
     is_cfp = algo.get_GCFP();
     mCRL2log(log::verbose) << "CFP flags initialized" << std::endl;
 
@@ -454,11 +214,11 @@ struct pbescegar_pbes_cegar_iterator
       const data::variable_list& params = eq.variable().parameters();
       const std::vector<bool>& cfp_flags = is_cfp[eq.variable().name()];
       mCRL2log(log::debug) << "Equation has " << params.size() << " parameters" << std::endl;
-      
-      mCRL2log(log::debug) << "Equation has " ;
+
+      mCRL2log(log::debug) << "Equation has ";
       for (const auto& flag: cfp_flags)
       {
-        mCRL2log(log::debug) << (flag) << " ";
+        mCRL2log(log::debug) << (flag ? "Y" : "N") << " ";
       }
       mCRL2log(log::debug) << "as CFP parameters" << std::endl;
 
@@ -469,8 +229,7 @@ struct pbescegar_pbes_cegar_iterator
         if (!cfp_flags[i])
         {
           sorts_to_abstract.insert(param.sort());
-          mCRL2log(log::debug) << "  Parameter " << param << " (non-CFP) has sort " << pp(param.sort())
-                             << std::endl;
+          mCRL2log(log::debug) << "  Parameter " << param << " (non-CFP) has sort " << pp(param.sort()) << std::endl;
         }
         i++;
       }
@@ -483,15 +242,26 @@ struct pbescegar_pbes_cegar_iterator
     data::data_specification abstracted_data = p.data();
     std::map<data::sort_expression, data::sort_expression> sort_map;
     std::map<data::sort_expression, data::function_symbol> abs_constructors;
+    std::string sorts_text = "sort ";
+    std::string var_text = "var ";
+    std::string eqn_text = "eqn ";
+    std::string absmap_text = "absmap ";
+    std::string absfunc_text = "absfunc ";
 
-    for (const auto& sort: sorts_to_abstract)
+    data::set_identifier_generator generator;
+
+    std::string var_bool = generator("bool");
+    var_text += var_bool + ": Bool;\n";
+
+    for (const data::sort_expression& sort: sorts_to_abstract)
     {
-      mCRL2log(log::debug) << "Processing sort for abstraction: " << core::pp(sort) << std::endl;
+      std::string org_sort_name = pp(sort[0]);
+      mCRL2log(log::debug) << "Processing sort for abstraction: " << pp(sort) << std::endl;
 
       // Create a structured sort with a single abstract constructor
       // This represents the abstraction of the entire sort into one value
-      std::string abs_sort_name = "Abs_" + core::pp(sort);
-      std::string cons_name = "abs_" + core::pp(sort);
+      std::string abs_sort_name = "Abs_" + org_sort_name;
+      std::string cons_name = "abs_" + org_sort_name;
 
       // Create constructor with no arguments
       std::vector<data::structured_sort_constructor> constructors;
@@ -499,6 +269,27 @@ struct pbescegar_pbes_cegar_iterator
 
       data::structured_sort abs_sort(constructors);
       data::basic_sort abs_sort_basic(abs_sort_name);
+      sorts_text += abs_sort_name + " = " + pp(abs_sort) + ";\n";
+
+      // Var and eqn text
+      std::string var_arb_original = generator(tolower(org_sort_name + "gen"));
+      var_text += var_arb_original + " : " + org_sort_name + ";\n";
+      eqn_text += "h(" + var_arb_original + ") = " + cons_name + ";\n";
+      absmap_text += "h: " + org_sort_name + " -> " + abs_sort_name + ";\n";
+
+      std::string var_new_1 = generator(tolower(abs_sort_name + "gen"));
+      std::string var_new_2 = generator(tolower(abs_sort_name + "gen"));
+      var_text += var_new_1 + " : " + abs_sort_name + ";\n";
+      var_text += var_new_2 + " : " + abs_sort_name + ";\n";
+      eqn_text += "abseq(" + var_new_1 + ", " + var_new_2 + ") = {true,false};\n";
+
+      eqn_text += "absif(" + var_bool + ", " + var_new_1 + ", " + var_new_2 + ") = {" + cons_name + "};\n";
+
+      absfunc_text += "if: Bool # " + org_sort_name + " # " + org_sort_name + " -> " + org_sort_name
+                      + " := absif: Bool # " + abs_sort_name + " # " + abs_sort_name + " -> Set(" + abs_sort_name
+                      + ")\n";
+      absfunc_text += "==: " + org_sort_name + " # " + org_sort_name + " -> Bool := abseq: " + abs_sort_name + " # "
+                      + abs_sort_name + " -> Set(Bool)\n";
 
       // Add the sort as an alias to the structured sort
       try
@@ -511,7 +302,6 @@ struct pbescegar_pbes_cegar_iterator
         // Get the constructor function and add it
         mCRL2log(log::debug) << "Adding constructor for " << cons_name << std::endl;
         data::function_symbol cons = constructors[0].constructor_function(abs_sort_basic);
-        abstracted_data.add_constructor(cons);
 
         sort_map[sort] = abs_sort_basic;
         abs_constructors[sort] = cons;
@@ -534,73 +324,85 @@ struct pbescegar_pbes_cegar_iterator
       }
     }
 
-    mCRL2log(log::verbose) << "Abstracted data specification created" << std::endl;
-    p.data() = abstracted_data;
-    mCRL2log(log::verbose) << "Updated PBES data specification" << std::endl;
+    std::string abstraction_text
+      = sorts_text + "\n" + var_text + "\n" + eqn_text + "\n" + absmap_text + "\n" + absfunc_text + "\n";
+    absinthe_algorithm algorithm;
+    pbes p_copy = p;
+    mCRL2log(log::verbose) << "=== ABSTRACTED DATA SPECIFICATION ===" << std::endl << abstraction_text << std::endl;
+    algorithm.run(p_copy, abstraction_text, false);
+    bool result = solve_underapproximation(p_copy, options);
 
-    // Update equations: replace parameter sorts and apply A_cap
-    mCRL2log(log::verbose) << "Updating equations with abstraction..." << std::endl;
-    std::vector<pbes_equation> new_equations;
-    for (auto& eq: p.equations())
-    {
-      mCRL2log(log::debug) << "Processing equation: " << eq.variable().name() << std::endl;
-      data::variable_list new_params;
-      const auto& cfp_flags = is_cfp[eq.variable().name()];
-
-      std::size_t i = 0;
-      for (const auto& param: eq.variable().parameters())
-      {
-        // Keep CFP parameters unchanged
-        if (cfp_flags[i])
-        {
-          new_params.push_front(param);
-        }
-        else
-        {
-          auto it = sort_map.find(param.sort());
-          if (it != sort_map.end())
-          {
-            new_params.push_front(data::variable(param.name(), it->second));
-          }
-          else
-          {
-            new_params.push_front(param);
-          }
-        }
-        ++i;
-      }
-
-      propositional_variable new_var(eq.variable().name(), new_params);
-      mCRL2log(log::debug) << "Applying A_cap to formula..." << std::endl;
-      pbes_expression new_formula = apply_A_cap(eq.formula(), abs_constructors, sort_map, original_params);
-      mCRL2log(log::debug) << "A_cap applied" << std::endl;
-      pbes_equation new_eq(eq.symbol(), new_var, new_formula);
-      new_equations.push_back(new_eq);
-    }
-    p.equations() = new_equations;
-    mCRL2log(log::verbose) << "Equations updated with abstraction" << std::endl;
-
-    // Analyze and prune edges based on guard evaluation
-    mCRL2log(log::verbose) << "Analyzing and pruning edges..." << std::endl;
-    analyze_and_prune_edges(p, datar, sort_map);
-    mCRL2log(log::verbose) << "Edge analysis completed" << std::endl;
-
-    // Solve the underapproximated PBES iteratively with refinement
-    mCRL2log(log::verbose) << "Starting iterative CEGAR solving..." << std::endl;
-    bool result = solve_underapproximation(p);
     mCRL2log(log::verbose) << "Solving completed with result: " << (result ? "TRUE" : "FALSE") << std::endl;
 
-    if (result)
-    {
-      mCRL2log(log::verbose) << "Underapproximation returned true - problem solved!" << std::endl;
-    }
-    else
-    {
-      mCRL2log(log::verbose) << "Underapproximation returned false - need refinement" << std::endl;
-      mCRL2log(log::verbose) << "Note: Full iterative refinement loop not yet enabled" << std::endl;
-    }
+    // mCRL2log(log::verbose) << "Abstracted data specification created" << std::endl;
+    // p.data() = abstracted_data;
+    // mCRL2log(log::verbose) << "Updated PBES data specification" << std::endl;
 
-    mCRL2log(log::verbose) << "=== CEGAR RUN COMPLETED ===" << std::endl;
+    // Update equations: replace parameter sorts and apply A_cap
+    // mCRL2log(log::verbose) << "Updating equations with abstraction..." << std::endl;
+    // std::vector<pbes_equation> new_equations;
+    // for (auto& eq: p.equations())
+    // {
+    //   mCRL2log(log::debug) << "Processing equation: " << eq.variable().name() << std::endl;
+    //   data::variable_list new_params;
+    //   const auto& cfp_flags = is_cfp[eq.variable().name()];
+
+    //   auto vec = as_vector(eq.variable().parameters());
+    //   std::size_t size = eq.variable().parameters().size();
+    //   for (int i = size - 1; i >= 0; i--)
+    //   {
+    //     data::variable param = atermpp::down_cast<data::variable>(vec[i]);
+    //     // Keep CFP parameters unchanged
+    //     if (cfp_flags[i])
+    //     {
+    //       new_params.push_front(param);
+    //     }
+    //     else
+    //     {
+    //       auto it = sort_map.find(param.sort());
+    //       if (it != sort_map.end())
+    //       {
+    //         new_params.push_front(data::variable(param.name(), it->second));
+    //       }
+    //       else
+    //       {
+    //         new_params.push_front(param);
+    //       }
+    //     }
+    //   }
+
+    //   propositional_variable new_var(eq.variable().name(), new_params);
+    //   mCRL2log(log::debug) << "Applying A_cap to formula..." << std::endl;
+    //   pbes_expression new_formula = apply_A_cap(eq.formula(), abs_constructors, sort_map, original_params);
+    //   mCRL2log(log::debug) << "A_cap applied" << std::endl;
+    //   pbes_equation new_eq(eq.symbol(), new_var, new_formula);
+    //   new_equations.push_back(new_eq);
+    // }
+    //   p.equations() = new_equations;
+    //   mCRL2log(log::verbose) << "Equations updated with abstraction" << std::endl;
+    //   mCRL2log(log::verbose) << pp(p) << std::endl;
+
+    //   // Analyze and prune edges based on guard evaluation
+    //   mCRL2log(log::verbose) << "Analyzing and pruning edges..." << std::endl;
+    //   analyze_and_prune_edges(p, datar, sort_map);
+    //   mCRL2log(log::verbose) << "Edge analysis completed" << std::endl;
+
+    //   // Solve the underapproximated PBES iteratively with refinement
+    //   mCRL2log(log::verbose) << "Starting iterative CEGAR solving..." << std::endl;
+    //   bool result = solve_underapproximation(p);
+    //   mCRL2log(log::verbose) << "Solving completed with result: " << (result ? "TRUE" : "FALSE") << std::endl;
+
+    //   if (result)
+    //   {
+    //     mCRL2log(log::verbose) << "Underapproximation returned true - problem solved!" << std::endl;
+    //   }
+    //   else
+    //   {
+    //     mCRL2log(log::verbose) << "Underapproximation returned false - need refinement" << std::endl;
+    //     mCRL2log(log::verbose) << "Note: Full iterative refinement loop not yet enabled" << std::endl;
+    //   }
+
+    //   mCRL2log(log::verbose) << "=== CEGAR RUN COMPLETED ===" << std::endl;
   }
 };
 
