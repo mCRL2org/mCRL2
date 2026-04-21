@@ -44,6 +44,7 @@
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/pbes/unify_parameters.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include <chrono>
 #include <cstddef>
@@ -62,128 +63,53 @@ struct pbescegar_options
 struct pbescegar_pbes_cegar_iterator
 {
   // Solves the underapproximated PBES using structure graph solving
-  bool solve_underapproximation(pbes& p, pbescegar_options options)
+  bool solve_approximation(const pbes& p,
+    pbescegar_options options,
+    const std::string& abstraction_text,
+    const bool& is_overapproximation)
   {
-    mCRL2log(log::verbose) << "Solving underapproximated PBES using structure graph..." << std::endl;
+    mCRL2log(log::verbose) << "Solving " << (is_overapproximation ? "over" : "under")
+                           << "approximated PBES using structure graph..." << std::endl;
+
+    data::mutable_map_substitution<> sigma;
+    pbes p_copy(p);
+    sigma = pbes_system::detail::instantiate_global_variables(p_copy);
+    pbes_system::detail::replace_global_variables(p_copy, sigma);
+
+    absinthe_algorithm algorithm;
+    algorithm.run(p_copy, abstraction_text, is_overapproximation);
 
     try
     {
       // Normalize the PBES
-      algorithms::normalize(p);
+      algorithms::normalize(p_copy);
 
       pbessolve_options options2;
       options2.rewrite_strategy = options.rewrite_strategy;
 
       // Build the structure graph from the PBES
-      data::mutable_map_substitution<> sigma;
-      sigma = pbes_system::detail::instantiate_global_variables(p);
-      pbes_system::detail::replace_global_variables(p, sigma);
 
       structure_graph G;
-      pbesinst_structure_graph_algorithm algorithm(options2, p, G);
+      pbesinst_structure_graph_algorithm algorithm(options2, p_copy, G);
       algorithm.run();
 
       // Solve the structure graph
       bool result = solve_structure_graph(G);
-
-      if (result)
-      {
-        mCRL2log(log::verbose) << "Structure graph solver returned TRUE" << std::endl;
-      }
-      else
-      {
-        mCRL2log(log::verbose) << "Structure graph solver returned FALSE" << std::endl;
-      }
-
+      mCRL2log(log::debug) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
       return result;
     }
     catch (const std::exception& e)
     {
-      mCRL2log(log::warning) << "Exception during PBES solving: " << e.what() << std::endl;
-      mCRL2log(log::warning) << "Defaulting to FALSE" << std::endl;
-      return false;
+      throw mcrl2::runtime_error("Exception during structure graph solving: " + std::string(e.what()));
     }
   }
 
-  // Iterative refinement: progressively un-abstract parameters
-  void iterative_refinement(pbes& p,
-    pbescegar_options options,
-    const detail::stategraph_global_algorithm& algorithm,
-    std::set<data::sort_expression>& sorts_to_abstract,
-    std::size_t max_iterations = 10)
+  // Helper: Calculate Control Flow Parameters (CFP)
+  std::map<core::identifier_string, std::vector<bool>>
+  calculate_cfp(pbes& p, detail::stategraph_pbes& stategraph, data::rewriter& datar)
   {
-    for (std::size_t iteration = 0; iteration < max_iterations; ++iteration)
-    {
-      mCRL2log(log::verbose) << "=== CEGAR Iteration " << iteration << " ===" << std::endl;
-      mCRL2log(log::verbose) << "Currently abstracting " << sorts_to_abstract.size() << " sorts" << std::endl;
-
-      // Solve current underapproximation
-      bool result = solve_underapproximation(p, options);
-
-      if (result)
-      {
-        mCRL2log(log::verbose) << "Underapproximation returned TRUE - problem solved!" << std::endl;
-        return;
-      }
-
-      // If underapproximation is false, need to refine
-      // Pick a new sort to un-abstract (add back to the PBES)
-      if (sorts_to_abstract.empty())
-      {
-        mCRL2log(log::verbose) << "No more sorts to abstract - problem likely FALSE" << std::endl;
-        return;
-      }
-
-      // Remove the first abstracted sort and re-solve
-      auto sort_to_refine = *sorts_to_abstract.begin();
-      sorts_to_abstract.erase(sorts_to_abstract.begin());
-
-      mCRL2log(log::verbose) << "Refining: removing abstraction of sort " << core::pp(sort_to_refine) << std::endl;
-
-      // Reconstruct PBES with one fewer abstracted sort and iterate
-      // To do this, we need to reload the original PBES and apply abstraction
-      // only with the reduced set of sorts
-
-      mCRL2log(log::debug) << "Reconstructing PBES with reduced abstraction set..." << std::endl;
-      // The current iteration removes one sort from sorts_to_abstract
-      // We would need to reload the original PBES and reapply abstraction
-      // This is a placeholder for the next iteration of refinement
-      mCRL2log(log::verbose) << "Restarting with reduced abstraction set (not yet fully implemented)" << std::endl;
-    }
-
-    mCRL2log(log::verbose) << "Maximum iterations reached" << std::endl;
-  }
-
-  std::string tolower(const std::string& str)
-  {
-    std::string result = str;
-    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-    return result;
-  }
-
-  bool run(pbes& p, pbescegar_options options)
-  {
-    mCRL2log(log::verbose) << "=== CEGAR RUN STARTING ===" << std::endl;
-    mCRL2log(log::verbose) << "Number of equations: " << p.equations().size() << std::endl;
-
-    // Store original parameters for each propositional variable
-    data::rewriter datar(p.data(), options.rewrite_strategy);
-    std::map<core::identifier_string, data::variable_list> original_params;
-    for (const auto& eq: p.equations())
-    {
-      original_params[eq.variable().name()] = eq.variable().parameters();
-    }
-    mCRL2log(log::verbose) << "Original parameters stored" << std::endl;
-
-    // Collect control flow parameters (CFP) from the PBES structure
-    // For now, we identify CFPs as parameters that appear in guards
-    // and parameters that flow unchanged through all equations
-    std::map<core::identifier_string, std::vector<bool>> is_cfp;
-
-    // Initialize: assume all parameters might be CFP
     pbesstategraph_options opts;
     detail::stategraph_algorithm algo(p, opts);
-    detail::stategraph_pbes stategraph(p, datar);
     simplify_data_rewriter<data::rewriter> pbes_default_rewriter(datar);
 
     // Preparation
@@ -198,17 +124,24 @@ struct pbescegar_pbes_cegar_iterator
     stategraph.compute_source_target_copy();
     mCRL2log(log::verbose) << "CFP calculation" << std::endl;
     algo.run();
-    is_cfp = algo.get_GCFP();
+    std::map<core::identifier_string, std::vector<bool>> is_cfp = algo.get_GCFP();
     mCRL2log(log::verbose) << "CFP flags initialized" << std::endl;
 
-    // Collect sorts to abstract: sorts used in non-CFP parameters
+    return is_cfp;
+  }
+
+  // Helper: Collect sorts of non-CFP parameters
+  std::set<data::sort_expression> collect_sorts_to_abstract(pbes& p,
+    const std::map<core::identifier_string, std::vector<bool>>& is_cfp)
+  {
     mCRL2log(log::verbose) << "Collecting sorts to abstract..." << std::endl;
     std::set<data::sort_expression> sorts_to_abstract;
+
     for (const auto& eq: p.equations())
     {
       mCRL2log(log::debug) << "Processing equation: " << eq.variable().name() << std::endl;
       const data::variable_list& params = eq.variable().parameters();
-      const std::vector<bool>& cfp_flags = is_cfp[eq.variable().name()];
+      const std::vector<bool>& cfp_flags = is_cfp.at(eq.variable().name());
       mCRL2log(log::debug) << "Equation has " << params.size() << " parameters" << std::endl;
 
       mCRL2log(log::debug) << "Equation has ";
@@ -232,8 +165,12 @@ struct pbescegar_pbes_cegar_iterator
     }
 
     mCRL2log(log::verbose) << "Abstracting " << sorts_to_abstract.size() << " non-CFP sorts" << std::endl;
+    return sorts_to_abstract;
+  }
 
-    // Create abstracted data specification with structured sorts
+  // Helper: Create abstracted data specification with abstract constructors
+  std::string create_abstraction_specification(const pbes& p, const std::set<data::sort_expression>& sorts_to_abstract)
+  {
     mCRL2log(log::verbose) << "Creating abstracted data specification..." << std::endl;
     data::data_specification abstracted_data = p.data();
     std::map<data::sort_expression, data::sort_expression> sort_map;
@@ -248,11 +185,6 @@ struct pbescegar_pbes_cegar_iterator
 
     std::string var_bool = generator("bool");
     var_text += var_bool + ": Bool;\n";
-
-    // std::string var_pos = generator("posgen");
-    // var_text += var_pos + ": Pos;\n";
-    // eqn_text += "@absmost_significant_digit(" + var_pos + ") = {@most_significant_digit(" + var_pos + ")};\n";
-    // absfunc_text += "@most_significant_digit: @word -> Pos := @absmost_significant_digit: @word -> Set(Pos)\n";
 
     for (const data::sort_expression& sort: sorts_to_abstract)
     {
@@ -288,12 +220,6 @@ struct pbescegar_pbes_cegar_iterator
       absfunc_text += "if: Bool # " + org_sort_name + " # " + org_sort_name + " -> " + org_sort_name
                       + " := absif: Bool # " + abs_sort_name + " # " + abs_sort_name + " -> Set(" + abs_sort_name
                       + ")\n";
-      // eqn_text += "absif(true, " + var_new_1 + ", " + var_new_2 + ") = " + var_new_1 + ";\n";
-      // eqn_text += "absif(false, " + var_new_1 + ", " + var_new_2 + ") = " + var_new_2 + ";\n";
-      // eqn_text += "absif("+var_bool+", " + var_new_1 + ", " + var_new_1 + ") = " + var_new_1 + ";\n";
-      // absfunc_text += "if: Bool # " + org_sort_name + " # " + org_sort_name + " -> " + org_sort_name
-      //                 + " := absif: Bool # " + abs_sort_name + " # " + abs_sort_name + " -> (" + abs_sort_name
-      //                 + ")\n";
 
       absfunc_text += "==: " + org_sort_name + " # " + org_sort_name + " -> Bool := abseq: " + abs_sort_name + " # "
                       + abs_sort_name + " -> Set(Bool)\n";
@@ -333,14 +259,96 @@ struct pbescegar_pbes_cegar_iterator
 
     std::string abstraction_text
       = sorts_text + "\n" + var_text + "\n" + eqn_text + "\n" + absmap_text + "\n" + absfunc_text + "\n";
-    absinthe_algorithm algorithm;
-    pbes p_copy = p;
-    algorithm.run(p_copy, abstraction_text, false);
-    bool result = solve_underapproximation(p_copy, options);
+    return abstraction_text;
+  }
 
-    mCRL2log(log::verbose) << "Solving completed with result: " << (result ? "TRUE" : "FALSE") << std::endl;
+  // Iterative refinement: progressively un-abstract parameters
+  void update_parameters(const pbes& p, std::set<data::sort_expression>& sorts_to_abstract)
+  {
+    mCRL2log(log::verbose) << "Updating parameters for refinement..." << std::endl;
 
+    // Find the first parameter in the first equation that is not yet enabled
+    for (const pbes_equation& eq: p.equations())
+    {
+      mCRL2log(log::debug) << "for loop" << std::endl;
+      const std::vector<data::variable>& original_vars = as_vector(eq.variable().parameters());
+
+      mCRL2log(log::debug) << "Checking equation: " << eq.variable().name() << std::endl;
+
+      // Iterate through parameters
+      for (std::size_t i = 0; i < original_vars.size(); ++i)
+      {
+        const data::variable& param = atermpp::down_cast<data::variable>(original_vars[i]);
+
+        // Check if this parameter is CFP (control flow) - if so, skip
+        if (sorts_to_abstract.find(param.sort()) != sorts_to_abstract.end())
+        {
+          mCRL2log(log::verbose) << "Enabling parameter " << i << " (" << param << ") in equation "
+                                 << eq.variable().name() << std::endl;
+          mCRL2log(log::verbose) << "  Sort: " << pp(param.sort()) << std::endl;
+
+          // Remove this sort from sorts_to_abstract
+          sorts_to_abstract.erase(param.sort());
+          mCRL2log(log::verbose) << "Removed sort " << pp(param.sort()) << " from abstraction" << std::endl;
+          mCRL2log(log::verbose) << "Remaining sorts to abstract: " << sorts_to_abstract << std::endl;
+          return;
+        }
+      }
+    }
+  }
+
+  void report_abstracted_sorts(const std::set<data::sort_expression>& sorts_to_abstract)
+  {
+    mCRL2log(log::verbose) << "Abstracted sorts: " << sorts_to_abstract << std::endl;
+  }
+  
+  std::string tolower(const std::string& str)
+  {
+    std::string result = str;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
     return result;
+  }
+
+  bool run(pbes& p, pbescegar_options options)
+  {
+    mCRL2log(log::verbose) << "=== CEGAR RUN STARTING ===" << std::endl;
+    mCRL2log(log::verbose) << "Number of equations: " << p.equations().size() << std::endl;
+
+    // Step 1: Initialize structures
+    data::rewriter datar(p.data(), options.rewrite_strategy);
+    detail::stategraph_pbes stategraph(p, datar);
+
+    // Step 2: Calculate Control Flow Parameters
+    std::map<core::identifier_string, std::vector<bool>> is_cfp = calculate_cfp(p, stategraph, datar);
+
+    // Step 3: Collect sorts to abstract (non-CFP parameters)
+    std::set<data::sort_expression> sorts_to_abstract = collect_sorts_to_abstract(p, is_cfp);
+    bool tried_all = false;
+    do
+    {
+      // Step 4: Create abstraction specification and solve
+      std::string abstraction_text = create_abstraction_specification(p, sorts_to_abstract);
+
+      bool under_result = solve_approximation(p, options, abstraction_text, false);
+      if (under_result)
+      {
+          report_abstracted_sorts(sorts_to_abstract);
+          return true;
+      }
+      bool over_result = solve_approximation(p, options, abstraction_text, true);
+      if (!over_result)
+      {
+          report_abstracted_sorts(sorts_to_abstract);
+        return false;
+      }
+
+      tried_all = sorts_to_abstract.size() == 0;
+
+      update_parameters(p, sorts_to_abstract);
+    }
+    while (!tried_all);
+
+    throw mcrl2::runtime_error("Could not find a solution");
   }
 };
 
