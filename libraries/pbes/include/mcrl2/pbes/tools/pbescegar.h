@@ -62,6 +62,21 @@ struct pbescegar_options
 
 struct pbescegar_pbes_cegar_iterator
 {
+  bool solve(const pbes& p, pbescegar_options options)
+  {
+    pbessolve_options options2;
+    options2.rewrite_strategy = options.rewrite_strategy;
+
+    structure_graph G;
+    pbesinst_structure_graph_algorithm algorithm(options2, p, G);
+    algorithm.run();
+
+    // Solve the structure graph
+    bool result = solve_structure_graph(G);
+    mCRL2log(log::debug) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
+    return result;
+  }
+
   // Solves the underapproximated PBES using structure graph solving
   bool solve_approximation(const pbes& p,
     pbescegar_options options,
@@ -81,22 +96,7 @@ struct pbescegar_pbes_cegar_iterator
 
     try
     {
-      // Normalize the PBES
-      algorithms::normalize(p_copy);
-
-      pbessolve_options options2;
-      options2.rewrite_strategy = options.rewrite_strategy;
-
-      // Build the structure graph from the PBES
-
-      structure_graph G;
-      pbesinst_structure_graph_algorithm algorithm(options2, p_copy, G);
-      algorithm.run();
-
-      // Solve the structure graph
-      bool result = solve_structure_graph(G);
-      mCRL2log(log::debug) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
-      return result;
+      return solve(p_copy, options);
     }
     catch (const std::exception& e)
     {
@@ -120,12 +120,9 @@ struct pbescegar_pbes_cegar_iterator
         predvar.simplify_guard();
       }
     }
-    mCRL2log(log::verbose) << "TARGET COPY" << std::endl;
     stategraph.compute_source_target_copy();
-    mCRL2log(log::verbose) << "CFP calculation" << std::endl;
     algo.run();
     std::map<core::identifier_string, std::vector<bool>> is_cfp = algo.get_GCFP();
-    mCRL2log(log::verbose) << "CFP flags initialized" << std::endl;
 
     return is_cfp;
   }
@@ -134,7 +131,7 @@ struct pbescegar_pbes_cegar_iterator
   std::set<data::sort_expression> collect_sorts_to_abstract(pbes& p,
     const std::map<core::identifier_string, std::vector<bool>>& is_cfp)
   {
-    mCRL2log(log::verbose) << "Collecting sorts to abstract..." << std::endl;
+    mCRL2log(log::debug) << "Collecting sorts to abstract..." << std::endl;
     std::set<data::sort_expression> sorts_to_abstract;
 
     for (const auto& eq: p.equations())
@@ -164,7 +161,7 @@ struct pbescegar_pbes_cegar_iterator
       }
     }
 
-    mCRL2log(log::verbose) << "Abstracting " << sorts_to_abstract.size() << " non-CFP sorts" << std::endl;
+    mCRL2log(log::debug) << "Abstracting " << sorts_to_abstract.size() << " non-CFP sorts" << std::endl;
     return sorts_to_abstract;
   }
 
@@ -285,12 +282,12 @@ struct pbescegar_pbes_cegar_iterator
         {
           mCRL2log(log::verbose) << "Enabling parameter " << i << " (" << param << ") in equation "
                                  << eq.variable().name() << std::endl;
-          mCRL2log(log::verbose) << "  Sort: " << pp(param.sort()) << std::endl;
+          mCRL2log(log::debug) << "  Sort: " << pp(param.sort()) << std::endl;
 
           // Remove this sort from sorts_to_abstract
           sorts_to_abstract.erase(param.sort());
-          mCRL2log(log::verbose) << "Removed sort " << pp(param.sort()) << " from abstraction" << std::endl;
-          mCRL2log(log::verbose) << "Remaining sorts to abstract: " << sorts_to_abstract << std::endl;
+          mCRL2log(log::debug) << "Removed sort " << pp(param.sort()) << " from abstraction" << std::endl;
+          mCRL2log(log::verbose) << "Remaining sorts to abstract: " << pp(sorts_to_abstract) << std::endl;
           return;
         }
       }
@@ -299,9 +296,9 @@ struct pbescegar_pbes_cegar_iterator
 
   void report_abstracted_sorts(const std::set<data::sort_expression>& sorts_to_abstract)
   {
-    mCRL2log(log::verbose) << "Abstracted sorts: " << sorts_to_abstract << std::endl;
+    mCRL2log(log::verbose) << "Abstracted sorts: " << pp(sorts_to_abstract) << std::endl;
   }
-  
+
   std::string tolower(const std::string& str)
   {
     std::string result = str;
@@ -311,9 +308,6 @@ struct pbescegar_pbes_cegar_iterator
 
   bool run(pbes& p, pbescegar_options options)
   {
-    mCRL2log(log::verbose) << "=== CEGAR RUN STARTING ===" << std::endl;
-    mCRL2log(log::verbose) << "Number of equations: " << p.equations().size() << std::endl;
-
     // Step 1: Initialize structures
     data::rewriter datar(p.data(), options.rewrite_strategy);
     detail::stategraph_pbes stategraph(p, datar);
@@ -326,19 +320,25 @@ struct pbescegar_pbes_cegar_iterator
     bool tried_all = false;
     do
     {
+      if (sorts_to_abstract.size() == 0)
+      {
+        mCRL2log(log::verbose) << "No sorts to abstract, solving normally." << std::endl;
+        return solve(p, options);
+      }
+
       // Step 4: Create abstraction specification and solve
       std::string abstraction_text = create_abstraction_specification(p, sorts_to_abstract);
 
       bool under_result = solve_approximation(p, options, abstraction_text, false);
       if (under_result)
       {
-          report_abstracted_sorts(sorts_to_abstract);
-          return true;
+        report_abstracted_sorts(sorts_to_abstract);
+        return true;
       }
       bool over_result = solve_approximation(p, options, abstraction_text, true);
       if (!over_result)
       {
-          report_abstracted_sorts(sorts_to_abstract);
+        report_abstracted_sorts(sorts_to_abstract);
         return false;
       }
 
@@ -355,27 +355,17 @@ struct pbescegar_pbes_cegar_iterator
 inline bool
 pbescegar(const std::string& input_filename, const utilities::file_format& input_format, pbescegar_options options)
 {
-  mCRL2log(log::verbose) << "=== PBESCEGAR STARTING ===" << std::endl;
-
   pbes p;
-  mCRL2log(log::verbose) << "Loading PBES from " << input_filename << std::endl;
   load_pbes(p, input_filename, input_format);
-  mCRL2log(log::verbose) << "PBES loaded successfully. Equations: " << p.equations().size() << std::endl;
-
-  mCRL2log(log::verbose) << "Normalizing PBES..." << std::endl;
   algorithms::normalize(p);
-  mCRL2log(log::verbose) << "PBES normalized successfully" << std::endl;
 
-  mCRL2log(log::verbose) << "Running CEGAR iterator..." << std::endl;
   pbescegar_pbes_cegar_iterator iterator;
   bool result = iterator.run(p, options);
-  mCRL2log(log::verbose) << "CEGAR iterator completed" << std::endl;
 
   // mCRL2log(log::verbose) << "Saving PBES to " << output_filename << std::endl;
   // save_pbes(p, output_filename, output_format);
   // mCRL2log(log::verbose) << "PBES saved successfully" << std::endl;
 
-  mCRL2log(log::verbose) << "=== PBESCEGAR COMPLETED ===" << std::endl;
   mCRL2log(log::info) << (result ? "true" : "false") << std::endl;
   return result;
 }
