@@ -18,6 +18,9 @@ namespace mcrl2::lps::detail
 /// \brief If true, statistics are logged for the linearisation of allow and block operators.
 constexpr bool EnableLineariseStatistics = false;
 
+/// \brief If true, statistics are logged for the symbolic exploration of LPSs in lpsreach.
+constexpr bool EnableSymbolicExplorationStatistics = false;
+
 } // namespace mcrl2::lps::detail
 
 #endif // MCRL2_LPS_DETAIL_CONFIGURATION_H_
