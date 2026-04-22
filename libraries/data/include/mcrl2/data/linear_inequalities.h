@@ -1295,7 +1295,7 @@ static void pivot_and_update(
 namespace detail
 {
   /* False end nodes could be associated with NULL */
-using node_type = enum
+enum node_type
 {
   true_end_node,
   false_end_node,
