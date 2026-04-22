@@ -18,7 +18,7 @@ namespace mcrl2::lps
 {
 
 /// \brief The available linearisation methods
-using t_lin_method = enum
+enum t_lin_method
 {
   lmStack,
   lmRegular,
