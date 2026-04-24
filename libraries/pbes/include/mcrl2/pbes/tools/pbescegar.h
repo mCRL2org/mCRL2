@@ -18,35 +18,31 @@
 #define MCRL2_PBES_TOOLS_PBESCEGAR_H
 
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/detail/iteration_builders.h"
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
-#include "mcrl2/pbes/detail/stategraph_global_graph.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
-#include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/pbesinst_lazy_counter_example.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/pbessolve_options.h"
-#include "mcrl2/pbes/resolve_name_clashes.h"
-#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriters/dataspec_prune_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
-#include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
-#include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
-#include <chrono>
 #include <cstddef>
 #include <iostream>
 #include <map>
@@ -58,17 +54,45 @@ namespace mcrl2::pbes_system
 struct pbescegar_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
+  bool init_control_flow = false;
 };
 
 struct pbescegar_pbes_cegar_iterator
 {
   bool solve(const pbes& p, pbescegar_options options)
   {
+      data::rewriter datar(p.data(), options.rewrite_strategy);
+    // simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(datar);
+    pbes p_copy;
+    mCRL2log(log::debug) << "MY BEFORE" << pp(p) << "MY END" << std::endl;
+    p_copy.data() = p.data();
+    p_copy.global_variables() = p.global_variables();
+    p_copy.equations() = p.equations();
+    p_copy.initial_state() = p.initial_state();
+    simplify_data_rewriter<data::rewriter> pbesr(datar);
+    dataspec_prune_rewriter rewr;
+    mCRL2log(log::verbose) << "Normal rewr" << std::endl;
+    pbes_rewrite(p_copy, pbesr);
+    mCRL2log(log::verbose) << "Data spec rewr" << std::endl;
+    p_copy = rewr(p_copy);
+    quantifiers_inside_rewriter pbesr_inside;
+    mCRL2log(log::verbose) << "Inside" << std::endl;
+    pbes_rewrite(p_copy, pbesr_inside);
+    one_point_rule_rewriter pbesr_one_point;
+    mCRL2log(log::verbose) << "One point" << std::endl;
+    replace_pbes_expressions(p_copy, pbesr_one_point, false);
+    mCRL2log(log::verbose) << "Regular" << std::endl;
+    pbes_rewrite(p_copy, pbesr);
+    mCRL2log(log::verbose) << "Data prune" << std::endl;
+    p_copy = rewr(p_copy);
+    
+    mCRL2log(log::debug) << "MY APPROX" << pp(p_copy)<< "MY END" << std::endl;
+
     pbessolve_options options2;
     options2.rewrite_strategy = options.rewrite_strategy;
 
     structure_graph G;
-    pbesinst_structure_graph_algorithm algorithm(options2, p, G);
+    pbesinst_structure_graph_algorithm algorithm(options2, p_copy, G);
     algorithm.run();
 
     // Solve the structure graph
@@ -83,8 +107,8 @@ struct pbescegar_pbes_cegar_iterator
     const std::string& abstraction_text,
     const bool& is_overapproximation)
   {
-    mCRL2log(log::verbose) << "Solving " << (is_overapproximation ? "over" : "under")
-                           << "approximated PBES using structure graph..." << std::endl;
+    mCRL2log(log::verbose) << "Calculating " << (is_overapproximation ? "over" : "under") << "approximation"
+                           << std::endl;
 
     data::mutable_map_substitution<> sigma;
     pbes p_copy(p);
@@ -96,6 +120,8 @@ struct pbescegar_pbes_cegar_iterator
 
     try
     {
+      mCRL2log(log::verbose) << "Solving " << (is_overapproximation ? "over" : "under")
+                             << "approximated PBES using structure graph..." << std::endl;
       return solve(p_copy, options);
     }
     catch (const std::exception& e)
@@ -106,23 +132,33 @@ struct pbescegar_pbes_cegar_iterator
 
   // Helper: Calculate Control Flow Parameters (CFP)
   std::map<core::identifier_string, std::vector<bool>>
-  calculate_cfp(pbes& p, detail::stategraph_pbes& stategraph, data::rewriter& datar)
+  calculate_cfp(pbes& p, pbescegar_options& options, const bool use_init_control_flow)
   {
+    std::map<core::identifier_string, std::vector<bool>> is_cfp;
+    if (!use_init_control_flow)
+    {
+      for (pbes_equation& equation: p.equations())
+      {
+        is_cfp[equation.variable().name()] = std::vector<bool>(equation.variable().parameters().size(), false);
+      }
+      return is_cfp;
+    }
+    data::rewriter datar(p.data(), options.rewrite_strategy);
+    detail::stategraph_pbes stategraph(p, datar);
     pbesstategraph_options opts;
     detail::stategraph_algorithm algo(p, opts);
-    simplify_data_rewriter<data::rewriter> pbes_default_rewriter(datar);
-
-    // Preparation
     for (detail::stategraph_equation& equation: stategraph.equations())
     {
+      is_cfp[equation.variable().name()] = std::vector<bool>(equation.parameters().size(), false);
       for (detail::predicate_variable& predvar: equation.predicate_variables())
       {
         predvar.simplify_guard();
       }
     }
+    return is_cfp;
     stategraph.compute_source_target_copy();
     algo.run();
-    std::map<core::identifier_string, std::vector<bool>> is_cfp = algo.get_GCFP();
+    is_cfp = algo.get_GCFP();
 
     return is_cfp;
   }
@@ -165,6 +201,14 @@ struct pbescegar_pbes_cegar_iterator
     return sorts_to_abstract;
   }
 
+  std::string sanitize(const std::string& term)
+  {
+    std::string result = term;
+    result.erase(std::remove(result.begin(), result.end(), '('), result.end());
+    result.erase(std::remove(result.begin(), result.end(), ')'), result.end());
+    return result;
+  }
+
   // Helper: Create abstracted data specification with abstract constructors
   std::string create_abstraction_specification(const pbes& p, const std::set<data::sort_expression>& sorts_to_abstract)
   {
@@ -185,15 +229,16 @@ struct pbescegar_pbes_cegar_iterator
 
     for (const data::sort_expression& sort: sorts_to_abstract)
     {
-      std::string org_sort_name = pp(sort[0]);
+      std::string org_sort_name = pp(sort);
+      // mCRL2log(log::verbose) << "Processing sort for abstraction: " << pp(sort[0]) << std::endl;
       mCRL2log(log::debug) << "Processing sort for abstraction: " << pp(sort) << std::endl;
 
       // Create a structured sort with a single abstract constructor
-      // This represents the abstraction of the entire sort into one value
-      std::string abs_sort_name = "Abs_" + org_sort_name;
-      std::string cons_name = "abs_" + org_sort_name;
+      // Remove any parentheses from the sort name
+      std::string san_org_sort_name = sanitize(org_sort_name);
+      std::string abs_sort_name = "Abs_" + san_org_sort_name;
+      std::string cons_name = "abs_" + san_org_sort_name;
 
-      // Create constructor with no arguments
       std::vector<data::structured_sort_constructor> constructors;
       constructors.emplace_back(cons_name);
 
@@ -202,16 +247,17 @@ struct pbescegar_pbes_cegar_iterator
       sorts_text += abs_sort_name + " = " + pp(abs_sort) + ";\n";
 
       // Var and eqn text
-      std::string var_arb_original = generator(tolower(org_sort_name + "gen"));
+      std::string var_arb_original = generator(tolower(san_org_sort_name + "gen"));
       var_text += var_arb_original + " : " + org_sort_name + ";\n";
       eqn_text += "h(" + var_arb_original + ") = " + cons_name + ";\n";
       absmap_text += "h: " + org_sort_name + " -> " + abs_sort_name + ";\n";
 
-      std::string var_new_1 = generator(tolower(abs_sort_name + "gen"));
-      std::string var_new_2 = generator(tolower(abs_sort_name + "gen"));
+      std::string var_new_1 = generator(tolower(san_org_sort_name + "gen"));
+      std::string var_new_2 = generator(tolower(san_org_sort_name) + "gen");
       var_text += var_new_1 + " : " + abs_sort_name + ";\n";
       var_text += var_new_2 + " : " + abs_sort_name + ";\n";
       eqn_text += "abseq(" + var_new_1 + ", " + var_new_2 + ") = {true,false};\n";
+      eqn_text += "" + var_new_1 + " == " + var_new_2 + " = true;\n";
 
       eqn_text += "absif(" + var_bool + ", " + var_new_1 + ", " + var_new_2 + ") = {" + cons_name + "};\n";
       absfunc_text += "if: Bool # " + org_sort_name + " # " + org_sort_name + " -> " + org_sort_name
@@ -256,6 +302,7 @@ struct pbescegar_pbes_cegar_iterator
 
     std::string abstraction_text
       = sorts_text + "\n" + var_text + "\n" + eqn_text + "\n" + absmap_text + "\n" + absfunc_text + "\n";
+    mCRL2log(log::debug) << "  Abstraction text: " << abstraction_text << std::endl;
     return abstraction_text;
   }
 
@@ -306,17 +353,34 @@ struct pbescegar_pbes_cegar_iterator
     return result;
   }
 
+  static bool is_even(data::sort_expression i)
+  {
+    mCRL2log(log::verbose) << "is_even: " << (i[0]) << std::endl;
+    return pp(i[0]) == "ControlPhase";
+  }
+
   bool run(pbes& p, pbescegar_options options)
   {
     // Step 1: Initialize structures
-    data::rewriter datar(p.data(), options.rewrite_strategy);
-    detail::stategraph_pbes stategraph(p, datar);
-
+    
     // Step 2: Calculate Control Flow Parameters
-    std::map<core::identifier_string, std::vector<bool>> is_cfp = calculate_cfp(p, stategraph, datar);
+    std::map<core::identifier_string, std::vector<bool>> is_cfp = calculate_cfp(p, options, options.init_control_flow);
 
     // Step 3: Collect sorts to abstract (non-CFP parameters)
     std::set<data::sort_expression> sorts_to_abstract = collect_sorts_to_abstract(p, is_cfp);
+    sorts_to_abstract.erase(data::sort_nat::nat());
+    sorts_to_abstract.erase(data::sort_pos::pos());
+    sorts_to_abstract.erase(data::sort_bool::bool_());
+    sorts_to_abstract.erase(data::sort_real::real_());
+    sorts_to_abstract.erase(data::sort_list::list(data::sort_bool::bool_()));
+    sorts_to_abstract.erase(data::sort_list::list(data::sort_nat::nat()));
+    sorts_to_abstract.erase(data::sort_list::list(data::sort_real::real_()));
+    auto it = std::find_if(sorts_to_abstract.begin(), sorts_to_abstract.end(), is_even);
+    if (it != sorts_to_abstract.end())
+    {
+      sorts_to_abstract.erase(it);
+    }
+    mCRL2log(log::verbose) << "Abstracted sorts: " << pp(sorts_to_abstract) << std::endl;
     bool tried_all = false;
     do
     {
@@ -352,13 +416,15 @@ struct pbescegar_pbes_cegar_iterator
   }
 };
 
-inline bool
-pbescegar(const std::string& input_filename, const utilities::file_format& input_format, pbescegar_options options)
+inline bool pbescegar(const std::string& input_filename,
+  const utilities::file_format& input_format,
+  const pbescegar_options options)
 {
   pbes p;
   load_pbes(p, input_filename, input_format);
   algorithms::normalize(p);
 
+  // TODO: Error when encountering implication
   pbescegar_pbes_cegar_iterator iterator;
   bool result = iterator.run(p, options);
 
