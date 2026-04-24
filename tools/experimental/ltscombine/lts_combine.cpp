@@ -502,7 +502,8 @@ private:
     auto filter_and_report = [this, state_index](const lps::multi_action& candidate_label,
                                                    const std::vector<state_t>& target_state)
     {
-      lps::multi_action label = candidate_label;
+      std::function<bool(const process::action&, const process::action&)> action_compare = process::action_compare();
+      lps::multi_action label(atermpp::sort_list(candidate_label.actions(), action_compare), candidate_label.time());
 
       mCRL2log(log::debug) << lps::pp(label) << std::endl;
 
