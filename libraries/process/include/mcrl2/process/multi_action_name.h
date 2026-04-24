@@ -131,6 +131,17 @@ inline multi_action_name_set make_name_set(const action_name_multiset_list& v)
   return result;
 }
 
+inline action_name_multiset_list make_multiset_list(const multi_action_name_set& A)
+{
+  return action_name_multiset_list(
+    A.begin(),
+    A.end(),
+    [](const multi_action_name& alpha)
+    {
+      return action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end()));
+    });
+}
+
 inline bool contains(const multi_action_name_set& A, const multi_action_name& a)
 {
   // note that A implicitly contains the empty multi_action_name

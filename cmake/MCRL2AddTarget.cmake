@@ -1,7 +1,7 @@
 # This script provides several standard functions to add mCRL2 specific (gui) tools and libraries
 
 # Adds a target for an mCRL2 library.
-function(mcrl2_add_library TARGET_NAME)  
+function(mcrl2_add_library TARGET_NAME)
   set(OPTION_KW)
   set(VALUE_K)
   set(LIST_KW EXCLUDE_HEADERTEST DPARSER_SOURCES INCLUDE_DIRS SOURCES DEPENDS)
@@ -14,12 +14,12 @@ function(mcrl2_add_library TARGET_NAME)
   # For dparser grammer files we need to generate a .c file using make_dparser, and include that file as dependency.
   foreach(GRAMMER_FILE ${ARG_DPARSER_SOURCES})
 
-    # Get the absolute path to be able to run make_dparser    
+    # Get the absolute path to be able to run make_dparser
     get_filename_component(GRAMMER_ABS ${GRAMMER_FILE} ABSOLUTE)
 
     # Determine the output file, and grammar identifier
     get_filename_component(GRAMMER_NAME ${GRAMMER_FILE} NAME_WE)
-    
+
     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/source)
     set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/source/${GRAMMER_NAME}.c)
     string(REGEX REPLACE "(.*)_syntax" "\\1" GRAMMAR_IDENT ${GRAMMER_NAME})
@@ -38,11 +38,11 @@ function(mcrl2_add_library TARGET_NAME)
     list(APPEND ARG_SOURCES ${OUTPUT_FILE})
     list(APPEND DEPENDS make_${GRAMMER_NAME})
   endforeach()
-  
+
   if(MCRL2_ENABLE_HEADER_TESTS)
     mcrl2_add_header_tests(${TARGET_NAME} "include" "${ARG_EXCLUDE_HEADERTEST}")
   endif()
-  
+
   add_library(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
 
   target_link_libraries(${TARGET_NAME} PUBLIC ${ARG_DEPENDS})
@@ -74,7 +74,7 @@ function(mcrl2_add_tool TARGET_NAME)
   # Add application to the MCRL2_TOOLS
   get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
   set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TARGET_NAME}")
-    
+
   # Finds header files, can be glob since it is only used to show headers in MSVC
   file(GLOB_RECURSE TARGET_INCLUDE_FILES "*.h")
 
@@ -86,7 +86,7 @@ function(mcrl2_add_tool TARGET_NAME)
   if(MCRL2_MAN_PAGES)
     mcrl2_add_man_page(${TARGET_NAME})
   endif()
-  
+
   install(TARGETS ${TARGET_NAME}
     COMPONENT "Stable"
     RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
@@ -101,7 +101,7 @@ function(mcrl2_add_gui_tool TARGET_NAME)
   set(OPTION_KW)
   set(VALUE_KW MENUNAME DESCRIPTION ICON)
   set(LIST_KW SOURCES DEPENDS RESOURCES)
-  
+
   cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
 
   if(NOT MCRL2_ENABLE_GUI_TOOLS)
@@ -110,7 +110,7 @@ function(mcrl2_add_gui_tool TARGET_NAME)
 
   # Add application to the MCRL2_QT_APPS
   set(MCRL2_QT_APPS "${MCRL2_QT_APPS};${TARGET_NAME}" CACHE INTERNAL "")
-  
+
   # Add application to the MCRL2_TOOLS
   get_property(MCRL2_TOOLS GLOBAL PROPERTY MCRL2_TOOLS)
   set_property(GLOBAL PROPERTY MCRL2_TOOLS "${MCRL2_TOOLS},${TARGET_NAME}")
@@ -139,7 +139,7 @@ function(mcrl2_add_gui_tool TARGET_NAME)
   set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC TRUE)
   set_target_properties(${TARGET_NAME} PROPERTIES AUTOUIC TRUE)
   set_target_properties(${TARGET_NAME} PROPERTIES AUTORCC TRUE)
-    
+
   install(TARGETS ${TARGET_NAME}
     COMPONENT "Stable"
     RUNTIME DESTINATION ${MCRL2_RUNTIME_PATH}
@@ -191,12 +191,12 @@ function(mcrl2_add_tests TARGET_NAME TEST_DIR TEST_CATEGORY)
 
     # Execute the test with ctest
     if(CMAKE_CONFIGURATION_TYPES)
-      add_test(NAME ${testname} 
-        COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_CATEGORY}/$<CONFIG>/${testname}" 
+      add_test(NAME ${testname}
+        COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_CATEGORY}/$<CONFIG>/${testname}"
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/Testing/")
     else()
-      add_test(NAME ${testname} 
-        COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_CATEGORY}/${testname}" 
+      add_test(NAME ${testname}
+        COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_CATEGORY}/${testname}"
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/Testing/")
     endif()
 
@@ -204,14 +204,55 @@ function(mcrl2_add_tests TARGET_NAME TEST_DIR TEST_CATEGORY)
     set_tests_properties(${testname} PROPERTIES
       LABELS ${TEST_CATEGORY}
       ENVIRONMENT "MCRL2_COMPILEREWRITER=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter")
-  endforeach()  
+  endforeach()
+endfunction()
+
+# Finds all .cpp files in the test/ subdirectory and generates one test executable for each that
+# is subsequently added as a test executed in the Testing directory. This variant is intended for
+# tools, where the test executable must be linked against explicit dependencies and may need extra
+# support sources from the tool directory.
+function(mcrl2_add_tool_tests TARGET_NAME TEST_DIR TEST_CATEGORY)
+  set(OPTION_KW)
+  set(VALUE_KW)
+  set(LIST_KW TEST_SOURCES DEPENDS INCLUDE_DIRS)
+  cmake_parse_arguments("ARG" "${OPTION_KW}" "${VALUE_KW}" "${LIST_KW}" ${ARGN})
+
+  file(GLOB tests "${TEST_DIR}/*.cpp")
+
+  foreach(test ${tests})
+
+    get_filename_component(base ${test} NAME_WE)
+    set(testname ${TEST_CATEGORY}_${TARGET_NAME}_${base})
+
+    # Add a compilation target for test
+    add_executable(${testname} ${test} ${ARG_TEST_SOURCES})
+    set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_CATEGORY})
+    target_link_libraries(${testname} ${ARG_DEPENDS})
+    target_include_directories(${testname} PUBLIC "." ${ARG_INCLUDE_DIRS})
+
+    # Execute the test with ctest
+    if(CMAKE_CONFIGURATION_TYPES)
+      add_test(NAME ${testname}
+        COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_CATEGORY}/$<CONFIG>/${testname}"
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/Testing/")
+    else()
+      add_test(NAME ${testname}
+        COMMAND "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_CATEGORY}/${testname}"
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/Testing/")
+    endif()
+
+    # Some tests need jittyc so ensure that the compile rewriter script is available.
+    set_tests_properties(${testname} PROPERTIES
+      LABELS ${TEST_CATEGORY}
+      ENVIRONMENT "MCRL2_COMPILEREWRITER=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter")
+  endforeach()
 endfunction()
 
 # Finds all header files in the include/ directory and generates a test consisting of just
 # compiling with that file included.
 function(mcrl2_add_header_tests TARGET_NAME INCLUDE_DIR EXCLUDE_FILES)
   file(GLOB_RECURSE headers "${INCLUDE_DIR}/*.h")
-  
+
   foreach(header ${headers})
     file(RELATIVE_PATH cppname ${CMAKE_CURRENT_SOURCE_DIR}/include ${header})
     file(TO_CMAKE_PATH ${cppname} cppname)
@@ -270,6 +311,6 @@ function(mcrl2_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_F
     configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
     install(FILES ${DESKTOP_FILE} DESTINATION share/applications)
   endif()
-  
+
   set(${SOURCE_FILES} "${${SOURCE_FILES}}" PARENT_SCOPE)
 endfunction()

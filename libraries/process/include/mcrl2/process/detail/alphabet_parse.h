@@ -189,6 +189,11 @@ core::identifier_string_list parse_block_set(const std::string& text)
   return make_identifier_string_list(set_elements(text));
 }
 
+inline core::identifier_string_list parse_hide_set(const std::string& text)
+{
+  return make_identifier_string_list(set_elements(text));
+}
+
 inline
 communication_expression_list parse_comm_set(const std::string& text)
 {
@@ -196,6 +201,10 @@ communication_expression_list parse_comm_set(const std::string& text)
   for (const std::string& word: set_elements(text))
   {
     auto [lhs, rhs] = split_arrow(word);
+    if (rhs == "tau" || rhs.empty())
+    {
+      throw mcrl2::runtime_error("A communication expression is not allowed to result in tau or have an empty right hand side. Offending expression: " + word);
+    }
     result.emplace_back(mcrl2::process::action_name_multiset(make_identifier_string_list(split_bar(lhs))), core::identifier_string(rhs));
   }
   return communication_expression_list(result.begin(), result.end());

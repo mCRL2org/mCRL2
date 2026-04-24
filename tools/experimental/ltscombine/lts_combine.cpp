@@ -1,4 +1,4 @@
-// Author(s): Willem Rietdijk
+// Author(s): Willem , Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -11,16 +11,21 @@
 #include "lts_combine.h"
 
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/merge_data_specifications.h"
+#include "mcrl2/lps/linearise_allow_block.h"
+#include "mcrl2/lps/linearise_hide.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_builder.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/state_space_generator.h"
+#include "mcrl2/process/communication_expression.h"
 #include "mcrl2/process/merge_action_specifications.h"
+#include "mcrl2/process/process_expression.h"
 
 #include <condition_variable>
-#include <chrono>
 #include <cstddef>
+#include <memory>
 #include <mutex>
 #include <queue>
 
@@ -28,157 +33,171 @@ using state_t = std::size_t;
 
 using namespace mcrl2;
 
-class identifier_string_compare
+/// \brief Converts an action list to a mutable vector for manipulation.
+inline
+std::vector<process::action> make_action_vector(const process::action_list& actions)
 {
-  core::identifier_string m_str;
-
-public:
-  identifier_string_compare(core::identifier_string str)
-      : m_str(str)
-  {}
-
-  bool operator()(core::identifier_string str) { return str == m_str; }
-};
-
-/// \brief Utility function that returns the index of the synchronisation for which
-///        the action_list actions matches the list of strings in syncs.second.
-///
-/// \param syncs The list of synchronisations
-/// \param actions The list of actions to be matched.
-/// \returns The index of the matching synchronisation, or max value when no matching synchronisation is found.
-size_t get_sync(const std::vector<core::identifier_string_list>& syncs, const core::identifier_string_list& action_names)
-{
-  // A synchronising action must consist of two or more action labels
-  if (action_names.size() < 2)
-  {
-    return std::numeric_limits<std::size_t>::max();
-  }
-
-  for (auto it = syncs.begin(); it != syncs.end(); it++)
-  {
-    if (*it == action_names)
-    {
-      return it - syncs.begin();
-    }
-  }
-
-  return std::numeric_limits<std::size_t>::max();
+  return std::vector<process::action>(actions.begin(), actions.end());
 }
 
-/// \brief Convert and sort an action_list to an
-/// identifier_string_list of names of the actions in the list.
+/// \brief Attempts to match a sorted communication left-hand side for fixed arguments.
+/// \details Both actions and lhs_names are assumed to be sorted by action name. The match
+/// succeeds if each name in lhs_names occurs in actions with the given arguments.
 ///
-/// \param actions The input list of actions.
-/// \returns The sorted list of identifier strings.
-core::identifier_string_list sorted_action_name_list(const process::action_list& actions)
+/// \param actions The actions to match against, sorted by action name.
+/// \param lhs_names The names of the actions to match, sorted by action name.
+/// \param arguments The arguments to match for each action name.
+/// \param indices Output parameter containing the indices of the matching actions in the actions vector, if the match is successful.
+/// \pre actions and lhs_names are sorted by action name.
+/// \pre lhs_names is not empty.
+inline
+bool match_sorted_lhs(const std::vector<process::action>& actions,
+                      const core::identifier_string_list& lhs_names,
+                      const data::data_expression_list& arguments,
+                      std::vector<std::size_t>& indices)
 {
-  std::multiset<core::identifier_string> names;
-  for (auto& action : actions)
+  assert(std::is_sorted(actions.begin(), actions.end(), process::action_compare()));
+  assert(std::is_sorted(lhs_names.begin(), lhs_names.end(), process::action_name_compare()));
+  assert(!lhs_names.empty());
+
+  indices.clear();
+
+  auto lhs_it = lhs_names.begin();
+  for (std::size_t i = 0; i < actions.size() && lhs_it != lhs_names.end(); ++i)
   {
-    names.insert(action.label().name());
-  }
+    const core::identifier_string& action_name = actions[i].label().name();
 
-  return core::identifier_string_list(names.begin(), names.end());
-}
-
-/// \brief Checks if the given action list contains one of the blocked actions.
-///
-/// \param blocks The list of blocked actions.
-/// \param actions The list of actions to be checked.
-/// \returns Whether the list of actions contains a blocked action.
-bool is_blocked(const std::vector<core::identifier_string>& blocks, const process::action_list& actions)
-{
-  // tau actions can not be blocked
-  if (actions.empty() || blocks.empty())
-  {
-    return false;
-  }
-
-  for (const process::action& action : actions)
-  {
-    core::identifier_string action_name = action.label().name();
-
-    for (const auto& it : blocks)
-    {
-      if (it == action_name)
-      {
-        return true;
-      }
-    }
-  }
-
-  // No matching blocked action could be found
-  return false;
-}
-
-/// \brief Checks if the given action list matches one of the allowed
-/// multi-actions. A match can only occur when the list of actions and allowed
-/// multi-action are equal. If the list is empty, all actions are allowed.
-///
-/// \param allowed The list of allowed multi-actions.
-/// \param actions The list of actions to be matched.
-/// \returns Whether the list of actions is matched by an allowed multi-action
-///          from the list of allowed multi-actions.
-bool is_allowed(const std::vector<core::identifier_string_list>& allowed, const core::identifier_string_list& action_names)
-{
-  // If the list is empty, all actions are allowed
-  // tau actions are always allowed
-  if (allowed.empty() || action_names.empty())
-  {
-    return true;
-  }
-
-  for (const atermpp::term_list<atermpp::aterm_string>& action: allowed)
-  {
-    if (action == action_names)
-    {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/// \brief Returns a new action label for which
-/// the given actions are hidden.
-///
-/// \param tau_actions The action names to be hidden.
-/// \param label The existing action label.
-void hide_actions(const std::vector<core::identifier_string>& tau_actions, lps::multi_action& label)
-{
-  process::action_vector new_multi_action;
-  for (const process::action& a : label.actions())
-  {
-    if (std::find_if(tau_actions.begin(),
-            tau_actions.end(),
-            identifier_string_compare(a.label().name()))
-        == tau_actions.end()) // this action must not be hidden.
-    {
-      new_multi_action.push_back(a);
-    }
-  }
-  
-  label = lps::multi_action(process::action_list(new_multi_action.begin(), new_multi_action.end()));
-}
-
-/// \brief Checks whether the arguments of each of the actions of the
-///        action_label are equal.
-///
-/// \param label The label to check.
-/// \returns Whether all arguments of each action of the label
-///          are equal.
-bool can_sync(const lps::multi_action& label)
-{
-  // Check if each action's arguments are equal to the first action's arguments
-  for (auto& action : label.actions())
-  {
-    if (action.arguments() != label.actions().front().arguments())
+    if (*lhs_it < action_name)
     {
       return false;
     }
+    else if (action_name == *lhs_it && actions[i].arguments() == arguments)
+    {
+      indices.push_back(i);
+      ++lhs_it;
+    }
+    // else (action_name < *lhs_it), continue searching for the same action name.
   }
 
-  return true;
+  /// If we have matched all names in the left-hand side, the match is successful.
+  if (lhs_it == lhs_names.end())
+  {
+    return true;
+  }
+  else
+  {
+    indices.clear();
+    return false;
+  }
+}
+
+/// \brief Finds a subset of actions matching a communication rule's left-hand side.
+/// \details Tries each candidate argument list for the first action name and then matches the
+/// remaining names using a single forward pass over the sorted actions.
+/// \param actions The actions to match against, sorted by action name.
+/// \param lhs_names The names of the actions to match, sorted by action name.
+/// \param indices Output parameter containing the indices of the matching actions in the actions vector, if the match is successful.
+/// \pre actions and lhs_names are sorted by action name.
+/// \pre lhs_names is not empty.
+inline
+bool find_matching_indices(const std::vector<process::action>& actions,
+                           const core::identifier_string_list& lhs_names,
+                           std::vector<std::size_t>& indices)
+{
+  assert(std::is_sorted(actions.begin(), actions.end(), process::action_compare()));
+  assert(std::is_sorted(lhs_names.begin(), lhs_names.end(), process::action_name_compare()));
+  assert(!lhs_names.empty());
+
+  const core::identifier_string& first_label = lhs_names.front();
+
+  // Try each candidate argument list for the first action name in the left-hand side,
+  // and then match the remaining names using a single forward pass over the sorted actions.
+  for (std::size_t i = 0; i < actions.size(); ++i)
+  {
+    const core::identifier_string& action_name = actions[i].label().name();
+    if (first_label < action_name)
+    {
+      /// Since actions and lhs_names are sorted, if the first label is smaller than the current action name, there is no match.
+      break;
+    }
+    else if (match_sorted_lhs(actions, lhs_names, actions[i].arguments(), indices))
+    {
+      return true;
+    }
+    // else (action_name < first_label), continue searching for the first label.
+  }
+
+  indices.clear();
+  return false;
+}
+
+/// \brief Removes actions at the specified indices from the action vector.
+inline
+void erase_indices(std::vector<process::action>& actions,
+                   const std::vector<std::size_t>& indices)
+{
+  std::vector<process::action> remaining;
+  remaining.reserve(actions.size() - indices.size());
+
+  auto index_it = indices.begin();
+  for (std::size_t i = 0; i < actions.size(); ++i)
+  {
+    if (index_it != indices.end() && *index_it == i)
+    {
+      ++index_it;
+    }
+    else
+    {
+      remaining.push_back(actions[i]);
+    }
+  }
+
+  actions = std::move(remaining);
+}
+
+/// \brief Applies communication rules to a multi-action label.
+/// \details For each communication rule, greedily matches and replaces subsets of actions
+/// with their communicated counterpart. Returns the resulting multi-action with unmatched
+/// actions preserved.
+/// \pre label.actions() is sorted by action name.
+/// \pre every communication expression in comm_set has a left-hand side that is sorted by action name.
+///      the left hand sides of communication expressions are disjoint.
+lps::multi_action mcrl2::apply_communication(const lps::multi_action& label,
+                                             const process::communication_expression_list& comm_set)
+{
+  assert(std::is_sorted(label.actions().begin(), label.actions().end(), process::action_compare()));
+  assert(std::all_of(comm_set.begin(), comm_set.end(), [](const process::communication_expression& comm_expr)
+  {
+    return std::is_sorted(comm_expr.action_name().names().begin(), comm_expr.action_name().names().end(),
+                          process::action_name_compare());
+  }));
+
+  // vector of actions that have not yet participated in a communication, sorted by action name
+  std::vector<process::action> remaining_actions = make_action_vector(label.actions());
+  // vector of actions that are the result of a communication
+  std::vector<process::action> communicated_actions;
+  // temporary vector for storing matching indices when applying a communication rule
+  std::vector<std::size_t> matching_indices;
+
+  // apply every communication expression in the communication set until
+  // no more matches can be found.
+  for (const process::communication_expression& comm_expr : comm_set)
+  {
+    while (find_matching_indices(remaining_actions, comm_expr.action_name().names(), matching_indices))
+    {
+      const process::action& representative = remaining_actions[matching_indices.front()];
+      communicated_actions.emplace_back(
+          process::action_label(comm_expr.name(), representative.label().sorts()),
+          representative.arguments());
+
+      erase_indices(remaining_actions, matching_indices);
+    }
+  }
+
+  remaining_actions.insert(remaining_actions.end(), communicated_actions.begin(), communicated_actions.end());
+  std::sort(remaining_actions.begin(), remaining_actions.end(), process::action_compare());
+
+  return lps::multi_action(process::action_list(remaining_actions.begin(), remaining_actions.end()), label.time());
 }
 
 struct combined_lts_builder
@@ -227,295 +246,301 @@ public:
   }
 };
 
-/// \brief A thread that computes the states of the LTS.
-class state_thread
+struct thread_context_t
+{
+  // Shared objects used by all worker threads.
+  lts::lts_builder* lts_builder;
+  std::queue<std::size_t>& queue;
+  lts::detail::progress_monitor& progress_monitor;
+  mcrl2::utilities::indexed_set<std::vector<state_t>>& states;
+  std::size_t number_of_threads;
+
+  // Mutexes guard the corresponding shared objects.
+  std::mutex& lts_builder_mutex;
+  std::mutex& queue_mutex;
+  std::mutex& progress_mutex;
+  std::mutex& states_mutex;
+
+  // Condition variable and scheduler state for queue-based work distribution.
+  // Invariant: active_workers and stop are read/written while holding queue_mutex.
+  std::condition_variable& queue_cond;
+  std::size_t& active_workers;
+  bool& stop;
+};
+
+/// \brief A worker that computes states of the combined LTS.
+class state_thread_worker
 {
 public:
-  state_thread(std::vector<lts::lts_lts_t>& lts,
-      std::vector<core::identifier_string_list>& syncs,
-      std::vector<core::identifier_string>& resulting_actions,
-      std::vector<core::identifier_string>& blocks,
-      std::vector<core::identifier_string>& hiden,
-      std::vector<core::identifier_string_list>& allow,
-      std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions)
-      : lts(lts),
-        syncs(syncs),
-        resulting_actions(resulting_actions),
-        blocks(blocks),
-        hiden(hiden),
-        allow(allow),
-        outgoing_transitions(outgoing_transitions)
+  state_thread_worker(const combine_lts_static_context& input,
+    const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions,
+    thread_context_t& context)
+    : input(input),
+      outgoing_transitions(outgoing_transitions),
+      context(context),
+      termination_action(process::action(
+          process::action_label(core::identifier_string("Terminate"), data::sort_expression_list()),
+          data::data_expression_list()))
   {}
 
-  void operator()(lts::lts_builder* lts_builder,
-      std::queue<std::size_t>& queue,
-      lts::detail::progress_monitor& progress_monitor,
-      mcrl2::utilities::indexed_set<std::vector<state_t>>& states,
-      std::size_t number_of_threads,
-      std::mutex& lts_builder_mutex,
-      std::mutex& queue_mutex,
-      std::mutex& progress_mutex,
-      std::mutex& states_mutex,
-      std::condition_variable& queue_cond,
-      std::size_t& busy)
+  void operator()()
   {
     while (true)
     {
-      std::unique_lock<std::mutex> queue_lock(queue_mutex);
-      
-      // Wait if queue is empty but threads are still working
-      while (queue.empty())
+      std::unique_lock<std::mutex> queue_lock(context.queue_mutex);
+
+      context.queue_cond.wait(queue_lock, [this]()
       {
-        busy--;
-        if (busy > 0)
-        {
-          // Some threads are still busy, wait for them to add work
-          queue_cond.wait(queue_lock);
-        }
-        else
-        {
-          // All threads completed and queue is empty, exit
-          return;
-        }
+        return context.stop || !context.queue.empty();
+      });
+
+      if (context.stop && context.queue.empty())
+      {
+        // Global shutdown: no queued work remains and exploration has ended.
+        return;
       }
-      
-      busy++;
+
+      const std::size_t state_index = context.queue.front();
+      context.queue.pop();
+      ++context.active_workers;
+      queue_lock.unlock();
 
       // Process the state
-      compute_state(lts_builder,
-              queue,
-              progress_monitor,
-              states,
-              number_of_threads,
-              lts_builder_mutex,
-              queue_lock,
-              progress_mutex,
-              states_mutex);
+      visit_state(state_index);
+
+      queue_lock.lock();
+      --context.active_workers;
+
+      if (context.queue.empty() && context.active_workers == 0)
+      {
+        // This worker observed that no work is queued, and no other workers are
+        // processing states; this means we have explored the entire state space.
+        // The worker publishes stop and wakes all
+        // waiters so every thread can terminate without depending on new work.
+        context.stop = true;
+        queue_lock.unlock();
+        context.queue_cond.notify_all();
+        return;
+      }
+
+      queue_lock.unlock();
     }
   }
 
 private:
-  const std::vector<lts::lts_lts_t>& lts;
-  const std::vector<core::identifier_string_list>& syncs;
-  const std::vector<core::identifier_string>& resulting_actions;
-  const std::vector<core::identifier_string>& blocks;
-  const std::vector<core::identifier_string>& hiden;
-  const std::vector<core::identifier_string_list>& allow;
+  const combine_lts_static_context& input;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
-  
-  /// \returns True iff at least one state was computed.
-  void compute_state(lts::lts_builder* lts_builder,
-      std::queue<std::size_t>& queue,
-      lts::detail::progress_monitor& progress_monitor,
-      mcrl2::utilities::indexed_set<std::vector<state_t>>& states,
-      const std::size_t& number_of_threads,
-      std::mutex& lts_builder_mutex,
-      std::unique_lock<std::mutex>& queue_lock,
-      std::mutex& progress_mutex,
-      std::mutex& states_mutex)
+  thread_context_t& context;
+  const process::action termination_action;
+
+  std::vector<state_t> get_state(std::size_t state_index)
   {
-    // Take the next pair from the queue.
-    std::size_t state_index = queue.front();
+    std::lock_guard<std::mutex> state_lock(context.states_mutex);
+    return context.states[state_index];
+  }
 
-    std::unique_lock state_lock(states_mutex);
-    std::vector<state_t> state = states[state_index];    
-    state_lock.unlock();
+  std::pair<std::size_t, bool> insert_state(const std::vector<state_t>& state)
+  {
+    std::lock_guard<std::mutex> state_lock(context.states_mutex);
+    return context.states.insert(state);
+  }
 
-    queue.pop();
+  void queue_state(std::size_t state_index)
+  {
+    std::unique_lock<std::mutex> queue_lock(context.queue_mutex);
+    context.queue.push(state_index);
     queue_lock.unlock();
 
-    // List of new outgoing transitions from this state, combined from the states
-    // state[0] to state[i]
-    std::vector<std::pair<lps::multi_action, std::vector<state_t>>> combos;
+    // Wake exactly one worker: one new state was enqueued.
+    context.queue_cond.notify_one();
+  }
 
-    // Loop over the old states contained in the new state
-    for (size_t i = 0; i < state.size(); ++i)
+  std::size_t states_size()
+  {
+    std::lock_guard<std::mutex> states_lock(context.states_mutex);
+    return context.states.size();
+  }
+
+  std::size_t queue_size()
+  {
+    std::lock_guard<std::mutex> queue_lock(context.queue_mutex);
+    return context.queue.size();
+  }
+
+  void examine_transition()
+  {
+    std::lock_guard<std::mutex> progress_lock(context.progress_mutex);
+    context.progress_monitor.examine_transition();
+  }
+
+  void finish_state()
+  {
+    // Snapshot sizes under their own locks; report with progress_mutex only.
+    // This keeps long progress operations away from queue/states critical sections.
+    const std::size_t states_size = this->states_size();
+    const std::size_t queue_size = this->queue_size();
+
+    std::lock_guard<std::mutex> progress_lock(context.progress_mutex);
+    context.progress_monitor.finish_state(states_size, queue_size, input.nr_of_threads);
+  }
+
+  template <typename ActionLabel>
+  void add_transition(std::size_t from_state, const ActionLabel& label, std::size_t to_state)
+  {
+    std::lock_guard<std::mutex> builder_lock(context.lts_builder_mutex);
+    context.lts_builder->add_transition(from_state, label, to_state, context.number_of_threads);
+  }
+
+  /// \brief Compute the outgoing transitions for the combined state and report them via callback.
+  /// \details Generates all combinations of transitions (including stutters) across components
+  /// without explicitly generating the full set. Each candidate (label, target_state) pair is reported
+  /// via callback for early filtering, so we only store the transitions that pass the filter.
+  template <typename ReportCandidate>
+  void emit_outgoing_transitions(const std::vector<state_t>& state, ReportCandidate report_candidate)
+  {
+    // Generate all combinations recursively by expanding one component at a time.
+    std::vector<state_t> target_state;
+    target_state.reserve(state.size());
+    lps::multi_action current_label;
+
+    generate_outgoing_transition_combinations(state, 0, false, target_state, current_label, report_candidate);
+  }
+
+private:
+  /// \brief Recursively generate all combinations of transitions across components.
+  /// \details For each component, either take no transition (stutter) or one of the available
+  /// outgoing transitions. Generates combinations in depth-first order, reporting each complete
+  /// transition (reached all components) via the callback.
+  template <typename ReportCandidate>
+  void generate_outgoing_transition_combinations(const std::vector<state_t>& state,
+                           std::size_t component_index,
+                           bool has_taken_transition,
+                           std::vector<state_t>& target_state,
+                           lps::multi_action& current_label,
+                           ReportCandidate& report_candidate)
+  {
+    // Base case: all components have been processed, report only if at least one
+    // component contributed a real transition (exclude pure global stutter).
+    if (component_index == state.size())
     {
-      state_t old_state = state[i];
-
-      // Seperate new transitions from this state such that transitions from this state
-      // don't combine with other transitions from this state
-      std::vector<std::pair<lps::multi_action, std::vector<state_t>>> new_combos;
-
-      // Loop over the outgoing transitions from the old state
-      for (state_t t = outgoing_transitions[i].lowerbound(old_state); t < outgoing_transitions[i].upperbound(old_state);
-           ++t)
+      if (has_taken_transition)
       {
-        const lts::outgoing_pair_t& transition = outgoing_transitions[i].get_transitions()[t];
-        const lts::action_label_lts& label = lts[i].action_label(lts::label(transition));
-
-        // Add transition t, from state to [state[0], ..., state[i-1], to(state[i])]
-        std::vector<state_t> old_states;
-        // Preserve old states for states 0..i-1
-        for (size_t j = 0; j < i; ++j)
-        {
-          old_states.push_back(state[j]);
-        }
-        // Add new state for state i
-        old_states.push_back(lts::to(transition));
-        new_combos.emplace_back(label, old_states);
-
-        // Add transition t to the existing multi-action from each combo
-        for (auto& combo : combos)
-        {
-          // The new state of the combo already contains this state
-          if (combo.second.size() >= i + 1)
-          {
-            continue;
-          }
-
-          // Copy states from combo to new state list
-          std::vector<state_t> new_states;
-          for (state_t s : combo.second)
-          {
-            new_states.push_back(s);
-          }
-
-          // Add new state for state i
-          new_states.push_back(lts::to(transition));
-
-          // Create new action label from multi-action of combo and transition t
-          // lts::action_label_lts new_label(lps::multi_action(label.actions() + combo.first.actions()));
-
-          new_combos.emplace_back(label + combo.first, new_states);
-        }
+        report_candidate(current_label, target_state);
       }
-
-      // For each existing multi-action, add the old state of state i
-      // to simulate no transition being taken
-      for (auto& combo : combos)
-      {
-        // The new state of the combo already contains this state
-        if (combo.second.size() >= i + 1)
-        {
-          continue;
-        }
-
-        // Add current state, thus no transition
-        combo.second.push_back(old_state);
-      }
-
-      // Finished state i
-      for (auto& combo : new_combos)
-      {
-        combos.push_back(combo);
-      }
+      return;
     }
 
-    // Finished generating all new transitions, add them to the LTS
-    for (auto& combo : combos)
+    const state_t& state_component_index = state[component_index];
+
+    // Option 1: stutter on this component (no transition)
+    target_state.push_back(state_component_index);
+    generate_outgoing_transition_combinations(state, component_index + 1, has_taken_transition, target_state, current_label, report_candidate);
+    target_state.pop_back();
+
+    // Option 2: take each available outgoing transition from this component
+    for (state_t t = outgoing_transitions[component_index].lowerbound(state_component_index);
+         t < outgoing_transitions[component_index].upperbound(state_component_index);
+         ++t)
     {
-      mCRL2log(log::debug) << lps::pp(combo.first) << std::endl;
+      const lts::outgoing_pair_t& transition = outgoing_transitions[component_index].get_transitions()[t];
+      const lts::action_label_lts& label = input.ltss[component_index].action_label(lts::label(transition));
 
-      size_t sync_index;
-      core::identifier_string_list action_names = sorted_action_name_list(combo.first.actions());
-
-      mCRL2log(log::debug) << core::pp(action_names) << std::endl;
-
-      if (can_sync(combo.first) && (sync_index = get_sync(syncs, action_names)) != std::numeric_limits<std::size_t>::max())
+      // Optimization: if the names in the label of the transition does not occur
+      // in the inner allow set, we can skip generating this transition
+      // since it will be filtered out by the allow operator later anyway.
+      const process::action_list& actions = label.actions();
+      bool all_allowed = std::all_of(actions.begin(), actions.end(), [this](const process::action& action)
       {
-        // Synchronise
-        core::identifier_string result_action = resulting_actions[sync_index];
-        mCRL2log(log::debug) << "Sync: " << result_action << std::endl;
+        return input.inner_allowed_action_names.find(action.label().name()) != input.inner_allowed_action_names.end();
+      });
 
-        data::data_expression_list arguments;
-        data::sort_expression_list sorts;
-        if (!combo.first.actions().empty())
-        {
-          // Only use arguments and sorts if the action is not a tau action
-          arguments = combo.first.actions().front().arguments();
-          sorts = combo.first.actions().front().label().sorts();
-        }
-
-        // Create new label from the synchronisation
-        lts::action_label_lts new_label(
-            lps::multi_action(process::action(process::action_label(result_action, sorts), arguments)));
-
-        // Check if new transition is blocked or not allowed
-        core::identifier_string_list new_action_names = sorted_action_name_list(new_label.actions());
-        if (is_blocked(blocks, new_label.actions()) || !is_allowed(allow, new_action_names))
-        {
-          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
-          continue;
-        }
-
-        // Hide actions in transition label
-        hide_actions(hiden, new_label);
-
-        std::unique_lock state_lock(states_mutex);
-        // Add new state
-        const auto [new_state, inserted] = states.insert(combo.second);
-        state_lock.unlock();
-
-        if (inserted)
-        {
-          queue_lock.lock();          
-          queue.push(new_state);
-          queue_lock.unlock();
-        }
-
-        // Add the transition with the remaining actions
-        std::unique_lock progress_lock(progress_mutex);
-        progress_monitor.examine_transition();
-        progress_lock.unlock();
-
-        std::unique_lock builder_lock(lts_builder_mutex);
-        lts_builder->add_transition(state_index, new_label, new_state, number_of_threads);
-      }
-      else
+      if (all_allowed)
       {
-        // Normal multi-action
-        mCRL2log(log::debug) << "Multi action" << std::endl;
+        // Extend the label and target state, then recurse to next component
+        target_state.push_back(lts::to(transition));
+        const lps::multi_action saved_label = current_label;
+        current_label = current_label + label;
 
-        // Check if the transition is blocked or not allowed
-        if (is_blocked(blocks, combo.first.actions()) || !is_allowed(allow, action_names))
-        {
-          mCRL2log(log::debug) << "Blocked or not allowed: " << lps::pp(combo.first) << std::endl;
-          continue;
-        }
+      generate_outgoing_transition_combinations(state, component_index + 1, true, target_state, current_label, report_candidate);
 
-        // Hide actions in transition label
-        hide_actions(hiden, combo.first);
-
-        // Add new state
-        states_mutex.lock();
-        const auto [new_state, inserted] = states.insert(combo.second);
-        states_mutex.unlock();
-        if (inserted)
-        {
-          queue_lock.lock();
-          queue.push(new_state);
-          queue_lock.unlock();
-        }
-
-        // Add the transition with the remaining actions
-        progress_mutex.lock();
-        progress_monitor.examine_transition();
-        progress_mutex.unlock();
-
-        lts_builder_mutex.lock();
-        lts_builder->add_transition(state_index, combo.first, new_state, number_of_threads);
-        lts_builder_mutex.unlock();
+        current_label = saved_label;
+        target_state.pop_back();
       }
     }
   }
+
+
+  std::size_t report_state(const std::vector<state_t>& state)
+  {
+    auto [new_state, inserted] = insert_state(state);
+    if (inserted)
+    {
+      queue_state(new_state);
+    }
+    return new_state;
+  }
+
+  void report_transition(std::size_t from_state, const lps::multi_action& label, std::size_t to_state)
+  {
+    examine_transition();
+    add_transition(from_state, label, to_state);
+  }
+
+  lps::multi_action apply_communication(const lps::multi_action& label)
+  {
+    return mcrl2::apply_communication(label, input.comm_set);
+  }
+
+  /// \brief Process one state from the combined state space.
+  /// \details Emits outgoing transitions via callback, applying communication and filter operators
+  /// (allow/block/hide) to each candidate immediately. Rejected candidates are not reported.
+  void visit_state(std::size_t state_index)
+  {
+    const std::vector<state_t> state = get_state(state_index);
+
+    // Callback that filters and reports each candidate transition.
+    auto filter_and_report = [this, state_index](const lps::multi_action& candidate_label,
+                                                   const std::vector<state_t>& target_state)
+    {
+      std::function<bool(const process::action&, const process::action&)> action_compare = process::action_compare();
+      lps::multi_action label(atermpp::sort_list(candidate_label.actions(), action_compare), candidate_label.time());
+
+      mCRL2log(log::debug) << lps::pp(label) << std::endl;
+
+      // Apply communication rules
+      label = apply_communication(label);
+
+      // Check if new transition is blocked or not allowed
+      if (!lps::encap(input.block_set, label.actions()) && lps::allow_(input.allow_cache, label.actions(), termination_action))
+      {
+        mCRL2log(log::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
+
+        // Hide returns a new label; assign it back.
+        label = lps::hide_(input.hide_set, label);
+
+        const std::size_t new_state = report_state(target_state);
+        report_transition(state_index, label, new_state);
+      }
+      else
+      {
+        mCRL2log(log::trace) << "Multi-action is blocked or not allowed: " << lps::pp(label) << std::endl;
+      }
+    };
+
+    // Emit transitions via callback; filtering happens inside the lambda above.
+    emit_outgoing_transitions(state, filter_and_report);
+    finish_state();
+  }
 };
 
-void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
-    std::vector<core::identifier_string_list>& syncs,
-    std::vector<core::identifier_string>& resulting_actions,
-    std::vector<core::identifier_string>& blocks,
-    std::vector<core::identifier_string>& hiden,
-    std::vector<core::identifier_string_list>& allow,
-    std::string filename,
-    bool save_at_end,
-    std::size_t nr_of_threads)
+void mcrl2::combine_lts(const combine_lts_static_context& input)
 {
+  mCRL2log(log::verbose) << "Combining " << input.ltss.size() << " LTSs with " << input.nr_of_threads << " threads." << std::endl;
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
-  for (const lts::lts_lts_t& input : lts)
+  for (const lts::lts_lts_t& lts_input: input.ltss)
   {
-    outgoing_transitions.emplace_back(input.get_transitions(), input.num_states(), true);
+    outgoing_transitions.emplace_back(lts_input.get_transitions(), lts_input.num_states(), true);
   }
 
   // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).
@@ -524,7 +549,7 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   process::action_label_list action_decls;
   data::data_specification data_spec;
   data::variable_list proc_params;
-  for (auto& lts : lts)
+  for (const auto& lts: input.ltss)
   {
     initial_states.push_back(lts.initial_state());
     action_decls = process::merge_action_specifications(action_decls, lts.action_label_declarations());
@@ -540,20 +565,19 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   // Progress monitor.
   lts::detail::progress_monitor progress_monitor(lps::exploration_strategy::es_breadth);
 
-  combined_lts_builder* combined_lts_builder;
+  std::unique_ptr<combined_lts_builder> combined_lts_builder;
   lts::lts_builder* lts_builder;
-  if (save_at_end)
+  if (input.save_at_end)
   {
-    combined_lts_lts_builder* lts_lts_builder = new combined_lts_lts_builder(data_spec, action_decls, proc_params);
-    lts_builder = lts_lts_builder;
-    combined_lts_builder = lts_lts_builder;
+    auto lts_lts_builder = std::make_unique<combined_lts_lts_builder>(data_spec, action_decls, proc_params);
+    lts_builder = lts_lts_builder.get();
+    combined_lts_builder = std::move(lts_lts_builder);
   }
   else
   {
-    combined_lts_disk_builder* lts_disk_builder
-        = new combined_lts_disk_builder(filename, data_spec, action_decls, proc_params);
-    lts_builder = lts_disk_builder;
-    combined_lts_builder = lts_disk_builder;
+    auto lts_disk_builder = std::make_unique<combined_lts_disk_builder>(input.filename, data_spec, action_decls, proc_params);
+    lts_builder = lts_disk_builder.get();
+    combined_lts_builder = std::move(lts_disk_builder);
   }
 
   std::mutex builder_mutex;
@@ -561,41 +585,42 @@ void mcrl2::combine_lts(std::vector<lts::lts_lts_t>& lts,
   std::mutex progress_mutex;
   std::mutex states_mutex;
 
-  // Used to signal busy and empty queue.
+  // Shared worker scheduling state, protected by queue_mutex.
+  // active_workers counts threads that popped work but have not yet completed it.
+  // stop becomes true once all states have been processed.
   std::condition_variable queue_cond;
-  std::size_t busy = nr_of_threads;
+  std::size_t active_workers = 0;
+  bool stop = false;
+
+  thread_context_t context{
+      lts_builder,
+      queue,
+      progress_monitor,
+      states,
+      input.nr_of_threads,
+      builder_mutex,
+      queue_mutex,
+      progress_mutex,
+      states_mutex,
+      queue_cond,
+      active_workers,
+      stop};
 
   std::vector<std::thread> threads;
 
-  for (size_t i = 0; i < nr_of_threads; i++)
+  for (size_t i = 0; i < input.nr_of_threads; i++)
   {
-    state_thread thread(lts, syncs, resulting_actions, blocks, hiden, allow, outgoing_transitions);
-    threads.emplace_back(
-        [&]
-        {
-          thread(lts_builder,
-            queue,
-            progress_monitor,
-            states,
-            nr_of_threads,
-            builder_mutex,
-            queue_mutex,
-            progress_mutex,
-            states_mutex,
-            queue_cond,
-            busy);
-        });
+    threads.emplace_back(state_thread_worker(input, outgoing_transitions, context));
   }
 
-  for (size_t i = 0; i < nr_of_threads; i++)
+  for (size_t i = 0; i < input.nr_of_threads; i++)
   {
     threads[i].join();
   }
 
-  progress_monitor.finish_exploration(states.size(), nr_of_threads);
+  progress_monitor.finish_exploration(states.size(), input.nr_of_threads);
 
   // Write the initial state and the state labels.
   combined_lts_builder->finalize_combined(states.size());
-  lts_builder->save(filename);
-  delete lts_builder;
+  lts_builder->save(input.filename);
 }

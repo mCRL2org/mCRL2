@@ -14,7 +14,6 @@
 #define MCRL2_PROCESS_ACTION_NAMES_H
 
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/process/alphabet_operations.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/multi_action_name.h"
 #include "mcrl2/process/process_expression.h"

@@ -78,9 +78,15 @@ def main():
                 output.write(f"proc {q_process};\n\n")
 
                 # Write the new init process.
-                output.write(
-                    f"init hide({{ {args.hide} }}, allow({{ {args.allow} }}, comm({{ {args.comm} }}, {init_p} || {init_q})));"
-                )
+                init_expr = f"{init_p} || {init_q}"
+                if args.comm:
+                    init_expr = f"comm({args.comm}, {init_expr})"
+                if args.allow:
+                    init_expr = f"allow({args.allow}, {init_expr})"
+                if args.hide:
+                    init_expr = f"hide({args.hide}, {init_expr})"
+
+                output.write(f"init {init_expr};")
 
 
 if __name__ == "__main__":

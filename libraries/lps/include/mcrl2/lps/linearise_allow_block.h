@@ -120,16 +120,16 @@ inline bool allow_(const detail::allow_list_cache& allow_cache,
 
 /// \brief Calculate if any of the actions in multiaction is blocked by encap_list.
 ///
-/// \param encap_list is a list of action_name_multisets of size 1. Its single element contains all the blocked actions.
+/// \param blocked_actions is a list of action names that are blocked.
 /// \param multi_action contains a multiaction a1(d1)|...|an(dn)
 /// \returns \exists i: ai \in encap_list
-inline bool encap(const process::action_name_multiset_list& encaplist, const process::action_list& multiaction)
+template <typename Container>
+bool encap(const Container& blocked_actions, const process::action_list& multiaction)
 {
-  assert(encaplist.size() == 1);
-  assert(std::is_sorted(multiaction.begin(), multiaction.end(), process::action_compare()));
+  static_assert(std::is_same_v<typename Container::value_type, core::identifier_string>, "Container must contain core::identifier_string");
 
-  const core::identifier_string_list& blocked_actions = encaplist.front().names();
   assert(std::is_sorted(blocked_actions.begin(), blocked_actions.end(), process::action_name_compare()));
+  assert(std::is_sorted(multiaction.begin(), multiaction.end(), process::action_compare()));
 
   core::identifier_string_list::const_iterator blocked_actions_it = blocked_actions.begin();
   process::action_list::const_iterator multiaction_it = multiaction.begin();
@@ -155,6 +155,20 @@ inline bool encap(const process::action_name_multiset_list& encaplist, const pro
   }
 
   return false;
+}
+
+/// \brief Calculate if any of the actions in multiaction is blocked by encap_list.
+///
+/// \param encap_list is a list of action_name_multisets of size 1. Its single element contains all the blocked actions.
+/// \param multi_action contains a multiaction a1(d1)|...|an(dn)
+/// \returns \exists i: ai \in encap_list
+inline bool encap(const process::action_name_multiset_list& encaplist, const process::action_list& multiaction)
+{
+  assert(encaplist.size() == 1);
+  assert(std::is_sorted(multiaction.begin(), multiaction.end(), process::action_compare()));
+
+  const core::identifier_string_list& blocked_actions = encaplist.front().names();
+  return encap(blocked_actions, multiaction);
 }
 
 /// Calculate the application of the allow or block operator over the action

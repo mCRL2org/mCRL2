@@ -1,4 +1,4 @@
-// Author(s): Willem Rietdijk
+// Author(s): Willem Rietdijk, Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -14,6 +14,10 @@
 
 #include "lts_combine.h"
 
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/process/action_label.h"
+#include "mcrl2/process/action_name_multiset.h"
+#include "mcrl2/process/action_names.h"
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/utilities/xinput_output_tool.h"
 
@@ -53,8 +57,48 @@ public:
       lts.push_back(new_lts);
     }
 
+    // Ensure that block and hide sets are sorted
+    std::function<bool(const core::identifier_string&, const core::identifier_string&)> action_name_compare = process::action_name_compare();
+    block_set = atermpp::sort_list(block_set, action_name_compare);
+
+    hide_set = atermpp::sort_list(hide_set, action_name_compare);
+    // Ensure that each of the multi actions names in the allow set is sorted.
+    allow_set = process::action_name_multiset_list(
+      allow_set.begin(),
+      allow_set.end(),
+      [&action_name_compare](const process::action_name_multiset& multi_action_name)
+      {
+        return process::action_name_multiset(atermpp::sort_list(multi_action_name.names(), action_name_compare));
+      });
+
+    // Ensure that the left-hand sides of the synchronisation rules are sorted.
+    comm_set = process::communication_expression_list(
+      comm_set.begin(),
+      comm_set.end(),
+      [&action_name_compare](const process::communication_expression& comm)
+      {
+        return process::communication_expression(
+          process::action_name_multiset(atermpp::sort_list(comm.action_name().names(), action_name_compare)),
+          comm.name());
+      });
+
+    allow_cache = lps::detail::make_allow_list_cache(allow_set);
+
+    process::action_name_set used_actions;
+    get_action_names(lts, used_actions);
+    inner_allow_set = calculate_inner_allow_set(comm_set, used_actions, allow_set);
+
+    for (const process::action_name_multiset& allow: inner_allow_set)
+    {
+      for (const core::identifier_string& name: allow.names())
+      {
+        inner_allowed_action_names.insert(name);
+      }
+    }
+
     // Generate and output resulting LTS
-    combine_lts(lts, syncs, resulting_actions, blocks, hiden, allow, output_filename(), save_at_end, nr_of_threads);
+    combine_lts_static_context input(lts, comm_set, block_set, hide_set, allow_cache, inner_allow_set, inner_allowed_action_names, output_filename(), save_at_end, nr_of_threads);
+    combine_lts(input);
 
     return true;
   }
@@ -89,6 +133,73 @@ protected:
         "This option only applies to .aut and .lts files, which are by default saved on the fly.");
   }
 
+  void parse_comm(const utilities::command_line_parser& parser)
+  {
+    std::string filename = parser.option_argument("comm");
+    std::stringstream stringstream(filename);
+    mCRL2log(log::debug) << "Reading synchronisation actions from " << filename << std::endl;
+    std::ifstream file_input(filename.c_str());
+    std::istream* syncs_inputs = &file_input;
+    if (!file_input.good())
+    {
+      // File doesn't exist, read directly from input.
+      syncs_inputs = &stringstream;
+    }
+    comm_set = parse_comm_set(*syncs_inputs);
+  }
+
+  void parse_block(const utilities::command_line_parser& parser)
+  {
+    std::string filename = parser.option_argument("block");
+    std::istringstream stringstream(filename);
+    std::ifstream file_input(filename.c_str());
+    std::istream* block_input = &file_input;
+    if (!file_input.good())
+    {
+      // File doesn't exist
+      block_input = &stringstream;
+      mCRL2log(log::debug) << "Reading blocked actions from input" << std::endl;
+    }
+    else
+    {
+      mCRL2log(log::debug) << "Reading blocked actions from file " << filename << std::endl;
+    }
+
+    block_set = parse_block_set(*block_input);
+  }
+
+  void parse_allow(const utilities::command_line_parser& parser)
+  {
+    std::string filename = parser.option_argument("allow");
+    std::stringstream stringstream(filename);
+    mCRL2log(log::debug) << "Reading allowed multi-actions from file " << filename << std::endl;
+    std::ifstream file_input(filename.c_str());
+    std::istream* allow_input = &file_input;
+    if (!file_input.good())
+    {
+      // File doesn't exist
+      allow_input = &stringstream;
+    }
+
+    allow_set = parse_multi_action_name_set(*allow_input);
+  }
+
+  void parse_hide(const utilities::command_line_parser& parser)
+  {
+    std::string filename = parser.option_argument("hide");
+    std::stringstream stringstream(filename);
+    mCRL2log(log::debug) << "Reading hidden actions from file " << filename << std::endl;
+    std::ifstream file_input(filename.c_str());
+    std::istream* hide_input = &file_input;
+    if (!file_input.good())
+    {
+      // File doesn't exist
+      hide_input = &stringstream;
+    }
+
+    hide_set = parse_hide_set(*hide_input);
+  }
+
   void parse_options(const utilities::command_line_parser& parser) override
   {
     super::parse_options(parser);
@@ -98,207 +209,52 @@ protected:
 
     if (parser.options.count("comm") > 0)
     {
-      std::string filename = parser.option_argument("comm");
-      std::stringstream stringstream(filename);
-      mCRL2log(log::debug) << "Reading synchronisation actions from " << filename << std::endl;
-      std::ifstream file_input(filename.c_str());
-      std::istream* syncs_inputs = &file_input;
-      if (!file_input.good())
-      {
-        // File doesn't exist
-        syncs_inputs = &stringstream;
-      }
-      std::string line;
-
-      // Read synchronisation statements seperated by commas
-      while (std::getline(*syncs_inputs, line, ','))
-      {
-        std::istringstream iss(line);
-        std::multiset<core::identifier_string> labels{};
-        std::string label;
-        std::size_t delim = line.find('|');
-        std::size_t prev_delim = 0;
-
-        // Read multi-action consisting of actions seperated by bars
-        while (delim != std::string::npos)
-        {
-          label = line.substr(prev_delim, delim - prev_delim);
-          trim(label);
-          labels.insert(label);
-
-          prev_delim = delim + 1;
-          delim = line.find('|', prev_delim);
-        }
-
-        // Find ->, which signals the resulting action
-        delim = line.find('-', prev_delim + 1);
-        if (delim != std::string::npos && line[delim + 1] == '>')
-        {
-          // Add last action of multi-action to list
-          label = line.substr(prev_delim, delim - prev_delim);
-          trim(label);
-          labels.insert(label);
-
-          if (labels.size() < 2)
-          {
-            // Syntax error, communication must contain two or more action labels
-            mCRL2log(log::error)
-                << "Syntax error in communications, left hand size must contain two or more action labels: '" << line
-                << "'." << std::endl;
-            throw mcrl2::runtime_error("Could not parse file " + filename + ".");
-          }
-
-          syncs.emplace_back(labels.begin(), labels.end());
-
-          // Add multi-action and resulting action to list of sychronisations
-          label = line.substr(delim + 2);
-          trim(label);
-          resulting_actions.emplace_back(label);
-        }
-        else
-        {
-          // Syntax error, -> not found
-          mCRL2log(log::error) << "Syntax error in communications, -> not found for '" << line << "'." << std::endl;
-          throw mcrl2::runtime_error("Could not parse file " + filename + ".");
-        }
-      }
+      parse_comm(parser);
     }
 
     if (parser.options.count("block") > 0)
     {
-      std::string filename = parser.option_argument("block");
-      std::istringstream stringstream(filename);
-      std::ifstream file_input(filename.c_str());
-      std::istream* block_input = &file_input;
-      if (!file_input.good())
-      {
-        // File doesn't exist
-        block_input = &stringstream;
-        mCRL2log(log::debug) << "Reading blocked actions from input" << std::endl;
-      }
-      else
-      {
-        mCRL2log(log::debug) << "Reading blocked actions from file " << filename << std::endl;
-      }
-      std::string action_label;
-
-      // Read list of blocked actions seperated by commas
-      while (std::getline(*block_input, action_label, ','))
-      {
-        if (action_label.find('|') != std::string::npos)
-        {
-          // Syntax error, multi-actions cannot be blocked
-          mCRL2log(log::error) << "List of blocked action contains multi-action '" << action_label << "'." << std::endl;
-          throw mcrl2::runtime_error("Could not parse file " + filename + ".");
-        }
-
-        // Trim action and add to list of blocked actions
-        trim(action_label);
-        blocks.emplace_back(action_label);
-      }
+      parse_block(parser);
     }
 
     if (parser.options.count("allow") > 0)
     {
-      std::string filename = parser.option_argument("allow");
-      std::stringstream stringstream(filename);
-      mCRL2log(log::debug) << "Reading allowed multi-actions from file " << filename << std::endl;
-      std::ifstream file_input(filename.c_str());
-      std::istream* allow_input = &file_input;
-      if (!file_input.good())
-      {
-        // File doesn't exist
-        allow_input = &stringstream;
-      }
-      std::string action_label;
-
-      // Read list of allowed multi-actions seperated by commas
-      while (std::getline(*allow_input, action_label, ','))
-      {
-        std::istringstream iss(action_label);
-        std::multiset<core::identifier_string> labels;
-        std::string label;
-        std::size_t delim = action_label.find('|');
-        std::size_t prev_delim = 0;
-
-        // Read all actions seperated by bars
-        while (delim != std::string::npos)
-        {
-          label = action_label.substr(prev_delim, delim - prev_delim);
-          trim(label);
-          labels.insert(label);
-
-          prev_delim = delim + 1;
-          delim = action_label.find('|', delim + 1);
-        }
-
-        // Read last action of multi-action
-        label = action_label.substr(prev_delim);
-        trim(label);
-        labels.insert(label);
-
-        // Add multi-action to the list of allowed actions
-        allow.emplace_back(labels.begin(), labels.end());
-      }
+      parse_allow(parser);
     }
 
     if (parser.options.count("hide") > 0)
     {
-      std::string filename = parser.option_argument("hide");
-      std::stringstream stringstream(filename);
-      mCRL2log(log::debug) << "Reading hidden actions from file " << filename << std::endl;
-      std::ifstream file_input(filename.c_str());
-      std::istream* hide_input = &file_input;
-      if (!file_input.good())
-      {
-        // File doesn't exist
-        hide_input = &stringstream;
-      }
-      std::string action_label;
+      parse_hide(parser);
+    }
+  }
 
-      // Read list of hiden actions seperated by commas
-      while (std::getline(*hide_input, action_label, ','))
+  void get_action_names(const lts::lts_lts_t& lts, process::action_name_set& action_names) const
+  {
+    for (const lts::action_label_lts& label: lts.action_labels())
+    {
+      for (const process::action& action: label.actions())
       {
-        if (action_label.find('|') != std::string::npos)
-        {
-          // Syntax error, multi-actions cannot be hiden
-          mCRL2log(log::error) << "List of hide actions contains multi-action '" << action_label << "'." << std::endl;
-          throw mcrl2::runtime_error("Could not parse file " + filename + ".");
-        }
-
-        // Trim action and add to list of hiden actions
-        trim(action_label);
-        hiden.emplace_back(action_label);
+        action_names.insert(action.label().name());
       }
     }
   }
 
+  void get_action_names(const std::vector<lts::lts_lts_t>& ltss, process::action_name_set& action_names) const
+  {
+    for (const lts::lts_lts_t& lts: ltss)
+    {
+      get_action_names(lts, action_names);
+    }
+  }
+
 private:
-  // trim from start (in place)
-  inline void ltrim(std::string& s)
-  {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-  }
-
-  // trim from end (in place)
-  inline void rtrim(std::string& s)
-  {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
-  }
-
-  // trim from both ends (in place)
-  inline void trim(std::string& s)
-  {
-    rtrim(s);
-    ltrim(s);
-  }
-
-  std::vector<core::identifier_string> blocks;
-  std::unordered_set<core::identifier_string_list> allow_set;
-  std::vector<core::identifier_string_list> allow;
-  std::vector<core::identifier_string> hiden;
-  std::vector<core::identifier_string_list> syncs;
-  std::vector<core::identifier_string> resulting_actions;
+  core::identifier_string_list block_set;
+  process::action_name_multiset_list allow_set;
+  lps::detail::allow_list_cache allow_cache;
+  core::identifier_string_list hide_set;
+  process::communication_expression_list comm_set;
+  process::action_name_multiset_list inner_allow_set;
+  std::unordered_set<core::identifier_string> inner_allowed_action_names;
 
   bool save_at_end = false;
   std::size_t nr_of_threads = 0UL;

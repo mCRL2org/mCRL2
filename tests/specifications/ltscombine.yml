@@ -27,7 +27,7 @@ nodes:
     type: lps
   l14:
     type: lts
-  
+
 tools:
   t1:
     input: [l1]
@@ -52,7 +52,7 @@ tools:
   t5:
     input: [l5, l6]
     output: [l7]
-    args: [--hide=a, "--allow=a,b", --comm="a|b->c"]
+    args: ["--hide={a}", "--allow={a,b}", "--comm={a|b->c}"]
     name: ltscombine
   t6:
     input: [l5, l3]
@@ -77,7 +77,7 @@ tools:
   t10:
     input: [l10, l11]
     output: [l12]
-    args: [--hide=a, "--allow=a,b", --comm=a|b->c]
+    args: ["--hide={a}", "--allow={a,b}", "--comm={a|b->c}" ]
     name: ltscombine_naive.py
   t11:
     input: [l12]
@@ -94,6 +94,6 @@ tools:
     output: []
     args: [-ebisim]
     name: ltscompare
-    
+
 result: |
   result = t13.value['result']
