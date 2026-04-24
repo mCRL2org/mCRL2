@@ -13,12 +13,20 @@
 #define MCRL2_PBES_ABSINTHE_H
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/data/alias.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/consistency.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/default_expression_generator.h"
 #include "mcrl2/data/detail/data_construction.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/data/detail/print_parse_check.h"
+#include "mcrl2/utilities/logger.h"
+#include <optional>
 
 namespace mcrl2::pbes_system
 {
@@ -126,16 +134,19 @@ struct absinthe_algorithm
     const abstraction_map& sigmaH;
     const sort_expression_substitution_map& sigmaS;
     const function_symbol_substitution_map& sigmaF;
+    const data::alias_vector& user_defined_aliases;
     data::set_identifier_generator& generator;
 
     absinthe_sort_expression_builder(const abstraction_map& sigmaA_,
                                      const sort_expression_substitution_map& sigmaS_,
                                      const function_symbol_substitution_map& sigmaF_,
+                                     const data::alias_vector& user_defined_aliases_,
                                      data::set_identifier_generator& generator_
                                     )
       : sigmaH(sigmaA_),
         sigmaS(sigmaS_),
         sigmaF(sigmaF_),
+        user_defined_aliases(user_defined_aliases_),
         generator(generator_)
     {}
 
@@ -244,9 +255,10 @@ struct absinthe_algorithm
     sort_function(const abstraction_map& sigmaH,
                   const sort_expression_substitution_map& sigmaS,
                   const function_symbol_substitution_map& sigmaF,
+                  const data::alias_vector& user_defined_aliases,
                   data::set_identifier_generator& generator
                  )
-      : f(sigmaH, sigmaS, sigmaF, generator)
+      : f(sigmaH, sigmaS, sigmaF, user_defined_aliases, generator)
     {}
 
     data::sort_expression operator()(const data::sort_expression& x)
@@ -277,45 +289,48 @@ struct absinthe_algorithm
     const abstraction_map& sigmaH;
     const sort_expression_substitution_map& sigmaS;
     const function_symbol_substitution_map& sigmaF;
+    const data::alias_vector& user_defined_aliases;
     data::set_identifier_generator& generator;
     bool m_is_over_approximation;
 
     data::data_expression lift(const data::data_expression& x)
     {
       data::data_expression result;
-      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, user_defined_aliases, generator).apply(result, x);
       return result;
     }
 
     data::data_expression_list lift(const data::data_expression_list& x)
     {
       data::data_expression_list result;
-      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, user_defined_aliases, generator).apply(result, x);
       return result;
     }
 
     data::variable_list lift(const data::variable_list& x)
     {
       data::variable_list result;
-      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, user_defined_aliases, generator).apply(result, x);
       return result;
     }
 
     pbes_system::propositional_variable lift(const pbes_system::propositional_variable& x)
     {
       pbes_system::propositional_variable result;
-      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(result, x);
+      absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, user_defined_aliases, generator).apply(result, x);
       return result;
     }
 
     absinthe_data_expression_builder(const abstraction_map& sigmaA_,
                                      const sort_expression_substitution_map& sigmaS_,
                                      const function_symbol_substitution_map& sigmaF_,
+                                     const data::alias_vector& user_defined_aliases_,
                                      data::set_identifier_generator& generator_,
                                      bool is_over_approximation)
       : sigmaH(sigmaA_),
         sigmaS(sigmaS_),
         sigmaF(sigmaF_),
+        user_defined_aliases(user_defined_aliases_),
         generator(generator_),
         m_is_over_approximation(is_over_approximation)
     {}
@@ -338,13 +353,44 @@ struct absinthe_algorithm
     void apply(T& result, const propositional_variable_instantiation& x)
     {
       data::data_expression_list e = lift(x.parameters());
-      data::variable_list variables = make_variables(x.parameters(), "x", sort_function(sigmaH, sigmaS, sigmaF, generator));
+      data::variable_list variables = make_variables(x.parameters(), "x", sort_function(sigmaH, sigmaS, sigmaF, user_defined_aliases, generator));
+      data::data_expression_list tgtvariables(variables);
       data::data_expression_list::iterator i = e.begin();
       data::variable_list::iterator j = variables.begin();
+      data::data_expression_list::iterator t = tgtvariables.begin();
       data::data_expression_vector z;
-      for (; i != e.end(); ++i, ++j)
+      for (; i != e.end(); ++i, ++j, ++t)
       {
-        z.push_back(data::detail::create_set_in(*j, *i));
+        data::sort_expression j_sort = (*j).sort();
+        mCRL2log(log::debug) << "j_sort: " << j_sort << "is_basic_sort: " << data::is_basic_sort(j_sort) << "is_structured_sort: " <<std::endl;
+        if (!data::is_basic_sort(j_sort)) {
+            z.push_back(data::detail::create_set_in(*j, *i));
+            continue;
+        }
+        data::basic_sort j_sort_basic = atermpp::down_cast<data::basic_sort>(j_sort);
+        // j_sort as value in aliases
+        std::optional<data::structured_sort> j_sort_structured;
+        for (const data::alias& alias: user_defined_aliases)
+        {
+          if (alias.name().name() == j_sort_basic.name())
+          {
+            j_sort_structured.emplace(alias.reference());
+            break;
+          }
+        }
+        if (!j_sort_structured.has_value() || j_sort_structured->constructors().size() != 1 || 
+            atermpp::down_cast<data::structured_sort_constructor>(j_sort_structured->constructors()[0])
+            .arguments().size() > 0) {
+            z.push_back(data::detail::create_set_in(*j, *i));
+            continue;
+        }
+        // TODO: Find the actual value of the sort.
+        data::data_specification spec;
+        data::default_expression_generator gen();
+        data::structured_sort_constructor cons
+          = atermpp::down_cast<data::structured_sort_constructor>(j_sort_structured->constructors()[0]);
+        mCRL2log(log::debug) << "function_symbol(): " << data::function_symbol(cons.name()) << std::endl;
+        data::function_symbol(cons.name());
       }
       data::data_expression q = data::lazy::join_and(z.begin(), z.end());
       if (m_is_over_approximation)
@@ -852,12 +898,12 @@ struct absinthe_algorithm
   }
 
   // add lifted mappings and equations to the data specification
-  void lift_data_specification(const pbes& p, const abstraction_map& sigmaH, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
+  void lift_data_specification(const pbes& p, const abstraction_map& sigmaH, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, const data::alias_vector& user_defined_aliases, data::data_specification& dataspec)
   {
     using utilities::detail::has_key;
 
     sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
-    sort_function sigma(sigmaH, sigmaS, sigmaF, m_generator);
+    sort_function sigma(sigmaH, sigmaS, sigmaF, user_defined_aliases, m_generator);
 
     // add lifted versions of used function symbols that are not specified by the user to sigmaF, and adds them to the data specification as well
     std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
@@ -957,6 +1003,13 @@ struct absinthe_algorithm
     std::vector<std::string> all_keywords = { "sort", "var", "eqn", "map", "cons", "absfunc", "absmap" };
     std::pair<std::string, std::string> q;
 
+    mCRL2log(log::debug) << "--- dataspec: " << data::pp(p.data()) << std::endl;
+    for (const auto& s: p.data().sort_alias_map())
+    {
+      mCRL2log(log::debug) << "--- sort: " << s.first << " -> " << s.second << std::endl;
+    }
+
+    
     q = utilities::detail::separate_keyword_section(text, "sort", all_keywords);
     user_sorts_text = q.first;
     text = q.second;
@@ -1026,7 +1079,7 @@ struct absinthe_algorithm
     // after: f2 and f3 have been added to dataspec
     // after: equations for f3 have been added to dataspec
     // generate mapping f1 -> f2 for missing function symbols
-    lift_data_specification(p, sigmaH, sigmaS, sigmaF, dataspec);
+    lift_data_specification(p, sigmaH, sigmaS, sigmaF, dataspec.user_defined_aliases(), dataspec);
     mCRL2log(log::debug) << "--- data specification 4) ---\n" << dataspec << std::endl;
 
     mCRL2log(log::debug) << "\n--- function symbol mapping after lifting ---\n" << print_mapping(sigmaF) << std::endl;
@@ -1036,7 +1089,7 @@ struct absinthe_algorithm
     p.data() = dataspec;
 
     // then transform the data expressions and the propositional variable instantiations
-    absinthe_data_expression_builder(sigmaH, sigmaS, sigmaF, m_generator, is_over_approximation).update(p);
+    absinthe_data_expression_builder(sigmaH, sigmaS, sigmaF, dataspec.user_defined_aliases(), m_generator, is_over_approximation).update(p);
 
     mCRL2log(log::debug) << "--- pbes after ---\n" << p << std::endl;
   }
