@@ -63,12 +63,8 @@ struct pbescegar_pbes_cegar_iterator
   {
       data::rewriter datar(p.data(), options.rewrite_strategy);
     // simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(datar);
-    pbes p_copy;
+    pbes p_copy(p);
     mCRL2log(log::debug) << "MY BEFORE" << pp(p) << "MY END" << std::endl;
-    p_copy.data() = p.data();
-    p_copy.global_variables() = p.global_variables();
-    p_copy.equations() = p.equations();
-    p_copy.initial_state() = p.initial_state();
     simplify_data_rewriter<data::rewriter> pbesr(datar);
     dataspec_prune_rewriter rewr;
     mCRL2log(log::verbose) << "Normal rewr" << std::endl;
@@ -257,7 +253,7 @@ struct pbescegar_pbes_cegar_iterator
       var_text += var_new_1 + " : " + abs_sort_name + ";\n";
       var_text += var_new_2 + " : " + abs_sort_name + ";\n";
       eqn_text += "abseq(" + var_new_1 + ", " + var_new_2 + ") = {true,false};\n";
-      eqn_text += "" + var_new_1 + " == " + var_new_2 + " = true;\n";
+      // eqn_text += "" + var_new_1 + " == " + var_new_2 + " = true;\n";
 
       eqn_text += "absif(" + var_bool + ", " + var_new_1 + ", " + var_new_2 + ") = {" + cons_name + "};\n";
       absfunc_text += "if: Bool # " + org_sort_name + " # " + org_sort_name + " -> " + org_sort_name
@@ -355,8 +351,7 @@ struct pbescegar_pbes_cegar_iterator
 
   static bool is_even(data::sort_expression i)
   {
-    mCRL2log(log::verbose) << "is_even: " << (i[0]) << std::endl;
-    return pp(i[0]) == "ControlPhase";
+    return pp(i[0]) == "ControlPhase" || pp(i[0]) == "SingleLight" || pp(i[0]) == "DoubleLight";
   }
 
   bool run(pbes& p, pbescegar_options options)
@@ -376,9 +371,10 @@ struct pbescegar_pbes_cegar_iterator
     sorts_to_abstract.erase(data::sort_list::list(data::sort_nat::nat()));
     sorts_to_abstract.erase(data::sort_list::list(data::sort_real::real_()));
     auto it = std::find_if(sorts_to_abstract.begin(), sorts_to_abstract.end(), is_even);
-    if (it != sorts_to_abstract.end())
+    while (it != sorts_to_abstract.end())
     {
       sorts_to_abstract.erase(it);
+      it = std::find_if(sorts_to_abstract.begin(), sorts_to_abstract.end(), is_even);
     }
     mCRL2log(log::verbose) << "Abstracted sorts: " << pp(sorts_to_abstract) << std::endl;
     bool tried_all = false;
