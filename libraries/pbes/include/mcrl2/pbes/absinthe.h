@@ -22,6 +22,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/data/detail/print_parse_check.h"
@@ -354,17 +355,20 @@ struct absinthe_algorithm
     {
       data::data_expression_list e = lift(x.parameters());
       data::variable_list variables = make_variables(x.parameters(), "x", sort_function(sigmaH, sigmaS, sigmaF, user_defined_aliases, generator));
-      data::data_expression_list tgtvariables(variables);
-      data::data_expression_list::iterator i = e.begin();
-      data::variable_list::iterator j = variables.begin();
-      data::data_expression_list::iterator t = tgtvariables.begin();
-      data::data_expression_vector z;
-      for (; i != e.end(); ++i, ++j, ++t)
+      data::variable_vector quantvariablesvec;
+      data::data_expression_vector tgtvariablesvec;
+      data::data_expression_list::const_iterator i = e.begin();
+      data::variable_list::const_iterator j = variables.begin();
+      data::data_expression_vector guard_and_vec;
+      // Try and minimize the number of quantifier created. If we have a sort with only one possible value 
+      // (in this case only structured sort), just put that value inside.
+      for (; i != e.end(); ++i, ++j)
       {
         data::sort_expression j_sort = (*j).sort();
-        mCRL2log(log::debug) << "j_sort: " << j_sort << "is_basic_sort: " << data::is_basic_sort(j_sort) << "is_structured_sort: " <<std::endl;
         if (!data::is_basic_sort(j_sort)) {
-            z.push_back(data::detail::create_set_in(*j, *i));
+            guard_and_vec.push_back(data::detail::create_set_in(*j, *i));
+            quantvariablesvec.push_back(*j);
+            tgtvariablesvec.push_back(*j);
             continue;
         }
         data::basic_sort j_sort_basic = atermpp::down_cast<data::basic_sort>(j_sort);
@@ -381,26 +385,28 @@ struct absinthe_algorithm
         if (!j_sort_structured.has_value() || j_sort_structured->constructors().size() != 1 || 
             atermpp::down_cast<data::structured_sort_constructor>(j_sort_structured->constructors()[0])
             .arguments().size() > 0) {
-            z.push_back(data::detail::create_set_in(*j, *i));
+            guard_and_vec.push_back(data::detail::create_set_in(*j, *i));
+            quantvariablesvec.push_back(*j);
+            tgtvariablesvec.push_back(*j);
             continue;
         }
-        // TODO: Find the actual value of the sort.
-        data::data_specification spec;
-        data::default_expression_generator gen();
         data::structured_sort_constructor cons
           = atermpp::down_cast<data::structured_sort_constructor>(j_sort_structured->constructors()[0]);
-        mCRL2log(log::debug) << "function_symbol(): " << data::function_symbol(cons.name()) << std::endl;
-        data::function_symbol(cons.name());
+        data::function_symbol fs;
+        make_function_symbol(fs, cons.name(), j_sort);
+        tgtvariablesvec.push_back(fs);
       }
-      data::data_expression q = data::lazy::join_and(z.begin(), z.end());
+      data::data_expression q = data::lazy::join_and(guard_and_vec.begin(), guard_and_vec.end());
+      data::variable_list quantvariables(quantvariablesvec);
+      data::data_expression_list tgtvariables(tgtvariablesvec);
       if (m_is_over_approximation)
       {
-        result = make_exists_(variables, and_(atermpp::down_cast<pbes_expression>(q), 
-          propositional_variable_instantiation(x.name(), data::data_expression_list(variables))));
+        result = make_exists_(quantvariables, and_(atermpp::down_cast<pbes_expression>(q), 
+          propositional_variable_instantiation(x.name(), tgtvariables)));
       }
       else
       {
-        result = make_forall_(variables, imp(atermpp::down_cast<pbes_expression>(q), propositional_variable_instantiation(x.name(), data::data_expression_list(variables))));
+        result = make_forall_(quantvariables, imp(atermpp::down_cast<pbes_expression>(q), propositional_variable_instantiation(x.name(), tgtvariables)));
       }
     }
 
