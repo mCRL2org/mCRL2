@@ -670,7 +670,6 @@ TASK(void, lace_steal_random)
  * Main Lace worker implementation.
  * Steal from random victims until "quit" is set.
  */
-LACE_NO_SANITIZE_THREAD
 TASK(void, lace_steal_loop, atomic_int*, quit)
 {
     // Determine who I am
