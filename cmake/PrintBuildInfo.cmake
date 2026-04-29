@@ -12,10 +12,6 @@ if(NOT MCRL2_ENABLE_GUI_TOOLS)
   set(BUILD_TYPE "${BUILD_TYPE}, no GUI tools")
 endif()
 
-if(NOT MCRL2_ENABLE_STABLE)
-  set(BUILD_TYPE "${BUILD_TYPE}, no stable tools")
-endif()
-
 if(MCRL2_ENABLE_EXPERIMENTAL)
   set(BUILD_TYPE "${BUILD_TYPE}, experimental")
 endif()
