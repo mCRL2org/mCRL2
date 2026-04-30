@@ -95,6 +95,8 @@ public:
     data::rewriter datar(p.data(), options.rewrite_strategy);
     // simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(datar);
     pbes p_copy(p);
+    utilities::execution_timer timer;
+    timer.start("preprocessing");
     mCRL2log(log::debug) << "MY BEFORE" << pp(p) << "MY END" << std::endl;
     simplify_data_rewriter<data::rewriter> pbesr(datar);
     dataspec_prune_rewriter rewr;
@@ -112,37 +114,47 @@ public:
     pbes_rewrite(p_copy, pbesr);
     mCRL2log(log::debug) << "Data prune" << std::endl;
     p_copy = rewr(p_copy);
+    timer.finish("preprocessing");
 
     mCRL2log(log::debug) << "MY APPROX" << pp(p_copy) << "MY END" << std::endl;
 
     bool result = false;
+    timer.start("solving approximation");
     if (options.solve_symbolic)
     {
-      bp::ipstream output_sym_stream;
-      bp::opstream input_sym_stream;
-      mCRL2log(log::debug) << "Solving symbolic with args: " << options.solve_symbolic_args << std::endl;
-      sym_process = bp::child(("pbessolvesymbolic - " + options.solve_symbolic_args),
-        bp::std_in<input_sym_stream, bp::std_out> output_sym_stream);
-
-      std::ostringstream buffer(std::ios::binary);
-      atermpp::binary_aterm_ostream(buffer) << p_copy;
-
-      const std::string& data = buffer.str();
-      input_sym_stream.write(data.data(), data.size());
-
-      input_sym_stream.flush();
-
-      std::vector<std::string> outline;
-      std::string line;
-      while (sym_process.running() && std::getline(output_sym_stream, line))
+      try
       {
-        mCRL2log(log::debug) << "[symbolic]: " << line << std::endl;
-        outline.push_back(line);
-      }
-      mCRL2log(log::verbose) << "Result: " << outline.back() << std::endl;
-      sym_process.wait();
+        bp::ipstream output_sym_stream;
+        bp::opstream input_sym_stream;
+        mCRL2log(log::debug) << "Solving symbolic with args: " << options.solve_symbolic_args << std::endl;
+        sym_process = bp::child(("pbessolvesymbolic - " + options.solve_symbolic_args),
+          bp::std_in<input_sym_stream, bp::std_out> output_sym_stream);
 
-      result = outline.back() == "true";
+        std::ostringstream buffer(std::ios::binary);
+        atermpp::binary_aterm_ostream(buffer) << p_copy;
+
+        const std::string& data = buffer.str();
+        input_sym_stream.write(data.data(), data.size());
+
+        input_sym_stream.flush();
+
+        std::vector<std::string> outline;
+        std::string line;
+        while (sym_process.running() && std::getline(output_sym_stream, line))
+        {
+          mCRL2log(log::debug) << "[symbolic]: " << line << std::endl;
+          outline.push_back(line);
+        }
+        mCRL2log(log::verbose) << "Result: " << outline.back() << std::endl;
+        sym_process.wait();
+
+        result = outline.back() == "true";
+      }
+      catch (const std::exception& e)
+      {
+        sym_process.wait();
+        mcrl2::runtime_error("symbolic solver failed: " + std::string(e.what()));
+      }
     }
     else
     {
@@ -156,6 +168,11 @@ public:
       // Solve the structure graph
       result = solve_structure_graph(G);
       mCRL2log(log::verbose) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
+    }
+    timer.finish("solving approximation");
+    if (mcrl2::log::mCRL2logEnabled(log::verbose))
+    {
+      timer.report();
     }
     return result;
   }
