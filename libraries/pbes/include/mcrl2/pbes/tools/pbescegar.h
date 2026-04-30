@@ -35,18 +35,30 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
+#ifdef MCRL2_ENABLE_SYLVAN
+#include "mcrl2/pbes/pbesreach.h"
+#include "mcrl2/pbes/tools/pbesstategraph_options.h"
+#endif
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/rewriters/dataspec_prune_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
-#include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
+#include <boost/asio.hpp>
+#include <boost/asio/buffer.hpp>
+#include <boost/asio/read_until.hpp>
+#include <boost/container/flat_map.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/process.hpp>
+#include <boost/process/search_path.hpp>
 #include <cstddef>
 #include <iostream>
 #include <map>
 #include <set>
+
+namespace bp = boost::process;
 
 namespace mcrl2::pbes_system
 {
@@ -55,45 +67,96 @@ struct pbescegar_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   bool init_control_flow = false;
+  bool solve_symbolic = false;
+  std::string solve_symbolic_args = "";
 };
+
+srf_pbes tosrf(pbes_system::pbes pbesspec)
+{
+  pbes_system::detail::instantiate_global_variables(pbesspec);
+  auto result = pbes2pre_srf(pbesspec, true);
+  // Unify the parameters of the original PBES (which has potential counter example information)
+  unify_parameters(result, true, false);
+  pbes_system::resolve_summand_variable_name_clashes(result,
+    result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
+  return pre_srf2srfpbes(result);
+}
 
 struct pbescegar_pbes_cegar_iterator
 {
+private:
+  utilities::indexed_set<data::data_expression> m_values;
+
+  bp::child sym_process;
+
+public:
   bool solve(const pbes& p, pbescegar_options options)
   {
-      data::rewriter datar(p.data(), options.rewrite_strategy);
+    data::rewriter datar(p.data(), options.rewrite_strategy);
     // simplify_quantifiers_data_rewriter<data::rewriter> pbes_default_rewriter(datar);
     pbes p_copy(p);
     mCRL2log(log::debug) << "MY BEFORE" << pp(p) << "MY END" << std::endl;
     simplify_data_rewriter<data::rewriter> pbesr(datar);
     dataspec_prune_rewriter rewr;
-    mCRL2log(log::verbose) << "Normal rewr" << std::endl;
+    mCRL2log(log::debug) << "Normal rewr" << std::endl;
     pbes_rewrite(p_copy, pbesr);
-    mCRL2log(log::verbose) << "Data spec rewr" << std::endl;
+    mCRL2log(log::debug) << "Data spec rewr" << std::endl;
     p_copy = rewr(p_copy);
     quantifiers_inside_rewriter pbesr_inside;
-    mCRL2log(log::verbose) << "Inside" << std::endl;
+    mCRL2log(log::debug) << "Inside" << std::endl;
     pbes_rewrite(p_copy, pbesr_inside);
     one_point_rule_rewriter pbesr_one_point;
-    mCRL2log(log::verbose) << "One point" << std::endl;
+    mCRL2log(log::debug) << "One point" << std::endl;
     replace_pbes_expressions(p_copy, pbesr_one_point, false);
-    mCRL2log(log::verbose) << "Regular" << std::endl;
+    mCRL2log(log::debug) << "Regular" << std::endl;
     pbes_rewrite(p_copy, pbesr);
-    mCRL2log(log::verbose) << "Data prune" << std::endl;
+    mCRL2log(log::debug) << "Data prune" << std::endl;
     p_copy = rewr(p_copy);
-    
-    mCRL2log(log::debug) << "MY APPROX" << pp(p_copy)<< "MY END" << std::endl;
 
-    pbessolve_options options2;
-    options2.rewrite_strategy = options.rewrite_strategy;
+    mCRL2log(log::debug) << "MY APPROX" << pp(p_copy) << "MY END" << std::endl;
 
-    structure_graph G;
-    pbesinst_structure_graph_algorithm algorithm(options2, p_copy, G);
-    algorithm.run();
+    bool result = false;
+    if (options.solve_symbolic)
+    {
+      bp::ipstream output_sym_stream;
+      bp::opstream input_sym_stream;
+      mCRL2log(log::debug) << "Solving symbolic with args: " << options.solve_symbolic_args << std::endl;
+      sym_process = bp::child(("pbessolvesymbolic - " + options.solve_symbolic_args),
+        bp::std_in<input_sym_stream, bp::std_out> output_sym_stream);
 
-    // Solve the structure graph
-    bool result = solve_structure_graph(G);
-    mCRL2log(log::debug) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
+      std::ostringstream buffer(std::ios::binary);
+      atermpp::binary_aterm_ostream(buffer) << p_copy;
+
+      const std::string& data = buffer.str();
+      input_sym_stream.write(data.data(), data.size());
+
+      input_sym_stream.flush();
+
+      std::vector<std::string> outline;
+      std::string line;
+      while (sym_process.running() && std::getline(output_sym_stream, line))
+      {
+        mCRL2log(log::debug) << "[symbolic]: " << line << std::endl;
+        outline.push_back(line);
+      }
+      mCRL2log(log::verbose) << "Result: " << outline.back() << std::endl;
+      sym_process.wait();
+
+      result = outline.back() == "true";
+    }
+    else
+    {
+      pbessolve_options options2;
+      options2.rewrite_strategy = options.rewrite_strategy;
+
+      structure_graph G;
+      pbesinst_structure_graph_algorithm algorithm(options2, p_copy, G);
+      algorithm.run();
+
+      // Solve the structure graph
+      result = solve_structure_graph(G);
+      mCRL2log(log::verbose) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
+    }
     return result;
   }
 
@@ -116,8 +179,8 @@ struct pbescegar_pbes_cegar_iterator
 
     try
     {
-      mCRL2log(log::verbose) << "Solving " << (is_overapproximation ? "over" : "under")
-                             << "approximated PBES using structure graph..." << std::endl;
+      mCRL2log(log::verbose) << "Solving " << (is_overapproximation ? "over" : "under") << "approximated PBES"
+                             << std::endl;
       return solve(p_copy, options);
     }
     catch (const std::exception& e)
@@ -351,17 +414,17 @@ struct pbescegar_pbes_cegar_iterator
 
   static bool is_even(data::sort_expression i)
   {
-    return pp(i[0]) == "ControlPhase" || pp(i[0]) == "SingleLight" || pp(i[0]) == "DoubleLight";
+    mCRL2log(log::debug) << "is_even: " << pp(i[0]) << std::endl;
+    return pp(i[0]) == "ControlPhase" || pp(i[0]) == "SingleLight" || pp(i[0]) == "DoubleLight" || pp(i[0]) == "Enum3";
+    // || pp(i[0]) == "Colour" || pp(i[0]) == "Sluice";
   }
 
   bool run(pbes& p, pbescegar_options options)
   {
-    // Step 1: Initialize structures
-    
-    // Step 2: Calculate Control Flow Parameters
+    // Calculate Control Flow Parameters
     std::map<core::identifier_string, std::vector<bool>> is_cfp = calculate_cfp(p, options, options.init_control_flow);
 
-    // Step 3: Collect sorts to abstract (non-CFP parameters)
+    // Collect sorts to abstract (non-CFP parameters)
     std::set<data::sort_expression> sorts_to_abstract = collect_sorts_to_abstract(p, is_cfp);
     sorts_to_abstract.erase(data::sort_nat::nat());
     sorts_to_abstract.erase(data::sort_pos::pos());
@@ -386,7 +449,7 @@ struct pbescegar_pbes_cegar_iterator
         return solve(p, options);
       }
 
-      // Step 4: Create abstraction specification and solve
+      // Create abstraction specification and solve
       std::string abstraction_text = create_abstraction_specification(p, sorts_to_abstract);
 
       bool under_result = solve_approximation(p, options, abstraction_text, false);
