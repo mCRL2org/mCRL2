@@ -92,7 +92,7 @@ namespace mcrl2::lps
                 thread_enumerator,
                 thread_id_generator,
                 [&](const lps::multi_action& a, const state_type& s1)
-                {   
+                {
                   if constexpr (Timed)
                   { 
                     const data::data_expression& t = current_state[m_n];
