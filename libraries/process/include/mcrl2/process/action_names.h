@@ -62,6 +62,7 @@ struct action_names_traverser: public process_expression_traverser<Derived>
   const std::vector<process_equation>& equations;
   std::set<process_identifier>& W;
   std::vector<Node> node_stack;
+  std::map<process_expression, action_name_set> action_name_cache; // cache for process instances whose action names have already been computed.
 
   action_names_traverser(const std::vector<process_equation>& equations_, std::set<process_identifier>& W_)
     : equations(equations_), W(W_)
@@ -115,15 +116,24 @@ struct action_names_traverser: public process_expression_traverser<Derived>
   void leave(const process::process_instance& x)
   {
     using utilities::detail::contains;
-    if (!contains(W, x.identifier()))
+
+    if (action_name_cache.find(x) != action_name_cache.end())
     {
+      // equation was previously visited, recall from cache.
+      push(action_name_cache[x]);
+    }
+    else if (!contains(W, x.identifier()))
+    {
+      // W was not yet visited during the computation. Recursively compute, and store in cache.
       W.insert(x.identifier());
       const process_equation& eqn = find_equation(equations, x.identifier());
       derived().apply(eqn.expression());
       W.erase(x.identifier());
+      action_name_cache[x] = top().action_names;
     }
     else
     {
+      // W was already visited during the computation, do not visit again.
       push(action_name_set());
     }
   }
@@ -131,15 +141,23 @@ struct action_names_traverser: public process_expression_traverser<Derived>
   void leave(const process::process_instance_assignment& x)
   {
     using utilities::detail::contains;
-    if (!contains(W, x.identifier()))
+    if (action_name_cache.find(x) != action_name_cache.end())
     {
+      // equation was previously visited, recall from cache.
+      push(action_name_cache[x]);
+    }
+    else if (!contains(W, x.identifier()))
+    {
+      // W was not yet visited during the computation. Recursively compute, and store in cache.
       W.insert(x.identifier());
       const process_equation& eqn = find_equation(equations, x.identifier());
       derived().apply(eqn.expression());
       W.erase(x.identifier());
+      action_name_cache[x] = top().action_names;
     }
     else
     {
+      // W was already visited during the computation, do not visit again.
       push(action_name_set());
     }
   }
