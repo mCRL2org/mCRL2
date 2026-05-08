@@ -41,7 +41,7 @@ namespace detail
 
 inline
 bool save_trace(
-  class trace& tr,
+  trace& tr,
   const std::string& filename
 )
 {
@@ -60,9 +60,9 @@ bool save_trace(
 
 inline
 void save_traces(
-  class trace& tr,
+  trace& tr,
   const std::string& filename1,
-  class trace& tr2,
+  trace& tr2,
   const std::string& filename2
 )
 {
@@ -122,7 +122,7 @@ class trace_constructor
     {}
 
     // Constructs a trace ending in s, using the backpointers map.
-    class trace construct_trace(const lps::state& s)
+    trace construct_trace(const lps::state& s)
     {
       std::deque<lps::state> states{ s };
       std::deque<lps::multi_action> actions;
@@ -139,7 +139,7 @@ class trace_constructor
         actions.push_front(find_action(s0, s1));
       }
 
-      class trace tr;
+      trace tr;
       for (std::size_t i = 0; i < actions.size(); i++)
       {
         tr.set_state(states[i]);
@@ -253,7 +253,7 @@ class action_detector
       mCRL2log(log::info) << "Action '" + lps::pp(a) + "' found (state index: " + std::to_string(s0_index) + ")";
       if (m_trace_count < m_max_trace_count)
       {
-        class trace tr = m_trace_constructor.construct_trace(s0);
+        trace tr = m_trace_constructor.construct_trace(s0);
         tr.add_action(a);
         tr.set_state(s1);
         std::string filename = create_filename(a);
@@ -294,7 +294,7 @@ class deadlock_detector
       mCRL2log(log::info) << "Deadlock found (state index: " + std::to_string(s_index) + ")";
       if (m_trace_count < m_max_trace_count)
       {
-        class trace tr = m_trace_constructor.construct_trace(s);
+        trace tr = m_trace_constructor.construct_trace(s);
         std::string filename = filename_prefix + "_dlk_" + std::to_string(m_trace_count++) + ".trc";
         save_trace(tr, filename);
       }
@@ -351,7 +351,7 @@ class nondeterminism_detector
         mCRL2log(log::info) << "Nondeterministic state found (state index: " + std::to_string(s0_index) + ")";
         if (m_trace_count < m_max_trace_count)
         {
-          class trace tr = m_trace_constructor.construct_trace(s0);
+          trace tr = m_trace_constructor.construct_trace(s0);
           tr.add_action(a);
           tr.set_state(s1);
           std::string filename = filename_prefix + "_nondeterministic_" + std::to_string(m_trace_count++) + ".trc";
@@ -473,8 +473,8 @@ class divergence_detector
             mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
             if (m_trace_count < m_max_trace_count)
             {
-              class trace tr = global_trace_constructor.construct_trace(s);
-              class trace tr_loop = m_local_trace_constructor.construct_trace(s0);
+              trace tr = global_trace_constructor.construct_trace(s);
+              trace tr_loop = m_local_trace_constructor.construct_trace(s0);
               for (const lps::state& u: tr_loop.states())
               {
                 m_divergent_states[u] = s_index;
@@ -509,8 +509,8 @@ class divergence_detector
             mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
             if (m_trace_count < m_max_trace_count)
             {
-              class trace tr = global_trace_constructor.construct_trace(s);
-              class trace tr_loop = m_local_trace_constructor.construct_trace(s0);
+              trace tr = global_trace_constructor.construct_trace(s);
+              trace tr_loop = m_local_trace_constructor.construct_trace(s0);
               for (const lps::state& u: tr_loop.states())
               {
                 m_divergent_states[u] = s_index;
@@ -645,6 +645,7 @@ class progress_monitor
 };
 
 } // namespace detail
+
 
 template <bool Stochastic, bool Timed, typename Specification>
 struct state_space_generator
@@ -812,7 +813,7 @@ struct state_space_generator
       if (options.save_error_trace)
       {
         const lps::state& s = *source;
-        class trace tr = m_trace_constructor.construct_trace(s);
+        trace tr = m_trace_constructor.construct_trace(s);
         std::string filename = options.trace_prefix + "_error.trc";
         detail::save_trace(tr, filename);
       }

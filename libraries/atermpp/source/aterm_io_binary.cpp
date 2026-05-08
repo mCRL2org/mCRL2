@@ -79,7 +79,7 @@ binary_aterm_ostream::~binary_aterm_ostream()
 /// \brief Keep track of whether the term can be written to the stream.
 struct write_todo
 {
-  detail::reference_aterm<aterm> term;
+  detail::markable_aterm<aterm> term;
   bool write = false;
 
   write_todo(const aterm& term)

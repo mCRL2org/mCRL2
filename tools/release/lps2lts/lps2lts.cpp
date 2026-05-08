@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lps2lts_parallel.cpp
+/// \file lps2lts.cpp
 /// \brief This tool transforms an .lps file into a labelled transition system.
 ///        Optionally, it can be run with multiple treads. 
 
@@ -15,6 +15,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/lps/explorer.h"
 #include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/stochastic_lts_builder.h"
@@ -55,6 +56,9 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       desc.add_option("no-probability-checking", "do not check if probabilities in stochastic specifications have sensible values");
       desc.add_hidden_option("dfs-recursive", "use recursive depth first search for divergence detection");
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
+#ifdef MCRL2_USE_PROJECTIONS
+      desc.add_option("project", "use read/write projections ");
+#endif
       desc.add_option("todo-max", utilities::make_mandatory_argument("NUM"),
                  "keep at most NUM states in the todo list; this option is only relevant for "
                  "highway search, where NUM is the maximum number of states per level per thread. ");
@@ -204,6 +208,9 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       options.cached                                = parser.has_option("cached");
       options.global_cache                          = parser.has_option("global-cache");
       options.confluence                            = parser.has_option("confluence");
+#ifdef MCRL2_USE_PROJECTIONS
+      options.use_projections                       = parser.has_option("project");
+#endif
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = !parser.has_option("no-replace-constants-by-variables");
@@ -334,6 +341,13 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
          }
       }
 
+#ifdef MCRL2_USE_PROJECTIONS
+      if (parser.has_option("project") && (parser.has_option("cached") || parser.has_option("global-cache")))
+      {
+        parser.error("Option --project cannot be combined with --cached or --global-cache.");
+      }
+#endif
+
       options.rewrite_actions = output_format!=lts::lts_none ||
                                 options.save_error_trace ||
                                 options.generate_traces;
@@ -368,6 +382,13 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 
       if (lps::is_stochastic(stochastic_lpsspec))
       {
+#ifdef MCRL2_USE_PROJECTIONS
+        if (options.use_projections) {
+            options.use_projections = false;
+            mCRL2log(log::warning) << "Projections are currently not supported for stochastic specifications. "
+                                   << "Projections have been disabled.\n";
+        }
+#endif
         auto builder = create_stochastic_lts_builder(stochastic_lpsspec, options, output_format);
         if (is_timed)
         {

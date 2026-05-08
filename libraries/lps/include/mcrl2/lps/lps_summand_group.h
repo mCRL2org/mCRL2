@@ -106,8 +106,8 @@ std::pair<std::set<data::variable>, std::set<data::variable>> read_write_paramet
 }
 
 /// \brief Assigns a unique index to every parameter of the process.
-inline
-std::map<data::variable, std::size_t> process_parameter_index(const lps::specification& lpsspec)
+template <typename Specification>
+std::map<data::variable, std::size_t> process_parameter_index(const Specification& lpsspec)
 {
   std::map<data::variable, std::size_t> result;
   std::size_t i = 0;
