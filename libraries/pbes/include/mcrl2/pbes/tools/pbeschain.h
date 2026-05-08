@@ -50,6 +50,7 @@ struct pbeschain_options
   bool quantifier_free = false;
   bool avoid_alternating = false;
   bool rewrite_only_substitution = false;
+  std::size_t max_number_pvi = 1;
   double srf_factor; // factor of the maximum size the chained equation in SRF should be after chaining compared
                      // to the size of the original equation. Default is 1.0
 };
@@ -368,29 +369,42 @@ inline void self_substitute(pbes_equation& equation,
           size = std::set(phi_vector.begin(), phi_vector.end()).size();
         }
 
+        // TODO: Also queue the other PVI in some way
+
         // (3) check if simpler
-        if (size == 1 && is_avoiding_alternation(options, *phi_vector.begin(), equation)
-            && is_not_too_big(options, cur_x, phi) && is_quantifier_free(phi, options))
+        if ((size >= 1 && size <= options.max_number_pvi)
+            && is_avoiding_alternation(options, *phi_vector.begin(), equation) && is_not_too_big(options, cur_x, phi)
+            && is_quantifier_free(phi, options))
         {
-          propositional_variable_instantiation new_x = *phi_vector.begin();
+          std::set<propositional_variable_instantiation> phi_set(phi_vector.begin(), phi_vector.end());
+          bool all_in_path = true;
 
-          mCRL2log(log::debug) << "Trying loop " << new_x << " in path with \n";
-          for (const propositional_variable_instantiation& itr: path)
+          for (const propositional_variable_instantiation& phi_x: phi_set)
           {
-            mCRL2log(log::debug) << itr << "\n";
-          }
-
-          if (path.contains(new_x))
-          {
-            // We have already seen this, so we are in a loop.
-            mCRL2log(log::debug) << "Loop, seen " << new_x << " in path after " << cur_x << "    " << phi << "\n";
+            mCRL2log(log::debug) << "Trying loop " << phi_x << " in path with \n";
             for (const propositional_variable_instantiation& itr: path)
             {
               mCRL2log(log::debug) << itr << "\n";
             }
-            pvi_substituter.set_pvi(new_x);
-            pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
-            pvi_substituter.apply(result, phi);
+
+            if (path.contains(phi_x))
+            {
+              // We have already seen this, so we are in a loop.
+              mCRL2log(log::debug) << "Loop, seen " << phi_x << " in path after " << cur_x << "    " << phi << "\n";
+              for (const propositional_variable_instantiation& itr: path)
+              {
+                mCRL2log(log::debug) << itr << "\n";
+              }
+              pvi_substituter.set_pvi(phi_x);
+              pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
+              pvi_substituter.apply(result, phi);
+            } else {
+                all_in_path = false;
+            }
+          }
+
+          if (all_in_path)
+          {
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(result);
             pvi_substituter.apply(equation.formula(), equation.formula());
@@ -403,19 +417,36 @@ inline void self_substitute(pbes_equation& equation,
           {
             // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler.
             mCRL2log(log::debug) << "Replaced in PBES equation for " << cur_x << "\n-->\n"
-                                 << phi << "\n[" << new_x << "]\n";
+                                 << phi << "\n" << core::detail::print_list(phi_set) << "\n";
+
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(phi);
             pvi_substituter.apply(equation.formula(), equation.formula());
-            if (new_x.name() == equation.variable().name())
+            // Get the set of elements that have the same name as the equation variable
+            std::set<propositional_variable_instantiation> phi_set_same_name;
+            std::copy_if(phi_set.begin(), phi_set.end(), std::inserter(phi_set_same_name, phi_set_same_name.begin()),
+                         [&](const propositional_variable_instantiation& pvi) { return pvi.name() == equation.variable().name(); });
+            if (phi_set_same_name.size() == 0)
             {
-              cur_x = new_x;
-              path.insert(new_x);
+                stable = false;
+                pvi_done = true;
             }
             else
             {
-              stable = false;
-              pvi_done = true;
+                // bool first = true;
+                for (const propositional_variable_instantiation& pvi : phi_set_same_name)
+                {
+                    // if (first)
+                    // {
+                        cur_x = pvi;
+                        pvi_done = true;
+                        // first = false;
+                    // }
+                    break;
+                    // else {
+                    //     set.insert(pvi);
+                    // }
+                }
             }
           }
         }
