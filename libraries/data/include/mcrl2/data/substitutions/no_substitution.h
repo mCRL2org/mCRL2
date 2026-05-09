@@ -27,7 +27,7 @@ struct no_substitution
     return true;
   }
 
-  const variable& operator()(const variable& v)
+  const variable& operator()(const variable& v) const
   {
     return v;
   }

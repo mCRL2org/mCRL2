@@ -295,7 +295,9 @@ template <IsATerm Derived, IsATerm Base>
 Derived& assign_cast(Base& t)
 {
   // Runtime check that the cast is valid.
-  assert(Derived(static_cast<const aterm&>(t)) != aterm());
+  // This check is unnecessary and even incorrect as the term assigned may contain an arbitrary term,
+  // that is not necessary of type Derived. 
+  // assert(Derived(static_cast<const aterm&>(t)) != aterm());
 
   // UB: Only allowed when we constructed an actual Derived type
   return reinterpret_cast<Derived&>(reinterpret_cast<detail::_aterm&>(t));

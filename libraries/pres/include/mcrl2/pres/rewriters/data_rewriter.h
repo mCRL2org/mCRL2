@@ -22,31 +22,15 @@ namespace mcrl2::pres_system {
 namespace detail {
 
 template <typename DataRewriter, typename SubstitutionFunction>
-const data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, SubstitutionFunction& sigma)
-{
-  mCRL2log(log::trace) << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
-  return R(x, sigma);
-}
-
-template <typename DataRewriter, typename SubstitutionFunction>
 void data_rewrite(data::data_expression& result, const data::data_expression& x, const DataRewriter& R, SubstitutionFunction& sigma)
 {
-  mCRL2log(log::trace) << "data_rewrite " << x << sigma << " -> " << R(x, sigma) << std::endl;
   R(result, x, sigma);
-}
-
-template <typename DataRewriter>
-const data::data_expression data_rewrite(const data::data_expression& x, const DataRewriter& R, data::no_substitution&)
-{
-  mCRL2log(log::trace) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
-  return R(x);
 }
 
 template <typename DataRewriter>
 void data_rewrite(data::data_expression& result, const data::data_expression& x, const DataRewriter& R, data::no_substitution&)
 {
-  mCRL2log(log::trace) << "data_rewrite " << x << "[]" << " -> " << R(x) << std::endl;
-  result = R(x);
+  R(result, x);
 }
 
 template <template <class> class Builder, class Derived, class DataRewriter, class SubstitutionFunction = data::no_substitution>
@@ -65,9 +49,7 @@ struct add_data_rewriter: public Builder<Derived>
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
-    data::data_expression tmp;
-    data_rewrite(tmp, x, R, sigma);
-    result = atermpp::down_cast<T>(tmp);
+    data_rewrite(atermpp::assign_cast<data::data_expression>(result), x, R, sigma);
   }
 
   template <class T>
