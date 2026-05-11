@@ -1,0 +1,3 @@
+# These data races are benign according to the creator of Lace.
+race:lace_steal
+race:lace_yield
