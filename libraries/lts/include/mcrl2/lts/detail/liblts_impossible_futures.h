@@ -230,6 +230,11 @@ write_counter_example(const LTS& lts, std::ostream& stream, const trace& initial
     {
       stream << "tau*";
     }
+    else
+    {
+      // We also need to stutter after the last action.
+      stream << " . tau*";
+    }
 
     stream << ">(";
   }
