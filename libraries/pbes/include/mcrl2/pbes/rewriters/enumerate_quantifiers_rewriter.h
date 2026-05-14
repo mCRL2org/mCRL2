@@ -15,6 +15,7 @@
 #include <numeric>
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/detail/split_finite_variables.h"
+// #include "mcrl2/data/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
@@ -47,6 +48,15 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   /// The enumerator
   data::enumerator_algorithm<self> E;
 
+  /// Rewriter 
+  const DataRewriter& m_r;
+
+  /// Substitution
+  MutableSubstitution& m_sigma;
+  
+  /// identifier generator
+  data::enumerator_identifier_generator& m_id_generator;
+
   /// \brief Constructor.
   /// \param r A data rewriter.
   /// \param sigma A mutable substitution.
@@ -62,7 +72,11 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     : super(r, sigma, sigma_pbes),
       m_dataspec(dataspec),
       m_enumerate_infinite_sorts(enumerate_infinite_sorts),
-      E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)())
+      E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)()),
+      m_r(r),
+      m_sigma(sigma),
+      m_id_generator(id_generator)
+
   { }
 
   Derived& derived()
@@ -268,6 +282,15 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     }
     redo_substitution(x.variables(), undo);
   }
+
+  template <atermpp::IsATerm T>
+  void apply(T& result, const data::data_expression& x)
+  { 
+std::cerr << "DATA EXPRESSION ENUMERATE QUANTIFIERS BUILDER\n";
+    // data::enumerate_quantifiers_rewriter(m_r,m_dataspec,m_id_generator,m_enumerate_infinite_sorts)(atermpp::assign_cast<data::data_expression>(result), x, m_sigma);
+    m_r(atermpp::assign_cast<data::data_expression>(result),x,m_sigma);
+  }
+
 
   // N.B. This function has been added to make this class operate well with the enumerator.
   pbes_expression operator()(const pbes_expression& x, MutableSubstitution&)

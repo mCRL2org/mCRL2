@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/explorer_utilities.h"
 

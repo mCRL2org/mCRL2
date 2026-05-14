@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_REWRITERS_DATA_REWRITER_H
 #define MCRL2_DATA_REWRITERS_DATA_REWRITER_H
 
+#include "mcrl2/data/concepts.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/substitutions/no_substitution.h"
 
@@ -38,7 +39,7 @@ struct add_data_rewriter: public Builder<Derived>
   using super = Builder<Derived>;
   using super::enter;
   using super::leave;
-  using super::operator();
+  // using super::operator();
 
   const DataRewriter& m_R;
   SubstitutionFunction& m_sigma;

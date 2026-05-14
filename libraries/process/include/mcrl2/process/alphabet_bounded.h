@@ -1,3 +1,5 @@
+// THIS FILE IS NOT USED AND CAN BE REMOVED.
+
 // Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -28,7 +30,7 @@ multi_action_name_set alphabet_bounded(const process_expression& x,
                                       );
 
 /// \brief Traverser that computes the alphabet of process expressions
-struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_bounded_traverser>
+/* struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_bounded_traverser>
 {
   typedef process_expression_traverser<alphabet_bounded_traverser> super;
   using super::enter;
@@ -124,19 +126,19 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
     }
   }
 
-  void leave(const process::delta& /* x */)
+  void leave(const process::delta& )
   {
     push(multi_action_name_set());
   }
 
-  void leave(const process::tau& /* x */)
+  void leave(const process::tau& )
   {
     multi_action_name_set A;
     A.insert(multi_action_name()); // A = { tau }
     push(A);
   }
 
-  void leave(const process::sum& /* x */)
+  void leave(const process::sum& )
   {
   }
 
@@ -210,34 +212,34 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
     push(alphabet_operations::bounded_sync(Aleft, Aright, A).first);
   }
 
-  void leave(const process::at& /* x */)
+  void leave(const process::at& )
   {
   }
 
-  void leave(const process::seq& /* x */)
+  void leave(const process::seq& )
   {
     join();
   }
 
-  void leave(const process::if_then& /* x */)
+  void leave(const process::if_then& )
   {
   }
 
-  void leave(const process::if_then_else& /* x */)
+  void leave(const process::if_then_else& )
   {
     join();
   }
 
-  void leave(const process::bounded_init& /* x */)
+  void leave(const process::bounded_init& )
   {
     join();
   }
 
-  void leave(const process::choice& /* x */)
+  void leave(const process::choice& )
   {
     join();
   }
-};
+}; 
 
 inline
 multi_action_name_set alphabet_bounded(const process_expression& x,
@@ -249,11 +251,11 @@ multi_action_name_set alphabet_bounded(const process_expression& x,
   alphabet_bounded_traverser f(A, equations, cache);
   f.apply(x);
   return f.node_stack.back().A;
-}
+} */
 
 } // namespace detail
 
-inline
+/* inline
 multi_action_name_set alphabet_bounded(const process_expression& x, const multi_action_name_set& A, const std::vector<process_equation>& equations)
 {
   std::map<process_identifier, multi_action_name_set> cache = detail::compute_pcrl_equation_cache(equations);
@@ -266,7 +268,7 @@ multi_action_name_set alphabet_bounded(const process_expression& x, const multi_
   }
 
   return detail::alphabet_bounded(x, allow_set(A), equations, cache);
-}
+} */
 
 } // namespace process
 
