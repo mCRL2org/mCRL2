@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_IS_SIMPLE_SUBSTITUTION_H
 #define MCRL2_DATA_IS_SIMPLE_SUBSTITUTION_H
 
+#include "mcrl2/data/concepts.h"
 #include "mcrl2/data/data_expression.h"
 
 
@@ -23,7 +24,7 @@ namespace mcrl2::data {
 ///
 /// \note The default return value is \c true, so a template specialization is
 /// required to enable this check for substitutions.
-template <typename Substitution>
+template <IsSubstitution Substitution>
 bool is_simple_substitution(const Substitution& /*sigma*/)
 {
   return true;

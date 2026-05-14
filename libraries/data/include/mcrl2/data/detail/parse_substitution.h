@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_PARSE_SUBSTITUTION_H
 #define MCRL2_DATA_DETAIL_PARSE_SUBSTITUTION_H
 
+#include "mcrl2/data/concepts.h"
 #include "mcrl2/data/parse.h"
 
 namespace mcrl2::data::detail
@@ -20,7 +21,7 @@ namespace mcrl2::data::detail
 /// \brief Parses a string of the form "b: Bool := true, n: Nat := 0", and adds
 /// the substitutions to the substition function sigma. If the string is surrounded
 /// by brackets (e.g. "[b: Bool := true, n: Nat := 0]"), these are ignored.
-template <typename MutableSubstitution>
+template <IsSubstitution MutableSubstitution>
 void parse_substitution(std::string text, MutableSubstitution& sigma, const data_specification& data_spec = data::data_specification())
 {
   text = utilities::regex_replace("^\\s*\\[", "", text);

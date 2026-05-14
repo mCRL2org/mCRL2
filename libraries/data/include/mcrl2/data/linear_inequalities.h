@@ -241,7 +241,7 @@ namespace detail
       }
 
       /// \brief Evaluate the variables in this lhs_t according to the subsitution function.
-      template <typename SubstitutionFunction>
+      template <IsSubstitution SubstitutionFunction>
       data_expression evaluate(const SubstitutionFunction& beta, const rewriter& r) const
       {
         data_expression result=real_zero();

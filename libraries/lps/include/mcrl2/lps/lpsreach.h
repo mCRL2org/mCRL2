@@ -58,7 +58,7 @@ class lpsreach_algorithm
     symbolic_lts m_lts;
     
     /// \brief Rewrites all arguments of the given action.
-    template<typename Rewriter, typename Substitution>
+    template<typename Rewriter, data::IsSubstitution Substitution>
     lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
     {
       const process::action_list& actions = a.actions();

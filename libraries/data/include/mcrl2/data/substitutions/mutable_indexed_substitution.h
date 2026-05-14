@@ -23,6 +23,7 @@
 
 #include "mcrl2/atermpp/standard_containers/unordered_map.h"
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
+#include "mcrl2/data/concepts.h"
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2::data {
@@ -243,7 +244,7 @@ public:
   }
 
   /// \brief Compare substitutions
-  template <typename Substitution>
+  template <IsSubstitution Substitution>
   bool operator==(const Substitution&) const
   {
     return false;

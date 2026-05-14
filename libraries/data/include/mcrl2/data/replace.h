@@ -61,7 +61,7 @@ replace_sort_expressions_builder<Builder, Substitution> make_replace_sort_expres
   return replace_sort_expressions_builder<Builder, Substitution>(sigma, innermost);
 }
 
-template <template <class> class Builder, class Substitution>
+template <template <class> class Builder, IsSubstitution Substitution>
 struct replace_data_expressions_builder : public Builder<replace_data_expressions_builder<Builder, Substitution>>
 {
   using super = Builder<replace_data_expressions_builder<Builder, Substitution>>;
@@ -92,14 +92,14 @@ struct replace_data_expressions_builder : public Builder<replace_data_expression
   }
 };
 
-template <template <class> class Builder, class Substitution>
+template <template <class> class Builder, IsSubstitution Substitution>
 replace_data_expressions_builder<Builder, Substitution> make_replace_data_expressions_builder(const Substitution& sigma,
     bool innermost)
 {
   return replace_data_expressions_builder<Builder, Substitution>(sigma, innermost);
 }
 
-template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+template <template <class> class Builder, template <template <class> class, class> class Binder, IsSubstitution Substitution>
 struct replace_free_variables_builder
     : public Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution>>
 {
@@ -137,7 +137,7 @@ struct replace_free_variables_builder
   }
 };
 
-template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+template <template <class> class Builder, template <template <class> class, class> class Binder, IsSubstitution Substitution>
 replace_free_variables_builder<Builder, Binder, Substitution> make_replace_free_variables_builder(
     const Substitution& sigma)
 {
@@ -160,7 +160,7 @@ make_replace_free_variables_builder(const Substitution& sigma, const VariableCon
 } // namespace detail
 
 /// \brief Returns the variables appearing in the right hand sides of the substitution.
-template <typename Substitution>
+template <IsSubstitution Substitution>
 std::set<data::variable> substitution_variables(const Substitution& /* sigma */)
 {
   throw mcrl2::runtime_error("substitution_variables is undefined!");

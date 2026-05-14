@@ -20,7 +20,7 @@ namespace mcrl2::lps
 
 namespace detail {
 
-template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
+template <typename Derived, typename DataRewriter, data::IsSubstitution SubstitutionFunction>
 struct data_rewriter_builder: public data::detail::add_data_rewriter<lps::data_expression_builder, Derived, DataRewriter, SubstitutionFunction>
 {
   using super
@@ -55,7 +55,7 @@ struct data_rewriter
     return data::detail::make_apply_rewriter_builder<detail::data_rewriter_builder>(R, sigma)(x);
   }
 
-  template <typename SubstitutionFunction>
+  template <data::IsSubstitution SubstitutionFunction>
   data::data_expression operator()(const data::data_expression& x, SubstitutionFunction& sigma) const
   {
     return data::detail::make_apply_rewriter_builder<detail::data_rewriter_builder>(R, sigma)(x);

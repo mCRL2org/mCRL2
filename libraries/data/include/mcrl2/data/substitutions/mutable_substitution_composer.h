@@ -20,7 +20,7 @@ namespace mcrl2::data
 {
 
 /// \brief An adapter that makes an arbitrary substitution function mutable.
-template <typename Substitution>
+template <IsSubstitution Substitution>
 class mutable_substitution_composer
 {
   public:

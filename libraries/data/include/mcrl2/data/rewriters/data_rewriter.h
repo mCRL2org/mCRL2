@@ -19,7 +19,7 @@ namespace mcrl2::data {
 
 namespace detail {
 
-template <typename DataRewriter, typename SubstitutionFunction>
+template <typename DataRewriter, IsSubstitution SubstitutionFunction>
 void data_rewrite(data_expression& result, const data_expression& x, const DataRewriter& R, SubstitutionFunction& sigma)
 {
   R(result, x, sigma);
@@ -32,7 +32,7 @@ void data_rewrite(data_expression& result, const data_expression& x, const DataR
 }
 
 /// \brief Applies a data rewriter to data expressions appearing in a term. It works both with and without a substitution.
-template <template <class> class Builder, class Derived, class DataRewriter, class SubstitutionFunction = no_substitution>
+template <template <class> class Builder, class Derived, class DataRewriter, IsSubstitution SubstitutionFunction = no_substitution>
 struct add_data_rewriter: public Builder<Derived>
 {
   using super = Builder<Derived>;
@@ -62,7 +62,7 @@ struct add_data_rewriter: public Builder<Derived>
 
 };
 
-template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
+template <typename Derived, typename DataRewriter, IsSubstitution SubstitutionFunction>
 struct data_rewriter_builder: public add_data_rewriter<data::data_expression_builder, Derived, DataRewriter, SubstitutionFunction>
 {
   using super = add_data_rewriter<data::data_expression_builder, Derived, DataRewriter, SubstitutionFunction>;
@@ -75,7 +75,7 @@ struct data_rewriter_builder: public add_data_rewriter<data::data_expression_bui
   {}
 };
 
-template <template <class, class, class> class Builder, class DataRewriter, class SubstitutionFunction>
+template <template <class, class, class> class Builder, class DataRewriter, IsSubstitution SubstitutionFunction>
 struct apply_rewriter_builder: public Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction>
 {
   using super = Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>,
@@ -94,7 +94,7 @@ struct apply_rewriter_builder: public Builder<apply_rewriter_builder<Builder, Da
 #endif
 };
 
-template <template <class, class, class> class Builder, class DataRewriter, class SubstitutionFunction>
+template <template <class, class, class> class Builder, class DataRewriter, IsSubstitution SubstitutionFunction>
 apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>
 make_apply_rewriter_builder(const DataRewriter& datar, SubstitutionFunction& sigma)
 {
@@ -122,7 +122,7 @@ struct data_rewriter
     return detail::make_apply_rewriter_builder<detail::data_rewriter_builder>(R, sigma)(x);
   }
 
-  template <typename SubstitutionFunction>
+  template <IsSubstitution SubstitutionFunction>
   data_expression operator()(const data_expression& x, SubstitutionFunction& sigma) const
   {
     return detail::make_apply_rewriter_builder<detail::data_rewriter_builder>(R, sigma)(x);

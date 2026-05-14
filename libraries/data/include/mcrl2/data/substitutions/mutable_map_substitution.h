@@ -117,7 +117,7 @@ public:
     m_map.clear();
   }
 
-  template <typename Substitution>
+  template <IsSubstitution Substitution>
   bool operator==(const Substitution&) const
   {
     return false;

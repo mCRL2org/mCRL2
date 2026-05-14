@@ -176,7 +176,7 @@ class rewriter: public basic_rewriter<data_expression>
     /// \param[in] d A data expression.
     /// \param[in] sigma A substitution function.
     /// \return The normal form of the term.
-    template <typename SubstitutionFunction>
+    template <IsSubstitution SubstitutionFunction>
     data_expression operator()(const data_expression& d, const SubstitutionFunction& sigma) const
     {
       data_expression result;
@@ -189,7 +189,7 @@ class rewriter: public basic_rewriter<data_expression>
     /// \param[out] result The normal form of the term is placed in result.
     /// \param[in] d A data expression.
     /// \param[in] sigma A substitution function.
-    template <typename SubstitutionFunction>
+    template <IsSubstitution SubstitutionFunction>
     void operator()(data_expression& result, const data_expression& d, const SubstitutionFunction& sigma) const
     {
       substitution_type sigma_with_iterator;

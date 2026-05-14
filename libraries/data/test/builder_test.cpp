@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/concepts.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -46,7 +47,7 @@ struct my_builder: public add_data_variable_binding<data::data_expression_builde
   }
 };
 
-template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+template <template <class> class Builder, template <template <class> class, class> class Binder, IsSubstitution Substitution>
 struct replace_free_variables_builder: public Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution> >
 {
   using super = Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution>>;
@@ -87,6 +88,8 @@ struct subst
   using argument_type = variable;
   using result_type = data_expression;
 
+  static constexpr bool is_identity_substitution=false;
+
   data_expression operator()(const variable& v)
   {
     if (v == bool_("b"))
@@ -101,14 +104,14 @@ struct subst
   }
 };
 
-template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+template <template <class> class Builder, template <template <class> class, class> class Binder, IsSubstitution Substitution>
 replace_free_variables_builder<Builder, Binder, Substitution>
 make_replace_free_variables_builder(Substitution sigma)
 {
   return replace_free_variables_builder<Builder, Binder, Substitution>(sigma);
 }
 
-template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution, class VariableContainer>
+template <template <class> class Builder, template <template <class> class, class> class Binder, IsSubstitution Substitution, class VariableContainer>
 replace_free_variables_builder<Builder, Binder, Substitution>
 make_replace_free_variables_builder(Substitution sigma, const VariableContainer& bound_variables)
 {

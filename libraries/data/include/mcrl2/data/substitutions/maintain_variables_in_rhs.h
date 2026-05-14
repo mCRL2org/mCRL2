@@ -29,7 +29,7 @@ namespace mcrl2::data
 ///          Provided that, given a variable, its index can be computed in O(1)
 ///          time, insertion is O(1) amortized, and lookup is O(1).
 ///          Memory required is O(n) where n is the largest index used.
-template <typename Substitution>
+template <IsSubstitution Substitution>
 class maintain_variables_in_rhs: public Substitution
 {
   public:

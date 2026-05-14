@@ -169,7 +169,7 @@ T replace_free_variables(const T& x,
 namespace detail {
 
 /// \cond INTERNAL_DOCS
-template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+template <template <class> class Builder, template <template <class> class, class> class Binder, data::IsSubstitution Substitution>
 struct replace_process_parameter_builder: public Binder<Builder, replace_process_parameter_builder<Builder, Binder, Substitution> >
 {
   using super = Binder<Builder, replace_process_parameter_builder<Builder, Binder, Substitution>>;
@@ -251,7 +251,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   }
 };
 
-template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+template <template <class> class Builder, template <template <class> class, class> class Binder, data::IsSubstitution Substitution>
 replace_process_parameter_builder<Builder, Binder, Substitution>
 make_replace_process_parameters_builder(Substitution sigma)
 {
@@ -262,7 +262,7 @@ make_replace_process_parameters_builder(Substitution sigma)
 } // namespace detail
 
 /// \brief Applies a substitution to the process parameters of the specification spec.
-template <typename Substitution>
+template <data::IsSubstitution Substitution>
 void replace_process_parameters(specification& spec, Substitution sigma)
 {
   lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder, lps::add_data_variable_builder_binding>(sigma).update(spec);

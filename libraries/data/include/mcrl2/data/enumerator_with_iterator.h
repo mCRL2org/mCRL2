@@ -61,7 +61,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
     }
 
     // add element without additional variables
-    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter, typename Expression>
+    template <typename EnumeratorListElement, IsSubstitution MutableSubstitution, typename Filter, typename Expression>
     void add_element(enumerator_queue<EnumeratorListElement>& P,
                      MutableSubstitution& sigma,
                      Filter accept,
@@ -79,7 +79,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
     }
 
     // add element with additional variables
-    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter, typename Expression>
+    template <typename EnumeratorListElement, IsSubstitution MutableSubstitution, typename Filter, typename Expression>
     void add_element(enumerator_queue<EnumeratorListElement>& P,
                      MutableSubstitution& sigma,
                      Filter accept,
@@ -100,7 +100,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
 
     // specialization for enumerator_list_element; in this case we are not interested in the substitutions,
     // and this allows an optimization
-    template <typename MutableSubstitution, typename Filter, typename Expression>
+    template <IsSubstitution MutableSubstitution, typename Filter, typename Expression>
     void add_element(enumerator_queue<enumerator_list_element<Expression>>& P,
                      MutableSubstitution& sigma,
                      Filter accept,
@@ -152,7 +152,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
     /// \param sigma A mutable substitution that is applied by the rewriter.
     /// \param accept Elements p for which accept(p) is false are discarded.
     /// \pre !P.empty()
-    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
+    template <typename EnumeratorListElement, IsSubstitution MutableSubstitution, typename Filter>
     void step(enumerator_queue<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
     {
       assert(!P.empty());
@@ -290,7 +290,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
     /// \param accept Elements p for which accept(p) is false are discarded.
     /// \return The number of elements that have been processed
     /// \post Either P.empty() or P.front().is_solution()
-    template <typename EnumeratorListElement, typename MutableSubstitution, typename Filter>
+    template <typename EnumeratorListElement, IsSubstitution MutableSubstitution, typename Filter>
     std::size_t next(enumerator_queue<EnumeratorListElement>& P, MutableSubstitution& sigma, Filter accept) const
     {
       std::size_t count = 0;
@@ -319,7 +319,7 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
 };
 
 /// \brief An enumerator algorithm with an iterator interface.
-template <typename Rewriter = data::rewriter, typename EnumeratorListElement = enumerator_list_element_with_substitution<>, typename Filter = data::is_not_false, typename DataRewriter = data::rewriter, typename MutableSubstitution = data::mutable_indexed_substitution<> >
+template <typename Rewriter = data::rewriter, typename EnumeratorListElement = enumerator_list_element_with_substitution<>, typename Filter = data::is_not_false, typename DataRewriter = data::rewriter, IsSubstitution MutableSubstitution = data::mutable_indexed_substitution<> >
 class enumerator_algorithm_with_iterator: public enumerator_algorithm_without_callback<Rewriter, DataRewriter>
 {
   protected:

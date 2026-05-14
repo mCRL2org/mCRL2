@@ -49,7 +49,7 @@ make_rewrite_data_expressions_builder(Rewriter R)
   return rewrite_data_expressions_builder<Builder, Rewriter>(R);
 }
 
-template <template <class> class Builder, class Rewriter, class Substitution>
+template <template <class> class Builder, class Rewriter, IsSubstitution Substitution>
 struct rewrite_data_expressions_with_substitution_builder: public Builder<rewrite_data_expressions_with_substitution_builder<Builder, Rewriter, Substitution> >
 {
   using super = Builder<rewrite_data_expressions_with_substitution_builder<Builder, Rewriter, Substitution>>;
@@ -73,7 +73,7 @@ struct rewrite_data_expressions_with_substitution_builder: public Builder<rewrit
   }
 };
 
-template <template <class> class Builder, class Rewriter, class Substitution>
+template <template <class> class Builder, class Rewriter, IsSubstitution Substitution>
 rewrite_data_expressions_with_substitution_builder<Builder, Rewriter, Substitution>
 make_rewrite_data_expressions_with_substitution_builder(Rewriter R, Substitution sigma)
 {
