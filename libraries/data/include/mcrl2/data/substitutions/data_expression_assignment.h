@@ -21,6 +21,7 @@ namespace mcrl2::data
 /// \brief Substitution that maps a data expression to a data expression
 struct data_expression_assignment
 {
+  static constexpr bool is_identity_substitution=false;
   using variable_type = data_expression;
   using expression_type = data_expression;
   using argument_type = data_expression;

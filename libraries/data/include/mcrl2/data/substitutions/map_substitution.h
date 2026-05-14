@@ -49,10 +49,7 @@ struct map_substitution
     // return i == m_map.end() ? v : i->second;
   }
 
-  constexpr bool is_trivial() const
-  {
-    return false;
-  }
+  static constexpr bool is_identity_substitution=false;
 
   std::string to_string() const
   {

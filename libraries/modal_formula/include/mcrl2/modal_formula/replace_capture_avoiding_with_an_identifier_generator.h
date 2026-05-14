@@ -70,7 +70,7 @@ struct add_capture_avoiding_replacement_with_an_identifier_generator: public lps
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
                        IdentifierGenerator& id_generator
@@ -89,7 +89,7 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 /// \\return The result is the term x to which sigma has been applied.
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
                     IdentifierGenerator& id_generator
@@ -147,7 +147,7 @@ make_add_capture_avoiding_replacement_with_an_identifier_generator(Substitution&
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
                        IdentifierGenerator& id_generator
@@ -166,7 +166,7 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 /// \\return The result is the term x to which sigma has been applied.
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
                     IdentifierGenerator& id_generator
@@ -242,7 +242,7 @@ make_add_capture_avoiding_replacement_with_an_identifier_generator(Substitution&
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
                        IdentifierGenerator& id_generator
@@ -261,7 +261,7 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 /// \\return The result is the term x to which sigma has been applied.
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
                     IdentifierGenerator& id_generator

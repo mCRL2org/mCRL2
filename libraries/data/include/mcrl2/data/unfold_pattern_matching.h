@@ -11,6 +11,7 @@
 
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/data_expression_assignment.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/substitutions/map_substitution.h"
 #include "mcrl2/data/substitutions/variable_substitution.h"
@@ -285,7 +286,8 @@ data_expression construct_rhs(
       std::set<data_expression> subexpr = find_data_expressions(rule.rhs);
       if (!parameters.empty() && std::none_of(subexpr.begin(), subexpr.end(), [](const data_expression& e) { return is_abstraction(e); }))
       {
-        auto sigma = [&](const data_expression& x) { return x == pattern ? matching_target : x; };
+        // auto sigma = [&](const data_expression& x) { return x == pattern ? matching_target : x; };
+        data_expression_assignment sigma(pattern,matching_target);
         rule.rhs = replace_data_expressions(rule.rhs, sigma, true);
         rule.condition = replace_data_expressions(rule.condition, sigma, true);
       }

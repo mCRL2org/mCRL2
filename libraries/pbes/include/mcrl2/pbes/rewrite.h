@@ -121,7 +121,7 @@ T rewrite(const T& x,
 /// \\param x an object containing expressions
 /// \\param R a rewriter
 /// \\param sigma a substitution
-template <typename T, typename Rewriter, typename Substitution>
+template <typename T, typename Rewriter, data::IsSubstitution Substitution>
 void rewrite(T& x,
              Rewriter R,
              const Substitution& sigma
@@ -136,7 +136,7 @@ void rewrite(T& x,
 /// \\param R a rewriter
 /// \\param sigma a substitution
 /// \\return the rewrite result
-template <typename T, typename Rewriter, typename Substitution>
+template <typename T, typename Rewriter, data::IsSubstitution Substitution>
 T rewrite(const T& x,
           Rewriter R,
           const Substitution& sigma

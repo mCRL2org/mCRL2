@@ -338,6 +338,8 @@ struct fourier_motzkin_sigma
 
   public:
 
+    static constexpr bool is_identity_substitution = false;
+
     fourier_motzkin_sigma(const rewriter& rewr_)
     :  rewr(rewr_)
     {}

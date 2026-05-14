@@ -498,11 +498,11 @@ class specification_basic_type
       }
     }
 
-    template <class SUBSTITUTION>
-    std::set<data::variable> sigma_variables(const SUBSTITUTION& sigma)
+    template <data::IsSubstitution Substitution>
+    std::set<data::variable> sigma_variables(const Substitution& sigma)
     {
       std::set<data::variable> result;
-      for (typename SUBSTITUTION::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+      for (typename Substitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
       {
         std::set<data::variable> V = data::find_free_variables(i->second);
         V.erase(i->first);

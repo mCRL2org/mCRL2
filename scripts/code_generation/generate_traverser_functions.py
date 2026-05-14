@@ -45,7 +45,7 @@ T rewrite(const T& x,
 /// \\\\param x an object containing expressions
 /// \\\\param R a rewriter
 /// \\\\param sigma a substitution
-template <typename T, typename Rewriter, typename Substitution>
+template <typename T, typename Rewriter, data::IsSubstitution Substitution>
 void rewrite(T& x,
              Rewriter R,
              const Substitution& sigma
@@ -60,7 +60,7 @@ void rewrite(T& x,
 /// \\\\param R a rewriter
 /// \\\\param sigma a substitution
 /// \\\\return the rewrite result
-template <typename T, typename Rewriter, typename Substitution>
+template <typename T, typename Rewriter, data::IsSubstitution Substitution>
 T rewrite(const T& x,
           Rewriter R,
           const Substitution& sigma
@@ -95,7 +95,7 @@ T replace_sort_expressions(const T& x,
   return result;
 }
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_data_expressions(T& x,
                               const Substitution& sigma,
                               bool innermost
@@ -105,7 +105,7 @@ void replace_data_expressions(T& x,
   data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost).update(x);
 }
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_data_expressions(const T& x,
                            const Substitution& sigma,
                            bool innermost
@@ -118,7 +118,7 @@ T replace_data_expressions(const T& x,
 }
 
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_variables(T& x,
                        const Substitution& sigma
                       )
@@ -127,7 +127,7 @@ void replace_variables(T& x,
   core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma).update(x);
 }
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_variables(const T& x,
                     const Substitution& sigma
                    )
@@ -139,7 +139,7 @@ T replace_variables(const T& x,
 }
 
 /* Replace all variables, including those in binders and the left hand side of assignments */
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_all_variables(T& x,
                            const Substitution& sigma
                           )
@@ -148,7 +148,7 @@ void replace_all_variables(T& x,
   core::make_update_apply_builder<NAMESPACE::sort_expression_builder>(sigma).update(x);
 }
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_all_variables(const T& x,
                         const Substitution& sigma
                        )
@@ -161,7 +161,7 @@ T replace_all_variables(const T& x,
 
 /// \\\\brief Applies the substitution sigma to x.
 /// \\\\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_free_variables(T& x,
                             const Substitution& sigma
                            )
@@ -173,7 +173,7 @@ void replace_free_variables(T& x,
 
 /// \\\\brief Applies the substitution sigma to x.
 /// \\\\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_free_variables(const T& x,
                          const Substitution& sigma
                         )
@@ -187,7 +187,7 @@ T replace_free_variables(const T& x,
 
 /// \\\\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
 /// \\\\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
-template <typename T, typename Substitution, typename VariableContainer>
+template <typename T, data::IsSubstitution Substitution, typename VariableContainer>
 void replace_free_variables(T& x,
                             const Substitution& sigma,
                             const VariableContainer& bound_variables
@@ -200,7 +200,7 @@ void replace_free_variables(T& x,
 
 /// \\\\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
 /// \\\\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
-template <typename T, typename Substitution, typename VariableContainer>
+template <typename T, data::IsSubstitution Substitution, typename VariableContainer>
 T replace_free_variables(const T& x,
                          const Substitution& sigma,
                          const VariableContainer& bound_variables
@@ -218,7 +218,7 @@ REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT: str = '''/// \\\\brief Applies sigma as 
 /// \\\\param x The object to which the subsitution is applied.
 /// \\\\param sigma A substitution.
 /// \\\\param id_generator An identifier generator that generates names that do not appear in x and sigma
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
                                         data::set_identifier_generator& id_generator
@@ -233,7 +233,7 @@ void replace_variables_capture_avoiding(T& x,
 /// \\\\param x The object to which the substiution is applied.
 /// \\\\param sigma A substitution.
 /// \\\\param id_generator An identifier generator that generates names that do not appear in x and sigma
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
                                      data::set_identifier_generator& id_generator
@@ -249,7 +249,7 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\\\brief Applies sigma as a capture avoiding substitution to x.
 /// \\\\param x The object to which the subsitution is applied.
 /// \\\\param sigma A substitution.
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma
 )
@@ -267,7 +267,7 @@ void replace_variables_capture_avoiding(T& x,
 /// \\\\brief Applies sigma as a capture avoiding substitution to x.
 /// \\\\param x The object to which the substiution is applied.
 /// \\\\param sigma A substitution.
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma
 )
@@ -292,7 +292,7 @@ REPLACE_CAPTURE_AVOIDING_WITH_IDENTIFIER_GENERATOR_FUNCTION_TEXT: str = ''' /// 
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\\\param id_generator A generator that generates unique strings, not yet used as variable names.
 
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
                        IdentifierGenerator& id_generator
@@ -311,7 +311,7 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\\\param id_generator A generator that generates unique strings, not yet used as variable names.
 /// \\\\return The result is the term x to which sigma has been applied.
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
                     IdentifierGenerator& id_generator

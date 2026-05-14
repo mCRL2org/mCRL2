@@ -21,6 +21,7 @@ namespace mcrl2::data {
 /// assignment_list.
 struct assignment_sequence_substitution
 {
+  static constexpr bool is_identity_substitution=false;
   using variable_type = variable;
   using expression_type = data_expression;
   using argument_type = variable;

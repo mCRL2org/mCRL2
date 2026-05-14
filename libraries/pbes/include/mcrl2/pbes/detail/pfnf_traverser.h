@@ -76,6 +76,8 @@ struct variable_data_expression_substitution
   using variable_type = data::variable;
   using expression_type = data::data_expression;
 
+  static constexpr bool is_identity_substitution = false;
+
   const variable_variable_substitution& sigma;
 
   variable_data_expression_substitution(const variable_variable_substitution& sigma_)

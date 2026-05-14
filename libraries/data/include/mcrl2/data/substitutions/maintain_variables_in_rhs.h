@@ -36,7 +36,7 @@ class maintain_variables_in_rhs: public Substitution
     using super = Substitution;
     using variable_type = typename super::variable_type;
     using expression_type = typename super::expression_type;
-    using super::is_trivial;
+    using super::is_identity_substitution;
 
   protected:
     std::multiset<variable_type> m_variables_in_rhs;

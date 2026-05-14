@@ -13,7 +13,7 @@
 #define MCRL2_DATA_REPLACE_CAPTURE_AVOIDING_WITH_AN_IDENTIFIER_GENERATOR_H
 
 #include "mcrl2/atermpp/aterm.h"
-// #include "mcrl2/atermpp/standard_containers/vector.h"
+#include "mcrl2/data/concepts.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
 
@@ -45,7 +45,7 @@ class substitution_updater_with_an_identifier_generator
 
     data::variable bind(const data::variable& v)
     {
-      if constexpr (Substitution::is_trivial())
+      if constexpr (Substitution::is_identity_substitution)
       {
         return v;
       }
@@ -73,7 +73,7 @@ class substitution_updater_with_an_identifier_generator
 
     void pop(const data::variable& )
     {
-      if constexpr (!Substitution::is_trivial())
+      if constexpr (!Substitution::is_identity_substitution)
       {
         const saved_assignment& a = m_undo.back();
         m_sigma[a.first] = a.second;
@@ -276,7 +276,7 @@ public:
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
                        Substitution& sigma,
                        IdentifierGenerator& id_generator
@@ -295,7 +295,7 @@ void replace_variables_capture_avoiding_with_an_identifier_generator(T& x,
 ///              right hand side. The class maintain_variables_in_rhs is useful for this purpose.
 /// \\param id_generator A generator that generates unique strings, not yet used as variable names.
 /// \\return The result is the term x to which sigma has been applied.
-template <typename T, typename Substitution, typename IdentifierGenerator>
+template <typename T, data::IsSubstitution Substitution, typename IdentifierGenerator>
 T replace_variables_capture_avoiding_with_an_identifier_generator(const T& x,
                     Substitution& sigma,
                     IdentifierGenerator& id_generator

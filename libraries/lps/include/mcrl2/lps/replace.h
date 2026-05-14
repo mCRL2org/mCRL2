@@ -47,7 +47,7 @@ T replace_sort_expressions(const T& x,
   return result;
 }
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_data_expressions(T& x,
                               const Substitution& sigma,
                               bool innermost
@@ -57,7 +57,7 @@ void replace_data_expressions(T& x,
   data::detail::make_replace_data_expressions_builder<lps::data_expression_builder>(sigma, innermost).update(x);
 }
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_data_expressions(const T& x,
                            const Substitution& sigma,
                            bool innermost
@@ -70,7 +70,7 @@ T replace_data_expressions(const T& x,
 }
 
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_variables(T& x,
                        const Substitution& sigma
                       )
@@ -79,7 +79,7 @@ void replace_variables(T& x,
   core::make_update_apply_builder<lps::data_expression_builder>(sigma).update(x);
 }
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_variables(const T& x,
                     const Substitution& sigma
                    )
@@ -91,7 +91,7 @@ T replace_variables(const T& x,
 }
 
 /* Replace all variables, including those in binders and the left hand side of assignments */
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_all_variables(T& x,
                            const Substitution& sigma
                           )
@@ -100,7 +100,7 @@ void replace_all_variables(T& x,
   core::make_update_apply_builder<lps::sort_expression_builder>(sigma).update(x);
 }
 
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_all_variables(const T& x,
                         const Substitution& sigma
                        )
@@ -113,7 +113,7 @@ T replace_all_variables(const T& x,
 
 /// \\brief Applies the substitution sigma to x.
 /// \\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_free_variables(T& x,
                             const Substitution& sigma
                            )
@@ -125,7 +125,7 @@ void replace_free_variables(T& x,
 
 /// \\brief Applies the substitution sigma to x.
 /// \\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_free_variables(const T& x,
                          const Substitution& sigma
                         )
@@ -139,7 +139,7 @@ T replace_free_variables(const T& x,
 
 /// \\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
 /// \\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
-template <typename T, typename Substitution, typename VariableContainer>
+template <typename T, data::IsSubstitution Substitution, typename VariableContainer>
 void replace_free_variables(T& x,
                             const Substitution& sigma,
                             const VariableContainer& bound_variables
@@ -152,7 +152,7 @@ void replace_free_variables(T& x,
 
 /// \\brief Applies the substitution sigma to x, where the elements of bound_variables are treated as bound variables.
 /// \\pre { The substitution sigma must have the property that FV(sigma(x)) is included in {x} for all variables x. }
-template <typename T, typename Substitution, typename VariableContainer>
+template <typename T, data::IsSubstitution Substitution, typename VariableContainer>
 T replace_free_variables(const T& x,
                          const Substitution& sigma,
                          const VariableContainer& bound_variables

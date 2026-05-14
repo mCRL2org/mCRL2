@@ -20,6 +20,31 @@ namespace mcrl2::state_formulas {
 namespace detail
 {
 
+class mapvector_substitution
+{
+
+  typedef std::map<data::variable, std::vector<data::variable>> vector_map;
+
+  vector_map m_substitutions;
+
+public:
+  static constexpr bool is_identity_substitution=false;
+
+  mapvector_substitution(const vector_map& substitutions)
+   : m_substitutions(substitutions)
+  {}
+
+  data::data_expression operator()(const data::variable& v) const
+  {
+    auto i = m_substitutions.find(v);
+    if (i == m_substitutions.end())
+    {
+      return v;
+    }
+    return i->second.back();
+  };
+};
+
 template <typename Derived>
 class state_variable_name_clash_resolver: public state_formulas::state_formula_builder<Derived>
 {
@@ -162,26 +187,28 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
 
     data::assignment_list apply_assignments(const data::assignment_list& x)
     {
-      auto sigma = [&](const data::variable& v) -> data::data_expression
-      {
-        auto i = substitutions.find(v);
-        if (i == substitutions.end())
-        {
-          return v;
-        }
-        return i->second.back();
-      };
-
-      return data::assignment_list(x.begin(), x.end(), [&](const data::assignment& a)
-        {
-          return data::assignment(atermpp::down_cast<data::variable>(sigma(a.lhs())), data::replace_free_variables(a.rhs(), sigma));
-        }
-      );
+      mapvector_substitution sigma(substitutions); 
+      // auto sigma = [&](const data::variable& v) -> data::data_expression
+      // {
+      //   auto i = substitutions.find(v);
+      //   if (i == substitutions.end())
+      //   {
+      //     return v;
+      //   }
+      //   return i->second.back();
+      // };
+      return data::assignment_list(x.begin(), 
+                                   x.end(), 
+                                   [&](const data::assignment& a)
+                                   {
+                                     return data::assignment(atermpp::down_cast<data::variable>(sigma(a.lhs())), data::replace_free_variables(a.rhs(), sigma));
+                                   });
     }
 
     data::variable_list apply_variables(const data::variable_list& x)
     {
-      auto sigma = [&](const data::variable& v) -> data::data_expression
+      mapvector_substitution sigma(substitutions); 
+      /* auto sigma = [&](const data::variable& v) -> data::data_expression
       {
         auto i = substitutions.find(v);
         if (i == substitutions.end())
@@ -189,7 +216,7 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
           return v;
         }
         return i->second.back();
-      };
+      }; */
 
       return data::variable_list(x.begin(), x.end(), [&](const data::variable& v)
                                    {
@@ -293,7 +320,8 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
     template <class T>
     void apply(T& result, const data::data_expression& x)
     {
-      auto sigma = [&](const data::variable& v) -> data::data_expression
+      mapvector_substitution sigma(substitutions); 
+      /*auto sigma = [&](const data::variable& v) -> data::data_expression
       {
         auto i = substitutions.find(v);
         if (i == substitutions.end())
@@ -301,7 +329,7 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
           return v;
         }
         return i->second.back();
-      };
+      };*/
 
       result=atermpp::down_cast<T>(data::replace_free_variables(x, sigma));
     }

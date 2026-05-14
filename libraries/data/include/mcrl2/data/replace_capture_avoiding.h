@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/concepts.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/find.h"
@@ -238,7 +239,7 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
 /// \\param x The object to which the subsitution is applied.
 /// \\param sigma A substitution.
 /// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma,
                                         data::set_identifier_generator& id_generator
@@ -253,7 +254,7 @@ void replace_variables_capture_avoiding(T& x,
 /// \\param x The object to which the substiution is applied.
 /// \\param sigma A substitution.
 /// \\param id_generator An identifier generator that generates names that do not appear in x and sigma
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma,
                                      data::set_identifier_generator& id_generator
@@ -269,7 +270,7 @@ T replace_variables_capture_avoiding(const T& x,
 /// \\brief Applies sigma as a capture avoiding substitution to x.
 /// \\param x The object to which the subsitution is applied.
 /// \\param sigma A substitution.
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 void replace_variables_capture_avoiding(T& x,
                                         Substitution& sigma
 )
@@ -287,7 +288,7 @@ void replace_variables_capture_avoiding(T& x,
 /// \\brief Applies sigma as a capture avoiding substitution to x.
 /// \\param x The object to which the substiution is applied.
 /// \\param sigma A substitution.
-template <typename T, typename Substitution>
+template <typename T, data::IsSubstitution Substitution>
 T replace_variables_capture_avoiding(const T& x,
                                      Substitution& sigma
 )

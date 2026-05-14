@@ -22,10 +22,12 @@ namespace mcrl2::data
 /// Used for rewriters.
 struct no_substitution
 {
-  static constexpr bool is_trivial()
+  static constexpr bool is_identity_substitution=true;
+
+  /* static constexpr bool is_trivial()
   {
     return true;
-  }
+  } */
 
   const variable& operator()(const variable& v) const
   {

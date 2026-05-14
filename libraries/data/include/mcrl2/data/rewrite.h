@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_REWRITE_H
 #define MCRL2_DATA_REWRITE_H
 
+#include "mcrl2/data/concepts.h"
 #include "mcrl2/data/builder.h"
 
 namespace mcrl2::data {
@@ -113,7 +114,7 @@ T rewrite(const T& x,
 /// \\param x an object containing expressions
 /// \\param R a rewriter
 /// \\param sigma a substitution
-template <typename T, typename Rewriter, typename Substitution>
+template <typename T, typename Rewriter, data::IsSubstitution Substitution>
 void rewrite(T& x,
              Rewriter R,
              const Substitution& sigma
@@ -128,7 +129,7 @@ void rewrite(T& x,
 /// \\param R a rewriter
 /// \\param sigma a substitution
 /// \\return the rewrite result
-template <typename T, typename Rewriter, typename Substitution>
+template <typename T, typename Rewriter, data::IsSubstitution Substitution>
 T rewrite(const T& x,
           Rewriter R,
           const Substitution& sigma

@@ -93,10 +93,7 @@ public:
     }
   }
 
-  static constexpr bool is_trivial()
-  {
-    return false;
-  } 
+  static constexpr bool is_identity_substitution=false;
 
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment
