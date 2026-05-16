@@ -33,9 +33,11 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr1)
     ;
   pbes p = txt2pbes(pbes_text);
   data::rewriter datar(p.data(), data::jitty);
-  bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
-  pbes_rewrite(p, pbesr);
+  enumerate_quantifiers_rewriter pbesr1(datar, p.data(), expand_infinite_sorts);
+  pbes_rewrite(p, pbesr1);
+  BOOST_CHECK(p.is_well_typed());
+  enumerate_quantifiers_rewriter pbesr2(datar, p.data());
+  pbes_rewrite(p, pbesr2);
   BOOST_CHECK(p.is_well_typed());
 }
 
@@ -48,9 +50,14 @@ BOOST_AUTO_TEST_CASE(test_pbesrewr2)
   BOOST_CHECK(p.is_well_typed());
 
   data::rewriter datar(p.data(), data::jitty);
-  bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
-  pbes_rewrite(p, pbesr);
+  enumerate_quantifiers_rewriter pbesr1(datar, p.data(), expand_infinite_sorts);
+  pbes_rewrite(p, pbesr1);
+  BOOST_CHECK(p.is_well_typed());
+  enumerate_quantifiers_rewriter pbesr2(datar, p.data(), expand_finite_sorts);
+  pbes_rewrite(p, pbesr2);
+  BOOST_CHECK(p.is_well_typed());
+  enumerate_quantifiers_rewriter pbesr3(datar, p.data());
+  pbes_rewrite(p, pbesr3);
   BOOST_CHECK(p.is_well_typed());
 }
 

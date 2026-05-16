@@ -42,7 +42,7 @@ namespace mcrl2::pbes_system::detail {
     pbes_greybox_interface(pbes& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::jitty)
       : parity_game_generator(p, true_false_dependencies, is_min_parity, rewrite_strategy),
       	datar(p.data()),
-        pbes_rewriter(datar, p.data(), true)
+        pbes_rewriter(datar, p.data())
     {
       initialize_generation();
     }

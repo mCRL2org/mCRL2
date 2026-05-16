@@ -92,15 +92,13 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
         }
         case pbes_rewriter_type::quantifier_all:
         {
-          bool enumerate_infinite_sorts = true;
-          enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter pbesr(datar, p.data(), expand_infinite_sorts);
           pbes_rewrite(p, pbesr);
           break;
         }
         case pbes_rewriter_type::quantifier_finite:
         {
-          bool enumerate_infinite_sorts = false;
-          enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter pbesr(datar, p.data(), expand_finite_sorts);
           pbes_rewrite(p, pbesr);
           break;
         }

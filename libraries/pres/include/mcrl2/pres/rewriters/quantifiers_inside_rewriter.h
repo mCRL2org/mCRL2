@@ -84,6 +84,12 @@ struct quantifiers_inside_builder: public pres_expression_builder<quantifiers_in
     apply(result, phi);
     result = quantifiers_inside_supremum(W, result);
   }
+
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
+  {
+    atermpp::assign_cast<data::data_expression>(result) = data::quantifiers_inside_rewrite(x);
+  } 
 };
 
 struct quantifiers_inside_infimum_builder: public data_expression_builder<quantifiers_inside_infimum_builder>

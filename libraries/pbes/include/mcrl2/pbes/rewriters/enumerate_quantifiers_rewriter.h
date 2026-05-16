@@ -15,9 +15,10 @@
 #include <numeric>
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/data/detail/split_finite_variables.h"
-// #include "mcrl2/data/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/data/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/rewriters/quantifier_expansion_mode.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/substitutions.h"
 
@@ -39,43 +40,43 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   using super::update;
   using super::apply;
   using super::sigma;
+  using super::R;
 
+/*   MutableSubstitution& m_sigma;
+  const DataRewriter& m_R;
+  const PbesSubstitution& m_sigma_pbes; */
   const data::data_specification& m_dataspec;
 
   /// If false, only quantifier variables over finite sorts are enumerated.
-  bool m_enumerate_infinite_sorts;
+  enumerate_quantifiers_mode m_enum_mode;
+
+  /// identifier generator
+  data::enumerator_identifier_generator& m_id_generator;
 
   /// The enumerator
   data::enumerator_algorithm<self> E;
 
-  /// Rewriter 
-  const DataRewriter& m_r;
-
-  /// Substitution
-  MutableSubstitution& m_sigma;
-  
-  /// identifier generator
-  data::enumerator_identifier_generator& m_id_generator;
-
   /// \brief Constructor.
-  /// \param r A data rewriter.
+  /// \param R A data rewriter.
   /// \param sigma A mutable substitution.
+  /// \param sigma_pbes A substitution for pbes variables.
   /// \param dataspec A data specification.
   /// \param id_generator A generator to generate fresh variable names.
   /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well.
-  enumerate_quantifiers_builder(const DataRewriter& r,
+  enumerate_quantifiers_builder(const DataRewriter& R,
     MutableSubstitution& sigma,
     const PbesSubstitution& sigma_pbes,
     const data::data_specification& dataspec,
     data::enumerator_identifier_generator& id_generator,
-    bool enumerate_infinite_sorts = true)
-    : super(r, sigma, sigma_pbes),
+    enumerate_quantifiers_mode enum_mode = expand_infinite_sorts_and_use_data_rewriter )
+    : super(R, sigma, sigma_pbes),
+      // m_R(R),
+      // m_sigma(sigma),
+      // m_sigma_pbes(sigma_pbes),
       m_dataspec(dataspec),
-      m_enumerate_infinite_sorts(enumerate_infinite_sorts),
-      E(*this, m_dataspec, r, id_generator, (std::numeric_limits<std::size_t>::max)()),
-      m_r(r),
-      m_sigma(sigma),
-      m_id_generator(id_generator)
+      m_enum_mode(enum_mode),
+      m_id_generator(id_generator),
+      E(*this, m_dataspec, R, id_generator, (std::numeric_limits<std::size_t>::max)())
 
   { }
 
@@ -154,63 +155,41 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
-    if (m_enumerate_infinite_sorts)
+    data::variable_list enumerable;
+    data::variable_list non_enumerable;
+    data::variable_list unused;
+
+    if (m_enum_mode==expand_finite_sorts)
     {
-      data::variable_list enumerable;
-      data::variable_list non_enumerable;
-      data::variable_list unused;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R,
-                                               enumerable, non_enumerable, unused,
-                                               [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
-      if (enumerable.empty())
-      {
-        data::optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
-      }
-      else
-      {
-        pbes_expression phi_;
-        enumerate_forall(phi_, enumerable, result);
-        if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
-        {
-          // we need to rewrite the new body again to deal properly with PBES substitutions
-          // TODO: update enumerate_forall such that it uses the rewriter in derived() during enumeration
-          derived().apply(result, phi_);
-        }
-        else
-        {
-          result = phi_;
-        }
-        data::optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
-      }
+      data::detail::split_finite_variables(x.variables(), m_dataspec,
+                                           enumerable, non_enumerable, unused,
+                                           [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
     }
     else
     {
-      data::variable_list finite;
-      data::variable_list infinite;
-      data::variable_list unused;
-      data::detail::split_finite_variables(x.variables(), m_dataspec,
-                                           finite, infinite, unused,
-                                           [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
-      if (finite.empty())
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, R,
+                                               enumerable, non_enumerable, unused,
+                                               [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
+    }
+    if (enumerable.empty())
+    {
+      data::optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+    }
+    else
+    {
+      pbes_expression phi_;
+      enumerate_forall(phi_, enumerable, result);
+      if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
       {
-        data::optimized_forall_no_empty_domain(result, infinite, result, remove_unused_variables);
+        // we need to rewrite the new body again to deal properly with PBES substitutions
+        // TODO: update enumerate_forall such that it uses the rewriter in derived() during enumeration
+        derived().apply(result, phi_);
       }
       else
       {
-        pbes_expression phi_;
-        enumerate_forall(phi_, finite, result);
-        if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
-        {
-          // we need to rewrite the new body again to deal properly with PBES substitutions
-          // TODO: update enumerate_forall such that it uses the rewriter in derived() during enumeration
-          derived().apply(result, phi_);
-        }
-        else
-        {
-          result = phi_;
-        }
-        data::optimized_forall_no_empty_domain(result, infinite, result, remove_unused_variables);
+        result = phi_;
       }
+      data::optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
     }
     redo_substitution(x.variables(), undo);
   }
@@ -222,63 +201,41 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
-    if (m_enumerate_infinite_sorts)
+    data::variable_list enumerable;
+    data::variable_list non_enumerable;
+    data::variable_list unused;
+    
+    if (m_enum_mode==expand_finite_sorts)
     {
-      data::variable_list enumerable;
-      data::variable_list non_enumerable;
-      data::variable_list unused;
-      data::detail::split_enumerable_variables(x.variables(), m_dataspec, super::R,
-                                               enumerable, non_enumerable, unused,
-                                               [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
-      if (enumerable.empty())
-      {
-        data::optimized_exists_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
-      }
-      else
-      {
-        pbes_expression phi_;
-        enumerate_exists(phi_, enumerable, result);
-        if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
-        {
-          // we need to rewrite the new body again to deal properly with PBES substitutions
-          // TODO: update enumerate_exists such that it uses the rewriter in derived() during enumeration
-          derived().apply(result, phi_);
-        }
-        else
-        {
-          result = phi_;
-        }
-        data::optimized_exists_no_empty_domain(result, non_enumerable, phi_, remove_unused_variables);
-      }
+      data::detail::split_finite_variables(x.variables(), m_dataspec,
+                                           enumerable, non_enumerable, unused,
+                                           [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
     }
     else
     {
-      data::variable_list finite;
-      data::variable_list infinite;
-      data::variable_list unused;
-      data::detail::split_finite_variables(x.variables(), m_dataspec,
-                                           finite, infinite, unused,
-                                           [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
-      if (finite.empty())
+      data::detail::split_enumerable_variables(x.variables(), m_dataspec, R,
+                                               enumerable, non_enumerable, unused,
+                                               [&free_variables](const data::variable& v){ return free_variables.count(v)>0; });
+    }
+    if (enumerable.empty())
+    {
+      data::optimized_exists_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+    }
+    else
+    {
+      pbes_expression phi_;
+      enumerate_exists(phi_, enumerable, result);
+      if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
       {
-        data::optimized_exists_no_empty_domain(result, infinite, result, remove_unused_variables);
+        // we need to rewrite the new body again to deal properly with PBES substitutions
+        // TODO: update enumerate_exists such that it uses the rewriter in derived() during enumeration
+        derived().apply(result, phi_);
       }
       else
       {
-        pbes_expression phi_;
-        enumerate_exists(phi_, finite, result);
-        if constexpr (!std::is_same_v<PbesSubstitution, no_substitution>)
-        {
-          // we need to rewrite the new body again to deal properly with PBES substitutions
-          // TODO: update enumerate_exists such that it uses the rewriter in derived() during enumeration
-          derived().apply(result, phi_);
-        }
-        else
-        {
-          result = phi_;
-        }
-        data::optimized_exists_no_empty_domain(result, infinite, phi_, remove_unused_variables);
+        result = phi_;
       }
+      data::optimized_exists_no_empty_domain(result, non_enumerable, phi_, remove_unused_variables);
     }
     redo_substitution(x.variables(), undo);
   }
@@ -286,9 +243,16 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <atermpp::IsATerm T>
   void apply(T& result, const data::data_expression& x)
   { 
-std::cerr << "DATA EXPRESSION ENUMERATE QUANTIFIERS BUILDER\n";
-    // data::enumerate_quantifiers_rewriter(m_r,m_dataspec,m_id_generator,m_enumerate_infinite_sorts)(atermpp::assign_cast<data::data_expression>(result), x, m_sigma);
-    m_r(atermpp::assign_cast<data::data_expression>(result),x,m_sigma);
+    if (m_enum_mode==expand_infinite_sorts_and_use_data_rewriter)
+    {
+      R(atermpp::assign_cast<data::data_expression>(result),x,sigma);
+    }
+    else 
+    {
+      data::data_expression temporary_result;
+      data::enumerate_quantifiers_rewriter(R,m_dataspec,m_id_generator,m_enum_mode==expand_infinite_sorts)(temporary_result, x, sigma);
+      R(atermpp::assign_cast<data::data_expression>(result),temporary_result,sigma);
+    }
   }
 
 
@@ -323,8 +287,8 @@ struct apply_enumerate_builder: public Builder<apply_enumerate_builder<Builder, 
     const PbesSubstitution& sigma_pbes,
     const data::data_specification& dataspec,
     data::enumerator_identifier_generator& id_generator,
-    bool enumerate_infinite_sorts)
-    : super(R, sigma, sigma_pbes, dataspec, id_generator, enumerate_infinite_sorts)
+    const enumerate_quantifiers_mode enum_mode)
+    : super(R, sigma, sigma_pbes, dataspec, id_generator, enum_mode)
   {}
 };
 
@@ -379,7 +343,7 @@ struct enumerate_quantifiers_rewriter
     data::data_specification m_dataspec;
 
     /// \brief If true, quantifier variables of infinite sort are enumerated.
-    bool m_enumerate_infinite_sorts;
+    enumerate_quantifiers_mode m_enum_mode;
 
     mutable data::enumerator_identifier_generator m_id_generator;
 
@@ -387,15 +351,19 @@ struct enumerate_quantifiers_rewriter
     using term_type = pbes_expression;
     using variable_type = data::variable;
 
-    enumerate_quantifiers_rewriter(const data::rewriter& R, const data::data_specification& dataspec, bool enumerate_infinite_sorts = true)
-      : m_rewriter(R), m_dataspec(dataspec), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
+    enumerate_quantifiers_rewriter(const data::rewriter& R, 
+                                   const data::data_specification& dataspec, 
+                                   const enumerate_quantifiers_mode enum_mode = expand_infinite_sorts_and_use_data_rewriter)
+      : m_rewriter(R), 
+        m_dataspec(dataspec), 
+        m_enum_mode(enum_mode)
     {}
 
     pbes_expression operator()(const pbes_expression& x) const
     {
       data::rewriter::substitution_type sigma;
       pbes_expression result;
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, data::rewriter::substitution_type>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enum_mode).apply(result, x);
       return result;
     }
 
@@ -403,14 +371,14 @@ struct enumerate_quantifiers_rewriter
     pbes_expression operator()(const pbes_expression& x, MutableSubstitution& sigma) const
     {
       pbes_expression result;
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enum_mode).apply(result, x);
       return result;
     }
 
     template <typename MutableSubstitution>
     void operator()(pbes_expression& result, const pbes_expression& x, MutableSubstitution& sigma) const
     {
-      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enumerate_infinite_sorts).apply(result, x);
+      detail::apply_enumerate_builder<detail::enumerate_quantifiers_builder, data::rewriter, MutableSubstitution>(m_rewriter, sigma, no_substitution(), m_dataspec, m_id_generator, m_enum_mode).apply(result, x);
     }
 
     template<typename MutableSubstitution, typename PbesSubstitution>
@@ -425,7 +393,7 @@ struct enumerate_quantifiers_rewriter
         sigma_pbes,
         m_dataspec,
         m_id_generator,
-        m_enumerate_infinite_sorts)
+        m_enum_mode)
         .apply(result, x);
       return result;
     }
@@ -439,7 +407,7 @@ struct enumerate_quantifiers_rewriter
         sigma_pbes,
         m_dataspec,
         m_id_generator,
-        m_enumerate_infinite_sorts)
+        m_enum_mode)
         .apply(result, x);
     }
 
@@ -453,7 +421,7 @@ struct enumerate_quantifiers_rewriter
     /// \return A rewriter, with a copy of the underlying jitty, jittyc or jittyp rewriting engine.
     enumerate_quantifiers_rewriter clone()
     {
-      return enumerate_quantifiers_rewriter(m_rewriter.clone(), m_dataspec, m_enumerate_infinite_sorts);
+      return enumerate_quantifiers_rewriter(m_rewriter.clone(), m_dataspec, m_enum_mode);
     }
 
     /// \brief Initialises this rewriter with thread dependent information.

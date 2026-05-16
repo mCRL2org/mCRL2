@@ -73,7 +73,7 @@ struct quantifiers_inside_builder: public pbes_expression_builder<quantifiers_in
   template <class T>
   void apply(T& result, const forall& x)
   {
-    pbes_expression const& phi = x.body();
+    const pbes_expression& phi = x.body();
     std::set<data::variable> W = data::detail::make_variable_set(x.variables());
     apply(result, phi);
     result = quantifiers_inside_forall(W, result);
@@ -82,11 +82,18 @@ struct quantifiers_inside_builder: public pbes_expression_builder<quantifiers_in
   template <class T>
   void apply(T& result, const exists& x)
   {
-    pbes_expression const& phi = x.body();
+    const pbes_expression& phi = x.body();
     std::set<data::variable> W = data::detail::make_variable_set(x.variables());
     apply(result, phi);
     result = quantifiers_inside_exists(W, result);
   }
+
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
+  {
+    atermpp::assign_cast<data::data_expression>(result) = data::quantifiers_inside_rewrite(x);
+  }
+
 };
 
 struct quantifiers_inside_forall_builder: public data_expression_builder<quantifiers_inside_forall_builder>

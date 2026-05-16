@@ -338,8 +338,10 @@ void eqelm(pbes& p,
     case pbes_rewriter_type::quantifier_all:
     case pbes_rewriter_type::quantifier_finite:
     {
-      bool enumerate_infinite_sorts = (rewriter_type == pbes_rewriter_type::quantifier_all);
-      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
+      const enumerate_quantifiers_mode enum_mode = (rewriter_type == pbes_rewriter_type::quantifier_all?
+                                                         expand_infinite_sorts_and_use_data_rewriter:
+                                                         expand_finite_sorts);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enum_mode);
       pbes_eqelm_algorithm<pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, ignore_initial_state);
       break;

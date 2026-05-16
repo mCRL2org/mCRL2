@@ -1031,8 +1031,10 @@ void constelm(pres& p,
     case quantifier_all:
     case quantifier_finite:
     {
-      bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
-      enumerate_quantifiers_rewriter presr(datar, p.data(), enumerate_infinite_sorts);
+      const pbes_system::enumerate_quantifiers_mode enum_mode = (rewriter_type == pres_rewriter_type::quantifier_all?
+                                                                 pbes_system::expand_infinite_sorts_and_use_data_rewriter:
+                                                                 pbes_system::expand_finite_sorts);
+      enumerate_quantifiers_rewriter presr(datar, p.data(), enum_mode);
       pres_constelm_algorithm<data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, presr);
       algorithm.run(p, compute_conditions, check_quantifiers);
       if (remove_redundant_equations)

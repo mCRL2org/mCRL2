@@ -86,15 +86,13 @@ class pres_rewriter : public pres_input_tool<pres_output_tool<pres_rewriter_tool
         }
         case quantifier_all:
         {
-          bool enumerate_infinite_sorts = true;
-          enumerate_quantifiers_rewriter presr(datar, p.data(), enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter presr(datar, p.data(), pbes_system::expand_infinite_sorts);
           pres_rewrite(p, presr);
           break;
         }
         case quantifier_finite:
         {
-          bool enumerate_infinite_sorts = false;
-          enumerate_quantifiers_rewriter presr(datar, p.data(), enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter presr(datar, p.data(), pbes_system::expand_finite_sorts);
           pres_rewrite(p, presr);
           break;
         }
