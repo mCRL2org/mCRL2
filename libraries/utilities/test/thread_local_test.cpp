@@ -7,9 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#define BOOST_TEST_MODULE thread_local_test
+#define BOOST_AUTO_TEST_MAIN
+#include <boost/test/included/unit_test.hpp>
 
-#include <boost/test/unit_test.hpp>
 #include "mcrl2/utilities/thread_local.h"
 
 #include <thread>
@@ -18,8 +18,6 @@
 #include <atomic>
 
 using mcrl2::utilities::ThreadLocal;
-
-BOOST_AUTO_TEST_SUITE(thread_local_tests)
 
 BOOST_AUTO_TEST_CASE(test_basic_creation)
 {
@@ -138,5 +136,3 @@ BOOST_AUTO_TEST_CASE(test_size)
   tls.get_or([] { return 42; });
   BOOST_CHECK_EQUAL(tls.size(), 1);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
