@@ -15,6 +15,8 @@
 #include "mcrl2/lps/explorer.h"
 #include "mcrl2/lts/trace.h"
 
+#include <forward_list>
+
 namespace mcrl2::lts 
 {
 
