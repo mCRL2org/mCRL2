@@ -4884,8 +4884,10 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn, vw1, vw2}), equal_to(concat_digit(vn, vw1), most_significant_digit_nat(vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vn, vw1, vw2}), equal_to(most_significant_digit_nat(vw1), concat_digit(vn, vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vn1, vn2, vw1, vw2}), equal_to(concat_digit(vn1, vw1), concat_digit(vn2, vw2)), sort_bool::and_(sort_machine_word::equal_word(vw1, vw2), equal_to(vn1, vn2))));
-        result.push_back(data_equation(variable_list({vn1, vn2}), equal_to(succ_nat(vn1), vn2), sort_bool::and_(not_equals_zero(vn2), equal_to(vn1, natpred(vn2)))));
-        result.push_back(data_equation(variable_list({vn1, vn2}), equal_to(vn1, succ_nat(vn2)), sort_bool::and_(not_equals_zero(vn1), equal_to(natpred(vn1), vn2))));
+        result.push_back(data_equation(variable_list({vn1, vn2}), equals_zero(vn2), equal_to(succ_nat(vn1), vn2), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vn1, vn2}), not_equals_zero(vn2), equal_to(succ_nat(vn1), vn2), equal_to(vn1, natpred(vn2))));
+        result.push_back(data_equation(variable_list({vn1, vn2}), equals_zero(vn1), equal_to(vn1, succ_nat(vn2)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list({vn1, vn2}), not_equals_zero(vn1), equal_to(vn1, succ_nat(vn2)), equal_to(natpred(vn1), vn2)));
         result.push_back(data_equation(variable_list({vw1, vw2}), less(most_significant_digit_nat(vw1), most_significant_digit_nat(vw2)), sort_machine_word::less_word(vw1, vw2)));
         result.push_back(data_equation(variable_list({vn, vw1, vw2}), less(concat_digit(vn, vw1), most_significant_digit_nat(vw2)), sort_bool::false_()));
         result.push_back(data_equation(variable_list({vn, vw1, vw2}), less(most_significant_digit_nat(vw1), concat_digit(vn, vw2)), sort_bool::true_()));

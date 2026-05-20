@@ -62,8 +62,10 @@ eqn  @c1 = @most_significant_digit(@one_word);
      ==(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
      ==(@most_significant_digit(w1),@concat_digit(p,w2)) = false;
      ==(@concat_digit(p1,w1),@concat_digit(p2,w2)) = &&(@equal(w1,w2),==(p1,p2));
-     ==(@succ_pos(p1),p2) = &&(!(@equals_one(p2)),==(p1,@pospred(p2)));
-     ==(p1, @succ_pos(p2)) = &&(!(@equals_one(p1)),==(@pospred(p1),p2));
+     (@equals_one(p2)) -> ==(@succ_pos(p1),p2) = false;
+     !(@equals_one(p2)) -> ==(@succ_pos(p1),p2) = ==(p1,@pospred(p2));
+     (@equals_one(p1)) -> ==(p1, @succ_pos(p2)) = false;
+     !(@equals_one(p1)) -> ==(p1, @succ_pos(p2)) = ==(@pospred(p1),p2);
  
      <(@most_significant_digit(w1),@most_significant_digit(w2)) = @less(w1,w2);
      <(@concat_digit(p,w1),@most_significant_digit(w2)) = false;

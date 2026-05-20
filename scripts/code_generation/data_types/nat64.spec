@@ -154,8 +154,10 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
      ==(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
      ==(@most_significant_digitNat(w1),@concat_digit(n,w2)) = false;
      ==(@concat_digit(n1,w1), @concat_digit(n2,w2)) = &&(@equal(w1,w2), ==(n1,n2));
-     ==(@succ_nat(n1),n2) = &&(@not_equals_zero(n2),==(n1,@natpred(n2)));
-     ==(n1, @succ_nat(n2)) = &&(@not_equals_zero(n1),==(@natpred(n1),n2));
+     (@equals_zero(n2)) -> ==(@succ_nat(n1),n2) = false;
+     (@not_equals_zero(n2)) -> ==(@succ_nat(n1),n2) = ==(n1,@natpred(n2));
+     (@equals_zero(n1)) -> ==(n1, @succ_nat(n2)) = false;
+     (@not_equals_zero(n1)) -> ==(n1, @succ_nat(n2)) = ==(@natpred(n1),n2);
  
      <(@most_significant_digitNat(w1), @most_significant_digitNat(w2)) = @less(w1,w2);
      <(@concat_digit(n,w1), @most_significant_digitNat(w2)) = false;
