@@ -426,9 +426,9 @@ inline void self_substitute(pbes_equation& equation,
             std::set<propositional_variable_instantiation> phi_set_same_name;
             std::copy_if(phi_set.begin(), phi_set.end(), std::inserter(phi_set_same_name, phi_set_same_name.begin()),
                          [&](const propositional_variable_instantiation& pvi) { return pvi.name() == equation.variable().name(); });
+            stable = false;
             if (phi_set_same_name.size() == 0)
             {
-                stable = false;
                 pvi_done = true;
             }
             else
