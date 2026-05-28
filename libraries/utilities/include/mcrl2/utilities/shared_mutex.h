@@ -198,7 +198,8 @@ public:
   }
 
   inline
-  void lock_impl() {    
+  void lock_impl() 
+  {    
     if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
     {
       // Shared and exclusive sections MUST be disjoint.
