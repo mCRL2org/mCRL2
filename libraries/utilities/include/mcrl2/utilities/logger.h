@@ -144,9 +144,9 @@ class logger: private utilities::noncopyable
     }
 
     /// \brief An indication whether time information should be printed.
-    static bool& m_print_time_information()
+    static std::atomic<bool>& m_print_time_information()
     {
-      thread_local bool print_timing_info=false;
+      static std::atomic<bool> print_timing_info(false);
       return print_timing_info;
     }
 
