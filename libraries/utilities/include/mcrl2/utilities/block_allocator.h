@@ -203,18 +203,18 @@ private:
       return reinterpret_cast<T*>(e);
     }
 
+    // Fast path 2: bump-allocate from the current thread's block.
+    if (state.current_block != nullptr && state.bump_offset < N)
+    {
+      return reinterpret_cast<T*>(&state.current_block->data[state.bump_offset++]);
+    }
+
     // Refill the thread-local freelist from a shared chunk.
     if (refill_local_free(state) && state.free_head != nullptr)
     {
       Entry* e = state.free_head;
       state.free_head = e->next;
       return reinterpret_cast<T*>(e);
-    }
-
-    // Fast path 2: bump-allocate from the current thread's block.
-    if (state.current_block != nullptr && state.bump_offset < N)
-    {
-      return reinterpret_cast<T*>(&state.current_block->data[state.bump_offset++]);
     }
 
     // Slow path: allocate a new block under the mutex.
