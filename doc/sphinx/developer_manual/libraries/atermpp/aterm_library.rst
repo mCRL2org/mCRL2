@@ -38,27 +38,23 @@ The class :mcrl2:`aterm <atermpp::aterm>` is a base class for all others.
    type                                                     description
    =======================================================  ==========================================
    :mcrl2:`function_symbol <atermpp::function_symbol>`      a function symbol
-   :mcrl2:`aterm <atermpp::aterm>`                          a generic aterm
-   :mcrl2:`term_appl\<T\> <atermpp::term_appl>`             a function application
+   :mcrl2:`aterm <atermpp::aterm>`                          a generic aterm, i.e. an applicative term
    :mcrl2:`term_list\<T\> <atermpp::term_list>`             a list of terms
    :mcrl2:`aterm_int <atermpp::aterm_int>`                  a term containing a 64 bit positive number
    =======================================================  ==========================================
 
 
-The types :mcrl2:`term_appl
-<atermpp::term_appl>` are template classes. Typedefs exist for two commonly used variants:
+:mcrl2:`term_list\<T\> <atermpp::term_list>` is a template class. A typedef exists for the commonly
+used variant:
 
 .. code-block:: c++
 
   typedef term_list<aterm> aterm_list;
-  typedef term_appl<aterm> aterm_appl;
 
 A :mcrl2:`term_list\<T\> <atermpp::term_list>` models a read-only singly
 linked list with elements of type `T`. The element type should be
 :mcrl2:`aterm <atermpp::aterm>` or one of its derivatives, or a user defined
-aterm (see :ref:`atermpp_programming_user_defined`). A
-:mcrl2:`term_appl\<T\> <atermpp::term_appl>` is a function application to arguments
-of type :mcrl2:`T`.
+aterm (see :ref:`atermpp_programming_user_defined`).
 
 Besides this the library contains a few more data types in which elements derived from aterms can
 be stored. Indexed sets (:mcrl2:`indexed_set\<T\> <atermpp::indexed_set>` are essentially unordered sets providing a unique index for each inserted
