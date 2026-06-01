@@ -16,16 +16,14 @@ different types of travelsals possible:
    Type                     Meaning
    =======================  ====================================================================
    normal traversal         Traverse an object completely
-   binding aware traversal  Traverse an object completely, while maintaining the bound variables
    sort traversal           Traverses only the parts of an object that contain sorts
    =======================  ====================================================================
 
 
 Each library defines classes that support these traversal types, namely
-`traverser`, `binding_aware_traverser` and `builder`. They are
-the most commonly occurring traversals. When writing an algorithm that needs to
-traverse an object, one can usually implement it using one of the predefined
-traversal classes.
+`traverser` and `builder`. They are the most commonly occurring traversals.
+When writing an algorithm that needs to traverse an object, one can usually
+implement it using one of the predefined traversal classes.
 
 When deriving from a traverser class, the `enter` and `leave` functions must be made visible using
 
@@ -65,14 +63,11 @@ The traverser classes have the following structure:
    template < typename Derived >
    class traverser
    {
-     public:     
+     public:
        void operator()(function_symbol const& e);
        void operator()(data_expression const& e);
        ...
    };
-
-   template < typename Derived >
-   class binding_aware_traverser : public traverser< Derived >;
 
    template < typename Derived >
    class sort_traverser : public traverser< Derived >;
@@ -99,27 +94,10 @@ Note that the `Curiously recurring template pattern <http://en.wikipedia.org/wik
 needs to be applied in the implementation of `traverser`, since it needs access
 to protected interfaces of derived classes.
 
-The traversal framework can be reused in other libraries.
-The LPS Library defines classes `lps_data_traverser` and `lps_binding_aware_traverser` like this:
-
-.. code-block:: c++
-
-   template < typename Derived, template < class > class Traverser = mcrl2::data::detail::traverser >
-   class lps_data_traverser : public Traverser< Derived >
-   {
-     public:
-       void operator()(const multi_action& a);
-       void operator()(const linear_process& p);
-       ...
-   };
-       
-   template < typename Derived >
-   struct lps_binding_aware_traverser : public lps::detail::lps_data_traverser< Derived, data::detail::binding_aware_traverser >
-
-.. warning::
-
-  The traversal classes have only been partly defined for the LPS Library
-  and not yet for the Process and PBES Library.
+The traversal framework can be reused in other libraries. Each library that
+needs traversal support defines its own traverser classes in the same way,
+extending the base ``traverser`` template with overloads for its specific
+types.
 
 Examples
 ^^^^^^^^
