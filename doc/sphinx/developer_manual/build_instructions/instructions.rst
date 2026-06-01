@@ -20,9 +20,10 @@ obtained using the following command::
   $ git clone https://github.com/mCRL2org/mCRL2.git
 
 In the remainder of this manual, we assume that you have the source code on your
-system in a folder called ``mCRL2``. We will set up an in-source build in
-``build``, this is especially useful for vscode plugins that rely on the
-``compile_commands.json``.
+system in a folder called ``mCRL2``. We will use an out-of-source build directory,
+referred to as ``<build>``. Setting ``CMAKE_EXPORT_COMPILE_COMMANDS`` to ``ON``
+produces a ``compile_commands.json`` in the build directory, which is used by
+VS Code and other IDE plugins for code navigation and analysis.
 
 .. note::
 
@@ -182,24 +183,31 @@ graphical user interfaces, some advanced settings are initially hidden.
   ``OFF`` Disable profiling when executing tools.
   ======= ======================================================================
 
-``MCRL2_ENABLE_TEST_TARGETS``
+``MCRL2_ENABLE_TESTS``
   *Default*: ``OFF``
 
   ======= ======================================================================
-  ``ON``  Generate test targets. This option needs to be enabled in combination
-          with ``BUILD_TESTING`` to execute library tests. If not enabled, only
-          tool tests are executed when ``BUILD_TESTING`` is enabled.
+  ``ON``  Enable generation of library and random test targets.
   ------- ----------------------------------------------------------------------
-  ``OFF`` Disable profiling when executing tools.
+  ``OFF`` Do not generate library and random test targets.
   ======= ======================================================================
 
-``MCRL2_MAN_PAGES``
+``MCRL2_ENABLE_TOOL_TESTS``
   *Default*: ``ON``
 
   ======= ======================================================================
-  ``ON``  Enable generation of manual pages.
+  ``ON``  Enable generation of tool tests.
   ------- ----------------------------------------------------------------------
-  ``OFF`` Disable generation of manual pages.
+  ``OFF`` Do not generate tool tests.
+  ======= ======================================================================
+
+``MCRL2_ENABLE_DOC_MANUAL``
+  *Default*: ``ON``
+
+  ======= ======================================================================
+  ``ON``  Enable generation of tool manual pages (requires built tools).
+  ------- ----------------------------------------------------------------------
+  ``OFF`` Disable generation of tool manual pages.
   ======= ======================================================================
 
 ``MCRL2_ENABLE_GUI_TOOLS``
@@ -217,19 +225,12 @@ graphical user interfaces, some advanced settings are initially hidden.
   *Default*: ``ON``
 
   ======= ======================================================================
-  ``ON``  Execute tests after successful build. The tests that are exeuted are
-          determined by the ``MCRL2_ENABLE_TEST_TARGETS`` configuration
-          variable.
+  ``ON``  Execute tests after successful build. Which tests are generated is
+          determined by the ``MCRL2_ENABLE_TESTS`` and
+          ``MCRL2_ENABLE_TOOL_TESTS`` configuration variables.
   ------- ----------------------------------------------------------------------
   ``OFF`` Do not execute tests.
   ======= ======================================================================
 
-``CTAGS``
-  *Default*: ``/PATH/WITH/FILE/ctags``
-
-  This variable specifies the location where Ctags can be found. Ctags is a
-  program that generates an index (or tag) file of names found in source and
-  header files of various programming languages.
-
-``Qt5_DIR``
-  This variable specifies the location where Qt can be found.
+``Qt6_DIR``
+  This variable specifies the location where Qt6 can be found.
