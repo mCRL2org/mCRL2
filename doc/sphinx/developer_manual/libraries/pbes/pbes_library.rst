@@ -135,7 +135,7 @@ Search and Replace functions
    :mcrl2:`find_identifiers                            <mcrl2::pbes_system::find_identifiers>`                                Finds all identifiers occurring in a PBES data type
    :mcrl2:`find_sort_expressions                       <mcrl2::pbes_system::find_sort_expressions>`                           Finds all sort expressions occurring in a PBES  data type
    :mcrl2:`find_function_symbols                       <mcrl2::pbes_system::find_function_symbols>`                           Finds all function symbols occurring in a PBES  data type
-   :mcrl2:`find_all_variables                          <mcrl2::pbes_system::find_variables>`                                  Finds all variables occurring in a PBES  data type
+   :mcrl2:`find_all_variables                          <mcrl2::pbes_system::find_all_variables>`                              Finds all variables occurring in a PBES  data type
    :mcrl2:`find_free_variables                         <mcrl2::pbes_system::find_free_variables>`                             Finds all free variables occurring in a PBES  data type
    :mcrl2:`find_propositional_variable_instantiations  <mcrl2::pbes_system::find_propositional_variable_instantiations>`      Finds all propositional variable instantiations occurring in a PBES data type
    :mcrl2:`replace_sort_expressions                    <mcrl2::pbes_system::replace_sort_expressions>`                        Replaces sort expressions in a PBES data type
