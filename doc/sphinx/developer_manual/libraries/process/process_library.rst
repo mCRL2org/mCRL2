@@ -87,9 +87,8 @@ Algorithms on processes
    algorithm                                                                                        description
    ===============================================================================================  =========================================================================================
    :mcrl2:`alphabet_reduce                  <mcrl2::process::alphabet_reduce>`                        Applies alphabet reduction to a process specification
-   :mcrl2:`eliminate_single_usage_equations <mcrl2::process::eliminate_single_usage_equations>`       Eliminates equations that are used only once, using substitution
    :mcrl2:`eliminate_trivial_equations      <mcrl2::process::eliminate_trivial_equations>`            Eliminates trivial equations, that have a process instance as the right hand side
-   :mcrl2:`eliminate_trivial_sums           <mcrl2::process::eliminate_trivial_sums>`                 Eliminates trivial equations, that have a sum of process instances as the right hand side
+   :mcrl2:`eliminate_unused_equations       <mcrl2::process::eliminate_unused_equations>`             Eliminates equations that are not reachable from the initial state
    :mcrl2:`is_guarded                       <mcrl2::process::is_guarded>`                             Checks if a process expression is guarded
    :mcrl2:`is_linear                        <mcrl2::process::is_linear>`                              Determines if a process specification is linear
    :mcrl2:`normalize_sorts                  <mcrl2::process::normalize_sorts>`                        Applies sort normalization to a process data type
@@ -109,7 +108,7 @@ Search and Replace functions
    :mcrl2:`find_identifiers                   <mcrl2::process::find_identifiers>`                        Finds all identifiers occurring in a process data type
    :mcrl2:`find_sort_expressions              <mcrl2::process::find_sort_expressions>`                   Finds all sort expressions occurring in a process  data type
    :mcrl2:`find_function_symbols              <mcrl2::process::find_function_symbols>`                   Finds all function symbols occurring in a process  data type
-   :mcrl2:`find_all_variables                 <mcrl2::process::find_variables>`                          Finds all variables occurring in a process  data type
+   :mcrl2:`find_all_variables                 <mcrl2::process::find_all_variables>`                      Finds all variables occurring in a process  data type
    :mcrl2:`find_free_variables                <mcrl2::process::find_free_variables>`                     Finds all free variables occurring in a process  data type
    :mcrl2:`replace_sort_expressions           <mcrl2::process::replace_sort_expressions>`                Replaces sort expressions in a process data type
    :mcrl2:`replace_data_expressions           <mcrl2::process::replace_data_expressions>`                Replaces data expressions in a process data type
