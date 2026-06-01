@@ -270,13 +270,13 @@ available tool classes, and the command line options that they handle.
    class :mcrl2:`mcrl2::utilities::tool`                                              handles =--quiet=, =--verbose=, =--debug=, =--help= and =--version=
    class :mcrl2:`mcrl2::utilities::input_tool`                                        in addition handles a positional input file argument
    class :mcrl2:`mcrl2::utilities::input_output_tool`                                 in addition handles a positional output file argument
-   template <typename Tool> class :mcrl2:`mcrl2::utilities::rewriter_tool`            extends a tool with a =--rewriter= option
-   template <typename Tool> class :mcrl2:`mcrl2::utilities::pbes_rewriter_tool`       extends a tool with =--rewriter= and =--pbes-rewriter= options
+   template <typename Tool> class :mcrl2:`mcrl2::data::tools::rewriter_tool`          extends a tool with a =--rewriter= option
+   template <typename Tool> class :mcrl2:`mcrl2::pbes_system::tools::pbes_rewriter_tool`  extends a tool with =--rewriter= and =--pbes-rewriter= options
    ================================================================================  ===================================================================
 
-The class :mcrl2:`mcrl2::utilities::rewriter_tool` makes strategies of the
+The class :mcrl2:`mcrl2::data::tools::rewriter_tool` makes strategies of the
 data rewriter available to the user. The class
-:mcrl2:`mcrl2::utilities::pbes_rewriter_tool` makes pbes rewriters available
+:mcrl2:`mcrl2::pbes_system::tools::pbes_rewriter_tool` makes pbes rewriters available
 to the user.
 
 Example
@@ -377,7 +377,7 @@ mCRL2 toolset through this logging library. The facilities provided by this
 library should be used throughout the toolset. The library is inspired by the
 description in `"Logging in C++" by P. Marginean <http://drdobbs.com/cpp/201804215>`_.
 
-All code of this library can be found in the mcrl2::log namespace.
+All code of this library can be found in the ``mcrl2::log`` namespace.
 
 Concepts
 --------
@@ -387,256 +387,125 @@ The logging library incorporates the concepts introduced in this section.
 Log level
 ^^^^^^^^^
 
-The type :mcrl2:`log_level_t` describes the various log levels that we identify.
-The log level describes the severity of the message.
+The type :mcrl2:`log_level_t <mcrl2::log::log_level_t>` describes the various
+log levels that we identify. The log level describes the severity or verbosity
+of a message. From lowest to highest verbosity the levels are:
+
+.. table:: Log levels
+
+   =========  ================================================================
+   Level      Meaning
+   =========  ================================================================
+   quiet      No output at all; used to disable all messages
+   error      Error messages only
+   warning    Warnings and errors
+   info       Informational messages (default reporting level)
+   status      Progress messages that overwrite the previous status line
+   verbose    Additional detail beyond info
+   debug      Debug-level output
+   trace      Fine-grained trace output
+   =========  ================================================================
 
 .. note::
 
-   No message should ever be printed to the quiet log level. This level
-   is meant to disable all messages.
-
-Hint
-^^^^
-
-Hints can be used to distinguish between separate components in the toolset.
-The logging library allows controlling logging statements with different hints
-separately. One can e.g. change the log level for a specific hint, or attach
-another output stream to a specific hint, allowing the library user to write
-specific messages to a file.
+   No message should ever be printed *to* the ``quiet`` log level. This level
+   is meant only to suppress all output.
 
 OutputPolicy
 ^^^^^^^^^^^^
 
-The output policy controls the way messages are output.
-By default the file_output policy is used, which writes a message to the
-file related to the hint of the current message.
+The output policy controls the way messages are written out.
+The abstract base class is ``mcrl2::log::output_policy``; the default
+implementation ``mcrl2::log::file_output`` writes messages to stderr.
+Custom policies can be registered and unregistered on the
+``mcrl2::log::logger`` class.
 
 Library interface
 -----------------
-The main routine in the library is :mcrl2:`mCRL2log(level, hint)`, where level is a
-loglevel, and hint is a (optional) string hint. The routine returns an output
-stream to which a single log message may be printed. Printing defaults
-to stderr.
+The main entry point is the macro ``mCRL2log(LEVEL)``, where ``LEVEL`` is one
+of the ``mcrl2::log::log_level_t`` values. It returns an output stream to
+which a single log message can be written. Output defaults to stderr.
 
-Maximal log level (compile time)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The library includes a compile time variable :c:macro:`MCRL2_MAX_LOG_LEVEL`, which,
-if not set, defaults to debug. All log messages with a log level
-higher than :c:macro:`MCRL2_MAX_LOG_LEVEL` will be disabled during compile-time,
-meaning they will not be in the generated executable.
+.. code-block:: c++
+
+  mCRL2log(mcrl2::log::verbose) << "This message is printed at verbose level." << std::endl;
 
 Maximal log level (runtime)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The maximal reporting level can be set using
-:mcrl2:`mcrl2_logger::set_reporting_level(level)`, by default info is assumed.
+The maximal reporting level can be set and queried using the static methods of
+``mcrl2::log::logger``:
 
-Setting output stream
-^^^^^^^^^^^^^^^^^^^^^
-The output stream of the logger can be set to be any file using
-:mcrl2:`mcrl2_logger::output_policy_t::set_stream(file_pointer)`. Note that
-file_pointer in this case can also be stderr or stdout. The default
-output stream is stderr.
+.. code-block:: c++
 
-Incorporating hints
-^^^^^^^^^^^^^^^^^^^
-For both the reporting level and the stream, the routines to change them have
-an optional hint argument that can be used to override the defaults for a
-specific hint. To set a reporting level for a specific hint "hint" one can
-use :mcrl2:`mcrl2_logger::set_reporting_level`, likewise, for a stream
-one can use :mcrl2:`mcrl2_logger::output_policy_t::set_stream`.
-In order to remove specific treatment of a hint, the routines
-:mcrl2:`mcrl2_logger::clear_reporting_level` an
-:mcrl2:`mcrl2_logger::output_policy_t::clear_stream` can be used.
+  mcrl2::log::logger::set_reporting_level(mcrl2::log::verbose);
+  mcrl2::log::log_level_t current = mcrl2::log::logger::get_reporting_level();
+
+The default reporting level is ``info``.
+
+Custom output policies
+^^^^^^^^^^^^^^^^^^^^^^
+To redirect log output (e.g. to a file), implement ``mcrl2::log::output_policy``
+and register it:
+
+.. code-block:: c++
+
+  class my_file_output : public mcrl2::log::output_policy
+  {
+  public:
+    void output(mcrl2::log::log_level_t level, time_t timestamp,
+                const std::string& msg, bool print_time_information) override
+    {
+      // write msg to custom destination
+    }
+  };
+
+  my_file_output my_policy;
+  mcrl2::log::logger::register_output_policy(my_policy);
+  // ... use logging ...
+  mcrl2::log::logger::unregister_output_policy(my_policy);
 
 Tutorial
 --------
 In this section we describe a typical use case of the logging library.
 
-To enable logging, first include the header file.
+To enable logging, include the header file:
 
 .. code-block:: c++
 
   #include "mcrl2/utilities/logger.h"
 
-If you want to control the log levels that are compiled into the code, you
-should set the following macro *before the first include* of logger.h, or
-you should provide it as a compiler flag.
+A minimal example:
 
 .. code-block:: c++
 
-  #define MCRL2_MAX_LOG_LEVEL debug
-
-this only compiles logging statements up to and including debug
-(and is actually the default).
-
-Now let's start out main routine as usual
-
-.. code-block:: c++
-
-  using namespace mcrl2;
-  int main(int argc, char** argv)
-  {
-
-We only allow reporting of messages up to verbose, so we do not print
-messages of level debug or higher.
-
-.. code-block:: c++
-
-    log::mcrl2_logger::set_reporting_level(log::verbose);
-
-We want this information to be printed to stderr, which is the default.
-Let's do some logging.
-
-.. code-block:: c++
-
-    mCRL2log(log::info) << "This shows the way info messages are printed, using the default messages" << std::endl;
-    mCRL2log(log::debug) << "This line is not printed, and the function " << my_function() << " is not evaluated" << std::endl;
-
-Now we call an algorithm `my_algorithm`, which we will define later.
-The algorithm uses "my_algorithm" as hint for logging, and we want to write
-its output to a file. First we create a file logger_test_file.txt to which
-we log, and assign it to the hint "my_algorithm".
-
-.. code-block:: c++
-
-    FILE* plogfile;
-    plogfile = fopen("logger_test_file.txt" , "w");
-    if(plogfile == NULL)
-    {
-      throw mcrl2::runtime_error("Cannot open logfile for writing");
-    }
-    log::mcrl2_logger::output_policy_t::set_stream(plogfile, "my_algorithm");
-    log::mcrl2_logger::set_reporting_level(log::debug3, "my_algorithm");
-
-    // Execute algorithm
-    my_algorithm();
-
-    // Do not forget to close the file.
-    fclose(plogfile);
-  }
-
-Let's take a look at an implementation of =my_algorithm()=.
-
-.. code-block:: c++
-
-  void do_something_special()
-  {
-    mCRL2log(log::debug3, "my_algorithm") << "doing something special" << std::endl;
-  }
-
-  std::string my_algorithm()
-  {
-    mCRL2log(log::debug, "my_algorithm") << "Starting my_algorithm" << std::endl;
-    int iterations = 3;
-    mCRL2log(log::debug1, "my_algorithm") << "A loop with " << iterations << " iterations" << std::endl;
-    log::mcrl2_logger::indent();
-    for(int i = 0; i < iterations; ++i)
-    {
-      mCRL2log(log::debug2, "my_algorithm") << "Iteration " << i << std::endl;
-      if(i >= 2)
-      {
-        log::mcrl2_logger::indent();
-        mCRL2log(log::debug3, "my_algorithm") << "iteration number >= 2, treating specially" << std::endl;
-        do_something_special();
-        log::mcrl2_logger::unindent();
-      }
-    }
-    log::mcrl2_logger::unindent();
-    return "my_algorithm";
-  }
-
-Note that, with the settings so far, only the first debug statement in
-:mcrl2:`my_algorithm` will be printed, the other log messages are compiled away due
-to the setting of :c:macro:`MCRL2_MAX_LOG_LEVEL`. To overcome this, the define before
-the include of ``logger.h`` must allow for more debug levels, e.g. by setting
-it as follows
-
-.. code-block:: c++
-
-  #define MCRL2_MAX_LOG_LEVEL log::debug3
-
-This does not yet suffice; setting this only made sure that the logging
-statements of all levels up to and including debug3 are actually compiled
-into the code. We still have to enable the logging statements at run-time,
-because so far we have only allowed logging of messages up to verbose level.
-Therefore we should add the following anywhere before the execution of
-the second debug print in `my_algorithm`
-
-.. code-block:: c++
-
-  log::mcrl2_logger::set_reporting_level(log::debug3, "my_algorithm");
-
-The complete code now looks as follows:
-
-.. code-block:: c++
-
-  #define MCRL2_MAX_LOG_LEVEL mcrl2::log::debug3
   #include "mcrl2/utilities/logger.h"
 
   using namespace mcrl2;
 
-  void do_something_special()
-  {
-    mCRL2log(log::debug3, "my_algorithm") << "doing something special" << std::endl;
-  }
-
   std::string my_algorithm()
   {
-    mCRL2log(log::debug, "my_algorithm") << "Starting my_algorithm" << std::endl;
+    mCRL2log(log::verbose) << "Starting my_algorithm" << std::endl;
     int iterations = 3;
-    mCRL2log(log::debug1, "my_algorithm") << "A loop with " << iterations << " iterations" << std::endl;
-    log::mcrl2_logger::indent();
-    for(int i = 0; i < iterations; ++i)
+    for (int i = 0; i < iterations; ++i)
     {
-      mCRL2log(log::debug2, "my_algorithm") << "Iteration " << i << std::endl;
-      if(i >= 2)
-      {
-        log::mcrl2_logger::indent();
-        mCRL2log(log::debug3, "my_algorithm") << "iteration number >= 2, treating specially" << std::endl;
-        do_something_special();
-        log::mcrl2_logger::unindent();
-      }
+      mCRL2log(log::debug) << "Iteration " << i << std::endl;
     }
-    log::mcrl2_logger::unindent();
     return "my_algorithm";
   }
 
   int main(int argc, char** argv)
   {
-    log::mcrl2_logger::set_reporting_level(log::verbose);
+    // Only report messages up to and including verbose level (debug messages
+    // will be suppressed).
+    log::logger::set_reporting_level(log::verbose);
 
-    mCRL2log(log::info) << "This shows the way info messages are printed, using the default messages" << std::endl;
-    mCRL2log(log::debug) << "This line is not printed, and the function " << my_algorithm() << " is not evaluated" << std::endl;
+    mCRL2log(log::info) << "Starting tool" << std::endl;
+    mCRL2log(log::debug) << "This line is not printed because debug > verbose" << std::endl;
 
-    FILE* plogfile;
-    plogfile = fopen("logger_test_file.txt" , "w");
-    if(plogfile == NULL)
-    {
-      throw std::runtime_error("Cannot open logfile for writing");
-    }
-    log::mcrl2_logger::output_policy_t::set_stream(plogfile, "my_algorithm");
-    log::mcrl2_logger::set_reporting_level(log::debug3, "my_algorithm");
-
-    // Execute algorithm
     my_algorithm();
-
-    // Do not forget to close the file.
-    fclose(plogfile);
   }
-
-Note that in this code, the logging of `my_algorithm` is done to the file
-logger_test_file.txt, whereas the other log messages are printed to stderr.
 
 After execution, stderr looks as follows::
 
-  [11:51:02.639 info]    This shows the way info messages are printed, using the default messages
-
-The file logger_test_file.txt contains the following::
-
-  [11:52:35.381 my_algorithm::debug]   Starting my_algorithm
-  [11:52:35.381 my_algorithm::debug]   A loop with 3 iterations
-  [11:52:35.381 my_algorithm::debug]     Iteration 0
-  [11:52:35.381 my_algorithm::debug]     Iteration 1
-  [11:52:35.381 my_algorithm::debug]     Iteration 2
-  [11:52:35.381 my_algorithm::debug]       iteration number >= 2, treating specially
-  [11:52:35.381 my_algorithm::debug]       doing something special
+  [info]    Starting tool
+  [verbose] Starting my_algorithm
