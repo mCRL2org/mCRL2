@@ -5943,9 +5943,32 @@ class specification_basic_type
       return  var;
     }
 
+    // This function makes an assignment_list where the terms in resultnextstate are 
+    // assigned to the variables in the variable parameters, where no assignment is added
+    // if the righ and left hand side are identical, except when the parameter equals
+    // the expression in resultnextstate and this expression is a variable in sumvars 
+    // or stochvars. 
+    assignment_list make_optimised_assignment_list(const variable_list& parameters,
+                                                   const data_expression_list& resultnextstate,
+                                                   const variable_list& sum_vars, 
+                                                   const variable_list& stoch_vars)
+    {
+      assert(parameters.size()==resultnextstate.size());
+
+      data_expression_list::const_iterator i=resultnextstate.begin();
+      return assignment_list(parameters.begin(), 
+                             parameters.end(),
+                             [&i](const variable& p){ return assignment(p, *i++); },   // assignment to be inserted.
+                             [&sum_vars, &stoch_vars](const assignment& p)             // filter. If true, assignment is added.
+                                 { return p.lhs()!=p.rhs() || 
+                                          std::find(sum_vars.begin(),sum_vars.end(),p.rhs())!=sum_vars.end() ||
+                                          std::find(stoch_vars.begin(),stoch_vars.end(),p.rhs())!=stoch_vars.end(); });
+
+    }
+    
+
     stochastic_action_summand collect_sum_arg_arg_cond(
       const enumtype& e,
-      std::size_t n,
       const stochastic_action_summand_vector& action_summands,
       const variable_list& parameters)
     {
@@ -5956,6 +5979,7 @@ class specification_basic_type
          a variable of enumtype. In case binary is used,
          a sequence of variables are introduced of sort Bool */
 
+      std::size_t n=action_summands.size();
       variable_list resultsum;
       data_expression resultcondition;
       action_list resultmultiaction;
@@ -6557,7 +6581,7 @@ class specification_basic_type
       resultnextstate=reverse(resultnextstate);
       /* The list of arguments in nextstate are now in a sequential form, and
            must be transformed back to a list of assignments */
-      const assignment_list final_resultnextstate=make_assignment_list(parameters,resultnextstate);
+      const assignment_list final_resultnextstate=make_optimised_assignment_list(parameters,resultnextstate,resultsum,resulting_stochastic_variables);
       return stochastic_action_summand(
                             resultsum,
                             resultcondition,
@@ -6568,7 +6592,6 @@ class specification_basic_type
 
     deadlock_summand collect_sum_arg_arg_cond(
       const enumtype& e,
-      std::size_t n,
       const deadlock_summand_vector& deadlock_summands,
       const variable_list& parameters)
     {
@@ -6579,6 +6602,7 @@ class specification_basic_type
          a variable of enumtype. In case binary is used,
          a sequence of variables are introduced of sort Bool */
 
+      std::size_t n=deadlock_summands.size();
       variable_list resultsum;
       data_expression resultcondition;
       action_list resultmultiaction;
@@ -6876,7 +6900,7 @@ class specification_basic_type
 
               const enumtype enumeratedtype_(options.binary?2:n,actionsorts,get_sorts(pars),*this);
 
-              result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,n,w1,pars));
+              result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,w1,pars));
             }
             else
             {
@@ -6926,7 +6950,7 @@ class specification_basic_type
 
             const enumtype enumeratedtype_(options.binary?2:n,actionsorts,get_sorts(pars),*this);
 
-            result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,n,w1,pars));
+            result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,w1,pars));
           }
           else
           {

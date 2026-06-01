@@ -135,7 +135,8 @@ public:
   /// \param last The end of a range of elements.
   /// \param convert_to_aterm A class with a () operation, which is applied to each element
   ///                   before it is put into the list.
-  /// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
+  /// \param aterm_filter A class with an operator () that yields a bool, and if true the elements is inserted in the list.
+  ///                     Otherwise, it is ignored. 
   template <class Iter, class ATermConverter, class ATermFilter>
   explicit term_list(Iter first,
       Iter last,
@@ -201,7 +202,8 @@ public:
   /// \param last The end of a range of elements.
   /// \param convert_to_aterm A class with a () operation, whic is applied to each element
   ///                      before it is put into the list.
-  /// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
+  /// \param aterm_filter A class with an operator () yielding a bool that if true allows the element to be added to the list.
+  ///                     Otherwise, the element is not added. 
   template <class Iter, class ATermConverter, class ATermFilter>
   explicit term_list(Iter first,
       Iter last,
