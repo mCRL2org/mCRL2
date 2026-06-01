@@ -17,7 +17,12 @@ To conduct the tests specified in the build tree execute::
 
   $ ctest
 
-Specific tests can be run by using ``ctest``. Below some examples are given. 
+Specific tests can be run by using ``ctest``. Below some examples are given.
+
+* When using a multi-configuration generator such as Ninja Multi-Config or Visual
+  Studio, a configuration must be specified explicitly::
+
+    $ ctest -C Debug
 
 * To displays the list of tests, without running them, execute::
 
