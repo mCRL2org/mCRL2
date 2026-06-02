@@ -122,10 +122,9 @@ Type conversions
 ^^^^^^^^^^^^^^^^
 
 Data types that employ the atermpp library typically derive from
-:mcrl2:`term_appl\<T\> <atermpp::term_appl>`, and sometimes
+:mcrl2:`aterm <atermpp::aterm>`, and sometimes
 from :mcrl2:`term_list\<T\> <atermpp::term_list>` and
-:mcrl2:`aterm_int <atermpp::aterm_int>`. These are subclasses
-from :mcrl2:`aterm <atermpp::aterm>`. This means that there is
+:mcrl2:`aterm_int <atermpp::aterm_int>`. This means that there is
 an automatic conversion from such classes towards :mcrl2:`aterm <atermpp::aterm>`'s.
 
 To convert aterm based types to derived classes explicit
@@ -149,7 +148,7 @@ that terms are well defined and of proper type.
     aterm_int& z1 = down_cast<aterm_int>(x)y;       // The down_cast prevents increasing a reference count.
     aterm_int z2(y);                                // The use of an explicit constructor.
     assert(z1.value() == 10 and z2.value == 10);
-    aterm_appl f = read_term_from_string("f(x,y)"); // This term is type-checked in debug mode.
+    aterm f = read_term_from_string("f(x,y)");      // reads an applicative aterm.
 
 String representations
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -190,59 +189,66 @@ Programming with aterms
 ATerm creation
 --------------
 
-All aterm types have their own appropriate constructors for creating them:
+All aterm types have their own appropriate constructors or factory functions for creating them.
+
+For ``aterm_int`` and ``term_list``, constructors are available:
 
 .. code-block:: c++
 
-    #include <atermpp::aterm_int>
-    #include <atermpp::aterm_appl>
-    #include <atermpp::aterm_list>
-    using atermpp;
+    #include "mcrl2/atermpp/aterm_int.h"
+    #include "mcrl2/atermpp/aterm_list.h"
+    using namespace atermpp;
     aterm_int i(10);             // an aterm_int can be constructed from a value.
-    aterm x,y;
-    function_symbol f("f",2);    // the function symbol f of arity 2.
-    aterm_appl t(f, x,y);        // represents f(x,y). These constructors exist up till arity 7.
+    aterm x, y;
     aterm_list empty_list;       // the default constructor yields the empty list.
-    aterm_list l(x,empty_list);  // this is the list [x].
+    aterm_list l(x, empty_list); // this is the list [x].
 
-Using iterators ranging over a term type `T`, aterm_appl's with more arguments and
-longer lists can be constructed;
+For function applications (applicative aterms), the ``make_term_appl`` function is used,
+which writes the result into a target variable:
+
+.. code-block:: c++
+
+    #include "mcrl2/atermpp/aterm.h"
+    using namespace atermpp;
+    aterm x, y, t;
+    function_symbol f("f", 2);        // the function symbol f of arity 2.
+    make_term_appl(t, f, x, y);       // t now represents f(x,y).
+
+Using iterators, applicative aterms and lists with more arguments can be constructed:
 
 .. code-block:: c++
 
     #include <vector>
-    #include <atermpp::aterm_appl>
-    #include <atermpp::aterm_list>
-    using atermpp;
-    std::vector < aterm > v;
-    aterm x,y;
+    #include "mcrl2/atermpp/aterm.h"
+    #include "mcrl2/atermpp/aterm_list.h"
+    using namespace atermpp;
+    std::vector<aterm> v;
+    aterm x, y, t;
     v.push_back(x);
-    v.push)back(y);
-    function_symbol f("g",2);           // a function symbol with two arguments.
-    aterm_appl t(f,v.begin(),v.end());  // construct the term g(x,y). Vector v must have length 2.
-    aterm_list l(v.begin(),v.end());    // construct the list [x,y].
+    v.push_back(y);
+    function_symbol g("g", 2);                     // a function symbol with two arguments.
+    make_term_appl(t, g, v.begin(), v.end());       // t represents g(x,y). Vector v must have length 2.
+    aterm_list l(v.begin(), v.end());               // construct the list [x,y].
 
-Both lists and term_appl's can also be contructed from iterators while applying a conversion to all
-elements over which the iterator ranges. The operator () in the conversion class is applied to each term
-before it becomes an argument or a list element. This conversion class can also be a lambda term.
+Applicative aterms can also be constructed from iterators while applying a conversion to each element.
+The converter is a lambda or function object that is applied to each element before it becomes an argument:
 
 .. code-block:: c++
 
     #include <vector>
-    #include <atermpp::aterm_appl>
-    #include <atermpp::aterm_list>
-    using atermpp;
-    std::vector < Term > v;             // Assume Term is some class that has been inherited form aterms and
-                                        // v is the vector x1,...,xn.
-    function_symbol f("g",2);           // a function symbol with two arguments.
-    aterm_appl t(f,v.begin(),v.end(),[](const Term& t){return convertor(t);});
-                                        // construct the term g(convertor(x1),...,convertor(xn)).
-                                        // convertor to x respectively y.
-    aterm_list l(v.begin(),v.end(),conversion_class);
-                                        // construct the list [conversion(x1),...,converstion(xn)]
-                                        // assuming conversion_class contains a member Term operator()(const Term& t){ return conversion(t);}.
+    #include "mcrl2/atermpp/aterm.h"
+    #include "mcrl2/atermpp/aterm_list.h"
+    using namespace atermpp;
+    std::vector<Term> v;              // Assume Term is derived from aterm; v = [x1,...,xn].
+    aterm t;
+    function_symbol g("g", 2);
+    make_term_appl(t, g, v.begin(), v.end(),
+                   [](const Term& x){ return convertor(x); });
+                                      // t represents g(convertor(x1),...,convertor(xn)).
+    aterm_list l(v.begin(), v.end(), conversion_class);
+                                      // [conversion(x1),...,conversion(xn)]
 
-For lists it is even possible to apply a filter on the elements in the input. A filter is a class containing a function
+For lists it is possible to apply a filter on the elements in the input. A filter is a class containing a function
 bool operator()(const Term& t). Only if this function provides true on an element it is added to the list.
 In the code fragment below the list of aterm_lists l is constructed by taking each aterm_list m in vector v that has a length larger
 than 4 with the aterm y put in front of it.
@@ -250,14 +256,14 @@ than 4 with the aterm y put in front of it.
 .. code-block:: c++
 
     #include <vector>
-    #include <atermpp::aterm_list>
-
+    #include "mcrl2/atermpp/aterm_list.h"
+    using namespace atermpp;
     std::vector<aterm_list> v;          // Assume v is a vector containing aterm_lists.
     aterm y;
     term_list<aterm_list> l(v.begin(),
                             v.end(),
-                            [](const aterm_list& m){ return aterm_list(y,m); },
-                            [](const aterm_list& m){ return m.size()>4; })
+                            [&y](const aterm_list& m){ return aterm_list(y, m); },
+                            [](const aterm_list& m){ return m.size() > 4; });
 
 ATerm manipulation
 ------------------
@@ -287,27 +293,27 @@ The value in an aterm_int can be obtained using the function :mcrl2:`value() <at
      aterm_int n(12);
      size_t x=n.value();    // x gets the value 12.
 
-The function symbol of a :mcrl2:`function() <atermpp::term_appl::function>`.
-The number of arguments of a term is obtained using :mcrl2:`size() <atermpp::term_appl::size>`. A convenience function
-:mcrl2:`empty() <atermpp::term_appl::empty>` can be used to check whether the term application is a constant, i.e.,
-has no arguments. An argument can be obtained using the subscript operator :mcrl2:`operator[] <atermpp::term_appl::operator[]>`.
-The first argument has number 0. Using const iterators it is possible to iteratate over the arguments of a term.
-For this purpose the functions :mcrl2:`end() <atermpp::term_appl::end>` are defined.
+The function symbol of an aterm is obtained using :mcrl2:`function() <atermpp::aterm::function>`.
+The number of arguments of a term is obtained using :mcrl2:`size() <atermpp::aterm::size>`. A convenience function
+:mcrl2:`empty() <atermpp::aterm::empty>` can be used to check whether the term application is a constant, i.e.,
+has no arguments. An argument can be obtained using the subscript operator :mcrl2:`operator[] <atermpp::aterm::operator[]>`.
+The first argument has number 0. Using const iterators it is possible to iterate over the arguments of a term.
+For this purpose the functions :mcrl2:`begin() <atermpp::aterm::begin>` and :mcrl2:`end() <atermpp::aterm::end>` are defined.
 
 .. code-block:: c++
 
-     #include <atermpp::aterm_appl.h>
-     using atermpp;
-     function_symbol f("f",3);
-     aterm x,y,z;
-     aterm_appl t(f,x,y,z));
-     function_symbol g=t.function();    // g becomes equal to function symbol f.
-     aterm u=t[1];                      // u becomes equal to y.
-     size_t n=t.size();                 // n becomes 3.
-     bool b=t.empty();                  // t has three arguments, therefore b is false.
-     for(aterm_appl:const_iterator i=t.begin(); t.end(); ++t)
+     #include "mcrl2/atermpp/aterm.h"
+     using namespace atermpp;
+     function_symbol f("f", 3);
+     aterm x, y, z, t;
+     make_term_appl(t, f, x, y, z);
+     function_symbol g = t.function();  // g becomes equal to function symbol f.
+     aterm u = t[1];                    // u becomes equal to y.
+     std::size_t n = t.size();          // n becomes 3.
+     bool b = t.empty();                // t has three arguments, therefore b is false.
+     for (aterm::const_iterator i = t.begin(); i != t.end(); ++i)
      {
-       ...                              // iterator over the the arguments of t
+       ...                              // iterate over the arguments of t
      }
 
 There are a number of functions to manipulate with term_lists.
@@ -359,9 +365,9 @@ For example:
 Iterator interfaces
 ^^^^^^^^^^^^^^^^^^^
 The classes :mcrl2:`term_list\<T\> <atermpp::term_list>` and
-:mcrl2:`term_appl\<T\> <atermpp::term_appl>` have C++ standard conforming iterator interfaces.
+:mcrl2:`aterm <atermpp::aterm>` have C++ standard conforming iterator interfaces.
 The iterator of a :mcrl2:`term_list` iterates over the elements in the list. The iterator
-of a :mcrl2:`term_appl` iterates over the arguments of the term.
+of an :mcrl2:`aterm <atermpp::aterm>` iterates over the arguments of the term.
 They operate well with the C++ Standard Library, as illustrated by the following example:
 
 .. code-block:: c++
@@ -408,76 +414,78 @@ User defined terms
 The aterm library provides an excellent basis on top of which user defined terms
 can be constructed. Suppose one wants to create terms with zero, one and addition
 where only addition is defined explicitly below.
-This can be done by creating a class :mcrl2:`Expression` inheriting from an aterm_appl.
+This can be done by creating a class :mcrl2:`Expression` inheriting from :mcrl2:`aterm <atermpp::aterm>`.
 
 .. code-block:: c++
 
    using namespace atermpp;
-   class Expression: public aterm_appl
+   class Expression: public aterm
    {
-     Expression(const function_symbol& f)
-       : aterm_appl(f);
-     { }
+   public:
+     explicit Expression(const function_symbol& f)
+     {
+       make_term_appl(*this, f);
+     }
 
      Expression(const function_symbol& f, const Expression& e1, const Expression& e2)
-       : aterm_appl(f,e1,e2);
-     { }
+     {
+       make_term_appl(*this, f, e1, e2);
+     }
 
      // Check whether the expression is zero.
-     bool is_zero(const Expression& e) const
+     bool is_zero() const
      {
-       return e.function_symbol() == function_symbol("zero",0);
+       return function() == function_symbol("zero", 0);
      }
 
      // Check whether the expression is one.
-     bool is_one(const Expression& e) const
+     bool is_one() const
      {
-       return e.function_symbol() == function_symbol("one",0);
+       return function() == function_symbol("one", 0);
      }
 
-     // Check whether the function is an addition.
-     bool is_addition(const Expression& e) const
+     // Check whether the expression is an addition.
+     bool is_addition() const
      {
-       return e.function_symbol() == function_symbol("add",2);
+       return function() == function_symbol("add", 2);
      }
    };
 
    class Zero: public Expression
    {
-     // Constructor
+   public:
      Zero()
-      : Expression(function_symbol("zero"))
+       : Expression(function_symbol("zero", 0))
      {}
-   }
+   };
 
    class One: public Expression
    {
-     // Constructor
+   public:
      One()
-      : Expression(function_symbol("one"))
+       : Expression(function_symbol("one", 0))
      {}
-   }
+   };
 
    class Addition: public Expression
    {
-     // Constructor
-     Addition(const Expression& e1, const Expression e2)
-      : Expression(function_symbol("add",2), e1,e2)
+   public:
+     Addition(const Expression& e1, const Expression& e2)
+       : Expression(function_symbol("add", 2), e1, e2)
      {}
 
      // Get left argument.
-     const Expression& left(const Addition& e) const
+     const Expression& left() const
      {
        return down_cast<Expression>((*this)[0]);
      }
 
      // Get right argument.
-     const Expression& right(const Addition& e) const
+     const Expression& right() const
      {
        return down_cast<Expression>((*this)[1]);
      }
-
-   }
+   };
 
 Now that we have defined :mcrl2:`Expression`, we can use it in standard containers.
 
@@ -513,16 +521,16 @@ predicate. The program fragment below illustrates this:
 
   #include "mcrl2/atermpp/algorithm.h"
 
-  // function object to test if it is an aterm_appl with function symbol "f"
+  // function object to test if it is an aterm with function symbol "f"
   struct is_f
   {
     bool operator()(aterm t) const
     {
-      return (t.type_is_appl()) && aterm_appl(t).function().name() == "f";
+      return t.type_is_appl() && t.function().name() == "f";
     }
   };
 
-  aterm_appl a = read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))");
+  aterm a = read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))");
   aterm t = find_if(a, is_f());
   assert(t == read_term_from_string("f(y)"));
 
@@ -548,20 +556,20 @@ based on a predicate.
 
   #include "atermpp/algorithm.h"
 
-  // function object to test if it is an aterm_appl with function symbol "a" or "b"
+  // function object to test if it is an aterm with function symbol "a" or "b"
   struct is_a_or_b
   {
     bool operator()(aterm t) const
     {
-      return (t.type() == AT_APPL) &&
-      (aterm_appl(t).function().name() == "a" || aterm_appl(t).function().name() == "b");
+      return t.type_is_appl() &&
+        (t.function().name() == "a" || t.function().name() == "b");
     }
   };
 
-  aterm_appl a = read_term_from_string("f(f(x))");
-  aterm_appl b = replace(a, read_term_from_string("f(x)"), read_term_from_string("x"));
+  aterm a = read_term_from_string("f(f(x))");
+  aterm b = replace(a, read_term_from_string("f(x)"), read_term_from_string("x"));
   assert(b == read_term_from_string("f(x)"));
-  aterm_appl c = replace(a, read_term_from_string("f(x)"), read_term_from_string("x"), true);
+  aterm c = replace(a, read_term_from_string("f(x)"), read_term_from_string("x"), true);
   assert(c == read_term_from_string("x"));
 
 Miscellaneous algorithms
@@ -578,20 +586,22 @@ an operation to each subterm of a term.
    // Applies a function f to the given argument t.
    struct apply_f
    {
-     aterm_appl operator()(aterm_appl t) const
+     aterm operator()(const aterm& t) const
      {
-       return aterm_appl(function_symbol("f", 1), t);
+       aterm result;
+       make_term_appl(result, function_symbol("f", 1), t);
+       return result;
      }
    };
 
-   bool print(aterm_appl t) // The return value true indicates that for_each
-                              // should recurse into the children of t.
+   bool print(const aterm& t)  // The return value true indicates that for_each
+                               // should recurse into the children of t.
    {
      std::cout << t.function().name() << " ";
      return true;
    }
 
-   aterm_appl t = read_term_from_string("h(g(x),f(y))");
+   aterm t = read_term_from_string("h(g(x),f(y))");
    atermpp::for_each(t, print);             // prints "h g x f y"
 
    aterm_list l = read_term_from_string("[0,1,2,3]");
@@ -609,7 +619,6 @@ as building blocks of other algorithms. They have the following interface:
   {
     void apply(const aterm_int& x);
     void apply(const aterm_list& x);
-    void apply(const aterm_appl& x);
     void apply(const aterm& x);
   };
 
@@ -618,7 +627,6 @@ as building blocks of other algorithms. They have the following interface:
   {
     aterm apply(const aterm_int& x);
     aterm apply(const aterm_list& x);
-    aterm apply(const aterm_appl& x);
     aterm apply(const aterm& x);
   };
 
@@ -634,7 +642,7 @@ enough to modify all subterms ``x`` by ``y``.
     typedef builder<xy_replacer> super;
     using super::apply;
 
-    aterm apply(const aterm_appl& x)
+    aterm apply(const aterm& x)
     {
       if (x == atermpp::read_term_from_string("x"))
       {
@@ -651,4 +659,4 @@ enough to modify all subterms ``x`` by ``y``.
   assert(t1 == atermpp::read_term_from_string("h(g(f(y),y))"));
 
 Note that static polymorphism using the `Curiously recurring template pattern <http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern>`_
-is applied in the visitor classes. The call to ``super::apply`` triggers the default behaviour of ``apply(aterm_appl)``, which is to recurse into the subterms.
+is applied in the visitor classes. The call to ``super::apply`` triggers the default behaviour of ``apply(aterm)``, which is to recurse into the subterms.
