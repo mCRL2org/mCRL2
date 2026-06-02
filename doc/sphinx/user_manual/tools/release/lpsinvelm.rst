@@ -73,7 +73,6 @@ Consider a linear process specification
 
 .. code-block:: mcrl2
 
-   act a:Nat; b,c;
    act a, b, c;
    proc X(b1,b2:Bool) = b1 -> a.X(!b1,b2)
                       + b2 ->b.X(true,b2 && b1)
@@ -88,18 +87,18 @@ the resulting LPS looks like
 
 .. code-block:: mcrl2
 
-   act  c,b,a;
+   act  a,b,c;
 
    proc P(b1_X,b2_X: Bool) =
-          b1_X ->
-            a .
-            P(b1_X = !b1_X)
-        + b2_X ->
-            b .
-            P(b1_X = true, b2_X = b2_X && b1_X)
-        + (b1_X && b2_X) ->
+          (b1_X && b2_X) ->
             c .
             P(b1_X = false, b2_X = false)
+        + (b2_X) ->
+            b .
+            P(b1_X = true, b2_X = b2_X && b1_X)
+        + (b1_X) ->
+            a .
+            P(b1_X = !b1_X)
         + delta;
 
    init P(false, true);
@@ -132,16 +131,16 @@ yields the following:
 
 .. code-block:: mcrl2
 
-   act c,b,a;
+   act  a,b,c;
 
    proc P(b1_X,b2_X: Bool) =
-          if(b1_X, if(b2_X, false, true), false) ->
-            a .
-            P(b1_X = !b1_X)
-        + if(b1_X, false, if(b2_X, true, false)) ->
+          (if(b2_X, if(b1_X, false, true), false)) ->
             b .
             P(b1_X = true, b2_X = b2_X && b1_X)
-        + if(b1_X, if(b2_X, false, true), true) ->
+        + (if(b2_X, false, if(b1_X, true, false))) ->
+            a .
+            P(b1_X = !b1_X)
+        + (if(b2_X, if(b1_X, false, true), true)) ->
             delta;
 
    init P(false, true);
@@ -162,19 +161,19 @@ the result becomes
 
 .. code-block:: mcrl2
 
-   act  c,b,a;
+   act  a,b,c;
 
    proc P(b1_X,b2_X: Bool) =
-          (!(b1_X && b2_X) && b1_X) ->
-            a .
-            P(b1_X = !b1_X)
+          (!(b1_X && b2_X) && b1_X && b2_X) ->
+            c .
+            P(b1_X = false, b2_X = false)
         + (!(b1_X && b2_X) && b2_X) ->
             b .
             P(b1_X = true, b2_X = b2_X && b1_X)
-        + (!(b1_X && b2_X) && b1_X && b2_X) ->
-            c .
-            P(b1_X = false, b2_X = false)
-        + !(b1_X && b2_X) ->
+        + (!(b1_X && b2_X) && b1_X) ->
+            a .
+            P(b1_X = !b1_X)
+        + (!(b1_X && b2_X)) ->
             delta;
 
    init P(false, true);
