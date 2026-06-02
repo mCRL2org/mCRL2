@@ -17,7 +17,7 @@ numbers as parameters, but these could be different of course).
 
 .. code-block:: mcrl2
 
-   pbes mu X(n:Nat)=(n<5)||(forall m:Nat.(m<=n+1) => X(m));
+   pbes mu X(n:Nat)=val(n<5)||(forall m:Nat.val(m<=n+1) => X(m));
    init X(0);
 
 The initial instantiated variable is ``X(0)``. The right hand side belonging to
@@ -25,13 +25,13 @@ The initial instantiated variable is ``X(0)``. The right hand side belonging to
 
 .. code-block:: mcrl2
 
-   (0<5)||(forall m:Nat.(m<=0+1) => X(m))
+   val(0<5)||(forall m:Nat.val(m<=0+1) => X(m))
 
 which using rewriting reduces to:
 
 .. code-block:: mcrl2
 
-   (forall m:Nat.(m<=1) => X(m))
+   (forall m:Nat.val(m<=1) => X(m))
 
 The variable ``m`` can either be ``0`` or ``1``. Using that natural numbers are
 defined by constructors, a technique called narrowing is used, using which it is
