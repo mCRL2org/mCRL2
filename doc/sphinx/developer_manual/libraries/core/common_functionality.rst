@@ -194,32 +194,8 @@ object of the LPS library, the function `lps::find_variables` must be used.
   It is important to choose the right overload of generic traverser functions. Failing to do so may
   result in compilation errors, or runtime exceptions.
 
-Implementation details
-""""""""""""""""""""""
-The implementation of find functions is not finished yet. It has to be figured out
-how to extend the functionality of the Data Library to other libraries.
-The file `mcrl2/lps/find.h` currently contains this:
 
-.. code-block:: c++
 
-   /// \brief Returns all data variables that occur in a range of expressions
-   /// \param[in] container a container with expressions
-   /// \return All data variables that occur in the term t
-   template <typename Container, typename OutputIterator >
-   void find_free_variables(Container const& container, OutputIterator o)
-   {
-     data::detail::make_free_variable_find_helper< lps::detail::lps_binding_aware_traverser >(o)(container);
-   }
-
-   /// \brief Returns all data variables that occur in a range of expressions
-   /// \param[in] container a container with expressions
-   /// \return All data variables that occur in the term t
-   /// TODO replace uses by data::find_free_variables
-   template <typename Container >
-   std::set< data::variable > find_free_variables(Container const& container)
-   { ... }
-
-                                                                                                                                                                                                                        
 Generic programming techniques
 ------------------------------
 
