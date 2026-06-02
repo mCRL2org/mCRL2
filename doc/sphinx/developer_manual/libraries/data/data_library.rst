@@ -99,17 +99,17 @@ unique anymore. When declaring in mCRL2
 .. code-block:: mcrl2
 
    sort Time=Nat;
-        D=list(Nat);
+        D=List(Nat);
         E=struct f(E)|g;
 
-the sorts Time and Nat, as well as D and list(Nat) and even
+the sorts Time and Nat, as well as D and List(Nat) and even
 E and struct f(E)|g are pairwise equal. In a specification it is not very
 inefficient to have different names for equal sorts. Therefore the sorts
 in a specification are made unique. The algorithm that is used maps every
 structured and container sort for which an alias is introduced to the
 sort alias at the left hand side. Every sort alias between basic sorts
 is mapped to the right hand side. In the example above every occurrence
-of Time is replaced by Nat, and occurrences of list(Nat) and struct f(E)|g
+of Time is replaced by Nat, and occurrences of List(Nat) and struct f(E)|g
 are replaced by D and E respectively.
 
 The method sort_alias_map() delivers a mapping from sorts to sorts giving
