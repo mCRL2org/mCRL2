@@ -209,9 +209,12 @@ Next we are going to investigate some properties of the gossiping girls.
       an ``all_done`` action can be performed.
       
       However, if we try to verify this property using::
-      
+
         $ lps2pbes -f gossip3.mcf gossip.lps | pbessolve -rjittyc
-        
+        Warning: detected nested modal operators. This may result in a long execution time.
+        Use the option -m (for lps2pbes/lps2pres), -p (for lts2pbes/lts2pres) or insert dummy fix
+        point operators in between manually to speed up the transformation.
+
       It seems that :ref:`tool-lps2pbes` is getting stuck. This is caused by the
       translation of µ-calculus formula with an LPS to a PBES, that has to look
       ahead 8 levels in the state space, by recursively evaluating the guards in
