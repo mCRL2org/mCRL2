@@ -165,7 +165,10 @@ namespace detail
         args.push_back(rhs);
       }
 
-      return data::application(cache_elem.case_functions.at(rhss.front().sort()), args);
+      // Create the case function on demand:
+      // the output sort may not have been creation of case functions.
+      const data::function_symbol case_func = create_case_function(target.sort(), rhss.front().sort());
+      return data::application(case_func, args);
     }
 
     const data::function_symbol_vector& get_projection_funcs(const data::function_symbol& f)
@@ -351,7 +354,7 @@ namespace detail
     bool is_det_or_pi(const data::application& expr) const
     {
       using utilities::detail::contains;
-      
+
       const data::function_symbol f = data::detail::get_top_fs(expr);
       // If f is not unary, then it is certainly unequal to Det or pi
       if (f == data::function_symbol() || expr.size() != 1)
@@ -387,7 +390,7 @@ namespace detail
       }
       auto udm = m_datamgr.dataspec().mappings();
       const data::data_specification& dataspec = m_datamgr.dataspec();
-      if (std::find_if(udm.begin(), udm.end(), 
+      if (std::find_if(udm.begin(), udm.end(),
           [&](const auto& f2){ return f.name() == f2.name() && dataspec.equal_sorts(f.sort(), f2.sort()); }) == udm.end())
       {
         // f is not a mapping, but likely a constructor
@@ -507,7 +510,7 @@ namespace detail
           super::apply(branch1, x[1]);
           data::data_expression branch2;
           super::apply(branch2, x[2]);
-          
+
           data::make_application(result,
             data::if_(x.sort()),
             x[0],

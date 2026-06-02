@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lpsparunfold_test.cpp
-/// \brief Add your file description here.
+/// \brief Tests for the lpsparunfold algorithm.
 
 #define BOOST_TEST_MODULE lpsparunfold_test
 #include <boost/algorithm/string.hpp>
@@ -114,3 +114,42 @@ BOOST_AUTO_TEST_CASE(test_main)
     }
 }
 
+// Regression test: unfolding a List(T) parameter when a pattern-matching mapping has a
+// nested constructor subpattern caused create_cases() to look up a case function for a
+// sort (List(Pair)) that was never registered in the Pair cache element.
+// Issue originally spotted by Jan Friso Groote.
+BOOST_AUTO_TEST_CASE(test_unfold_list_pair_nested_constructor_pattern)
+{
+  // `toggle` pattern-matches on |> with the Pair-typed head expressed as `pair(n, b)`.
+  // After unfolding the List(Pair) parameter, the pattern-match unfolder encounters
+  // Det_ListPair(toggle(C_ListPair(...))), unfolds `toggle`, and eventually calls
+  // create_cases(pi_ListPair(x), [List(Pair)-typed rhs]), needing case_functions[List(Pair)]
+  // in the Pair cache — which did not exist before the fix.
+  const std::string spec_text =
+    "sort Pair = struct pair(Nat, Bool);\n"
+    "\n"
+    "map  toggle: List(Pair) -> List(Pair);\n"
+    "     cons_pair: Nat # Bool # List(Pair) -> List(Pair);\n"
+    "var  n: Nat; b: Bool; t: List(Pair);\n"
+    "eqn  toggle([]) = [];\n"
+    "     toggle(pair(n, b) |> t) = pair(n, !b) |> toggle(t);\n"
+    "     cons_pair(n, b, t) = pair(n, b) |> t;\n"
+    "\n"
+    "act  add: Nat # Bool;\n"
+    "     flip;\n"
+    "\n"
+    "proc P(s: List(Pair)) =\n"
+    "       sum n: Nat, b: Bool. add(n, b) . P(cons_pair(n, b, s))\n"
+    "     + flip . P(toggle(s));\n"
+    "\n"
+    "init P([]);\n";
+
+  stochastic_specification spec;
+  parse_lps(spec_text, spec);
+
+  std::map<data::sort_expression, unfold_cache_element> cache;
+  lpsparunfold unfolder(spec, cache, false, false, true);
+  // Index 0 is s: List(Pair).  Unfolding it triggers the pattern-match unfolder on
+  // Det_ListPair(toggle(C_ListPair(...))), which hits the missing case function.
+  BOOST_CHECK_NO_THROW(unfolder.algorithm(0));
+}
