@@ -39,12 +39,18 @@ Take the the following LPS:
    act  a: D;
         b: E;
 
-   proc P = a(d1) . P
-          + a(d2) . P
-          + b(e1(d1)) . P
-          + b(e1(d2)) . P
-          + b(e2) . P
-          ;
+   proc P =
+          b(e2) .
+            P()
+        + b(e1(d1)) .
+            P()
+        + b(e1(d2)) .
+            P()
+        + a(d1) .
+            P()
+        + a(d2) .
+            P()
+        + delta;
 
    init P;
 
