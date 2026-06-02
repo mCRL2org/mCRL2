@@ -26,39 +26,28 @@ Consider an LPS with the following process equation.
 
   init P(0);
 
-The tool transforms this to the following strongly bisimilar LPS
-(where it must be noted that in this particular case the condition
-``x>=0`` has been added to each summand in the input LPS).
+The tool transforms this to the following strongly bisimilar LPS.
 
 .. code-block:: mcrl2
 
-   sort Comp = struct smaller?is_smaller | equal?is_equal | larger?is_larger;
-
    act  step,urgent,reset;
 
-   proc P(xi,xi00: Comp) =
-          !is_smaller(xi) ->
-            reset .
-            P(equal, smaller)
-        + (is_smaller(xi00) && !is_smaller(xi)) ->
+   proc P(xi: Bool) =
+          reset .
+            P(xi = true)
+        + (xi) ->
             urgent .
-            P(larger, equal)
-        + (!is_smaller(xi) && is_smaller(xi00)) ->
+            P(xi = true)
+        + (xi) ->
             urgent .
-            P(larger, smaller)
-        + (is_smaller(xi00) && !is_smaller(xi)) ->
-            urgent .
-            P(larger, larger)
-        + (is_smaller(xi00) && !is_smaller(xi)) ->
+            P(xi = false)
+        + (xi) ->
             step .
-            P(larger, equal)
-        + (!is_smaller(xi) && is_smaller(xi00)) ->
-            step .
-            P(larger, smaller)
-        + !is_smaller(xi) ->
-            step .
-            P(larger, larger);
+            P(xi = true)
+        + step .
+            P(xi = false)
+        + delta;
 
-   init P(equal, smaller);
+   init P(true);
 
 .. mcrl2_manual:: lpsrealelm
