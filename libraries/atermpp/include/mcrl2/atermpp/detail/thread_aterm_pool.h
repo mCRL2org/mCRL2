@@ -21,6 +21,14 @@
 namespace atermpp::detail
 {
 
+// Forward declaration needed by the extern below.
+class thread_aterm_pool;
+
+/// \brief Pointer to the main thread's pool; set on its first access and used
+///        by ~thread_aterm_pool to transfer orphaned protection-set entries
+///        when a worker thread exits.
+extern thread_aterm_pool* g_main_thread_pool;
+
 /// \brief This is a thread's specific access to the global aterm pool which ensures that
 ///        garbage collection and hash table resizing can proceed.
 class thread_aterm_pool final : public mcrl2::utilities::noncopyable
@@ -46,12 +54,40 @@ public:
     }
   }
 
-  ~thread_aterm_pool() 
+  ~thread_aterm_pool()
   {
-      // We leak values for the global aterm pool since they contain global variables (for which initialisation order is undefined).
+    // We leak values for the global aterm pool since they contain global
+    // variables (for which initialisation order is undefined).
     if (!m_is_main_thread)
     {
-      // We need to prematurely unregister this thread pool since we are going to delete reference variables.
+      // Transfer any remaining variables and containers to the main-thread
+      // pool BEFORE unregistering.  This keeps them reachable during GC,
+      // which is essential for static-local aterm_core objects (e.g. those
+      // in sort/data header files) that were first initialised on this worker
+      // thread and will be destroyed at program exit on the main thread.
+      // Without the transfer those objects become invisible to the garbage
+      // collector the moment this pool is unregistered, so the next GC cycle
+      // would reclaim their underlying _aterm nodes.
+      if (g_main_thread_pool != nullptr)
+      {
+        for (const aterm_core* v : *m_variables)
+        {
+          if (v != nullptr)
+          {
+            g_main_thread_pool->register_variable(const_cast<aterm_core*>(v));
+          }
+        }
+        for (const aterm_container* c : *m_containers)
+        {
+          if (c != nullptr)
+          {
+            g_main_thread_pool->register_container(
+                const_cast<aterm_container*>(c));
+          }
+        }
+      }
+      // We need to prematurely unregister this thread pool since we are going
+      // to delete the reference-variable hashtables.
       m_thread_interface.unregister();
       delete m_variables;
       delete m_containers;
