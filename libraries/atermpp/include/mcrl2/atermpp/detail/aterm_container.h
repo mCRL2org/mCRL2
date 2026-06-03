@@ -10,8 +10,11 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_CONTAINER_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_CONTAINER_H
 
+#include <concepts>
 #include <stack>
 #include <type_traits>
+#include <utility>
+#include <vector>
 #include "mcrl2/atermpp/aterm_core.h"
 #include "mcrl2/atermpp/detail/aterm_core.h"
 #include "mcrl2/atermpp/detail/aterm_pool_storage_implementation.h"
@@ -26,18 +29,17 @@ inline void mark_term(const aterm_core& t, term_mark_stack& todo)
 {
   if (t.defined())
   {
-    detail::mark_term(*atermpp::detail::address(t),todo);
+    detail::mark_term(*atermpp::detail::address(t), todo);
   }
 }
-
 
 namespace detail
 {
 
 /// \brief Provides safe storage of unprotected_aterm_core instances in a container by marking
 ///        them during garbage collection.
-/// 
-/// \details Can not be inherited since it is being registered during construction and the 
+///
+/// \details Can not be inherited since it is being registered during construction and the
 ///          vptr is being updated by inherited classes otherwise.
 class aterm_container final : private mcrl2::utilities::noncopyable
 {
@@ -45,13 +47,13 @@ public:
   aterm_container(std::function<void(term_mark_stack&)> mark_func, std::function<std::size_t()> size_func);
   ~aterm_container();
 
-  /// \brief Ensure that all the terms in the containers.
+  /// \brief Mark all terms held by this container.
   void mark(term_mark_stack& todo) const
   {
     mark_func(todo);
   }
 
-  inline std::size_t size() const 
+  std::size_t size() const
   {
     return size_func();
   }
@@ -61,341 +63,303 @@ private:
   std::function<std::size_t()> size_func;
 };
 
-template<class T, typename Type = void >  
-class reference_aterm;
+// Forward declaration.
+template<typename T>
+struct markable_aterm;
 
-
-template<class T>
-struct is_pair_helper : public std::false_type
-{};
-
-template<class T, class U>
-struct is_pair_helper<std::pair<T,U> > : public std::true_type
-{};
-
-template <class T>
-struct is_pair : public is_pair_helper<std::decay_t<T>>
-{};
-
-template<class T>
-struct is_reference_aterm_helper : public std::false_type
-{};
-
-template<class T>
-struct is_reference_aterm_helper<reference_aterm<T> > : public std::true_type
-{};
-
-template <class T>
-struct is_reference_aterm : public is_reference_aterm_helper<std::decay_t<T>>
-{};
-
-/// \brief Base class that should not be used. 
-template<class T, typename Type >
-class reference_aterm
+/// \brief Concept for types that support GC marking.
+/// \details A Markable type provides void mark(term_mark_stack&) const that recursively marks
+///          all aterm_core instances it contains.
+template<typename T>
+concept Markable = requires(const T& t, term_mark_stack& todo)
 {
-protected:
-  using T_type = std::decay_t<T>;
-  T_type m_t;
-public:
-  reference_aterm() = default;
+  { t.mark(todo) } -> std::same_as<void>;
+};
 
-  reference_aterm(const T_type& other) noexcept
-   : m_t(other)
-  { }
- 
-  template <class... Args>
-  reference_aterm(Args&&... args) noexcept
-   : m_t(std::forward<Args>(args)...)
-  { }
- 
-  template <class... Args>
-  reference_aterm(const Args&... args) noexcept
-   : m_t(args...)
-  { }
- 
-  reference_aterm(T_type&& other) noexcept
-   : m_t(std::forward(other))
+/// \brief Type trait to detect markable_aterm instantiations.
+template<typename T>
+struct is_markable_aterm : std::false_type
+{};
+
+template<typename T>
+struct is_markable_aterm<markable_aterm<T>> : std::true_type
+{};
+
+/// \brief Returns T if T is already a markable_aterm<U>, otherwise markable_aterm<T>.
+/// \details Prevents double-wrapping when T is already a markable_aterm.
+template<typename T>
+using markable_t = std::conditional_t<is_markable_aterm<std::decay_t<T>>::value, T, markable_aterm<T>>;
+
+// ---- Specialization: fundamental types ----
+
+/// \brief Wrapper for fundamental types (int, bool, etc.) — mark is a no-op.
+template<typename T>
+  requires std::is_fundamental_v<std::decay_t<T>>
+struct markable_aterm<T>
+{
+private:
+  using stored_type = std::decay_t<T>;
+  stored_type m_t{};
+
+public:
+  markable_aterm() noexcept = default;
+
+  markable_aterm(const T& other) noexcept
+    : m_t(other)
   {}
 
-  const reference_aterm& operator=(const T_type& other) noexcept
+  markable_aterm(stored_type&& other) noexcept
+    : m_t(std::move(other))
+  {}
+
+  markable_aterm& operator=(const T& other) noexcept
   {
-    static_assert(std::is_base_of_v<aterm_core, T_type>);
-    m_t=other;
-    return m_t;
+    m_t = other;
+    return *this;
   }
 
-  const reference_aterm& operator=(T_type&& other) noexcept
-  {
-    static_assert(std::is_base_of_v<aterm_core, T_type>);
-    m_t = std::forward(other);
-    return m_t;
-  }
-
-  /// Converts implicitly to a protected term of type T.
-  operator T_type&()
-  {
-    return m_t;
-  }
-
-  operator const T_type&() const
-  {
-    return m_t;
-  }
-
-  /// For types that are not a std::pair, or a type convertible to an aterm_core
-  /// it is necessary that a dedicated mark function is provided that calls mark_term
-  /// on all aterm_core types in the class T, when this class is stored in an atermpp container.
-  /// See below for an example, where the code is given for pairs, aterms and built in types.
-  /// The container is traversed during garbage collection, such that all terms in these
-  /// containers are protected individually, without putting them all explicitly in 
-  /// protection sets. 
-  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
-  {
-    m_t.mark(todo);
-  }
-
-};
-
-/// \brief A reference aterm_core applied to fundamental types, such as int, bool. Nothing needs to happen with such
-///       terms. But a special class is needed, because such types are not classes, and we cannot derive from it.
-template <class T>
-class reference_aterm<T, std::enable_if_t<std::is_fundamental_v<std::decay_t<T>>>>
-{
-protected:
-  using T_type = std::decay_t<T>;
-  T_type m_t;
-
-public:
-
-  /// \brief Default constructor.
-  reference_aterm() noexcept = default;
-  
-  reference_aterm(const T& other) noexcept
-   : m_t(other)
-  { }
-  
-  reference_aterm(T_type&& other) noexcept  
-   : m_t(std::move(other))
-  {} 
-  
-  const T& operator=(const T& other) noexcept
-  {
-    m_t=other;
-    return m_t;
-  }
-
-  const T& operator=(T&& other) noexcept
+  markable_aterm& operator=(T&& other) noexcept
   {
     m_t = std::move(other);
-    return m_t;
+    return *this;
   }
 
-  /// Converts implicitly to a protected term of type T.
-  operator T&()
-  {
-    return m_t;
-  } 
+  operator T&() noexcept { return m_t; }
+  operator const T&() const noexcept { return m_t; }
 
-  operator const T&() const
-  {
-    return m_t;
-  }
+  void mark(term_mark_stack& /* todo */) const noexcept {}
 
-  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& /* todo */) const
-  {
-    /* Do nothing */
-  } 
-
-  bool operator==(const reference_aterm& other) const
-  {
-    return m_t==other.m_t;
-  }
-
+  bool operator==(const markable_aterm& other) const { return m_t == other.m_t; }
 };
 
-/// \brief An unprotected term that is stored inside an aterm_container.
-template <typename T>
-class reference_aterm<T, std::enable_if_t<std::is_base_of_v<aterm_core, T>>> : public unprotected_aterm_core
-{
-public:
-  /// \brief Default constructor.
-  reference_aterm() noexcept = default;
+// ---- Specialization: aterm_core-derived types ----
 
-  explicit reference_aterm(const unprotected_aterm_core& other) noexcept
+/// \brief Unprotected wrapper for aterm_core-derived types stored inside an aterm container.
+/// \details Stores a raw _aterm* without registering it in the GC variable root set.
+///          The owning container registers once via aterm_container instead.
+template<typename T>
+  requires std::is_base_of_v<aterm_core, T>
+struct markable_aterm<T> : unprotected_aterm_core
+{
+  /// \brief Default constructor.
+  markable_aterm() noexcept = default;
+
+  explicit markable_aterm(const unprotected_aterm_core& other) noexcept
   {
     m_term = detail::address(other);
   }
 
-  reference_aterm(const T& other) noexcept
-   : unprotected_aterm_core(detail::address(other))
-  { }
+  markable_aterm(const T& other) noexcept
+    : unprotected_aterm_core(detail::address(other))
+  {}
 
-  reference_aterm(unprotected_aterm_core&& other) noexcept
-   : unprotected_aterm_core(detail::address(other))
-  {
-  }
+  markable_aterm(unprotected_aterm_core&& other) noexcept
+    : unprotected_aterm_core(detail::address(other))
+  {}
 
-  const reference_aterm& operator=(const unprotected_aterm_core& other) noexcept;
-  const reference_aterm& operator=(unprotected_aterm_core&& other) noexcept;
+  markable_aterm& operator=(const unprotected_aterm_core& other) noexcept;
+  markable_aterm& operator=(unprotected_aterm_core&& other) noexcept;
 
-  /// Converts implicitly to a protected term of type T.
-  operator T&()
+  operator T&() noexcept
   {
     static_assert(std::is_base_of_v<aterm_core, T>, "Term must be derived from an aterm_core");
-    static_assert(sizeof(T)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
+    static_assert(sizeof(T) == sizeof(std::size_t), "Term derived from an aterm_core must not have extra fields");
     return reinterpret_cast<T&>(*this);
   }
 
-  operator const T&() const
+  operator const T&() const noexcept
   {
     static_assert(std::is_base_of_v<aterm_core, T>, "Term must be derived from an aterm_core");
-    static_assert(sizeof(T)==sizeof(std::size_t),"Term derived from an aterm_core must not have extra fields");
+    static_assert(sizeof(T) == sizeof(std::size_t), "Term derived from an aterm_core must not have extra fields");
     return reinterpret_cast<const T&>(*this);
-
   }
 
-  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
+  void mark(term_mark_stack& todo) const
   {
     if (defined())
     {
-      mark_term(*m_term,todo);
+      mark_term(*m_term, todo);
     }
   }
 };
 
-template <typename T>
-typename std::pair<std::conditional_t<is_reference_aterm<typename T::first_type>::value,
-                       typename T::first_type,
-                       reference_aterm<typename T::first_type>>,
-    std::conditional_t<is_reference_aterm<typename T::second_type>::value,
-        typename T::second_type,
-        reference_aterm<typename T::second_type>>>
-reference_aterm_pair_constructor_helper(const T& other)
+// ---- Specialization: std::pair<F, S> ----
+
+/// \brief Wrapper for std::pair — recursively marks both elements.
+/// \details Each element is stored as markable_t<F> / markable_t<S> to avoid double-wrapping.
+///          Because markable_t<T> always provides mark(), the mark() implementations below
+///          call it directly without any if-constexpr dispatch.
+template<typename F, typename S>
+struct markable_aterm<std::pair<F, S>> : std::pair<markable_t<F>, markable_t<S>>
 {
-  if constexpr (is_reference_aterm<typename T::first_type>::value && is_reference_aterm<typename T::second_type>::value)
-  {
-    return other; 
-  }
-  else if constexpr (is_reference_aterm<typename T::first_type>::value && !is_reference_aterm<typename T::second_type>::value)
-  {
-    return std::pair(other.first, reference_aterm<typename T::second_type>(other.second));
-  }
-  else if constexpr (!is_reference_aterm<typename T::first_type>::value && is_reference_aterm<typename T::second_type>::value)
-  {
-    return std::pair(reference_aterm<typename T::first_type>(other.first),other.second);
-  }
-  else 
-  { 
-    static_assert(!is_reference_aterm<typename T::first_type>::value && 
-                  !is_reference_aterm<typename T::second_type>::value,"Logic error");
-  
-    return std::pair(reference_aterm<typename T::first_type>(other.first), reference_aterm<typename T::second_type>(other.second));
-  }
-}
-
-
-
-
-/// \brief A pair that is stored into an atermpp container. This class takes care that all aterms that occur (recursively) inside
-///        such a pair are marked, whears non-aterm_core types are not marked.
-template <typename T>
-class reference_aterm<T, std::enable_if_t<is_pair<T>::value>>
-    : public std::pair<std::conditional_t<is_reference_aterm<typename T::first_type>::value,
-                           typename T::first_type,
-                           reference_aterm<typename T::first_type>>,
-          std::conditional_t<is_reference_aterm<typename T::second_type>::value,
-              typename T::second_type,
-              reference_aterm<typename T::second_type>>>
-{
-protected:
-  using super = std::pair<std::conditional_t<is_reference_aterm<typename T::first_type>::value,
-                              typename T::first_type,
-                              reference_aterm<typename T::first_type>>,
-      std::conditional_t<is_reference_aterm<typename T::second_type>::value,
-          typename T::second_type,
-          reference_aterm<typename T::second_type>>>;
-  using std_pair = T;
+private:
+  using std_pair = std::pair<F, S>;
+  using super = std::pair<markable_t<F>, markable_t<S>>;
 
 public:
-  /// \brief Default constructor.
-  reference_aterm() = default;
+  markable_aterm() = default;
+  markable_aterm(const markable_aterm&) = default;
+  markable_aterm(markable_aterm&&) = default;
+  markable_aterm& operator=(const markable_aterm&) = default;
+  markable_aterm& operator=(markable_aterm&&) = default;
 
-  reference_aterm(const reference_aterm& other)
-    : super()
-  {
-    *this = other;
-  }
-
-  reference_aterm(const std_pair& other)
-    : super(reference_aterm_pair_constructor_helper(other))
+  markable_aterm(const std_pair& other)
+    : super(markable_t<F>(other.first), markable_t<S>(other.second))
   {}
 
-  reference_aterm(std_pair&& other)
-   : super(reference_aterm<typename T::first_type >(std::move(other.first)),
-           reference_aterm<typename T::second_type>(std::move(other.second)))
-  {} 
+  markable_aterm(std_pair&& other)
+    : super(markable_t<F>(std::move(other.first)), markable_t<S>(std::move(other.second)))
+  {}
 
-  reference_aterm& operator=(const reference_aterm& other)
-  {
-    super::first=other.first;
-    super::second=other.second;
-    return *this;
-  }
-
-  const reference_aterm& operator=(const std_pair& other)
-  {
-    super::first=other.first;
-    super::second=other.second;
-    return *this;
-  }
-
-  reference_aterm& operator=(reference_aterm&& other) noexcept
-  {
-    super::first = std::move(other.first);
-    super::second = std::move(other.second);
-    return *this;
-  }
-
-  const reference_aterm& operator=(std_pair&& other)
+  markable_aterm& operator=(const std_pair& other)
   {
     super::first = other.first;
     super::second = other.second;
     return *this;
   }
 
+  markable_aterm& operator=(std_pair&& other)
+  {
+    super::first = std::move(other.first);
+    super::second = std::move(other.second);
+    return *this;
+  }
 
-  /// Converts implicitly to a protected term of type std::pair<T,U>..
   operator std_pair&()
   {
-    return reinterpret_cast<std_pair>(*this);
+    return *reinterpret_cast<std_pair*>(this);
   }
 
   operator const std_pair&() const
   {
-    return *reinterpret_cast<std_pair const*>(this);
+    return *reinterpret_cast<const std_pair*>(this);
   }
 
-  void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
+  void mark(term_mark_stack& todo) const
   {
-    if constexpr (is_reference_aterm<typename T::first_type>::value)
-    {
-      super::first.mark(todo);
-    }
-    else 
-    {
-      reference_aterm<typename T::first_type>(super::first).mark(todo);
-    }
-
-    if constexpr (is_reference_aterm<typename T::second_type>::value)
-    {
-      super::second.mark(todo);
-    }
-    else 
-    {
-      reference_aterm<typename T::second_type>(super::second).mark(todo);
-    }
+    super::first.mark(todo);
+    super::second.mark(todo);
   }
-}; 
+};
+
+// ---- Specialization: std::vector<T, Alloc> ----
+
+/// \brief Wrapper for std::vector — recursively marks all elements.
+/// \details Elements are stored as markable_t<T> to avoid double-wrapping.
+template<typename T, typename Alloc>
+struct markable_aterm<std::vector<T, Alloc>>
+  : std::vector<markable_t<T>, typename std::allocator_traits<Alloc>::template rebind_alloc<markable_t<T>>>
+{
+private:
+  using stored_type = markable_t<T>;
+  using stored_alloc = typename std::allocator_traits<Alloc>::template rebind_alloc<stored_type>;
+  using std_vector = std::vector<T, Alloc>;
+  using super = std::vector<stored_type, stored_alloc>;
+
+public:
+  markable_aterm() = default;
+
+  markable_aterm(const std_vector& other)
+  {
+    this->reserve(other.size());
+    for (const auto& v : other)
+      this->emplace_back(v);
+  }
+
+  markable_aterm(std_vector&& other)
+  {
+    this->reserve(other.size());
+    for (auto& v : other)
+      this->emplace_back(std::move(v));
+  }
+
+  markable_aterm& operator=(const std_vector& other)
+  {
+    this->clear();
+    this->reserve(other.size());
+    for (const auto& v : other)
+      this->emplace_back(v);
+    return *this;
+  }
+
+  markable_aterm& operator=(std_vector&& other)
+  {
+    this->clear();
+    this->reserve(other.size());
+    for (auto& v : other)
+      this->emplace_back(std::move(v));
+    return *this;
+  }
+
+  operator std_vector&()
+  {
+    return *reinterpret_cast<std_vector*>(this);
+  }
+
+  operator const std_vector&() const
+  {
+    return *reinterpret_cast<const std_vector*>(this);
+  }
+
+  void mark(term_mark_stack& todo) const
+  {
+    for (const auto& element : *this)
+      element.mark(todo);
+  }
+};
+
+// ---- Primary template: user-defined Markable types ----
+
+/// \brief Wrapper for user-defined types that provide their own mark() implementation.
+/// \details T must satisfy the Markable concept by providing void mark(term_mark_stack&) const.
+///          This is the extension point for types that contain aterm_core instances but are
+///          not fundamental, aterm-derived, std::pair, or std::vector.
+template<typename T>
+struct markable_aterm
+{
+private:
+  using stored_type = std::decay_t<T>;
+  stored_type m_t;
+
+public:
+  markable_aterm() = default;
+
+  markable_aterm(const stored_type& other) noexcept
+    : m_t(other)
+  {}
+
+  template<typename... Args>
+  markable_aterm(Args&&... args) noexcept
+    : m_t(std::forward<Args>(args)...)
+  {}
+
+  markable_aterm& operator=(const stored_type& other) noexcept
+  {
+    m_t = other;
+    return *this;
+  }
+
+  markable_aterm& operator=(stored_type&& other) noexcept
+  {
+    m_t = std::move(other);
+    return *this;
+  }
+
+  operator stored_type&() { return m_t; }
+  operator const stored_type&() const { return m_t; }
+
+  void mark(term_mark_stack& todo) const
+  {
+    static_assert(Markable<stored_type>,
+      "T must be a fundamental type, an aterm_core-derived type, a std::pair, "
+      "a std::vector, or provide void mark(term_mark_stack&) const");
+    m_t.mark(todo);
+  }
+};
+
+/// \brief Backward-compatible alias for markable_aterm.
+template<typename T>
+using reference_aterm = markable_aterm<T>;
 
 template<typename T, typename Allocator>
 class aterm_allocator
@@ -405,8 +369,6 @@ public:
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;
 
-  //static_assert(std::is_same_v<value_type, typename Allocator::value_type>, "Types should be equal");
-
   template <class U>
   struct rebind
   {
@@ -415,15 +377,13 @@ public:
 
   aterm_allocator() = default;
 
-  /// \details The unused parameter is to make the interface equivalent
-  ///          to the allocator.
+  /// \details The unused parameter is to make the interface equivalent to the allocator.
   T* allocate(size_type n, const void* hint = nullptr)
   {
     return m_allocator.allocate(n, hint);
   }
 
-  /// \details The unused parameter is to make the interface equivalent
-  ///          to the allocator.
+  /// \details The unused parameter is to make the interface equivalent to the allocator.
   void deallocate(T* p, size_type n);
 
   // Move assignment and construction is possible.
@@ -438,45 +398,32 @@ template<typename Container>
 class generic_aterm_container
 {
 public:
-  /// \brief Constructor
+  /// \brief Constructor. Registers the container with the GC.
   generic_aterm_container(const Container& container)
-   : m_container([&container](term_mark_stack& todo) {   
-      // Marking contained terms.       
-      for (const typename Container::value_type& element: container) 
-      {
-        static_assert(is_reference_aterm<reference_aterm<typename Container::value_type> >::value);
-        if constexpr (is_reference_aterm<typename Container::value_type>::value)
-        {
-          static_assert(is_reference_aterm<typename Container::value_type >::value);
-          element.mark(todo);
-        }
-        else
-        {
-          static_assert(!is_reference_aterm<typename Container::value_type >::value);
-          reference_aterm<typename Container::value_type>(element).mark(todo);
-        }
-      }
-    },
-    [&container]() -> std::size_t {  
-      // Return the number of elements in the container.
-      return container.size();
-     })
+    : m_container(
+        [&container](term_mark_stack& todo) {
+          for (const auto& element : container)
+          {
+            if constexpr (Markable<typename Container::value_type>)
+            {
+              element.mark(todo);
+            }
+            else
+            {
+              markable_aterm<typename Container::value_type>(element).mark(todo);
+            }
+          }
+        },
+        [&container]() -> std::size_t { return container.size(); })
   {}
 
-  // Container is a reference so unclear what to do in these cases.
+  // Container is a reference so copy/move construction is not meaningful.
   generic_aterm_container(const generic_aterm_container&) = delete;
   generic_aterm_container(generic_aterm_container&&) = delete;
 
-  // It is fine here if the container gets updated, but the functions stay the same.
-  generic_aterm_container& operator=(const generic_aterm_container&) 
-  {
-    return *this;
-  };
-
-  generic_aterm_container& operator=(generic_aterm_container&) 
-  {
-    return *this;
-  }
+  // The captured reference stays valid; assignment is a no-op.
+  generic_aterm_container& operator=(const generic_aterm_container&) { return *this; }
+  generic_aterm_container& operator=(generic_aterm_container&&) { return *this; }
 
 protected:
   aterm_container m_container;
@@ -489,10 +436,10 @@ namespace std
 {
 
 /// \brief specialization of the standard std::hash function.
-template<class T>
-struct hash<atermpp::detail::reference_aterm<T>>
+template<typename T>
+struct hash<atermpp::detail::markable_aterm<T>>
 {
-  std::size_t operator()(const atermpp::detail::reference_aterm<T>& t) const
+  std::size_t operator()(const atermpp::detail::markable_aterm<T>& t) const
   {
     return std::hash<T>()(t);
   }
