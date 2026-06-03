@@ -30,16 +30,16 @@ namespace atermpp
 /// \brief A unordered_map class in which aterms can be stored. 
 template < class Key, 
            class T,
-           class Hash = std::hash<detail::reference_aterm<Key> >,
-           class Pred = std::equal_to<detail::reference_aterm<Key> >,
-           class Alloc = std::allocator< std::pair<const detail::reference_aterm<Key>, detail::reference_aterm<T> > > >
+           class Hash = std::hash<detail::markable_aterm<Key> >,
+           class Pred = std::equal_to<detail::markable_aterm<Key> >,
+           class Alloc = std::allocator< std::pair<const detail::markable_aterm<Key>, detail::markable_aterm<T> > > >
 
-class unordered_map : public std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc >
+class unordered_map : public std::unordered_map< detail::markable_aterm<Key>, detail::markable_aterm<T>, Hash, Pred, Alloc >
 {
 protected:
-  using super = std::unordered_map<detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc>;
+  using super = std::unordered_map<detail::markable_aterm<Key>, detail::markable_aterm<T>, Hash, Pred, Alloc>;
 
-  detail::generic_aterm_container<std::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc > > container_wrapper;
+  detail::generic_aterm_container<std::unordered_map< detail::markable_aterm<Key>, detail::markable_aterm<T>, Hash, Pred, Alloc > > container_wrapper;
 
 public:
   
@@ -68,6 +68,11 @@ public:
   /// \brief Constructor.
   explicit unordered_map (size_type n, const allocator_type& alloc = allocator_type())
    : super::unordered_map(n, alloc),
+     container_wrapper(*this)     
+  {}
+
+  unordered_map (size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
+   : super::unordered_map(n, detail::markable_aterm<std::pair<const Key, T>>(val), alloc),
      container_wrapper(*this)     
   {}
 
@@ -228,19 +233,19 @@ namespace utilities
 /// \brief A unordered_map class in which aterms can be stored. 
 template < class Key,
   class T,
-  class Hash = std::hash<detail::reference_aterm<Key> >,
-  class Pred = std::equal_to<detail::reference_aterm<Key> >,
-  class Alloc = std::allocator< std::pair<const detail::reference_aterm<Key>, detail::reference_aterm<T> > >,
+  class Hash = std::hash<detail::markable_aterm<Key> >,
+  class Pred = std::equal_to<detail::markable_aterm<Key> >,
+  class Alloc = std::allocator< std::pair<const detail::markable_aterm<Key>, detail::markable_aterm<T> > >,
   bool ThreadSafe = false >
 
-class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, 
-                                                              detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false >
+class unordered_map : public mcrl2::utilities::unordered_map< detail::markable_aterm<Key>, 
+                                                              detail::markable_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false >
 {
   protected:
     using super = mcrl2::utilities::
-        unordered_map<detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false>;
+        unordered_map<detail::markable_aterm<Key>, detail::markable_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false>;
 
-    detail::generic_aterm_container<mcrl2::utilities::unordered_map< detail::reference_aterm<Key>, detail::reference_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false > > container_wrapper;
+    detail::generic_aterm_container<mcrl2::utilities::unordered_map< detail::markable_aterm<Key>, detail::markable_aterm<T>, Hash, Pred, Alloc, ThreadSafe, false > > container_wrapper;
 
   public:
 
@@ -267,6 +272,11 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     /// \brief Constructor.
     explicit unordered_map(size_type n, const allocator_type& alloc = allocator_type())
       : super::unordered_map(n, alloc),
+      container_wrapper(*this)
+    {}
+
+    unordered_map(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
+      : super::unordered_map(n, detail::markable_aterm<std::pair<const Key, T>>(val), alloc),
       container_wrapper(*this)
     {}
 
