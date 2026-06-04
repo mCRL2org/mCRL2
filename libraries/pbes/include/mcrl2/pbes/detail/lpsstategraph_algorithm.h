@@ -18,10 +18,6 @@
 #include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 
-
-
-
-
 namespace mcrl2::pbes_system::detail {
 
 class lpsstategraph_algorithm;
@@ -117,15 +113,18 @@ class lpsstategraph_algorithm: public local_reset_variables_algorithm
       : local_reset_variables_algorithm(construct_stategraph_pbes(lpsspec), options), m_original_lps(lpsspec)
     {}
 
-    void run() override
+    void execute_postprocessing() override
     {
-      
-      stategraph_local_algorithm::run(); // NOLINT(bugprone-parent-virtual-call)
       m_transformed_lps = m_original_lps;
       compute_occurring_data_parameters();
       start_timer("reset_variables_to_original");
       reset_variables_to_original(m_transformed_lps);
       finish_timer("reset_variables_to_original");
+    }
+
+    const lps::specification& original_lps() const
+    {
+      return m_original_lps;
     }
 
     const lps::specification& result() const
@@ -195,9 +194,5 @@ void lps_reset_variables(lpsstategraph_algorithm& algorithm,
 }
 
 } // namespace mcrl2::pbes_system::detail
-
-
-
-
 
 #endif // MCRL2_PBES_DETAIL_LPSSTATEGRAPH_ALGORITHM_H

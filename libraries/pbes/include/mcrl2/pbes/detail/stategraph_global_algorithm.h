@@ -16,10 +16,6 @@
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_global_graph.h"
 
-
-
-
-
 namespace mcrl2::pbes_system::detail {
 
 /// \brief Algorithm class for the global variant of the stategraph algorithm
@@ -168,10 +164,8 @@ class stategraph_global_algorithm: public stategraph_algorithm
       : stategraph_algorithm(p, options)
     { }
 
-    /// \brief Computes the control flow graph
-    void run() override
+    void execute_core() override
     {
-      super::run();
       start_timer("compute_global_control_flow_graph");
       compute_global_control_flow_graph();
       finish_timer("compute_global_control_flow_graph");
@@ -184,9 +178,5 @@ class stategraph_global_algorithm: public stategraph_algorithm
 };
 
 } // namespace mcrl2::pbes_system::detail
-
-
-
-
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_ALGORITHM_H
