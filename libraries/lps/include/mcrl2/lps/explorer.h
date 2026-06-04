@@ -36,6 +36,15 @@
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/stochastic_state.h"
 
+#ifdef MCRL2_USE_PROJECTIONS
+#include "mcrl2/lps/explorer_projections.h"
+#endif
+
+#ifdef MCRL2_USE_CONTROL_FLOW
+#include <boost/container/small_vector.hpp>
+#include "mcrl2/lps/explorer_control_flow.h"
+#endif
+
 namespace mcrl2::lps {
 
 template <bool Stochastic, bool Timed, typename Specification>
@@ -90,6 +99,10 @@ class explorer: public abortable
 
     // used by make_timed_state, to avoid needless creation of vectors
     mutable std::vector<data::data_expression> timed_state;
+
+#ifdef MCRL2_USE_CONTROL_FLOW
+    std::vector<cf_graph> m_control_flow_graphs;
+#endif
 
     Specification preprocess(const Specification& lpsspec)
     {
@@ -188,6 +201,69 @@ class explorer: public abortable
       }
     }
 
+#ifdef MCRL2_USE_PROJECTIONS
+    template <typename DataExpressionSequence, typename IndexSequence>
+    void compute_projected_state(
+        lps::state& result,
+        const DataExpressionSequence& next_state,
+        const IndexSequence& I_w,
+        data::mutable_indexed_substitution<>& sigma,
+        const data::rewriter& rewr) const
+    {
+      lps::make_state(
+        result,
+        I_w.begin(),
+        I_w.size(),
+        [&](data::data_expression& target, std::size_t i)
+        {
+          rewr(target, next_state[i], sigma);
+        }
+      );
+    }
+
+    template <typename DataExpressionSequence, typename IndexSequence>
+    void compute_stochastic_projected_state(
+        stochastic_state& result,
+        const stochastic_distribution& distribution,
+        const DataExpressionSequence& next_state,
+        const IndexSequence& I_w,
+        data::mutable_indexed_substitution<>& sigma,
+        const data::rewriter& rewr,
+        data::enumerator_algorithm<>& enumerator) const
+    {
+      result.clear();
+      if (distribution.is_defined())
+      {
+        enumerator.enumerate<enumerator_element>(
+          distribution.variables(),
+          distribution.distribution(),
+          sigma,
+          [&](const enumerator_element& p)
+          {
+            p.add_assignments(distribution.variables(), sigma, rewr);
+            result.probabilities.push_back(p.expression());
+            result.states.emplace_back();
+            compute_projected_state(result.states.back(), next_state, I_w, sigma, rewr);
+            return false;
+          },
+          [](const data::data_expression& x) { return x == data::sort_real::real_zero(); }
+        );
+        data::remove_assignments(sigma, distribution.variables());
+
+        if (m_options.check_probabilities)
+        {
+          check_stochastic_state(result, rewr);
+        }
+      }
+      else
+      {
+        result.probabilities.push_back(data::sort_real::real_one());
+        result.states.emplace_back();
+        compute_projected_state(result.states.back(), next_state, I_w, sigma, rewr);
+      }
+    }
+#endif
+
     /// Rewrite action a, and put it back in place.
     lps::multi_action rewrite_action(
                              const lps::multi_action& a,
@@ -209,7 +285,7 @@ class explorer: public abortable
                                                                      args.end(), 
                                                                      [&](data::data_expression& result, 
                                                                          const data::data_expression& x) -> void
-                                                                                 { rewr(result, x, sigma); })); return;     
+                                                                                 { rewr(result, x, sigma); }));
             }
           ),
           a.has_time() ? rewr(time, sigma) : time
@@ -240,9 +316,71 @@ class explorer: public abortable
       }
     }
 
+#ifdef MCRL2_USE_PROJECTIONS
+    // Generic enumeration primitive.
+    // The callback determines whether solutions are:
+    //  - consumed immediately,
+    //  - stored in an enumeration cache, or
+    //  - transformed into projected transitions.
+    template <typename EmitSolution>
+    void enumerate_solutions(
+      const explorer_summand& summand,
+      data::mutable_indexed_substitution<>& sigma,
+      data::rewriter& rewr,
+      data::data_expression& condition,
+      data::enumerator_algorithm<>& enumerator,
+      EmitSolution emit_solution
+    )
+    {
+      rewr(condition, summand.condition, sigma);
+      if (data::is_false(condition))
+      {
+        return;
+      }
+
+      if (summand.variables.empty())
+      {
+        // No enumeration needed
+        check_enumerator_solution(condition, summand, sigma, rewr);
+        emit_solution(data::data_expression_list{});
+      }
+      else
+      {
+        enumerator.enumerate<enumerator_element>(
+          summand.variables,
+          condition,
+          sigma,
+          [&](const enumerator_element& p)
+          {
+            check_enumerator_solution(p.expression(), summand, sigma, rewr);
+            emit_solution(p.assign_expressions(summand.variables, rewr));
+            return false;
+          },
+          data::is_false
+        );
+      }
+    }
+
+    // Projects the current state `x` on the read parameters `I_r`.
+    // * The current state x is encoded in the substitution sigma.
+    // * As a side effect the projected state is assigned to `result`.
+    void project(lps::state& result, const std::vector<std::size_t>& I_r, const data::mutable_indexed_substitution<>& sigma)
+    {
+      lps::make_state(
+        result,
+        I_r.begin(),
+        I_r.size(),
+        [&](data::data_expression& target, std::size_t j)
+        {
+          sigma.apply(m_process_parameters[j], target);
+        }
+      );
+    }
+#endif
+
     // Generates outgoing transitions for a summand, and reports them via the callback function report_transition.
     // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
-    template <typename SummandSequence, typename ReportTransition = utilities::skip>
+    template <bool ReportActions = true, typename SummandSequence, typename ReportTransition = utilities::skip>
     void generate_transitions(
       const explorer_summand& summand,
       const SummandSequence& confluent_summands,
@@ -253,14 +391,237 @@ class explorer: public abortable
       atermpp::aterm key,
       data::enumerator_algorithm<>& enumerator,
       data::enumerator_identifier_generator& id_generator,
+#ifdef MCRL2_USE_CONTROL_FLOW
+      const boost::container::small_vector<std::size_t, 64>& active_cfg_vertices,
+#endif
       ReportTransition report_transition = ReportTransition()
     )
     {
       bool variables_are_assigned_to_sigma=false;
+
+#ifdef MCRL2_USE_CONTROL_FLOW
+      if (m_options.use_control_flow && !m_control_flow_graphs.empty() && !cfg_allows_summand(summand.index, m_control_flow_graphs, active_cfg_vertices))
+      {
+        return;
+      }
+#endif
+
+#ifdef MCRL2_USE_PROJECTIONS
+      auto process_transition =
+        [&](const data::data_expression_list* assignments)
+        {
+          if (assignments)
+          {
+            data::add_assignments(sigma, summand.variables, *assignments);
+            variables_are_assigned_to_sigma = true;
+          }
+
+          if constexpr (Stochastic)
+          {
+            compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
+          }
+          else
+          {
+            compute_state(s1, summand.next_state, sigma, rewr);
+            if (!confluent_summands.empty())
+            {
+              s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
+            }
+          }
+
+          if constexpr (ReportActions)
+          {
+            if (m_options.rewrite_actions)
+            {
+              lps::multi_action a = rewrite_action(summand.multi_action, sigma, rewr);
+              report_transition(a, s1);
+            }
+            else
+            {
+              report_transition(summand.multi_action, s1);
+            }
+          }
+          else
+          {
+            report_transition(s1);
+          }
+
+          if (m_recursive && variables_are_assigned_to_sigma)
+          {
+            data::remove_assignments(sigma, summand.variables);
+            variables_are_assigned_to_sigma = false;
+          }
+        };
+
+      auto enumerate_projected_transitions =
+        [&]()
+        {
+          std::vector<projected_transition> result;
+          // Enumerate all satisfying valuations and compute projected transitions (action, projected state).
+          // Results are stored in the projection cache.
+          enumerate_solutions(
+            summand, sigma, rewr, condition, enumerator,
+            [&](const data::data_expression_list& e)
+            {
+              data::add_assignments(sigma, summand.variables, e);
+              lps::multi_action a = m_options.rewrite_actions ? rewrite_action(summand.multi_action, sigma, rewr) : summand.multi_action;
+
+              if constexpr (Stochastic)
+              {
+                // lps::stochastic_state q;
+                // compute_stochastic_projected_state(q, summand.distribution, summand.next_state, summand.I_w, sigma, rewr, enumerator);
+                // out.emplace_back(a, q);
+                throw mcrl2::runtime_error("A stochastic projection cache has not been implemented yet");
+              }
+              else
+              {
+                lps::state q;
+                compute_projected_state(q, summand.next_state, summand.I_w, sigma, rewr);
+                result.emplace_back(a, q);
+              }
+
+              data::remove_assignments(sigma, summand.variables);
+            }
+          );
+          return result;
+        };
+
+      auto consume_projected_transitions =
+        [&](const projected_transition& t)
+        {
+          const lps::multi_action& a = t.first;
+          const lps::state& q = t.second;
+
+          // reconstruct full state from sigma and the projected write values q
+          state s_y;
+          std::size_t j = 0;
+          lps::make_state(
+            s_y,
+            counting_iterator(0),
+            m_n, // total number of process parameters
+            [&](data::data_expression& r, std::size_t i)
+            {
+              if (j < summand.I_w.size() && summand.I_w[j] == i)
+              {
+                r = q[j++];
+              }
+              else
+              {
+                // reconstruct x[i] from the substitution sigma
+                rewr(r, m_process_parameters[i], sigma);
+              }
+            }
+          );
+
+          if constexpr (!Stochastic)
+          {
+            state_type y = s_y;
+            if (!confluent_summands.empty())
+            {
+              y = find_representative(y, confluent_summands, sigma, rewr, enumerator, id_generator);
+            }
+            if constexpr (utilities::is_applicable<ReportTransition, state_type, void>::value)
+            {
+              report_transition(y);
+            }
+            else
+            {
+              report_transition(a, y);
+            }
+          }
+          else
+          {
+            // Convert reconstructed state to a Dirac stochastic state.
+            state_type y;
+            y.clear();
+            y.probabilities.push_back(data::sort_real::real_one());
+            y.states.push_back(s_y);
+            if constexpr (utilities::is_applicable<ReportTransition, state_type, void>::value)
+            {
+              report_transition(y);
+            }
+            else
+            {
+              report_transition(a, y);
+            }
+          }
+        };
+#endif
+
       if (!m_recursive)
       {
         id_generator.clear();
       }
+
+#ifdef MCRL2_USE_PROJECTIONS
+      if (m_options.use_projections && !summand.I_r.empty())
+      {
+        lps::state key;
+        project(key, summand.I_r, sigma);
+        utilities::shared_guard g = atermpp::detail::g_thread_term_pool().lock_shared();
+
+        auto it = summand.projection_cache.find(key);
+        if (it == summand.projection_cache.end())
+        {
+          g.unlock_shared();
+
+          std::vector<projected_transition> projected = enumerate_projected_transitions();
+          it = summand.projection_cache.emplace(key, std::move(projected)).first;
+        }
+        else
+        {
+          g.unlock_shared();
+        }
+
+        for (const projected_transition& t : it->second)
+        {
+          consume_projected_transitions(t);
+        }
+      }
+      else if (summand.cache_strategy == caching::none)
+      {
+        // Enumerate and immediately consume all satisfying valuations (no caching, no projection).
+        enumerate_solutions(
+          summand, sigma, rewr, condition, enumerator,
+          [&](const data::data_expression_list& e)
+          {
+            process_transition(&e);
+          }
+        );
+      }
+      else
+      {
+        summand_cache_map& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
+        utilities::shared_guard g = atermpp::detail::g_thread_term_pool().lock_shared();
+
+        auto q = cache.find(detail::cheap_cache_key(sigma, summand.gamma));
+        if (q == cache.end())
+        {
+          g.unlock_shared();
+
+          atermpp::term_list<data::data_expression_list> solutions;
+          // Enumerate all satisfying valuations for this summand and store them in the cache.
+          enumerate_solutions(
+            summand, sigma, rewr, condition, enumerator,
+            [&](const data::data_expression_list& e)
+            {
+              solutions.push_front(e);
+            }
+          );
+          summand.compute_key(key, sigma);
+          q = cache.insert({key, solutions}).first;
+        }
+        else
+        {
+          g.unlock_shared();
+        }
+
+        for (const auto& e : static_cast<atermpp::term_list<data::data_expression_list>&>(q->second))
+        {
+          process_transition(e.empty() ? nullptr : &e);
+        }
+      }
+#else
       if (summand.cache_strategy == caching::none)
       {
         rewr(condition, summand.condition, sigma);
@@ -282,12 +643,7 @@ class explorer: public abortable
                 s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator); 
               }
             }
-            // Check whether report transition only needs a state, and no action.
-            if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
-            {
-              report_transition(s1);
-            }
-            else
+            if constexpr (ReportActions)
             {
               if (m_options.rewrite_actions)
               {
@@ -298,6 +654,10 @@ class explorer: public abortable
               {
                 report_transition(summand.multi_action,s1);
               }
+            }
+            else
+            {
+              report_transition(s1);
             }
           }
           else // There are variables to be enumerated.
@@ -310,7 +670,7 @@ class explorer: public abortable
                           check_enumerator_solution(p.expression(), summand, sigma, rewr);
                           p.add_assignments(summand.variables, sigma, rewr);
                           variables_are_assigned_to_sigma=true;
-                          state_type s1;
+                          state_type s1; // TODO: wasn't the redundant parameter s1 added to the interface to avoid this declaration?
                           if constexpr (Stochastic)
                           {
                             compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
@@ -328,12 +688,7 @@ class explorer: public abortable
                             data::remove_assignments(sigma, summand.variables);
                             variables_are_assigned_to_sigma=false;
                           }
-                          // Check whether report transition only needs a state, and no action.
-                          if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
-                          {
-                            report_transition(s1);
-                          }
-                          else 
+                          if constexpr (ReportActions)
                           {
                             if (m_options.rewrite_actions)
                             {
@@ -345,6 +700,10 @@ class explorer: public abortable
                               report_transition(summand.multi_action,s1);
                             }
                           }
+                          else
+                          {
+                            report_transition(s1);
+                          }
                           return false;
                         },
                         data::is_false
@@ -355,8 +714,8 @@ class explorer: public abortable
       else
       {
         summand_cache_map& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
-        // The result of find is sometimes compared with the "end()" below, where the end() belongs to 
-        // the cache which is resized in the meantime. The lock is needed to avoid this premature resizing. 
+        // The result of find is sometimes compared with the "end()" below, where the end() belongs to
+        // the cache which is resized in the meantime. The lock is needed to avoid this premature resizing.
         utilities::shared_guard g=atermpp::detail::g_thread_term_pool().lock_shared();
         summand_cache_map::iterator q = cache.find(detail::cheap_cache_key(sigma, summand.gamma));
         if (q == cache.end())
@@ -367,7 +726,7 @@ class explorer: public abortable
           if (!data::is_false(condition))
           {
             enumerator.enumerate<enumerator_element>(
-                        summand.variables, 
+                        summand.variables,
                         condition,
                         sigma,
                         [&](const enumerator_element& p) {
@@ -407,12 +766,7 @@ class explorer: public abortable
             data::remove_assignments(sigma, summand.variables);
             variables_are_assigned_to_sigma=false;
           }
-          // If report transition does not require a transition, do not calculate it. 
-          if constexpr (utilities::is_applicable<ReportTransition,state_type,void>::value)
-          {
-            report_transition(s1);
-          }
-          else
+          if constexpr (ReportActions)
           {
             if (m_options.rewrite_actions)
             {
@@ -424,9 +778,13 @@ class explorer: public abortable
               report_transition(summand.multi_action,s1);
             }
           }
+          else
+          {
+            report_transition(s1);
+          }
         }
-        
       }
+#endif // !MCRL2_USE_PROJECTIONS
       if (!m_recursive && variables_are_assigned_to_sigma)
       {
         data::remove_assignments(sigma, summand.variables);
@@ -448,6 +806,9 @@ class explorer: public abortable
       atermpp::aterm key;
       std::list<transition> transitions;
       data::add_assignments(sigma, m_process_parameters, s);
+#ifdef MCRL2_USE_CONTROL_FLOW
+      auto active_cfg_vertices = compute_active_cfg_vertices(sigma, m_process_parameters, m_control_flow_graphs);
+#endif
       for (const explorer_summand& summand: regular_summands)
       {
         generate_transitions(
@@ -460,6 +821,9 @@ class explorer: public abortable
           key,
           enumerator,
           id_generator,
+#ifdef MCRL2_USE_CONTROL_FLOW
+          active_cfg_vertices,
+#endif
           [&](const lps::multi_action& a, const state_type& s1)
           {
             if constexpr (Timed)
@@ -500,9 +864,12 @@ class explorer: public abortable
       atermpp::aterm key;
       std::vector<state> result;
       data::add_assignments(sigma, m_process_parameters, s0);
+#ifdef MCRL2_USE_CONTROL_FLOW
+      auto active_cfg_vertices = compute_active_cfg_vertices(sigma, m_process_parameters, m_control_flow_graphs);
+#endif
       for (const explorer_summand& summand: summands)
       {
-        generate_transitions(
+        generate_transitions<false>(
           summand,
           confluent_summands,
           sigma,
@@ -512,6 +879,9 @@ class explorer: public abortable
           key,
           enumerator,
           id_generator,
+#ifdef MCRL2_USE_CONTROL_FLOW
+          active_cfg_vertices,
+#endif
           // [&](const lps::multi_action& /* a */, const state& s1) OLD. Calculates transitions, that are not used. 
           [&](const state& s1)
           {
@@ -556,7 +926,7 @@ class explorer: public abortable
       }
     }
 
-private:
+  private:
     bool is_confluent_tau(const multi_action& a)
     {
       if (a.actions().empty())
@@ -571,13 +941,33 @@ private:
     }
 
   public:
-    explorer(const Specification& lpsspec, const explorer_options& options_, const data::rewriter& rewr)
+    explorer(const Specification& lpsspec, const explorer_options& options_, const data::rewriter& rewr
+#ifdef MCRL2_USE_CONTROL_FLOW
+            , const pbes_system::pbesstategraph_options& stategraph_options = {}
+            , bool compute_marking = false
+#endif
+            )
       : m_options(options_),
         m_global_rewr(rewr),
         m_global_enumerator(m_global_rewr, lpsspec.data(), m_global_rewr, m_global_id_generator, false),
         m_global_lpsspec(preprocess(lpsspec)),
         m_discovered(m_options.number_of_threads)
     {
+#ifdef MCRL2_USE_CONTROL_FLOW
+      if constexpr (!Stochastic)
+      {
+        lps::specification control_flow_lpsspec = lpsspec;
+        m_control_flow_graphs = compute_control_flow_graphs(control_flow_lpsspec, stategraph_options, compute_marking);
+        if (mCRL2logEnabled(log::debug))
+        {
+          for (const cf_graph& G: m_control_flow_graphs)
+          {
+            print_graph(G);
+          }
+        }
+      }
+#endif
+
       const data::variable_list& params = m_global_lpsspec.process().process_parameters();
       m_process_parameters = std::vector<data::variable>(params.begin(), params.end());
       m_n = m_process_parameters.size();
@@ -600,6 +990,18 @@ private:
           m_regular_summands.emplace_back(summand, i, m_global_lpsspec.process().process_parameters(), cache_strategy);
         }
       }
+
+#ifdef MCRL2_USE_PROJECTIONS
+      // Initialize the read/write projections
+      if (m_options.use_projections)
+      {
+        auto [R, W] = compute_read_write_patterns_separated(lpsspec);
+        for (std::size_t i = 0; i < m_regular_summands.size(); ++i)
+        {
+          m_regular_summands[i].set_projection_attributes(R[i], W[i]);
+        }
+      }
+#endif
     }
 
     ~explorer() override = default;
@@ -757,6 +1159,9 @@ private:
       data::data_expression condition;
       atermpp::aterm key;
       state_type state;
+#ifdef MCRL2_USE_CONTROL_FLOW
+      auto active_cfg_vertices = compute_active_cfg_vertices(sigma, m_process_parameters, m_control_flow_graphs);
+#endif
       for (const explorer_summand& summand: m_regular_summands)
       {
         generate_transitions(
@@ -769,6 +1174,9 @@ private:
           key,
           enumerator,
           id_generator,
+#ifdef MCRL2_USE_CONTROL_FLOW
+          active_cfg_vertices,
+#endif
           [&](const lps::multi_action& a, const state_type& d1)
           {
             result.emplace_back(lps::multi_action(a.actions(), a.time()), d1);
@@ -814,6 +1222,9 @@ private:
       compute_state(d0,init,sigma,rewr);
       std::vector<std::pair<lps::multi_action, state_type>> result;
       data::add_assignments(sigma, m_process_parameters, d0);
+#ifdef MCRL2_USE_CONTROL_FLOW
+      auto active_cfg_vertices = compute_active_cfg_vertices(sigma, m_process_parameters, m_control_flow_graphs);
+#endif
       generate_transitions(
         m_regular_summands[i],
         m_confluent_summands,
@@ -823,6 +1234,9 @@ private:
         d0,
         enumerator,
         id_generator,
+#ifdef MCRL2_USE_CONTROL_FLOW
+        active_cfg_vertices,
+#endif
         [&](const lps::multi_action& a, const state_type& d1)
         {
           result.emplace_back(lps::multi_action(a), d1);
