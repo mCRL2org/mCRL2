@@ -15,10 +15,6 @@
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 
-
-
-
-
 namespace mcrl2::pbes_system::detail {
 
 class global_reset_variables_algorithm;
@@ -267,12 +263,8 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         m_simplify(options.simplify)
     {}
 
-    /// \brief Runs the stategraph algorithm
-    /// \param simplify If true, simplify the resulting PBES
-    /// \param apply_to_original_pbes Apply resetting variables to the original PBES instead of the STATEGRAPH one
-    void run() override
+    void execute_core() override
     {
-      super::run();
       start_timer("compute_global_control_flow_marking");
       compute_global_control_flow_marking(m_control_flow_graph);
       finish_timer("compute_global_control_flow_marking");
@@ -395,9 +387,5 @@ pbes_expression reset_variables(global_reset_variables_algorithm& algorithm, con
 }
 
 } // namespace mcrl2::pbes_system::detail
-
-
-
-
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_RESET_VARIABLES_H

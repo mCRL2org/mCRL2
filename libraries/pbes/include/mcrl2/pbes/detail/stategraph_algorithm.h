@@ -16,10 +16,6 @@
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/sequence.h"
 
-
-
-
-
 namespace mcrl2::pbes_system::detail {
 
 inline
@@ -61,53 +57,6 @@ class stategraph_algorithm
     data::rewriter m_datar;
 
     // determines how local control flow parameters are computed
-    //
-    // Keuze uit twee alternatieven voor de berekening van lokale CFPs.
-    // <default>
-    //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-    //          a. source(X,i,n) and target(X,i,n) zijn beide defined, of
-    //          b. copy(X,i,n) is defined en gelijk aan n.
-    //
-    // <alternative>
-    //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-    //          a. copy(X,i,n) is undefined en source(X,i,n) and target(X,i,n) zijn beide defined, of
-    //          b. copy(X,i,n) is defined (en gelijk aan n) en source(X,i,n) en target(X,i,n) zijn beide undefined.
-    //
-    // De tweede definieert in feite een exclusive or, terwijl de eerste een standaard or is.
-    bool m_use_alternative_lcfp_criterion;
-
-    // determines how global control flow parameters are related
-    //
-    // Keuze uit twee alternatieven voor het relateren van CFPs.
-    // <default>
-    //  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
-    //         a. er is een i z.d.d. copy(X, i, n) = m, of
-    //         b. er is een i z.d.d. copy(Y, i, m) = n
-    //
-    // <alternative>
-    //  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
-    //         a. er is een i z.d.d. copy(X, i, n) = m, en target(X, i, m) is ongedefinieerd, of
-    //         b. er is een i z.d.d. copy(Y, i, m) = n en target(Y, i, n) is ongedefinieerd.
-    // Hier zit het verschil er dus in dat we, in het tweede geval, parameters alleen relateren als er een copy is
-    // van de een naar de ander EN de target in dat geval ongedefinieerd is.
-    bool m_use_alternative_gcfp_relation;
-
-    // determines how global control flow parameters are selected
-    //
-    // Keuze voor de selectie van globale CFPs (of globale consistentie eisen).
-    // <default>
-    //  * Een set van CFPs is consistent als voor elke d^X[n], en voor alle Y in bnd(E)\{X} (dus in alle andere vergelijkingen), voor alle i waarvoor geldt pred(phi_Y, i) = X, danwel:
-    //         a. target(Y, i, n) is gedefinieerd, of
-    //         b. copy(Y, i, m) = n voor een of andere globale CFP d^Y[m]
-    // Deze eis is in principe voldoende om globale CFPs te identificeren. Als we echter een strikte scheiding tussen control flow parameters en data parameters willen bewerkstelligen, dan moet hier optioneel de volgende eis aan toegevoegd worden:
-    //
-    // <alternative>
-    //  * Een set van CFPs is consistent als de voorgaande eisen gelden, en bovendien voor elke d^X[n] geldt dat voor alle i waarvoor pred(phi_X, i) = Y != X, als d^X[n] affects data(phi_X, i)[m], dan is d^Y[m] een globale control flow parameter.
-    // Waar de eerste gemarkeerd is als "detect conflicts for parameters of Y in equations of the form X(d) = ... Y(e)"
-    // en de tweede als "detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)".
-    bool m_use_alternative_gcfp_consistency;
-
-    // TODO: remove the three booleans above, since they are also present in m_options
     pbesstategraph_options m_options;
 
     // the local control flow parameters
@@ -253,7 +202,7 @@ class stategraph_algorithm
           {
             for (std::size_t n = 0; n < d_X.size(); n++)
             {
-              if (m_use_alternative_lcfp_criterion)
+              if (m_options.use_alternative_lcfp_criterion)
               {
                 // Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
                 // 1. copy(X,i,n) is undefined en source(X,i,n) and target(X,i,n) zijn beide defined, of
@@ -335,7 +284,7 @@ class stategraph_algorithm
         }
 
         // Detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)
-        if (m_use_alternative_gcfp_consistency)
+        if (m_options.use_alternative_gcfp_consistency)
         {
           for (const stategraph_equation& equation: equations)
           {
@@ -472,7 +421,7 @@ class stategraph_algorithm
             std::size_t m = j.second;
             if (is_GCFP_parameter(X, n) && is_GCFP_parameter(Y, m))
             {
-              if (m_use_alternative_gcfp_relation)
+              if (m_options.use_alternative_gcfp_relation)
               {
                 // Twee parameters zijn alleen gerelateerd als er een copy is van de een naar de ander,
                 // EN dat de target in dat geval ongedefinieerd is (dus we weten echt geen concrete waarde
@@ -794,9 +743,6 @@ class stategraph_algorithm
     /// \brief Constructor.
     stategraph_algorithm(const pbes& p, const pbesstategraph_options& options)
       : m_datar(p.data(), options.rewrite_strategy),
-        m_use_alternative_lcfp_criterion(options.use_alternative_lcfp_criterion),
-        m_use_alternative_gcfp_relation(options.use_alternative_gcfp_relation),
-        m_use_alternative_gcfp_consistency(options.use_alternative_gcfp_consistency),
         m_options(options)
     {
       m_pbes = stategraph_pbes(p, m_datar);
@@ -907,8 +853,15 @@ class stategraph_algorithm
       throw mcrl2::runtime_error("error in compute_values: vertex not found");
     }
 
-    /// \brief Computes the control flow graph
-    virtual void run()
+    // Standard execution flow
+    void run()
+    {
+      execute_preprocessing();
+      execute_core();
+      execute_postprocessing();
+    }
+
+    virtual void execute_preprocessing()
     {
       simplify(m_pbes);
       m_pbes.compute_source_target_copy();
@@ -925,6 +878,9 @@ class stategraph_algorithm
       finish_timer("compute_connected_component_values");
     }
 
+    virtual void execute_core() {}
+    virtual void execute_postprocessing() {}
+
     const stategraph_pbes& get_pbes() const
     {
       return m_pbes;
@@ -935,6 +891,11 @@ class stategraph_algorithm
       return m_GCFP_graph;
     }
 
+    std::vector<local_control_flow_graph>& local_graphs()
+    {
+      return m_local_control_flow_graphs;
+    }
+
     const std::vector<local_control_flow_graph>& local_graphs() const
     {
       return m_local_control_flow_graphs;
@@ -943,8 +904,51 @@ class stategraph_algorithm
 
 } // namespace mcrl2::pbes_system::detail
 
+// Documentation of stategraph options.
+//
+// Keuze uit twee alternatieven voor de berekening van lokale CFPs.
+// <default>
+//  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
+//          a. source(X,i,n) and target(X,i,n) zijn beide defined, of
+//          b. copy(X,i,n) is defined en gelijk aan n.
+//
+// <alternative>
+//  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
+//          a. copy(X,i,n) is undefined en source(X,i,n) and target(X,i,n) zijn beide defined, of
+//          b. copy(X,i,n) is defined (en gelijk aan n) en source(X,i,n) en target(X,i,n) zijn beide undefined.
+//
+// De tweede definieert in feite een exclusive or, terwijl de eerste een standaard or is.
+// bool m_use_alternative_lcfp_criterion;
 
+// determines how global control flow parameters are related
+//
+// Keuze uit twee alternatieven voor het relateren van CFPs.
+// <default>
+//  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
+//         a. er is een i z.d.d. copy(X, i, n) = m, of
+//         b. er is een i z.d.d. copy(Y, i, m) = n
+//
+// <alternative>
+//  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
+//         a. er is een i z.d.d. copy(X, i, n) = m, en target(X, i, m) is ongedefinieerd, of
+//         b. er is een i z.d.d. copy(Y, i, m) = n en target(Y, i, n) is ongedefinieerd.
+// Hier zit het verschil er dus in dat we, in het tweede geval, parameters alleen relateren als er een copy is
+// van de een naar de ander EN de target in dat geval ongedefinieerd is.
+// bool m_use_alternative_gcfp_relation;
 
-
+// determines how global control flow parameters are selected
+//
+// Keuze voor de selectie van globale CFPs (of globale consistentie eisen).
+// <default>
+//  * Een set van CFPs is consistent als voor elke d^X[n], en voor alle Y in bnd(E)\{X} (dus in alle andere vergelijkingen), voor alle i waarvoor geldt pred(phi_Y, i) = X, danwel:
+//         a. target(Y, i, n) is gedefinieerd, of
+//         b. copy(Y, i, m) = n voor een of andere globale CFP d^Y[m]
+// Deze eis is in principe voldoende om globale CFPs te identificeren. Als we echter een strikte scheiding tussen control flow parameters en data parameters willen bewerkstelligen, dan moet hier optioneel de volgende eis aan toegevoegd worden:
+//
+// <alternative>
+//  * Een set van CFPs is consistent als de voorgaande eisen gelden, en bovendien voor elke d^X[n] geldt dat voor alle i waarvoor pred(phi_X, i) = Y != X, als d^X[n] affects data(phi_X, i)[m], dan is d^Y[m] een globale control flow parameter.
+// Waar de eerste gemarkeerd is als "detect conflicts for parameters of Y in equations of the form X(d) = ... Y(e)"
+// en de tweede als "detect conflicts for parameters of X in equations of the form X(d) = ... Y(e)".
+// bool m_use_alternative_gcfp_consistency;
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_ALGORITHM_H
