@@ -15,10 +15,6 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
 
-
-
-
-
 namespace mcrl2::pbes_system::detail {
 
 struct default_rules_predicate
@@ -1137,26 +1133,40 @@ class stategraph_local_algorithm: public stategraph_algorithm
       : stategraph_algorithm(p, options),
         m_cache_marking_updates(options.cache_marking_updates)
     { }
-
-    /// \brief Computes the control flow graph
-    void run() override
+  
+    void execute_core() override
     {
-      super::run();
+      execute_local_graphs_step();
+      execute_belongs_step();
+      execute_extra_graph_step();
+      execute_marking_step();
+    }
 
+    void execute_local_graphs_step()
+    {
       start_timer("compute_local_control_flow_graphs");
       compute_local_control_flow_graphs();
       finish_timer("compute_local_control_flow_graphs");
       print_local_control_flow_graphs();
+    }
 
+    void execute_belongs_step()
+    {
       start_timer("compute_belongs");
       compute_belongs();
       finish_timer("compute_belongs");
       print_belongs();
+    }
 
+    void execute_extra_graph_step()
+    {
       start_timer("compute_extra_local_control_flow_graph");
       compute_extra_local_control_flow_graph();
       finish_timer("compute_extra_local_control_flow_graph");
+    }
 
+    void execute_marking_step()
+    {
       start_timer("compute_control_flow_marking");
       switch (m_options.marking_algorithm)
       {
@@ -1185,9 +1195,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
       print_marking_statistics();
     }
-
-
-
+  
     const std::vector<belongs_relation>& belongs() const
     {
       return m_belongs;
@@ -1195,9 +1203,5 @@ class stategraph_local_algorithm: public stategraph_algorithm
 };
 
 } // namespace mcrl2::pbes_system::detail
-
-
-
-
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_ALGORITHM_H

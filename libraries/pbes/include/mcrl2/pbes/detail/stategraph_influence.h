@@ -14,11 +14,6 @@
 
 #include "mcrl2/pbes/detail/pfnf_pbes.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
-#include <iomanip>
-
-
-
-
 
 namespace mcrl2::pbes_system::detail {
 
@@ -158,9 +153,5 @@ class stategraph_influence_graph_algorithm
   };
 
 } // namespace mcrl2::pbes_system::detail
-
-
-
-
 
 #endif // MCRL2_PBES_DETAIL_STATEGRAPH_INFLUENCE_H
