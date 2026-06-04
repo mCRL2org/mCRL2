@@ -6,9 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lps2lts_parallel.cpp
+/// \file lps2lts.cpp
 /// \brief This tool transforms an .lps file into a labelled transition system.
-///        Optionally, it can be run with multiple treads. 
+///        Optionally, it can be run with multiple treads.
 
 #include <csignal>
 #include <memory>
@@ -20,6 +20,10 @@
 #include "mcrl2/lts/stochastic_lts_builder.h"
 #include "mcrl2/lts/state_space_generator.h"
 
+#ifdef MCRL2_USE_CONTROL_FLOW
+#include "mcrl2/lps/explorer_control_flow.h"
+#endif
+
 using namespace mcrl2;
 using utilities::tools::input_output_tool;
 using utilities::tools::parallel_tool;
@@ -29,10 +33,15 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 {
   using super = parallel_tool<rewriter_tool<input_output_tool>>;
 
-  lps::explorer_options options;
+  lps::explorer_options options{};
   lts::lts_type output_format = lts::lts_none;
   lps::abortable* current_explorer = nullptr;
   std::set<std::string> trace_multiaction_strings;
+
+#ifdef MCRL2_USE_CONTROL_FLOW
+  pbes_system::pbesstategraph_options stategraph_options{};
+  bool compute_marking = false;
+#endif
 
   public:
     lps2lts_tool()
@@ -55,6 +64,12 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       desc.add_option("no-probability-checking", "do not check if probabilities in stochastic specifications have sensible values");
       desc.add_hidden_option("dfs-recursive", "use recursive depth first search for divergence detection");
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
+#ifdef MCRL2_USE_PROJECTIONS
+      desc.add_option("project", "use read/write projections ");
+#endif
+#ifdef MCRL2_USE_CONTROL_FLOW
+      desc.add_option("control-flow", "use control flow based summand pruning");
+#endif
       desc.add_option("todo-max", utilities::make_mandatory_argument("NUM"),
                  "keep at most NUM states in the todo list; this option is only relevant for "
                  "highway search, where NUM is the maximum number of states per level per thread. ");
@@ -111,6 +126,22 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       desc.add_option("save-at-end", "delay saving of the generated LTS until the end. "
                  "This option only applies to .aut and .lts files, which are by default saved on the fly.");
       desc.add_option("no-info", "do not add state label information to OUTFILE. This option only applies to .lts files.");
+
+#ifdef MCRL2_PREPROCESS
+      desc.add_option("preprocess","apply some preprocessing, which sometimes benefits.");
+      desc.add_option("mcrl2file", utilities::make_mandatory_argument<std::string>("FILE"), "A .mcrl2 file");
+#endif
+
+#ifdef MCRL2_USE_CONTROL_FLOW
+      //--- stategraph options ---//
+      desc.add_hidden_option("no-simplify", "do not simplify the PBES during reduction (works only in combination with -g)");
+      desc.add_hidden_option("disable-cache-marking-updates", "disable caching of rewriter calls in marking updates");
+      desc.add_option("compute-marking", "compute the marking of the control flow graph");
+      desc.add_option("marking-algorithm", utilities::make_optional_argument("NAME", "0"), "specifies the algorithm that is used for the marking computation 0 (default), 1 or 2. In certain cases this choice can have a significant impact on the performance.");
+      desc.add_hidden_option("use-alternative-lcfp-criterion", "use an alternative criterion for local control flow parameter computation");
+      desc.add_hidden_option("use-alternative-gcfp-relation", "use an alternative global control flow parameter relation");
+      desc.add_hidden_option("use-alternative-gcfp-consistency", "use an alternative global control flow parameter consistency");
+#endif
     }
 
     static std::list<std::string> split_actions(const std::string& s)
@@ -204,6 +235,12 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       options.cached                                = parser.has_option("cached");
       options.global_cache                          = parser.has_option("global-cache");
       options.confluence                            = parser.has_option("confluence");
+#ifdef MCRL2_USE_PROJECTIONS
+      options.use_projections                       = parser.has_option("project");
+#endif
+#ifdef MCRL2_USE_CONTROL_FLOW
+      options.use_control_flow                      = parser.has_option("control-flow");
+#endif
       options.one_point_rule_rewrite                = !parser.has_option("no-one-point-rule-rewrite");
       options.remove_unused_rewrite_rules           = !parser.has_option("no-remove-unused-rewrite-rules");
       options.replace_constants_by_variables        = !parser.has_option("no-replace-constants-by-variables");
@@ -338,13 +375,50 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
                                 options.save_error_trace ||
                                 options.generate_traces;
 
+#ifdef MCRL2_USE_PROJECTIONS
+      if (parser.has_option("project") && (parser.has_option("cached") || parser.has_option("global-cache")))
+      {
+        parser.error("Option --project cannot be combined with --cached or --global-cache.");
+      }
+#endif
+
+#ifdef MCRL2_USE_CONTROL_FLOW
+      stategraph_options.rewrite_strategy = rewrite_strategy();
+      stategraph_options.simplify = !parser.has_option("no-simplify");
+      stategraph_options.use_global_variant = false;
+      stategraph_options.print_influence_graph = false;
+      stategraph_options.cache_marking_updates = !parser.has_option("disable-cache-marking-updates");
+      compute_marking = parser.has_option("compute-marking");
+      stategraph_options.marking_algorithm = parser.option_argument_as<int>("marking-algorithm");
+      if (stategraph_options.marking_algorithm < 0 || stategraph_options.marking_algorithm > 2)
+      {
+        throw mcrl2::runtime_error("invalid value for marking-algorithm!");
+      }
+      stategraph_options.use_alternative_lcfp_criterion = parser.has_option("use-alternative-lcfp-criterion");
+      stategraph_options.use_alternative_gcfp_relation = parser.has_option("use-alternative-gcfp-relation");
+      stategraph_options.use_alternative_gcfp_consistency = parser.has_option("use-alternative-gcfp-consistency");
+      stategraph_options.timer = &timer();
+#endif
     }
 
     template <bool Stochastic, bool Timed, typename Specification, typename LTSBuilder>
-    bool generate_state_space(const Specification& lpsspec, LTSBuilder& builder)
+    bool generate_state_space(const Specification& lpsspec,
+                              LTSBuilder& builder
+#ifdef MCRL2_USE_CONTROL_FLOW
+                              , const pbes_system::pbesstategraph_options& stategraph_options = {}
+                              , bool compute_marking = false
+#endif
+                             )
     {
       data::rewriter rewr = lps::construct_rewriter(lpsspec, options.rewrite_strategy, options.remove_unused_rewrite_rules);
-      lps::explorer<Stochastic, Timed, Specification> explorer(lpsspec, options, rewr);
+      lps::explorer<Stochastic, Timed, Specification> explorer(lpsspec,
+                                                               options,
+                                                               rewr
+#ifdef MCRL2_USE_CONTROL_FLOW
+                                                               , stategraph_options
+                                                               , compute_marking
+#endif
+      );
       lts::state_space_generator<Stochastic, Timed, Specification> generator(lpsspec, options, explorer);
       current_explorer = &generator.explorer;
       
@@ -368,6 +442,13 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 
       if (lps::is_stochastic(stochastic_lpsspec))
       {
+#ifdef MCRL2_USE_PROJECTIONS
+        if (options.use_projections) {
+            options.use_projections = false;
+            mCRL2log(log::warning) << "Projections are currently not supported for stochastic specifications. "
+                                   << "Projections have been disabled.\n";
+        }
+#endif
         auto builder = create_stochastic_lts_builder(stochastic_lpsspec, options, output_format);
         if (is_timed)
         {
@@ -384,11 +465,25 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         auto builder = create_lts_builder(lpsspec, options, output_format, output_filename());
         if (is_timed)
         {
-          result = generate_state_space<false, true>(lpsspec, *builder);
+          result = generate_state_space<false, true>(
+            lpsspec,
+            *builder
+#ifdef MCRL2_USE_CONTROL_FLOW
+            , stategraph_options
+            , compute_marking
+#endif
+          );
         }
         else
         {
-          result = generate_state_space<false, false>(lpsspec, *builder);
+          result = generate_state_space<false, false>(
+            lpsspec,
+            *builder
+#ifdef MCRL2_USE_CONTROL_FLOW
+            , stategraph_options
+            , compute_marking
+#endif
+          );
         }
       }
 
