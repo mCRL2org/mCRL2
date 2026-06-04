@@ -1,7 +1,7 @@
 mCRL2 library documentation
 ###########################
 
-Atermpp
+ATermpp
 =========
 
 .. toctree::
