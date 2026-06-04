@@ -79,6 +79,9 @@ namespace mcrl2::lps
             std::size_t s_index = discovered.index(current_state,thread_index);
             start_state(thread_index, current_state, s_index);
             data::add_assignments(thread_sigma, m_process_parameters, current_state);
+#ifdef MCRL2_USE_CONTROL_FLOW
+            auto active_cfg_vertices = compute_active_cfg_vertices(thread_sigma, m_process_parameters, m_control_flow_graphs);
+#endif
             for (const explorer_summand& summand: regular_summands)
             {   
               generate_transitions(
@@ -91,8 +94,11 @@ namespace mcrl2::lps
                 key,
                 thread_enumerator,
                 thread_id_generator,
+#ifdef MCRL2_USE_CONTROL_FLOW
+                active_cfg_vertices,
+#endif
                 [&](const lps::multi_action& a, const state_type& s1)
-                {   
+                {
                   if constexpr (Timed)
                   { 
                     const data::data_expression& t = current_state[m_n];

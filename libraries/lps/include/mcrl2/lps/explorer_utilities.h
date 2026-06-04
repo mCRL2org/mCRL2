@@ -16,7 +16,11 @@
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
-#include "mcrl2/lps/explorer_utilities.h"
+#include "mcrl2/atermpp/standard_containers/vector.h"
+
+#ifdef MCRL2_USE_PROJECTIONS
+#include "mcrl2/lps/explorer_projections.h"
+#endif
 
 namespace mcrl2::lps
 {
@@ -168,6 +172,15 @@ using summand_cache_map = atermpp::utilities::unordered_map<atermpp::aterm,
     std::allocator<std::pair<atermpp::aterm, atermpp::term_list<data::data_expression_list>>>,
     true>;
 
+#ifdef MCRL2_USE_PROJECTIONS
+using projection_cache_map = atermpp::utilities::unordered_map<lps::state,
+    std::vector<projected_transition>,
+    projection_cache_hash,
+    projection_cache_equality,
+    std::allocator<std::pair<lps::state, std::vector<projected_transition>>>,
+    true>;
+#endif
+
 struct explorer_summand
 {
   data::variable_list variables;
@@ -182,6 +195,23 @@ struct explorer_summand
   std::vector<data::variable> gamma;
   atermpp::function_symbol f_gamma;
   mutable summand_cache_map local_cache;
+
+#ifdef MCRL2_USE_PROJECTIONS
+  // attributes for projections (these are not initialized during construction!)
+  std::vector<std::size_t> I_r;  // indices of read parameters
+  std::vector<std::size_t> I_w;  // indices of write parameters
+  mutable projection_cache_map projection_cache;
+
+  void set_projection_attributes(const std::vector<std::size_t>& Ir, const std::vector<std::size_t>& Iw)
+  {
+    mCRL2log(log::verbose) << "Setting projection attributes I_r = " << core::detail::print_list(Ir) << " I_w = " << core::detail::print_list(Iw) << std::endl;
+    if (!Ir.empty())
+    {
+      I_r = Ir;
+      I_w = Iw;
+    }
+  }
+#endif
 
   template <typename ActionSummand>
   explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
