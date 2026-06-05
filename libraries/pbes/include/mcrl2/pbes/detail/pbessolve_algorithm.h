@@ -479,10 +479,6 @@ class pbessolve_tool
       throw mcrl2::runtime_error("Invalid strategy " +
                                  std::to_string(static_cast<int>(options.optimization)));
     }
-    if (options.prune_todo_list && options.number_of_threads > 1)
-    {
-      throw mcrl2::runtime_error("Option --prune-todo-list cannot be used with multiple threads.\n");
-    }
     if (options.prune_todo_list && options.optimization < partial_solve_strategy::propagate_solved_equations_using_substitution)
     {
       mCRL2log(log::warning) << "Option --prune-todo-list has no effect for " 

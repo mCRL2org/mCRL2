@@ -157,7 +157,8 @@ class pbesinst_lazy_todo
           new_irrelevant.insert(x);
         }
       }
-      std::swap(todo, new_todo);
+      todo.swap(new_todo); // Note: std::swap(todo, new_todo) is wrong when doing multithreading as the atermpp 
+                           // wrapper is not moved simultaneously with the content of the deque. 
       std::swap(irrelevant, new_irrelevant);
 
       std::size_t size_after = todo.size() + irrelevant.size();
