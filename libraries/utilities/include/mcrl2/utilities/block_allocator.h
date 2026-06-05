@@ -22,6 +22,7 @@
 #include <limits>
 #include <mutex>
 #include <new>
+#include <type_traits>
 #include <vector>
 
 namespace mcrl2::utilities

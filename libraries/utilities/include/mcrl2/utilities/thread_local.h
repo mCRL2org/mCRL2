@@ -14,12 +14,14 @@
 #ifndef MCRL2_UTILITIES_THREAD_LOCAL_H_
 #define MCRL2_UTILITIES_THREAD_LOCAL_H_
 
+#include <array>
 #include <atomic>
-#include <memory>
-#include <stdexcept>
-#include <optional>
-#include <cstring>
+#include <bit>
+#include <cstddef>
 #include <iterator>
+#include <new>
+#include <stdexcept>
+#include <type_traits>
 
 #include "mcrl2/utilities/noncopyable.h"
 
@@ -62,7 +64,7 @@ struct ThreadBucket
     }
     else
     {
-      bucket = (sizeof(std::size_t) * 8) - __builtin_clzll(thread_id);
+      bucket = std::bit_width(thread_id);
       std::size_t offset = thread_id - (1ULL << (bucket - 1));
       index = offset;
       bucket_size = 1ULL << bucket;
@@ -113,7 +115,7 @@ private:
   std::atomic<std::size_t> values_count{0};
 
   /// \brief Helper to deallocate a bucket.
-  static void deallocate_bucket(Entry* bucket_ptr, std::size_t size)
+  static void deallocate_bucket(Entry* bucket_ptr, std::size_t /* size */)
   {
     delete[] bucket_ptr;
   }
