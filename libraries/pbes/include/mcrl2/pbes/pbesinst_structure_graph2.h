@@ -96,31 +96,36 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       using super::leave;
       using super::apply;
 
-      struct stack_element
+      // A reference_aterm_stack_element is a stack element to be used inside an aterm container.
+      // Its elements are not protected individually, when used outside a container. In that 
+      // case the stack_element below should be used. 
+      struct reference_aterm_stack_element
       {
         atermpp::detail::reference_aterm<pbes_expression> b;
         atermpp::detail::reference_aterm<pbes_expression> f;
         atermpp::detail::reference_aterm<pbes_expression> g0;
         atermpp::detail::reference_aterm<pbes_expression> g1;
 
-        stack_element(
-          pbes_expression b_,
-          pbes_expression f_,
-          pbes_expression g0_,
-          pbes_expression g1_
+        reference_aterm_stack_element(
+          const pbes_expression& b_,
+          const pbes_expression& f_,
+          const pbes_expression& g0_,
+          const pbes_expression& g1_
         )
-         : b(std::move(b_)), f(std::move(f_)), g0(std::move(g0_)), g1(std::move(g1_))
+         : b(b_), f(f_), g0(g0_), g1(g1_)
         {}
 
         template<class E1, class E2>
-        stack_element(
-          E1 b_,
-          E2 f_,
-          pbes_expression g0_,
-          pbes_expression g1_
+        reference_aterm_stack_element(
+          const E1& b_,
+          const E2& f_,
+          const pbes_expression& g0_,
+          const pbes_expression& g1_
         )
-         : b(std::move(atermpp::down_cast<pbes_expression>(b_))),
-           f(std::move(atermpp::down_cast<pbes_expression>(f_))), g0(std::move(g0_)), g1(std::move(g1_))
+         : b(atermpp::down_cast<pbes_expression>(b_)),
+           f(atermpp::down_cast<pbes_expression>(f_)), 
+           g0(g0_), 
+           g1(g1_)
         {}
 
         void mark(atermpp::term_mark_stack& todo) const
@@ -132,44 +137,55 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
       };
 
+      // A stack element is an reference_aterm_stack_element of which the elements are protected against garbage collection. 
+      struct stack_element
+      {
+        pbes_expression b;
+        pbes_expression f;
+        pbes_expression g0;
+        pbes_expression g1;
+
+        stack_element(const reference_aterm_stack_element& s)
+         : b(s.b), f(s.f), g0(s.g0), g1(s.g1)
+        {}
+      };
+
       std::array<vertex_set, 2>& S;
 
       detail::structure_graph_builder& graph_builder;
-      // TODO: replace with aterm container
-      atermpp::vector<stack_element> stack;
+      atermpp::vector<reference_aterm_stack_element> stack;
 
       Rplus_traverser(std::array<vertex_set, 2>& S_, detail::structure_graph_builder& graph_builder_)
        : S(S_), graph_builder(graph_builder_)
       {}
 
-      void push(const stack_element& elem)
+      void push(const reference_aterm_stack_element& elem)
       {
         stack.push_back(elem);
       }
 
       stack_element pop()
       {
-        auto result = stack.back();
+        stack_element result(stack.back());
         stack.pop_back();
         return result;
       }
 
       // Return the top element of result_stack
-      stack_element& top()
+      reference_aterm_stack_element& top()
       {
         return stack.back();
       }
 
       // Return the top element of result_stack
-      const stack_element& top() const
+      const reference_aterm_stack_element& top() const
       {
         return stack.back();
       }
 
-      // TODO: use a heuristic for the smallest term
-      static bool less(const pbes_expression& /* x1 */, const pbes_expression& /* x2 */)
+      static bool less(const pbes_expression& x1, const pbes_expression& x2)
       {
-        return true;
+        return x1 < x2;
       }
 
       void leave(const data::data_expression& x)
@@ -186,7 +202,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       void leave(const propositional_variable_instantiation& x)
       {
-        auto u = graph_builder.find_vertex(x);
+        const structure_graph::index_type u = graph_builder.find_vertex(x);
         if (u == undefined_vertex())
         {
           // if x is not yet in the graph, then it certainly isn't in S[0] or S[1]
@@ -208,16 +224,16 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       void leave(const and_& /* x */)
       {
-        stack_element elem2 = pop();
-        stack_element& elem1 = top();
-        auto& b_1 = elem1.b;
-        auto& f1_prime = elem1.f;
-        auto& g0_1 = elem1.g0;
-        auto& g1_1 = elem1.g1;
-        auto& b_2 = elem2.b;
-        auto& f2_prime = elem2.f;
-        auto& g0_2 = elem2.g0;
-        auto& g1_2 = elem2.g1;
+        const stack_element elem2 = pop();
+        reference_aterm_stack_element& elem1 = top();
+        atermpp::detail::reference_aterm<pbes_expression>& b_1 = elem1.b;
+        atermpp::detail::reference_aterm<pbes_expression>& f1_prime = elem1.f;
+        atermpp::detail::reference_aterm<pbes_expression>& g0_1 = elem1.g0;
+        atermpp::detail::reference_aterm<pbes_expression>& g1_1 = elem1.g1;
+        const pbes_expression& b_2 = elem2.b;
+        const pbes_expression& f2_prime = elem2.f;
+        const pbes_expression& g0_2 = elem2.g0;
+        const pbes_expression& g1_2 = elem2.g1;
 
         // put the result in (b1, f1_prime, g0, g1)
         if (is_true(b_1) && is_true(b_2))
@@ -269,16 +285,16 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       void leave(const or_& /* x */)
       {
-        stack_element elem2 = pop();
-        stack_element& elem1 = top();
-        auto& b_1 = elem1.b;
-        auto& f1_prime = elem1.f;
-        auto& g0_1 = elem1.g0;
-        auto& g1_1 = elem1.g1;
-        auto& b_2 = elem2.b;
-        auto& f2_prime = elem2.f;
-        auto& g0_2 = elem2.g0;
-        auto& g1_2 = elem2.g1;
+        const stack_element elem2 = pop();
+        reference_aterm_stack_element& elem1 = top();
+        atermpp::detail::reference_aterm<pbes_expression>& b_1 = elem1.b;
+        atermpp::detail::reference_aterm<pbes_expression>& f1_prime = elem1.f;
+        atermpp::detail::reference_aterm<pbes_expression>& g0_1 = elem1.g0;
+        atermpp::detail::reference_aterm<pbes_expression>& g1_1 = elem1.g1;
+        const pbes_expression& b_2 = elem2.b;
+        const pbes_expression& f2_prime = elem2.f;
+        const pbes_expression& g0_2 = elem2.g0;
+        const pbes_expression& g1_2 = elem2.g1;
 
         // put the result in (b1, f1_prime, g0, g1)
         if (is_false(b_1) && is_false(b_2))
@@ -363,12 +379,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       Rplus_traverser f(S, m_graph_builder);
       f.apply(x);
-      return f.top();
+      return Rplus_traverser::stack_element(f.top());  // Protection is added explicitly. 
     }
 
     bool solution_found(const propositional_variable_instantiation& init) const override
     {
-      auto u = m_graph_builder.find_vertex(init);
+      const structure_graph::index_type u = m_graph_builder.find_vertex(init);
       return S[0].contains(u) || S[1].contains(u);
     }
 
@@ -386,7 +402,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       } */
       for (const propositional_variable_instantiation& X: todo.elements())
       {
-        structure_graph::index_type u = m_graph_builder.find_vertex(X);
+        const structure_graph::index_type u = m_graph_builder.find_vertex(X);
         const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
         if (u_.is_defined())
         {
@@ -395,7 +411,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
       for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
       {
-        structure_graph::index_type u = m_graph_builder.find_vertex(X);
+        const structure_graph::index_type u = m_graph_builder.find_vertex(X);
         const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
         if (u_.is_defined())
         {
@@ -431,8 +447,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         X = todo1.front();
         todo1.pop_front();
         done1.insert(X);
-        auto u = m_graph_builder.find_vertex(X);
-        const auto& u_ = m_graph_builder.vertex(u);
+        const structure_graph::index_type u = m_graph_builder.find_vertex(X);
+        const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
 
         if (u_.decoration == structure_graph::d_none && u_.successors.empty())
         {
@@ -444,10 +460,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           if (!S[0].contains(u) && !S[1].contains(u))
           {
             // todo' := todo' U (succ(u) \ done')
-            for (auto v: G.successors(u))
+            for (const structure_graph::index_type& v: G.successors(u))
             {
-              const auto& v_ = m_graph_builder.vertex(v);
-              const auto& Y = v_.formula();
+              const structure_graph::vertex& v_ = m_graph_builder.vertex(v);
+              const pbes_expression& Y = v_.formula();
               if (contains(done1, Y))
               {
                 continue;
@@ -533,7 +549,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       assert(&result != &psi); // required by super::rewrite_psi
       super::rewrite_psi(thread_index, result, symbol, X, psi);
-      auto rplus_result = Rplus(result);
+      const Rplus_traverser::stack_element& rplus_result = Rplus(result);
       b[thread_index] = rplus_result.b;
       if (is_true(rplus_result.b))
       {
@@ -559,7 +575,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       S[0].resize(m_graph_builder.extent());
       S[1].resize(m_graph_builder.extent());
 
-      auto u = m_graph_builder.find_vertex(X);
+      const structure_graph::index_type u = m_graph_builder.find_vertex(X);
       if (is_true(b[thread_index]))
       {
         S[0].insert(u);
@@ -653,7 +669,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
       simple_structure_graph G(m_graph_builder.vertices());
 
-      structure_graph::index_type u = m_graph_builder.find_vertex(init);
+      const structure_graph::index_type u = m_graph_builder.find_vertex(init);
       assert(strategies_are_set_in_solved_nodes());
 
       std::set<structure_graph::index_type> V = extract_minimal_structure_graph(G, u, S[0], S[1], tau[0], tau[1]);
