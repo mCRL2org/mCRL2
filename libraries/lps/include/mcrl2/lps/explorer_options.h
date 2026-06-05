@@ -31,6 +31,12 @@ struct explorer_options
   bool cached = false;
   bool global_cache = false;
   bool confluence = false;
+#ifdef MCRL2_USE_PROJECTIONS
+  bool use_projections = false;
+#endif
+#ifdef MCRL2_USE_CONTROL_FLOW
+  bool use_control_flow = false;
+#endif
   bool detect_deadlock = false;
   bool detect_nondeterminism = false;
   bool detect_divergence = false;
@@ -77,6 +83,12 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "global-cache = " << std::boolalpha << options.global_cache << std::endl;
   out << "confluence = " << std::boolalpha << options.confluence << std::endl;
   out << "confluence-action = " << options.confluence << std::endl;
+#ifdef MCRL2_USE_PROJECTIONS
+  out << "use-projections = " << std::boolalpha << options.use_projections << std::endl;
+#endif
+#ifdef MCRL2_USE_CONTROL_FLOW
+  out << "use-control-flow = " << std::boolalpha << options.use_control_flow << std::endl;
+#endif
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;

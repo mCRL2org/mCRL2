@@ -186,7 +186,7 @@ public:
   /// \param   v The variable to which the subsitution is applied.
   /// \param   target The target into which the substitution is stored. 
   template <class ResultType>
-  void apply(const variable_type& v, ResultType& target)
+  void apply(const variable_type& v, ResultType& target) const
   {
     static_assert(
         std::is_same_v<ResultType&, expression_type&> || std::is_same_v<ResultType&, atermpp::unprotected_aterm_core&>);
