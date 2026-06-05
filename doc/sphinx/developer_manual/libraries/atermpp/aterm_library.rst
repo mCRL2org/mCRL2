@@ -19,14 +19,14 @@ mCRL2 toolset.
 What is an aterm?
 =================
 
-Aterms are hierarchical terms composed of three building blocks: number, lists and
+ATerms are hierarchical terms composed of three building blocks: number, lists and
 function applications. A function consists of a name, which is an arbitrary string, and
 an arity.
 Simple examples of aterms are ``[0,1,2]`` and ``f(x,y)``.
 Terms can be nested arbitrarily, e.g. ``[0,[f(1),2]]`` and
 ``f(g(x,[a,b]),h(z))``.
 
-Atermpp types
+ATermpp types
 -------------
 
 In the atermpp library there is a class for function symbols and 4 predefined core types for terms, as shown in the following table.
@@ -79,14 +79,14 @@ tree is itself an aterm, and can therefore be used in other terms and lists.
    :mcrl2:`term_balanced_tree\<T\> <atermpp::term_balanced_tree>`      a sort containing balanced trees of terms
    ==================================================================  ===================================================================================
 
-Aterm properties
+ATerm properties
 ----------------
 The aterms in the atermpp library have some properties that need to be
 understood to use the library effectively. Function symbols and aterms are essentially
 pointers to data structures stored internally. Copying an aterm is thus a
 very cheap operation.
 
-Aterm sharing and garbage collection
+ATerm sharing and garbage collection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The most important feature of the atermpp library is that function symbols and terms are shared in
 memory. Consider the terms ``f(x,g(y))`` and ``h(f(x,g(y)),g(y))``. The atermpp
@@ -158,8 +158,8 @@ that terms are well defined and of proper type.
 String representations
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Aterms and derived terms can be transformed to strings using the pretty print function
-:mcrl2:`pp <atermpp::pp>` function. Aterms can also be used in output streams.
+ATerms and derived terms can be transformed to strings using the pretty print function
+:mcrl2:`pp <atermpp::pp>` function. ATerms can also be used in output streams.
 
 .. code-block:: c++
 
@@ -191,7 +191,7 @@ find out whether an aterm is equal to the default constructed aterm.
 Programming with aterms
 =======================
 
-Aterm creation
+ATerm creation
 --------------
 
 All aterm types have their own appropriate constructors for creating them:
@@ -263,7 +263,7 @@ than 4 with the aterm y put in front of it.
                             [](const aterm_list& m){ return aterm_list(y,m); },
                             [](const aterm_list& m){ return m.size()>4; })
 
-Aterm manipulation
+ATerm manipulation
 ------------------
 
 All elements of aterm and derived types can be constructed, assigned and destructed. Standard swap and hash functions are
@@ -342,12 +342,12 @@ a list is empty. It is possible to iterate over the elements of a list using
      }
 
 
-Aterms and the C++ Standard Library
+ATerms and the C++ Standard Library
 -----------------------------------
 
 Standard containers
 ^^^^^^^^^^^^^^^^^^^^
-Aterms work seamlessly with the standard containers of C++.
+ATerms work seamlessly with the standard containers of C++.
 For example:
 
 .. code-block:: c++
@@ -498,7 +498,7 @@ Now that we have defined :mcrl2:`Expression`, we can use it in standard containe
 
 .. _atermpp_programming_algorithms:
 
-Aterm algorithms
+ATerm algorithms
 ----------------
 
 For the `atermpp` library a couple of algorithms are defined. Most
