@@ -723,7 +723,7 @@ Self-loop removal example
         act b;
 
         proc L(n: Nat) = (n==1) -> b . L(2)
-                    + (n==2) -> b.  L(2);
+                       + (n==2) -> b.  L(2);
         init L(1);
 
     The labelled transition system underlying this specification is
@@ -762,9 +762,9 @@ Self-loop removal example
     ::
 
         pbes mu X(n_L: Nat) =
-            (exists e_L: Bool. val(if(e_L, n_L == 2, n_L == 1)) && X(2)) || Y(n_L);
-            nu Y(n_L: Nat) =
-            exists e_L: Bool. val(if(e_L, n_L == 2, n_L == 1)) && Y(2);
+                   (exists e_L: Bool. val(if(e_L, n_L == 2, n_L == 1)) && X(2)) || Y(n_L);
+             nu Y(n_L: Nat) =
+                   exists e_L: Bool. val(if(e_L, n_L == 2, n_L == 1)) && Y(2);
 
         init X(1);
 
@@ -999,7 +999,7 @@ Self-loop removal example
         Y(19) = Y(20) with rank 0
         Y(20) = Y(10) with rank 0
 
-    The instantiation procedure stops when it finds that `Y(10)`, which is solved, is successor of `Y(20)`, and the structure graph is simplified to the following
+    The instantiation procedure stops when it finds that `Y(10)`, which is solved, is a successor of `Y(20)`, and the structure graph is simplified to the following
 
     .. math::
         :nowrap:
