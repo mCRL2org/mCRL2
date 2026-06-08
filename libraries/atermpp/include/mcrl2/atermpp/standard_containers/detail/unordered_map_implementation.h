@@ -41,7 +41,7 @@ namespace atermpp
   std::pair<typename unordered_map<Key,T,Hash,Pred,Alloc>::iterator,bool> unordered_map<Key,T,Hash,Pred,Alloc>::insert( P&& value )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::insert(std::forward(value)); 
+    return super::insert(std::forward<P>(value));
   }
 
   template< class Key, class T, class Hash, class Pred, class Alloc >
@@ -56,7 +56,7 @@ namespace atermpp
   typename unordered_map<Key,T,Hash,Pred,Alloc>::iterator unordered_map<Key,T,Hash,Pred,Alloc>::insert( const_iterator hint, P&& value )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::insert(hint, std::forward(value));
+    return super::insert(hint, std::forward<P>(value));
   }
   
   template< class Key, class T, class Hash, class Pred, class Alloc >
@@ -207,14 +207,14 @@ namespace atermpp
   typename unordered_map<Key,T,Hash,Pred,Alloc>::node_type unordered_map<Key,T,Hash,Pred,Alloc>::extract( const_iterator position )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return extract(position);
+    return super::extract(position);
   }
-  
+
   template< class Key, class T, class Hash, class Pred, class Alloc >
   typename unordered_map<Key,T,Hash,Pred,Alloc>::node_type unordered_map<Key,T,Hash,Pred,Alloc>::extract( const Key& k )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return extract(k);
+    return super::extract(k);
   }
 
   template< class Key, class T, class Hash, class Pred, class Alloc >
@@ -222,31 +222,31 @@ namespace atermpp
   void unordered_map<Key,T,Hash,Pred,Alloc>::merge( std::unordered_map<Key, T, H2, P2, allocator_type>& source )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return merge(source);
+    super::merge(source);
   }
-  
+
   template< class Key, class T, class Hash, class Pred, class Alloc >
   template<class H2, class P2>
   void unordered_map<Key,T,Hash,Pred,Alloc>::merge( std::unordered_map<Key, T, H2, P2, allocator_type>&& source )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return merge(std::move(source));
+    super::merge(std::move(source));
   }
-  
+
   template< class Key, class T, class Hash, class Pred, class Alloc >
   template<class H2, class P2>
   void unordered_map<Key,T,Hash,Pred,Alloc>::merge( std::unordered_multimap<Key, T, H2, P2, allocator_type>& source )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return merge(source);
+    super::merge(source);
   }
-  
+
   template< class Key, class T, class Hash, class Pred, class Alloc >
   template<class H2, class P2>
   void unordered_map<Key,T,Hash,Pred,Alloc>::merge( std::unordered_multimap<Key, T, H2, P2, allocator_type>&& source )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return merge(std::move(source));
+    super::merge(std::move(source));
   }
       
   template< class Key, class T, class Hash, class Pred, class Alloc >
@@ -358,13 +358,13 @@ namespace atermpp::utilities {
   template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
   template<typename ...Args>
   typename unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::const_iterator unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::find(const Args&... args) const 
-  { 
-    if (ThreadSafe)
+  {
+    if constexpr (ThreadSafe)
     {
       mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-      return super::find(args...); 
+      return super::find(args...);
     }
-    return super::find(args...); 
+    return super::find(args...);
   }
 
   template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
@@ -381,7 +381,7 @@ namespace atermpp::utilities {
   {
     rehash_if_needed();
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::insert(std::forward(value));
+    return super::insert(std::forward<P>(value));
   }
 
   template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
@@ -398,7 +398,7 @@ namespace atermpp::utilities {
   {
     rehash_if_needed();
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::insert(hint, std::forward(value));
+    return super::insert(hint, std::forward<P>(value));
   }
   
   template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >

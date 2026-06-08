@@ -71,11 +71,6 @@ public:
      container_wrapper(*this)     
   {}
 
-  unordered_map (size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
-   : super::unordered_map(n, detail::reference_aterm(val), alloc),
-     container_wrapper(*this)     
-  {}
-
   /// \brief Constructor.
   template <class InputIterator>
   unordered_map (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
@@ -272,11 +267,6 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::reference_
     /// \brief Constructor.
     explicit unordered_map(size_type n, const allocator_type& alloc = allocator_type())
       : super::unordered_map(n, alloc),
-      container_wrapper(*this)
-    {}
-
-    unordered_map(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
-      : super::unordered_map(n, detail::reference_aterm(val), alloc),
       container_wrapper(*this)
     {}
 
