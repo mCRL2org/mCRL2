@@ -58,25 +58,30 @@ BOOST_AUTO_TEST_CASE(test_multiple_threads)
 {
   auto tls = std::make_shared<ThreadLocal<int>>();
   std::vector<std::atomic<int>> results(3);
-  
+  std::vector<std::atomic<bool>> non_null(3);
+
+  // Note: Boost.Test assertion macros are not thread-safe (they write to a
+  // shared global log), so the worker threads only record plain data and all
+  // checks are performed on the main thread after the threads have joined.
   std::vector<std::thread> threads;
   for (int i = 0; i < 3; ++i)
   {
-    threads.emplace_back([tls, i, &results]() {
+    threads.emplace_back([tls, i, &results, &non_null]() {
       const int* val = tls->get_or([i] { return i * 10; });
-      BOOST_REQUIRE(val != nullptr);
-      results[i].store(*val, std::memory_order_release);
+      non_null[i].store(val != nullptr, std::memory_order_release);
+      results[i].store(val != nullptr ? *val : -1, std::memory_order_release);
     });
   }
-  
+
   for (auto& t : threads)
   {
     t.join();
   }
-  
+
   // Verify that each thread got a different value
   for (int i = 0; i < 3; ++i)
   {
+    BOOST_CHECK(non_null[i].load(std::memory_order_acquire));
     BOOST_CHECK_EQUAL(results[i].load(std::memory_order_acquire), i * 10);
   }
 }
