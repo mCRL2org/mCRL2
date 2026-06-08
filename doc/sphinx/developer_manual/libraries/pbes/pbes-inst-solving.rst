@@ -2084,8 +2084,8 @@ In fact, algorithm :ref:`PbesInstStructureGraphPrune <solve-prune>` uses :ref:`P
             \EndIf
         \EndWhile
         \State $\newtd := \newtd \cap (\td \cup \irr)$  
-        \State $\newirr := (\td \cup \newirr) \setminus \newtd$             
-        \State \Return $\newtd, \newirr$
+        \State $\mathit{newirrelevant} := (\td \cup \irr) \setminus \newtd$             
+        \State \Return $\newtd, \mathit{newirrelevant}$
     \EndFunction
     \end{algorithmic}
 
