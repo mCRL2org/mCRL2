@@ -10,9 +10,7 @@
 
 #include "mcrl2/gui/glu.h"
 
-#ifdef MCRL2_PLATFORM_MAC
-  #include <GLKit/GLKMatrix4.h>
-#endif
+#include <array>
 
 #ifndef M_PI
   #define M_PI 3.14159265358979323846264338327950288
@@ -27,12 +25,12 @@ static QVector3D arcballVector(const QPoint& p)
 {
   float x, y, z;
   const float radius = 1.5f;
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
+  std::array<GLint, 4> viewport;
+  glGetIntegerv(GL_VIEWPORT, viewport.data());
 
   // Compute x and y relative to the middle of the viewport
-  x = (float)p.x() / viewport[2] * 2.0f - 1.0f;
-  y = (float)p.y() / viewport[3] * 2.0f - 1.0f;
+  x = static_cast<float>(p.x()) / static_cast<float>(viewport[2]) * 2.0f - 1.0f;
+  y = static_cast<float>(p.y()) / static_cast<float>(viewport[3]) * 2.0f - 1.0f;
   y = -y;
 
   float squared = x * x + y * y;
@@ -70,7 +68,7 @@ QQuaternion arcballRotation(const QPoint& p1, const QPoint& p2)
 
 void applyRotation(const QQuaternion& rotation, bool reverse)
 {
-  float angle = 180 / M_PI * std::acos(std::min(1.0f, rotation.scalar()));
+  float angle = static_cast<float>(180.0 / M_PI) * std::acos(std::clamp(rotation.scalar(), -1.0f, 1.0f));
   if (reverse)
   {
     angle = -angle;
