@@ -43,6 +43,20 @@ aterm_pool::aterm_pool() :
   create_appl(reinterpret_cast<aterm&>(m_empty_list), m_function_symbol_pool.as_empty_list());
 }
 
+aterm_pool::~aterm_pool()
+{
+  stop_gc_stress_thread();
+}
+
+void aterm_pool::stop_gc_stress_thread()
+{
+  if (m_gc_stress_thread.joinable())
+  {
+    m_gc_stress_running.store(false, std::memory_order_relaxed);
+    m_gc_stress_thread.join();
+  }
+}
+
 void aterm_pool::add_deletion_hook(function_symbol sym, term_callback callback)
 {
   const std::size_t arity = sym.arity();

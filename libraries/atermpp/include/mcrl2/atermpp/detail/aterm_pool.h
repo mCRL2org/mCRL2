@@ -15,6 +15,9 @@
 
 #include "mcrl2/utilities/shared_mutex.h"
 
+#include <atomic>
+#include <thread>
+
 
 namespace atermpp::detail
 {
@@ -132,6 +135,13 @@ public:
 
   inline function_symbol_pool& get_symbol_pool() { return m_function_symbol_pool; }
 
+  /// \brief Start the background GC stress thread if EnableGCStressThread and GlobalThreadSafe are both true.
+  /// \details Defined in aterm_implementation.cpp where g_thread_term_pool() is accessible.
+  void start_gc_stress_thread();
+
+  /// \brief Stop the background GC stress thread if it is running.
+  inline void stop_gc_stress_thread();
+
   // These functions of the aterm pool should be called through a thread_aterm_pool.
 private:
   /// \brief Force garbage collection on all storages.
@@ -221,6 +231,10 @@ private:
 
   /// Represents an empty list.
   aterm_core m_empty_list;
+
+  /// Background GC stress thread state (only used when EnableGCStressThread is true).
+  std::atomic<bool> m_gc_stress_running{false};
+  std::thread m_gc_stress_thread;
 };
 
 inline

@@ -36,6 +36,7 @@ inline aterm_pool& g_term_pool()
     if (!initialized)
     {
       new (&g_aterm_pool_instance) aterm_pool();
+      g_aterm_pool_instance.start_gc_stress_thread();
       initialized = true;
     }
   }

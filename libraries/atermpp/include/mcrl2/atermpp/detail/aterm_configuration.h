@@ -27,6 +27,11 @@ constexpr static bool EnableGarbageCollectionMetrics = false;
 /// Performs garbage collection intensively for testing purposes.
 constexpr static bool EnableAggressiveGarbageCollection = false;
 
+/// \brief Spawns a dedicated background thread that continuously triggers garbage collection.
+/// \details Only has effect when MCRL2_ENABLE_MULTITHREADING is defined. Useful for stress-testing
+///          the thread safety of the term pool under concurrent GC pressure.
+constexpr static bool EnableGCStressThread = false;
+
 /// \brief Enable to print hashtable collision, size and number of buckets.
 constexpr static bool EnableHashtableMetrics = false;
 
