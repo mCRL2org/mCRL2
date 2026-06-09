@@ -68,7 +68,8 @@ public:
   static inline
   std::size_t index(const Variable& x)
   {
-    const _aterm_int* i = reinterpret_cast<const _aterm_int*>(address(x[N]));
+    // x[N] is the index slot which is always stored as an _aterm_int by make_term_appl_with_index.
+    const _aterm_int* i = static_cast<const _aterm_int*>(address(x[N]));
     return i->value();
   }
 

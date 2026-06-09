@@ -596,24 +596,24 @@ namespace detail
                    detail::g_term_pool().as_list(), 
                    [&transformer, &p](Term& result)
                       {
-                        if constexpr (mcrl2::utilities::is_applicable2<Transformer, Term&, const Term&>::value)   
+                        if constexpr (mcrl2::utilities::is_applicable2<Transformer, Term&, const Term&>::value)
                         {
-                          transformer(reinterpret_cast<Term&>(result), *(p++));
+                          transformer(result, *(p++));
                         }
                         else
                         {
-                          reinterpret_cast<Term&>(result)=transformer(*(p++));
+                          result = transformer(*(p++));
                         }
                       },
                    [&transformer, &p, last](term_list<Term>& result)
                       {
                         if (p==last)
                         {
-                          make_term_list(reinterpret_cast<term_list<Term>& >(result));
+                          make_term_list(result);
                         }
-                        else 
+                        else
                         {
-                          make_list_forward_helper(reinterpret_cast<term_list<Term>& >(result), p, last, transformer);
+                          make_list_forward_helper(result, p, last, transformer);
                         }
                       });
   }  

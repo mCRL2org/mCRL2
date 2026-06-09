@@ -63,7 +63,7 @@ class term_balanced_tree : public aterm
                           std::size_t new_size = (size + 1) >> 1; // size/2 rounded up.
                           if (new_size==1)
                           {
-                            transformer(reinterpret_cast<Term&>(target), *(p++));
+                            transformer(assign_cast<Term>(target), *(p++));
                           }
                           else
                           {
@@ -71,13 +71,13 @@ class term_balanced_tree : public aterm
                           }
                         },
                      [&size, &transformer, &p](aterm& target)
-                        { 
+                        {
                           assert(size>1);
-                          
+
                           std::size_t new_size = size >> 1; // size/2 rounded down.
                           if (new_size==1)
                           {
-                            transformer(reinterpret_cast<Term&>(target), *(p++));
+                            transformer(assign_cast<Term>(target), *(p++));
                           }
                           else
                           {
@@ -96,9 +96,9 @@ class term_balanced_tree : public aterm
       else if (size==1)
       {
         make_term_appl(result, tree_single_node_function(),
-          [&transformer,&p](aterm& target) 
+          [&transformer,&p](aterm& target)
             {
-              transformer(reinterpret_cast<Term&>(target), *(p++));
+              transformer(assign_cast<Term>(target), *(p++));
             });
       }
       else
@@ -234,10 +234,10 @@ class term_balanced_tree : public aterm
           }
           else
           {
-            return reinterpret_cast<const Term&>(left);
+            return vertical_cast<Term>(left);
           }
         }
-        else 
+        else
         {
           // down_cast<term_balanced_tree<Term>>(right_branch()).element_at(position-left_size, size - left_size);
           const aterm& right(right_branch());
@@ -247,7 +247,7 @@ class term_balanced_tree : public aterm
           }
           else
           {
-            return reinterpret_cast<const Term&>(right);
+            return vertical_cast<Term>(right);
           }
         }
       }

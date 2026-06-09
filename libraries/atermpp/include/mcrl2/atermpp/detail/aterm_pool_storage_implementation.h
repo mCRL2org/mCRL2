@@ -74,7 +74,12 @@ void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& t
 {
   if (!root.is_marked())
   {
-    // Do not use the stack, because this might run out of stack memory for large lists.
+    // Mark root before pushing. If root also appears as a subterm of another root processed
+    // later in the same marking pass, the is_marked() check below will prevent it from being
+    // pushed a second time and processed redundantly.
+    root.mark();
+
+    // Do not use recursion, because this might run out of stack memory for large lists.
     todo.emplace(const_cast<_aterm&>(root));
 
     // Mark the term depth-first to reduce the maximum todo size required.
@@ -83,8 +88,6 @@ void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& t
       _aterm& term = todo.top();
       todo.pop();
 
-      // Each term should be marked.
-      term.mark();
       // Determine the arity of the function application.
       const std::size_t arity = term.function().arity();
       _term_appl& term_appl = static_cast<_term_appl&>(term);
@@ -102,7 +105,6 @@ void mark_term(const _aterm& root, std::stack<std::reference_wrapper<_aterm>>& t
           todo.emplace(argument);
         }
       }
-
     }
   }
 }
@@ -307,7 +309,7 @@ void ATERM_POOL_STORAGE::print_performance_stats(const char* identifier) const
 ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::sweep()
 {
-  // Iterate over all terms and removes the ones that are marked.
+  // Iterate over all terms and remove the ones that are not marked (unreachable).
   for (auto it = m_term_set.begin(); it != m_term_set.end(); )
   {
     const Element& term = *it;

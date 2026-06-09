@@ -31,7 +31,7 @@ protected:
   /// \param t A pointer internal data structure from which the term is constructed.
   /// \details This function is explicitly protected such that is not used in common code.
   explicit aterm(detail::_term_appl* t)
-      : aterm_core(reinterpret_cast<detail::_aterm*>(t))
+      : aterm_core(static_cast<detail::_aterm*>(t))
   {}
 
 public:
