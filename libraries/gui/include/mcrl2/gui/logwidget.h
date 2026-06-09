@@ -13,8 +13,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/utilities.h"
 
-using namespace mcrl2::log;
-
 namespace Ui
 {
   class LogWidget;
@@ -23,12 +21,12 @@ namespace Ui
 namespace mcrl2::gui::qt
 {
 
-class LogRelay : public QObject, public output_policy
+class LogRelay : public QObject, public mcrl2::log::output_policy
 {
   Q_OBJECT
 
   public:
-    void output(log_level_t level, time_t timestamp, const std::string& msg, bool print_time_information);
+    void output(mcrl2::log::log_level_t level, time_t timestamp, const std::string& msg, bool print_time_information);
 
   signals:
     void logMessage(QString level, QDateTime timestamp, QString message);
