@@ -31,7 +31,6 @@ Data
    :maxdepth: 1
 
    libraries/data/data_library
-   libraries/data/algorithm_for_sort_equivalence
 
 
 *PDF documentation*
