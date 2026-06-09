@@ -28,7 +28,7 @@ Data
 ======
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    libraries/data/data_library
 
