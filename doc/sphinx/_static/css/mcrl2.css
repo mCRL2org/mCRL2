@@ -154,6 +154,13 @@ div.dparser .admonition-title {
   background-color: var(--mcrl2-light);
 }
 
+.admonition.note .admonition-title {
+  background-color: var(--mcrl2-title);
+}
+.admonition.note {
+  background-color: var(--mcrl2-light);
+}
+
 
 
 .invisible {

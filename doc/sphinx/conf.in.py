@@ -45,6 +45,7 @@ master_doc = 'index'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'mcrl2_admonitions',
     'mcrl2_dparser',
     'mcrl2_pygment',
     'myst_parser',
