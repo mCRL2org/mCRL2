@@ -28,12 +28,12 @@ public:
     /**
      * @brief Used to create context menu for tabbar
      */
-    bool eventFilter(QObject *target, QEvent *event);
+    bool eventFilter(QObject *target, QEvent *event) override;
 
     /**
      * @brief Used to close tabs with shortcut
      */
-    void keyPressEvent(QKeyEvent * event);
+    void keyPressEvent(QKeyEvent * event) override;
 signals:
 
 public slots:
