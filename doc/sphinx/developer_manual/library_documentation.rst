@@ -38,7 +38,6 @@ Data
 * :mcrl2_pdflatex:`Some basic notions concerning the mCRL2 data library <libraries/data/latex/data.tex>`
 * :mcrl2_pdflatex:`Data types for mCRL2 <libraries/data/latex/mcrl2data.tex>`
 * :mcrl2_pdflatex:`substitutions.tex <libraries/data/latex/substitutions.tex>`
-* :mcrl2_pdflatex:`Rewriter Implementation Notes <libraries/data/latex/rewriter.tex>`
 
 GUI
 =====
