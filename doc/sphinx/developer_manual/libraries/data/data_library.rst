@@ -1257,11 +1257,17 @@ and let ``sigma`` be a ``SubstitutionFunction``.
    |             | while on the fly applying the substitution function sigma to all data variables in d.                     |
    +-------------+-----------------------------------------------------------------------------------------------------------+
 
+The mathematical foundations underlying these operations — formal definitions of
+substitutions, rewrite rules, and the abstract rewrite algorithm — are given in
+the `Rewriter implementation notes`_ section below.
+
+.. _rewriter-implementation-notes:
+
 Rewriter implementation notes
 ------------------------------
 
-This section describes the theoretical foundations of the rewrite algorithms
-used in the mCRL2 toolset, based on [weerdenburg2009]_ and [vanderwulp2009]_.
+This section provides the mathematical foundations for the ``Rewriter`` concept
+and its operations defined above, based on [weerdenburg2009]_ and [vanderwulp2009]_.
 
 Introduction
 ^^^^^^^^^^^^
