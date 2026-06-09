@@ -253,6 +253,10 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
      +(n1,@succ_pos(p2)) = @succ_pos(+(n1,p2));
      +(@succ_pos(p1),n2) = @succ_pos(+(p1,n2));
      +(p1,@succ_nat(n2)) = @succ_pos(+(p1,n2));
+     +(@most_significant_digitNat(@zero_word),n) = n;
+     +(n, @most_significant_digitNat(@zero_word)) = n;
+     +(@most_significant_digitNat(@zero_word),p) = p;
+     +(p, @most_significant_digitNat(@zero_word)) = p;
 
      @plus_nat(n1,n2) = +(n1,n2);
  

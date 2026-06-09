@@ -4934,6 +4934,10 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list({vn1, vp2}), plus(vn1, sort_pos::succpos(vp2)), sort_pos::succpos(plus(vn1, vp2))));
         result.push_back(data_equation(variable_list({vn2, vp1}), plus(sort_pos::succpos(vp1), vn2), sort_pos::succpos(plus(vp1, vn2))));
         result.push_back(data_equation(variable_list({vn2, vp1}), plus(vp1, succ_nat(vn2)), sort_pos::succpos(plus(vp1, vn2))));
+        result.push_back(data_equation(variable_list({vn}), plus(most_significant_digit_nat(sort_machine_word::zero_word()), vn), vn));
+        result.push_back(data_equation(variable_list({vn}), plus(vn, most_significant_digit_nat(sort_machine_word::zero_word())), vn));
+        result.push_back(data_equation(variable_list({vp}), plus(most_significant_digit_nat(sort_machine_word::zero_word()), vp), vp));
+        result.push_back(data_equation(variable_list({vp}), plus(vp, most_significant_digit_nat(sort_machine_word::zero_word())), vp));
         result.push_back(data_equation(variable_list({vn1, vn2}), auxiliary_plus_nat(vn1, vn2), plus(vn1, vn2)));
         result.push_back(data_equation(variable_list({vw}), natpred(most_significant_digit_nat(vw)), if_(sort_machine_word::equals_zero_word(vw), most_significant_digit_nat(sort_machine_word::zero_word()), most_significant_digit_nat(sort_machine_word::pred_word(vw)))));
         result.push_back(data_equation(variable_list({vn, vw}), natpred(concat_digit(vn, vw)), if_(sort_machine_word::equals_zero_word(vw), if_(equals_one(vn), most_significant_digit_nat(sort_machine_word::max_word()), concat_digit(natpred(vn), sort_machine_word::max_word())), concat_digit(vn, sort_machine_word::pred_word(vw)))));
