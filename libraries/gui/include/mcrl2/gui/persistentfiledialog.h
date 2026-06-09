@@ -23,17 +23,17 @@ public:
 
     QString getExistingDirectory(const QString& caption = QString(), 
                                  QFileDialog::Options options = QFileDialog::ShowDirsOnly);
-    QString getOpenFileName(const QString& caption = QString(), 
-                            const QString& filter = QString(), 
-                            QString* selectedFilter = 0, 
+    QString getOpenFileName(const QString& caption = QString(),
+                            const QString& filter = QString(),
+                            QString* selectedFilter = nullptr,
                             QFileDialog::Options options = QFileDialog::Options());
-    QStringList getOpenFileNames(const QString& caption = QString(), 
-                                 const QString& filter = QString(), 
-                                 QString* selectedFilter = 0, 
+    QStringList getOpenFileNames(const QString& caption = QString(),
+                                 const QString& filter = QString(),
+                                 QString* selectedFilter = nullptr,
                                  QFileDialog::Options options = QFileDialog::Options());
-    QString  getSaveFileName(const QString& caption = QString(), 
-                             const QString& filter = QString(), 
-                             QString* selectedFilter = 0, 
+    QString  getSaveFileName(const QString& caption = QString(),
+                             const QString& filter = QString(),
+                             QString* selectedFilter = nullptr,
                              QFileDialog::Options options = QFileDialog::Options());
 
 private:
