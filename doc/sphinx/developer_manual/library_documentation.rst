@@ -31,6 +31,7 @@ Data
    :maxdepth: 1
 
    libraries/data/data_library
+   libraries/data/algorithm_for_sort_equivalence
 
 
 *PDF documentation*
@@ -38,7 +39,6 @@ Data
 * :mcrl2_pdflatex:`Some basic notions concerning the mCRL2 data library <libraries/data/latex/data.tex>`
 * :mcrl2_pdflatex:`Data types for mCRL2 <libraries/data/latex/mcrl2data.tex>`
 * :mcrl2_pdflatex:`Enumerator <libraries/data/latex/enumerator.tex>`
-* :mcrl2_pdflatex:`An algorithm to find a representant for sorts in the context of sort aliases and recursive sorts <libraries/data/latex/algorithm-for-sort-equivalence.tex>`
 * :mcrl2_pdflatex:`substitutions.tex <libraries/data/latex/substitutions.tex>`
 * :mcrl2_pdflatex:`Rewriter Implementation Notes <libraries/data/latex/rewriter.tex>`
 
