@@ -85,3 +85,57 @@
 \newcommand{\sr}{\mathit{SR}}
 \newcommand{\qr}{\mathit{QR}}
 \newcommand{\newtd}{\mathit{newtodo}}
+
+% mCRL2 syntax definition
+\providecommand{\f}[1]{\mathit{#1}}
+\providecommand{\mb}[1]{\mathbf{#1}}
+
+% Standard sorts
+\providecommand{\sbool}{\mathsf{B}}
+\providecommand{\snat}{\mathsf{N}}
+\providecommand{\spos}{\snat^{+}}
+\providecommand{\sint}{\mathsf{Z}}
+\providecommand{\sreal}{\mathsf{R}}
+
+% mCRL2 keywords
+\providecommand{\kwsort}{\mathbf{sort}}
+\providecommand{\kwcons}{\mathbf{cons}}
+\providecommand{\kwmap}{\mathbf{map}}
+\providecommand{\kwvar}{\mathbf{var}}
+\providecommand{\kweqn}{\mathbf{eqn}}
+\providecommand{\kwact}{\mathbf{act}}
+\providecommand{\kwstruct}{\mathbf{struct}}
+\providecommand{\kwwhr}{\mathbf{whr}}
+\providecommand{\kwend}{\mathbf{end}}
+\providecommand{\kwdiv}{\mathbf{div}}
+\providecommand{\kwmod}{\mathbf{mod}}
+\providecommand{\kwglob}{\mathbf{glob}}
+\providecommand{\kwproc}{\mathbf{proc}}
+\providecommand{\kwinit}{\mathbf{init}}
+\providecommand{\kwpbes}{\mathbf{pbes}}
+
+% Logic
+\providecommand{\limp}{\Rightarrow}
+
+% Lists
+\providecommand{\el}{[\,]}
+\providecommand{\lst}[1]{[\,#1\,]}
+\providecommand{\cons}{\mathbin{\triangleright}}
+\providecommand{\snoc}{\mathbin{\triangleleft}}
+\providecommand{\concat}{\mathbin{{+}\!{+}}}
+
+% Sets
+\providecommand{\set}[1]{\{\,#1\,\}}
+\providecommand{\scompr}[2]{\{\,#1\mid #2\,\}}
+
+% Process algebra (operators not already defined above)
+\providecommand{\pmerge}{\mathbin{\parallel}}
+\providecommand{\lmerge}{\mathbin{\llfloor}}
+\providecommand{\sync}{\mathbin{|}}
+\providecommand{\block}[1]{\partial_{#1}}
+\providecommand{\hide}[1]{\tau_{#1}}
+\providecommand{\ren}[1]{\rho_{#1}}
+\providecommand{\allow}[1]{\nabla_{#1}}
+\providecommand{\comm}[1]{\Gamma_{#1}}
+\providecommand{\pinit}{\gg}
+\providecommand{\pbefore}{\ll}
