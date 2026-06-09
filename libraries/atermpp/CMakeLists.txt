@@ -5,6 +5,7 @@ mcrl2_add_library(mcrl2_atermpp
     source/aterm_io_text.cpp
     source/function_symbol.cpp
     source/function_symbol_pool.cpp
+    source/gc_stress_thread.cpp
   DEPENDS
     mcrl2_utilities
     Threads::Threads

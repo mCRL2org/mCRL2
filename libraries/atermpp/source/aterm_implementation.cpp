@@ -11,8 +11,6 @@
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
 #include "mcrl2/utilities/shared_mutex.h"
 
-#include <cstdlib>
-
 using namespace atermpp;
 using namespace atermpp::detail;
 
@@ -56,24 +54,6 @@ thread_aterm_pool& g_thread_term_pool()
 }
 
 } // end namespace atermpp::detail
-
-void atermpp::detail::aterm_pool::start_gc_stress_thread()
-{
-  if constexpr (EnableGCStressThread && mcrl2::utilities::detail::GlobalThreadSafe)
-  {
-    m_gc_stress_running.store(true, std::memory_order_relaxed);
-    m_gc_stress_thread = std::thread([this]
-    {
-      // Registering the thread-local pool connects this thread to the global pool.
-      while (m_gc_stress_running.load(std::memory_order_relaxed))
-      {
-        g_thread_term_pool().collect();
-        std::this_thread::yield();
-      }
-    });
-    std::atexit([] { g_aterm_pool_instance.stop_gc_stress_thread(); });
-  }
-}
 
 aterm_stream::~aterm_stream() = default;
 

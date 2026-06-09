@@ -11,6 +11,7 @@
 #define MCRL2_ATERMPP_DETAIL_GLOBAL_ATERM_POOL_H_
 
 #include "mcrl2/atermpp/detail/aterm_pool.h"
+#include "mcrl2/atermpp/detail/gc_stress_thread.h"
 #include "mcrl2/atermpp/detail/thread_aterm_pool.h"
 
 
@@ -36,7 +37,7 @@ inline aterm_pool& g_term_pool()
     if (!initialized)
     {
       new (&g_aterm_pool_instance) aterm_pool();
-      g_aterm_pool_instance.start_gc_stress_thread();
+      start_gc_stress_thread();
       initialized = true;
     }
   }
