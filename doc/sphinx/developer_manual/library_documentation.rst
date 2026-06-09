@@ -22,11 +22,7 @@ Core
 
    libraries/core/core_library
    libraries/core/common_functionality
-
-
-*PDF documentation*
-
- * :mcrl2_pdflatex:`mCRL2 syntax definition <libraries/core/latex/mcrl2_syntax_definition.tex>`
+   libraries/core/mcrl2_syntax_definition
 
 Data
 ======
