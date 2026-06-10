@@ -26,7 +26,10 @@ class LogRelay : public QObject, public mcrl2::log::output_policy
   Q_OBJECT
 
   public:
-    void output(mcrl2::log::log_level_t level, time_t timestamp, const std::string& msg, bool print_time_information);
+    void output(mcrl2::log::log_level_t level,
+      time_t timestamp,
+      const std::string& msg,
+      bool print_time_information) override;
 
   signals:
     void logMessage(QString level, QDateTime timestamp, QString message);
@@ -38,7 +41,7 @@ class LogWidget: public QWidget
 
   public:
     LogWidget(QWidget *parent = nullptr);
-    ~LogWidget();
+    ~LogWidget() override;
 
   signals:
     void logMessage(QString level, QDateTime timestamp, QString message, QString formattedMessage);

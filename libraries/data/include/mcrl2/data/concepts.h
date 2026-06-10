@@ -13,8 +13,8 @@
 #include <mcrl2/atermpp/concepts.h>
 #include <mcrl2/data/variable.h>
 
-namespace mcrl2 {
-namespace data {
+namespace mcrl2::data
+{
 
 /// Concept that indicates that T is a substitution with an operator () on
 /// variables, and a static constant is_identity_substitution that indicates
@@ -27,7 +27,6 @@ concept IsSubstitution = requires(T sigma, variable v)
   requires atermpp::IsATerm<std::remove_cvref_t<decltype(sigma(v))>>;
 };
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_CONCEPTS_H

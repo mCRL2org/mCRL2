@@ -127,7 +127,7 @@ class CodeEditor : public QPlainTextEdit
    * @param parent The parent of this widget
    */
   explicit CodeEditor(QWidget* parent = nullptr);
-  ~CodeEditor();
+  ~CodeEditor() override;
 
   /**
    * @brief setPurpose Set whether this code editor is for editing

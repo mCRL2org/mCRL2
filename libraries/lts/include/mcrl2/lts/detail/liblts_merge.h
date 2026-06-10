@@ -111,9 +111,9 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   // Update the label numbers of all transitions of the LTS l1 to reflect
   // the new indices as given by labs.
   std::vector<transition>& trans1=l1.get_transitions();
-  for (std::vector<transition>::iterator r=trans1.begin(); r!=trans1.end(); ++r)
+  for (auto& r: trans1)
   {
-    r->set_label(labs[l1.action_label(r->label())]);
+    r.set_label(labs[l1.action_label(r.label())]);
   }
 
   // Now add the transition labels of LTS l2
@@ -121,12 +121,11 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   // The labels will be added below, depending on whether there is label
   // information in both LTSs.
   const std::vector<transition>& trans2=l2.get_transitions();
-  for (std::vector<transition>::const_iterator r=trans2.begin(); r!=trans2.end(); ++r)
+  for (auto transition_to_add: trans2)
   {
-    const transition transition_to_add=*r;
-    l1.add_transition(transition(transition_to_add.from()+old_nstates,
-                                 labs[l2.action_label(transition_to_add.label())],
-                                 transition_to_add.to()+old_nstates));
+    l1.add_transition(transition(transition_to_add.from() + old_nstates,
+      labs[l2.action_label(transition_to_add.label())],
+      transition_to_add.to() + old_nstates));
   }
 
 }

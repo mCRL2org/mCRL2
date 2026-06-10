@@ -100,12 +100,11 @@ class RewriterJitty: public Rewriter
 
     void rewrite_aux(data_expression& result, const data_expression& term, substitution_type& sigma);
 
-    void rewrite_aux_function_symbol(
-                      data_expression& result,
-                      const function_symbol& op,
-                      const application& term,
-                      substitution_type& sigma,
-                      const std::size_t do_not_rewrite_first_arguments=0);
+    void rewrite_aux_function_symbol(data_expression& result,
+      const function_symbol& op,
+      const application& term,
+      substitution_type& sigma,
+      std::size_t do_not_rewrite_first_arguments = 0);
 
     void rewrite_aux_const_function_symbol(
                       data_expression& result,

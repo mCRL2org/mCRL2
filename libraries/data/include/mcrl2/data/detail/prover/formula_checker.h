@@ -15,11 +15,7 @@
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
 
-namespace mcrl2
-{
-namespace data
-{
-namespace detail
+namespace mcrl2::data::detail
 {
 
 /// \brief The class formula checker takes a data specification in mCRL2 format and a list of expressions
@@ -132,8 +128,7 @@ class Formula_Checker
     /// \brief Formula_Checker::f_bdd_prover and Formula_Checker::f_dot_file_name.
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
-    Formula_Checker(
-      mcrl2::data::data_specification a_data_spec,
+    Formula_Checker(mcrl2::data::data_specification a_data_spec,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
@@ -141,17 +136,22 @@ class Formula_Checker
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_witness = false,
-      char const* a_dot_file_name = 0
-    ):
-      f_bdd_prover(a_data_spec, used_data_equation_selector(a_data_spec),a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction), f_dot_file_name(a_dot_file_name)
+      char const* a_dot_file_name = nullptr)
+      : f_bdd_prover(a_data_spec,
+          used_data_equation_selector(a_data_spec),
+          a_rewrite_strategy,
+          a_time_limit,
+          a_path_eliminator,
+          a_solver_type,
+          a_apply_induction),
+        f_dot_file_name(a_dot_file_name)
     {
       f_counter_example = a_counter_example;
       f_witness = a_witness;
     }
 
     /// \brief Destructor without any specific functionality.
-    ~Formula_Checker()
-    {}
+    ~Formula_Checker() = default;
 
     /// \brief Checks the formulas in the list a_formulas.
     /// precondition: the parameter a_formulas is a list of expressions of sort Bool in internal mCRL2 format
@@ -159,9 +159,8 @@ class Formula_Checker
     {
       int v_formula_number = 1;
 
-      for(data_expression_list::const_iterator i = a_formulas.begin(); i != a_formulas.end(); ++i)
+      for (const auto& v_formula: a_formulas)
       {
-        const data_expression& v_formula = *i;
         mCRL2log(log::info) << "'" << v_formula << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();
@@ -187,8 +186,6 @@ class Formula_Checker
 
 };
 
-} // namespace detail
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif

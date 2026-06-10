@@ -14,13 +14,7 @@
 
 #include "mcrl2/utilities/logger.h"
 
-namespace mcrl2
-{
-
-namespace data
-{
-
-namespace detail
+namespace mcrl2::data::detail
 {
 
 template <class T> // note, T is only a dummy
@@ -54,10 +48,6 @@ void increment_rewrite_count()
   }
 }
 
-} // namespace detail
-
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data::detail
 
 #endif // MCRL2_DATA_DETAIL_REWRITE_STATISTICS_H

@@ -325,28 +325,29 @@ protected:
                                         m_rewriter, m_generator, false, enumeration_limit);
 
       /* Create a list to store solutions */
-      std::size_t count = enumerator.enumerate(enumerator_element(qvars_in_cond_or_update, rewritten_condition),
-                            sigma,
-                            [&](const enumerator_element& p)
-                            {
-                              p.add_assignments(qvars_in_update,sigma,m_rewriter);
-                              m_graph.insert(v,m_rewriter(update_expr,sigma));
-                              assert(find_free_variables(m_rewriter(update_expr,sigma)).empty());
-                              p.remove_assignments(qvars_in_update, sigma);
-                              // Stop if the condition is true and no variables occur in the new_expression.
-                              return update_fv.empty() && p.expression()==sort_bool::true_(); 
-                            },
-                            // Ignore the following solution. 
-                            [&](const data_expression& d)->bool 
-                            { 
-                              if (find_free_variables(d).empty() && d!=sort_bool::true_() && d!=sort_bool::false_())
-                              { 
-                                mCRL2log(log::warning) << "The expression " << d << " does not rewrite to true or false. It is assumed to be true.\n";
-                              }
-                              return d == sort_bool::false_(); 
-                            },
-                            [](const data_expression& d)->bool { return false; }
-                          );
+      std::size_t count = enumerator.enumerate(
+        enumerator_element(qvars_in_cond_or_update, rewritten_condition),
+        sigma,
+        [&](const enumerator_element& p)
+        {
+          p.add_assignments(qvars_in_update, sigma, m_rewriter);
+          m_graph.insert(v, m_rewriter(update_expr, sigma));
+          assert(find_free_variables(m_rewriter(update_expr, sigma)).empty());
+          p.remove_assignments(qvars_in_update, sigma);
+          // Stop if the condition is true and no variables occur in the new_expression.
+          return update_fv.empty() && p.expression() == sort_bool::true_();
+        },
+        // Ignore the following solution.
+        [&](const data_expression& d) -> bool
+        {
+          if (find_free_variables(d).empty() && d != sort_bool::true_() && d != sort_bool::false_())
+          {
+            mCRL2log(log::warning) << "The expression " << d
+                                   << " does not rewrite to true or false. It is assumed to be true.\n";
+          }
+          return d == sort_bool::false_();
+        },
+        [](const data_expression& /*d*/) -> bool { return false; });
       if (count >= enumeration_limit)
       {
         if (update_fv.empty())

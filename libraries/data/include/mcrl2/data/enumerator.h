@@ -732,33 +732,35 @@ class enumerator_algorithm
                             };
 
       auto add_element_with_variables = [&](const data::variable_list& variables,
-                                            const data::variable_list& added_variables,
-                                            const typename EnumeratorListElement::expression_type& phi,
-                                            const data::variable& v,
-                                            const data::data_expression& e,
-                                            const bool print=false
-                                           ) -> bool
-                                           {
-                                             rewrite(P.scratch_expression, phi, sigma);
-                                             if (reject(P.scratch_expression))
-                                             {
-                                               return false;
-                                             }
-                                             bool added_variables_empty = added_variables.empty() || (P.scratch_expression == phi && m_accept_solutions_with_variables);
-                                             if ((accept(P.scratch_expression) && m_accept_solutions_with_variables) || (variables.empty() && added_variables_empty))
-                                             {
-                                               return report_solution(P.enumerator_element_cache(variables + added_variables, P.scratch_expression, p, v, e));
-                                             }
-                                             if (added_variables_empty)
-                                             {
-                                               P.emplace_back(variables, P.scratch_expression, p, v, e);
-                                             }
-                                             else
-                                             {
-                                               P.emplace_back(variables + added_variables, P.scratch_expression, p, v, e);
-                                             }
-                                             return false;
-                                           };
+                                          const data::variable_list& added_variables,
+                                          const typename EnumeratorListElement::expression_type& phi,
+                                          const data::variable& v,
+                                          const data::data_expression& e,
+                                          const bool /*print*/ = false) -> bool
+      {
+        rewrite(P.scratch_expression, phi, sigma);
+        if (reject(P.scratch_expression))
+        {
+          return false;
+        }
+        bool added_variables_empty
+          = added_variables.empty() || (P.scratch_expression == phi && m_accept_solutions_with_variables);
+        if ((accept(P.scratch_expression) && m_accept_solutions_with_variables)
+            || (variables.empty() && added_variables_empty))
+        {
+          return report_solution(
+            P.enumerator_element_cache(variables + added_variables, P.scratch_expression, p, v, e));
+        }
+        if (added_variables_empty)
+        {
+          P.emplace_back(variables, P.scratch_expression, p, v, e);
+        }
+        else
+        {
+          P.emplace_back(variables + added_variables, P.scratch_expression, p, v, e);
+        }
+        return false;
+      };
 
       const variable_list& v = p.variables();
       const typename EnumeratorListElement::expression_type& phi = p.expression();

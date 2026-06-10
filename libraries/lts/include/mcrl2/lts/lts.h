@@ -379,10 +379,7 @@ class lts: public LTS_BASE
     /** \brief Provide the index of the label that represents tau.
      *  \return const_tau_label_index, which is 0, i.e. the index of the label tau.
      */
-    const labels_size_type tau_label_index() const
-    {
-      return const_tau_label_index;
-    }
+    labels_size_type tau_label_index() const { return const_tau_label_index; }
 
     /** \brief Sets the label of a state.
      * \param[in] state The number of the state.
@@ -575,7 +572,7 @@ class lts: public LTS_BASE
     /** \brief Rename the hidden labels in the hidden label map explicitly in the lts. 
      *  \details The hidden label set is cleared as this information is not of any use anymore.
      */
-    void rename_hidden_labels_to_tau(void)
+    void rename_hidden_labels_to_tau()
     {
       if (m_hidden_label_set.size()>0)    // Check whether there is something to rename.
       {

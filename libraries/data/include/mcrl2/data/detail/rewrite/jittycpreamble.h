@@ -80,7 +80,7 @@ static void rewrite(data_expression& result, const data_expression& t, RewriterC
 //
 // Type definitions
 //
-typedef void(*rewriter_function)(data_expression&, const application&, RewriterCompilingJitty*);
+using rewriter_function = void (*)(data_expression&, const application&, RewriterCompilingJitty*);
 
 // A class that contains terms which are explicitly tagged to be
 // not in normal form. By invoking normal_form the normalform

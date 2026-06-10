@@ -12,9 +12,10 @@
 #ifndef MCRL2_ATERMPP_SHARED_SUBSET_H
 #define MCRL2_ATERMPP_SHARED_SUBSET_H
 
-#include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
+#include <boost/iterator/iterator_facade.hpp>
+#include <utility>
 
 static inline int highest_bit(std::size_t x)
 {
@@ -27,9 +28,7 @@ static inline int highest_bit(std::size_t x)
   return i;
 }
 
-namespace atermpp
-{
-namespace detail
+namespace atermpp::detail
 {
 
 /// \brief Stores a subset of a given base set using maximum sharing.
@@ -60,8 +59,7 @@ class shared_subset
     class bdd_node : public atermpp::aterm
     {
       public:
-        bdd_node()
-        {}
+        bdd_node() = default;
 
         bdd_node(const atermpp::aterm& t)
           : atermpp::aterm(t)
@@ -139,10 +137,7 @@ class shared_subset
           return m_index;
         }
 
-        operator bool() const
-        {
-          return m_index != (std::size_t)(-1);
-        }
+        operator bool() const { return std::cmp_not_equal(m_index, (-1)); }
 
       private:
         friend class boost::iterator_core_access;
@@ -397,7 +392,6 @@ class shared_subset
     }
 };
 
-} // namespace detail
-} // namespace atermpp
+} // namespace atermpp::detail
 
 #endif

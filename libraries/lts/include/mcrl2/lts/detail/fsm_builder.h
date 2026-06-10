@@ -57,7 +57,7 @@ inline lts_fsm_base::probabilistic_state parse_distribution(const std::string& d
   // Otherwise the distribution has the shape [state1 enumerator1/denominator1 ... staten enumeratorn/denominatorn]
   std::vector<lts_fsm_base::state_probability_pair> result;
   std::string s = utilities::trim_copy(distribution);
-  if (s.substr(0,1) != "[")
+  if (!s.starts_with("["))
   {
     throw mcrl2::runtime_error("Distribution does not start with ']': " + distribution + ".");
   }

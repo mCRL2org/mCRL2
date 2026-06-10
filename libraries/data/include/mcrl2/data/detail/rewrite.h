@@ -150,18 +150,16 @@ class Rewriter
       bool body_in_normal_form);
 
     /// Rewrite t, assuming that the headsymbol of t, which can be nested, is a lambda term.
-    void rewrite_lambda_application(
-                      data_expression& result,
-                      const data_expression& t,
-                      substitution_type& sigma,
-                      const bool arguments_are_in_normal_form = false);
+    void rewrite_lambda_application(data_expression& result,
+      const data_expression& t,
+      substitution_type& sigma,
+      bool arguments_are_in_normal_form = false);
 
-    void rewrite_lambda_application(
-                      data_expression& result,
-                      const abstraction& lambda_term,
-                      const application& t,
-                      substitution_type& sigma,
-                      const bool arguments_are_in_normal_form = false);
+    void rewrite_lambda_application(data_expression& result,
+      const abstraction& lambda_term,
+      const application& t,
+      substitution_type& sigma,
+      bool arguments_are_in_normal_form = false);
 
     virtual void thread_initialise()
     {
