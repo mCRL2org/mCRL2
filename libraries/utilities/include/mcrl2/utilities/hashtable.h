@@ -120,7 +120,7 @@ public:
   void clear();
 
   /// \brief Insert a key in the indexed set and return its index. 
-  /// \details If the element was already in the set, the resulting bool is true, and the existing index is returned.
+  /// \details If the element was already in the set, the resulting bool is false, and the existing index is returned.
   ///         Otherwise, the key is inserted in the set, and the next available index is assigned to it. 
   /// \param  key The key to be inserted in the set.
   /// \return The index of the key and a boolean indicating whether the element was actually inserted. 

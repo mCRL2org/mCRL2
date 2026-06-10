@@ -14,6 +14,7 @@
 #include "mcrl2/utilities/power_of_two.h" 
 #include "mcrl2/utilities/hashtable.h"    // necessary for header test.
 #include "mcrl2/utilities/indexed_set.h"    // necessary for header test.
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2::utilities
 {
@@ -89,26 +90,37 @@ inline std::pair<typename hashtable<Key,Hash,Equals,Allocator>::iterator, bool> 
 {
   // Resize hashtable must be done explicitly.
   assert(!must_resize());
-  ++m_number_of_elements;
 
   const std::size_t key_index = get_index(key);
   auto it = begin() + key_index;
 
-  // Find the first empty position.
-  while (*it != nullptr)
+  // Find either an existing key or the first empty position.
+  while (true)
   {
+    if (*it == nullptr)
+    {
+      *it = key;
+      ++m_number_of_elements;
+      return std::make_pair(it, true);
+    }
+
+    if (m_equals(*it, key))
+    {
+      return std::make_pair(it, false);
+    }
+
     ++it;
     if (it == end())
     {
       it = begin();
     }
 
-    assert(it != begin() + key_index);
+    if (it == begin() + key_index)
+    {
+      assert(false && "hashtable::insert exhausted table without finding a slot");
+      throw mcrl2::runtime_error("hashtable::insert exhausted table without finding a slot");
+    }
   }
-
-  // Found an empty spot, insert a new index belonging to key,
-  *it = key;
-  return std::make_pair(it, true);
 }
 
 
@@ -129,13 +141,9 @@ inline typename hashtable<Key,Hash,Equals,Allocator>::iterator hashtable<Key,Has
 
     if (it == begin() + key_index)
     {
-      // An element not in the hashset is begin removed.
-      // When optimizing, the gcc compiler tends to generate
-      // destructions of non generated aterms. If this is
-      // repaired, this safety escape can be removed. 
-      return it; 
+      assert(false && "hashtable::erase called for a key that is not present");
+      throw mcrl2::runtime_error("hashtable::erase called for a key that is not present");
     }
-    assert(it != begin() + key_index);
   }
 
   *it = nullptr;
