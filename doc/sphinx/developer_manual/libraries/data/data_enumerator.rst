@@ -1,6 +1,29 @@
 Data enumerator
 ################
 
+Formal definition
+-----------------
+
+Let :math:`\mathit{range}(e)` denote the set of all values that data expression
+:math:`e` can attain.
+
+.. admonition:: Definition (Enumerable sort)
+
+   A sort :math:`S` is *enumerable* iff there exists a function
+   :math:`\mathit{enum}_S` that maps an arbitrary data expression :math:`e` of
+   sort :math:`S` to a finite set of closed data expressions
+   :math:`\{e_1, \ldots, e_k\}` such that
+
+   .. math:: \mathit{range}(e) = \bigcup_{i=1}^{k} \mathit{range}(e_i).
+
+By applying :math:`\mathit{enum}_S` repeatedly to the non-closed sub-results,
+a tree expansion is obtained whose leaves form a finite representation of
+:math:`e`. For sorts that are finite (see `Finiteness of sorts
+<data_library.html#finiteness-of-sorts>`_), this tree is always finite.
+
+Algorithm
+---------
+
 Given an expression :math:`\varphi` of type :math:`T` and a list of data
 variables :math:`v`, the enumerator algorithm iteratively reports expressions
 :math:`[\varphi_0, \varphi_1, \ldots]` that can be obtained from :math:`\varphi`
