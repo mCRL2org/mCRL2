@@ -25,9 +25,8 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/bool.h"
 
-namespace mcrl2 {
-
-  namespace data {
+namespace mcrl2::data
+{
 
       /// \brief Give all system defined constructors for function_update.
       /// \return All system defined constructors for function_update.
@@ -477,19 +476,17 @@ namespace mcrl2 {
         variable vf("f",make_function_sort_(s, t));
 
         data_equation_vector result;
-        result.push_back(data_equation(variable_list({vf, vv, vx}), is_not_a_function_update(s, t, vf), function_update(s, t, vf, vx, vv), if_always_else(s, t, equal_to(vf(vx), vv), vf, function_update_stable(s, t, vf, vx, vv))));
-        result.push_back(data_equation(variable_list({vf, vv, vw, vx}), function_update(s, t, function_update_stable(s, t, vf, vx, vw), vx, vv), if_always_else(s, t, equal_to(vf(vx), vv), vf, function_update_stable(s, t, vf, vx, vv))));
-        result.push_back(data_equation(variable_list({vf, vv, vw, vx, vy}), less(vy, vx), function_update(s, t, function_update_stable(s, t, vf, vy, vw), vx, vv), function_update_stable(s, t, function_update(s, t, vf, vx, vv), vy, vw)));
-        result.push_back(data_equation(variable_list({vf, vv, vw, vx, vy}), less(vx, vy), function_update(s, t, function_update_stable(s, t, vf, vy, vw), vx, vv), if_always_else(s, t, equal_to(vf(vx), vv), function_update_stable(s, t, vf, vy, vw), function_update_stable(s, t, function_update_stable(s, t, vf, vy, vw), vx, vv))));
-        result.push_back(data_equation(variable_list({vf, vv, vx, vy}), not_equal_to(vx, vy), function_update_stable(s, t, vf, vx, vv)(vy), vf(vy)));
-        result.push_back(data_equation(variable_list({vf, vv, vx}), function_update_stable(s, t, vf, vx, vv)(vx), vv));
-        result.push_back(data_equation(variable_list({vf, vv, vx, vy}), function_update(s, t, vf, vx, vv)(vy), if_(equal_to(vx, vy), vv, vf(vy))));
+        result.emplace_back(variable_list({vf, vv, vx}), is_not_a_function_update(s, t, vf), function_update(s, t, vf, vx, vv), if_always_else(s, t, equal_to(vf(vx), vv), vf, function_update_stable(s, t, vf, vx, vv)));
+        result.emplace_back(variable_list({vf, vv, vw, vx}), function_update(s, t, function_update_stable(s, t, vf, vx, vw), vx, vv), if_always_else(s, t, equal_to(vf(vx), vv), vf, function_update_stable(s, t, vf, vx, vv)));
+        result.emplace_back(variable_list({vf, vv, vw, vx, vy}), less(vy, vx), function_update(s, t, function_update_stable(s, t, vf, vy, vw), vx, vv), function_update_stable(s, t, function_update(s, t, vf, vx, vv), vy, vw));
+        result.emplace_back(variable_list({vf, vv, vw, vx, vy}), less(vx, vy), function_update(s, t, function_update_stable(s, t, vf, vy, vw), vx, vv), if_always_else(s, t, equal_to(vf(vx), vv), function_update_stable(s, t, vf, vy, vw), function_update_stable(s, t, function_update_stable(s, t, vf, vy, vw), vx, vv)));
+        result.emplace_back(variable_list({vf, vv, vx, vy}), not_equal_to(vx, vy), function_update_stable(s, t, vf, vx, vv)(vy), vf(vy));
+        result.emplace_back(variable_list({vf, vv, vx}), function_update_stable(s, t, vf, vx, vv)(vx), vv);
+        result.emplace_back(variable_list({vf, vv, vx, vy}), function_update(s, t, vf, vx, vv)(vy), if_(equal_to(vx, vy), vv, vf(vy)));
         return result;
       }
 
-  } // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #include "mcrl2/data/detail/function_update.h" // This file contains the manual implementations of rewrite functions.
 #endif // MCRL2_DATA_FUNCTION_UPDATE_H
