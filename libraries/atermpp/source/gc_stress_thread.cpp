@@ -13,6 +13,7 @@
 #include "mcrl2/atermpp/detail/thread_aterm_pool.h"
 
 #include <atomic>
+#include <chrono>
 #include <cstdlib>
 #include <thread>
 
@@ -38,7 +39,7 @@ void start_gc_stress_thread()
       while (g_gc_stress_running.load(std::memory_order_relaxed))
       {
         g_thread_term_pool().collect();
-        std::this_thread::yield();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
       }
     });
     std::atexit(stop_gc_stress_thread);
