@@ -38,20 +38,20 @@ inline lps::specification transform_lts2lps(const lts_lts_t& l)
   );
 
   const std::vector<transition>& trans=l.get_transitions();
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const auto& tran: trans)
   {
-    const lps::multi_action actions=l.action_label(r->label());
-  
+    const lps::multi_action actions = l.action_label(tran.label());
+
     assignment_list assignments;
-    if (r->from()!=r->to())
+    if (tran.from() != tran.to())
     {
-      assignments=push_back(assignments,assignment(process_parameter,sort_pos::pos(r->to()+1)));
+      assignments = push_back(assignments, assignment(process_parameter, sort_pos::pos(tran.to() + 1)));
     }
-  
+
     const action_summand summand(variable_list(),
-                                 equal_to(process_parameter,sort_pos::pos(r->from()+1)),
-                                 actions,
-                                 assignments);
+      equal_to(process_parameter, sort_pos::pos(tran.from() + 1)),
+      actions,
+      assignments);
     action_summands.push_back(summand);
   }
   

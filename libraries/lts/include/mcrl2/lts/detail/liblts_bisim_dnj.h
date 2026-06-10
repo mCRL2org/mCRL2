@@ -2891,8 +2891,8 @@ class bisim_partitioner_dnj
   private:
     /// \brief modes that determine details of how split() should work
     enum refine_mode_t{extend_from_marked_states,
-                       extend_from_marked_states__add_new_noninert_to_splitter,
-                       extend_from_splitter };
+      extend_from_marked_states_add_new_noninert_to_splitter,
+      extend_from_splitter };
 
     /// \brief automaton that is being reduced
     LTS_TYPE& aut;
@@ -3401,11 +3401,12 @@ class bisim_partitioner_dnj
                                                  part_tr.splitter_list.begin();
                 if (1 < B->size())
                 {
-                    B = split(B, /* splitter block_bunch */ slice,
-                      extend_from_marked_states__add_new_noninert_to_splitter);
-                    // We can ignore possible new non-inert transitions, as
-                    // every R-bottom state already has a transition in bunch.
-                    B->marked_nonbottom_begin = B->end;
+                  B = split(B,
+                    /* splitter block_bunch */ slice,
+                    extend_from_marked_states_add_new_noninert_to_splitter);
+                  // We can ignore possible new non-inert transitions, as
+                  // every R-bottom state already has a transition in bunch.
+                  B->marked_nonbottom_begin = B->end;
                 }
                 else
                 {                                                               assert(B->nonbottom_begin == B->end);
@@ -4340,10 +4341,12 @@ class bisim_partitioner_dnj
                 // Line 2.16: Remove Tprime_B--> = Tprime_R--> from the
                 //            splitter list
                 /* and the remainder of Line 2.17                            */ assert(0 == block_U->marked_size());  assert(0 == block_R->marked_size());
-                part_tr.adapt_transitions_for_new_block(block_U, block_R,       ONLY_IF_DEBUG( *this, )
-                    extend_from_marked_states__add_new_noninert_to_splitter ==
-                                  mode, splitter_T, bisim_dnj::new_block_is_U);
-                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                part_tr.adapt_transitions_for_new_block(block_U,
+                  block_R,
+                  ONLY_IF_DEBUG(*this) extend_from_marked_states_add_new_noninert_to_splitter == mode,
+                  splitter_T,
+                  bisim_dnj::new_block_is_U);
+#if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     finalise_U_is_smaller(block_U, block_R, *this);
                                                                                 #endif
             END_COROUTINE
@@ -4494,10 +4497,12 @@ class bisim_partitioner_dnj
                 // Line 2.16: Remove Tprime_B--> = Tprime_R--> from the
                 //            splitter list
                 /* and the remainder of Line 2.17                            */ assert(0 == block_B->marked_size());  assert(0 == block_R->marked_size());
-                part_tr.adapt_transitions_for_new_block(block_R, block_B,       ONLY_IF_DEBUG( *this, )
-                    extend_from_marked_states__add_new_noninert_to_splitter ==
-                                  mode, splitter_T, bisim_dnj::new_block_is_R);
-                                                                                #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
+                part_tr.adapt_transitions_for_new_block(block_R,
+                  block_B,
+                  ONLY_IF_DEBUG(*this) extend_from_marked_states_add_new_noninert_to_splitter == mode,
+                  splitter_T,
+                  bisim_dnj::new_block_is_R);
+#if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     finalise_R_is_smaller(block_B, block_R, *this);
                                                                                 #endif
             END_COROUTINE
@@ -4548,9 +4553,13 @@ class bisim_partitioner_dnj
                                                                                             part_tr.splitter_list.begin() != bbslice_R_tau_U &&
                                                                                                        part_tr.splitter_list.front().source_block() == block_R;
                                                                                 #endif
-            block_N = split(block_R, bbslice_R_tau_U,
-                      extend_from_marked_states__add_new_noninert_to_splitter); assert(part_st.permutation.data() < block_N->begin);
-            block_Rprime = block_N->begin[-1].st->bl.ock;
+                                                                                    block_N = split(block_R,
+                                                                                      bbslice_R_tau_U,
+                                                                                      extend_from_marked_states_add_new_noninert_to_splitter);
+                                                                                    assert(part_st.permutation.data()
+                                                                                           < block_N->begin);
+                                                                                    block_Rprime
+                                                                                      = block_N->begin[-1].st->bl.ock;
                                                                                 #ifndef NDEBUG
                                                                                     // If the first element of the splitter list was a block_bunch-slice of
                                                                                     // block_N, it was split up.  The condition below checks whether the

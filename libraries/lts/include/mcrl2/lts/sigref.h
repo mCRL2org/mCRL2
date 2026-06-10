@@ -376,9 +376,9 @@ protected:
   {
     std::stringstream os;
     os << "{ ";
-    for(signature_t::const_iterator i = sig.begin(); i != sig.end() ; ++i)
+    for (const auto& i: sig)
     {
-      os << " (" << pp(m_lts.action_label(i->first)) << ", " << i->second << ") ";
+      os << " (" << pp(m_lts.action_label(i.first)) << ", " << i.second << ") ";
     }
     os << " }";
     return os.str();
@@ -442,9 +442,9 @@ protected:
 
     // Set quotient transitions
     m_lts.clear_transitions();
-    for(std::set<transition>::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
+    for (const auto& i: transitions)
     {
-      m_lts.add_transition(*i);
+      m_lts.add_transition(i);
     }
   }
 

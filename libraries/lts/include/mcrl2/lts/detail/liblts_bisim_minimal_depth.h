@@ -13,7 +13,7 @@
 ///
 /// \details
 #ifndef _LIBLTS_BISIM_M
-#define _LIBLTS_BISIM_M
+#define LIBLTS_BISIM_M
 
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
@@ -50,9 +50,9 @@ public:
     }
     sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::lbl_tgt_src);
     const std::vector<transition>& trans = aut.get_transitions();
-    for (std::vector<transition>::const_iterator r = trans.begin(); r != trans.end(); ++r)
+    for (const auto& transition: trans)
     {
-      initial_block.transitions.push_back(*r);
+      initial_block.transitions.push_back(transition);
     }
     initial_block.block_index = 0;
     initial_block.state_index = 0;
@@ -357,15 +357,15 @@ private:
         std::vector<transition> non_flagged_transitions;
 
         old_transitions = blocks[Bsplit].transitions;
-        for (std::vector<transition>::iterator k = old_transitions.begin(); k != old_transitions.end(); ++k)
+        for (auto& old_transition: old_transitions)
         {
-          if (state_flags[(*k).to()])
+          if (state_flags[old_transition.to()])
           {
-            flagged_transitions.push_back(*k);
+            flagged_transitions.push_back(old_transition);
           }
           else
           {
-            non_flagged_transitions.push_back(*k);
+            non_flagged_transitions.push_back(old_transition);
           }
         }
 
@@ -403,11 +403,9 @@ private:
         if (BlockLeft.block_index != Bsplit)
         {
           std::vector<state_type>& reference_to_flagged_states_of_block2 = blocks.back().states;
-          for (std::vector<state_type>::const_iterator j = reference_to_flagged_states_of_block2.begin();
-               j != reference_to_flagged_states_of_block2.end();
-               ++j)
+          for (unsigned long j: reference_to_flagged_states_of_block2)
           {
-            block_index_of_a_state[*j] = BlockLeft.block_index;
+            block_index_of_a_state[j] = BlockLeft.block_index;
           }
         }
       }

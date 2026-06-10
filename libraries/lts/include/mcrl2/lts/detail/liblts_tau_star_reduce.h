@@ -66,10 +66,10 @@ std::map < std::size_t,
     {
       const std::set<std::size_t>& outgoing_states= i->second;
       std::set<std::size_t> new_outgoing_states=outgoing_states;
-      for(std::set<std::size_t>::const_iterator j=outgoing_states.begin(); j!=outgoing_states.end(); j++)
+      for (unsigned long outgoing_state: outgoing_states)
       {
-        new_outgoing_states.insert(resulting_tau_transitions[*j].begin(),
-                                   resulting_tau_transitions[*j].end());
+        new_outgoing_states.insert(resulting_tau_transitions[outgoing_state].begin(),
+          resulting_tau_transitions[outgoing_state].end());
       }
       if (i->second.size()<new_outgoing_states.size())
       { 
@@ -121,10 +121,9 @@ void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BAS
   }
   
   // Add the newly generated transitions
-  for(std::set < transition >::const_iterator i=new_transitions.begin();
-            i!=new_transitions.end(); ++i)
+  for (const auto& new_transition: new_transitions)
   {
-    l.add_transition(*i);
+    l.add_transition(new_transition);
   }
 }
 
@@ -252,34 +251,33 @@ void tau_star_reduce(lts< STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS >& l)
   std::set < transition> new_transitions;
 
   // Add all the original non tau transitions.
-  for(std::vector < transition >::const_iterator i=original_transitions.begin(); i!=original_transitions.end(); ++i)
+  for (const auto& original_transition: original_transitions)
   {
-    if (!l.is_tau(l.apply_hidden_label_map(i->label())))
+    if (!l.is_tau(l.apply_hidden_label_map(original_transition.label())))
     {
-      new_transitions.insert(*i);
+      new_transitions.insert(original_transition);
     }
   }
 
   // Add for every tau*.a transitions sequence a single transition a, provided a is not tau.
   std::map <state_t, std::set <state_t> > backward_tau_closure=calculate_non_reflexive_transitive_tau_closure(l,false);
-  for(std::vector < transition >::const_iterator i=original_transitions.begin(); i!=original_transitions.end(); ++i)
+  for (const auto& original_transition: original_transitions)
   {
-    if (!l.is_tau(l.apply_hidden_label_map(i->label())))
+    if (!l.is_tau(l.apply_hidden_label_map(original_transition.label())))
     {
-      std::set<state_t>& new_from_states=backward_tau_closure[i->from()];
+      std::set<state_t>& new_from_states = backward_tau_closure[original_transition.from()];
       for(typename std::set<state_t>::const_iterator j=new_from_states.begin(); j!=new_from_states.end(); ++j)
       {
-        new_transitions.insert(transition(*j,i->label(),i->to()));
+        new_transitions.insert(transition(*j, original_transition.label(), original_transition.to()));
       }
     }
   }
   l.clear_transitions();
   
   // Add the newly generated transitions
-  for(std::set < transition >::const_iterator i=new_transitions.begin();
-            i!=new_transitions.end(); ++i)
+  for (const auto& new_transition: new_transitions)
   {
-    l.add_transition(*i);
+    l.add_transition(new_transition);
   }
 
   reachability_check(l, true); // Remove unreachable parts.

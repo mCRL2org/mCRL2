@@ -348,7 +348,7 @@ void scc_partitioner<LTS_TYPE>::number_sccs()
           const state_type v = src_tgt.get_transitions()[i];
           if (disc[v] == uninitialised)
           {
-            work.emplace_back(std::make_pair(s, i + 1));
+            work.emplace_back(s, i + 1);
             work.emplace_back(std::make_pair(v, src_tgt.lowerbound(v)));
             disc[v]=0;
             recurse = true;

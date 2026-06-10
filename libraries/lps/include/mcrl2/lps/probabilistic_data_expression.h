@@ -60,7 +60,7 @@ namespace detail
     return result;
   }
 
-  inline const data::data_expression make_nat_bnn(const utilities::big_natural_number& b)
+  inline data::data_expression make_nat_bnn(const utilities::big_natural_number& b)
   {
     std::size_t pos=b.size();
     if (pos==0)
@@ -81,7 +81,7 @@ namespace detail
     return result;
   }
 
-  inline const data::data_expression make_pos_bnn(const utilities::big_natural_number& b)
+  inline data::data_expression make_pos_bnn(const utilities::big_natural_number& b)
   {
     std::size_t pos=b.size();
     assert(pos>0);

@@ -676,18 +676,15 @@ private:
       return s;
     }
 
-    template <
-      typename StateType,
+    template<typename StateType,
       typename SummandSequence,
       typename DiscoverState = utilities::skip,
       typename ExamineTransition = utilities::skip,
       typename StartState = utilities::skip,
       typename FinishState = utilities::skip,
-      typename DiscoverInitialState = utilities::skip
-    >
-    void generate_state_space_thread(
-      std::unique_ptr<todo_set>& todo,
-      const std::size_t thread_index,
+      typename DiscoverInitialState = utilities::skip>
+    void generate_state_space_thread(std::unique_ptr<todo_set>& todo,
+      std::size_t thread_index,
       std::atomic<std::size_t>& number_of_active_processes,
       std::atomic<std::size_t>& number_of_idle_processes,
       const SummandSequence& regular_summands,
@@ -698,7 +695,7 @@ private:
       StartState start_state,
       FinishState finish_state,
       data::rewriter thread_rewr,
-      data::mutable_indexed_substitution<> thread_sigma  // This is intentionally a copy. 
+      data::mutable_indexed_substitution<> thread_sigma // This is intentionally a copy.
     );
 
     // pre: s0 is in normal form

@@ -108,10 +108,7 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     /// \brief Apply on single single variable expression.
     /// \param[in] v the variable for which to give the associated expression.
     /// \return expression equivalent to s(e), or a reference to such an expression.
-    const expression_type operator()(variable_type const& v) const
-    {
-      return g_(v);
-    }
+    expression_type operator()(variable_type const& v) const { return g_(v); }
 
     assignment operator[](variable_type const& v)
     {
@@ -161,10 +158,7 @@ class mutable_substitution_composer<mutable_indexed_substitution<VariableType, E
     /// \brief Apply on single single variable expression.
     /// \param[in] v the variable for which to give the associated expression.
     /// \return expression equivalent to s(e), or a reference to such an expression.
-    const expression_type operator()(variable_type const& v) const
-    {
-      return g_(v);
-    }
+    expression_type operator()(variable_type const& v) const { return g_(v); }
 
     assignment operator[](variable_type const& v)
     {

@@ -196,9 +196,7 @@ inline action_label_lts translate_label_aux(const action_label_string& l1,
   std::string l(l1);
   
   // Remove quotes, if present in the action label string.
-  if ((l.size()>=2) &&
-      (l.substr(0,1)=="\"") &&
-      (l.substr(l.size()-1,l.size())=="\""))
+  if ((l.size() >= 2) && (l.starts_with("\"")) && (l.substr(l.size() - 1, l.size()) == "\""))
   {
     l=l.substr(1,l.size()-1);
   }

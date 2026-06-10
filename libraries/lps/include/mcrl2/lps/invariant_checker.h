@@ -14,6 +14,8 @@
 #ifndef MCRL2_LPS_INVARIANT_CHECKER_H
 #define MCRL2_LPS_INVARIANT_CHECKER_H
 
+#include <utility>
+
 #include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
 #include "mcrl2/lps/stochastic_specification.h"
@@ -129,7 +131,7 @@ void Invariant_Checker<Specification>::save_dot_file(std::size_t a_summand_numbe
   {
     std::string v_file_name=f_dot_file_name;
 
-    if (a_summand_number == (std::size_t)-1) // Dangerous
+    if (std::cmp_equal(a_summand_number, -1)) // Dangerous
     {
       v_file_name += "-init.dot";
     }
