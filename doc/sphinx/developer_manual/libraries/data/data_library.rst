@@ -337,10 +337,12 @@ More formally, data expressions ``e``, with sort expression ``S`` and variable n
     : | forall x:S, ..., x:S. e
     : | exists x:S, ..., x:S. e
     : | e whr x = e, ..., x = e end
+    : | {x:S | e}
 
 Here ``e(e,...,e)`` denotes application of data expressions, ``lambda x:S, ..., x:S . e``
 denotes lambda abstraction, ``forall x:S, ..., x:S . e`` and ``exists x:S, ..., x:S . e``
-denote universal and existential quantification.
+denote universal and existential quantification. The form ``{x:S | e}`` is set or bag
+comprehension: a set when ``e`` has sort ``Bool``, a bag when ``e`` has sort ``Nat``.
 
 Predefined sorts
 ^^^^^^^^^^^^^^^^
@@ -895,3 +897,424 @@ is:
    with aliased sorts are recognised as equal.
 
    :doc:`Data rewriters <data_rewriters>` — evaluating and simplifying data expressions.
+
+Formal foundations
+------------------
+
+This section gives the mathematical definitions underlying the mCRL2 data
+language. Practical usage is described in the sections above; the material here
+provides the formal reference for the concepts implemented in the library.
+
+Data specification
+^^^^^^^^^^^^^^^^^^
+
+.. admonition:: Definition (Data specification)
+
+   A *data specification* is a triple
+
+   .. math:: D = (S,\, \Omega,\, E)
+
+   where :math:`S` is a set of sorts, :math:`\Omega` is a set of operations, and
+   :math:`E` is a set of equations. In an mCRL2 specification, sorts are
+   declared with the ``sort`` keyword, constructors with ``cons``, mappings with
+   ``map``, and equations with ``eqn``.
+
+Sort expressions
+^^^^^^^^^^^^^^^^
+
+We assume a fixed set of *basic sorts* :math:`S_\mathit{Basic}`, always
+containing the booleans :math:`\mathbb{B}`, positive naturals
+:math:`\mathbb{N}^+`, naturals :math:`\mathbb{N}`, integers :math:`\mathbb{Z}`,
+and reals :math:`\mathbb{R}`.
+
+.. admonition:: Definition (Sort expressions)
+
+   Sort expressions :math:`S` are defined as follows (:math:`\rightarrow`
+   right-associative):
+
+   .. math::
+
+      S\ ::=\ S_\mathit{Basic}\ \mid\ S_\mathit{Container}\
+              \mid\ S \times \cdots \times S \rightarrow S\
+              \mid\ S_\mathit{Struct}
+
+   with container sorts
+
+   .. math::
+
+      S_\mathit{Container}\ ::=\ \mathit{List}(S)\ \mid\ \mathit{Set}(S)\ \mid\ \mathit{Bag}(S)
+
+   In :math:`S_0 \times \cdots \times S_n \rightarrow S`, the sorts
+   :math:`S_0, \ldots, S_n` are the *domain* and :math:`S` is the *codomain*.
+   Sorts outside :math:`S_\mathit{Basic} \cup S_\mathit{Container} \cup
+   S_\mathit{Struct}` are *function sorts*.
+
+The language also supports *sort aliases* :math:`S_0 = S_1`; only one of the
+two is treated as the canonical sort.
+
+.. admonition:: Example (Sort aliases)
+
+   Given alias :math:`\mathit{LNat} = \mathit{List}(\mathit{Nat})`,
+   data expressions of sort :math:`\mathit{LNat}` and of sort
+   :math:`\mathit{List}(\mathit{Nat})` are interchangeable.
+
+.. admonition:: Definition (Variables)
+
+   We assume a set :math:`V` of variable names with associated sorts. We write
+   :math:`V_s` for the variables of sort :math:`s`.
+
+Operations
+^^^^^^^^^^
+
+.. admonition:: Definition (Operations)
+
+   The set of operations :math:`\Omega` consists of *constructors*
+   :math:`\Omega_C` and *mappings* :math:`\Omega_M`:
+
+   .. math:: \Omega = \Omega_C \cup \Omega_M
+
+   Every element is a typed symbol :math:`n : S`. Constructors are restricted
+   to basic-sort codomains:
+
+   .. math::
+
+      \Omega_C\ ::=\ n : S_B\ \mid\ n : S \times \cdots \times S \rightarrow S_B
+
+   We write :math:`\Omega_{C,s}` for the constructors whose codomain is :math:`s`.
+
+.. admonition:: Definition (Signature)
+
+   A *signature* :math:`\Sigma = (S_\mathit{Basic},\, \Omega)` pairs a set of
+   basic sorts with a set of operations.  The signature always contains at least
+   :math:`\mathbb{B},\, \mathbb{N}^+,\, \mathbb{N},\, \mathbb{Z},\, \mathbb{R}`.
+
+Data expressions
+^^^^^^^^^^^^^^^^
+
+.. admonition:: Definition (Data expressions)
+
+   Data expressions :math:`e`, with sort expressions :math:`S` and variables
+   :math:`x`, are defined inductively:
+
+   .. math::
+
+      e\ ::=\ x\ \mid\ n\ \mid\ e(e,\ldots,e)
+             \ \mid\ \lambda\,x{:}S,\ldots,x{:}S.\,e
+             \ \mid\ \forall\,x{:}S,\ldots,x{:}S.\,e
+             \ \mid\ \exists\,x{:}S,\ldots,x{:}S.\,e
+             \ \mid\ e\ \mathbf{whr}\ x=e,\ldots,x=e\ \mathbf{end}
+             \ \mid\ \{x{:}S\mid e\}
+
+   Here :math:`e(e,\ldots,e)` is application, :math:`\lambda\ldots` is
+   abstraction, and :math:`\{x:S\mid e\}` is set or bag comprehension (a set
+   when :math:`e:\mathbb{B}`, a bag when :math:`e:\mathbb{N}`).
+
+.. admonition:: Convention (Binding operators)
+
+   We write :math:`\Lambda` to denote any binding operator
+   (:math:`\lambda`, :math:`\forall`, :math:`\exists`, :math:`\{\}`) when
+   stating rules that apply to all of them uniformly.
+
+.. admonition:: Convention (System-defined operators)
+
+   System-defined operators are written infix; for example :math:`b_1 \land b_2`
+   for :math:`\mathit{and}(b_1,b_2)`. Standard operator precedence applies.
+
+Valid data expressions
+^^^^^^^^^^^^^^^^^^^^^^
+
+Type validity is defined relative to a *context* :math:`\Gamma`—a set of
+typing statements for variables and operations. We write
+:math:`\Gamma, x : s` for :math:`\Gamma \cup \{x : s\}` and
+:math:`\exists^1_s` to mean *exactly one* such sort :math:`s` exists.
+
+.. admonition:: Definition (Valid data expressions)
+
+   .. math::
+
+      \dfrac{x : s \in \Gamma}{\Gamma \vdash x : s}\ (\mathit{Var})
+      \qquad\qquad
+      \dfrac{n : s \in \Gamma}{\Gamma \vdash n : s}\ (\mathit{Op})
+
+   .. math::
+
+      \dfrac{
+        \Gamma,\,x_0{:}s_0,\ldots,x_n{:}s_n \vdash e : s
+      }{
+        \Gamma \vdash (\lambda\,x_0{:}s_0,\ldots,x_n{:}s_n.\,e)
+          : s_0 \times \cdots \times s_n \rightarrow s
+      }\ (\mathit{Abs})
+
+   .. math::
+
+      \dfrac{
+        \exists^1_{s_0,\ldots,s_n}\!\Bigl(
+          \Gamma \vdash t : s_0 \times \cdots \times s_n \rightarrow s
+          \quad \Gamma \vdash t_0 : s_0 \quad \cdots \quad
+          \Gamma \vdash t_n : s_n
+        \Bigr)
+      }{
+        \Gamma \vdash t(t_0,\ldots,t_n) : s
+      }\ (\mathit{Appl})
+
+   .. math::
+
+      \dfrac{
+        \exists^1_{s_0,\ldots,s_n}\!\Bigl(
+          \Gamma \vdash x_i : s_i,\;
+          \Gamma \vdash e_i : s_i\; (0 \le i \le n),\;
+          \Gamma,\,x_0{:}s_0,\ldots,x_n{:}s_n \vdash e : s
+        \Bigr)
+      }{
+        \Gamma \vdash (e\ \mathbf{whr}\ x_0=e_0,\ldots,x_n=e_n\ \mathbf{end}) : s
+      }\ (\mathit{Where})
+
+   .. math::
+
+      \dfrac{
+        \Gamma,\,x_0{:}s_0,\ldots,x_n{:}s_n \vdash e : \mathbb{B}
+      }{
+        \Gamma \vdash (\forall\,x_0{:}s_0,\ldots,x_n{:}s_n.\,e) : \mathbb{B}
+      }\ (\mathit{Forall})
+      \qquad
+      \dfrac{
+        \Gamma,\,x_0{:}s_0,\ldots,x_n{:}s_n \vdash e : \mathbb{B}
+      }{
+        \Gamma \vdash (\exists\,x_0{:}s_0,\ldots,x_n{:}s_n.\,e) : \mathbb{B}
+      }\ (\mathit{Exists})
+
+   .. math::
+
+      \dfrac{
+        \Gamma,\,x{:}s \vdash e : \mathbb{B}
+      }{
+        \Gamma \vdash \{x{:}s\mid e\} : \mathit{Set}(s)
+      }\ (\mathit{SetComp})
+      \qquad
+      \dfrac{
+        \Gamma,\,x{:}s \vdash e : \mathbb{N}
+      }{
+        \Gamma \vdash \{x{:}s\mid e\} : \mathit{Bag}(s)
+      }\ (\mathit{BagComp})
+
+Equations
+^^^^^^^^^
+
+.. admonition:: Definition (Equations)
+
+   The syntax of equations is:
+
+   .. math:: E\ ::=\ e = e\ \mid\ e \rightarrow e = e
+
+   An unconditional equation has the form :math:`d = e`; a *conditional*
+   equation :math:`c \rightarrow d = e` requires :math:`c` to be true.
+
+   Validity under context :math:`\Gamma`:
+
+   .. math::
+
+      \dfrac{
+        \exists^1_s\!\bigl(\Gamma \vdash d : s \;\; \Gamma \vdash e : s\bigr)
+      }{
+        \Gamma \vdash d = e
+      }\ (\mathit{Eq})
+      \qquad
+      \dfrac{
+        \Gamma \vdash c : \mathbb{B} \quad
+        \exists^1_s\!\bigl(\Gamma \vdash d : s \;\; \Gamma \vdash e : s\bigr)
+      }{
+        \Gamma \vdash c \rightarrow d = e
+      }\ (\mathit{CondEq})
+
+Semantics
+^^^^^^^^^
+
+.. admonition:: Definition (:math:`\Sigma`-algebra)
+
+   A :math:`\Sigma`-algebra :math:`A` for
+   :math:`\Sigma = (S_\mathit{Basic},\,\Omega)` assigns:
+
+   - a *carrier set* :math:`A(s)` to each sort :math:`s`, containing all
+     elements of that sort;
+   - a total function :math:`A(n:s)` to each operation :math:`n:s \in \Omega`.
+
+   All elements of :math:`A(s)` are obtainable by applying the constructors
+   :math:`\Omega_{C,s}`.
+
+.. admonition:: Example (:math:`\Sigma`-algebra for natural numbers)
+
+   With :math:`\Omega_C = \{\mathit{zero}:\mathit{Nat},\;
+   \mathit{succ}:\mathit{Nat}\rightarrow\mathit{Nat}\}` and
+   :math:`\Omega_M = \{\mathit{add}:\mathit{Nat}\times\mathit{Nat}
+   \rightarrow\mathit{Nat}\}`, one :math:`\Sigma`-algebra :math:`A` sets
+   :math:`A(\mathit{Nat})=\mathbb{N}`, :math:`A(\mathit{zero})=0`,
+   :math:`A(\mathit{succ})=\lambda n.\,n+1`, and
+   :math:`A(\mathit{add})=\lambda m,n.\,m+n`.
+
+An *assignment* :math:`\alpha : V \rightarrow A` is a family of functions
+:math:`\alpha_s : V_s \rightarrow A(s)`. The *value* of expression :math:`e`
+under :math:`A` and :math:`\alpha` is written :math:`A(\alpha)(e)`.
+
+.. admonition:: Definition (Value of a data expression)
+
+   .. math::
+
+      \begin{aligned}
+      A(\alpha)(x)
+        &= \alpha_s(x) && x \in V_s\\
+      A(\alpha)(n)
+        &= A(n)\\
+      A(\alpha)\bigl(e(u_0,\ldots,u_n)\bigr)
+        &= A(\alpha)(e)\bigl(A(\alpha)(u_0),\ldots,A(\alpha)(u_n)\bigr)\\
+      A(\alpha)(\Lambda\,x_0{:}s_0,\ldots,x_n{:}s_n.\,e)
+        &= \widehat{\Lambda}\,d_0{\in}A(s_0),\ldots,d_n{\in}A(s_n).\,
+           A\!\left(\alpha[x_i:=d_i]_{0\le i\le n}\right)(e)\\
+      A(\alpha)(e\ \mathbf{whr}\ x_0{=}e_0,\ldots,x_n{=}e_n\ \mathbf{end})
+        &= A\!\left(\alpha[x_i:=d_i]_{0\le i\le n}\right)(e),\quad
+           d_i = A(\alpha)(e_i)
+      \end{aligned}
+
+   Here :math:`\widehat{\Lambda}` denotes abstraction in the semantic domain.
+
+.. admonition:: Remark (Substitution vs. assignment)
+
+   There is a close relation between the syntactic notion of substitution and
+   the semantic notion of assignment: for all substitutions
+   :math:`\sigma : V \rightarrow T_{\Sigma(W)}`, :math:`\Sigma`-algebras
+   :math:`A`, assignments :math:`\beta : W \rightarrow A`, and data expressions
+   :math:`e \in T_{\Sigma(V)}`,
+
+   .. math:: A(\beta)(\sigma(e)) = A(\alpha)(e)
+
+   where :math:`\alpha : V \rightarrow A` is defined by
+   :math:`\alpha(x) = A(\beta)(\sigma(x))`.
+
+   See the :doc:`Capture-avoiding substitutions <data_substitutions>` page for
+   the full definition of syntactic substitution.
+
+Equational logic
+""""""""""""""""
+
+.. admonition:: Definition (Satisfaction)
+
+   For a :math:`\Sigma`-algebra :math:`A`, condition :math:`c`, and expressions
+   :math:`d,e` of the same sort:
+
+   .. math::
+
+      A \vDash_{EL} c \rightarrow d = e
+      \iff
+      A(\alpha)(d) = A(\alpha)(e)\ \wedge\ A(\alpha)(c) = \mathit{true},
+      \quad \text{for all } \alpha : V \rightarrow A
+
+   If :math:`c` is omitted it is treated as :math:`\mathit{true}`.
+
+.. admonition:: Definition (Model and logical consequence)
+
+   A :math:`\Sigma`-algebra :math:`A` is a *model* of :math:`E` if
+   :math:`A \vDash_{EL} eq` for all :math:`eq \in E`; we denote this
+   :math:`A \vDash_{EL} E`. The class of all models is
+   :math:`\mathit{Mod}_{EL}(E)`.
+
+   An equation :math:`eq` is a *logical consequence* of :math:`E`, written
+   :math:`E \vDash_{EL} eq`, if :math:`A \vDash_{EL} eq` for all
+   :math:`A \in \mathit{Mod}_{EL}(E)`.
+
+Finiteness of sorts
+^^^^^^^^^^^^^^^^^^^
+
+Determining whether a sort is finite underlies the ``is_certainly_finite``
+function described under `Data specifications`_.
+
+Let :math:`\mathit{DependentSorts} : \Omega_C \rightarrow 2^S` and
+:math:`\mathit{Sorts} : S \rightarrow 2^S` be defined as follows:
+
+.. math::
+
+   \mathit{DependentSorts}(n : s) =
+   \begin{cases}
+     \emptyset
+       & \text{if } s \in S_\mathit{Basic}\\[4pt]
+     \displaystyle\bigcup_{0 \le i \le m}
+       \bigl(\{s_i\} \cup \mathit{Sorts}(s_i)\bigr)
+       & \text{if } s = s_0 \times \cdots \times s_m \rightarrow s'
+   \end{cases}
+
+.. math::
+
+   \mathit{Sorts}(s) =
+   \begin{cases}
+     \displaystyle\bigcup_{n \in \Omega_{C,s}} \mathit{DependentSorts}(n)
+       & \text{if } s \in S_\mathit{Basic}\\[8pt]
+     \mathit{Sorts}(s')
+       & \text{if } s \in S_\mathit{Container}\\[4pt]
+     \displaystyle\bigcup_{0 \le i \le m} \mathit{Sorts}(s_i) \cup \{s'\}
+       & \text{if } s = s_0 \times \cdots \times s_m \rightarrow s'\\[8pt]
+     \displaystyle\bigcup_{i,j} \mathit{Sorts}(s_{i,j})
+       & \text{if } s = \mathbf{struct}\ c_i(\ldots pr_{i,j}{:}s_{i,j}\ldots)
+   \end{cases}
+
+The predicate :math:`\mathit{Finite} : S \rightarrow \mathbb{B}` is:
+
+.. math::
+
+   \mathit{Finite}(s) =
+   \begin{cases}
+     \Omega_{C,s} \neq \emptyset
+       \;\wedge\; s \notin \mathit{Sorts}(s)
+       \;\wedge\; \forall n \in \Omega_{C,s},\,
+         s' \in \mathit{DependentSorts}(n).\;
+         \mathit{Finite}(s')
+       & \text{if } s \in S_\mathit{Basic}\\[4pt]
+     \mathit{Finite}(s')
+       & \text{if } s = \mathit{Set}(s')\\[4pt]
+     \mathit{false}
+       & \text{if } s \in S_\mathit{Container},\;
+         s \neq \mathit{Set}(s')\\[4pt]
+     (\forall i.\;\mathit{Finite}(s_i))
+       \;\wedge\; \mathit{Finite}(s')
+       & \text{if } s = s_0 \times \cdots \times s_m \rightarrow s'\\[4pt]
+     s \notin \mathit{Sorts}(s)
+       \;\wedge\; \forall s'' \in \mathit{Sorts}(s).\;
+         \mathit{Finite}(s'')
+       & \text{if } s = \mathbf{struct}\ \ldots
+   \end{cases}
+
+Free variables and closed expressions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. admonition:: Definition (Free variables)
+
+   The set of *free variables* :math:`\mathit{FV}(e)` is defined inductively:
+
+   .. math::
+
+      \begin{aligned}
+      \mathit{FV}(x) &= \{x\}\\
+      \mathit{FV}(n) &= \emptyset\\
+      \mathit{FV}\bigl(e(e_0,\ldots,e_n)\bigr)
+        &= \mathit{FV}(e) \cup \bigcup_{0 \le i \le n} \mathit{FV}(e_i)\\
+      \mathit{FV}(\lambda\,x_0{:}s_0,\ldots,x_n{:}s_n.\,e)
+        &= \mathit{FV}(e) \setminus \{x_i \mid 0 \le i \le n\}
+      \end{aligned}
+
+.. admonition:: Definition (Closed expression)
+
+   A data expression :math:`e` is *closed* iff :math:`\mathit{FV}(e) = \emptyset`.
+
+Equality checking
+^^^^^^^^^^^^^^^^^
+
+Equality of data expressions can be checked by a rewriter or a prover; see
+:doc:`Data rewriters <data_rewriters>`. An equality checker
+:math:`\mathit{Eq}` must satisfy:
+
+.. math::
+
+   \begin{aligned}
+   \mathit{Eq}(\mathit{true},\,\mathit{false}) &\equiv \mathit{false}\\
+   \mathit{Eq}(e,\,e') &\implies e = e'
+   \end{aligned}
+
+That is, :math:`\mathit{true}` and :math:`\mathit{false}` are distinct, and
+:math:`\mathit{Eq}` is sound: it only reports equality when it holds.
