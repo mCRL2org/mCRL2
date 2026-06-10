@@ -248,10 +248,10 @@ public:
   {
   private:
     const ThreadLocal* m_thread_local;
-    mutable std::size_t bucket;
-    mutable std::size_t bucket_size;
-    mutable std::size_t index;
-    mutable std::size_t yielded;
+    mutable std::size_t bucket = 0;
+    mutable std::size_t bucket_size = 1;
+    mutable std::size_t index = 0;
+    mutable std::size_t yielded = 0;
 
     /// \brief Advance to the next bucket.
     void next_bucket() const
@@ -269,7 +269,7 @@ public:
     using iterator_category = std::forward_iterator_tag;
 
     Iter(const ThreadLocal* tl, bool begin)
-      : m_thread_local(tl), bucket(0), bucket_size(1), index(0), yielded(0)
+      : m_thread_local(tl)
     {
       if (!begin)
       {

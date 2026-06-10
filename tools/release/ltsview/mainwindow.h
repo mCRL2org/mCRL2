@@ -58,7 +58,7 @@ class MainWindow : public QMainWindow
     void stopStructuring() { m_ltsCanvas->setUpdatesEnabled(true); setEnabled(true); }
     void logMessage(QString level, QDateTime /* timestamp */, QString message)
     {
-      if (log_level_from_string(level.toStdString()) == mcrl2::log::error)
+      if (mcrl2::log::log_level_from_string(level.toStdString()) == mcrl2::log::error)
       {
         QMessageBox::critical(this, QString("LTSView - An error occured (%1)"), message);
       }

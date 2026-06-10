@@ -66,6 +66,8 @@ public:
   using argument_type = variable_type;
   using result_type = expression_type;
 
+  mutable_indexed_substitution() = default;
+
   mutable_indexed_substitution(const substitution_type& substitution,
                                const bool variables_in_rhs_set_is_defined,
                                const std::multiset<variable_type>& variables_in_rhs)
