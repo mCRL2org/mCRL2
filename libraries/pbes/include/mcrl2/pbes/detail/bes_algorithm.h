@@ -76,15 +76,15 @@ class bes_algorithm
 
       std::vector<pbes_equation> reachable_equations;
       std::set<propositional_variable> unreachable_equations;
-      for(auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (auto& i: m_bes.equations())
       {
-        if(reachable.find(propositional_variable_instantiation(i->variable().name())) != reachable.end())
+        if (reachable.find(propositional_variable_instantiation(i.variable().name())) != reachable.end())
         {
-          reachable_equations.insert(reachable_equations.end(), *i);
+          reachable_equations.insert(reachable_equations.end(), i);
         }
         else
         {
-          unreachable_equations.insert(i->variable());
+          unreachable_equations.insert(i.variable());
         }
       }
 

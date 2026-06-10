@@ -459,18 +459,20 @@ class pbesinst_alternative_lazy_algorithm
       }
       // erase non reachable equations.
       std::unordered_map<propositional_variable_instantiation, pbes_expression> new_equations;
-      for(std::unordered_map<propositional_variable_instantiation, pbes_expression>::const_iterator i=equation.begin(); i!=equation.end(); ++i)
+      for (const auto& i: equation)
       {
         // Insert the new equation if it is reachable, or if it equal to true or false and m_erase_unused_bes_variables is set to some.
-        if (reachable.count(i->first)>0 || (m_erase_unused_bes_variables==pbes_system::some && (is_true(i->second) || is_false(i->second))))
+        if (reachable.count(i.first) > 0
+            || (m_erase_unused_bes_variables == pbes_system::some && (is_true(i.second) || is_false(i.second))))
         {
-          new_equations.insert(*i);
-          std::size_t index = equation_index[i->first.name()];
-          instantiations[index].push_back(i->first);
-          std::set<propositional_variable_instantiation> rhs_variables = find_propositional_variable_instantiations(i->second);
+          new_equations.insert(i);
+          std::size_t index = equation_index[i.first.name()];
+          instantiations[index].push_back(i.first);
+          std::set<propositional_variable_instantiation> rhs_variables
+            = find_propositional_variable_instantiations(i.second);
           for (const propositional_variable_instantiation& v: rhs_variables)
           {
-            occurrence[v].insert(i->first);
+            occurrence[v].insert(i.first);
           }
 
         }

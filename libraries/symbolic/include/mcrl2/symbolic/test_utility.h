@@ -18,6 +18,7 @@
 #include <sylvan_ldd.hpp>
 
 #include <random>
+#include <utility>
 #include <vector>
 
 namespace mcrl2::symbolic
@@ -70,7 +71,7 @@ inline sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t a
     std::size_t added = 0;
     for (const auto& vector : contained)
     {
-      if (static_cast<std::size_t>(dist(gen())) <= amount)
+      if (std::cmp_less_equal(dist(gen()), amount))
       {
         result_vector.push_back(vector);
         ++added;

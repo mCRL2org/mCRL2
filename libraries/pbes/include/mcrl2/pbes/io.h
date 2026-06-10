@@ -44,8 +44,7 @@ const utilities::file_format& pbes_format_internal_bes() { return pbes_file_form
 inline
 const utilities::file_format& pbes_format_pgsolver() { return pbes_file_formats()[3]; }
 
-inline
-const utilities::file_format guess_format(const std::string& filename)
+inline utilities::file_format guess_format(const std::string& filename)
 {
   for (const utilities::file_format& it : pbes_file_formats())
   {

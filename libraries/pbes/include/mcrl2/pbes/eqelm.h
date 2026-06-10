@@ -71,10 +71,10 @@ class pbes_eqelm_algorithm
     std::string print_vertices() const
     {
       std::ostringstream out;
-      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      for (const auto& vertex: m_vertices)
       {
-        out << i->first << " -> [ ";
-        const std::vector<equivalence_class>& v = i->second;
+        out << vertex.first << " -> [ ";
+        const std::vector<equivalence_class>& v = vertex.second;
         for (auto j = v.begin(); j != v.end(); ++j)
         {
           if (j != v.begin())
@@ -92,9 +92,9 @@ class pbes_eqelm_algorithm
     std::string print_edges() const
     {
       std::ostringstream out;
-      for (auto i = m_edges.begin(); i != m_edges.end(); ++i)
+      for (const auto& edge: m_edges)
       {
-        out << i->first << " -> " << core::detail::print_set(i->second) << std::endl;
+        out << edge.first << " -> " << core::detail::print_set(edge.second) << std::endl;
       }
       return out.str();
     }
@@ -103,10 +103,10 @@ class pbes_eqelm_algorithm
     std::string print_equivalence_classes() const
     {
       std::ostringstream out;
-      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      for (const auto& vertex: m_vertices)
       {
-        out << "  vertex " << i->first << ": ";
-        for (auto j = i->second.begin(); j != i->second.end(); ++j)
+        out << "  vertex " << vertex.first << ": ";
+        for (auto j = vertex.second.begin(); j != vertex.second.end(); ++j)
         {
           out << core::detail::print_set(*j) << " ";
         }

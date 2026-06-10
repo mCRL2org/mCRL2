@@ -188,13 +188,13 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
     std::set<data::variable> left_variables;
     std::set<data::variable> right_variables;
     std::set<data::variable> name_clashes;
-    for (std::vector<pfnf_traverser_quantifier>::const_iterator i = left.quantifiers.begin(); i != left.quantifiers.end(); ++i)
+    for (const auto& quantifier: left.quantifiers)
     {
-      left_variables.insert(i->second.begin(), i->second.end());
+      left_variables.insert(quantifier.second.begin(), quantifier.second.end());
     }
-    for (std::vector<pfnf_traverser_quantifier>::const_iterator j = right.quantifiers.begin(); j != right.quantifiers.end(); ++j)
+    for (const auto& quantifier: right.quantifiers)
     {
-      for (const data::variable& v: j->second)
+      for (const data::variable& v: quantifier.second)
       {
         right_variables.insert(v);
         if (left_variables.find(v) != left_variables.end())

@@ -15,9 +15,8 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 //--- start generated process rewrite code ---//
 /// \\brief Rewrites all embedded expressions in an object x
@@ -79,8 +78,6 @@ T rewrite(const T& x,
 }
 //--- end generated process rewrite code ---//
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // PROCESS_INCLUDE_MCRL2_PROCESS_REWRITE_H

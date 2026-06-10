@@ -25,10 +25,10 @@ class equation_index
     const EquationSystem& m_equations;
 
     // the type of the equations
-    typedef typename EquationSystem::equation_type equation_type;
+    using equation_type = typename EquationSystem::equation_type;
 
     // the type of the variables
-    typedef typename equation_type::variable_type variable_type;
+    using variable_type = typename equation_type::variable_type;
 
     // maps the name of an equation to the corresponding index
     std::map<core::identifier_string, std::size_t> m_index;

@@ -14,24 +14,23 @@
 
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
 /// \brief Checks if a process expression is 'communicating LPE'.
 struct communicating_lpe_traverser: public process_expression_traverser<communicating_lpe_traverser>
 {
-  typedef process_expression_traverser<communicating_lpe_traverser> super;
+  using super = process_expression_traverser<communicating_lpe_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result = true;
 
   communicating_lpe_traverser()
-    : result(true)
+    :
   {}
 
   void enter(const process::process_instance&)
@@ -119,8 +118,6 @@ bool is_communicating_lpe(const process::process_expression& x)
   return f.result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_COMMUNICATING_LPE_H

@@ -15,8 +15,7 @@
 #include "mcrl2/pbes/replace.h"
 
 #include <queue>
-
-
+#include <ranges>
 
 namespace mcrl2::pbes_system {
 
@@ -290,9 +289,9 @@ public:
       // Check if we need to add quantified variables that have a larger scope and
       // and are at least one quantifier alternation away from elem
       bool add_rest = false;
-      for(auto qv = qvars.rbegin(); qv != qvars.rend(); ++qv)
+      for (auto& qvar: std::ranges::reverse_view(qvars))
       {
-        const std::set<data::variable>& vars = qv->variables();
+        const std::set<data::variable>& vars = qvar.variables();
         if(add_rest)
         {
           for(const data::variable& var: set_difference(vars, seen))
@@ -346,10 +345,10 @@ public:
     pbes_expression new_rhs_X = pbes_system::replace_free_variables(find_equation(X_e).formula(), sigma);
     propositional_variable_instantiation new_X_e(new_name, new_update_list);
     pbes_expression new_Q_X_e = new_X_e;
-    for(auto qv = qvars.rbegin(); qv != qvars.rend(); ++qv)
+    for (auto& qvar: std::ranges::reverse_view(qvars))
     {
-      new_Q_X_e = qv->make_expr_include_only(seen, new_Q_X_e);
-      new_rhs_X = qv->make_expr_exclude(seen, new_rhs_X);
+      new_Q_X_e = qvar.make_expr_include_only(seen, new_Q_X_e);
+      new_rhs_X = qvar.make_expr_exclude(seen, new_rhs_X);
     }
     pbes_equation new_eqn(find_equation(X_e).symbol(), propositional_variable(new_name, new_parameter_list), new_rhs_X);
     m_new_equations.emplace_back(X_e.name(), new_eqn);

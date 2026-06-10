@@ -382,9 +382,9 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       term_type conjunction = true_();
       std::vector<equation_type> new_eqns;
       std::vector<term_type> conjuncts = split_conjuncts(e);
-      for (std::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
-        term_type expr = *c;
-        std::pair<term_type,equation_type> p = rewrite_inner_bounded_forall(sigma, var, expr, dummy);
+      for (auto expr: conjuncts)
+      {
+        std::pair<term_type, equation_type> p = rewrite_inner_bounded_forall(sigma, var, expr, dummy);
         if (is_true(conjunction)) {
           conjunction = p.first;
         } else {
@@ -397,9 +397,10 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       // Add conjunction with simplified terms.
       equation_type eqn = equation_type(sigma, var, conjunction);
       equations.push_back(eqn);
-      for (std::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
+      for (const auto& new_eqn: new_eqns)
+      {
         // Rewrite new equation.
-        visit_bqnf_equation(*new_eqn);
+        visit_bqnf_equation(new_eqn);
       }
       dec_indent();
       return true;
@@ -486,9 +487,9 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       term_type disjunction = false_();
       std::vector<equation_type> new_eqns;
       std::vector<term_type> disjuncts = split_disjuncts(e);
-      for (std::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
-        term_type expr = *d;
-        std::pair<term_type,equation_type> p = rewrite_inner_bounded_exists(sigma, var, expr, dummy);
+      for (auto expr: disjuncts)
+      {
+        std::pair<term_type, equation_type> p = rewrite_inner_bounded_exists(sigma, var, expr, dummy);
         if (is_false(disjunction)) {
           disjunction = p.first;
         } else {
@@ -501,9 +502,10 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       // Add disjunction with simplified terms.
       equation_type eqn = equation_type(sigma, var, disjunction);
       equations.push_back(eqn);
-      for (std::vector<equation_type>::const_iterator new_eqn = new_eqns.begin(); new_eqn != new_eqns.end(); ++new_eqn) {
+      for (const auto& new_eqn: new_eqns)
+      {
         // Rewrite new equation.
-        visit_bqnf_equation(*new_eqn);
+        visit_bqnf_equation(new_eqn);
       }
       dec_indent();
       return true;

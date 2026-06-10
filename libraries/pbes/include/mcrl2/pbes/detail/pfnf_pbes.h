@@ -233,9 +233,9 @@ class pfnf_equation
       phi = and_(m_h, phi);
 
       // apply quantifiers
-      for (auto i = m_quantifiers.rbegin(); i != m_quantifiers.rend(); ++i)
+      for (const auto& m_quantifier: std::ranges::reverse_view(m_quantifiers))
       {
-        phi = i->apply_(phi);
+        phi = m_quantifier.apply_(phi);
       }
       return pbes_equation(m_symbol, m_X, phi);
     }

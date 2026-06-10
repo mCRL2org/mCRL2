@@ -12,6 +12,8 @@
 #ifndef MCRL2_PRES_LTS2PRES_H
 #define MCRL2_PRES_LTS2PRES_H
 
+#include <ranges>
+
 #include "mcrl2/modal_formula/count_fixpoints.h"
 #include "mcrl2/pres/lps2pres.h"
 #include "mcrl2/pres/detail/lts2pres_e.h"
@@ -82,18 +84,19 @@ class lts2pres_algorithm
       {
         pres_expression initial_state;
         bool defined=false;
-        for(probabilistic_state_type::const_reverse_iterator i=s0.rbegin(); i!=s0.rend(); ++i)
+        for (const auto& i: std::ranges::reverse_view(s0))
         {
           if (!defined)
           {
-            initial_state = pres_system::const_multiply(i->probability(), propositional_variable_instantiation(Xs0 + "'" + std::to_string(i->state()),e));
+            initial_state = pres_system::const_multiply(i.probability(),
+              propositional_variable_instantiation(Xs0 + "'" + std::to_string(i.state()), e));
             defined=true;
           }
           else
           {
-            initial_state = plus(pres_system::const_multiply(i->probability(), 
-                                                             propositional_variable_instantiation(Xs0 + "'" + std::to_string(i->state()), e)), 
-                                 initial_state);
+            initial_state = plus(pres_system::const_multiply(i.probability(),
+                                   propositional_variable_instantiation(Xs0 + "'" + std::to_string(i.state()), e)),
+              initial_state);
           }
         }
         init = propositional_variable_instantiation(detail::mu_name(f),data::data_expression_list());

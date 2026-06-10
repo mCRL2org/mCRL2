@@ -126,17 +126,17 @@ class uncompiled_library : public dynamic_library
 
     void cleanup() 
     {
-      for(std::list<std::string>::iterator f = m_tempfiles.begin(); f != m_tempfiles.end(); ++f)
+      for (auto& tempfile: m_tempfiles)
       {
-        if (remove((*f).c_str()))
+        if (remove(tempfile.c_str()))
         {
           std::stringstream s;
-          s << "Could not remove file: " << *f;
+          s << "Could not remove file: " << tempfile;
           throw std::runtime_error(s.str());
         }
         else
         {
-           mCRL2log(mcrl2::log::debug) << "Temporary file '" << *f << "' deleted." << std::endl;
+          mCRL2log(mcrl2::log::debug) << "Temporary file '" << tempfile << "' deleted." << std::endl;
         }
       }
     }

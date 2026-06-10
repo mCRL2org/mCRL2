@@ -15,28 +15,4 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pres/pres_expression.h"
 
-namespace mcrl2 {
-
-namespace pres_system {
-
-/* struct is_not_false
-{
-  bool operator()(const pres_expression& x) const
-  {
-    return !is_false(x);
-  }
-};
-
-struct is_not_true
-{
-  bool operator()(const pres_expression& x) const
-  {
-    return !is_true(x);
-  }
-}; */
-
-} // namespace pres_system
-
-} // namespace mcrl2
-
 #endif // MCRL2_PRES_ENUMERATOR_H

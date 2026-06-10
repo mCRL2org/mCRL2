@@ -12,9 +12,7 @@
 
 #include <atomic>
 
-namespace mcrl2
-{
-namespace utilities
+namespace mcrl2::utilities
 {
 
 /// \brief Implements a very simple spinlock.
@@ -46,6 +44,6 @@ private:
 };
 
 } // namespace utilities.
-} // namespace mcrl2.
+// namespace mcrl2.
 
 #endif // MCRL2_UTILITIES_SPINLOCK_H_

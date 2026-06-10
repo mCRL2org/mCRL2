@@ -27,8 +27,11 @@ void data_rewrite(data::data_expression& result, const data::data_expression& x,
   R(result, x, sigma);
 }
 
-template <typename DataRewriter>
-void data_rewrite(data::data_expression& result, const data::data_expression& x, const DataRewriter& R, data::no_substitution& sigma)
+template<typename DataRewriter>
+void data_rewrite(data::data_expression& result,
+  const data::data_expression& x,
+  const DataRewriter& R,
+  data::no_substitution& /*sigma*/)
 {
   R(result, x);
 } 

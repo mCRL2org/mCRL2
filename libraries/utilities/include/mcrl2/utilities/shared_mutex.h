@@ -10,9 +10,9 @@
 #ifndef MCRL2_UTILITIES_DETAIL_SHARED_MUTEX_H
 #define MCRL2_UTILITIES_DETAIL_SHARED_MUTEX_H
 
-#include <assert.h>
 #include <algorithm>
 #include <atomic>
+#include <cassert>
 #include <memory>
 #include <mutex>
 #include <vector>

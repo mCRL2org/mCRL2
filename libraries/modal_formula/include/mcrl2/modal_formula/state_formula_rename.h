@@ -64,11 +64,11 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
   void apply(T& result, const variable& x)
   {
     core::identifier_string new_name = x.name();
-    for (std::deque<std::pair<core::identifier_string, core::identifier_string> >::iterator i = replacements.begin(); i != replacements.end(); ++i)
+    for (auto& replacement: replacements)
     {
-      if (i->first == x.name())
+      if (replacement.first == x.name())
       {
-        new_name = i->second;
+        new_name = replacement.second;
         break;
       }
     }

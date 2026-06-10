@@ -245,9 +245,9 @@ struct set_based_remove_parameters_builder: public pres_expression_builder<Deriv
 
   void remove_parameters(std::set<data::variable>& x) const
   {
-    for (auto i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+    for (const auto& i: to_be_removed)
     {
-      x.erase(*i);
+      x.erase(i);
     }
   }
 

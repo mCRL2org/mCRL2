@@ -16,8 +16,8 @@
 
 #include <sylvan_ldd.hpp>
 
+#include <cstdint>
 #include <limits>
-#include <stdint.h>
 #include <vector>
 
 namespace mcrl2::symbolic

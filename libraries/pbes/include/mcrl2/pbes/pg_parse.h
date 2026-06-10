@@ -13,6 +13,7 @@
 #define MCRL2_BES_PG_PARSE_H
 
 #include <fstream>
+#include <ranges>
 
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/pbes/pbes.h"
@@ -115,9 +116,9 @@ struct pg_actions: public core::default_parser_actions
     std::vector<pbes_equation> eqns;
     if(maxpg)
     {
-      for (std::map<priority_t, std::set<pbes_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
+      for (auto& block: std::ranges::reverse_view(blocks))
       {
-        eqns.insert(eqns.end(), i->second.begin(), i->second.end());
+        eqns.insert(eqns.end(), block.second.begin(), block.second.end());
       }
     }
     else
@@ -167,7 +168,14 @@ struct pg_actions: public core::default_parser_actions
 
   void parse_NodeSpecList(const core::parse_node& node)
   {
-    traverse(node, make_visitor(m_parser.symbol_table(), "NodeSpec", [&](const core::parse_node& node) { return parse_NodeSpec(node); }));
+    traverse(node,
+      make_visitor(m_parser.symbol_table(),
+        "NodeSpec",
+        [&](const core::parse_node& node)
+        {
+          parse_NodeSpec(node);
+          return;
+        }));
   }
 
   identifier_t parse_Id(const core::parse_node& node)

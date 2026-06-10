@@ -192,7 +192,7 @@ template<template<class> class Builder>
 struct substitute_propositional_variables_i_builder
   : public Builder<substitute_propositional_variables_i_builder<Builder>>
 {
-  typedef Builder<substitute_propositional_variables_i_builder<Builder>> super;
+  using super = Builder<substitute_propositional_variables_i_builder<Builder>>;
   using super::apply;
 
   simplify_data_rewriter<data::rewriter> m_pbes_rewriter;

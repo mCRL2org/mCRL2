@@ -224,18 +224,18 @@ class pbesinst_counter_example_structure_graph_algorithm : public pbesinst_struc
 {
 public:
   pbesinst_counter_example_structure_graph_algorithm(const pbessolve_options& options,
-      const pbes& p,
-      const structure_graph& SG,
-      bool _alpha,
-      const std::unordered_map<pbes_expression, structure_graph::index_type>& _mapping,
-      structure_graph& G,
-      std::optional<data::rewriter> rewriter = std::nullopt,
-      const std::unordered_map<std::string, std::set<int>> _R = {})
-      : pbesinst_structure_graph_algorithm(options, p, G, rewriter),
-        G(SG),
-        alpha(_alpha),
-        mapping(_mapping),
-        R(_R)
+    const pbes& p,
+    const structure_graph& SG,
+    bool _alpha,
+    const std::unordered_map<pbes_expression, structure_graph::index_type>& _mapping,
+    structure_graph& G,
+    std::optional<data::rewriter> rewriter = std::nullopt,
+    const std::unordered_map<std::string, std::set<int>> R = {})
+    : pbesinst_structure_graph_algorithm(options, p, G, rewriter),
+      G(SG),
+      alpha(_alpha),
+      mapping(_mapping),
+      R(R)
   {}
   // TODO ensure that the PVIs in mapping match the shape of the
   // vertices in G after they are rewritten with R.
@@ -261,18 +261,18 @@ class pbesinst_counter_example_structure_graph_algorithm2 : public pbesinst_stru
 {
 public:
   pbesinst_counter_example_structure_graph_algorithm2(const pbessolve_options& options,
-      const pbes& p,
-      const structure_graph& SG,
-      bool _alpha,
-      const std::unordered_map<pbes_expression, structure_graph::index_type>& _mapping,
-      structure_graph& G,
-      std::optional<data::rewriter> rewriter = std::nullopt,
-      const std::unordered_map<std::string, std::set<int>> _R = {})
-      : pbesinst_structure_graph_algorithm2(options, p, G, rewriter),
-        G(SG),
-        alpha(_alpha),
-        mapping(_mapping),
-        R(_R)
+    const pbes& p,
+    const structure_graph& SG,
+    bool _alpha,
+    const std::unordered_map<pbes_expression, structure_graph::index_type>& _mapping,
+    structure_graph& G,
+    std::optional<data::rewriter> rewriter = std::nullopt,
+    const std::unordered_map<std::string, std::set<int>> R = {})
+    : pbesinst_structure_graph_algorithm2(options, p, G, rewriter),
+      G(SG),
+      alpha(_alpha),
+      mapping(_mapping),
+      R(R)
   {}
 
   std::function<pbes_expression(const propositional_variable_instantiation&)> phi_substitution(

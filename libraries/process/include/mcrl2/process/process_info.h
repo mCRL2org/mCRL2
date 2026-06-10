@@ -14,9 +14,8 @@
 
 #include "mcrl2/process/process_specification.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 /// \brief Prints information about a process specification
 inline
@@ -27,8 +26,6 @@ void process_info(const process_specification& procspec)
   std::cout << "Number of declared action labels    : " << procspec.action_labels().size() << std::endl;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_PROCESS_INFO_H

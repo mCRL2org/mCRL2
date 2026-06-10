@@ -12,10 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_LPS2PBES_INDENTER_H
 #define MCRL2_PBES_DETAIL_LPS2PBES_INDENTER_H
 
-namespace mcrl2
-{
-
-namespace pbes_system
+namespace mcrl2::pbes_system
 {
 
 //namespace detail {
@@ -56,8 +53,6 @@ void lps2pbes_decrease_indent()
 
 //} // namespace detail
 
-} // namespace pbes_system
-
-} // namespace mcrl2
+} // namespace mcrl2::pbes_system
 
 #endif // MCRL2_PBES_DETAIL_LPS2PBES_INDENTER_H

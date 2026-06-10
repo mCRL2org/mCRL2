@@ -78,7 +78,7 @@ class pres2res_algorithm
        m_R(R) 
     {}
 
-    const pres run()
+    pres run()
     {
       std::size_t max_rank=m_equation_index.max_rank();
       std::vector<atermpp::vector<pres_equation>> generated_equations(max_rank+1);

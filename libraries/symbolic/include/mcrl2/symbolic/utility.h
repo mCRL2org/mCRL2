@@ -14,8 +14,8 @@
 
 #include "mcrl2/symbolic/data_index.h"
 
+#include <cstdint>
 #include <vector>
-#include <stdint.h>
 
 #include <sylvan_ldd.hpp>
 

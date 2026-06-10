@@ -17,9 +17,8 @@
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/function_update.h"
 
-namespace mcrl2 {
-
-namespace data {
+namespace mcrl2::data
+{
 
 namespace detail {
 
@@ -84,8 +83,6 @@ bool is_sub_sort(const sort_expression& x1, const sort_expression& x2)
   throw mcrl2::runtime_error("is_sub_sort: not implemented yet!");
 }
 
-} // namespace data
-
-} // namespace mcrl2
+} // namespace mcrl2::data
 
 #endif // MCRL2_DATA_IS_SUB_SORT_H

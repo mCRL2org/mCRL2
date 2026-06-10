@@ -1005,11 +1005,11 @@ struct absinthe_algorithm
 
     // sort expressions replacements (extracted from sigmaH)
     sort_expression_substitution_map sigmaS;
-    for (auto i = sigmaH.begin(); i != sigmaH.end(); ++i)
+    for (auto& i: sigmaH)
     {
-      data::function_symbol f = i->second;
+      data::function_symbol f = i.second;
       const data::function_sort& fs = atermpp::down_cast<data::function_sort>(f.sort());
-      sigmaS[i->first] = fs.codomain();
+      sigmaS[i.first] = fs.codomain();
     }
     mCRL2log(log::debug) << "\n--- sort expression mapping ---\n" << print_mapping(sigmaS) << std::endl;
 

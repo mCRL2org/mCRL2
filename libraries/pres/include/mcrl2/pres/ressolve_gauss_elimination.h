@@ -930,11 +930,11 @@ inline pres_expression solve_fixed_point_inner(const propositional_variable& v,
   }
 }
 
-inline const pres_expression solve_single_equation(const fixpoint_symbol& f,
-    const propositional_variable& v,
-    const pres_expression& t,
-    const data::data_specification& dataspec,
-    const data::rewriter& rewriter)
+inline pres_expression solve_single_equation(const fixpoint_symbol& f,
+  const propositional_variable& v,
+  const pres_expression& t,
+  const data::data_specification& dataspec,
+  const data::rewriter& rewriter)
 {
   { 
     //  First check whether v does occur in t. If not, nothing needs to be solved.
@@ -1185,7 +1185,7 @@ class ressolve_by_gauss_elimination_algorithm
        m_R(m_datar,input_pres.data())
     {}
 
-    const pres_expression run()
+    pres_expression run()
     {
       std::vector<pres_equation> res_equations(m_input_pres.equations().begin(), m_input_pres.equations().end());
       assert(res_equations.size()>0);

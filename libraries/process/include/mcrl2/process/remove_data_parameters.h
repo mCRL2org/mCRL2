@@ -14,15 +14,14 @@
 
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
 struct remove_data_parameters_builder: public process_expression_builder<remove_data_parameters_builder>
 {
-  typedef process_expression_builder<remove_data_parameters_builder> super;
+  using super = process_expression_builder<remove_data_parameters_builder>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -111,8 +110,6 @@ void remove_data_parameters(process_specification& procspec)
   f.update(procspec);
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_REMOVE_DATA_PARAMETERS_H

@@ -22,8 +22,7 @@ namespace detail
 
 class mapvector_substitution
 {
-
-  typedef std::map<data::variable, std::vector<data::variable>> vector_map;
+  using vector_map = std::map<data::variable, std::vector<data::variable>>;
 
   vector_map m_substitutions;
 

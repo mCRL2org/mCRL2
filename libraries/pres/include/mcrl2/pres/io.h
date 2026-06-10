@@ -40,8 +40,7 @@ const utilities::file_format& pres_format_internal() { return pres_file_formats(
 inline
 const utilities::file_format& pres_format_text() { return pres_file_formats()[1]; }
 
-inline
-const utilities::file_format guess_format(const std::string& filename)
+inline utilities::file_format guess_format(const std::string& filename)
 {
   for (const utilities::file_format& it : pres_file_formats())
   {

@@ -14,23 +14,22 @@
 
 #include "mcrl2/process/traverser.h"
 
-namespace mcrl2 {
-
-namespace process {
+namespace mcrl2::process
+{
 
 namespace detail {
 
 struct is_stochastic_traverser: public process::data_expression_traverser<is_stochastic_traverser>
 {
-  typedef process::data_expression_traverser<is_stochastic_traverser> super;
+  using super = process::data_expression_traverser<is_stochastic_traverser>;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  bool result;
+  bool result = false;
 
   is_stochastic_traverser()
-    : result(false)
+    :
   {}
 
   void apply(const process::stochastic_operator& x)
@@ -53,8 +52,6 @@ bool is_stochastic(const T& x)
   return f.result;
 }
 
-} // namespace process
-
-} // namespace mcrl2
+} // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_STOCHASTIC_H

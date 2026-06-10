@@ -159,7 +159,7 @@ class qt_tool: public Tool
       return Tool::execute(argc, argv);
     }
 
-    bool pre_run(int& argc, char** argv)
+    bool pre_run(int& argc, char** argv) override
     {
 #ifdef MCRL2_PLATFORM_WINDOWS
       // Disable the dark mode on Windows 11 until the icons have been adapted

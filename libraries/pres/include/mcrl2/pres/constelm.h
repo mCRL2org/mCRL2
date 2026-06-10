@@ -10,6 +10,8 @@
 #ifndef MCRL2_PRES_CONSTELM_H
 #define MCRL2_PRES_CONSTELM_H
 
+#include <ranges>
+
 #include "mcrl2/pres/pres_expression.h"
 #include "mcrl2/pres/algorithms.h"
 #include "mcrl2/pres/pres_rewriter_type.h"
@@ -504,14 +506,14 @@ class pres_constelm_algorithm
         qvar_list quantifier_inside_approximation(const qvar_list& Q) const
         {
           qvar_list result;
-          for (auto it = Q.crbegin(); it != Q.crend(); ++it)
+          for (const auto& it: std::ranges::reverse_view(Q))
           {
             // Variable of a universal quantifier cannot occur in the disjunctive context
             // Variable of an existential quantifier cannot occur in the conjunctive context
-            if (( it->is_infimum() && m_disj_context.find(it->variable()) == m_disj_context.end()) ||
-                (!it->is_infimum() && m_conj_context.find(it->variable()) == m_conj_context.end()))
+            if ((it.is_infimum() && m_disj_context.find(it.variable()) == m_disj_context.end())
+                || (!it.is_infimum() && m_conj_context.find(it.variable()) == m_conj_context.end()))
             {
-              result.push_front(*it);
+              result.push_front(it);
             }
             else
             {

@@ -81,9 +81,9 @@ class transform_tool: public Tool
 
       add_commands(options);
 
-      for (auto i = commands.begin(); i != commands.end(); ++i)
+      for (auto& command: commands)
       {
-        algorithms.insert(i->first);
+        algorithms.insert(command.first);
       }
 
       if (algorithm_number >= 0 && !algorithm_and_options.empty())

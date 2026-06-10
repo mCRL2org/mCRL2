@@ -1173,11 +1173,9 @@ public:
   /// \overload
   inline bool validate(std::string const& s) const override
   {
-    for (typename std::vector<basic_argument::argument_description>::const_iterator i = m_enum.begin();
-      i != m_enum.end();
-      ++i)
+    for (const auto& i: m_enum)
     {
-      if (i->get_long() == s || i->get_short() == s)
+      if (i.get_long() == s || i.get_short() == s)
       {
         std::istringstream test(s);
         T result;

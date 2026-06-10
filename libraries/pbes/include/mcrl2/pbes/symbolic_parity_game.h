@@ -534,12 +534,12 @@ class symbolic_parity_game
     {
       using namespace sylvan::ldds;
 
-      for (auto i = m_rank_map.begin(); i != m_rank_map.end(); ++i)
+      for (const auto& i: m_rank_map)
       {
-        ldd Vmin = intersect(V, i->second);
+        ldd Vmin = intersect(V, i.second);
         if (Vmin != empty_set())
         {
-          std::size_t min_rank = i->first;
+          std::size_t min_rank = i.first;
           return { min_rank, Vmin };
         }
       }
