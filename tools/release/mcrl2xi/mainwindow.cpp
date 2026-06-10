@@ -352,7 +352,7 @@ void MainWindow::onParse()
 
 void MainWindow::parseError(QString err)
 {
-  mCRL2log(error) << err.toStdString() << std::endl;
+  mCRL2log(mcrl2::log::error) << err.toStdString() << std::endl;
 
   int line = m_lastErrorPosition.x();
   int col = m_lastErrorPosition.y();
@@ -410,7 +410,7 @@ void MainWindow::onRewriteAbort()
 
 void MainWindow::rewriteError(QString err)
 {
-  mCRL2log(error) << err.toStdString() << std::endl;
+  mCRL2log(mcrl2::log::error) << err.toStdString() << std::endl;
   m_ui.editRewriteExpr->selectAll();
 }
 
@@ -449,7 +449,7 @@ void MainWindow::solvedPart(QString output)
 
 void MainWindow::solveError(QString err)
 {
-  mCRL2log(error) << err.toStdString() << std::endl;
+  mCRL2log(mcrl2::log::error) << err.toStdString() << std::endl;
   m_ui.editSolveExpr->selectAll();
 }
 
