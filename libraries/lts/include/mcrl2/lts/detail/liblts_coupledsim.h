@@ -19,8 +19,8 @@
 // \author Huong Ngoc Le
 
 
-#ifndef _LIBLTS_COUPLED_SIM_H
-#define _LIBLTS_COUPLED_SIM_H
+#ifndef MCRL2_LTS_DETAIL_LIBLTS_COUPLED_SIM_H
+#define MCRL2_LTS_DETAIL_LIBLTS_COUPLED_SIM_H
 
 #include <cstdlib>
 #include <cstdio>
@@ -597,4 +597,4 @@ template <class LTS_TYPE>
   } // namespace mcrl2::lts::detail
     // end namespace lts
     // end namespace mclr
-#endif  // _LIBLTS_COUPLED_SIM_H
+#endif  // MCRL2_LTS_DETAIL_LIBLTS_COUPLED_SIM_H

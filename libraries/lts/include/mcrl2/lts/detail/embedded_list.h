@@ -8,8 +8,8 @@
 //
 /// \file lts/detail/embedded_list.h
 
-#ifndef _EMBEDDED_LIST_H
-#define _EMBEDDED_LIST_H
+#ifndef MCRL2_LTS_DETAIL_EMBEDDED_LIST_H
+#define MCRL2_LTS_DETAIL_EMBEDDED_LIST_H
 
 #include <cassert>
 #include <vector>
@@ -299,4 +299,4 @@ class embedded_list
 } // end namespace detail
 // end namespace lts
 // end namespace mcrl2
-#endif //_EMBEDDED_LIST_H
+#endif //MCRL2_LTS_DETAIL_EMBEDDED_LIST_H

@@ -12,8 +12,8 @@
 ///        bisimulation afterwards. In order to apply this algorithm
 ///        it is advisable to first apply a branching bisimulation reduction.
 
-#ifndef _LIBLTS_WEAK_BISIM_H
-#define _LIBLTS_WEAK_BISIM_H
+#ifndef MCRL2_LTS_WEAK_BISIM_H
+#define MCRL2_LTS_WEAK_BISIM_H
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_tau_star_reduce.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
@@ -105,5 +105,4 @@ bool weak_bisimulation_compare(
 
 }
 
-
-#endif  // #define _LIBLTS_WEAK_BISIM_H
+#endif  // MCRL2_LTS_WEAK_BISIM_H

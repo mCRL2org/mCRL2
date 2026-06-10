@@ -106,9 +106,9 @@ class pbes_eqelm_algorithm
       for (const auto& vertex: m_vertices)
       {
         out << "  vertex " << vertex.first << ": ";
-        for (auto j = vertex.second.begin(); j != vertex.second.end(); ++j)
+        for (const auto& j: vertex.second)
         {
-          out << core::detail::print_set(*j) << " ";
+          out << core::detail::print_set(j) << " ";
         }
         out << std::endl;
       }

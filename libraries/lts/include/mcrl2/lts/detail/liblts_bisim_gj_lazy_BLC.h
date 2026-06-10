@@ -179,8 +179,7 @@ struct outgoing_transition_type_lb
   outgoing_transitions_it_lb start_same_saC;
 
   // The default initialiser does not initialize the fields of this struct.
-  outgoing_transition_type_lb()
-  {}
+  outgoing_transition_type_lb() = default;
 
   outgoing_transition_type_lb(const outgoing_transitions_it_lb sssaC)
    : start_same_saC(sssaC)
@@ -194,8 +193,7 @@ struct state_in_block_pointer_lb
    : ref_state(new_ref_state)
   {}
 
-  state_in_block_pointer_lb()
-  {}
+  state_in_block_pointer_lb() = default;
 
   fixed_vector<state_type_gj_lb>::iterator ref_state;
 
@@ -687,8 +685,8 @@ struct BLC_source_type
   state_in_block_pointer_lb* end_BLC_source;
 
   /// list of super-BLC sets with transitions starting in these states
-  simple_list<BLC_indicators_lb> block_to_constellation;                           static_assert(std::is_trivially_destructible
-                                                                                                                        <simple_list<BLC_indicators_lb> >::value);
+  simple_list<BLC_indicators_lb> block_to_constellation;
+  static_assert(std::is_trivially_destructible_v<simple_list<BLC_indicators_lb>>);
   BLC_source_type(state_in_block_pointer_lb* new_start,
                   state_in_block_pointer_lb* new_end)
     : start_BLC_source(new_start),
@@ -746,7 +744,8 @@ struct block_that_needs_refinement_type
   /// `start_bottom_states[AvoidSml] ... start_bottom_states[AvoidSml+1]` contains the states that might remain in AvoidSml
   /// `start_bottom_states[AvoidLrg] ... start_bottom_states[AvoidLrg+1]` contains the states that are guaranteed to be in AvoidLrg
 
-  state_in_block_pointer_lb* start_bottom_states[4];
+  state_in_block_pointer_lb* start_bottom_states[4]
+    = {B.start_bottom_states, B.start_bottom_states, B.sta.rt_non_bottom_states, B.sta.rt_non_bottom_states};
 
   /// \brief potential non-bottom states
   /// \details These vectors contain non-bottom states that have been found
@@ -774,14 +773,13 @@ struct block_that_needs_refinement_type
   /// states (the default).  The block's pointer to `refinement_info` is also
   /// initialized.  Note that there is no destructor that would set
   /// `refinement_info` to nullptr again.
-  block_that_needs_refinement_type(block_type_lb& B,
-                                   BLC_indicators_lb* a_large_splitter=nullptr)
-    : start_bottom_states{B.start_bottom_states, B.start_bottom_states, B.sta.rt_non_bottom_states, B.sta.rt_non_bottom_states},
-      potential_non_bottom_states(),
-      potential_non_bottom_states_HitSmall(),
-      large_splitter(a_large_splitter)
-      #ifdef MORE_STATISTICS
-        , transition_count_sample_state(B.start_bottom_states->ref_state)
+    block_that_needs_refinement_type(block_type_lb& B, BLC_indicators_lb* a_large_splitter = nullptr)
+      : potential_non_bottom_states(),
+        potential_non_bottom_states_HitSmall(),
+        large_splitter(a_large_splitter)
+#ifdef MORE_STATISTICS
+        ,
+        transition_count_sample_state(B.start_bottom_states->ref_state)
       #endif
   {}
 
@@ -2484,11 +2482,10 @@ class bisim_partitioner_gj_lazy_BLC
     /// [`start_blocks`, `end_blocks`) is split at `splitpoint`, for example to
     /// split a constellation or a super-BLC source.  Then the smallness
     /// counters of all blocks in this range are adapted if allowed.
-    void update_small_subblock_counters
-                                      (state_in_block_pointer_lb* start_blocks,
-                                       state_in_block_pointer_lb* splitpoint,
-                                       state_in_block_pointer_lb* end_blocks,
-                                       const int split_type = SPLIT_SMALLER)
+    void update_small_subblock_counters(state_in_block_pointer_lb* start_blocks,
+      state_in_block_pointer_lb* splitpoint,
+      state_in_block_pointer_lb* end_blocks,
+      const int /*split_type*/ = SPLIT_SMALLER)
     {                                                                           assert(m_states_in_blocks.data()<=start_blocks);
                                                                                 assert(start_blocks<splitpoint);  assert(splitpoint<end_blocks);
                                                                                 assert(end_blocks<=m_states_in_blocks.data_end());

@@ -8,8 +8,9 @@
 //
 /// \file lts/detail/liblts_bisim.h
 
-#ifndef _LIBLTS_BISIM_H
-#define _LIBLTS_BISIM_H
+#ifndef MCRL2_LTS_DETAIL_LIBLTS_BISIM_H
+#define MCRL2_LTS_DETAIL_LIBLTS_BISIM_H
+
 #include <fstream>
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/lts/lts_utilities.h"
@@ -1256,4 +1257,4 @@ bool destructive_bisimulation_compare(
 
 }
 
-#endif
+#endif // MCRL2_LTS_DETAIL_LIBLTS_BISIM_H

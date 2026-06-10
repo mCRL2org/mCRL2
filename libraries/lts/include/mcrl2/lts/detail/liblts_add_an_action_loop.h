@@ -8,8 +8,9 @@
 //
 /// \file lts/detail/liblts_scc.h
 
-#ifndef _LIBLTS_ADD_ACTION_LOOP_H
-#define _LIBLTS_ADD_ACTION_LOOP_H
+#ifndef MCRL2_LTS_DETAIL_LIBLTS_ADD_ACTION_LOOP_H
+#define MCRL2_LTS_DETAIL_LIBLTS_ADD_ACTION_LOOP_H
+
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -27,4 +28,4 @@ void add_an_action_loop_to_each_state(LTS_TYPE& l, std::size_t action)
 
 } // namespace detail;
 
-#endif // _LIBLTS_ADD_ACTION_LOOP_H
+#endif // MCRL2_LTS_DETAIL_LIBLTS_ADD_ACTION_LOOP_H

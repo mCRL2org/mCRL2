@@ -12,8 +12,8 @@
 /// counter-examples.
 ///
 /// \details
-#ifndef _LIBLTS_BISIM_M
-#define LIBLTS_BISIM_M
+#ifndef MCRL2_LTS_DETAIL_LIBLTS_BISIM_MINIMAL_DEPTH_H
+#define MCRL2_LTS_DETAIL_LIBLTS_BISIM_MINIMAL_DEPTH_H
 
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
@@ -654,4 +654,4 @@ bool destructive_bisimulation_compare_minimal_depth(LTS_TYPE& l1, LTS_TYPE& l2, 
 
 } // namespace mcrl2::lts::detail
 
-#endif
+#endif // MCRL2_LTS_DETAIL_LIBLTS_BISIM_MINIMAL_DEPTH_H

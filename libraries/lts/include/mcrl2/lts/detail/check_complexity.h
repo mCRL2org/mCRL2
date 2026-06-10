@@ -70,8 +70,8 @@
 ///
 /// \author David N. Jansen, Radboud Universiteit, Nijmegen, The Netherlands
 
-#ifndef _CHECK_COMPLEXITY_H
-#define _CHECK_COMPLEXITY_H
+#ifndef MCRL2_LTS_DETAIL_CHECK_COMPLEXITY_H
+#define MCRL2_LTS_DETAIL_CHECK_COMPLEXITY_H
 
 // If the preprocessor constant `COUNT_WORK_BALANCE` is defined, the temporary
 // work is even counted in non-debug modes.  No checks are executed; we only
@@ -1986,4 +1986,4 @@ class check_complexity
 // end namespace lts
 // end namespace mcrl2
 
-#endif
+#endif // MCRL2_LTS_DETAIL_CHECK_COMPLEXITY_H

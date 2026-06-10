@@ -20,8 +20,8 @@
 ///
 /// \author David N. Jansen, Radboud Universiteit, Nijmegen, The Netherlands
 
-#ifndef _LIBLTS_BISIM_GJKW_H
-#define _LIBLTS_BISIM_GJKW_H
+#ifndef MCRL2_LTS_DETAIL_LIBLTS_BISIM_GJKW_H
+#define MCRL2_LTS_DETAIL_LIBLTS_BISIM_GJKW_H
 
 #include <unordered_map> // used during initialisation
 #include <list>          // for the list of B_to_C_descriptors
@@ -2110,4 +2110,4 @@ inline bool state_info_entry::surely_has_no_transition_to(
 // end namespace lts
 // end namespace mcrl2
 
-#endif // ifndef _LIBLTS_BISIM_GJKW_H
+#endif // MCRL2_LTS_DETAIL_LIBLTS_BISIM_GJKW_H

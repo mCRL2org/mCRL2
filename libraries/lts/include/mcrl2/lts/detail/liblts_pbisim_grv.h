@@ -8,8 +8,9 @@
 //
 /// \file lts/detail/liblts_pbisim.h
 
-#ifndef _LIBLTS_PBISIM_GRV_H
-#define _LIBLTS_PBISIM_GRV_H
+#ifndef MCRL2_LTS_DETAIL_LIBLTS_PBISIM_GRV_H
+#define MCRL2_LTS_DETAIL_LIBLTS_PBISIM_GRV_H
+
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/lts/detail/embedded_list.h"
 #include "mcrl2/lts/detail/liblts_plts_merge.h"
@@ -1397,4 +1398,4 @@ bool destructive_probabilistic_bisimulation_compare_grv(
 } // end namespace detail
 // end namespace lts
 // end namespace mcrl2
-#endif //_LIBLTS_PBISIM_GRV_H
+#endif // MCRL2_LTS_DETAIL_LIBLTS_PBISIM_GRV_H

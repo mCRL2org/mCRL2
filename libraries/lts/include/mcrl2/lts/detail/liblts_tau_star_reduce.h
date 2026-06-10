@@ -8,8 +8,8 @@
 //
 /// \file lts/detail/liblts_tau_star_reduce.h
 
-#ifndef _LIBLTS_TAUSTARREDUCE_H
-#define _LIBLTS_TAUSTARREDUCE_H
+#ifndef MCRL2_LTS_DETAIL_LIBLTS_TAU_STAR_REDUCE_H
+#define MCRL2_LTS_DETAIL_LIBLTS_TAU_STAR_REDUCE_H
 
 #include "mcrl2/lts/lts_utilities.h"
 
@@ -285,4 +285,4 @@ void tau_star_reduce(lts< STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS >& l)
 
 }
 
-#endif // _LIBLTS_TAUSTARREDUCE_H
+#endif // MCRL2_LTS_DETAIL_LIBLTS_TAU_STAR_REDUCE_H

@@ -8,8 +8,9 @@
 //
 /// \file lts/detail/tree_set.h
 
-#ifndef _TREE_SET_H
-#define _TREE_SET_H
+#ifndef MCRL2_LTS_DETAIL_TREE_SET_H
+#define MCRL2_LTS_DETAIL_TREE_SET_H
+
 #include <cstddef>
 #include <vector>
 
@@ -54,4 +55,4 @@ class tree_set_store
 };
 }
 
-#endif
+#endif // MCRL2_LTS_DETAIL_TREE_SET_H

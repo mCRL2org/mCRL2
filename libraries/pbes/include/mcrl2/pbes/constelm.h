@@ -10,6 +10,8 @@
 #ifndef MCRL2_PBES_CONSTELM_H
 #define MCRL2_PBES_CONSTELM_H
 
+#include <ranges>
+
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/print.h"
@@ -525,10 +527,10 @@ class pbes_constelm_algorithm
           detail::make_constelm_substitution(constraints, sigma);
 
           qvar_list result;
-          for (auto it = Q.crbegin(); it != Q.crend(); ++it)
+          for (const auto& it: std::ranges::reverse_view(Q))
           {
-            bool is_forall = it->is_forall();
-            const data::variable& var = it->variable();
+            bool is_forall = it.is_forall();
+            const data::variable& var = it.variable();
             // Variable of a universal quantifier cannot occur in the disjunctive context
             // Variable of an existential quantifier cannot occur in the conjunctive context
             const std::set<data::variable>& context = is_forall ? m_disj_context : m_conj_context;
@@ -547,7 +549,7 @@ class pbes_constelm_algorithm
 
             if (none_occurs_in_context)
             {
-              result.push_front(*it);
+              result.push_front(it);
             }
             else
             {

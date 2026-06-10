@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lts/detail/liblts_liblts_counter_example.h
+/// \file lts/detail/counter_example.h
 /// \details This file contains a class in which counter examples 
 ///          for divergence preserving failures refinement can 
 ///          be constructed. A counterexample is a trace from 
@@ -15,8 +15,8 @@
 ///          is labelled with an action. By walking from a leaf to
 ///          the root the desired counterexample can be constructed.
 
-#ifndef _LIBLTS_COUNTER_EXAMPLE_H
-#define _LIBLTS_COUNTER_EXAMPLE_H
+#ifndef MCRL2_LTS_DETAIL_COUNTER_EXAMPLE_H
+#define MCRL2_LTS_DETAIL_COUNTER_EXAMPLE_H
 
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/trace.h"
@@ -216,4 +216,4 @@ class dummy_counter_example_constructor
 
 } // namespace mcrl2::lts::detail
 
-#endif // _LIBLTS_COUNTER_EXAMPLE_H
+#endif // MCRL2_LTS_DETAIL_COUNTER_EXAMPLE_H
