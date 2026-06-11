@@ -24,7 +24,7 @@ void LogRelay::output(const log_level_t level,
 
 LogWidget::LogWidget(QWidget *parent)
   : QWidget(parent),
-    m_ui(new Ui::LogWidget)
+    m_ui(std::make_unique<Ui::LogWidget>())
 {
   m_ui->setupUi(this);
   connect(&m_relay, SIGNAL(logMessage(QString, QDateTime, QString)), this, SLOT(writeMessage(QString, QDateTime, QString)));
@@ -34,7 +34,6 @@ LogWidget::LogWidget(QWidget *parent)
 LogWidget::~LogWidget()
 {
   logger::unregister_output_policy(m_relay);
-  delete m_ui;
 }
 
 void LogWidget::writeMessage(QString level, QDateTime timestamp, QString message)

@@ -16,6 +16,7 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 #include "mcrl2/utilities/exception.h"
 
 #ifdef MCRL2_PLATFORM_LINUX
@@ -58,16 +59,14 @@ namespace mcrl2::utilities
 #endif // MCRL2_PLATFORM_LINUX
 
 #ifdef MCRL2_PLATFORM_MAC
-      char* pathbuf = NULL;
       uint32_t bufsize = 0;
-      _NSGetExecutablePath(pathbuf, &bufsize);
-      pathbuf = new char[bufsize];
-      if (_NSGetExecutablePath(pathbuf, &bufsize) != 0)
+      _NSGetExecutablePath(nullptr, &bufsize);
+      std::vector<char> pathbuf(bufsize);
+      if (_NSGetExecutablePath(pathbuf.data(), &bufsize) != 0)
       {
         throw mcrl2::runtime_error("Could not retrieve path to main executable (_NSGetExecutablePath returned nonzero).");
       }
-      path = pathbuf;
-      delete[] pathbuf;
+      path = pathbuf.data();
       std::string::size_type t = path.find_last_of("/");
       path = path.substr(0,t);
 #endif //MCRL2_PLATFORM_MAC

@@ -255,12 +255,11 @@ void CodeEditor::changeHighlightingRules()
 
 void CodeEditor::showContextMenu(const QPoint& position)
 {
-  QMenu* contextMenu = this->createStandardContextMenu();
+  std::unique_ptr<QMenu> contextMenu(this->createStandardContextMenu());
   contextMenu->addSeparator();
   zoomInAction = contextMenu->addAction("Zoom in", this, SLOT(zoomIn()));
   zoomOutAction = contextMenu->addAction("Zoom out", this, SLOT(zoomOut()));
   contextMenu->exec(mapToGlobal(position));
-  delete contextMenu;
 }
 
 void CodeEditor::highlightCurrentLine()

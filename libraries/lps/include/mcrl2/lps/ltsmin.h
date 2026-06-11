@@ -14,6 +14,8 @@
 
 #define MCRL2_GUARDS 1
 
+#include <memory>
+
 #include "mcrl2/data/join.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/io.h"
@@ -352,8 +354,8 @@ class pins
     // where N is the number of process parameters
     std::vector<pins_data_type*> m_data_types;
 
-    /// The unique type mappings (is contained in m_data_types).
-    std::vector<pins_data_type*> m_unique_data_types;
+    /// The unique type mappings; owns the data types that m_data_types refers to.
+    std::vector<std::unique_ptr<pins_data_type>> m_unique_data_types;
 
     // maps process parameter index to the corresponding index in m_unique_data_types
     std::vector<std::size_t> m_unique_data_type_index;
@@ -692,9 +694,9 @@ class pins
         std::map<data::sort_expression, pins_data_type*>::const_iterator j = existing_type_maps.find(s);
         if (j == existing_type_maps.end())
         {
-          pins_data_type* dt = new state_data_type(m_specification.data(), m_specification.action_labels(), s, m_specification.data().is_certainly_finite(s));
+          m_unique_data_types.push_back(std::make_unique<state_data_type>(m_specification.data(), m_specification.action_labels(), s, m_specification.data().is_certainly_finite(s)));
+          pins_data_type* dt = m_unique_data_types.back().get();
           m_data_types.push_back(dt);
-          m_unique_data_types.push_back(dt);
           existing_type_maps[s] = dt;
         }
         else
@@ -702,29 +704,15 @@ class pins
           m_data_types.push_back(j->second);
         }
       }
-      pins_data_type* dt = new action_label_data_type(m_specification.data(), m_specification.action_labels());
-      m_data_types.push_back(dt);
-      m_unique_data_types.push_back(dt);
+      m_unique_data_types.push_back(std::make_unique<action_label_data_type>(m_specification.data(), m_specification.action_labels()));
+      m_data_types.push_back(m_unique_data_types.back().get());
 
-      for (auto m_data_type : m_data_types)
+      for (pins_data_type* data_type : m_data_types)
       {
-        std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_type);
+        auto j = std::find_if(m_unique_data_types.begin(), m_unique_data_types.end(),
+            [&](const std::unique_ptr<pins_data_type>& unique_data_type) { return unique_data_type.get() == data_type; });
         assert(j != m_unique_data_types.end());
         m_unique_data_type_index.push_back(j - m_unique_data_types.begin());
-      }
-    }
-
-    ~pins()
-    {
-      // make sure the pins data types are not deleted twice
-      std::set<pins_data_type*> deleted;
-      for (auto& data_type_ptr: m_data_types)
-      {
-        if (deleted.find(data_type_ptr) == deleted.end())
-        {
-          delete data_type_ptr;
-          deleted.insert(data_type_ptr);
-        }
       }
     }
 
@@ -1009,10 +997,10 @@ class pins
       }
 
       out << "\n--- INITIAL STATE ---\n";
-      ltsmin_state_type init = new int[process_parameter_count()];
-      get_initial_state(init);
-      out << "initial state = " << print_vector(init, init + process_parameter_count()) << std::endl;
-      delete[] init;
+      std::vector<int> init(process_parameter_count());
+      ltsmin_state_type init_state = init.data();
+      get_initial_state(init_state);
+      out << "initial state = " << print_vector(init.data(), init.data() + process_parameter_count()) << std::endl;
 
       out << "\n--- DATA TYPE MAPS ---\n";
       out << "datatype_count() = " << datatype_count() << std::endl;

@@ -480,7 +480,7 @@ class BDD_Prover: protected rewriter
         : rewriter(data_spec, equations_selector, a_rewrite_strategy),
           f_time_limit(a_time_limit),
           f_apply_induction(a_apply_induction),
-          f_bdd_simplifier(a_path_eliminator ? std::shared_ptr<BDD_Simplifier>(new BDD_Path_Eliminator(a_solver_type))
+          f_bdd_simplifier(a_path_eliminator ? std::make_shared<BDD_Path_Eliminator>(a_solver_type)
                                              : std::make_shared<BDD_Simplifier>())
     {
       rewriter::thread_initialise();
@@ -517,16 +517,9 @@ class BDD_Prover: protected rewriter
     : rewriter(r),
       f_time_limit(time_limit),
       f_apply_induction(apply_induction),
-      f_bdd_simplifier(new BDD_Simplifier())
+      f_bdd_simplifier(std::make_shared<BDD_Simplifier>())
     {
       rewriter::thread_initialise();
-    }
-
-    /// \brief Destructor that destroys the BDD simplifier BDD_Prover::f_bdd_simplifier.
-    ~BDD_Prover()
-    {
-      // delete f_bdd_simplifier;
-      // f_bdd_simplifier = nullptr;
     }
 
     /// \brief Set the substitution to be used to construct the BDD

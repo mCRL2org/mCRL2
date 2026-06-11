@@ -9,6 +9,8 @@
 #ifndef MCRL2_UTILITIES_LOGWIDGET_H
 #define MCRL2_UTILITIES_LOGWIDGET_H
 
+#include <memory>
+
 #include <QDateTime>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/utilities.h"
@@ -50,7 +52,7 @@ class LogWidget: public QWidget
     void writeMessage(QString level, QDateTime timestamp, QString message);
 
   private:
-    Ui::LogWidget *m_ui;
+    std::unique_ptr<Ui::LogWidget> m_ui;
     LogRelay m_relay;
     QSize m_sizeHint;
 };

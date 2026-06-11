@@ -37,10 +37,7 @@ Bdd::operator!=(const Bdd& other) const
 
 Bdd&
 Bdd::operator=(const Bdd& right)
-{
-    bdd = right.bdd;
-    return *this;
-}
+= default;
 
 bool
 Bdd::operator<=(const Bdd& other) const
@@ -748,10 +745,7 @@ Mtbdd::operator!=(const Mtbdd& other) const
 
 Mtbdd&
 Mtbdd::operator=(const Mtbdd& right)
-{
-    mtbdd = right.mtbdd;
-    return *this;
-}
+= default;
 
 Mtbdd
 Mtbdd::operator!() const

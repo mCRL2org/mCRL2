@@ -31,9 +31,8 @@ namespace mcrl2::data::detail
  * internal format):
  *
  * \code
- *   Rewriter *r = createRewriter(equations);
+ *   std::shared_ptr<Rewriter> r = createRewriter(equations);
  *   t = r->rewrite(t);
- *   delete r;
  * \endcode
  **/
 class Rewriter
