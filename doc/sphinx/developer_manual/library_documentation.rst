@@ -109,11 +109,11 @@ Process
    :maxdepth: 1
 
    libraries/process/process_library
+   libraries/process/global_variables
 
 
 *PDF documentation*
 
-* :mcrl2_pdflatex:`On free variables in process specifications, LPSs and PBESs <libraries/process/latex/global-variables.tex>`
 * :mcrl2_pdflatex:`Process Library Implementation Notes <libraries/process/latex/process-implementation-notes.tex>`
 
 SMT
