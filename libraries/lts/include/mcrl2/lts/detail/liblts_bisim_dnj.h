@@ -4147,8 +4147,8 @@ class bisim_partitioner_dnj
                                                                                     mCRL2log(log::debug) << "split("
                                                                                         << block_B->debug_id(*this)
                                                                                         << ',' << splitter_T->debug_id(*this)
-                                                                                        << (extend_from_marked_states__add_new_noninert_to_splitter == mode
-                                                                                           ? ",extend_from_marked_states__add_new_noninert_to_splitter)\n"
+                                                                                        << (extend_from_marked_states_add_new_noninert_to_splitter == mode
+                                                                                           ? ",extend_from_marked_states_add_new_noninert_to_splitter)\n"
                                                                                            : (extend_from_marked_states == mode
                                                                                              ? ",extend_from_marked_states)\n"
                                                                                              : (extend_from_splitter == mode
@@ -4343,7 +4343,7 @@ class bisim_partitioner_dnj
                 /* and the remainder of Line 2.17                            */ assert(0 == block_U->marked_size());  assert(0 == block_R->marked_size());
                 part_tr.adapt_transitions_for_new_block(block_U,
                   block_R,
-                  ONLY_IF_DEBUG(*this) extend_from_marked_states_add_new_noninert_to_splitter == mode,
+                  ONLY_IF_DEBUG(*this, ) extend_from_marked_states_add_new_noninert_to_splitter == mode,
                   splitter_T,
                   bisim_dnj::new_block_is_U);
 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
@@ -4499,7 +4499,7 @@ class bisim_partitioner_dnj
                 /* and the remainder of Line 2.17                            */ assert(0 == block_B->marked_size());  assert(0 == block_R->marked_size());
                 part_tr.adapt_transitions_for_new_block(block_R,
                   block_B,
-                  ONLY_IF_DEBUG(*this) extend_from_marked_states_add_new_noninert_to_splitter == mode,
+                  ONLY_IF_DEBUG(*this, ) extend_from_marked_states_add_new_noninert_to_splitter == mode,
                   splitter_T,
                   bisim_dnj::new_block_is_R);
 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)

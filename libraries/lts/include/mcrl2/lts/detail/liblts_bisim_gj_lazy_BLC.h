@@ -744,8 +744,7 @@ struct block_that_needs_refinement_type
   /// `start_bottom_states[AvoidSml] ... start_bottom_states[AvoidSml+1]` contains the states that might remain in AvoidSml
   /// `start_bottom_states[AvoidLrg] ... start_bottom_states[AvoidLrg+1]` contains the states that are guaranteed to be in AvoidLrg
 
-  state_in_block_pointer_lb* start_bottom_states[4]
-    = {B.start_bottom_states, B.start_bottom_states, B.sta.rt_non_bottom_states, B.sta.rt_non_bottom_states};
+  state_in_block_pointer_lb* start_bottom_states[4];
 
   /// \brief potential non-bottom states
   /// \details These vectors contain non-bottom states that have been found
@@ -774,7 +773,8 @@ struct block_that_needs_refinement_type
   /// initialized.  Note that there is no destructor that would set
   /// `refinement_info` to nullptr again.
     block_that_needs_refinement_type(block_type_lb& B, BLC_indicators_lb* a_large_splitter = nullptr)
-      : potential_non_bottom_states(),
+      : start_bottom_states{B.start_bottom_states, B.start_bottom_states, B.sta.rt_non_bottom_states, B.sta.rt_non_bottom_states},
+        potential_non_bottom_states(),
         potential_non_bottom_states_HitSmall(),
         large_splitter(a_large_splitter)
 #ifdef MORE_STATISTICS
@@ -2485,7 +2485,7 @@ class bisim_partitioner_gj_lazy_BLC
     void update_small_subblock_counters(state_in_block_pointer_lb* start_blocks,
       state_in_block_pointer_lb* splitpoint,
       state_in_block_pointer_lb* end_blocks,
-      const int /*split_type*/ = SPLIT_SMALLER)
+      const int split_type = SPLIT_SMALLER)
     {                                                                           assert(m_states_in_blocks.data()<=start_blocks);
                                                                                 assert(start_blocks<splitpoint);  assert(splitpoint<end_blocks);
                                                                                 assert(end_blocks<=m_states_in_blocks.data_end());

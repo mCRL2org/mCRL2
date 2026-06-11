@@ -516,7 +516,7 @@ class bisim_partitioner
             block_index_of_a_state[i1_bottom_state] = blocks.size();
           }
         }
-        assert(!flagged_states.empty()||!blocks[*i1].non_bottom_states.empty()||i1_bottom_states.empty());
+        assert(!flagged_states.empty()||!blocks[i1].non_bottom_states.empty()||i1_bottom_states.empty());
         block_index_type reset_state_flags_block = i1;
 
         if (!non_flagged_states.empty())
@@ -709,7 +709,7 @@ class bisim_partitioner
           // Finally the non-inert transitions are distributed over both blocks in the obvious way.
           // Note that this must be done after all states are properly put into a new block.
 
-          assert(*i1 < blocks.size());
+          assert(i1 < blocks.size());
           std::vector < transition > i1_non_inert_transitions;
           i1_non_inert_transitions.swap(blocks[i1].non_inert_transitions);
           for (auto& i1_non_inert_transition: i1_non_inert_transitions)
