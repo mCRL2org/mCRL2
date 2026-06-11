@@ -76,7 +76,6 @@ LTS
 *PDF documentation*
 
 * :mcrl2_pdflatex:`Implementation of LTSGraph3D <libraries/lts/latex/ltsgraph3d_report.tex>`
-* :mcrl2_pdflatex:`Notes on the bisimulation partitioner <libraries/lts/latex/bisimulation-partitioner-notes.tex>`
 
 
 Modal formula
