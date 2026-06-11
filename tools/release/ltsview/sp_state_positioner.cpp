@@ -42,7 +42,7 @@ class NodeClusterStatePositioner: public ClusterStatePositioner
 {
   public:
     NodeClusterStatePositioner(Cluster* c):
-      ClusterStatePositioner(c), slot_rtree(nullptr)
+      ClusterStatePositioner(c) 
     { }
 
     ~NodeClusterStatePositioner() override;
@@ -53,7 +53,7 @@ class NodeClusterStatePositioner: public ClusterStatePositioner
     void buildRTree();
     QVector2D sumSuccessorStateVectors(State* state);
 
-    RTree* slot_rtree;
+    RTree* slot_rtree = nullptr;
 };
 
 

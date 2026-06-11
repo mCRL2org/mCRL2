@@ -1469,11 +1469,11 @@ void ArcDiagram::clearSettingsDiagram()
   attrsDgrm.clear();
 
   {
-    for (auto & i : framesDgrm)
+    for (auto& i: framesDgrm)
     {
-      for (std::size_t j = 0; j < i.size(); ++j)
+      for (auto& j: i)
       {
-        delete i[j];
+        delete j;
       }
       i.clear();
     }

@@ -581,7 +581,7 @@ void Parser::parseAttribute(
       {
         throw mcrl2::runtime_error(QString("Current Position contains no valid integer (%1).").arg(positionElement.text()).toStdString());
       }
-      if (std::cmp_greater_equal(value ,domain.size())))
+      if (std::cmp_greater_equal(value ,domain.size()))
       {
         throw mcrl2::runtime_error(QString("Current Position is larger than current domain (%1).").arg(positionElement.text()).toStdString());
       }

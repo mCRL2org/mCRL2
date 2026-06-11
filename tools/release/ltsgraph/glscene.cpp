@@ -797,18 +797,18 @@ void GLScene::renderText(QPainter& painter)
       }
     };
     for (std::size_t i = 0; i < std::min(nodeCount,
-                                std::max(static_cast<std::size_t>(m_textLimitStateLabels),
-                                    static_cast<std::size_t>(m_textLimitStateNumbers)));
+                              std::max(static_cast<std::size_t>(m_textLimitStateLabels),
+                                static_cast<std::size_t>(m_textLimitStateNumbers)));
          ++i)
     {
       font.setPixelSize(getScale(indices[i]) * m_fontsize);
       painter.setFont(font);
-      if (m_drawstatenumbers && std::cmp_less(i ,m_textLimitStateNumbers)))
+      if (m_drawstatenumbers && std::cmp_less(i, m_textLimitStateNumbers))
       {
         renderStateNumber(painter, exploration_active ? m_graph.explorationNode(indices[i]) : indices[i]);
       }
 
-      if (m_drawstatelabels && std::cmp_less(i ,m_textLimitStateLabels)))
+      if (m_drawstatelabels && std::cmp_less(i, m_textLimitStateLabels))
       {
         renderStateLabel(painter, exploration_active ? m_graph.explorationNode(indices[i]) : indices[i]);
       }

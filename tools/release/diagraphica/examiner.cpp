@@ -373,7 +373,7 @@ void Examiner::handleHits(const std::vector< int >& ids)
       }
       else if (ids[0] == ID_FRAME_HIST)
       {
-        if (std::cmp_equal(focusFrameIdx ,ids[1])))
+        if (std::cmp_equal(focusFrameIdx, ids[1]))
         {
           focusFrameIdx = -1;
           clrFrame();

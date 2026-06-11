@@ -1587,11 +1587,11 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
   else
   {
     double pix = pixelSize();
-    std::vector< double > valsFrame;
+    std::vector<double> valsFrame;
 
     for (std::size_t i = 0; i < m_nextFramePositions.size(); ++i)
     {
-      if (m_currentSelection != ID_FRAME_NEXT || std::cmp_not_equal(i ,m_currentSelectionIndex)))
+      if (m_currentSelection != ID_FRAME_NEXT || std::cmp_not_equal(i, m_currentSelectionIndex))
       {
         double x = m_nextFramePositions[i].x;
         double y = m_nextFramePositions[i].y;

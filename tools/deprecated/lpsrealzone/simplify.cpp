@@ -240,12 +240,12 @@ namespace mcrl2::data
            tl->add_assignments(replaced_variables,sigma,r);
 
            process::action_vector new_replaced_actions;
-           for(const auto & new_action : new_actions)
+           for (const auto& new_action: new_actions)
            {
              data_expression_vector new_replaced_args;
-             for(data_expression_list::const_iterator k=new_action.arguments().begin();k!=new_action.arguments().end(); ++k)
+             for (const auto& k: new_action.arguments())
              {
-               new_replaced_args.push_back(replace_free_variables(*k,sigma));
+               new_replaced_args.push_back(replace_free_variables(k, sigma));
              }
              new_replaced_actions.emplace_back(new_action.label(),data_expression_list(new_replaced_args.begin(),new_replaced_args.end()));
            }
