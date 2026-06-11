@@ -33,10 +33,6 @@ Data
    libraries/data/data_library
 
 
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Some basic notions concerning the mCRL2 data library <libraries/data/latex/data.tex>`
-* :mcrl2_pdflatex:`Data types for mCRL2 <libraries/data/latex/mcrl2data.tex>`
 
 GUI
 =====
