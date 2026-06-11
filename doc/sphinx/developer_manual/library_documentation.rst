@@ -43,10 +43,6 @@ GUI
    libraries/gui/gui_library
 
 
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Architecture of mcrl2ide <libraries/gui/latex/architecture_mcrl2ide.tex>`
-
 LPS
 ======
 
