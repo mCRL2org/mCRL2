@@ -110,11 +110,7 @@ Process
 
    libraries/process/process_library
    libraries/process/global_variables
-
-
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Process Library Implementation Notes <libraries/process/latex/process-implementation-notes.tex>`
+   libraries/process/process_implementation_notes
 
 SMT
 ======
