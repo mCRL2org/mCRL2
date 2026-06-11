@@ -277,14 +277,19 @@ public:
     thread_context_t& context)
     : input(input),
       outgoing_transitions(outgoing_transitions),
-      context(context),
-      termination_action(process::action(
-          process::action_label(core::identifier_string("Terminate"), data::sort_expression_list()),
-          data::data_expression_list()))
+      context(context)
   {}
 
   void operator()()
   {
+    // The termination action is a local so that it is constructed and destroyed on this worker
+    // thread. An aterm member of this functor would be copy-constructed on the main thread
+    // (registering it in the main thread's protection set) but destroyed on the worker thread,
+    // because std::thread destroys its copy of the functor on the thread it runs.
+    const process::action termination_action(
+        process::action_label(core::identifier_string("Terminate"), data::sort_expression_list()),
+        data::data_expression_list());
+
     while (true)
     {
       std::unique_lock<std::mutex> queue_lock(context.queue_mutex);
@@ -306,7 +311,7 @@ public:
       queue_lock.unlock();
 
       // Process the state
-      visit_state(state_index);
+      visit_state(state_index, termination_action);
 
       queue_lock.lock();
       --context.active_workers;
@@ -331,7 +336,6 @@ private:
   const combine_lts_static_context& input;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
   thread_context_t& context;
-  const process::action termination_action;
 
   std::vector<state_t> get_state(std::size_t state_index)
   {
@@ -494,12 +498,12 @@ private:
   /// \brief Process one state from the combined state space.
   /// \details Emits outgoing transitions via callback, applying communication and filter operators
   /// (allow/block/hide) to each candidate immediately. Rejected candidates are not reported.
-  void visit_state(std::size_t state_index)
+  void visit_state(std::size_t state_index, const process::action& termination_action)
   {
     const std::vector<state_t> state = get_state(state_index);
 
     // Callback that filters and reports each candidate transition.
-    auto filter_and_report = [this, state_index](const lps::multi_action& candidate_label,
+    auto filter_and_report = [this, state_index, &termination_action](const lps::multi_action& candidate_label,
                                                    const std::vector<state_t>& target_state)
     {
       std::function<bool(const process::action&, const process::action&)> action_compare = process::action_compare();
