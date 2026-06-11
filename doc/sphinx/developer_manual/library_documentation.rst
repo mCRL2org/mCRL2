@@ -73,9 +73,6 @@ LTS
    libraries/lts/lts_library
 
 
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Implementation of LTSGraph3D <libraries/lts/latex/ltsgraph3d_report.tex>`
 
 
 Modal formula
