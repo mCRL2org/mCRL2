@@ -700,6 +700,7 @@ let x be an element of sort S, l of sort List(S), and n of sort Nat.
    in(S,x,l)          x in l     Test whether ``x`` is an element of ``l``
    count(S,l)         #l         The size of ``l``
    snoc(S,l,x)        l <| x     The list ``l`` suffixed with ``x``
+   concat(S,l,l')     l ++ l'    The concatenation of ``l`` and ``l'``
    element_at(S,l,n)  l.n        The element at position ``n`` in ``l``
    head(S,l)          head(l)    The first element of ``l``
    tail(S,l)          tail(l)    ``l`` from which the first element has been removed
@@ -1318,3 +1319,96 @@ Equality of data expressions can be checked by a rewriter or a prover; see
 
 That is, :math:`\mathit{true}` and :math:`\mathit{false}` are distinct, and
 :math:`\mathit{Eq}` is sound: it only reports equality when it holds.
+
+Historical notes
+----------------
+
+Design decisions
+^^^^^^^^^^^^^^^^
+
+The mCRL2 data language was designed with the following explicit constraints:
+
+- **Layout-neutral semantics.** Whitespace and indentation have no effect on
+  the semantics of a specification. This means that declarations must be
+  terminated by a semicolon; without it, the grammar would be ambiguous.  For
+  example, without semicolons the two lines::
+
+     X = f(g)
+     (k) = Y
+
+  could be parsed either as ``X = f(g)`` and ``(k) = Y``, or as ``X = f`` and
+  ``Y = (g)(k)``, because layout is not significant.
+
+Comparison with related languages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The data part of mCRL2 can be compared with related languages from the
+functional programming world. The table below shows a number of aspects for
+mCRL (the predecessor of mCRL2), mCRL2, Haskell/Clean, and MetaOCaml.
+
+.. list-table:: Comparison of data languages
+   :header-rows: 1
+   :widths: 30 10 10 15 10
+
+   * - Aspect
+     - mCRL
+     - mCRL2
+     - Haskell/Clean
+     - MetaOCaml
+   * - Purely functional
+     - yes
+     - yes
+     - yes
+     - no
+   * - Expressiveness
+     - first-order
+     - higher-order
+     - higher-order
+     - higher-order
+   * - Strict
+     - no
+     - no
+     - no
+     - yes
+   * - Evaluation
+     - somewhat lazy
+     - somewhat lazy
+     - lazy
+     - eager
+   * - Control of evaluation order
+     - no
+     - yes
+     - yes
+     - yes
+   * - Partial evaluation
+     - yes
+     - yes
+     - no
+     - yes
+   * - Polymorphism
+     - no
+     - no
+     - yes
+     - yes
+   * - Modules
+     - no
+     - no
+     - yes
+     - yes
+   * - Object orientation
+     - no
+     - no
+     - no
+     - yes
+   * - Concrete data types
+     - no
+     - yes
+     - yes
+     - yes
+
+Originally the evaluation in mCRL and mCRL2 was eager, but the addition of
+just-in-time rewriting strategies moved evaluation toward laziness. Because
+both languages have a non-strict semantics yet evaluation is not fully lazy,
+evaluation only *approximates* the semantics in degenerate cases. In practice
+this rarely causes problems, and when it does, the evaluation order can usually
+be controlled explicitly through conditional rewrite rules.
