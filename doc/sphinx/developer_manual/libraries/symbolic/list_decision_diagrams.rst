@@ -44,7 +44,7 @@ consists of 11 states that differ only in the 5th and 6th parameter. It can be c
 represented using an LDD, see the figure below. For our applications we use the LDD implementation that is part of the Sylvan multi-core framework for decision diagrams, see
 [vDvdP2017]_.
 
-.. figure:: latex/ldd_if_then.png
+.. figure:: ldd_if_then.png
    :width: 15cm
 
 For an LDD :math:`A` we use :math:`\mathit{down}(A)` to denote
