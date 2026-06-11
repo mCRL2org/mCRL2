@@ -9,6 +9,8 @@
 /// \file ./visutils.cpp
 
 #include "visutils.h"
+
+#include <numbers>
 #include "character_set.xpm"
 
 
@@ -2251,7 +2253,7 @@ float VisUtils::cushionProfile1D(
   const float& l_ratio)
 // Code adapted from Lucian Voinea.
 {
-  double pi = 3.1415926535;
+  double pi = std::numbers::pi;
   float alphaNew = (float)(pi*alpha)/180;
 
   float a= -(float)(4*h)/(D*D);

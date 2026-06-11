@@ -5,7 +5,7 @@
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 
-typedef gui::qt::qt_tool<tools::input_tool> diagraphica_base;
+using diagraphica_base = gui::qt::qt_tool<tools::input_tool>;
 class diagraphica_tool : public diagraphica_base
 {
   public:
@@ -43,7 +43,7 @@ class diagraphica_tool : public diagraphica_base
         QSurfaceFormat::setDefaultFormat(surfaceFormat);
     }
 
-    bool run()
+    bool run() override
     {
       MainWindow window;
 

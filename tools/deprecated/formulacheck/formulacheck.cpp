@@ -49,28 +49,28 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
 
     /// \brief The flag indicating whether or not counter examples are printed each time a formula is encountered
     /// \brief that is neither a contradiction nor a tautology.
-    bool f_counter_example;
+    bool f_counter_example = false;
 
     /// \brief The flag indicating whether or not witnesses are printed each time a formula is encountered
     /// \brief that is neither a contradiction nor a tautology.
-    bool f_witness;
+    bool f_witness = false;
 
     /// \brief The prefix of the files in dot format that are written each time a condition is encountered that is neither
     /// \brief a contradiction nor a tautology. If the string is 0, no files are written.
     std::string f_dot_file_name;
 
     /// \brief The maximal number of seconds spent on proving a single confluence condition.
-    int f_time_limit;
+    int f_time_limit = 0;
 
     /// \brief The flag indicating whether or not a path eliminator is used.
-    bool f_path_eliminator;
+    bool f_path_eliminator = false;
 
     /// \brief The flag indicating whether or not induction should be applied.
-    bool f_apply_induction;
+    bool f_apply_induction = false;
 
-    typedef prover_tool< rewriter_tool<input_tool> > super;
+    using super = prover_tool< rewriter_tool<input_tool> >;
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
 
@@ -96,7 +96,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
       }
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
 
@@ -185,12 +185,8 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
         "Luc Engelen",
         "check a boolean formula",
         "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in "
-        "INFILE holds. If INFILE is not present, stdin is used."),
-      f_counter_example(false),
-      f_witness(false),
-      f_time_limit(0),
-      f_path_eliminator(false),
-      f_apply_induction(false)
+        "INFILE holds. If INFILE is not present, stdin is used.")
+      
     {}
 
     /// \brief Checks and indicates whether or not the formula specified by
@@ -198,7 +194,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
     /// Reads the list of formulas specified by m_input_filename and the LPS
     /// specified by f_specification_filename. The method determines and indicates whether or not the
     /// formulas in the list are tautologies or contradictions using the data equations of the LPS.
-    bool run()
+    bool run() override
     {
       data_specification specification = load_specification(f_spec_file_name);
       data_expression formula = load_formula(m_input_filename, specification);

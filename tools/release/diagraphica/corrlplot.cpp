@@ -20,7 +20,7 @@ CorrlPlot::CorrlPlot(QWidget *parent, Graph* graph, int attributeIndex1, int att
   minRadHintPx =  5;
   maxRadHintPx = 25;
 
-  diagram         = 0;
+  diagram         = nullptr;
   showDgrm        = false;
   attrValIdx1Dgrm = NON_EXISTING;
   attrValIdx2Dgrm = NON_EXISTING;
@@ -317,15 +317,15 @@ void CorrlPlot::calcMaxNumber()
 
   // calc totals
   {
-    for (std::size_t i = 0; i < maxNumX.size(); ++i)
+    for (int i : maxNumX)
     {
-      sumMaxNumX += maxNumX[i];
+      sumMaxNumX += i;
     }
   }
   {
-    for (std::size_t i = 0; i < maxNumY.size(); ++i)
+    for (int i : maxNumY)
     {
-      sumMaxNumY += maxNumY[i];
+      sumMaxNumY += i;
     }
   }
 }
@@ -338,7 +338,7 @@ void CorrlPlot::showTooltip(std::size_t xIndex, std::size_t yIndex, const QPoint
   msgDgrm = Utils::dblToStr(number[xIndex][yIndex]) + " nodes; "
     + Utils::dblToStr(Utils::perc((double) number[xIndex][yIndex], (double) m_graph->getSizeNodes())) + '%';
 
-  if (diagram == 0)
+  if (diagram == nullptr)
   {
     QToolTip::showText(QCursor::pos(), QString::fromStdString(msgDgrm));
   }

@@ -480,10 +480,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::findErrorPosition(QString err)
 {
   QStringList lines = err.split("\n");
-  for (int i = 0; i < lines.size(); i++)
+  for (const auto & line : lines)
   {
     QRegularExpression rxlen("Line (\\d+), column (\\d+): syntax error");
-    QRegularExpressionMatch match = rxlen.match(lines[i]);
+    QRegularExpressionMatch match = rxlen.match(line);
 
     if (match.isValid()) {
       m_lastErrorPosition.setX(match.captured(1).toInt());

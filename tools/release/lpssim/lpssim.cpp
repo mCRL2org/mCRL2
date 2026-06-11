@@ -414,7 +414,7 @@ private:
           }
           notdone = false;
         }
-        else if ((s.substr(0,2) == "e ") || (s.substr(0,4) == "env "))
+        else if ((s.starts_with("e ")) || (s.starts_with("env ")))
         {
           handle_env(s, simulation, state_index);
         }
@@ -439,7 +439,7 @@ private:
         {
           handle_redo(simulation, state_index);
         }
-        else if ((s.substr(0,2) == "g ") || (s.substr(0,5) == "goto "))
+        else if ((s.starts_with("g ")) || (s.starts_with("goto ")))
         {
           handle_goto(s, simulation, state_index);
         }
@@ -447,11 +447,11 @@ private:
         {
           handle_trace(simulation, state_index);
         }
-        else if ((s.substr(0,2) == "s ") || (s.substr(0,5) == "save "))
+        else if ((s.starts_with("s ")) || (s.starts_with("save ")))
         {
           handle_save(s, simulation);
         }
-        else if ((s.substr(0,2) == "l ") || (s.substr(0,5) == "load "))
+        else if ((s.starts_with("l ")) || (s.starts_with("load ")))
         {
           handle_load(s, simulation, state_index);
         }

@@ -49,7 +49,7 @@ bool ExtendedTabWidget::eventFilter(QObject *target, QEvent *event) {
           menu.addAction("Close tabs on the left");
           menu.addAction("Close tabs on the right");
           QAction* act = menu.exec(mapToGlobal(position));
-          if (act != 0)
+          if (act != nullptr)
           {
             if (act->text() == "Close tab")
             {

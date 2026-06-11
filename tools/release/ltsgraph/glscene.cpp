@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <cmath>
 #include <list>
+#include <utility>
 
 /// \brief Number of orthogonal slices from which a circle representing a node
 /// is constructed.
@@ -242,7 +243,7 @@ void GLScene::initialize()
   m_node_shader.setAttributeBuffer(vertex_attrib_location, GL_FLOAT, 0, 3);
   m_node_shader.enableAttributeArray(vertex_attrib_location);
 
-  m_current_scene_size = std::max(m_batch_size, std::max(m_graph.nodeCount(), m_graph.edgeCount()));
+  m_current_scene_size = std::max({m_batch_size, m_graph.nodeCount(), m_graph.edgeCount()});
   m_drawInstances.resize(m_batch_size);
 
   m_colorBuffer.create();
@@ -337,12 +338,12 @@ void GLScene::initialize()
   m_arrow_shader.enableAttributeArray(arrow_vertex_attrib_location);
 
   m_offsetBuffer.bind();
-  m_arrow_shader.setAttributeArray(arrow_offset_attrib_location, GL_FLOAT, 0, 3);
+  m_arrow_shader.setAttributeArray(arrow_offset_attrib_location, GL_FLOAT, nullptr, 3);
   m_arrow_shader.enableAttributeArray(arrow_offset_attrib_location);
   glVertexAttribDivisor(arrow_offset_attrib_location, 1);
 
   m_colorBuffer.bind();
-  m_arrow_shader.setAttributeArray(arrow_color_attrib_location, GL_FLOAT, 0, 4);
+  m_arrow_shader.setAttributeArray(arrow_color_attrib_location, GL_FLOAT, nullptr, 4);
   m_arrow_shader.enableAttributeArray(arrow_color_attrib_location);
   glVertexAttribDivisor(arrow_color_attrib_location, 1);
 
@@ -350,7 +351,7 @@ void GLScene::initialize()
   m_directionBuffer.setUsagePattern(QOpenGLBuffer::UsagePattern::StreamDraw);
   m_directionBuffer.bind();
   m_directionBuffer.allocate(static_cast<int>(m_current_scene_size * sizeof(QVector3D)));
-  m_arrow_shader.setAttributeArray(arrow_dir_attrib_location, GL_FLOAT, 0, 3);
+  m_arrow_shader.setAttributeArray(arrow_dir_attrib_location, GL_FLOAT, nullptr, 3);
   m_arrow_shader.enableAttributeArray(arrow_dir_attrib_location);
   glVertexAttribDivisor(arrow_dir_attrib_location, 1);
 
@@ -802,12 +803,12 @@ void GLScene::renderText(QPainter& painter)
     {
       font.setPixelSize(getScale(indices[i]) * m_fontsize);
       painter.setFont(font);
-      if (m_drawstatenumbers && i < static_cast<std::size_t>(m_textLimitStateNumbers))
+      if (m_drawstatenumbers && std::cmp_less(i ,m_textLimitStateNumbers)))
       {
         renderStateNumber(painter, exploration_active ? m_graph.explorationNode(indices[i]) : indices[i]);
       }
 
-      if (m_drawstatelabels && i < static_cast<std::size_t>(m_textLimitStateLabels))
+      if (m_drawstatelabels && std::cmp_less(i ,m_textLimitStateLabels)))
       {
         renderStateLabel(painter, exploration_active ? m_graph.explorationNode(indices[i]) : indices[i]);
       }
@@ -897,7 +898,7 @@ void GLScene::renderText(QPainter& painter)
 
 GLScene::Selection GLScene::select(int x, int y)
 {
-  Selection s{SelectableObject::none, 0};
+  Selection s{.selectionType=SelectableObject::none, .index=0};
   selectObject(s, x, y, SelectableObject::node)
       || selectObject(s, x, y, SelectableObject::handle)
       // Only select transition labels when they are rendered
@@ -985,14 +986,14 @@ void GLScene::renderEdge(std::size_t i)
   QVector3D tip;
   QVector3D vec;
   {
-    const Math::Circle to_node{to, 0.5f * nodeSizeScaled()};
+    const Math::Circle to_node{.center=to, .radius=0.5f * nodeSizeScaled()};
     const Math::CubicBezier arc(control);
     Math::Scalar t = Math::make_intersection(to_node, arc).guessNearBack();
     tip = to_node.project(arc.at(t));
-    const Math::Circle from_node{from, 0.5f * nodeSizeScaled()};
+    const Math::Circle from_node{.center=from, .radius=0.5f * nodeSizeScaled()};
     t = Math::make_intersection(from_node, arc).guessNearFront();
     start = from_node.project(arc.at(t));
-    const Math::Circle head{to, 0.5f * nodeSizeScaled() + arrowheadSizeScaled()};
+    const Math::Circle head{.center=to, .radius=0.5f * nodeSizeScaled() + arrowheadSizeScaled()};
     const Math::Scalar s = Math::make_intersection(head, arc).guessNearBack();
     const QVector3D top = arc.at(s);
     vec = tip - top;

@@ -206,12 +206,12 @@ struct guard_expression
   {
     mCRL2log(log::debug) << "check_guards: x = " << pbes_system::pp(x) << std::endl;
     bool result = true;
-    for (auto i = guards.begin(); i != guards.end(); ++i)
+    for (const auto& i: guards)
     {
       try
       {
-        const propositional_variable_instantiation& X = i->first;
-        const pbes_expression& g1 = i->second;
+        const propositional_variable_instantiation& X = i.first;
+        const pbes_expression& g1 = i.second;
         pbes_expression g2 = guard(X, x);
         if (pbes_rewrite(g1, R) != pbes_rewrite(g2, R))
         {

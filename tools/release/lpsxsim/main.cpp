@@ -8,7 +8,7 @@ using namespace mcrl2;
 using mcrl2::data::tools::rewriter_tool;
 using namespace mcrl2::utilities;
 
-typedef gui::qt::qt_tool<rewriter_tool<tools::input_tool> > lpsxsim_base;
+using lpsxsim_base = gui::qt::qt_tool<rewriter_tool<tools::input_tool> >;
 
 class lpsxsim_tool : public lpsxsim_base
 {
@@ -17,13 +17,13 @@ class lpsxsim_tool : public lpsxsim_base
 
     bool m_do_not_use_dummies;
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       lpsxsim_base::add_options(desc);
       desc.add_option("nodummy", "do not replace global variables in the LPS with dummy values", 'y');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       lpsxsim_base::parse_options(parser);
       m_do_not_use_dummies = 0 < parser.options.count("nodummy");
@@ -40,7 +40,7 @@ class lpsxsim_tool : public lpsxsim_base
         "http://www.mcrl2.org/web/user_manual/tools/release/lpsxsim.html")
     {}
 
-    bool run()
+    bool run() override
     {
       qRegisterMetaType<QSemaphore *>("QSemaphore *");
 

@@ -7,6 +7,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <utility>
+
 #include "mcrl2/pg/DeloopSolver.h"
 #include "mcrl2/pg/attractor.h"
 
@@ -36,7 +38,7 @@ ParityGame::Strategy DeloopSolver::solve()
         std::deque<verti> winning;
         for (verti v = 0; v < V; ++v)
         {
-            if ( static_cast<int>(game_.priority(v)%2) == player &&
+            if ( std::cmp_equal(game_.priority(v)%2, player) &&
                  game_.graph().outdegree(v) == 1 &&
                  *game_.graph().succ_begin(v) == v )
             {
@@ -48,9 +50,9 @@ ParityGame::Strategy DeloopSolver::solve()
         }
 
         // Compute attractor set and associated strategy:
-        for (std::deque<verti>::const_iterator it = winning.begin(); it != winning.end(); ++it)
+        for (unsigned long it : winning)
         {
-          solved.insert(*it);
+          solved.insert(it);
         }
         make_attractor_set( game_, (ParityGame::Player)player,
                             solved, winning, strategy );

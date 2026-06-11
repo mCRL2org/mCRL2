@@ -14,7 +14,7 @@
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 
-typedef gui::qt::qt_tool<tools::input_tool> ltsgraph_base;
+using ltsgraph_base = gui::qt::qt_tool<tools::input_tool>;
 class ltsgraph_tool : public ltsgraph_base
 {
   public:

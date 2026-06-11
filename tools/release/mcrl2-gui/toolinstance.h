@@ -17,13 +17,15 @@
 #include "optionvalue.h"
 #include "multiprocess.h"
 
+#include <memory>
+#include <vector>
+
 class ToolInstance : public QWidget
 {
     Q_OBJECT
 
   public:
     explicit ToolInstance(QString filename, ToolInformation information, mcrl2::gui::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0);
-    ~ToolInstance();
 
     ToolInformation information() { return m_info; }
     QString executable();
@@ -44,7 +46,12 @@ class ToolInstance : public QWidget
     ToolInformation m_info;
     Ui::ToolInstance m_ui;
 
-    QList<OptionValue*> m_optionValues;
+    std::vector<std::unique_ptr<OptionValue>> m_optionValues;
+
+    /// Owns the process created for this instance; m_process and m_mprocess are
+    /// non-owning views of it. For GUI tools m_process may instead point to a
+    /// process spawned, and owned, by m_mprocess.
+    std::unique_ptr<QProcess> m_ownedProcess;
     QProcess* m_process;
     QMultiProcess* m_mprocess;
 

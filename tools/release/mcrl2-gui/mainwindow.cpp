@@ -66,11 +66,11 @@ void MainWindow::onOpenIDE()
   QString path = appDir.absoluteFilePath("mcrl2ide");
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-  QProcess* p = new QProcess();
-  p->setProgram(path);
-  if (!p->startDetached())
+  QProcess p;
+  p.setProgram(path);
+  if (!p.startDetached())
   {
-    QMessageBox::warning(this, "mCRL2-gui", "Failed to start mcrl2ide: " + p->errorString());
+    QMessageBox::warning(this, "mCRL2-gui", "Failed to start mcrl2ide: " + p.errorString());
   }
 #else
   if (!QProcess::startDetached(path))
@@ -101,12 +101,12 @@ void MainWindow::createToolMenu()
   menuTools->setTitle("&Tool Information");
 
   QStringList cats = m_catalog.categories();
-  for (int i = 0; i < cats.size(); i++)
+  for (const auto & cat : cats)
   {
     QMenu *menuCat = new QMenu(menuTools);
-    menuCat->setTitle(cats.at(i));
+    menuCat->setTitle(cat);
     menuTools->addMenu(menuCat);
-    QList<ToolInformation> tools = m_catalog.tools(cats.at(i));
+    QList<ToolInformation> tools = m_catalog.tools(cat);
     for (int i = 0; i < tools.count(); i++)
     {
       ToolInformation tool = tools.at(i);
@@ -176,13 +176,13 @@ void MainWindow::onTabColorChanged(QColor color)
 void MainWindow::onTabCloseRequest(int index)
 {
   ToolInstance* toolInstance = dynamic_cast<ToolInstance*>(m_ui.tabInstances->widget(index));
-  if (toolInstance != 0)
+  if (toolInstance != nullptr)
   {
     m_ui.tabInstances->removeTab(index);
     toolInstance->deleteLater();
   }
   FileInformation* fileInformation = dynamic_cast<FileInformation*>(m_ui.tabInstances->widget(index));
-  if (fileInformation != 0)
+  if (fileInformation != nullptr)
   {
     m_ui.tabInstances->removeTab(index);
     fileInformation->deleteLater();

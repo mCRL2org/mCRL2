@@ -34,7 +34,7 @@ using namespace mcrl2::log;
 class lpsrealzone_tool: public rewriter_tool<input_output_tool>
 {
   protected:
-    typedef rewriter_tool<input_output_tool> super;
+    using super = rewriter_tool<input_output_tool>;
 
   public:
     lpsrealzone_tool()
@@ -52,7 +52,7 @@ class lpsrealzone_tool: public rewriter_tool<input_output_tool>
     /// Runs the algorithm.
     /// Reads a specification from input_file,
     /// applies real time abstraction to it and writes the result to output_file.
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "Parameters of lpsrealzone:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;

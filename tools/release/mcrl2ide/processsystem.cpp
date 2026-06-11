@@ -11,6 +11,7 @@
 #include "processsystem.h"
 
 #include <QEventLoop>
+#include <utility>
 
 ProcessThread::ProcessThread(QQueue<int>* processQueue, ProcessType processType)
     : processQueue(processQueue), processType(processType), running(false),
@@ -663,7 +664,7 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
 
     /* if there are more subprocesses to run, check if the previous subprocess
      *   terminated successfully */
-    if (nextSubprocessIndex < int(processes[processid].size()) &&
+    if (std::cmp_less(nextSubprocessIndex ,processes[processid].size()) &&
         previousExitCode > 0)
     {
       /* if not, abort the process */
@@ -682,7 +683,7 @@ void ProcessSystem::executeNextSubprocess(int previousExitCode, int processid)
   }
 
   /* if the previous process was the last process, we are done */
-  if (nextSubprocessIndex < int(processes[processid].size()))
+  if (std::cmp_less(nextSubprocessIndex ,processes[processid].size()))
   {
 
     /* get the process and its properties */
@@ -1059,7 +1060,7 @@ void ProcessSystem::killProcess(int processid)
 void ProcessSystem::deleteProcess(int processid, int fromSubprocessIndex)
 {
   std::vector<QProcess*> subprocesses = processes[processid];
-  for (int i = fromSubprocessIndex; i < int(subprocesses.size()); i++)
+  for (int i = fromSubprocessIndex; std::cmp_less(i ,subprocesses.size()); i++)
   {
     subprocesses[i]->deleteLater();
   }

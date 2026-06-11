@@ -89,8 +89,7 @@ MainWindow::MainWindow(const QString& inputFilePath, QWidget* parent)
 }
 
 MainWindow::~MainWindow()
-{
-}
+= default;
 
 void MainWindow::setupMenuBar()
 {

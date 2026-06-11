@@ -15,7 +15,7 @@
 #include <QMessageBox>
 
 FileBrowser::FileBrowser(QWidget *parent) :
-  QTreeView(parent), m_model(this), m_menu(NULL), m_copyMode(cm_none), m_copydialog(parent)
+  QTreeView(parent), m_model(this), m_menu(nullptr), m_copyMode(cm_none), m_copydialog(parent)
 {
   connect(&m_copydialog, SIGNAL(rejected()), &m_copythread, SLOT(cancel()));
   connect(&m_copythread, SIGNAL(started()), &m_copydialog, SLOT(open()));
@@ -73,11 +73,6 @@ FileBrowser::FileBrowser(QWidget *parent) :
   connect(m_menu, SIGNAL(aboutToShow()), this, SLOT(onContextMenu()));
 }
 
-FileBrowser::~FileBrowser()
-{
-  delete m_menu;
-}
-
 void FileBrowser::removeToolActions()
 {
   for (QMenu* category : m_categories)
@@ -91,14 +86,14 @@ void FileBrowser::setCatalog(ToolCatalog catalog)
   removeToolActions();
   m_catalog = catalog;
   QStringList categories = m_catalog.categories();
-  for (auto cat = categories.begin(); cat != categories.end(); ++cat)
+  for (auto & categorie : categories)
   {
-    QMenu* catMenu = new QMenu(*cat, m_menu);
+    QMenu* catMenu = new QMenu(categorie, m_menu);
     m_menu->insertMenu(m_sep3, catMenu);
-    QList<ToolInformation> tools = m_catalog.tools(*cat);
-    for (auto tool = tools.begin(); tool != tools.end(); ++tool)
+    QList<ToolInformation> tools = m_catalog.tools(categorie);
+    for (auto & tool : tools)
     {
-      catMenu->addAction(new ToolAction(*tool, catMenu));
+      catMenu->addAction(new ToolAction(tool, catMenu));
       connect(catMenu->actions().back(), SIGNAL(triggered()), this, SLOT(onToolSelected()));
     }
     m_categories.append(catMenu);
@@ -132,24 +127,24 @@ void FileBrowser::onContextMenu()
   if (singleton)
   {
     QString ext = QFileInfo(m_model.filePath(selectedIndexes()[0])).suffix();
-    for (auto cat = m_categories.begin(); cat != m_categories.end(); ++cat)
+    for (auto & m_categorie : m_categories)
     {
       bool catVisible = false;
-      QList<QAction*> actions = (*cat)->actions();
-      for (auto tool = actions.begin(); tool != actions.end(); ++tool)
+      QList<QAction*> actions = m_categorie->actions();
+      for (auto & action : actions)
       {
-        if (dynamic_cast<ToolAction*>(*tool)->information().inputMatchesAny(m_catalog.fileTypes(ext)))
+        if (dynamic_cast<ToolAction*>(action)->information().inputMatchesAny(m_catalog.fileTypes(ext)))
         {
-          (*tool)->setVisible(true);
+          action->setVisible(true);
           catVisible = true;
         }
         else
         {
-          (*tool)->setVisible(false);
+          action->setVisible(false);
         }
       }
       toolsVisible = toolsVisible || catVisible;
-      (*cat)->menuAction()->setVisible(catVisible);
+      m_categorie->menuAction()->setVisible(catVisible);
     }
   }
   m_sep2->setVisible(toolsVisible);
@@ -239,9 +234,9 @@ void FileBrowser::onNewFolder()
 void FileBrowser::onOpenFiles()
 {
   QModelIndexList indexes = selectedIndexes();
-  for (auto i = indexes.begin(); i != indexes.end(); ++i)
+  for (auto & indexe : indexes)
   {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(m_model.filePath(*i)));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(m_model.filePath(indexe)));
   }
 }
 
@@ -250,9 +245,9 @@ void FileBrowser::onDeleteFiles()
   QModelIndexList indexes = selectedIndexes();
   if (askRemove(indexes))
   {
-    for (auto i = indexes.begin(); i != indexes.end(); ++i)
+    for (auto & indexe : indexes)
     {
-      m_model.remove(*i);
+      m_model.remove(indexe);
     }
   }
 }
@@ -278,9 +273,9 @@ void FileBrowser::onPasteFiles()
 
   QDir targetDir = QDir(m_model.filePath(selectedIndexes()[0]));
   m_copyMode = cm_none;
-  for (auto file = m_selectedFiles.begin(); file != m_selectedFiles.end(); ++file)
+  for (auto & m_selectedFile : m_selectedFiles)
   {
-    QModelIndex pastefile = m_model.index(*file);
+    QModelIndex pastefile = m_model.index(m_selectedFile);
     if (pastefile.isValid())
     {
       QString newName = targetDir.absoluteFilePath(m_model.fileName(pastefile));
@@ -290,11 +285,11 @@ void FileBrowser::onPasteFiles()
         {
         case cm_cut:
             QFile::remove(newName);
-            if (!QFile::rename(*file, newName))
-              copyDirectory(*file, newName, true);
+            if (!QFile::rename(m_selectedFile, newName))
+              copyDirectory(m_selectedFile, newName, true);
             break;
         case cm_copy:
-            copyDirectory(*file, newName);
+            copyDirectory(m_selectedFile, newName);
             break;
         default:
             break;
@@ -364,9 +359,9 @@ void FileBrowser::copyDirectory(QString oldPath, QString newPath, bool move)
       QString curPath = todo.takeFirst();
       curDir.setPath(curPath);
       QStringList entries = curDir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
-      for (int i = 0; i < entries.size(); i++)
+      for (const auto & entrie : entries)
       {
-        QString entry = curDir.absoluteFilePath(entries.at(i));
+        QString entry = curDir.absoluteFilePath(entrie);
         if (QFileInfo(entry).isDir())
         {
           todo.append(entry);

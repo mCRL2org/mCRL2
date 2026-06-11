@@ -45,7 +45,7 @@ DocumentWidget* DocumentManager::createDocument(QString title)
 DocumentWidget* DocumentManager::getDocument(int index)
 {
   if (index < 0 || index >= count())
-    return 0;
+    return nullptr;
   return dynamic_cast<DocumentWidget *>(widget(index));
 }
 
@@ -55,7 +55,7 @@ DocumentWidget* DocumentManager::findDocument(QString fileName)
     if (getDocument(i)->getFileName() == fileName)
       return getDocument(i);
   }
-  return 0;
+  return nullptr;
 }
 
 void DocumentManager::closeDocument(int index)
@@ -64,7 +64,7 @@ void DocumentManager::closeDocument(int index)
     return;
 
   DocumentWidget* document = getDocument(index);
-  if (document != 0)
+  if (document != nullptr)
   {
     emit documentClosed(document);
     document->deleteLater();
@@ -93,7 +93,7 @@ DocumentWidget* DocumentManager::currentDocument()
 QString DocumentManager::currentFileName()
 {
   DocumentWidget* document = currentDocument();
-  if (document == 0)
+  if (document == nullptr)
   {
     return QString("");
   }
@@ -127,7 +127,7 @@ void DocumentManager::openFile(QString fileName)
     }
   }
 
-  if (document == 0)
+  if (document == nullptr)
     document = createDocument(fileInfo.completeBaseName());
 
   document->openFile(fileName);

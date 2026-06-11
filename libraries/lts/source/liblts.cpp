@@ -195,9 +195,9 @@ std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_
   std::string r;
   std::string prev;
   bool first = true;
-  for (std::vector<lts_type>::iterator i=types.begin(); i!=types.end(); i++)
+  for (auto & type : types)
   {
-    if (extension_strings[*i] == prev)   // avoid mentioning extensions more than once
+    if (extension_strings[type] == prev)   // avoid mentioning extensions more than once
     {
       continue;
     }
@@ -209,8 +209,8 @@ std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_
     {
       r += sep;
     }
-    r += "*." + extension_strings[*i];
-    prev = extension_strings[*i];
+    r += "*." + extension_strings[type];
+    prev = extension_strings[type];
   }
 
   return r;

@@ -1078,7 +1078,7 @@ void FileSystem::createReinitialisedSpecification(const Property& property, Spec
     QString procExp = (specType == SpecType::First ? property.text : property.text2);
 
     /* find the init keyword */
-    QRegularExpressionMatch initKeywordMatch = QRegularExpression("(^|\\n)([^%]*[; \\t])?init[ \\t\\n%]").match(spec);
+    QRegularExpressionMatch initKeywordMatch = QRegularExpression(R"((^|\n)([^%]*[; \t])?init[ \t\n%])").match(spec);
     /* if there is no init block in the main spec, add an init block */
     if (!initKeywordMatch.hasMatch())
     {

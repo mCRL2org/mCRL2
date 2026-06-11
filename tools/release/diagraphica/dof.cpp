@@ -19,7 +19,7 @@ DOF::DOF(int index, QString label)
   m_label     = label;
   m_values    << 0.0 << 0.0;
   m_direction = 1;
-  m_attribute = 0;
+  m_attribute = nullptr;
 }
 
 

@@ -20,7 +20,7 @@ DistrPlot::DistrPlot(QWidget* parent, Graph* g, int attributeIndex):
   minHgtHintPx =  4;
   maxWthHintPx = 10;
 
-  diagram        = 0;
+  diagram        = nullptr;
   showDgrm       = false;
   attrValIdxDgrm = -1;
 
@@ -256,11 +256,11 @@ void DistrPlot::mouseMoveEvent(QMouseEvent* event)
 void DistrPlot::calcMaxNumber()
 {
   maxNumber = 0;
-  for (std::size_t i = 0; i < number.size(); ++i)
+  for (unsigned long i : number)
   {
-    if (number[i] > maxNumber)
+    if (i > maxNumber)
     {
-      maxNumber = number[i];
+      maxNumber = i;
     }
   }
 }
@@ -285,7 +285,7 @@ void DistrPlot::showTooltip(std::size_t valueIndex, const QPointF& position)
     msgDgrm = Utils::size_tToStr(number[valueIndex]) + " nodes; "
       + Utils::dblToStr(Utils::perc((int)number[valueIndex], (int)m_graph->getSizeNodes())) + '%';
 
-    if (diagram == 0)
+    if (diagram == nullptr)
     {
       QToolTip::showText(QCursor::pos(), QString::fromStdString(msgDgrm));
     }

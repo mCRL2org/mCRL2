@@ -16,7 +16,7 @@
 class Rectangle
 {
   public:
-    Rectangle() {}
+    Rectangle() = default;
 
     Rectangle(const QVector2D& lowc, const QVector2D& highc):
       low_corner(lowc), high_corner(highc)
@@ -68,7 +68,7 @@ class RNode
 {
   public:
     virtual ~RNode()
-    { }
+    = default;
 
     Rectangle boundingBox() const
     {
@@ -125,22 +125,21 @@ class RTreeNode: public RNode
 {
   public:
     RTreeNode()
-    { }
+    = default;
 
-    ~RTreeNode()
+    ~RTreeNode() override
     {
-      for (std::list< RNode* >::iterator ci = children.begin();
-           ci != children.end(); ++ci)
+      for (auto & ci : children)
       {
-        delete *ci;
+        delete ci;
       }
     }
 
-    void computeBoundingBox();
+    void computeBoundingBox() override;
 
-    void deletePoint(const QVector2D& point);
+    void deletePoint(const QVector2D& point) override;
 
-    bool hasChildren() const
+    bool hasChildren() const override
     {
       return !children.empty();
     }
@@ -199,17 +198,17 @@ class RTreeLeaf: public RNode
       point(p)
     { }
 
-    ~RTreeLeaf()
-    { }
+    ~RTreeLeaf() override
+    = default;
 
-    void computeBoundingBox();
+    void computeBoundingBox() override;
 
-    bool hasChildren() const
+    bool hasChildren() const override
     {
       return false;
     }
 
-    void deletePoint(const QVector2D&)
+    void deletePoint(const QVector2D&) override
     { }
 
     QVector2D point;
@@ -282,8 +281,8 @@ template< class Distance, class Compare >
 class NeighbourFinder
 {
   public:
-    typedef std::priority_queue< QueueElement, std::vector< QueueElement >,
-            Compare > PriorityQueue;
+    using PriorityQueue = std::priority_queue< QueueElement, std::vector< QueueElement >,
+            Compare >;
 
     void startNewSearch(RNode* root, const QVector2D& point)
     {
@@ -301,7 +300,7 @@ class NeighbourFinder
         RNode* top_node = queue.top().node;
         queue.pop();
         RTreeLeaf* leaf = dynamic_cast< RTreeLeaf* >(top_node);
-        if (leaf != NULL)
+        if (leaf != nullptr)
         {
           has_found_neighbour = true;
           found_neighbour = leaf->point;
@@ -337,7 +336,7 @@ class NeighbourFinder
 
 RTree::~RTree()
 {
-  if (root != NULL)
+  if (root != nullptr)
   {
     delete root;
   }
@@ -349,7 +348,7 @@ void RTree::deletePoint(const QVector2D& point)
   if (!root->hasChildren())
   {
     delete root;
-    root = NULL;
+    root = nullptr;
   }
 }
 

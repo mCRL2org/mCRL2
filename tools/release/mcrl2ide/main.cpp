@@ -13,7 +13,7 @@
 
 using namespace mcrl2;
 
-typedef gui::qt::qt_tool<utilities::tools::input_tool> mcrl2ide_base;
+using mcrl2ide_base = gui::qt::qt_tool<utilities::tools::input_tool>;
 
 class mcrl2ide_tool : public mcrl2ide_base
 {
@@ -31,7 +31,7 @@ class mcrl2ide_tool : public mcrl2ide_base
   {
   }
 
-  bool run()
+  bool run() override
   {
     MainWindow window(QString::fromStdString(m_input_filename));
     return show_main_window(window);

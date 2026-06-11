@@ -7,6 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include <ranges>
+
 #include "mcrl2/atermpp/aterm_io_binary.h"
 #include "mcrl2/core/load_aterm.h"
 #include "mcrl2/data/data_io.h"
@@ -318,9 +320,9 @@ atermpp::aterm pbes_to_aterm(const pbes& p)
 
   atermpp::aterm_list eqn_list;
   const std::vector<pbes_equation>& eqn = p.equations();
-  for (auto i = eqn.rbegin(); i != eqn.rend(); ++i)
+  for (const auto & i : std::ranges::reverse_view(eqn))
   {
-    atermpp::aterm a = pbes_equation_to_aterm(*i);
+    atermpp::aterm a = pbes_equation_to_aterm(i);
     eqn_list.push_front(a);
   }
   atermpp::aterm equations = atermpp::aterm(core::detail::function_symbol_PBEqnSpec(), eqn_list);

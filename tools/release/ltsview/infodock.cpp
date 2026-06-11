@@ -92,7 +92,7 @@ void InfoDock::selectionChanged()
       std::set<std::string> valueSet = lts->getClusterParameterValues(cluster, i);
       bool first = true;
       values += "{ ";
-      for (std::set<std::string>::iterator j = valueSet.begin(); j != valueSet.end(); j++)
+      for (const auto & j : valueSet)
       {
         if (first)
         {
@@ -102,7 +102,7 @@ void InfoDock::selectionChanged()
         {
           values += ", ";
         }
-        values += QString::fromStdString(*j);
+        values += QString::fromStdString(j);
       }
       values += " }";
     }

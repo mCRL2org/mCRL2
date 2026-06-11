@@ -16,7 +16,7 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using mcrl2::data::tools::rewriter_tool;
 
-typedef gui::qt::qt_tool<rewriter_tool<tools::input_tool> > mcrl2xi_base;
+using mcrl2xi_base = gui::qt::qt_tool<rewriter_tool<tools::input_tool> >;
 
 class mcrl2xi_tool : public mcrl2xi_base
 {
@@ -30,7 +30,7 @@ class mcrl2xi_tool : public mcrl2xi_base
                    "http://www.mcrl2.org/web/user_manual/tools/release/mcrl2xi.html")
     {}
 
-    bool run()
+    bool run() override
     {
       QThread *atermThread = new QThread;
       atermThread->start();

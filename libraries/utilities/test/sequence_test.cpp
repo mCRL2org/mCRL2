@@ -30,9 +30,9 @@ struct f
   // Adds the sum of the elements of v_ to sum_.
   void operator()() const
   {
-    for (std::vector<int>::const_iterator i = v_.begin(); i != v_.end(); ++i)
+    for (int i : v_)
     {
-      std::cout << *i << " ";
+      std::cout << i << " ";
     }
     std::cout << std::endl;
     sum_ += std::accumulate(v_.begin(), v_.end(), 0);

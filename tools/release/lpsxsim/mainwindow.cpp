@@ -15,11 +15,12 @@
 #include <QSettings>
 #include <QRandomGenerator>
 #include <climits>
+#include <utility>
 
 MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strategy, bool do_not_use_dummies)
   : m_atermThread(atermThread),
     m_strategy(strategy),
-    m_simulation(0),
+    m_simulation(nullptr),
     m_animationTimer(new QTimer(this)),
     m_do_not_use_dummies(do_not_use_dummies),
     m_fileDialog("", this)
@@ -169,7 +170,7 @@ void MainWindow::randomPlay()
 
   m_randomAnimation = true;
   // Set the trace to its current position. 
-  if (m_selected_state<m_trace.size())
+  if (std::cmp_less(m_selected_state,m_trace.size()))
   {
     reset(m_selected_state, false);
   }

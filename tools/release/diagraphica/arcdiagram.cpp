@@ -37,7 +37,7 @@ ArcDiagram::ArcDiagram(
 {
   idxInitStLeaves    = NON_EXISTING;
 
-  diagram = 0;
+  diagram = nullptr;
 
   connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(animate()));
 
@@ -64,7 +64,7 @@ ArcDiagram::ArcDiagram(
 
 ArcDiagram::~ArcDiagram()
 {
-  diagram = 0;
+  diagram = nullptr;
   clearSettings();
 }
 
@@ -75,9 +75,9 @@ ArcDiagram::~ArcDiagram()
 void ArcDiagram::getAttrsTree(std::vector< std::size_t >& idcs)
 {
   idcs.clear();
-  for (std::size_t i = 0; i < attrsTree.size(); ++i)
+  for (auto & i : attrsTree)
   {
-    idcs.push_back(attrsTree[i]->getIndex());
+    idcs.push_back(i->getIndex());
   }
 }
 
@@ -88,9 +88,9 @@ void ArcDiagram::getAttrsTree(std::vector< std::size_t >& idcs)
 void ArcDiagram::setAttrsTree(const std::vector< std::size_t > idcs)
 {
   attrsTree.clear();
-  for (std::size_t i = 0; i < idcs.size(); ++i)
+  for (unsigned long idc : idcs)
   {
-    attrsTree.push_back(m_graph->getAttribute(idcs[i]));
+    attrsTree.push_back(m_graph->getAttribute(idc));
   }
 }
 
@@ -105,16 +105,16 @@ void ArcDiagram::setDiagram(Diagram* dgrm)
 void ArcDiagram::hideAllDiagrams()
 {
   {
-    for (std::size_t i = 0; i < showDgrm.size(); ++i)
+    for (auto && i : showDgrm)
     {
-      showDgrm[i] = false;
+      i = false;
     }
   }
 
   {
-    for (std::size_t i = 0; i < markBundles.size(); ++i)
+    for (auto && markBundle : markBundles)
     {
-      markBundles[i] = false;
+      markBundle = false;
     }
   }
 }
@@ -156,9 +156,9 @@ void ArcDiagram::markBundle(const std::size_t& idx)
 
 void ArcDiagram::unmarkBundles()
 {
-  for (std::size_t i = 0; i < markBundles.size(); ++i)
+  for (auto && markBundle : markBundles)
   {
-    markBundles[i] = false;
+    markBundle = false;
   }
 }
 
@@ -230,7 +230,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawBundles()
 template <Visualizer::Mode mode>  void ArcDiagram::drawLeaves()
 {
   int segs = SEGM_HINT;
-  Cluster* clust = 0;
+  Cluster* clust = nullptr;
 
   if constexpr (mode == Visualizing)
   {
@@ -255,7 +255,7 @@ template <Visualizer::Mode mode>  void ArcDiagram::drawLeaves()
       VisUtils::fillEllipse(x+0.2*radLeaves, y-0.2*radLeaves, radLeaves, radLeaves, segs);
     }
 
-    if (clust != 0 && clust->getAttribute() != 0)
+    if (clust != nullptr && clust->getAttribute() != nullptr)
       VisUtils::setColor(calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues()));
     else if constexpr (mode == Visualizing)
       VisUtils::setColor(Qt::white);
@@ -283,7 +283,7 @@ template <Visualizer::Mode mode>  void ArcDiagram::drawLeaves()
     }
 
     VisUtils::disableLineAntiAlias();
-    clust = 0;
+    clust = nullptr;
   }
 }
 
@@ -291,7 +291,7 @@ template <Visualizer::Mode mode>  void ArcDiagram::drawLeaves()
 template <Visualizer::Mode mode> void ArcDiagram::drawTree()
 {
   int segs = SEGM_HINT;
-  Cluster* clust = 0;
+  Cluster* clust = nullptr;
   QColor colFill = Qt::white;
 
   if constexpr (mode == Visualizing)
@@ -319,7 +319,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawTree()
         clust   = mapPosToClust[i][j];
         colFill = VisUtils::lightGray;
 
-        if (clust != 0 && clust->getAttribute() != 0)
+        if (clust != nullptr && clust->getAttribute() != nullptr)
         {
           colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
         }
@@ -412,7 +412,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawBarTree()
 {
   if (posBarTreeTopLft.size() > 1)
   {
-    Cluster* clust = 0;
+    Cluster* clust = nullptr;
     QColor colFill = Qt::lightGray;
 
     if constexpr (mode == Visualizing)
@@ -438,7 +438,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawBarTree()
         {
           // fill color
           clust   = mapPosToClust[i][j];
-          if (clust != 0 && clust->getAttribute() != 0)
+          if (clust != nullptr && clust->getAttribute() != nullptr)
           {
             colFill = calcColor(clust->getAttrValIdx(), clust->getAttribute()->getSizeCurValues());
           }
@@ -473,7 +473,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawBarTree()
     {
       VisUtils::disableBlending();
       VisUtils::disableLineAntiAlias();
-      clust = 0;
+      clust = nullptr;
     }
   }
 }
@@ -521,8 +521,8 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
             vals.push_back(val);
           }
         }
-        attr = 0;
-        node = 0;
+        attr = nullptr;
+        node = nullptr;
 
         diagram->draw<mode>(pixelSize(), attrsDgrm[i], vals);
         vals.clear();
@@ -646,8 +646,8 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
               vals.push_back(val);
             }
           }
-          attr = 0;
-          node = 0;
+          attr = nullptr;
+          node = nullptr;
 
           diagram->draw<mode>(pixelSize(), attrsDgrm[i], vals);
           vals.clear();
@@ -678,8 +678,8 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
               vals.push_back(val);
             }
           }
-          attr = 0;
-          node = 0;
+          attr = nullptr;
+          node = nullptr;
 
           diagram->draw<mode>(pixelSize(), attrsDgrm[i], vals);
           vals.clear();
@@ -1169,7 +1169,7 @@ void ArcDiagram::calcSettingsBundles()
 
 void ArcDiagram::calcSettingsTree()
 {
-  if (m_graph->getRoot() != 0)
+  if (m_graph->getRoot() != nullptr)
   {
     QSizeF size = worldSize();
     double yTop = 0.5*Utils::minn(size.width(), size.height())-2.0*radLeaves;
@@ -1255,7 +1255,7 @@ void ArcDiagram::calcPositionsTree(
 
 void ArcDiagram::calcSettingsBarTree()
 {
-  if (m_graph->getRoot() != 0)
+  if (m_graph->getRoot() != nullptr)
   {
     QSizeF size = worldSize();
     double yBot = -0.5*Utils::minn(size.width(), size.height());
@@ -1364,9 +1364,9 @@ void ArcDiagram::calcSettingsDiagram()
 
 void ArcDiagram::updateMarkBundles()
 {
-  for (std::size_t i = 0; i < markBundles.size(); ++i)
+  for (auto && markBundle : markBundles)
   {
-    markBundles[i] = false;
+    markBundle = false;
   }
 
   if (currIdxDgrm != NON_EXISTING)
@@ -1461,21 +1461,21 @@ void ArcDiagram::clearSettingsDiagram()
   showDgrm.clear();
 
   {
-    for (std::size_t i = 0; i < attrsDgrm.size(); ++i)
+    for (auto & i : attrsDgrm)
     {
-      attrsDgrm[i].clear();
+      i.clear();
     }
   }
   attrsDgrm.clear();
 
   {
-    for (std::size_t i = 0; i < framesDgrm.size(); ++i)
+    for (auto & i : framesDgrm)
     {
-      for (std::size_t j = 0; j < framesDgrm[i].size(); ++j)
+      for (std::size_t j = 0; j < i.size(); ++j)
       {
-        delete framesDgrm[i][j];
+        delete i[j];
       }
-      framesDgrm[i].clear();
+      i.clear();
     }
   }
   framesDgrm.clear();
@@ -1542,7 +1542,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
         {
           currIdxDgrm = NON_EXISTING;
           updateMarkBundles();
-          emit hoverCluster(0);
+          emit hoverCluster(nullptr);
 
           handleHoverCluster(mapPosToClust.size()-1, ids[2]);
         }
@@ -1551,7 +1551,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
       case ID_TREE_NODE:
         currIdxDgrm = NON_EXISTING;
         updateMarkBundles();
-        emit hoverCluster(0);
+        emit hoverCluster(nullptr);
 
         handleHoverCluster(ids[2], ids[3]);
         break;
@@ -1559,7 +1559,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
       case ID_BAR_TREE:
         currIdxDgrm = NON_EXISTING;
         updateMarkBundles();
-        emit hoverCluster(0);
+        emit hoverCluster(nullptr);
 
         handleHoverBarTree(ids[2], ids[3]);
         break;
@@ -1629,7 +1629,7 @@ void ArcDiagram::handleHits(const std::vector< int >& ids)
     {
       currIdxDgrm = NON_EXISTING;
       updateMarkBundles();
-      emit hoverCluster(0);
+      emit hoverCluster(nullptr);
     }
     QToolTip::hideText(); 
   }
@@ -1718,7 +1718,7 @@ void ArcDiagram::handleShowDiagram(const std::size_t& dgrmIdx)
     hideDiagram(dgrmIdx);
     currIdxDgrm = NON_EXISTING;
     updateMarkBundles();
-    emit hoverCluster(0);
+    emit hoverCluster(nullptr);
   }
 }
 
@@ -1837,7 +1837,7 @@ void ArcDiagram::showDiagram(const std::size_t& dgrmIdx)
 {
   Cluster* clust = m_graph->getLeaf(dgrmIdx);
 
-  if (clust != 0)
+  if (clust != nullptr)
   {
     Attribute*        attr;
     std::set< Attribute* > attrs;
@@ -1850,49 +1850,49 @@ void ArcDiagram::showDiagram(const std::size_t& dgrmIdx)
     {
       // get result
       attr   = diagram->shape(i)->xCenterDOF()->attribute();
-      if (attr != 0)
+      if (attr != nullptr)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->shape(i)->yCenterDOF()->attribute();
-      if (attr != 0)
+      if (attr != nullptr)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->shape(i)->widthDOF()->attribute();
-      if (attr != 0)
+      if (attr != nullptr)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->shape(i)->heightDOF()->attribute();
-      if (attr != 0)
+      if (attr != nullptr)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->shape(i)->angleDOF()->attribute();
-      if (attr != 0)
+      if (attr != nullptr)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->shape(i)->colorDOF()->attribute();
-      if (attr != 0)
+      if (attr != nullptr)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->shape(i)->opacityDOF()->attribute();
-      if (attr != 0)
+      if (attr != nullptr)
       {
         attrs.insert(attr);
       }
 
       attr = diagram->shape(i)->textDOF()->attribute();
-      if (attr != 0)
+      if (attr != nullptr)
       {
         attrs.insert(attr);
       }
@@ -1916,9 +1916,9 @@ void ArcDiagram::showDiagram(const std::size_t& dgrmIdx)
 
     // clear framesDgrm
     {
-      for (std::size_t i = 0; i < framesDgrm[dgrmIdx].size(); ++i)
+      for (auto & i : framesDgrm[dgrmIdx])
       {
-        delete framesDgrm[dgrmIdx][i];
+        delete i;
       }
     }
     framesDgrm[dgrmIdx].clear();
@@ -1939,10 +1939,10 @@ void ArcDiagram::showDiagram(const std::size_t& dgrmIdx)
 
     // clear memory
     attrs.clear();
-    attr = 0;
+    attr = nullptr;
   }
 
-  clust = 0;
+  clust = nullptr;
 }
 
 
@@ -1950,7 +1950,7 @@ void ArcDiagram::hideDiagram(const std::size_t& dgrmIdx)
 {
   Cluster* clust = m_graph->getLeaf(dgrmIdx);
 
-  if (clust != 0)
+  if (clust != nullptr)
   {
     // hide diagram
     showDgrm[dgrmIdx] = false;
@@ -1973,7 +1973,7 @@ void ArcDiagram::hideDiagram(const std::size_t& dgrmIdx)
     posDgrm[dgrmIdx].y = 0;
   }
 
-  clust = 0;
+  clust = nullptr;
 }
 
 

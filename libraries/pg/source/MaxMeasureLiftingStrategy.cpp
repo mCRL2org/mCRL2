@@ -7,6 +7,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <ranges>
+
 #include "mcrl2/pg/MaxMeasureLiftingStrategy.h"
 
 /* TODO: write short description of how this works! */
@@ -126,9 +128,9 @@ verti MaxMeasureLiftingStrategy2::pop()
         std::sort(bumped_.begin(), bumped_.end());
         bumped_.erase( std::unique(bumped_.begin(), bumped_.end()),
                        bumped_.end() );
-        for (std::vector<verti>::iterator it = bumped_.begin(); it != bumped_.end(); ++it)
+        for (unsigned long & it : bumped_)
         {
-          move_up(*it);
+          move_up(it);
         }
 
         // CHECKME: why is this necessary for MAX_STEP too?
@@ -147,9 +149,9 @@ verti MaxMeasureLiftingStrategy2::pop()
             */
 
             // Move bumped vertices down the heap.
-            for (std::vector<verti>::reverse_iterator it = bumped_.rbegin(); it != bumped_.rend(); ++it)
+            for (unsigned long & it : std::ranges::reverse_view(bumped_))
             {
-              move_down(*it);
+              move_down(it);
             }
         }
         bumped_.clear();

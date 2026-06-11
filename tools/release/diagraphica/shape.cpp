@@ -215,7 +215,7 @@ DOF* Shape::dof(int index)
       return textDOF();
       break;
     default:
-      return 0;
+      return nullptr;
       break;
   }
 }
@@ -223,7 +223,7 @@ DOF* Shape::dof(int index)
 QString Shape::dofLabel(int index)
 {
   DOF* current = dof(index);
-  if (current != 0)
+  if (current != nullptr)
   {
     return current->label();
   }
@@ -273,52 +273,52 @@ void Shape::initDOF()
 void Shape::clearDOF()
 {
   // composition
-  if (m_xCenterDOF != 0)
+  if (m_xCenterDOF != nullptr)
   {
     delete m_xCenterDOF;
-    m_xCenterDOF = 0;
+    m_xCenterDOF = nullptr;
   }
 
-  if (m_yCenterDOF != 0)
+  if (m_yCenterDOF != nullptr)
   {
     delete m_yCenterDOF;
-    m_yCenterDOF = 0;
+    m_yCenterDOF = nullptr;
   }
 
-  if (m_widthDOF != 0)
+  if (m_widthDOF != nullptr)
   {
     delete m_widthDOF;
-    m_widthDOF = 0;
+    m_widthDOF = nullptr;
   }
 
-  if (m_heightDOF != 0)
+  if (m_heightDOF != nullptr)
   {
     delete m_heightDOF;
-    m_heightDOF = 0;
+    m_heightDOF = nullptr;
   }
 
-  if (m_angleDOF != 0)
+  if (m_angleDOF != nullptr)
   {
     delete m_angleDOF;
-    m_angleDOF = 0;
+    m_angleDOF = nullptr;
   }
 
-  if (m_colorDOF != 0)
+  if (m_colorDOF != nullptr)
   {
     delete m_colorDOF;
-    m_colorDOF = 0;
+    m_colorDOF = nullptr;
   }
 
-  if (m_opacityDOF != 0)
+  if (m_opacityDOF != nullptr)
   {
     delete m_opacityDOF;
-    m_opacityDOF = 0;
+    m_opacityDOF = nullptr;
   }
 
-  if (m_textDOF != 0)
+  if (m_textDOF != nullptr)
   {
     delete m_textDOF;
-    m_textDOF = 0;
+    m_textDOF = nullptr;
   }
 }
 

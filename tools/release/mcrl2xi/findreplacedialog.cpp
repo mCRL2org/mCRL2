@@ -31,7 +31,7 @@ void FindReplaceDialog::setTextEdit(QPlainTextEdit *textEdit)
 {
   if (m_textEdit)
   {
-    disconnect(m_textEdit, 0, m_ui.replaceButton, 0);
+    disconnect(m_textEdit, nullptr, m_ui.replaceButton, nullptr);
   }
 
   m_textEdit = textEdit;

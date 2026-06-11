@@ -17,7 +17,7 @@
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 
-typedef gui::qt::qt_tool<tools::tool> mcrl2_gui_base;
+using mcrl2_gui_base = gui::qt::qt_tool<tools::tool>;
 
 class mcrl2_gui_tool : public mcrl2_gui_base
 {
@@ -31,7 +31,7 @@ class mcrl2_gui_tool : public mcrl2_gui_base
                    "http://www.mcrl2.org/web/user_manual/tools/release/mcrl2-gui.html")
     {}
 
-    bool run()
+    bool run() override
     {
       //Create splash pixmap
       QPixmap pixmap(":/mcrl2.png");

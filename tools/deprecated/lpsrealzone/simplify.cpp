@@ -13,9 +13,8 @@
 #include "mcrl2/data/enumerator_with_iterator.h"
 #include "realzone.h"
 
-namespace mcrl2
-{
-namespace data
+
+namespace mcrl2::data
 {
 
   /// \brief Returns a list of all real variables in l
@@ -25,11 +24,11 @@ namespace data
   variable_list get_real_variables(const variable_list& l)
   {
     variable_list r;
-    for (variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
+    for (const auto & i : l)
     {
-      if (i->sort() == sort_real::real_())
+      if (i.sort() == sort_real::real_())
       {
-        r.push_front(*i);
+        r.push_front(i);
       }
     }
     return reverse(r);
@@ -42,11 +41,11 @@ namespace data
   variable_list get_nonreal_variables(const variable_list& l)
   {
     variable_list r;
-    for (variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
+    for (const auto & i : l)
     {
-      if (i->sort() != sort_real::real_())
+      if (i.sort() != sort_real::real_())
       {
-        r.push_front(*i);
+        r.push_front(i);
       }
     }
     return reverse(r);
@@ -159,9 +158,9 @@ namespace data
       const where_clause tw(t);
       const assignment_expression_list& l=tw.declarations();
       assignment_expression_vector new_l;
-      for(assignment_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+      for(const auto & i : l)
       {
-        const assignment ass(*i);
+        const assignment ass(i);
         new_l.push_back(assignment(ass.lhs(),replace_linear_inequalities_with_reals_by_variables(ass.rhs(),condition,vars,real_parameters)));
       }
 
@@ -183,9 +182,9 @@ namespace data
     }
 
     data_expression_vector new_args;
-    for(application::const_iterator a=ta.begin(); a!=ta.end(); ++a)
+    for(const auto & a : ta)
     {
-      new_args.push_back(replace_linear_inequalities_with_reals_by_variables(*a,condition,vars,real_parameters));
+      new_args.push_back(replace_linear_inequalities_with_reals_by_variables(a,condition,vars,real_parameters));
     }
     return application(replace_linear_inequalities_with_reals_by_variables(ta.head(),condition,vars,real_parameters),
                        new_args.begin(),new_args.end());
@@ -215,15 +214,15 @@ namespace data
        variable_list replaced_variables;
        data_expression new_condition=sort_bool::true_();
        process::action_vector new_actions;
-       for(process::action_list::const_iterator a=ma.begin(); a!=ma.end(); ++a)
+       for(const auto & a : ma)
        {
-         const data_expression_list l=a->arguments();
+         const data_expression_list l=a.arguments();
          data_expression_vector resulting_data;
-         for(data_expression_list::const_iterator j=l.begin(); j!=l.end(); ++j)
+         for(const auto & j : l)
          {
-           resulting_data.push_back(replace_linear_inequalities_with_reals_by_variables(*j,new_condition,replaced_variables,real_parameters));
+           resulting_data.push_back(replace_linear_inequalities_with_reals_by_variables(j,new_condition,replaced_variables,real_parameters));
          }
-         new_actions.push_back(process::action(a->label(),data_expression_list(resulting_data.begin(),resulting_data.end())));
+         new_actions.emplace_back(a.label(),data_expression_list(resulting_data.begin(),resulting_data.end()));
        }
 
        if (replaced_variables.empty())
@@ -241,17 +240,17 @@ namespace data
            tl->add_assignments(replaced_variables,sigma,r);
 
            process::action_vector new_replaced_actions;
-           for(process::action_vector::const_iterator j=new_actions.begin(); j!=new_actions.end(); ++j)
+           for(const auto & new_action : new_actions)
            {
              data_expression_vector new_replaced_args;
-             for(data_expression_list::const_iterator k=j->arguments().begin();k!=j->arguments().end(); ++k)
+             for(data_expression_list::const_iterator k=new_action.arguments().begin();k!=new_action.arguments().end(); ++k)
              {
                new_replaced_args.push_back(replace_free_variables(*k,sigma));
              }
-             new_replaced_actions.push_back(process::action(j->label(),data_expression_list(new_replaced_args.begin(),new_replaced_args.end())));
+             new_replaced_actions.emplace_back(new_action.label(),data_expression_list(new_replaced_args.begin(),new_replaced_args.end()));
            }
            const process::action_list new_action_list(new_replaced_actions.begin(),new_replaced_actions.end());
-           new_action_summands.push_back(action_summand(
+           new_action_summands.emplace_back(action_summand(
                                             i.summation_variables(),
                                             r(sort_bool::and_(data::replace_free_variables(new_condition,sigma),i.condition())),
                                             (i.has_time()?
@@ -332,46 +331,46 @@ namespace data
     else if (is_inequality(e) && (data::binary_left(atermpp::down_cast<application>(e)).sort() == sort_real::real_() || data::binary_right(atermpp::down_cast<application>(e)).sort() == sort_real::real_()))
     {
       std::set < variable > vars=data::find_all_variables(e);
-      for (std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
+      for (const auto & var : vars)
       {
-        if (i->sort()!=sort_real::real_())
+        if (var.sort()!=sort_real::real_())
         {
           throw  mcrl2::runtime_error("Expression " + data::pp(e) + " contains variable " +
-                                      data::pp(*i) + " not of sort Real.");
+                                      data::pp(var) + " not of sort Real.");
         }
       }
       if (negate)
       {
         real_conditions.push_back(data_expression_list({ negate_inequality(e) }));
-        non_real_conditions.push_back(data_expression_list());
+        non_real_conditions.emplace_back();
       }
       else
       {
         real_conditions.push_back(data_expression_list({ e }));
-        non_real_conditions.push_back(data_expression_list());
+        non_real_conditions.emplace_back();
       }
     }
     else
     {
       // e is assumed to be a non_real expression.
       std::set < variable > vars=data::find_all_variables(e);
-      for (std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
+      for (const auto & var : vars)
       {
-        if (i->sort()==sort_real::real_())
+        if (var.sort()==sort_real::real_())
         {
           throw  mcrl2::runtime_error("Expression " + data::pp(e) + " contains variable " +
-                                      data::pp(*i) + " of sort Real.");
+                                      data::pp(var) + " of sort Real.");
         }
       }
       if (negate)
       {
         non_real_conditions.push_back(data_expression_list({ data_expression(sort_bool::not_(e)) }));
-        real_conditions.push_back(data_expression_list());
+        real_conditions.emplace_back();
       }
       else
       {
         non_real_conditions.push_back(data_expression_list({ e }));
-        real_conditions.push_back(data_expression_list());
+        real_conditions.emplace_back();
       }
     }
   }
@@ -443,9 +442,9 @@ namespace data
           std::vector < linear_inequality > inequalities;
           // Collect all real conditions from the condition from this summand and put them
           // into inequalities.
-          for (data_expression_list::const_iterator k=j_r->begin(); k!=j_r->end(); k++)
+          for (const auto & k : *j_r)
           {
-            inequalities.push_back(linear_inequality(*k,r));
+            inequalities.emplace_back(k,r);
           }
 
           // Determine all variables that occur in the sum operator, but not in the
@@ -521,11 +520,11 @@ namespace data
             {
               // Construct replacements to contain the nextstate values for real variables in a map
               std::map<variable, data_expression> replacements;
-              for (assignment_list::const_iterator j = i.assignments().begin(); j != i.assignments().end(); ++j)
+              for (const auto & j : i.assignments())
               {
-                if (j->lhs().sort() == sort_real::real_())
+                if (j.lhs().sort() == sort_real::real_())
                 {
-                  replacements[j->lhs()] = j->rhs();
+                  replacements[j.lhs()] = j.rhs();
                 }
               }
 
@@ -550,11 +549,11 @@ namespace data
 
 
     const lps::deadlock_summand_vector& deadlock_smds = s.process().deadlock_summands();
-    for (lps::deadlock_summand_vector::const_iterator i = deadlock_smds.begin(); i != deadlock_smds.end(); ++i)
+    for (const auto & deadlock_smd : deadlock_smds)
     {
       std::vector <data_expression_list> real_conditions;
       std::vector <data_expression> non_real_conditions;
-      split_condition(i->condition(),real_conditions,non_real_conditions);
+      split_condition(deadlock_smd.condition(),real_conditions,non_real_conditions);
 
       std::vector <data_expression>::const_iterator j_n=non_real_conditions.begin();
       for (std::vector <data_expression_list>::const_iterator
@@ -564,21 +563,21 @@ namespace data
         const data_expression c=*j_n;
         if (!sort_bool::is_false_function_symbol(c))
         {
-          const summand_base t(i->summation_variables(),c);
+          const summand_base t(deadlock_smd.summation_variables(),c);
 
           std::vector < linear_inequality > inequalities;
           // Collect all real conditions from the condition from this summand and put them
           // into inequalities.
-          for (data_expression_list::const_iterator k=j_r->begin(); k!=j_r->end(); k++)
+          for (const auto & k : *j_r)
           {
-            inequalities.push_back(linear_inequality(*k,r));
+            inequalities.emplace_back(k,r);
           }
 
           // We can apply Fourier-Motzkin to eliminate the real variables from
           // this sum operator and the condition.
 
 
-          const variable_list eliminatable_real_sum_variables=get_real_variables(i->summation_variables());
+          const variable_list eliminatable_real_sum_variables=get_real_variables(deadlock_smd.summation_variables());
 
           std::vector < linear_inequality > new_inequalities;
           fourier_motzkin(inequalities,
@@ -615,7 +614,7 @@ namespace data
                                         assignment_list(),
                                         lps::stochastic_distribution(),
                                         lps::multi_action(),
-                                        i->deadlock(),
+                                        deadlock_smd.deadlock(),
                                         variable_list(), // All sum variables over reals have been eliminated.
                                         get_nonreal_variables(t.summation_variables()),
                                         inequalities,
@@ -640,14 +639,14 @@ namespace data
     normalize_specification(s, get_real_variables(s.process().process_parameters()), r, summand_info);
     stochastic_action_summand_vector action_summands;
     deadlock_summand_vector deadlock_summands;
-    for(std::vector<summand_information>::iterator i = summand_info.begin(); i != summand_info.end(); i++) {
-      if (i->is_delta_summand())
+    for(auto & i : summand_info) {
+      if (i.is_delta_summand())
       {
-        deadlock_summands.push_back(i->get_represented_deadlock_summand(s.data()));
+        deadlock_summands.push_back(i.get_represented_deadlock_summand(s.data()));
       }
       else
       {
-        action_summands.push_back(i->get_represented_action_summand(s.data()));
+        action_summands.emplace_back(i.get_represented_action_summand(s.data()));
       }
     }
     stochastic_linear_process lps(s.process().process_parameters(),
@@ -662,5 +661,5 @@ namespace data
     return spec1;
   }
 
-} // namespace data
-} // namespace mcrl2
+} // namespace mcrl2::data
+

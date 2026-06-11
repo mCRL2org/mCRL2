@@ -83,35 +83,35 @@ template<class T> std::vector<T> tsort(std::map<T, std::set<T> > dependencies)
 static std::vector<mcrl2::data::sort_expression> order_sorts(const data_specification &data, const std::set<sort_expression> &used_sorts)
 {
   std::map<sort_expression, std::set<sort_expression> > sort_dependencies;
-  for (std::set<sort_expression>::const_iterator i = used_sorts.begin(); i != used_sorts.end(); i++) {
-    if (*i == sort_bool::bool_() ||
-        *i == sort_pos::pos() ||
-        *i == sort_nat::nat() ||
-        *i == sort_int::int_() ||
-        *i == sort_real::real_())
+  for (const auto & used_sort : used_sorts) {
+    if (used_sort == sort_bool::bool_() ||
+        used_sort == sort_pos::pos() ||
+        used_sort == sort_nat::nat() ||
+        used_sort == sort_int::int_() ||
+        used_sort == sort_real::real_())
     {
-      sort_dependencies[*i] = std::set<sort_expression>();
-    } else if (is_container_sort(*i)) {
+      sort_dependencies[used_sort] = std::set<sort_expression>();
+    } else if (is_container_sort(used_sort)) {
       std::set<sort_expression> dependencies;
-      sort_expression base_sort = container_sort(*i).element_sort();
+      sort_expression base_sort = container_sort(used_sort).element_sort();
       dependencies.insert(base_sort);
-      sort_dependencies[*i] = dependencies;
-    } else if (is_basic_sort(*i)) {
+      sort_dependencies[used_sort] = dependencies;
+    } else if (is_basic_sort(used_sort)) {
       std::set<sort_expression> dependencies;
-      function_symbol_vector constructors = data.constructors(*i);
-      for (function_symbol_vector::iterator j = constructors.begin(); j != constructors.end(); j++) {
-        if (is_function_sort(j->sort())) {
-          sort_expression_list domain = function_sort(j->sort()).domain();
+      function_symbol_vector constructors = data.constructors(used_sort);
+      for (auto & constructor : constructors) {
+        if (is_function_sort(constructor.sort())) {
+          sort_expression_list domain = function_sort(constructor.sort()).domain();
           for (const mcrl2::data::sort_expression& k : domain)
           {
-            if (sort_expression(k) != *i)
+            if (sort_expression(k) != used_sort)
             {
               dependencies.insert(sort_expression(k));
             }
           }
         }
       }
-      sort_dependencies[*i] = dependencies;
+      sort_dependencies[used_sort] = dependencies;
     }
   }
   
@@ -311,19 +311,19 @@ static void translate_sort_definition(const mcrl2::data::data_specification &dat
       translation.definition += "(declare-datatypes () ( (" + name + "\n";
       
       int index = 0;
-      for (function_symbol_vector::iterator i = constructors.begin(); i != constructors.end(); i++) {
-        std::string constructor_name = sanitize_term(i->name());
+      for (auto & constructor : constructors) {
+        std::string constructor_name = sanitize_term(constructor.name());
         if (function_name_generator.has_identifier(constructor_name)) {
           constructor_name = name + "-" + constructor_name;
         }
         constructor_name = function_name_generator(constructor_name);
         
-        translation.function_names[*i] = constructor_name;
-        translation.constructor_field_names[*i] = std::vector<std::string>();
+        translation.function_names[constructor] = constructor_name;
+        translation.constructor_field_names[constructor] = std::vector<std::string>();
         
-        if (is_function_sort(i->sort())) {
+        if (is_function_sort(constructor.sort())) {
           translation.definition += "  ( " + constructor_name;
-          sort_expression_list domain = function_sort(i->sort()).domain();
+          sort_expression_list domain = function_sort(constructor.sort()).domain();
           for (const mcrl2::data::sort_expression& j : domain)
           {
             assert(translation.sort_names.count(j) > 0);
@@ -331,7 +331,7 @@ static void translate_sort_definition(const mcrl2::data::data_specification &dat
             std::string parameter_name = function_name_generator(name + itoa(index++));
             
             translation.definition += " (" + parameter_name + " " + sort_name + ")";
-            translation.constructor_field_names[*i].push_back(parameter_name);
+            translation.constructor_field_names[constructor].push_back(parameter_name);
           }
           translation.definition += ")\n";
         } else {
@@ -385,10 +385,10 @@ class function_definition
 
 static void add_undefined_functions(std::map<mcrl2::data::function_symbol, function_definition> &function_definitions, const function_symbol_vector &functions)
 {
-  for (function_symbol_vector::const_iterator i = functions.begin(); i != functions.end(); i++) {
-    std::string name = i->name();
-    if (name[0] == '@' && function_definitions.count(*i) == 0) {
-      function_definitions[*i] = function_definition::unavailable();
+  for (const auto & function : functions) {
+    std::string name = function.name();
+    if (name[0] == '@' && function_definitions.count(function) == 0) {
+      function_definitions[function] = function_definition::unavailable();
     }
   }
 }
@@ -596,27 +596,27 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
       i++;
     }
   }
-  for (std::map<mcrl2::data::function_symbol, function_definition>::iterator i = definitions.begin(); i != definitions.end(); i++) {
-    if (i->second.is_equations()) {
-      effective_equations.insert(effective_equations.end(), i->second.equations().begin(), i->second.equations().end());
+  for (auto & definition : definitions) {
+    if (definition.second.is_equations()) {
+      effective_equations.insert(effective_equations.end(), definition.second.equations().begin(), definition.second.equations().end());
     }
   }
   
   
   std::multimap<mcrl2::data::function_symbol, mcrl2::data::data_equation> function_equations;
   std::multimap<mcrl2::data::data_equation, mcrl2::data::function_symbol> equation_functions;
-  for (data_equation_vector::const_iterator i = effective_equations.begin(); i != effective_equations.end(); i++) {
-    std::set<mcrl2::data::function_symbol> rhs_functions = find_function_symbols(i->rhs());
-    std::set<mcrl2::data::function_symbol> lhs_functions = find_function_symbols(i->lhs());
+  for (const auto & effective_equation : effective_equations) {
+    std::set<mcrl2::data::function_symbol> rhs_functions = find_function_symbols(effective_equation.rhs());
+    std::set<mcrl2::data::function_symbol> lhs_functions = find_function_symbols(effective_equation.lhs());
     rhs_functions.insert(lhs_functions.begin(), lhs_functions.end());
-    std::set<mcrl2::data::function_symbol> condition_functions = find_function_symbols(i->condition());
+    std::set<mcrl2::data::function_symbol> condition_functions = find_function_symbols(effective_equation.condition());
     rhs_functions.insert(condition_functions.begin(), condition_functions.end());
     
-    for (std::set<mcrl2::data::function_symbol>::iterator j = lhs_functions.begin(); j != lhs_functions.end(); j++) {
-      function_equations.insert(std::pair<mcrl2::data::function_symbol, mcrl2::data::data_equation>(*j, *i));
+    for (const auto & lhs_function : lhs_functions) {
+      function_equations.insert(std::pair<mcrl2::data::function_symbol, mcrl2::data::data_equation>(lhs_function, effective_equation));
     }
-    for (std::set<mcrl2::data::function_symbol>::iterator j = rhs_functions.begin(); j != rhs_functions.end(); j++) {
-      equation_functions.insert(std::pair<mcrl2::data::data_equation, mcrl2::data::function_symbol>(*i, *j));
+    for (const auto & rhs_function : rhs_functions) {
+      equation_functions.insert(std::pair<mcrl2::data::data_equation, mcrl2::data::function_symbol>(effective_equation, rhs_function));
     }
   }
   
@@ -625,8 +625,8 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
   std::set<data_equation> defined_equations;
   std::set<function_symbol> function_queue = find_function_symbols(pbes);
   std::set<function_symbol> constructors(data.constructors().begin(), data.constructors().end());
-  for (std::set<function_symbol>::const_iterator i = constructors.begin(); i != constructors.end(); i++) {
-    function_queue.erase(*i);
+  for (const auto & constructor : constructors) {
+    function_queue.erase(constructor);
   }
   
   while (!function_queue.empty()) {
@@ -661,10 +661,10 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
   
   
   std::set<sort_expression> used_sorts = find_sort_expressions(defined_equations);
-  for (std::vector<pbes_system::pbes_equation>::const_iterator i = pbes.equations().begin(); i != pbes.equations().end(); i++) {
-    std::set<pbes_system::propositional_variable_instantiation> instantiations = pbes_system::find_propositional_variable_instantiations(i->formula());
-    for (std::set<pbes_system::propositional_variable_instantiation>::iterator j = instantiations.begin(); j != instantiations.end(); j++) {
-      std::set<sort_expression> sorts = find_sort_expressions(j->parameters());
+  for (const auto & i : pbes.equations()) {
+    std::set<pbes_system::propositional_variable_instantiation> instantiations = pbes_system::find_propositional_variable_instantiations(i.formula());
+    for (const auto & instantiation : instantiations) {
+      std::set<sort_expression> sorts = find_sort_expressions(instantiation.parameters());
       used_sorts.insert(sorts.begin(), sorts.end());
     }
     //std::set<sort_expression> equation_sorts = pbes_system::find_sort_expressions(i->formula());
@@ -677,23 +677,23 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
   
   // Translate all sorts to yices sort definitions.
   std::vector<sort_expression> sorts = order_sorts(data, used_sorts);
-  for (std::vector<sort_expression>::iterator i = sorts.begin(); i != sorts.end(); i++) {
-    translate_sort_definition(data, *i, function_name_generator, translation);
+  for (auto & sort : sorts) {
+    translate_sort_definition(data, sort, function_name_generator, translation);
     
     // Equality and inequality must be defined for all sorts.
-    translation.function_names[equal_to(*i)] = "=";
-    translation.function_names[not_equal_to(*i)] = "distinct";
+    translation.function_names[equal_to(sort)] = "=";
+    translation.function_names[not_equal_to(sort)] = "distinct";
     
-    variable v1("v1", *i);
-    variable v2("v2", *i);
-    definitions[equal_to(*i)] = "=";
-    definitions[not_equal_to(*i)] = "distinct";
-    definitions[if_(*i)] = "ite";
-    if (!definitions.count(greater(*i))) {
-      definitions[greater(*i)] = data_equation(variable_list({v1, v2}), greater(v1, v2), sort_bool::not_(less_equal(v1, v2)));
+    variable v1("v1", sort);
+    variable v2("v2", sort);
+    definitions[equal_to(sort)] = "=";
+    definitions[not_equal_to(sort)] = "distinct";
+    definitions[if_(sort)] = "ite";
+    if (!definitions.count(greater(sort))) {
+      definitions[greater(sort)] = data_equation(variable_list({v1, v2}), greater(v1, v2), sort_bool::not_(less_equal(v1, v2)));
     }
-    if (!definitions.count(greater_equal(*i))) {
-      definitions[greater_equal(*i)] = data_equation(variable_list({v1, v2}), greater_equal(v1, v2), sort_bool::not_(less(v1, v2)));
+    if (!definitions.count(greater_equal(sort))) {
+      definitions[greater_equal(sort)] = data_equation(variable_list({v1, v2}), greater_equal(v1, v2), sort_bool::not_(less(v1, v2)));
     }
   }
   // The unrolling code may generate invocations of those functions.
@@ -736,13 +736,13 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
   }
   
   
-  for (std::set<data_equation>::const_iterator i = defined_equations.begin(); i != defined_equations.end(); i++) {
+  for (const auto & defined_equation : defined_equations) {
     std::string quantification_domain;
     std::map<variable, std::string> context;
-    for (variable_list::const_iterator j = i->variables().begin(); j != i->variables().end(); j++) {
-      if (find_free_variables(i->lhs()).count(*j) == 0 &&
-          find_free_variables(i->rhs()).count(*j) == 0 &&
-          find_free_variables(i->condition()).count(*j) == 0)
+    for (variable_list::const_iterator j = defined_equation.variables().begin(); j != defined_equation.variables().end(); j++) {
+      if (find_free_variables(defined_equation.lhs()).count(*j) == 0 &&
+          find_free_variables(defined_equation.rhs()).count(*j) == 0 &&
+          find_free_variables(defined_equation.condition()).count(*j) == 0)
       {
         continue;
       }
@@ -753,27 +753,27 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
       context[*j] = name;
     }
     
-    std::string pattern = translate_expression(i->lhs(), context, translation);
-    std::string valuation = translate_expression(i->rhs(), context, translation);
-    std::string condition = translate_expression(i->condition(), context, translation);
+    std::string pattern = translate_expression(defined_equation.lhs(), context, translation);
+    std::string valuation = translate_expression(defined_equation.rhs(), context, translation);
+    std::string condition = translate_expression(defined_equation.condition(), context, translation);
     
     if (context.empty()) {
       translation.definition += "(assert ";
-      if (i->condition() != sort_bool::true_()) {
+      if (defined_equation.condition() != sort_bool::true_()) {
         translation.definition += "(=> " + condition + " ";
       }
       translation.definition += "(= " + pattern + " " + valuation + ")";
-      if (i->condition() != sort_bool::true_()) {
+      if (defined_equation.condition() != sort_bool::true_()) {
         translation.definition += ")";
       }
       translation.definition += ")\n";
     } else {
       translation.definition += "(assert (forall (" + quantification_domain + ") (! ";
-      if (i->condition() != sort_bool::true_()) {
+      if (defined_equation.condition() != sort_bool::true_()) {
         translation.definition += "(=> " + condition + " ";
       }
       translation.definition += "(= " + pattern + " " + valuation + ")";
-      if (i->condition() != sort_bool::true_()) {
+      if (defined_equation.condition() != sort_bool::true_()) {
         translation.definition += ")";
       }
       translation.definition += " :rewrite-rule) ))\n";

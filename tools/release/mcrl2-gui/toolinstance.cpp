@@ -10,6 +10,7 @@
 #include "toolinstance.h"
 
 #include <cassert>
+#include <memory>
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -32,7 +33,9 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
     // when the tab is closed, and multiple instance may be created from the
     // same tab.
     // m_process will be set to the last spawned process
-    m_process = m_mprocess = new QMultiProcess();
+    auto mprocess = std::make_unique<QMultiProcess>();
+    m_process = m_mprocess = mprocess.get();
+    m_ownedProcess = std::move(mprocess);
 
     connect(m_mprocess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(onStateChange(QProcess::ProcessState)));
     connect(m_mprocess, &QProcess::readyReadStandardOutput, this,
@@ -42,7 +45,8 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
   }
   else
   {
-    m_process = new QProcess();
+    m_ownedProcess = std::make_unique<QProcess>();
+    m_process = m_ownedProcess.get();
     m_mprocess = nullptr;
 
     connect(m_process, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(onStateChange(QProcess::ProcessState)));
@@ -81,7 +85,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
   }
   else
   {
-    m_pckFileOut = NULL;
+    m_pckFileOut = nullptr;
     m_ui.lblFileOut->setVisible(false);
     m_ui.pckFileOut->setVisible(false);
   }
@@ -93,7 +97,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
   }
   else
   {
-    m_pckFileIn = NULL;
+    m_pckFileIn = nullptr;
     m_ui.lblFileIn->setVisible(false);
     m_ui.pckFileIn->setVisible(false);
   }
@@ -109,8 +113,8 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
   for (int i = 0; i < m_info.options.count(); i++)
   {
     ToolOption option = m_info.options.at(i);
-    QWidget *nameOpt = NULL;
-    QCheckBox* cbOpt = NULL;
+    QWidget *nameOpt = nullptr;
+    QCheckBox* cbOpt = nullptr;
     QVBoxLayout *lytOpt = new QVBoxLayout();
 
     cbOpt = new QCheckBox(option.nameLong + ": ", this);
@@ -130,7 +134,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 
     if (!option.hasArgument())
     {
-      m_optionValues.append(new OptionValue(option, cbOpt));
+      m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt));
     }
     else
     {
@@ -145,14 +149,14 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
             QHBoxLayout *lytArg = new QHBoxLayout();
             lytArg->setSpacing(6);
 
-            QWidget *edtArg = NULL;
+            QWidget *edtArg = nullptr;
 
             switch (option.argument.type)
             {
               case LevelArgument:
                 {
                   QLineEdit *edtLdt = new QLineEdit("verbose", this);
-                  m_optionValues.append(new OptionValue(option, cbOpt, edtLdt));
+                  m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt, edtLdt));
                   edtArg = edtLdt;
                 }
                 break;
@@ -164,11 +168,11 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
                   {
                     QCheckBox *cbOptional = new QCheckBox(this);
                     lytArg->addWidget(cbOptional);
-                    m_optionValues.append(new OptionValue(option, cbOpt, edtSpb, cbOptional));
+                    m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt, edtSpb, cbOptional));
                   }
                   else
                   {
-                    m_optionValues.append(new OptionValue(option, cbOpt, edtSpb));
+                    m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt, edtSpb));
                   }
                   edtArg = edtSpb;
                 }
@@ -181,11 +185,11 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
                   {
                     QCheckBox *cbOptional = new QCheckBox(this);
                     lytArg->addWidget(cbOptional);
-                    m_optionValues.append(new OptionValue(option, cbOpt, edtSpb, cbOptional));
+                    m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt, edtSpb, cbOptional));
                   }
                   else
                   {
-                    m_optionValues.append(new OptionValue(option, cbOpt, edtSpb));
+                    m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt, edtSpb));
                   }
                   edtArg = edtSpb;
                 }
@@ -193,7 +197,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
               case BooleanArgument:
                 {
                   QCheckBox *edtChb = new QCheckBox("Yes", this);
-                  m_optionValues.append(new OptionValue(option, cbOpt, edtChb));
+                  m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt, edtChb));
                   edtArg = edtChb;
                 }
                 break;
@@ -201,7 +205,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
               default:
                 {
                   QLineEdit *edtLdt = new QLineEdit(this);
-                  m_optionValues.append(new OptionValue(option, cbOpt, edtLdt));
+                  m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt, edtLdt));
                   edtArg = edtLdt;
                 }
                 break;
@@ -228,7 +232,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 
             FilePicker *edtArg = new FilePicker(m_fileDialog, this, false);
             lytArg->addWidget(edtArg);
-            m_optionValues.append(new OptionValue(option, cbOpt, edtArg));
+            m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt, edtArg));
 
             if (!option.argument.optional)
             {
@@ -263,7 +267,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
               lytValues->addRow(rbVal, lblVal);
               lytValues->setLabelAlignment(Qt::AlignLeft);
             }
-            m_optionValues.append(new OptionValue(option, cbOpt, grpValues));
+            m_optionValues.push_back(std::make_unique<OptionValue>(option, cbOpt, grpValues));
 
             lytOpt->addLayout(lytValues);
           }
@@ -274,20 +278,6 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
     }
   }
   m_ui.scrollWidget->setLayout(formLayout);
-}
-
-ToolInstance::~ToolInstance()
-{
-  for (auto option = m_optionValues.begin(); option != m_optionValues.end(); ++option)
-  {
-    delete *option;
-  }
-  if (m_info.guiTool)
-    delete m_mprocess;
-  else
-    delete m_process;
-  m_process = nullptr;
-  m_mprocess = nullptr;
 }
 
 QString ToolInstance::executable()
@@ -318,10 +308,9 @@ QStringList ToolInstance::arguments(bool addQuotesAroundValuesWithSpaces)
     }
   }
 
-  for (int i = 0; i < m_optionValues.count(); i++)
+  for (const std::unique_ptr<OptionValue>& val : m_optionValues)
   {
-    OptionValue& val =  *m_optionValues[i];
-    QString valueAsString = val.value(addQuotesAroundValuesWithSpaces);
+    QString valueAsString = val->value(addQuotesAroundValuesWithSpaces);
     if (!valueAsString.isEmpty())
     {
       result.append(valueAsString);

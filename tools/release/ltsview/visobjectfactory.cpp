@@ -132,9 +132,9 @@ void VisObject::draw(PrimitiveFactory* pf,unsigned char alpha)
   glColor4ub(color.red(), color.green(), color.blue(), alpha);
   glPushMatrix();
   glMultMatrixf(matrix);
-  for (std::size_t i = 0; i < identifiers.size(); ++i)
+  for (int identifier : identifiers)
   {
-    glPushName(identifiers[i]);
+    glPushName(identifier);
   }
   pf->drawPrimitive(primitive);
   for (std::size_t i = 0; i < identifiers.size(); ++i)
@@ -186,7 +186,7 @@ bool Distance::operator()(const VisObject* o1, const VisObject* o2) const
 /* -------------------- VisObjectFactory ------------------------------------ */
 
 VisObjectFactory::VisObjectFactory()
-{ }
+= default;
 
 VisObjectFactory::~VisObjectFactory()
 {
@@ -207,26 +207,26 @@ void VisObjectFactory::drawObjects(PrimitiveFactory* pf,unsigned char alpha,
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     //glEnable(GL_TEXTURE_1D);
-    for (unsigned int i = 0; i < objects_sorted.size(); ++i)
+    for (auto & i : objects_sorted)
     {
-      objects_sorted[i]->drawWithTexture(pf,alpha);
+      i->drawWithTexture(pf,alpha);
     }
     //glDisable(GL_TEXTURE_1D);
   }
   else
   {
-    for (unsigned int i = 0; i < objects_sorted.size(); ++i)
+    for (auto & i : objects_sorted)
     {
-      objects_sorted[i]->drawWithTexture(pf, alpha);
+      i->drawWithTexture(pf, alpha);
     }
   }
 }
 
 void VisObjectFactory::clear()
 {
-  for (unsigned int i = 0; i < objects.size(); ++i)
+  for (auto & object : objects)
   {
-    delete objects[i];
+    delete object;
   }
   objects.clear();
   objects_sorted.clear();
@@ -238,9 +238,9 @@ int VisObjectFactory::makeObject(int primitive, std::vector<int> &ids)
   glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)vo->getMatrixP());
   vo->setPrimitive(primitive);
 
-  for (std::size_t i = 0; i < ids.size(); ++i)
+  for (int id : ids)
   {
-    vo->addIdentifier(ids[i]);
+    vo->addIdentifier(id);
   }
 
   objects.push_back(vo);

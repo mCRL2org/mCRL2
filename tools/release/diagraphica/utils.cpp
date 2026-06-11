@@ -295,9 +295,9 @@ double Utils::mean(const std::vector< double > vals)
   double result = 0;
   if (vals.size() > 0)
   {
-    for (std::size_t i = 0; i < vals.size(); ++i)
+    for (double val : vals)
     {
-      result += vals[i];
+      result += val;
     }
     result = result/(double)vals.size();
   }
@@ -312,9 +312,9 @@ double Utils::variance(const std::vector< double > vals)
 
   if (vals.size() > 1)
   {
-    for (std::size_t i = 0; i < vals.size(); ++i)
+    for (double val : vals)
     {
-      result += (vals[i]-mean)*(vals[i]-mean);
+      result += (val-mean)*(val-mean);
     }
     result = result/(double)(vals.size()-1);
   }

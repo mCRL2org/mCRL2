@@ -264,9 +264,8 @@ std::size_t Graph::add_probabilistic_state(
 
     // The following map recalls where probabilities are stored in
     // transitionLabels.
-    typedef std::map<typename lts_t::probabilistic_state_t::probability_t,
-                     std::size_t>
-        probability_map_t;
+    using probability_map_t = std::map<typename lts_t::probabilistic_state_t::probability_t,
+                     std::size_t>;
     probability_map_t probability_label_indices;
     for (const typename lts_t::probabilistic_state_t::state_probability_pair&
             p : probabilistic_state)
@@ -746,7 +745,7 @@ void DebugView::push(double value){
 
   // Then we check whether the last interval has passed
   if (current_time - m_current_interval_start > m_min_interval){
-    m_values.push_back({current_time, DataView(m_current_interval)});
+    m_values.emplace_back(current_time, DataView(m_current_interval));
     m_current_interval.clear();
     m_current_interval_start = current_time;
     changed = true;

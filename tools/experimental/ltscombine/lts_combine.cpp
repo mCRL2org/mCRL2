@@ -597,18 +597,18 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
   bool stop = false;
 
   thread_context_t context{
-      lts_builder,
-      queue,
-      progress_monitor,
-      states,
-      input.nr_of_threads,
-      builder_mutex,
-      queue_mutex,
-      progress_mutex,
-      states_mutex,
-      queue_cond,
-      active_workers,
-      stop};
+      .lts_builder=lts_builder,
+      .queue=queue,
+      .progress_monitor=progress_monitor,
+      .states=states,
+      .number_of_threads=input.nr_of_threads,
+      .lts_builder_mutex=builder_mutex,
+      .queue_mutex=queue_mutex,
+      .progress_mutex=progress_mutex,
+      .states_mutex=states_mutex,
+      .queue_cond=queue_cond,
+      .active_workers=active_workers,
+      .stop=stop};
 
   std::vector<std::thread> threads;
 

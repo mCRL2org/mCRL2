@@ -466,8 +466,7 @@ P_TruncatedCone::P_TruncatedCone(P_Ring* a_ring,P_Disc* a_disc,bool t,bool b)
 }
 
 P_TruncatedCone::~P_TruncatedCone()
-{
-}
+= default;
 
 void P_TruncatedCone::draw()
 {

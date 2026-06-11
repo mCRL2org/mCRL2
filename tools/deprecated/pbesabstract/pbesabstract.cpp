@@ -28,12 +28,12 @@ using pbes_system::tools::pbes_output_tool;
 class pbes_abstract_tool: public pbes_input_tool<pbes_output_tool<input_output_tool> >
 {
   protected:
-    typedef pbes_input_tool<pbes_output_tool<input_output_tool> > super;
+    using super = pbes_input_tool<pbes_output_tool<input_output_tool> >;
 
     std::string m_parameter_selection;
-    bool m_value_true;
+    bool m_value_true = true;
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const command_line_parser& parser) override
     {
       super::parse_options(parser);
       if (parser.options.count("select") > 0)
@@ -44,7 +44,7 @@ class pbes_abstract_tool: public pbes_input_tool<pbes_output_tool<input_output_t
       m_value_true = parser.option_argument_as<bool>("abstraction-value");
     }
 
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("select",
@@ -81,11 +81,11 @@ class pbes_abstract_tool: public pbes_input_tool<pbes_output_tool<input_output_t
         "If OUTFILE is not present, standard output is used. "
         "If INFILE is not present, standard input is used. "
         "\n\n"
-      ),
-      m_value_true(true)
+      )
+      
     {}
 
-    bool run()
+    bool run() override
     {
       mCRL2log(verbose) << "pbesabstract parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;

@@ -15,11 +15,17 @@
 #include <QTextStream>
 
 ToolInformation::ToolInformation(QString name, QString input1, QString input2, QString output, bool guiTool)
-  : name(name), input2(input2), output(output), guiTool(guiTool), valid(false)
+  : name(name),
+    input2(input2),
+    output(output),
+    guiTool(guiTool),
+    valid(false)
 {
   QStringList inputs = input1.split(';');
-  for (QStringList::iterator it = inputs.begin(); it != inputs.end(); ++it)
-    input.insert(*it);
+  for (auto& input: inputs)
+  {
+    this->input.insert(input);
+  }
 
   QDir appDir = QDir(QCoreApplication::applicationDirPath());
   path = appDir.absoluteFilePath(name);
@@ -36,23 +42,26 @@ void ToolInformation::load()
   if (!toolProcess.waitForFinished(3000))
   {
     mCRL2log(mcrl2::log::error) << "Command: " << path.toStdString() << " --generate-xml" << std::endl;
-    mCRL2log(mcrl2::log::error) << toolProcess.errorString().toStdString() << " (" << name.toStdString() << ")" << std::endl;
+    mCRL2log(mcrl2::log::error) << toolProcess.errorString().toStdString() << " (" << name.toStdString() << ")"
+                                << std::endl;
     return;
   }
   QByteArray xmlText = toolProcess.readAllStandardOutput();
 
   QString errorMsg;
   QDomDocument xml;
-  if(!xml.setContent(xmlText, false, &errorMsg))
+  if (!xml.setContent(xmlText, false, &errorMsg))
   {
-    mCRL2log(mcrl2::log::error) << "Could not parse XML output of " << name.toStdString() << ": " << errorMsg.toStdString() << std::endl;
+    mCRL2log(mcrl2::log::error) << "Could not parse XML output of " << name.toStdString() << ": "
+                                << errorMsg.toStdString() << std::endl;
     return;
   }
 
   QDomElement root = xml.documentElement();
-  if(root.tagName() != "tool")
+  if (root.tagName() != "tool")
   {
-    mCRL2log(mcrl2::log::error) << "XML output of " << name.toStdString() << " contains no valid tool information" << std::endl;
+    mCRL2log(mcrl2::log::error) << "XML output of " << name.toStdString() << " contains no valid tool information"
+                                << std::endl;
     return;
   }
 
@@ -71,7 +80,8 @@ void ToolInformation::load()
   }
   else
   {
-    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no description element" << std::endl;
+    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no description element"
+                                  << std::endl;
   }
 
   if (!authorElement.isNull())
@@ -80,7 +90,8 @@ void ToolInformation::load()
   }
   else
   {
-    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no author element" << std::endl;
+    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no author element"
+                                  << std::endl;
   }
 
   if (!optionsElement.isNull())
@@ -89,7 +100,8 @@ void ToolInformation::load()
   }
   else
   {
-    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no options element" << std::endl;
+    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no options element"
+                                  << std::endl;
   }
 }
 
@@ -97,7 +109,7 @@ bool ToolInformation::inputMatchesAny(const QStringList& filetypes)
 {
   for (const QString& s: filetypes)
   {
-    if (input.count(s)>0)
+    if (input.count(s) > 0)
     {
       return true;
     }
@@ -125,7 +137,6 @@ void ToolInformation::parseOptions(QDomElement optionsElement)
       QString typeStr = argElement.attribute("type");
       QString name = argElement.firstChildElement("name").text();
 
-
       ToolArgument argument(optional, guessType(typeStr, name), name);
 
       QDomElement argvalsElement = argElement.firstChildElement("values");
@@ -151,7 +162,6 @@ void ToolInformation::parseOptions(QDomElement optionsElement)
     options.append(option);
     optionElement = optionElement.nextSiblingElement("option");
   }
-
 }
 
 ArgumentType ToolInformation::guessType(QString type, QString name)
@@ -167,19 +177,19 @@ ArgumentType ToolInformation::guessType(QString type, QString name)
   {
     return FileArgument;
   }
-  else if (type == "level")                           // New type
+  else if (type == "level") // New type
   {
     return LevelArgument;
   }
-  else if (type == "int")                             // New type
+  else if (type == "int") // New type
   {
     return IntegerArgument;
   }
-  else if (type == "real")                            // New type
+  else if (type == "real") // New type
   {
     return RealArgument;
   }
-  else if (type == "bool")                            // New type
+  else if (type == "bool") // New type
   {
     return BooleanArgument;
   }
@@ -206,10 +216,3 @@ ArgumentType ToolInformation::guessType(QString type, QString name)
 
   return InvalidArgument;
 }
-
-
-
-
-
-
-

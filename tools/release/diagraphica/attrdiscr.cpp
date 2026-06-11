@@ -28,29 +28,29 @@ AttrDiscr::AttrDiscr(const AttrDiscr& attr)
   :Attribute(attr)
 {
   {
-    for (std::size_t i = 0; i < attr.origValues.size(); ++i)
+    for (auto origValue : attr.origValues)
     {
-      origValues.push_back(new Value(*(attr.origValues[i])));
+      origValues.push_back(new Value(*origValue));
     }
   }
 
   {
-    for (std::size_t i = 0; i < attr.curValues.size(); ++i)
+    for (auto curValue : attr.curValues)
     {
-      curValues.push_back(new Value(*(attr.curValues[i])));
+      curValues.push_back(new Value(*curValue));
     }
   }
 
   Value** mapping;
   {
-    for (std::size_t i = 0; i < attr.curMap.size(); ++i)
+    for (auto i : attr.curMap)
     {
       mapping  = new Value*;
-      *mapping = curValues[(*attr.curMap[i])->getIndex() ];
+      *mapping = curValues[(*i)->getIndex() ];
       curMap.push_back(mapping);
     }
   }
-  mapping = 0;
+  mapping = nullptr;
 }
 
 
@@ -85,13 +85,13 @@ void AttrDiscr::clusterValues(
 
     // update current map
     {
-      for (std::size_t i = 0; i < curMap.size(); ++i)
+      for (auto & i : curMap)
       {
-        for (std::size_t j = 0; j < sorted.size(); ++j)
+        for (int j : sorted)
         {
-          if (*curMap[i] == curValues[sorted[j]])
+          if (*i == curValues[j])
           {
-            *curMap[i] = value;
+            *i = value;
           }
         }
       }
@@ -100,18 +100,18 @@ void AttrDiscr::clusterValues(
     // update current domain
     // get iterators to values to delete
     {
-      for (std::size_t i = 0; i < sorted.size(); ++i)
+      for (int i : sorted)
       {
-        toRemove.push_back(curValues.begin() + sorted[i]);
+        toRemove.push_back(curValues.begin() + i);
       }
     }
 
     // delete these values
     {
-      for (std::size_t i = 0; i < toRemove.size(); ++i)
+      for (auto & i : toRemove)
       {
         // delete object
-        delete *(toRemove[i]);
+        delete *i;
       }
     }
     {
@@ -136,7 +136,7 @@ void AttrDiscr::clusterValues(
     }
 
     // -*-
-    value = 0;
+    value = nullptr;
   }
   catch (...)
   {
@@ -181,7 +181,7 @@ void AttrDiscr::moveValue(
       curValues[idxTo]->setIndex(idxTo);
     }
 
-    temp = 0;
+    temp = nullptr;
   }
   catch (...)
   {
@@ -200,10 +200,10 @@ void AttrDiscr::configValues(
   {
     // clear current values
     {
-      for (std::size_t i = 0; i < curValues.size(); ++i)
+      for (auto & curValue : curValues)
       {
-        delete curValues[i];
-        curValues[i] = 0;
+        delete curValue;
+        curValue = nullptr;
       }
     }
     curValues.clear();
@@ -222,14 +222,14 @@ void AttrDiscr::configValues(
     // re-init mapping to current values
     Value** mapping;
     {
-      for (std::size_t i = 0; i < origToCurDomain.size(); ++i)
+      for (unsigned long i : origToCurDomain)
       {
         mapping  = new Value*;
-        *mapping = curValues[ origToCurDomain[i] ];
+        *mapping = curValues[ i ];
         curMap.push_back(mapping);
       }
     }
-    mapping = 0;
+    mapping = nullptr;
   }
   catch (const mcrl2::runtime_error& e)
   {
@@ -313,9 +313,9 @@ void AttrDiscr::clearClusters()
 
 void AttrDiscr::initValues(const std::vector< std::string >& vals)
 {
-  Value*  value0  = 0;
-  Value*  value1  = 0;
-  Value** mapping = 0;
+  Value*  value0  = nullptr;
+  Value*  value1  = nullptr;
+  Value** mapping = nullptr;
 
   // init orig & current domain, current map
   for (std::size_t i = 0; i < vals.size(); ++i)
@@ -334,28 +334,28 @@ void AttrDiscr::initValues(const std::vector< std::string >& vals)
     curMap.push_back(mapping);
   }
 
-  value0  = 0;
-  value1  = 0;
-  mapping = 0;
+  value0  = nullptr;
+  value1  = nullptr;
+  mapping = nullptr;
 }
 
 
 void AttrDiscr::resetCurValues()
 {
-  Value* value    = 0;
-  Value** mapping = 0;
+  Value* value    = nullptr;
+  Value** mapping = nullptr;
 
   // clear current domain & mapping
   deleteCurValues();
   deleteCurMap();
 
   // reset current domain to original & update mapping
-  for (std::size_t i = 0; i < origValues.size(); ++i)
+  for (auto & origValue : origValues)
   {
     // call copy constructor
     value = new Value(
-      origValues[i]->getIndex(),
-      origValues[i]->getValue());
+      origValue->getIndex(),
+      origValue->getValue());
 
     // init domain
     curValues.push_back(value);
@@ -366,17 +366,17 @@ void AttrDiscr::resetCurValues()
     curMap.push_back(mapping);
   }
 
-  value   = 0;
-  mapping = 0;
+  value   = nullptr;
+  mapping = nullptr;
 }
 
 
 void AttrDiscr::deleteOrigValues()
 {
-  for (std::size_t i = 0; i < origValues.size(); ++i)
+  for (auto & origValue : origValues)
   {
-    delete origValues[i];
-    origValues[i] = 0;
+    delete origValue;
+    origValue = nullptr;
   }
   origValues.clear();
 }
@@ -384,10 +384,10 @@ void AttrDiscr::deleteOrigValues()
 
 void AttrDiscr::deleteCurValues()
 {
-  for (std::size_t i = 0; i < curValues.size(); ++i)
+  for (auto & curValue : curValues)
   {
-    delete curValues[i];
-    curValues[i] = 0;
+    delete curValue;
+    curValue = nullptr;
   }
   curValues.clear();
 }
@@ -395,10 +395,10 @@ void AttrDiscr::deleteCurValues()
 
 void AttrDiscr::deleteCurMap()
 {
-  for (std::size_t i = 0; i < curMap.size(); ++i)
+  for (auto & i : curMap)
   {
-    delete curMap[i];
-    curMap[i] = 0;
+    delete i;
+    i = nullptr;
   }
   curMap.clear();
 }

@@ -506,8 +506,8 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint* selectionBuffer, GLint it
   }
 
   Selection output;
-  output.state = 0;
-  output.cluster = 0;
+  output.state = nullptr;
+  output.cluster = nullptr;
 
   if (stateFound)
   {

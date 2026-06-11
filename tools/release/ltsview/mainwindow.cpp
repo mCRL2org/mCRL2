@@ -198,6 +198,6 @@ void MainWindow::setProgress(int phase, QString message)
 
 void MainWindow::selectionChanged()
 {
-  m_ui.zoomIntoAbove->setEnabled(m_ltsManager->selectedCluster() != 0);
-  m_ui.zoomIntoBelow->setEnabled(m_ltsManager->selectedCluster() != 0);
+  m_ui.zoomIntoAbove->setEnabled(m_ltsManager->selectedCluster() != nullptr);
+  m_ui.zoomIntoBelow->setEnabled(m_ltsManager->selectedCluster() != nullptr);
 }

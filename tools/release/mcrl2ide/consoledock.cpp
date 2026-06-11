@@ -26,8 +26,7 @@ ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
 }
 
 ConsoleWidget::~ConsoleWidget()
-{
-}
+= default;
 
 void ConsoleWidget::showContextMenu(const QPoint& position)
 {

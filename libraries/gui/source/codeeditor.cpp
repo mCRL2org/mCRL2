@@ -28,8 +28,8 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
 {
   /* identifiers */
   identifierFormat.setForeground(light ? Qt::black : Qt::white);
-  highlightingRules.push_back(HighlightingRule(
-    QRegularExpression("\\b[a-zA-Z_][a-zA-Z0-9_']*\\b"), identifierFormat));
+  highlightingRules.emplace_back(
+    QRegularExpression("\\b[a-zA-Z_][a-zA-Z0-9_']*\\b"), identifierFormat);
 
   /* in case of mcrl2 specification */
   if (spec)
@@ -42,8 +42,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
         "\\bact\\b",  "\\bproc\\b", "\\binit\\b", "\\bstruct\\b"};
     for (const QString& pattern : specificationKeywordPatterns)
     {
-      highlightingRules.push_back(
-          HighlightingRule(QRegularExpression(pattern), specificationKeywordFormat));
+      highlightingRules.emplace_back(QRegularExpression(pattern), specificationKeywordFormat);
     }
 
     /* process keywords */
@@ -51,8 +50,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
     QStringList processKeywordPatterns = {"\\bdelta\\b", "\\btau\\b"};
     for (const QString& pattern : processKeywordPatterns)
     {
-      highlightingRules.push_back(
-          HighlightingRule(QRegularExpression(pattern), processKeywordFormat));
+      highlightingRules.emplace_back(QRegularExpression(pattern), processKeywordFormat);
     }
 
     /* process operator keywords */
@@ -63,8 +61,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
         "\\bhide\\b", "\\brename\\b", "\\bcomm\\b"};
     for (const QString& pattern : processOperatorKeywordPatterns)
     {
-      highlightingRules.push_back(
-          HighlightingRule(QRegularExpression(pattern), processOperatorKeywordFormat));
+      highlightingRules.emplace_back(QRegularExpression(pattern), processOperatorKeywordFormat);
     }
   }
   /* in case of mcf formula */
@@ -77,8 +74,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
                                                   "\\bdelay\\b", "\\byelad\\b"};
     for (const QString& pattern : processOperatorKeywordPatterns)
     {
-      highlightingRules.push_back(
-          HighlightingRule(QRegularExpression(pattern), stateFormulaOpertorKeywordFormat));
+      highlightingRules.emplace_back(QRegularExpression(pattern), stateFormulaOpertorKeywordFormat);
     }
   }
 
@@ -91,8 +87,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
       "\\bBool\\b", "\\bPos\\b", "\\bNat\\b", "\\bInt\\b", "\\bReal\\b"};
   for (const QString& pattern : primitiveTypeKeywordPatterns)
   {
-    highlightingRules.push_back(
-        HighlightingRule(QRegularExpression(pattern), primitiveTypeKeywordFormat));
+    highlightingRules.emplace_back(QRegularExpression(pattern), primitiveTypeKeywordFormat);
   }
 
   /* container type keywords */
@@ -101,8 +96,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
       "\\bList\\b", "\\bSet\\b", "\\bBag\\b", "\\bFSet\\b", "\\bFBag\\b"};
   for (const QString& pattern : containerTypeKeywordPatterns)
   {
-    highlightingRules.push_back(
-        HighlightingRule(QRegularExpression(pattern), containerTypeKeywordFormat));
+    highlightingRules.emplace_back(QRegularExpression(pattern), containerTypeKeywordFormat);
   }
 
   /* data keywords */
@@ -110,8 +104,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
   QStringList dataKeywordPatterns = {"\\btrue\\b", "\\bfalse\\b"};
   for (const QString& pattern : dataKeywordPatterns)
   {
-    highlightingRules.push_back(
-        HighlightingRule(QRegularExpression(pattern), dataKeywordFormat));
+    highlightingRules.emplace_back(QRegularExpression(pattern), dataKeywordFormat);
   }
 
   /* data operator keywords */
@@ -121,8 +114,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
       "\\bexists\\b", "\\bdiv\\b", "\\bmod\\b",    "\\bin\\b"};
   for (const QString& pattern : dataOperatorKeywordPatterns)
   {
-    highlightingRules.push_back(
-        HighlightingRule(QRegularExpression(pattern), dataOperatorKeywordFormat));
+    highlightingRules.emplace_back(QRegularExpression(pattern), dataOperatorKeywordFormat);
   }
 
   /* to do keywords */
@@ -131,8 +123,7 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
                                      "\\bFIXME\\b", "\\bXXX\\b"};
   for (const QString& pattern : todoKeywordPatterns)
   {
-    highlightingRules.push_back(
-        HighlightingRule(QRegularExpression(pattern), todoKeywordFormat));
+    highlightingRules.emplace_back(QRegularExpression(pattern), todoKeywordFormat);
   }
 
   /* defined function keywords */
@@ -145,27 +136,23 @@ CodeHighlighter::CodeHighlighter(bool spec, bool light, QTextDocument* parent)
       "\\bNat2Pos\\b", "\\bSet2Bag\\b", "\\bBag2Set\\b"};
   for (const QString& pattern : functionKeywordPatterns)
   {
-    highlightingRules.push_back(
-        HighlightingRule(QRegularExpression(pattern), functionKeywordFormat));
+    highlightingRules.emplace_back(QRegularExpression(pattern), functionKeywordFormat);
   }
 
   /* operators */
   operatorFormat.setForeground(light ? Qt::darkGreen : Qt::green);
-  highlightingRules.push_back(HighlightingRule(
-    QRegularExpression("[\\.\\+|&<>:;=@(){}\\[\\],\\!\\*/\\\\-]"), operatorFormat));
-  highlightingRules.push_back(
-      HighlightingRule(QRegularExpression("\\|\\|_"), operatorFormat));
-  highlightingRules.push_back(HighlightingRule(QRegularExpression("->"), operatorFormat));
+  highlightingRules.emplace_back(
+    QRegularExpression(R"([\.\+|&<>:;=@(){}\[\],\!\*/\\-])"), operatorFormat);
+  highlightingRules.emplace_back(QRegularExpression("\\|\\|_"), operatorFormat);
+  highlightingRules.emplace_back(QRegularExpression("->"), operatorFormat);
 
   /* numbers */
   numberFormat.setForeground(light ? Qt::darkGreen : Qt::green);
-  highlightingRules.push_back(
-      HighlightingRule(QRegularExpression("\\b[0-9]+\\b"), numberFormat));
+  highlightingRules.emplace_back(QRegularExpression("\\b[0-9]+\\b"), numberFormat);
 
   /* single line comments */
   commentFormat.setForeground(light ? Qt::darkGray : Qt::lightGray);
-  highlightingRules.push_back(
-      HighlightingRule(QRegularExpression("%[^\n]*"), commentFormat));
+  highlightingRules.emplace_back(QRegularExpression("%[^\n]*"), commentFormat);
 }
 
 void CodeHighlighter::highlightBlock(const QString& text)

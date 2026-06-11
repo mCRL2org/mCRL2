@@ -16,18 +16,18 @@
 Bundle::Bundle()
 {
   index = NON_EXISTING;
-  parent = 0;
-  inCluster = 0;
-  outCluster = 0;
+  parent = nullptr;
+  inCluster = nullptr;
+  outCluster = nullptr;
 }
 
 
 Bundle::Bundle(const std::size_t& idx)
 {
   index      = idx;
-  parent     = 0;
-  inCluster  = 0;
-  outCluster = 0;
+  parent     = nullptr;
+  inCluster  = nullptr;
+  outCluster = nullptr;
 }
 
 
@@ -70,9 +70,9 @@ void Bundle::setEdges(const std::vector< Edge* > &e)
   edges = e;
 
   labels.clear();
-  for (std::size_t i = 0; i < edges.size(); ++i)
+  for (auto & edge : edges)
   {
-    labels.insert(std::pair< std::string, std::string >(edges[i]->getLabel(), "MAY"));
+    labels.insert(std::pair< std::string, std::string >(edge->getLabel(), "MAY"));
   }
 }
 
@@ -83,7 +83,7 @@ void Bundle::setEdges(const std::vector< Edge* > &e)
 Bundle* Bundle::getChild(const std::size_t& idx)
 {
   if (idx >= children.size())
-    return 0;
+    return nullptr;
   return children[idx];
 }
 
@@ -156,9 +156,9 @@ void Bundle::getLabels(
 
 void Bundle::clearChildren()
 {
-  for (std::size_t i = 0; i < children.size(); ++i)
+  for (auto & i : children)
   {
-    children[i] = 0;
+    i = nullptr;
   }
   children.clear();
 }
@@ -166,9 +166,9 @@ void Bundle::clearChildren()
 
 void Bundle::clearEdges()
 {
-  for (std::size_t i = 0; i < edges.size(); ++i)
+  for (auto & edge : edges)
   {
-    edges[i] = 0;
+    edge = nullptr;
   }
   edges.clear();
 

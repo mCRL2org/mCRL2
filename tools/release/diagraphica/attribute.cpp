@@ -34,7 +34,7 @@ Attribute::Attribute(const Attribute& attr)
 
 
 Attribute::~Attribute()
-{}
+= default;
 
 
 // -- set functions -------------------------------------------------
@@ -106,13 +106,13 @@ std::size_t Attribute::getSizeOrigValues()
 
 Value* Attribute::getOrigValue(std::size_t /*idx*/)
 {
-  return 0;
+  return nullptr;
 }
 
 
 Value* Attribute::getCurValue(std::size_t /*idx*/)
 {
-  return 0;
+  return nullptr;
 }
 
 

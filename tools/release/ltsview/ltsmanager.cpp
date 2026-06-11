@@ -10,12 +10,13 @@
 #include "state.h"
 #include "transition.h"
 #include <QEventLoop>
+#include <memory>
 
 void LtsManagerHelper::loadLts(QString filename)
 {
   emit loadingLts();
 
-  m_lts = 0;
+  m_lts = nullptr;
 
   LTS *lts = new LTS();
   try
@@ -70,10 +71,10 @@ LtsManager::LtsManager(QObject *parent, Settings *settings, QThread *atermThread
   QObject(parent),
   m_helper(settings),
   m_settings(settings),
-  m_lts(0),
+  m_lts(nullptr),
   m_simulation(nullptr),
-  m_selectedState(0),
-  m_selectedCluster(0)
+  m_selectedState(nullptr),
+  m_selectedCluster(nullptr)
 {
   m_helper.moveToThread(atermThread);
 
@@ -93,7 +94,7 @@ State *LtsManager::currentSimulationState() const
 {
   if (!m_simulation)
   {
-    return 0;
+    return nullptr;
   }
   else
   {
@@ -105,7 +106,7 @@ Transition *LtsManager::currentSimulationTransition() const
 {
   if (!m_simulation)
   {
-    return 0;
+    return nullptr;
   }
   else
   {
@@ -146,7 +147,7 @@ bool LtsManager::openLts(QString filename)
 
   delete m_lts;
   m_lts = lts;
-  m_simulation = std::unique_ptr<Simulation>(new Simulation(this, *lts));
+  m_simulation = std::make_unique<Simulation>(this, *lts);
 
   connect(m_simulation.get(), SIGNAL(changed()), this, SLOT(updateSimulationHistory()));
   connect(m_simulation.get(), SIGNAL(changed()), this, SLOT(unselectNonsimilated()));
@@ -197,8 +198,8 @@ void LtsManager::unselect()
 {
   if (m_lts && (m_selectedState || m_selectedCluster))
   {
-    m_selectedState = 0;
-    m_selectedCluster = 0;
+    m_selectedState = nullptr;
+    m_selectedCluster = nullptr;
     emit selectionChanged();
   }
 }
@@ -317,13 +318,13 @@ void LtsManager::updateSimulationHistory()
   if (m_simulation)
   {
     QList<Transition *> history = m_simulation->history();
-    for (int i = 0; i < history.size(); i++)
+    for (auto & i : history)
     {
       // TODO: this should only select states that are part of the current zoomed LTS!
       //if (history[i]->getBeginState()->
       {
-        m_simulationStateHistory += history[i]->getBeginState();
-        m_simulationTransitionHistory += history[i];
+        m_simulationStateHistory += i->getBeginState();
+        m_simulationTransitionHistory += i;
       }
     }
   }
@@ -331,7 +332,7 @@ void LtsManager::updateSimulationHistory()
 
 void LtsManager::unselectNonsimilated()
 {
-  if (m_simulation->isStarted() == (transitionTo(selectedState()) == 0))
+  if (m_simulation->isStarted() == (transitionTo(selectedState()) == nullptr))
   {
     //unselect();
   }
@@ -340,12 +341,12 @@ void LtsManager::unselectNonsimilated()
 Transition *LtsManager::transitionTo(State *state)
 {
   QList<Transition *> transitions = m_simulation->availableTransitions();
-  for (int i = 0; i < transitions.size(); i++)
+  for (auto & transition : transitions)
   {
-    if (transitions[i]->getEndState() == state)
+    if (transition->getEndState() == state)
     {
-      return transitions[i];
+      return transition;
     }
   }
-  return 0;
+  return nullptr;
 }

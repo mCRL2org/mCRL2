@@ -117,7 +117,7 @@ class objectdatatype
     bool canterminate=false;
     bool containstime=false;
 
-    const std::set <variable> get_free_variables() const
+    std::set <variable> get_free_variables() const
     {
       return process::find_free_variables(processbody);
     }

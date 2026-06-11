@@ -78,8 +78,8 @@ void Solver::solve(QString specification, QString dataExpression)
 
       term=rewr(term);
 
-      typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
-      typedef enumerator_list_element_with_substitution<> enumerator_element;
+      using enumerator_type = enumerator_algorithm_with_iterator<rewriter>;
+      using enumerator_element = enumerator_list_element_with_substitution<>;
 
       // Stop when more than 10000 internal variables are required.
       mcrl2::data::enumerator_identifier_generator id_generator;

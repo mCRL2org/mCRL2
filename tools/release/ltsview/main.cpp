@@ -15,7 +15,7 @@
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 
-typedef gui::qt::qt_tool<tools::input_tool> ltsview_base;
+using ltsview_base = gui::qt::qt_tool<tools::input_tool>;
 class ltsview_tool : public ltsview_base
 {
   public:
@@ -45,7 +45,7 @@ class ltsview_tool : public ltsview_base
         "http://www.mcrl2.org/web/user_manual/tools/release/ltsview.html")
     {}
 
-    bool run()
+    bool run() override
     {
       qRegisterMetaType<LTS *>("LTS *");
 

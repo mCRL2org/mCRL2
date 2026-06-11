@@ -37,7 +37,7 @@ void RewriteExpressionDock::rewriteExpression()
   m_processId = m_processSystem->rewriteExpression(ui->inputEdit->text().toStdString());
 }
 
-void RewriteExpressionDock::actionRewriteResult(int processId)
+void RewriteExpressionDock::actionRewriteResult(int  /*processId*/)
 {
   ui->rewriteButton->setEnabled(true);
   ui->resultText->setText("");

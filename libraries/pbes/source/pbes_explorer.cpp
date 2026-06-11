@@ -10,6 +10,7 @@
 /// \brief
 #include <climits>
 #include <queue>
+#include <utility>
 
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/representative_generator.h"
@@ -492,9 +493,8 @@ void lts_info::compute_transition_groups()
             pbes_expression expr = this->variable_expression[var];
             std::set<std::string> vars_stack;
             std::vector<pbes_expression> expression_parts = split_expression_and_substitute_variables(expr, priority, type, vars_stack);
-            for (std::vector<pbes_expression>::const_iterator e =
-                    expression_parts.begin(); e != expression_parts.end(); ++e) {
-                 std::set<std::string> occ_vars = lts_info::occ(*e);
+            for (const auto & expression_part : expression_parts) {
+                 std::set<std::string> occ_vars = lts_info::occ(expression_part);
                  for (const auto & var_str : variable_set)
                  {
                    occ_vars.erase(var_str);
@@ -524,15 +524,14 @@ void lts_info::compute_transition_groups()
             std::set<std::string> vars_stack;
             mCRL2log(log::debug) << std::endl << "Generating groups for equation " << variable_name << std::endl;
             std::vector<pbes_expression> expression_parts = split_expression_and_substitute_variables(expr, priority, type, vars_stack);
-            for (std::vector<pbes_expression>::const_iterator e =
-                    expression_parts.begin(); e != expression_parts.end(); ++e) {
-                this->transition_expression_plain.push_back(*e);
-                this->transition_expression.push_back(pgg->rewrite_and_simplify_expression(*e));
+            for (const auto & expression_part : expression_parts) {
+                this->transition_expression_plain.push_back(expression_part);
+                this->transition_expression.push_back(pgg->rewrite_and_simplify_expression(expression_part));
                 this->transition_variable_name.push_back(variable_name);
                 this->transition_type.push_back(type);
                 mCRL2log(log::debug) << "Add transition group " << group << ": "
                         << (type==parity_game_generator::PGAME_AND ? "AND" : "OR") << " " << variable_name << " "
-                        << pbes_system::pp(*e) << std::endl;
+                        << pbes_system::pp(expression_part) << std::endl;
                 group++;
             }
         }
@@ -827,9 +826,7 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
         data::data_expression_list values = atermpp::down_cast<propositional_variable_instantiation>(phi).parameters();
         assert(var_param_signatures.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
-        for (std::vector<std::string>::const_iterator param =
-                var_param_signatures.begin(); param != var_param_signatures.end(); ++param) {
-            std::string param_signature = *param;
+        for (auto param_signature : var_param_signatures) {
             if (data::is_variable(*val))
             {
                 const variable& value = atermpp::down_cast<variable>(*val);
@@ -875,9 +872,7 @@ std::set<std::string> lts_info::reset(const pbes_expression& phi, const std::set
         std::set<std::string> params;
         std::vector<std::string> var_params =
                     variable_parameter_signatures[atermpp::down_cast<propositional_variable_instantiation>(phi).name()];
-        for (std::vector<std::string>::const_iterator param =
-                var_params.begin(); param != var_params.end(); ++param) {
-            std::string signature = *param;
+        for (auto signature : var_params) {
             params.insert(signature);
         }
         for (const auto& signature: d)
@@ -1587,7 +1582,7 @@ std::string explorer::get_value(int type_no, int index)
 
 const std::string& explorer::get_string_value(int index)
 {
-    if (index >= (int)(localmap_int2string.size()))
+    if (std::cmp_greater_equal(index ,(localmap_int2string.size())))
     {
         throw(std::runtime_error("Error in get_string_value: Value not found for index " + std::to_string(index) + "."));
     }
@@ -1598,7 +1593,7 @@ const std::string& explorer::get_string_value(int index)
 const data_expression& explorer::get_data_value(int type_no, int index)
 {
     std::vector<data_expression>& int2data_map = this->localmaps_int2data.at(type_no);
-    if (index >= (int)(int2data_map.size()))
+    if (std::cmp_greater_equal(index ,(int2data_map.size())))
     {
         throw(std::runtime_error("Error in get_data_value: Value not found for type_no "
                                             + std::to_string(type_no) + " at index " + std::to_string(index) + "."));

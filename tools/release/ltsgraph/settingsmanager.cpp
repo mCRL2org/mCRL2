@@ -2,7 +2,7 @@
 
 void SettingsManager::addSettings(QString class_name)
 {
-  return SettingsManager::getInstance()._addSettings(class_name);
+  SettingsManager::getInstance()._addSettings(class_name);
 }
 
 void SettingsManager::_addSettings(QString class_name)

@@ -115,7 +115,7 @@ void Visualizer::computeSubtreeBounds(Cluster* root, float& bw, float& bh)
     for (i = 0; i < root->getNumDescendants(); ++i)
     {
       desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         if (desc->isCentered())
         {
@@ -222,7 +222,7 @@ void Visualizer::traverseTreeC(Cluster* root,bool topClosed,int rot)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         if (desc->isCentered())
         {
@@ -350,7 +350,7 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         if (desc->isCentered())
         {
@@ -772,9 +772,9 @@ void Visualizer::drawSimStates(QList<State*> historicStates,
   // Draw previous states of the simulation, in the colour specified in the
   // settings (default: white)
   State* s;
-  for (int i = 0; i < historicStates.size(); ++i)
+  for (auto & historicState : historicStates)
   {
-    s = historicStates[i];
+    s = historicState;
 
     if (ltsManager->lts()->getZoomLevel() == s->getZoomLevel()
         && drawnStates.find(s) == drawnStates.end())
@@ -923,7 +923,7 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         if (desc->isCentered())
         {
@@ -1045,7 +1045,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         drawStates(desc, simulating);
       }
@@ -1143,7 +1143,7 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         drawTransitions(desc,disp_fp,disp_bp);
       }
@@ -1159,9 +1159,8 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
   computeAbsPos();
 
   // Draw the historical transitions.
-  for (int i = 0; i < transHis.size(); ++i)
+  for (auto currTrans : transHis)
   {
-    Transition* currTrans = transHis[i];
     State* beginState = currTrans->getBeginState();
     State* endState = currTrans->getEndState();
 
@@ -1208,9 +1207,8 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
 
   // Draw the possible transitions from the current state, as well as the state
   // they lead into
-  for (int i = 0; i < posTrans.size(); ++i)
+  for (auto currTrans : posTrans)
   {
-    Transition* currTrans = posTrans[i];
     State* beginState = currTrans->getBeginState();
     State* endState = currTrans->getEndState();
 
@@ -1438,7 +1436,7 @@ void Visualizer::exportToText(std::string filename)
     {
       file << "at angle(" << (*ci)->getPosition() << ")";
     }
-    if ((*ci)->getAncestor() != NULL)
+    if ((*ci)->getAncestor() != nullptr)
     {
       file << " below parent cluster " << clus_id[(*ci)->getAncestor()];
     }

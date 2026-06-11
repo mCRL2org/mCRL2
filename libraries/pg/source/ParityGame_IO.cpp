@@ -258,10 +258,9 @@ void ParityGame::assign_pbes(mcrl2::pbes_system::pbes &pbes, verti *goal_vertex,
     for (verti v = begin; v < end; ++v)
     {
         std::set<std::size_t> deps = pgg.get_dependencies(v);
-        for ( std::set<std::size_t>::const_iterator it = deps.begin();
-                it != deps.end(); ++it )
+        for (unsigned long dep : deps)
         {
-            verti w = (verti)*it;
+            verti w = (verti)dep;
             assert(w >= begin);
             if (w >= end)
             {

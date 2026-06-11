@@ -138,9 +138,9 @@ struct NodeMoveRecord : public MoveRecord
   void release(bool toggleLocked) override
   {
     MoveRecord::release(toggleLocked);
-    for (std::size_t i = 0; i < edges.size(); ++i)
+    for (auto & edge : edges)
     {
-      edges[i].release(false); // Do not toggle the edges around this node
+      edge.release(false); // Do not toggle the edges around this node
     }
     label.release(toggleLocked);
   }
@@ -365,7 +365,7 @@ void GLWidget::paintGL()
   if (m_graph.nodeCount()>0) 
   {
     QOpenGLFramebufferObject::bindDefault();
-    QOpenGLFramebufferObject::blitFramebuffer(0, m_scene.m_fbo, GL_COLOR_BUFFER_BIT); 
+    QOpenGLFramebufferObject::blitFramebuffer(nullptr, m_scene.m_fbo, GL_COLOR_BUFFER_BIT); 
   }
   m_scene.renderText(painter);
   

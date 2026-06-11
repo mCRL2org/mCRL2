@@ -24,12 +24,12 @@ CombnPlot::CombnPlot(QWidget* parent, Graph* graph, const std::vector<std::size_
 
   mouseCombnIdx = NON_EXISTING;
 
-  diagram        = 0;
+  diagram        = nullptr;
   showDgrm       = false;
 
-  for (std::size_t i = 0; i < attributeIndices.size(); ++i)
+  for (unsigned long attributeIndice : attributeIndices)
   {
-    Attribute *attribute = m_graph->getAttribute(attributeIndices[i]);
+    Attribute *attribute = m_graph->getAttribute(attributeIndice);
     attributes.push_back(attribute);
     connect(attribute, SIGNAL(deleted()), this, SLOT(close()));
   }
@@ -508,18 +508,18 @@ void CombnPlot::mouseMoveEvent(QMouseEvent* event)
 void CombnPlot::initLabels()
 {
   attributeLabels.clear();
-  for (std::size_t i = 0; i < attributes.size(); ++i)
-    attributeLabels.push_back(attributes[i]->name().toStdString());
+  for (auto & attribute : attributes)
+    attributeLabels.push_back(attribute->name().toStdString());
 }
 
 
 void CombnPlot::calcMaxAttrCard()
 {
   maxAttrCard = 0;
-  for (std::size_t i = 0; i < attributes.size(); ++i)
+  for (auto & attribute : attributes)
   {
-    if (attributes[i]->getSizeCurValues() > maxAttrCard)
-      maxAttrCard = attributes[i]->getSizeCurValues();
+    if (attribute->getSizeCurValues() > maxAttrCard)
+      maxAttrCard = attribute->getSizeCurValues();
   }
 }
 
@@ -527,11 +527,11 @@ void CombnPlot::calcMaxAttrCard()
 void CombnPlot::calcMaxNumberPerComb()
 {
   maxNumberPerComb = 0;
-  for (std::size_t i = 0; i < numberPerComb.size(); ++i)
+  for (unsigned long i : numberPerComb)
   {
-    if (numberPerComb[i] > maxNumberPerComb)
+    if (i > maxNumberPerComb)
     {
-      maxNumberPerComb = numberPerComb[i];
+      maxNumberPerComb = i;
     }
   }
 }
@@ -546,7 +546,7 @@ void CombnPlot::showTooltip(const std::size_t& valueIndex, const QPointF& positi
     msgDgrm = Utils::dblToStr(numberPerComb[valueIndex]) + " nodes; "
       + Utils::dblToStr(Utils::perc((double) numberPerComb[valueIndex], (double) m_graph->getSizeNodes())) + '%';
 
-    if (diagram == 0)
+    if (diagram == nullptr)
     {
       QToolTip::showText(QCursor::pos(), QString::fromStdString(msgDgrm));
     }

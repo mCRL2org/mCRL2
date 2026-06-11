@@ -249,10 +249,9 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
             for (std::size_t k = i; k < j; ++k)
             {
                 edge_list subedges = subgraphs[k].get_edges();
-                for ( edge_list::const_iterator it = subedges.begin();
-                      it != subedges.end(); ++it )
+                for (const auto & subedge : subedges)
                 {
-                  edges.emplace_back(it->first + offset[k], it->second + offset[k]);
+                  edges.emplace_back(subedge.first + offset[k], subedge.second + offset[k]);
                 }
             }
 
@@ -292,10 +291,10 @@ void StaticGraph::shuffle_vertices()
 void StaticGraph::shuffle_vertices(const std::vector<verti> &perm)
 {
     edge_list edges = get_edges();
-    for (edge_list::iterator it = edges.begin(); it != edges.end(); ++it)
+    for (auto & edge : edges)
     {
-        it->first  = perm[it->first];
-        it->second = perm[it->second];
+        edge.first  = perm[edge.first];
+        edge.second = perm[edge.second];
     }
     assign(edges, edge_dir_);
 }
@@ -327,15 +326,15 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
 {
     // Find number of vertices
     verti V = 0;
-    for (edge_list::iterator it = edges.begin(); it != edges.end(); ++it)
+    for (auto & edge : edges)
     {
-      if (it->first >= V)
+      if (edge.first >= V)
       {
-        V = it->first + 1;
+        V = edge.first + 1;
       }
-      if (it->second >= V)
+      if (edge.second >= V)
       {
-        V = it->second + 1;
+        V = edge.second + 1;
       }
     }
 

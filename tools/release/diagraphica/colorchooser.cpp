@@ -13,7 +13,7 @@
 static const double handleSize = 5.0;
 
 ColorChooser::ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinates, ColorChooser::ColorType type):
-  Visualizer(parent, 0),
+  Visualizer(parent, nullptr),
   m_dof(dof),
   m_yCoordinates(yCoordinates),
   m_type(type),

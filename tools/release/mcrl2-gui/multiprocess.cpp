@@ -18,15 +18,15 @@ using ReadMethod = QByteArray(Process::*)();
 
 QMultiProcess::Process* QMultiProcess::start(QIODevice::OpenMode mode)
 {
-  QPersistentProcess *process = new QPersistentProcess();
-  connect(process, SIGNAL(readyReadStandardError()), this, SIGNAL(readyReadStandardError()));
-  connect(process, SIGNAL(readyReadStandardOutput()), this, SIGNAL(readyReadStandardOutput()));
+  ProcessPtr process = std::make_unique<QPersistentProcess>();
+  connect(process.get(), SIGNAL(readyReadStandardError()), this, SIGNAL(readyReadStandardError()));
+  connect(process.get(), SIGNAL(readyReadStandardOutput()), this, SIGNAL(readyReadStandardOutput()));
   process->setWorkingDirectory(workingDirectory());
   process->setProgram(program());
   process->setArguments(arguments());
   process->start(mode);
-  m_processes.emplace_back(process);
-  return process;
+  m_processes.emplace_back(std::move(process));
+  return m_processes.back().get();
 }
 
 static inline QString readAll(ReadMethod method, Processes &processes,

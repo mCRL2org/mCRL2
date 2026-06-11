@@ -88,7 +88,7 @@ static void declare_variables(
 // of s.
 static bool match_and_remove(std::string& s, const std::string& match)
 {
-  if (s.substr(0,match.size())==match)
+  if (s.starts_with(match))
   {
     s=s.substr(match.size());
     return true;

@@ -28,7 +28,7 @@ DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
     comboBox->addItem("None");
 
     DOF* dof = m_shape->dof(i);
-    Attribute* currentAttribute = (dof == 0 ? 0 : dof->attribute());
+    Attribute* currentAttribute = (dof == nullptr ? nullptr : dof->attribute());
 
     for (std::size_t j = 0; j < m_graph->getSizeAttributes(); ++j)
     {
@@ -61,17 +61,17 @@ DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
 
 void DofDialog::attributeSelected(int index)
 {
-  if (m_graph != 0)
+  if (m_graph != nullptr)
   {
     QObject* sender = QObject::sender();
     QComboBox* comboBox = dynamic_cast<QComboBox*>(sender);
-    if (comboBox != 0)
+    if (comboBox != nullptr)
     {
       int dofIndex = m_comboBoxes.indexOf(comboBox);
       if (dofIndex != -1)
       {
         DOF* dof = m_shape->dof(dofIndex);
-        if (dof != 0)
+        if (dof != nullptr)
         {
           if (index > 0)
           {
@@ -79,7 +79,7 @@ void DofDialog::attributeSelected(int index)
           }
           else
           {
-            dof->setAttribute(0);
+            dof->setAttribute(nullptr);
           }
         }
       }
@@ -92,7 +92,7 @@ bool DofDialog::eventFilter(QObject *object, QEvent *event)
   if (event->type() == QEvent::FocusIn)
   {
     QComboBox* comboBox = dynamic_cast<QComboBox*>(object);
-    if (comboBox != 0)
+    if (comboBox != nullptr)
     {
       int dofIndex = m_comboBoxes.indexOf(comboBox);
       if (dofIndex != -1)

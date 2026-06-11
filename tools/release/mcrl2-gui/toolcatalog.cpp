@@ -36,7 +36,7 @@ QStringList ToolCatalog::fileTypes(QString extension)
 
 void ToolCatalog::load()
 {
-  typedef QMap<QString, QList<ToolInformation> > categorymap;
+  using categorymap = QMap<QString, QList<ToolInformation> >;
 
   QDir toolsetDir = QDir(QCoreApplication::applicationDirPath());
   if (toolsetDir.dirName().toLower() == "bin")

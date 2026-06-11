@@ -7,6 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include <ranges>
+
 #include "mcrl2/atermpp/aterm_io_binary.h"
 #include "mcrl2/core/load_aterm.h"
 #include "mcrl2/data/data_io.h"
@@ -309,9 +311,9 @@ atermpp::aterm pres_to_aterm(const pres& p)
 
   atermpp::aterm_list eqn_list;
   const std::vector<pres_equation>& eqn = p.equations();
-  for (std::vector<pres_equation>::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
+  for (const auto & i : std::ranges::reverse_view(eqn))
   {
-    atermpp::aterm a = pres_equation_to_aterm(*i);
+    atermpp::aterm a = pres_equation_to_aterm(i);
     eqn_list.push_front(a);
   }
   atermpp::aterm equations = atermpp::aterm(core::detail::function_symbol_PREqnSpec(), eqn_list);

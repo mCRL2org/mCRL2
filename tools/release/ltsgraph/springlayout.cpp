@@ -92,23 +92,23 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
   m_graph.gv_debug.addVar("Energy");
   m_graph.gv_debug.addVar("min energy");
   m_graph.gv_debug.addVar("max energy");
-  m_graph.gv_debug.addToPlot(0, 0, {"Stability", QBrush(Qt::red, Qt::SolidPattern), QPen(Qt::red, 1)});
+  m_graph.gv_debug.addToPlot(0, 0, {.var="Stability", .brush=QBrush(Qt::red, Qt::SolidPattern), .pen=QPen(Qt::red, 1)});
 
   m_graph.gv_debug.addToPlot(1,
       0,
-      {"Energy", QBrush(QColor::fromRgbF(0, 0.5, 1), Qt::SolidPattern), QPen(QColor::fromRgbF(0, 0.5, 1), 1)});
+      {.var="Energy", .brush=QBrush(QColor::fromRgbF(0, 0.5, 1), Qt::SolidPattern), .pen=QPen(QColor::fromRgbF(0, 0.5, 1), 1)});
 
   m_graph.gv_debug.addToPlot(1,
       0,
-      {"min energy",
-          QBrush(QColor::fromRgbF(0, 0.25, 0.5), Qt::SolidPattern),
-          QPen(QColor::fromRgbF(0, 0.5, 1), 1, Qt::DashLine, Qt::FlatCap)});
+      {.var="min energy",
+          .brush=QBrush(QColor::fromRgbF(0, 0.25, 0.5), Qt::SolidPattern),
+          .pen=QPen(QColor::fromRgbF(0, 0.5, 1), 1, Qt::DashLine, Qt::FlatCap)});
 
   m_graph.gv_debug.addToPlot(1,
       0,
-      {"max energy",
-          QBrush(QColor::fromRgbF(0, 0.25, 0.5), Qt::SolidPattern),
-          QPen(QColor::fromRgbF(0, 0.5, 1), 1, Qt::DashLine, Qt::FlatCap)});
+      {.var="max energy",
+          .brush=QBrush(QColor::fromRgbF(0, 0.25, 0.5), Qt::SolidPattern),
+          .pen=QPen(QColor::fromRgbF(0, 0.5, 1), 1, Qt::DashLine, Qt::FlatCap)});
 
   srand(time(nullptr));
   drift_timer.restart();

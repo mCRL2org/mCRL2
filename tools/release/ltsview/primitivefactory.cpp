@@ -30,8 +30,8 @@ PrimitiveFactory::PrimitiveFactory(Settings* ss)
   connect(&settings->quality, SIGNAL(changed(int)), this, SLOT(qualityChanged()));
   connect(&settings->branchTilt, SIGNAL(changed(int)), this, SLOT(branchTiltChanged()));
 
-  cos_theta = NULL;
-  sin_theta = NULL;
+  cos_theta = nullptr;
+  sin_theta = nullptr;
   coneDB = new ConeDB();
   update_geom_tables();
 }
@@ -39,20 +39,20 @@ PrimitiveFactory::PrimitiveFactory(Settings* ss)
 PrimitiveFactory::~PrimitiveFactory()
 {
   delete coneDB;
-  for (unsigned int i = 0; i < primitives.size(); ++i)
+  for (auto & primitive : primitives)
   {
-    delete primitives[i];
+    delete primitive;
   }
   primitives.clear();
-  if (cos_theta != NULL)
+  if (cos_theta != nullptr)
   {
     free(cos_theta);
-    cos_theta = NULL;
+    cos_theta = nullptr;
   }
-  if (sin_theta != NULL)
+  if (sin_theta != nullptr)
   {
     free(sin_theta);
-    sin_theta = NULL;
+    sin_theta = nullptr;
   }
 }
 
@@ -145,9 +145,9 @@ void PrimitiveFactory::update_geom_tables()
 void PrimitiveFactory::update_primitives()
 {
   int qlt = settings->quality.value();
-  for (unsigned int i = 0; i < primitives.size(); ++i)
+  for (auto & primitive : primitives)
   {
-    primitives[i]->reshape(qlt,cos_theta,sin_theta);
+    primitive->reshape(qlt,cos_theta,sin_theta);
   }
 }
 
@@ -155,9 +155,9 @@ void PrimitiveFactory::update_oblique_cones()
 {
   int qlt = settings->quality.value();
   float obt = deg_to_rad(float(settings->branchTilt.value()));
-  for (unsigned int i = 0; i < oblq_cones.size(); ++i)
+  for (auto & oblq_cone : oblq_cones)
   {
-    oblq_cones[i]->reshape(qlt,cos_theta,sin_theta,obt);
+    oblq_cone->reshape(qlt,cos_theta,sin_theta,obt);
   }
 }
 

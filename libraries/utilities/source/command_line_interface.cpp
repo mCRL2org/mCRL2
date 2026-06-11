@@ -154,21 +154,21 @@ std::string interface_description::option_descriptor::textual_description(
   if (m_argument.get() != nullptr && m_argument->has_description())
   {
     std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
-    for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
+    for(const auto & i : arg_description)
     {
-      if (!show_hidden && i->is_hidden())
+      if (!show_hidden && i.is_hidden())
       {
         // If we are not showing all help and the argument is hidden, skip it
         continue;
       }
 
       std::string arg;
-      if(i->get_short() != std::string())
+      if(i.get_short() != std::string())
       {
-        arg += "'" + i->get_short() + "', ";
+        arg += "'" + i.get_short() + "', ";
       }
-      arg += "'" + i->get_long() + "' " + i->get_description();
-      bool is_default = m_argument->get_default() == i->get_long();
+      arg += "'" + i.get_long() + "' " + i.get_description();
+      bool is_default = m_argument->get_default() == i.get_long();
       if(is_default)
       {
         arg += " (default)";
@@ -228,15 +228,15 @@ std::string interface_description::option_descriptor::man_page_description() con
   if (m_argument.get() != nullptr && m_argument->has_description())
   {
     std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
-    for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
+    for(const auto & i : arg_description)
     {
       std::string arg;
-      if(i->get_short() != std::string())
+      if(i.get_short() != std::string())
       {
-        arg += "'" + i->get_short() + "', ";
+        arg += "'" + i.get_short() + "', ";
       }
-      arg += "'" + i->get_long() + "' " + i->get_description();
-      bool is_default = m_argument->get_default() == i->get_long();
+      arg += "'" + i.get_long() + "' " + i.get_description();
+      bool is_default = m_argument->get_default() == i.get_long();
       if(is_default)
       {
         arg += " (default)";
@@ -270,9 +270,9 @@ std::ostream& interface_description::option_descriptor::xml_page_description(std
   // Produce output line by line, such that indentation provided in the description
   // can be preserved.
   std::vector<std::string> lines = mcrl2::utilities::split(m_description, "\n");
-  for (std::vector<std::string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
+  for (const auto & line : lines)
   {
-    s << *i << "<br/>" << std::endl;
+    s << line << "<br/>" << std::endl;
   }
   s << std::string(--indentation, ' ') << "</description>" << std::endl;
 
@@ -285,16 +285,16 @@ std::ostream& interface_description::option_descriptor::xml_page_description(std
     {
       s << std::string(indentation++, ' ') << "<values>" << std::endl;
       std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
-      for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
+      for(const auto & i : arg_description)
       {
-        bool is_default = m_argument->get_default() == i->get_long();
+        bool is_default = m_argument->get_default() == i.get_long();
         s << std::string(indentation++, ' ') << "<value default=\"" << (is_default?"yes":"no") << "\">" << std::endl;
-        if(i->get_short() != std::string())
+        if(i.get_short() != std::string())
         {
-          s << std::string(indentation, ' ') << "<short>" << i->get_short() << "</short>" << std::endl;
+          s << std::string(indentation, ' ') << "<short>" << i.get_short() << "</short>" << std::endl;
         }
-        s << std::string(indentation, ' ') << "<long>" << i->get_long() << "</long>" << std::endl;
-        s << std::string(indentation, ' ') << "<description>" << i->get_description() << "</description>" << std::endl;
+        s << std::string(indentation, ' ') << "<long>" << i.get_long() << "</long>" << std::endl;
+        s << std::string(indentation, ' ') << "<description>" << i.get_description() << "</description>" << std::endl;
         s << std::string(--indentation, ' ') << "</value>" << std::endl;
       }
       s << std::string(--indentation, ' ') << "</values>" << std::endl;
@@ -627,9 +627,9 @@ std::ostream& interface_description::xml_page(std::ostream& s) const
   s << std::string(indentation++, ' ') << "<description>" << std::endl;
 
   std::vector<std::string> lines = mcrl2::utilities::split(m_description, "\n");
-  for (std::vector<std::string>::const_iterator i = lines.begin(); i != lines.end(); ++i)
+  for (const auto & line : lines)
   {
-    s << *i << "<br/>" << std::endl;
+    s << line << "<br/>" << std::endl;
   }
   s << std::string(--indentation, ' ') << "</description>" << std::endl;
 

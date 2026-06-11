@@ -201,11 +201,11 @@ bool parse_pbes(const pbes &pbes, bool disjunctive, parsed_pbes &output)
 	constant_equation.variable = propositional_variable(constant_variable_name, variable_list());
 	constant_equation.clauses.push_back(constant_clause);
 	
-	for (std::vector<pbes_equation>::const_iterator i = pbes.equations().begin(); i != pbes.equations().end(); ++i) {
+	for (const auto & i : pbes.equations()) {
 		equation e;
-		e.symbol = i->symbol();
-		e.variable = i->variable();
-		if (!parse_clauses(i->formula(), disjunctive, constant_clause.instantiation, variable_vector(), disjunctive ? sort_bool::true_() : sort_bool::false_(), false, e.clauses)) {
+		e.symbol = i.symbol();
+		e.variable = i.variable();
+		if (!parse_clauses(i.formula(), disjunctive, constant_clause.instantiation, variable_vector(), disjunctive ? sort_bool::true_() : sort_bool::false_(), false, e.clauses)) {
 			output.equations.clear();
 			return false;
 		}
@@ -274,10 +274,10 @@ static void build_unrolling_variables(const parsed_pbes &pbes, const translated_
 	std::string parameter_base = "parameter";
 	std::string quantification_base = "quantification";
 	
-	for (std::set<data::variable>::const_iterator i = pbes.global_variables.begin(); i != pbes.global_variables.end(); ++i) {
-		std::string global_variable = global_variable_base + "-" + sanitize_term(i->name());
-		variables.global_variables[*i] = global_variable;
-		variables.definition += define_variable(translation, global_variable, i->sort());
+	for (const auto & i : pbes.global_variables) {
+		std::string global_variable = global_variable_base + "-" + sanitize_term(i.name());
+		variables.global_variables[i] = global_variable;
+		variables.definition += define_variable(translation, global_variable, i.sort());
 	}
 	
 	for (size_t i = 0; i < pbes.equations.size(); ++i) {
@@ -291,12 +291,12 @@ static void build_unrolling_variables(const parsed_pbes &pbes, const translated_
 		
 		std::vector<std::vector<std::string> > round_parameter_variables;
 		std::vector<std::vector<std::vector<std::string> > > round_quantification_variables;
-		for (std::vector<equation>::const_iterator i = pbes.equations.begin(); i != pbes.equations.end(); ++i) {
+		for (const auto & i : pbes.equations) {
 			std::vector<std::string> equation_parameter_variables;
-			for (variable_list::const_iterator j = i->variable.parameters().begin(); j != i->variable.parameters().end(); ++j) {
+			for (variable_list::const_iterator j = i.variable.parameters().begin(); j != i.variable.parameters().end(); ++j) {
 				std::string parameter_variable =
 					parameter_base + "-" +
-					sanitize_term(i->variable.name()) + "-" +
+					sanitize_term(i.variable.name()) + "-" +
 					sanitize_term(j->name()) + "-" +
 					itoa(round);
 				equation_parameter_variables.push_back(parameter_variable);
@@ -305,17 +305,17 @@ static void build_unrolling_variables(const parsed_pbes &pbes, const translated_
 			round_parameter_variables.push_back(equation_parameter_variables);
 			
 			std::vector<std::vector<std::string> > equation_quantification_variables;
-			for (std::vector<clause>::const_iterator j = i->clauses.begin(); j != i->clauses.end(); ++j) {
+			for (std::vector<clause>::const_iterator j = i.clauses.begin(); j != i.clauses.end(); ++j) {
 				std::vector<std::string> clause_quantification_variables;
-				for (variable_vector::const_iterator k = j->quantification_domain.begin(); k != j->quantification_domain.end(); ++k) {
+				for (const auto & k : j->quantification_domain) {
 					std::string quantification_variable =
 						quantification_base + "-" +
-						sanitize_term(i->variable.name()) + "-" +
+						sanitize_term(i.variable.name()) + "-" +
 						itoa(equation_quantification_variables.size()) + "-" +
-						sanitize_term(k->name()) + "-" +
+						sanitize_term(k.name()) + "-" +
 						itoa(round);
 					clause_quantification_variables.push_back(quantification_variable);
-					variables.definition += define_variable(translation, quantification_variable, k->sort());
+					variables.definition += define_variable(translation, quantification_variable, k.sort());
 				}
 				equation_quantification_variables.push_back(clause_quantification_variables);
 			}
@@ -351,8 +351,8 @@ static std::string join(const std::vector<std::string> &clauses, const std::stri
 		return clauses[0];
 	}
 	std::string output = "(" + op;
-	for (std::vector<std::string>::const_iterator i = clauses.begin(); i != clauses.end(); ++i) {
-		output += " " + *i;
+	for (const auto & clause : clauses) {
+		output += " " + clause;
 	}
 	output += ")";
 	return output;
@@ -361,9 +361,9 @@ static std::string join(const std::vector<std::string> &clauses, const std::stri
 static std::string assert_occurs(const parsed_pbes &pbes, const translated_data_specification &translation, const unrolling_variables &variables, size_t from_round, size_t to_round)
 {
 	std::vector<std::string> possibilities;
-	for (std::vector<equation>::const_iterator i = pbes.equations.begin(); i != pbes.equations.end(); ++i) {
-		size_t from_variable_index = variables.variable_indices.at(i->variable.name());
-		for (std::vector<clause>::const_iterator j = i->clauses.begin(); j != i->clauses.end(); ++j) {
+	for (const auto & i : pbes.equations) {
+		size_t from_variable_index = variables.variable_indices.at(i.variable.name());
+		for (std::vector<clause>::const_iterator j = i.clauses.begin(); j != i.clauses.end(); ++j) {
 			size_t to_variable_index = variables.variable_indices.at(j->instantiation.name());
 			std::vector<std::string> clauses;
 			
@@ -372,12 +372,12 @@ static std::string assert_occurs(const parsed_pbes &pbes, const translated_data_
 			
 			std::map<mcrl2::data::variable, std::string> bound_variables = variables.global_variables;
 			size_t index = 0;
-			for (const mcrl2::data::variable& k : i->variable.parameters())
+			for (const mcrl2::data::variable& k : i.variable.parameters())
 			{
 				bound_variables[k] = variables.parameter_variables[from_round][from_variable_index][index++];
 			}
 			for (variable_vector::const_iterator k = j->quantification_domain.begin(); k != j->quantification_domain.end(); ++k) {
-				bound_variables[*k] = variables.quantification_variables[from_round][from_variable_index][j - i->clauses.begin()][k - j->quantification_domain.begin()];
+				bound_variables[*k] = variables.quantification_variables[from_round][from_variable_index][j - i.clauses.begin()][k - j->quantification_domain.begin()];
 			}
 			
 			if (j->predicate != sort_bool::true_()) {
@@ -413,12 +413,12 @@ static std::string define_assert_witness(const parsed_pbes &pbes, const translat
 	output += define_variable(translation, equation_variable, sort_nat::nat());
 	
 	std::vector<std::vector<std::string> > parameter_variables;
-	for (std::vector<equation>::const_iterator i = pbes.equations.begin(); i != pbes.equations.end(); ++i) {
+	for (const auto & i : pbes.equations) {
 		std::vector<std::string> equation_parameter_variables;
-		for (variable_list::const_iterator j = i->variable.parameters().begin(); j != i->variable.parameters().end(); ++j) {
+		for (variable_list::const_iterator j = i.variable.parameters().begin(); j != i.variable.parameters().end(); ++j) {
 			std::string parameter_variable =
 				base + "-parameter-" +
-				sanitize_term(i->variable.name()) + "-" +
+				sanitize_term(i.variable.name()) + "-" +
 				sanitize_term(j->name());
 			equation_parameter_variables.push_back(parameter_variable);
 			output += define_variable(translation, parameter_variable, j->sort());

@@ -16,6 +16,7 @@
 #include <QMessageBox>
 #include <QMenu>
 #include <QToolTip>
+#include <utility>
 
 using namespace mcrl2::gui::qt;
 
@@ -31,8 +32,8 @@ Examiner::Examiner(
   : Visualizer(parent, g),
     settings(s)
 {
-  diagram = 0;
-  frame = 0;
+  diagram = nullptr;
+  frame = nullptr;
   colFrm = VisUtils::mediumGray;
 
   focusFrameIdx = -1;
@@ -49,27 +50,27 @@ Examiner::Examiner(
 Examiner::~Examiner()
 {
   // association
-  diagram = 0;
+  diagram = nullptr;
   attributes.clear();
 
   // composition
   delete frame;
-  frame = 0;
+  frame = nullptr;
 
   // composition
   {
-    for (std::size_t i = 0; i < framesHist.size(); ++i)
+    for (auto & i : framesHist)
     {
-      delete framesHist[i];
+      delete i;
     }
   }
   framesHist.clear();
 
   // association
   {
-    for (std::size_t i = 0; i < attrsHist.size(); ++i)
+    for (auto & i : attrsHist)
     {
-      attrsHist[i].clear();
+      i.clear();
     }
   }
   attrsHist.clear();
@@ -112,7 +113,7 @@ void Examiner::setFrame(
 void Examiner::clrFrame()
 {
   delete frame;
-  frame = 0;
+  frame = nullptr;
 
   if (focusFrameIdx < framesHist.size())
   {
@@ -149,9 +150,9 @@ void Examiner::addFrameHist(
   QList<Cluster*> frames,
   const std::vector< Attribute* >& attrs)
 {
-  for (int i = 0; i < frames.size(); ++i)
+  for (auto & frame : frames)
   {
-    addFrameHist(frames[i], attrs);
+    addFrameHist(frame, attrs);
   }
 }
 
@@ -340,7 +341,7 @@ void Examiner::clearAttributes()
 void Examiner::clearDiagram()
 {
   // association
-  diagram = 0;
+  diagram = nullptr;
 }
 
 
@@ -348,7 +349,7 @@ void Examiner::clearFrames()
 {
   // composition
   delete frame;
-  frame = 0;
+  frame = nullptr;
 }
 
 
@@ -372,7 +373,7 @@ void Examiner::handleHits(const std::vector< int >& ids)
       }
       else if (ids[0] == ID_FRAME_HIST)
       {
-        if (focusFrameIdx == static_cast <std::size_t>(ids[1]))
+        if (std::cmp_equal(focusFrameIdx ,ids[1])))
         {
           focusFrameIdx = -1;
           clrFrame();
@@ -390,9 +391,9 @@ void Examiner::handleHits(const std::vector< int >& ids)
         {
           dataChanged = true;
 
-          for (std::size_t i = 0; i < framesHist.size(); ++i)
+          for (auto & i : framesHist)
           {
-            delete framesHist[i];
+            delete i;
           }
           framesHist.clear();
           attrsHist.clear();
@@ -619,9 +620,9 @@ template <Visualizer::Mode mode> void Examiner::drawFrame()
     */
     Attribute* attr;
     Node* node;
-    for (std::size_t i = 0; i < attributes.size(); ++i)
+    for (auto & attribute : attributes)
     {
-      attr = attributes[i];
+      attr = attribute;
       node = frame->getNode(0);
       if (attr->getSizeCurValues() > 0)
       {
@@ -633,8 +634,8 @@ template <Visualizer::Mode mode> void Examiner::drawFrame()
         valsFrame.push_back(val);
       }
     }
-    attr = 0;
-    node = 0;
+    attr = nullptr;
+    node = nullptr;
 
     diagram->draw<mode>(pixelSize(), attributes, valsFrame);
 
@@ -704,8 +705,8 @@ template <Visualizer::Mode mode> void Examiner::drawFramesHist()
           valsFrame.push_back(val);
         }
       }
-      attr = 0;
-      node = 0;
+      attr = nullptr;
+      node = nullptr;
 
       glPushMatrix();
       glTranslatef(posFramesHist[i].x, posFramesHist[i].y, 0.0);
@@ -1018,7 +1019,7 @@ template <Visualizer::Mode mode> void Examiner::draw()
 
   if constexpr (mode == Marking)
   {
-    if (diagram != 0)
+    if (diagram != nullptr)
     {
       drawFrame<mode>();
 
@@ -1031,7 +1032,7 @@ template <Visualizer::Mode mode> void Examiner::draw()
   }
   else
   {
-    if (diagram != 0)
+    if (diagram != nullptr)
     {
       drawFrame<mode>();
 

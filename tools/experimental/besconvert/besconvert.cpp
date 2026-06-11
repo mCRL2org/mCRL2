@@ -92,9 +92,9 @@ class bes_reduction_algorithm: public detail::bes_algorithm
     std::string allowed_equivalences()
     {
       std::set<std::string> tmp;
-      for (std::set<equivalence_t>::const_iterator i = allowed_eqs().begin(); i != allowed_eqs().end(); ++i)
+      for (auto i : allowed_eqs())
       {
-        tmp.insert(string_for_equivalence(*i));
+        tmp.insert(string_for_equivalence(i));
       }
       return utilities::string_join(tmp, ", ");
     }
@@ -195,26 +195,26 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       std::size_t index = 0;
       fixpoint_symbol sigma = fixpoint_symbol::nu();
       bool and_in_block = false;
-      for (auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (auto & i : m_bes.equations())
       {
-        if (i->symbol() != sigma)
+        if (i.symbol() != sigma)
         {
           block_to_operand[current_block] = and_in_block?BOOL_AND:BOOL_OR;
           and_in_block = false;
-          sigma = i->symbol();
+          sigma = i.symbol();
           ++current_block;
         }
 
-        if (get_operand(i->formula()) == BOOL_AND)
+        if (get_operand(i.formula()) == BOOL_AND)
         {
           and_in_block = true;
         }
 
-        std::set<propositional_variable_instantiation> occurring_variables = find_propositional_variable_instantiations(i->formula());
+        std::set<propositional_variable_instantiation> occurring_variables = find_propositional_variable_instantiations(i.formula());
         // occurring_variable_count += occurring_variables.size(); Not used.
 
-        statistics[i->variable()] = std::make_pair(current_block, get_operand(i->formula()));
-        indices[i->variable()] = index++;
+        statistics[i.variable()] = std::make_pair(current_block, get_operand(i.formula()));
+        indices[i.variable()] = index++;
       }
 
       // Collect block indices and operands of all equations
@@ -284,10 +284,10 @@ class bes_reduction_algorithm: public detail::bes_algorithm
 
         // Edges to successors
         std::set<propositional_variable_instantiation> occurring_variables = find_propositional_variable_instantiations(i.formula());
-        for (std::set<propositional_variable_instantiation>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
+        for (const auto & occurring_variable : occurring_variables)
         {
           std::stringstream label;
-          std::pair<unsigned int, boolean_operand_t> info_target = statistics[propositional_variable(j->name())];
+          std::pair<unsigned int, boolean_operand_t> info_target = statistics[propositional_variable(occurring_variable.name())];
 
           // If variable, map to operand that was precomputed for variables.
           if (info_target.second == BOOL_VAR)
@@ -307,7 +307,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           {
             label << "block(" << info_target.first << "),op(" << info_target.second << ")";
           }
-          std::size_t to = indices[propositional_variable(j->name())];
+          std::size_t to = indices[propositional_variable(occurring_variable.name())];
           process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
           std::size_t label_index = labs.index(t);
           if (label_index == labs.npos)
@@ -364,9 +364,9 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       sort_transitions(m_lts.get_transitions(), m_lts.hidden_label_set(), lts::src_lbl_tgt);
       const std::vector<lts::transition> &transitions=m_lts.get_transitions();
 
-      for (std::vector<lts::transition>::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
+      for (const auto & i : transitions)
       {
-        has_outgoing_transition[i->from()] = true;
+        has_outgoing_transition[i.from()] = true;
       }
 
       unsigned int deadlock_state = 0;

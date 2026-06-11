@@ -83,7 +83,7 @@ public:
 
     void from_int_vector(int size, std::vector<int> data, int* dst)
     {
-      BOOST_CHECK(size==(int)data.size());
+      BOOST_CHECK(std::cmp_equal(size,data.size());
       auto it = data.begin();
       for(int i=0; i < size; i++, it++)
       {

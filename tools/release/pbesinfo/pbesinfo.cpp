@@ -94,9 +94,9 @@ class pbesinfo_tool: public pbes_input_tool<input_tool>
       if (opt_full)
       {
         std::cout << "Predicate variables:\n";
-        for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        for (const auto & i : p.equations())
         {
-          std::cout << core::pp(i->symbol()) << "." << pp(i->variable()) << std::endl;
+          std::cout << core::pp(i.symbol()) << "." << pp(i.variable()) << std::endl;
         }
       }
       return true;

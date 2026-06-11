@@ -35,7 +35,7 @@ bool Comp_BCVolume::operator()(const Cluster* c1,const Cluster* c2) const
 
 Cluster::Cluster(int r)
 {
-  ancestor = NULL;
+  ancestor = nullptr;
   position = 0.0f;
   baseRadius = 0.0f;
   topRadius = 0.0f;
@@ -123,7 +123,7 @@ Cluster* Cluster::getDescendant(int i) const
 {
   if (severedDescendants[i].size() > 0)
   {
-    return NULL;
+    return nullptr;
   }
   else
   {
@@ -230,9 +230,9 @@ void Cluster::computeSizeAndPositions_FSM()
 {
   // This process is described in Frank van Ham's Master's thesis, p. 24
   // Recurse into the tree (depth first)
-  for (unsigned int i = 0; i < descendants.size(); ++i)
+  for (auto & descendant : descendants)
   {
-    descendants[i]->computeSizeAndPositions_FSM();
+    descendant->computeSizeAndPositions_FSM();
   }
 
   /* Compute the cluster radius r such that all states fit nicely into the
@@ -330,11 +330,11 @@ void Cluster::computeSizeAndPositions_FSM()
     bc_radius = std::max(min_radius1 + bcr_rim,min_radius2);
     bc_radius = std::max(topRadius,bc_radius);
     bc_height = 0.0f;
-    for (unsigned int i = 0; i < descendants.size(); ++i)
+    for (auto & descendant : descendants)
     {
-      if (descendants[i]->getBCHeight() > bc_height)
+      if (descendant->getBCHeight() > bc_height)
       {
-        bc_height = descendants[i]->getBCHeight();
+        bc_height = descendant->getBCHeight();
       }
     }
     bc_height += 1.0f;
@@ -354,9 +354,9 @@ void Cluster::computeSizeAndPositions()
 {
   // This process is described in Frank van Ham's Master's thesis, p. 24
   // Recurse into the tree (depth first)
-  for (unsigned int i = 0; i < descendants.size(); ++i)
+  for (auto & descendant : descendants)
   {
-    descendants[i]->computeSizeAndPositions();
+    descendant->computeSizeAndPositions();
   }
 
   /* Compute the cluster radius r such that all states fit nicely into the
@@ -438,11 +438,11 @@ void Cluster::computeSizeAndPositions()
     bc_radius = std::max(bcr_center + bcr_rim + 0.01f,minRimRadius +bcr_rim);
     bc_radius = std::max(topRadius,bc_radius);
     bc_height = 0.0f;
-    for (unsigned int i = 0; i < descendants.size(); ++i)
+    for (auto & descendant : descendants)
     {
-      if (descendants[i]->getBCHeight() > bc_height)
+      if (descendant->getBCHeight() > bc_height)
       {
-        bc_height = descendants[i]->getBCHeight();
+        bc_height = descendant->getBCHeight();
       }
     }
     bc_height += 1.0f;

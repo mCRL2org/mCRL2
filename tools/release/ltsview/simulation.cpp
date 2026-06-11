@@ -14,9 +14,9 @@
 Simulation::Simulation(QObject *parent, LTS& lts):
   QObject(parent),
   m_ltsRef(lts),
-  m_initialState(0),
-  m_currentState(0),
-  m_currentTransition(0)
+  m_initialState(nullptr),
+  m_currentState(nullptr),
+  m_currentTransition(nullptr)
 {
 }
 
@@ -42,9 +42,9 @@ void Simulation::operator=(const Simulation &other)
   if (m_currentState)
   {
     m_currentState->increaseSimulation();
-    for (int i = 0; i < m_history.size(); i++)
+    for (auto & i : m_history)
     {
-      m_history[i]->getBeginState()->increaseSimulation();
+      i->getBeginState()->increaseSimulation();
     }
   }
 
@@ -76,7 +76,7 @@ void Simulation::start()
   {
     m_currentState = (m_initialState ? m_initialState : m_ltsRef.getInitialState());
     m_currentState->increaseSimulation();
-    m_currentTransition = 0;
+    m_currentTransition = nullptr;
     emit started();
     emit changed();
   }
@@ -87,9 +87,9 @@ void Simulation::stop()
   if (m_currentState)
   {
     m_history.clear();
-    m_currentTransition = 0;
+    m_currentTransition = nullptr;
     m_currentState->decreaseSimulation();
-    m_currentState = 0;
+    m_currentState = nullptr;
     emit stopped();
     emit changed();
   }
@@ -107,7 +107,7 @@ void Simulation::selectTransition(Transition *transition)
 void Simulation::followTransition(Transition *transition)
 {
   m_history += transition;
-  m_currentTransition = 0;
+  m_currentTransition = nullptr;
   m_currentState = transition->getEndState();
   m_currentState->increaseSimulation();
   emit changed();
@@ -182,7 +182,7 @@ bool Simulation::loadTrace(QString filename)
      return false;
   }
 
-  Simulation simulation(0, m_ltsRef);
+  Simulation simulation(nullptr, m_ltsRef);
   State* initialState = m_ltsRef.getInitialState();
   if (trace.current_state().size() != m_ltsRef.getNumParameters())
   {
@@ -203,14 +203,14 @@ bool Simulation::loadTrace(QString filename)
 
     QList<Transition *> transitions = simulation.availableTransitions();
     int possibilities = 0;
-    Transition *transition = 0;
+    Transition *transition = nullptr;
 
-    for (int i = 0; i < transitions.size(); i++)
+    for (auto & i : transitions)
     {
-      if (action == m_ltsRef.getActionLabel(transitions[i]->getLabel()))
+      if (action == m_ltsRef.getActionLabel(i->getLabel()))
       {
         possibilities++;
-        transition = transitions[i];
+        transition = i;
       }
     }
 
@@ -228,9 +228,9 @@ bool Simulation::loadTrace(QString filename)
       // which are undetectable).
       int maxmatch = -1;
 
-      for (int i = 0; i < transitions.size(); i++)
+      for (auto & i : transitions)
       {
-        State *state = transitions[i]->getEndState();
+        State *state = i->getEndState();
         int match = 0;
 
         for (std::size_t j = 0; j < current_state.size(); j++)
@@ -244,7 +244,7 @@ bool Simulation::loadTrace(QString filename)
         if (match > maxmatch)
         {
           maxmatch = match;
-          transition = transitions[i];
+          transition = i;
         }
       }
     }

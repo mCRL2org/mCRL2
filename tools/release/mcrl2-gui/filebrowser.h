@@ -30,7 +30,6 @@ class FileBrowser : public QTreeView
     Q_OBJECT
   public:
     explicit FileBrowser(QWidget *parent = 0);
-    ~FileBrowser();
     void setCatalog(ToolCatalog catalog);
     QMenu* menu() { return m_menu; }
     void save(QSettings& settings);

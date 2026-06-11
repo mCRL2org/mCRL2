@@ -292,9 +292,9 @@ template <Visualizer::Mode mode> void Diagram::draw(double pixelSize,
   drawBorderFlush<mode>();
   if constexpr (mode == Visualizer::Visualizing)
   {
-    for (int i = 0; i < m_shapes.size(); ++i)
+    for (auto & m_shape : m_shapes)
     {
-      m_shapes[i]->draw<mode>(pixelSize, attrs, attrValIdcs, opacity);
+      m_shape->draw<mode>(pixelSize, attrs, attrValIdcs, opacity);
     }
   }
 }

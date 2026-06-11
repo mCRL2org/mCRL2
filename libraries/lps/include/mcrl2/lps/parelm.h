@@ -113,9 +113,9 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "initial significant variables: ";
-      for (auto i = significant_variables.begin(); i != significant_variables.end(); ++i)
+      for (const auto& significant_variable: significant_variables)
       {
-        std::clog << *i << " ";
+        std::clog << significant_variable << " ";
       }
       std::clog << std::endl;
 #endif
@@ -139,9 +139,9 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
             todo.insert(new_variables.begin(), new_variables.end());
             significant_variables.insert(new_variables.begin(), new_variables.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
-            for (auto k = new_variables.begin(); k != new_variables.end(); ++k)
+            for (const auto& new_variable: new_variables)
             {
-              std::clog << "found dependency " << x << " -> " << *k << std::endl;
+              std::clog << "found dependency " << x << " -> " << new_variable << std::endl;
             }
 #endif
           }
@@ -207,9 +207,9 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "initial significant variables: ";
-      for (auto k = v.begin(); k != v.end(); ++k)
+      for (unsigned long& k: v)
       {
-        std::clog << *k << " ";
+        std::clog << k << " ";
       }
       std::clog << std::endl;
 #endif
@@ -218,9 +218,9 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       std::vector<std::size_t> r1 = mcrl2::utilities::reachable_nodes(G, v.begin(), v.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "reachable nodes: ";
-      for (auto k = r1.begin(); k != r1.end(); ++k)
+      for (unsigned long& k: r1)
       {
-        std::clog << *k << " ";
+        std::clog << k << " ";
       }
       std::clog << std::endl;
 #endif

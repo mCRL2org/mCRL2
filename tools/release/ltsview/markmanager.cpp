@@ -17,7 +17,7 @@
 MarkManager::MarkManager(QObject *parent, LtsManager *ltsManager):
   QObject(parent),
   m_ltsManager(ltsManager),
-  m_lts(0),
+  m_lts(nullptr),
   m_markStyle(NO_MARKS),
   m_clusterMatchStyle(MATCH_ANY),
   m_stateMatchStyle(MATCH_ANY),
@@ -117,9 +117,9 @@ bool MarkManager::isMarked(Transition *transition)
 QList<QColor> MarkManager::markColors(State *state)
 {
   QList<QColor> output;
-  for (std::set<MarkRuleIndex>::iterator i = state->getMatchedRules().begin(); i != state->getMatchedRules().end(); i++)
+  for (auto i : state->getMatchedRules())
   {
-    output += (*i)->color;
+    output += i->color;
   }
   return output;
 }
@@ -127,9 +127,9 @@ QList<QColor> MarkManager::markColors(State *state)
 QList<QColor> MarkManager::markColors(Cluster *cluster)
 {
   QList<QColor> output;
-  for (std::set<MarkRuleIndex>::iterator i = cluster->getMatchedRules().begin(); i != cluster->getMatchedRules().end(); i++)
+  for (auto i : cluster->getMatchedRules())
   {
-    output += (*i)->color;
+    output += i->color;
   }
   return output;
 }
@@ -320,9 +320,9 @@ void MarkManager::flushClusters()
       {
         allAdded++;
       }
-      for (std::set<MarkRuleIndex>::iterator k = state->getMatchedRules().begin(); k != state->getMatchedRules().end(); k++)
+      for (auto k : state->getMatchedRules())
       {
-        cluster->addMatchedRule(*k);
+        cluster->addMatchedRule(k);
       }
     }
     cluster->setNumMarkedStatesAny(anyAdded);

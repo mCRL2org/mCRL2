@@ -150,12 +150,11 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
             ParityGame::Player opponent = (ParityGame::Player)(prio%2);
             //std::set<verti> lost_attr;
             DenseSet<verti> lost_attr(0, V);
-            for ( std::vector<verti>::const_iterator it = unsolved.begin();
-                  it != unsolved.end(); ++it )
+            for (unsigned long it : unsolved)
             {
-                if (strat.winner(*it, game.player(*it)) == opponent)
+                if (strat.winner(it, game.player(it)) == opponent)
                 {
-                    lost_attr.insert(*it);
+                    lost_attr.insert(it);
                 }
             }
             mCRL2log(mcrl2::log::debug) << "|lost|=" << lost_attr.size() << std::endl;

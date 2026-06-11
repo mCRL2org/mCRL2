@@ -20,8 +20,7 @@ Transition::Transition(State* bs,State* es,int lbl)
 }
 
 Transition::~Transition()
-{
-}
+= default;
 
 State* Transition::getBeginState() const
 {

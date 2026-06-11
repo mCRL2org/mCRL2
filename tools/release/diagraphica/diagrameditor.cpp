@@ -39,7 +39,7 @@ DiagramEditor::DiagramEditor(
 
 Shape* DiagramEditor::selectedShape()
 {
-  if (m_diagram != 0)
+  if (m_diagram != nullptr)
   {
     // Find any selected shape
     for (int i = 0; i < m_diagram->shapeCount(); ++i)
@@ -50,13 +50,13 @@ Shape* DiagramEditor::selectedShape()
       }
     }
   }
-  return 0;
+  return nullptr;
 }
 
 QList<Shape*> DiagramEditor::selectedShapes()
 {
   QList<Shape*> result;
-  if (m_diagram != 0)
+  if (m_diagram != nullptr)
   {
     for (int i = 0; i < m_diagram->shapeCount(); ++i)
     {
@@ -76,7 +76,7 @@ QList<Shape*> DiagramEditor::selectedShapes()
 void DiagramEditor::deselectAll()
 {
   std::size_t sizeShapes = 0;
-  if (m_diagram != 0)
+  if (m_diagram != nullptr)
   {
     sizeShapes = m_diagram->shapeCount();
   }
@@ -226,7 +226,7 @@ void DiagramEditor::setSnapGrid(bool show)
 void DiagramEditor::setFillColor()
 {
   Shape* s = selectedShape();
-  if (s != 0)
+  if (s != nullptr)
   {
     QColor color = QColorDialog::getColor(s->fillColor(), this);
     if (color.isValid())
@@ -241,7 +241,7 @@ void DiagramEditor::setFillColor()
 void DiagramEditor::setLineColor()
 {
   Shape* s = selectedShape();
-  if (s != 0)
+  if (s != nullptr)
   {
     QColor color = QColorDialog::getColor(s->lineColor(), this);
     if (color.isValid())
@@ -258,20 +258,20 @@ void DiagramEditor::setLineColor()
 
 void DiagramEditor::editDof(Shape *shape)
 {
-  Shape* s = (shape != 0 ? shape : selectedShape());
-  if (s != 0)
+  Shape* s = (shape != nullptr ? shape : selectedShape());
+  if (s != nullptr)
   {
     if (s->drawMode() == Shape::MODE_NORMAL || s->drawMode() == Shape::MODE_EDIT)
     {
       s->setModeEditDOFXCtr();
     }
     QList<DofDialog*> openDialogs = findChildren<DofDialog*>();
-    for (int i = 0; i < openDialogs.size(); ++i)
+    for (auto & openDialog : openDialogs)
     {
-      if (openDialogs[i]->shape() == s)
+      if (openDialog->shape() == s)
       {
-        openDialogs[i]->show();
-        openDialogs[i]->setFocus();
+        openDialog->show();
+        openDialog->setFocus();
         return;
       }
     }
@@ -284,7 +284,7 @@ void DiagramEditor::editDof(Shape *shape)
 void DiagramEditor::editTextSize()
 {
   Shape* s = selectedShape();
-  if (s != 0)
+  if (s != nullptr)
   {
     bool ok;
     int size = QInputDialog::getInt(this, "Set Text Size", "Points:", s->textSize(), 6, 72, 1, &ok);
@@ -324,10 +324,10 @@ void DiagramEditor::cutShapes()
 
   if (!shapes.isEmpty()) {
     m_clipBoardList.clear();
-    for (int i = 0; i < shapes.size(); ++i)
+    for (auto & shape : shapes)
     {
-      m_clipBoardList.append(new Shape(*shapes[i]));
-      m_diagram->removeShape(shapes[i]->index());
+      m_clipBoardList.append(new Shape(*shape));
+      m_diagram->removeShape(shape->index());
     }
   }
   update();
@@ -341,9 +341,9 @@ void DiagramEditor::copyShapes()
 
   if (!shapes.isEmpty()) {
     m_clipBoardList.clear();
-    for (int i = 0; i < shapes.size(); ++i)
+    for (auto & shape : shapes)
     {
-      m_clipBoardList.append(new Shape(*shapes[i]));
+      m_clipBoardList.append(new Shape(*shape));
     }
   }
 }
@@ -648,9 +648,9 @@ void DiagramEditor::showContextMenu()
   }
 
   QList<QAction*> actions = m_popup.actions();
-  for (int i = 0; i < actions.size(); ++i)
+  for (auto & action : actions)
   {
-    actions[i]->setEnabled(enabledOptions.indexOf(actions[i]->text()) != -1);
+    action->setEnabled(enabledOptions.indexOf(action->text()) != -1);
   }
 
   m_popup.popup(mapToGlobal(m_lastMouseEvent->pos()));
@@ -723,7 +723,7 @@ void DiagramEditor::handleHits(const std::vector< int > &ids)
       // Select the shape if it was not selected
       {
         Shape* s = m_diagram->shape(ids[1]);
-        if (s != 0)
+        if (s != nullptr)
         {
           if (s->drawMode() != Shape::MODE_EDIT)
           {
@@ -753,7 +753,7 @@ void DiagramEditor::handleHits(const std::vector< int > &ids)
   if (ids.size() >= 2 && m_lastMouseEvent->type() == QEvent::MouseButtonRelease && m_lastMouseEvent->button() == Qt::LeftButton)
   {
     Shape* s = m_diagram->shape(ids[1]);
-    if (s != 0)
+    if (s != nullptr)
     {
       if (m_editMode == EDIT_MODE_DOF && ids.size() == 2)
       {
@@ -786,9 +786,8 @@ void DiagramEditor::handleHits(const std::vector< int > &ids)
           double dY = rectangle.height();
 
           QList<Shape*> shapes = selectedShapes();
-          for (int i = 0; i < shapes.size(); ++i)
+          for (auto s : shapes)
           {
-            Shape* s = shapes[i];
             s->setCenter(s->xCenter()+dX, s->yCenter()+dY);
           }
         }
@@ -796,7 +795,7 @@ void DiagramEditor::handleHits(const std::vector< int > &ids)
         // Drag a shape handle
         {
           Shape* s = m_diagram->shape(m_currentSelectedShapeId);
-          if (s != 0)
+          if (s != nullptr)
           {
             switch(m_currentSelectedHandleId)
             {
@@ -844,7 +843,7 @@ void DiagramEditor::handleHits(const std::vector< int > &ids)
       // Drag a DOF handle
       {
         Shape* s = m_diagram->shape(m_currentSelectedShapeId);
-        if (s != 0)
+        if (s != nullptr)
         {
           switch(m_currentSelectedHandleId)
           {

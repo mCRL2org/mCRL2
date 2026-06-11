@@ -9,6 +9,7 @@
 /// \file ./parser.cpp
 
 #include <QFileInfo>
+#include <utility>
 
 #include "parser.h"
 
@@ -69,12 +70,12 @@ void Parser::parseFile(QString filename, Graph* graph)
   }
 
   const std::vector<transition>& trans=l.get_transitions();
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const auto & tran : trans)
   {
     graph->addEdge(
-          pp(l.action_label(r->label())),
-          r->from(),
-          r->to());
+          pp(l.action_label(tran.label())),
+          tran.from(),
+          tran.to());
     emit progressed(++progress);
   }
 }
@@ -377,16 +378,16 @@ void Parser::writeDiagram(
 
     QDomElement colorDofElement = appendDOF(xml, shapeElement, "ColorDOF", shape->colorDOF());
     QList<double> colorYValues = shape->colorYValues();
-    for (int i = 0; i < colorYValues.size(); ++i)
+    for (double colorYValue : colorYValues)
     {
-      appendValue(xml, colorDofElement, "AuxilaryValue", QString::number(colorYValues[i]));
+      appendValue(xml, colorDofElement, "AuxilaryValue", QString::number(colorYValue));
     }
 
     QDomElement opacityDofElement = appendDOF(xml, shapeElement, "OpacityDOF", shape->opacityDOF());
     QList<double> opacityYValues = shape->colorYValues();
-    for (int i = 0; i < opacityYValues.size(); ++i)
+    for (double opacityYValue : opacityYValues)
     {
-      appendValue(xml, opacityDofElement, "AuxilaryValue", QString::number(opacityYValues[i]));
+      appendValue(xml, opacityDofElement, "AuxilaryValue", QString::number(opacityYValue));
     }
 
     root.appendChild(shapeElement);
@@ -407,14 +408,14 @@ void Parser::writeDiagram(
 QMap<QString, QDomElement> Parser::findElements(QDomElement root, QStringList tagNames)
 {
   QMap<QString, QDomElement> result;
-  for (int i = 0; i < tagNames.size(); ++i)
+  for (const auto & tagName : tagNames)
   {
-    QDomElement tagElement = root.firstChildElement(tagNames[i]);
+    QDomElement tagElement = root.firstChildElement(tagName);
     if (tagElement.isNull())
     {
-      throw mcrl2::runtime_error(QString("%1 value not found.").arg(tagNames[i]).toStdString());
+      throw mcrl2::runtime_error(QString("%1 value not found.").arg(tagName).toStdString());
     }
-    result.insert(tagNames[i], tagElement);
+    result.insert(tagName, tagElement);
   }
   return result;
 }
@@ -423,14 +424,14 @@ QMap<QString, QString> Parser::findStringValues(QDomElement root, QStringList ta
 {
   QMap<QString, QDomElement> elements = findElements(root, tagNames);
   QMap<QString, QString> result;
-  for (int i = 0; i < tagNames.size(); ++i)
+  for (const auto & tagName : tagNames)
   {
-    QDomElement tagElement = elements[tagNames[i]];
+    QDomElement tagElement = elements[tagName];
     if (tagElement.text().isEmpty())
     {
-      throw mcrl2::runtime_error(QString("%1 value is empty.").arg(tagNames[i]).toStdString());
+      throw mcrl2::runtime_error(QString("%1 value is empty.").arg(tagName).toStdString());
     }
-    result.insert(tagNames[i], tagElement.text());
+    result.insert(tagName, tagElement.text());
   }
   return result;
 }
@@ -440,15 +441,15 @@ QMap<QString, double> Parser::findDoubleValues(QDomElement root, QStringList tag
   QMap<QString, QString> values = findStringValues(root, tagNames);
   QMap<QString, double> result;
 
-  for (int i = 0; i < tagNames.size(); ++i)
+  for (auto & tagName : tagNames)
   {
     bool ok;
-    double value = values[tagNames[i]].toDouble(&ok);
+    double value = values[tagName].toDouble(&ok);
     if (!ok)
     {
-      throw mcrl2::runtime_error(QString("%1 contains no valid double (%2).").arg(tagNames[i], values[tagNames[i]]).toStdString());
+      throw mcrl2::runtime_error(QString("%1 contains no valid double (%2).").arg(tagName, values[tagName]).toStdString());
     }
-    result.insert(tagNames[i], value);
+    result.insert(tagName, value);
   }
   return result;
 }
@@ -458,15 +459,15 @@ QMap<QString, float> Parser::findFloatValues(QDomElement root, QStringList tagNa
   QMap<QString, QString> values = findStringValues(root, tagNames);
   QMap<QString, float> result;
 
-  for (int i = 0; i < tagNames.size(); ++i)
+  for (auto & tagName : tagNames)
   {
     bool ok;
-    float value = values[tagNames[i]].toFloat(&ok);
+    float value = values[tagName].toFloat(&ok);
     if (!ok)
     {
-      throw mcrl2::runtime_error(QString("%1 contains no valid float (%2).").arg(tagNames[i], values[tagNames[i]]).toStdString());
+      throw mcrl2::runtime_error(QString("%1 contains no valid float (%2).").arg(tagName, values[tagName]).toStdString());
     }
-    result.insert(tagNames[i], value);
+    result.insert(tagName, value);
   }
   return result;
 }
@@ -476,15 +477,15 @@ QMap<QString, int> Parser::findIntValues(QDomElement root, QStringList tagNames)
   QMap<QString, QString> values = findStringValues(root, tagNames);
   QMap<QString, int> result;
 
-  for (int i = 0; i < tagNames.size(); ++i)
+  for (auto & tagName : tagNames)
   {
     bool ok;
-    int value = values[tagNames[i]].toInt(&ok);
+    int value = values[tagName].toInt(&ok);
     if (!ok)
     {
-      throw mcrl2::runtime_error(QString("%1 contains no valid integer (%2).").arg(tagNames[i], values[tagNames[i]]).toStdString());
+      throw mcrl2::runtime_error(QString("%1 contains no valid integer (%2).").arg(tagName, values[tagName]).toStdString());
     }
-    result.insert(tagNames[i], value);
+    result.insert(tagName, value);
   }
   return result;
 }
@@ -502,7 +503,7 @@ QDomElement Parser::appendDOF(QDomDocument document, QDomElement root, QString n
 {
   QDomElement element = document.createElement(name);
   Attribute* attribute = dof->attribute();
-  appendValue(document, element, "Attribute", (attribute == 0 ? QString("") : attribute->name()));
+  appendValue(document, element, "Attribute", (attribute == nullptr ? QString("") : attribute->name()));
 
   for (int i = 0; i < dof->valueCount(); ++i)
   {
@@ -535,7 +536,7 @@ void Parser::parseAttribute(
     QMap<QString, QDomElement> listPropertyElements = findElements(AttributeNode.toElement(), listProperties);
 
     Attribute* attribute = graph->getAttribute(stringPropertyValues["Name"]);
-    if (attribute == 0)
+    if (attribute == nullptr)
     {
       throw mcrl2::runtime_error(QString("Invalid attribute name (%1).").arg(stringPropertyValues["Name"]).toStdString());
     }
@@ -545,7 +546,7 @@ void Parser::parseAttribute(
       throw mcrl2::runtime_error(QString("Types do not match (%1 vs %2).").arg(attribute->type(), stringPropertyValues["Type"]).toStdString());
     }
 
-    if (int(attribute->getSizeOrigValues()) != originalCardinality)
+    if (std::cmp_not_equal(attribute->getSizeOrigValues(), originalCardinality))
     {
       throw mcrl2::runtime_error(QString("Cardinalities do not match (%1 vs %2).").arg(attribute->getSizeOrigValues()).arg(originalCardinality).toStdString());
     }
@@ -580,7 +581,7 @@ void Parser::parseAttribute(
       {
         throw mcrl2::runtime_error(QString("Current Position contains no valid integer (%1).").arg(positionElement.text()).toStdString());
       }
-      if (value >= int(domain.size()))
+      if (std::cmp_greater_equal(value ,domain.size())))
       {
         throw mcrl2::runtime_error(QString("Current Position is larger than current domain (%1).").arg(positionElement.text()).toStdString());
       }
@@ -635,19 +636,19 @@ void Parser::parseShape(
                                               "Alpha";
 
     // Construct QColor objects for each Color property
-    for (int i = 0; i < colorProperties.size(); ++i)
+    for (auto & colorPropertie : colorProperties)
     {
       try
       {
-        QMap<QString, float> colorPartValues = findFloatValues(colorPropertyElements[colorProperties[i]], colorParts);
-        colorPropertyValues.insert(colorProperties[i], QColor::fromRgbF(colorPartValues["Red"],
+        QMap<QString, float> colorPartValues = findFloatValues(colorPropertyElements[colorPropertie], colorParts);
+        colorPropertyValues.insert(colorPropertie, QColor::fromRgbF(colorPartValues["Red"],
                                                                         colorPartValues["Green"],
                                                                         colorPartValues["Blue"],
                                                                         colorPartValues["Alpha"]));
       }
       catch (const mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(QString("Invalid %1 value.\n%2").arg(colorProperties[i], e.what()).toStdString());
+        throw mcrl2::runtime_error(QString("Invalid %1 value.\n%2").arg(colorPropertie, e.what()).toStdString());
       }
     }
 
@@ -690,18 +691,18 @@ void Parser::parseShape(
     QStringList dofTags = dofs.keys();
     QMap<QString, QDomElement> dofElements = findElements(shapeNode.toElement(), dofTags);
 
-    for (int i = 0; i < dofTags.size(); ++i)
+    for (auto & dofTag : dofTags)
     {
       try
       {
-        QDomElement dofElement = dofElements[dofTags[i]];
-        DOF* dof = dofs[dofTags[i]];
+        QDomElement dofElement = dofElements[dofTag];
+        DOF* dof = dofs[dofTag];
         QMap<QString, QDomElement> attributeElements = findElements(dofElement, QStringList("Attribute"));
         QDomElement attributeElement = attributeElements["Attribute"];
         if (!attributeElement.text().isEmpty())
         {
           Attribute* attribute = graph->getAttribute(attributeElement.text());
-          if (attribute != 0)
+          if (attribute != nullptr)
           {
             dof->setAttribute(attribute);
           }
@@ -728,7 +729,7 @@ void Parser::parseShape(
               break;
           }
         }
-        if (dofTags[i] == "ColorDOF")
+        if (dofTag == "ColorDOF")
         {
           QDomElement valueElement = dofElement.firstChildElement("AuxilaryValue");
           for (int j = 0; !valueElement.isNull(); ++j, valueElement = valueElement.nextSiblingElement("AuxilaryValue"))
@@ -751,7 +752,7 @@ void Parser::parseShape(
             }
           }
         }
-        if (dofTags[i] == "OpacityDOF")
+        if (dofTag == "OpacityDOF")
         {
           QDomElement valueElement = dofElement.firstChildElement("AuxilaryValue");
           for (int j = 0; !valueElement.isNull(); ++j, valueElement = valueElement.nextSiblingElement("AuxilaryValue"))
@@ -777,7 +778,7 @@ void Parser::parseShape(
       }
       catch (const mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(QString("Invalid %1 value.\n%2").arg(dofTags[i], e.what()).toStdString());
+        throw mcrl2::runtime_error(QString("Invalid %1 value.\n%2").arg(dofTag, e.what()).toStdString());
       }
     }
 

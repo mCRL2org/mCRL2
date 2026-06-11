@@ -94,9 +94,9 @@ class presinfo_tool: public pres_input_tool<input_tool>
       if (opt_full)
       {
         std::cout << "Predicate variables:\n";
-        for (std::vector<pres_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        for (const auto & i : p.equations())
         {
-          std::cout << core::pp(i->symbol()) << "." << pres_system::pp(i->variable()) << std::endl;
+          std::cout << core::pp(i.symbol()) << "." << pres_system::pp(i.variable()) << std::endl;
         }
       }
       return true;
