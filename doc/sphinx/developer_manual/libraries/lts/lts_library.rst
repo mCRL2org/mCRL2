@@ -2,6 +2,7 @@
    :maxdepth: 1
 
    bisimulation_partitioner
+   ltsgraph3d
 
 
 Introduction
