@@ -7,9 +7,17 @@ Data specifications
 
 This page describes all built-in data types with their associated functions and
 operators, and describes how custom data types can be defined.
+The syntax is intended to be a practical mix between standard mathematical notation and the syntax of specification languages and programming languages in general.
 
-A data specification consists of a number of *sorts*, a number of *constructors*
-for each sort, a number of *mappings*, and a set of *equations*. A data
+The underlying theory of the mCRL2 data types is abstract data types.
+Abstract data types consist of:
+- sorts and operations on these sorts;
+- equations on terms made up from operations and variables, where the terms are of the same sort.
+
+In mCRL2, the data types are specified using a data specification.
+
+A data specification consists of a number of *sorts*, declared using keyword ``sort``, a number of *constructors*
+for each sort, using the keyword ``cons``, a number of *mappings*, using keyword ``map``, and a set of *equations* using keyword ``eqn``. A data
 specification is an equational specification, in which sorts denote data types.
 The semantics of a sort is a non-empty set. The elements of the semantics of a
 sort are described by its constructors, whereas the mappings are functions
@@ -130,6 +138,14 @@ also have defined the following::
 
   var x, y: Int;
   eqn square_sum(x, y) = (lambda z: Int . z * z)(x + y);
+
+Two important constraints apply to where clauses:
+
+- The identifier ``a_i`` bound in a definition ``a_i = e_i`` may not occur in
+  any of the other right-hand-side expressions ``e_j`` (``j ≠ i``). The
+  definitions are therefore not mutually recursive.
+- The order in which the definitions appear is irrelevant; each ``a_i`` is
+  simply an abbreviation for ``e_i`` in the body ``e``.
 
 .. index:: map, var, eqn
 
@@ -1017,6 +1033,61 @@ This defines a structured sort which has ``S`` as an alias.
 
    For a pair ``p`` the expression ``fst(p)`` gives its first element and
    ``snd(p)`` the second element.
+
+.. example::
+   :class: example collapse
+
+   Binary trees whose leaves and internal nodes are labelled with elements of
+   some sort ``A`` can be declared as follows::
+
+     sort BATree = struct leaf(A) | node(BATree, A, BATree);
+
+   The same sort with optional projection and recogniser functions::
+
+     sort BATree = struct leaf(lval: A) ? is_leaf
+                      | node(left: BATree, nval: A, right: BATree) ? is_node;
+
+   Given an associative binary operation ``f: A # A -> A``, the fold of ``f``
+   over all labels in a tree can be defined by pattern matching in data
+   equations::
+
+     map qf: BATree -> A;
+     var t, u: BATree;
+         a: A;
+     eqn qf(leaf(a))         = a;
+         qf(node(t, a, u))   = f(qf(t), f(a, qf(u)));
+
+   When projections and recognisers are available, the same operation can
+   alternatively be defined without pattern matching::
+
+     var t: BATree;
+     eqn qf(t) = if(is_leaf(t),
+                    lval(t),
+                    f(qf(left(t)), f(nval(t), qf(right(t)))));
+
+.. rubric:: Pattern matching versus projections and recognisers
+
+When defining *data equations*, pattern matching on constructors is usually the
+most concise and readable option (as in the ``qf`` example above).
+
+When defining *process equations*, pattern matching cannot appear directly on
+the left-hand side. It can be applied indirectly via the summation and
+conditional operators. As an illustration, consider the following process that
+reads the label of a tree node by using projections and recognisers::
+
+  act get: A;
+  proc P(t: BATree) =
+      is_leaf(t) -> get(lval(t)) . delta
+    + is_node(t) -> get(nval(t)) . (P(left(t)) + P(right(t)));
+
+The equivalent formulation using pattern matching reads::
+
+  proc P(t: BATree) =
+      (sum a: A .     (t == leaf(a))         -> get(a) . delta)
+    + (sum a: A, u, v: BATree .
+          (t == node(u, a, v)) -> get(a) . (P(u) + P(v)));
+
+Both are equivalent; which style is preferable is a matter of taste.
 
 .. index:: glob
 
