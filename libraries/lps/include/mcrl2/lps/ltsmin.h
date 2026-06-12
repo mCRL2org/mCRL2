@@ -856,7 +856,6 @@ class pins
       {
         state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
-      // data::data_expression_vector source = state_arguments;
       state source(state_arguments.begin(),nparams);
 
       std::list<generator_type::transition> transitions = m_generator.out_edges(source);

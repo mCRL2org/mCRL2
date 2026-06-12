@@ -118,17 +118,6 @@ GamePartition::GamePartition( const GamePartition &part,
     }
 
     // DEBUG: check consistency of vertex index mapping
-    /*
-    for (verti i = 0; i < (verti)global_.size(); ++i)
-    {
-        assert(local_[global_[i]] == i);
-    }
-    for (std::unordered_map<verti, verti>::const_iterator it = local_.begin();
-            it != local_.end(); ++it)
-    {
-        assert(global_[it->second] == it->first);
-    }
-    */
 }
 
 void GamePartition::swap(GamePartition &gp)

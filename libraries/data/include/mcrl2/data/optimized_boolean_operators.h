@@ -86,40 +86,6 @@ void optimized_and(typename TermTraits::term_type& result,
   }
 }
 
-/* template <typename TermTraits>
-inline
-typename TermTraits::term_type optimized_and(const typename TermTraits::term_type& left, const typename TermTraits::term_type& right, TermTraits)
-{
-  typedef TermTraits tr;
-
-  if (tr::is_true(left))
-  {
-    return right;
-  }
-  else if (tr::is_false(left))
-  {
-    return tr::false_();
-  }
-  else if (tr::is_true(right))
-  {
-    return left;
-  }
-  else if (tr::is_false(right))
-  {
-    return tr::false_();
-  }
-  else if (left == right)
-  {
-    return left;
-  }
-  else
-  {
-    return tr::and_(left, right);
-  }
-} */
-
-
-
 /// \brief Make a disjunction
 /// \param left A term
 /// \param right A term
@@ -321,23 +287,6 @@ void optimized_exists(typename TermTraits::term_type& result,
 /// \param false_ The value false
 /// \param is_false Function that tests for the value false
 /// \return The value <tt>!arg</tt>
-/* template <typename T1, typename T2, typename UnaryFunction, typename UnaryPredicate>
-inline
-T1 optimized_not(T1 arg, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
-{
-  if (is_true(arg))
-  {
-    return false_;
-  }
-  else if (is_false(arg))
-  {
-    return true_;
-  }
-  else
-  {
-    return not_(arg);
-  }
-} */
 
 /// \brief Make a conjunction
 /// \param left A term
@@ -348,36 +297,6 @@ T1 optimized_not(T1 arg, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T
 /// \param false_ The value false
 /// \param is_false Function that tests for the value false
 /// \return The value <tt>left && right</tt>
-/* template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
-inline
-T1 optimized_and(T1 left, T1 right, BinaryFunction and_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
-{
-  (void) true_; // Suppress a non used warning.
-  if (is_true(left))
-  {
-    return right;
-  }
-  else if (is_false(left))
-  {
-    return false_;
-  }
-  else if (is_true(right))
-  {
-    return left;
-  }
-  else if (is_false(right))
-  {
-    return false_;
-  }
-  else if (left == right)
-  {
-    return left;
-  }
-  else
-  {
-    return and_(left, right);
-  }
-} */
 
 /// \brief Make a disjunction
 /// \param left A term
@@ -388,36 +307,6 @@ T1 optimized_and(T1 left, T1 right, BinaryFunction and_, T2 true_, UnaryPredicat
 /// \param false_ The value false
 /// \param is_false Function that tests for the value false
 /// \return The value <tt>left || right</tt>
-/* template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
-inline
-T1 optimized_or(T1 left, T1 right, BinaryFunction or_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
-{
-  (void) false_; // Suppress a non used variable warning. 
-  if (is_true(left))
-  {
-    return true_;
-  }
-  else if (is_false(left))
-  {
-    return right;
-  }
-  else if (is_true(right))
-  {
-    return true_;
-  }
-  else if (is_false(right))
-  {
-    return left;
-  }
-  else if (left == right)
-  {
-    return left;
-  }
-  else
-  {
-    return or_(left, right);
-  }
-} */
 
 /// \brief Make an implication
 /// \param left A term
@@ -429,36 +318,6 @@ T1 optimized_or(T1 left, T1 right, BinaryFunction or_, T2 true_, UnaryPredicate 
 /// \param false_ The value false
 /// \param is_false Function that tests for the value false
 /// \return The value <tt>left => right</tt>
-/* template <typename T1, typename T2, typename UnaryPredicate, typename UnaryFunction, typename BinaryFunction>
-inline
-T1 optimized_imp(T1 left, T1 right, BinaryFunction imp, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
-{
-  (void)false_; // Suppress a non used variable warning.
-  if (is_true(left))
-  {
-    return right;
-  }
-  else if (is_false(left))
-  {
-    return true_;
-  }
-  else if (is_true(right))
-  {
-    return true_;
-  }
-  else if (is_false(right))
-  {
-    return not_(left);
-  }
-  else if (left == right)
-  {
-    return true_;
-  }
-  else
-  {
-    return imp(left, right);
-  }
-} */
 
 /// \brief Make a universal quantification
 /// \param v A sequence of variables
@@ -469,23 +328,6 @@ T1 optimized_imp(T1 left, T1 right, BinaryFunction imp, UnaryFunction not_, T2 t
 /// \param false_ The value false
 /// \param is_false Function that tests for the value false
 /// \return The universal quantification <tt>forall v.arg</tt>
-/* template <typename T1, typename T2, typename VariableSequence, typename UnaryPredicate, typename Forall>
-inline
-void optimized_forall(T1& result, VariableSequence v, T1 arg, Forall forall, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
-{
-  if (is_true(arg))
-  {
-    result = true_;
-  }
-  else if (is_false(arg))
-  {
-    result = false_;
-  }
-  else
-  {
-    make_forall(result, v, arg);
-  }
-} */
 
 /// \brief Make an existential quantification
 /// \param v A sequence of variables
@@ -496,23 +338,6 @@ void optimized_forall(T1& result, VariableSequence v, T1 arg, Forall forall, T2 
 /// \param false_ The value false
 /// \param is_false Function that tests for the value false
 /// \return The existential quantification <tt>exists v.arg</tt>
-/* template <typename T1, typename T2, typename VariableSequence, typename UnaryPredicate, typename Exists>
-inline
-void optimized_exists(T1& result, VariableSequence v, T1 arg, Exists exists, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
-{
-  if (is_true(arg))
-  {
-    result = true_;
-  }
-  else if (is_false(arg))
-  {
-    result = false_;
-  }
-  else
-  {
-    make_exists(result, v, arg);
-  }
-} */
 
 } // namespace detail
 

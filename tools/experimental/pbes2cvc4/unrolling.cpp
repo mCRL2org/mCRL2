@@ -216,35 +216,6 @@ bool parse_pbes(const pbes &pbes, bool disjunctive, parsed_pbes &output)
 	output.disjunctive = disjunctive;
 	output.global_variables = pbes.global_variables();
 	
-/*	
-	std::cerr << "Parsed form:\n====================\n";
-	for (std::vector<equation>::iterator i = output.equations.begin(); i != output.equations.end(); ++i) {
-		std::cerr << pbes_system::pp(i->symbol) << " " << pbes_system::pp(i->variable) << " = \n";
-		for (std::vector<clause>::iterator j = i->clauses.begin(); j != i->clauses.end(); ++j) {
-			std::cerr << "    (";
-			if (!j->quantification_domain.empty()) {
-				std::cerr << "exists ";
-				for (variable_vector::iterator k = j->quantification_domain.begin(); k != j->quantification_domain.end(); ++k) {
-					std::cerr << data::pp(*k);
-					if (k != j->quantification_domain.end() - 1) {
-						std::cerr << ", ";
-					}
-				}
-				std::cerr << " . ";
-			}
-			std::cerr << data::pp(j->predicate);
-			std::cerr << (output.disjunctive ? " && " : " || ");
-			std::cerr << pbes_system::pp(j->instantiation);
-			std::cerr << ")";
-			if (j == i->clauses.end() - 1) {
-				std::cerr << ";";
-			} else {
-				std::cerr << (output.disjunctive ? " ||" : " &&");
-			}
-			std::cerr << "\n\n";
-		}
-	}
-*/	
 	return true;
 }
 

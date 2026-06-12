@@ -140,53 +140,6 @@ class convertor
 
 // ====================== convert_core_lts =============================
 
-/* template <class CONVERTOR, class LTS_IN_TYPE, class LTS_OUT_TYPE>
-inline void convert_core_lts(CONVERTOR& c,
-                             const LTS_IN_TYPE& lts_in,
-                             LTS_OUT_TYPE& lts_out)
-{
-  if (lts_in.has_state_info())
-  {
-    for (std::size_t i=0; i<lts_in.num_states(); ++i)
-    {
-      lts_out.add_state(c.translate_state(lts_in.state_label(i)));
-    }
-  }
-  else
-  {
-    lts_out.set_num_states(lts_in.num_states(),false);
-  }
-
-  for (std::size_t i=0; i<lts_in.num_action_labels(); ++i)
-  {
-    lts_out.add_action(c.translate_label(lts_in.action_label(i)));
-    if (lts_in.is_tau(i))
-    {
-      lts_out.set_tau(i);
-    }
-  }
-
-  / * for (std::size_t i=0; i<lts_in.num_probabilistic_labels(); ++i)
-  {
-    lts_out.add_probabilistic_label(c.translate_probability_label(lts_in.probabilistic_label(i)));
-  }
- 
-  for (std::size_t i=0; i<lts_in.num_states(); ++i)
-  {
-    if (lts_in.is_probabilistic(i))
-    {
-      lts_out.set_is_probabilistic(i,true); 
-    }
-  } * /
-
-  const std::vector<transition>& trans=lts_in.get_transitions();
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
-  {
-    lts_out.add_transition(*r);
-  }
-  lts_out.set_initial_state(lts_in.initial_state());
-} */
-
 // =========================================================================   REWRITTEN CODE ==============
 
 inline action_label_lts translate_label_aux(const action_label_string& l1,

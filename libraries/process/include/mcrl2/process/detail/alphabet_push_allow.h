@@ -184,24 +184,6 @@ struct push_allow_cache
     unfinished.insert(unfinished_value(A, x));
   }
 
-/*
-  // For each entry (A, P) -> (alpha, finished, P1) it is checked if
-  // intersection(alphabet(P), A) == alpha.
-  void check_equations(const std::vector<process_equation>& equations) const
-  {
-    for (auto i = alphabet_map.begin(); i != alphabet_map.end(); ++i)
-    {
-      multi_action_name_set alphabet_P = process::alphabet(i->first.P, equations);
-      multi_action_name_set a = i->first.A.intersect(alphabet_P);
-      std::cout << "check (" << i->first.A << ", " << i->first.P << ")";
-      if (a != i->second.alphabet)
-      {
-        std::cout << "Error: left = " << process::pp(a) << " right = " << process::pp(i->second.alphabet);
-      }
-      std::cout << std::endl;
-    }
-  }
-*/
 };
 
 inline

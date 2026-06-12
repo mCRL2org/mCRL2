@@ -61,12 +61,6 @@ bool detailed_compare_for_equality(data_specification const& left, data_specific
     std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
                   << "Specification detailed comparison:" << std::endl;
 
-  /*
-    if (left_aliases != right_aliases)
-    {
-      std::clog << "Aliases (left)  " << data::pp(left.aliases()) << std::endl;
-      std::clog << "Aliases (right)  " << data::pp(right.aliases()) << std::endl;
-    }*/
     if (left_sorts != right_sorts)
     {
       std::clog << "Sorts (left)  " << data::pp(left.sorts()) << std::endl;
@@ -148,14 +142,6 @@ void test_aliases()
   std::set<basic_sort> sorts = { s, t };
   std::for_each(sorts.begin(), sorts.end(), [&spec](const basic_sort& s){ spec.add_sort(s); });
 
-  /* std::set< sort_expression > aliases;
-  aliases.insert(s1);
-  aliases.insert(s2);
-  spec.add_aliases(aliases);
-
-  BOOST_CHECK(spec.aliases(s).size()) == 2);
-  BOOST_CHECK(spec.aliases(t).size()) == 0);
-  BOOST_CHECK(spec.aliases(s) == aliases); */
 }
 
 void test_constructors()
@@ -485,11 +471,6 @@ BOOST_AUTO_TEST_CASE(test_system_defined)
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
   BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(basic_sort("E")));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
-
-  /* copy = specification;
-  specification1=data_specification(data::detail::data_specification_to_aterm(copy));
-  specification1.declare_data_specification_to_be_type_checked();
-  BOOST_CHECK(compare_for_equality(specification1, specification)); */
 
   // Check for the non presence of function sort
   BOOST_CHECK(specification.mappings(make_function_sort_(basic_sort("D"), sort_bool::bool_())).empty());

@@ -2610,12 +2610,6 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
 
   for (std::size_t i = 0; i < attrs.size(); ++i)
   {
-    /*
-    if ( attrs[i]->getSizeCurValues() == 1 )
-        alpha = 0.0;
-    else
-        alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
-    */
     if (attrs[i]->getSizeCurValues() == 1)
     {
       alpha = 0.0;

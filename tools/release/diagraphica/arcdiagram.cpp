@@ -498,13 +498,6 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
         glScalef(0.2f, 0.2f, 0.2f);
 
         std::vector< double > vals;
-        /*
-        for ( int j = 0; j < attrsDgrm[i].size(); ++j )
-            vals.push_back(
-                attrsDgrm[i][j]->mapToValue(
-                    framesDgrm[i][frameIdxDgrm[i]]->getNode(0)->getTupleVal(
-                        attrsDgrm[i][j]->getIndex() ) )->getIndex() );
-        */
         Attribute* attr;
         Node* node;
         for (std::size_t j = 0; j < attrsDgrm[i].size(); ++j)
@@ -1178,15 +1171,6 @@ void ArcDiagram::calcSettingsTree()
 
     // calc max depth of clustering tree
     std::size_t maxLvl = 0;
-    /*
-    {
-    for ( int i = 0; i < graph->getSizeLeaves(); ++i )
-    {
-        if ( graph->getLeaf(i)->getSizeCoord() > maxLvl )
-            maxLvl = graph->getLeaf(i)->getSizeCoord();
-    }
-    }
-    */
     maxLvl = attrsTree.size() + 1;
 
     // init positions
@@ -1658,15 +1642,6 @@ void ArcDiagram::handleHoverCluster(
         msg = value->getValue();
       }
 
-      /* -*-
-      Value* val;
-      val = clust->getAttribute()->mapToValue( clust->getAttrValIdx() );
-      if ( val != 0 )
-          msg = val->getValue();
-      else
-          msg = "";
-      val = 0;
-      */
     }
     QToolTip::showText(QCursor::pos(),QString::fromStdString(msg));
   }

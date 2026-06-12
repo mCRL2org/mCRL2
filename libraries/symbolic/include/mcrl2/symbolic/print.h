@@ -126,26 +126,6 @@ std::string print_states(const std::vector<data_expression_index>& data_index, c
   return out.str();
 }
 
-namespace 
-{
-
-/// \brief Print a transition vector as 'x -> y' where x is the from vector and y the to vector.
-/* This funcion is not used. 
-std::string print_transition(const std::vector<data_expression_index>& data_index, const std::vector<std::uint32_t>& xy)
-{
-  std::size_t n = xy.size() / 2;
-  std::vector<std::uint32_t> x(n);
-  std::vector<std::uint32_t> y(n);
-  for (std::size_t i = 0; i < n; i++)
-  {
-    x[i] = xy[2*i];
-    y[i] = xy[2*i+1];
-  }
-  return print_state(data_index, x) + " -> " + print_state(data_index, y);
-}
-*/
-
-} // internal
 
 /// \brief Print a transition vector as 'x -> y' where x is the from vector and y the to vector based on the read and write indices.
 inline std::string print_transition(const std::vector<data_expression_index>& data_index,

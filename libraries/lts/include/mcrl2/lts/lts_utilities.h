@@ -228,99 +228,7 @@ inline void group_transitions_on_label(std::vector<transition>& transitions,
   group_transitions_on_label<true>(transitions.begin(), transitions.end(), get_label, 
                                    count_sum_transitions_per_action, tau_label_index, todo_stack);
 }
-
-
-// Group the elements from begin up to end, using a range from [0,domain_size> where
-// each element pinpointed by the iterator has a value indicated by get_value.
-// first_element is the first element in the grouping, unless first_element is undefined, i.e. -1. 
       
-/* template <class ITERATOR>
-void group_in_situ(const ITERATOR& begin, 
-                   const ITERATOR& end,
-                   std::function<std::size_t(const typename ITERATOR::value_type&)> get_value,
-                   std::vector<std::size_t>& todo_stack,
-                   std::vector<std::pair<std::size_t, std::size_t> >& value_sum_counter)
-{                   
-  // Initialise the action counter.
-  todo_stack.clear();
-
-  for(ITERATOR i=begin; i!=end; ++i)
-  {     
-    std::size_t n=get_value(*i);
-    if (value_sum_counter[n].first==0)
-    {           
-      todo_stack.push_back(n);
-    }   
-    value_sum_counter[n].first++;
-  }       
-              
-  // Accumulate the entries in value_counter in sum_counter;
-  std::size_t sum=0;
-  for(std::size_t n: todo_stack)
-  {
-    sum=sum+value_sum_counter[n].first;
-    value_sum_counter[n].second=sum;
-  }
-                                        
-  // Move from left to right through the transitions and move them to the required place. 
-  std::vector<transition>::iterator current_leftmost_position=begin;
-  std::vector<std::size_t>::iterator current_leftmost_value=todo_stack.begin();
-  while (current_leftmost_position!=end)
-  {
-    while (current_leftmost_value!=todo_stack.end() && value_sum_counter[*current_leftmost_value].first==0)
-    {
-      current_leftmost_value++;
-    }
-    // Move to the first position with the current label that is potentially not correct.
-// std::cerr << "Current leftmost label " << *current_leftmost_value << "   " << value_counter[*current_leftmost_value] << "    " << sum_counter[*current_leftmost_value] << "\n";
-    if (current_leftmost_value==todo_stack.end())
-    {
-      break;
-    }
-    current_leftmost_position=begin+value_sum_counter[*current_leftmost_value].second-value_sum_counter[*current_leftmost_value].first;
-
-    // Shift the current leftmost position until a transition is found that must be moved.
-    // while (current_leftmost_position!=end && get_value(*current_leftmost_position)==*current_leftmost_value)
-    while (current_leftmost_position!=end && current_leftmost_position->to()==*current_leftmost_value)
-    {
-      current_leftmost_position++;
-      value_sum_counter[*current_leftmost_value].first--;
-    }
-
-    // Check whether a transition with the current valuel is expected at the current_leftmost_position.
-    if (value_sum_counter[*current_leftmost_value].first>0)
-    {
-      // At the current position there is a transition that needs to be moved. Move transitions out of the way, until
-      // the transitions that belongs here is found and is moved in place. 
-      transition transition_on_the_move= *current_leftmost_position;
-      do
-      {
-        std::size_t value=transition_on_the_move.to();
-        assert(value<value_sum_counter.size());
-        std::size_t new_position=value_sum_counter[value].second-value_sum_counter[value].first;
-        assert(std::distance(begin,end)-new_position>0);
-        value_sum_counter[value].first--;
-        // Search for a target position with a non-matching label. 
-        // while (get_value(*(begin+new_position))==value)
-        while ((begin+new_position)->to()==value)
-        {
-          new_position++;
-          value_sum_counter[value].first--;
-        }
-        assert(get_value(transition_on_the_move)!=get_value(*(begin+new_position)));
-        std::swap(transition_on_the_move,*(begin+new_position));
-      }
-      while (transition_on_the_move.to()!=*current_leftmost_value);
-      // We found the transition that we must put at the current place. 
-      *current_leftmost_position=transition_on_the_move;
-      current_leftmost_position++;
-      value_sum_counter[*current_leftmost_value].first--;
-    }
-  }
-
-
-
-} */
 
 
 
@@ -477,40 +385,6 @@ inline void group_transitions_on_tgt_label(LTS_TYPE& aut)
 {
   group_transitions_on_tgt_label(aut.get_transitions(), aut.num_action_labels(), aut.tau_label_index(), aut.num_states());
 }
-
-/* YYYYY
-inline void group_transitions_on_tgt_lbl_recursive(std::vector<transition>& transitions,
-                                                     const std::size_t number_of_labels,
-                                                     const std::size_t tau_label_index,
-                                                     const std::size_t number_of_states,
-                                                     const std::size_t bit_position,
-                                                     std::vector<std::size_t>& todo_stack,
-                                                     std::vector<std::pair<std::size_t, std::size_t>> count_sum_transitions_per_value
-                                                    )
-{
-  constexpr size_t shift=11;
-  constexpr size_t mask= (1<<shift)-1;
-  std::vector<std::pair<std::size_t, std::size_t>> count_sum_transitions_per_action(mask+1, {0,0});
-  std::vector<std::size_t> todo_stack;
-
-  std::vector<std::pair<std::size_t, std::size_t>> value_sum_counter(mask+1, {0,0});
-  std::vector<transition>::iterator begin=transitions.begin();
-  for(std::size_t label: todo_stack)
-  {
- 
-    group_transitions_on_label(transitions.begin(),
-                               transitions.end(),
-                               [](const transition& t){ return t.to() & mask; },
-                               count_sum_transitions_per_action,
-                               tau_label_index,
-                               todo_stack);
-    
-
-  std::vector<std::size_t> todo_stack_target;
-  std::vector<std::pair<std::size_t, std::size_t>> value_sum_counter(mask+1, {0,0});
-
-*/
-
 
 /** \brief Sorts the transitions using a sort style.
  * \param[in/out] transitions A vector of transitions to be sorted. 

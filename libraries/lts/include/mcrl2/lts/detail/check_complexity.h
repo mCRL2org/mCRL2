@@ -737,19 +737,6 @@ class check_complexity
                                     "maximum value (" << max_value << ") for ";
                 return complexity_error;
             }
-            /*
-            if ((FirstTempCounter == TRANS_MIN_TEMP ||
-                 FirstTempCounter == TRANS_dnj_MIN_TEMP) &&
-                    FirstTempCounter <= to && to < FirstPostprocessCounter &&
-                         DONT_COUNT_TEMPORARY == counters[from - FirstCounter])
-            {
-                assert(1 == max_value);
-                // the next assertion is always satisfied if 1 == max_value.
-                // assert(0 == counters[to - FirstCounter]);
-                counters[to - FirstCounter] = DONT_COUNT_TEMPORARY;
-            }
-            else
-            */
             {
                 counters[to - FirstCounter] = max_value;
                 assert(1 == counters[from - FirstCounter]);

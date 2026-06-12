@@ -546,18 +546,6 @@ class big_natural_number
       return result;
     } 
 
-    // This is an auxiliary function getting the n-th digit,
-    // where digit 0 is the least significant one.
-    // It is not necessary that n is in range.
-    /* std::size_t getdigit(const std::size_t n) const
-    {
-      if (n>=m_number.size()) 
-      {
-        return 0;
-      }
-      return m_number[n];
-    } */
-
     /* \brief Efficient divide operator that does not declare auxiliary vectors.
        \detail Initially result must be zero. At the end: result equals (*this)*other+result.
                The calculation_buffer does not need to be initialised. 
@@ -648,86 +636,6 @@ class big_natural_number
       result.is_well_defined();
       remainder.is_well_defined();
     }
-
-    /* void div_mod(const big_natural_number& other,
-                 big_natural_number& result,
-                 big_natural_number& remainder,
-                 big_natural_number& calculation_buffer_subtractor) const
-    {
-      is_well_defined();
-      other.is_well_defined();
-      assert(!other.is_zero());
-
-      result.clear();
-      remainder=*this;
-
-      if (m_number.size()<other.m_number.size())
-      {
-        return;
-      }
-this->print_number("div_mod: this: ");
-other.print_number("div_mod: other: ");
-      std::size_t remaining_digit=0;
-      for(std::size_t n=remainder.m_number.size()-1; n>=other.m_number.size(); n--)
-      {
-std::cerr << "Wat is n " << n << "\n";
-        std::size_t r=remainder.getdigit(n+1);
-        std::size_t divisor=detail::divide_single_number(
-                                            remainder.getdigit(n),
-                                            other.m_number.back(),
-                                            r);
-
-result.print_number("div_mod: result: ");
-remainder.print_number("div_mod: remainder: ");
-std::cerr << "dmwhile: divisor: " << divisor <<"\n";
-calculation_buffer_subtractor.is_well_defined();
-        calculation_buffer_subtractor.m_number=std::vector<std::size_t>(n-other.m_number.size(),0); Inefficient, want constructie
-        for(std::size_t i: other.m_number)
-        {
-          calculation_buffer_subtractor.m_number.push_back(i);
-        }
-        calculation_buffer_subtractor.multiply_by(divisor,0);
-calculation_buffer_subtractor.print_number("div_mod: subtractor: ");
-        if (remainder<calculation_buffer_subtractor)
-        {
-          divisor=divisor-1;
-std::cerr << "dmwhile: divisor adapted: " << divisor <<"\n";
-          calculation_buffer_subtractor.m_number=std::vector<std::size_t>(n-other.m_number.size(),0);
-          for(std::size_t i: other.m_number)
-          {
-            calculation_buffer_subtractor.m_number.push_back(i);
-          }
-          calculation_buffer_subtractor.multiply_by(divisor,0);
-        }
-        result.m_number.push_back(divisor);
-remainder.print_number("remainder before assert");         
-calculation_buffer_subtractor.print_number("subtractor before assert");         
-        assert(remainder>=calculation_buffer_subtractor);
-        std::size_t old_remainder_size=remainder.m_number.size();
-        remainder.subtract(calculation_buffer_subtractor);
-        remaining_digit=(remaining_digit?
-                            remainder.m_number.size()+1==old_remainder_size:
-                            remainder.m_number.size()==old_remainder_size);
-      }
-result.print_number("div_mod: result voor swap: ");
-      if (result.m_number.size()==0)
-      {
-        return;
-      }
-      // Result must be reverted.
-      std::size_t begin = 0; 
-      std::size_t end = result.m_number.size()-1;
-      while (begin<end)
-      {
-        std::swap(result.m_number[begin],result.m_number[end]);
-        begin++; 
-        end--;
-      }
-      result.remove_significant_digits_that_are_zero();
-result.print_number("div_mod: result na swap: ");
-      result.is_well_defined();
-      remainder.is_well_defined();
-    } */
 
     /* \brief Standard division operator. This is currently implemented by a bit wise subtraction. Can be optimized by a 64 bit calculation.
        \detail. This routine is not particularly efficient as it declares three temporary vectors.

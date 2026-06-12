@@ -3853,13 +3853,6 @@ class specification_basic_type
       }
 
       /* Store the pairs from process mapping into result */
-      /* std::map< process_identifier, process_expression > result;
-      for(const mapping_type_pair& p: process_mapping)
-      {
-        result[p.second]=p.first.second;
-      }
-      assert(result.count(initial_process)>0);
-      return result; */
       std::set< process_identifier > result;
       for(const mapping_type_pair& p: process_mapping)
       {

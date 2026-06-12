@@ -144,13 +144,6 @@ class ltsconvert_tool : public input_output_tool
         mCRL2log(verbose) << "After reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions." << std::endl;
       }
     
-      /* if (tool_options.determinise)
-      {
-        mCRL2log(verbose) << "determinising LTS..." << std::endl;
-        mCRL2log(verbose) << "before determinisation: " << l.num_states() << "u states and " << l.num_transitions() << " transitions" << std::endl;
-        determinise(l);
-        mCRL2log(verbose) << "after determinisation: " << l.num_states() << "u states and " << l.num_transitions() << " transitions" << std::endl;
-      } */
     
       mcrl2::lps::specification spec;
 

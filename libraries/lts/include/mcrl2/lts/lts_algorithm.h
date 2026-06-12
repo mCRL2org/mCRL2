@@ -788,24 +788,6 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::weak_bisimulation_reduce(l,true);
       return;
     }
-    /*
-    case lts_eq_divergence_preserving_weak_bisim_sigref:
-    {
-      {
-       sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s1(l);
-       s1.run();
-      }
-       std::size_t divergence_label=detail::mark_explicit_divergence_transitions(l);
-       detail::reflexive_transitive_tau_closure(l);
-      {
-       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s2(l);
-       s2.run();
-      }
-      scc_reduce(l); // Remove tau loops
-      detail::unmark_explicit_divergence_transitions(l,divergence_label);
-      return;
-    }
-    */
     case lts_eq_sim:
     {
       // Run the partitioning algorithm on this LTS

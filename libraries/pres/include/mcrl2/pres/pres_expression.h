@@ -1926,20 +1926,6 @@ bool is_constant(const pres_expression& x)
   return find_free_variables(x).empty();
 }
 
-/* inline
-const data::variable_list& quantifier_variables(const pres_expression& x)
-{
-  assert(is_exists(x) || is_forall(x));
-  if (is_exists(x))
-  {
-    return atermpp::down_cast<exists>(x).variables();
-  }
-  else
-  {
-    return atermpp::down_cast<forall>(x).variables();
-  }
-} */
-
 inline
 data::variable_list free_variables(const pres_expression& x)
 {

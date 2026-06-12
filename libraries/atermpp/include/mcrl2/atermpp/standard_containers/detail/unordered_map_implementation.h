@@ -418,21 +418,6 @@ namespace atermpp::utilities {
     super::insert(ilist);
   }
 
-    /*
-  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
-  insert_return_type insert(node_type&& nh)
-  {
-  mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::insert(nh);
-  }
-
-  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
-  iterator insert(const_iterator hint, node_type&& nh)
-  {
-  mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::insert(hint, nh);
-  }
-  */
     
   template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
   template <class M>

@@ -785,25 +785,6 @@ match_tree RewriterCompilingJitty::create_tree(const data_equation_list& rules)
 }
 
 // 
-
-// This function assigns a unique index to variable v and stores
-// v at this position in the vector rewriter_bound_variables. This is
-// used in the compiling rewriter to obtain this variable again.
-// Note that the static variable variable_indices is not cleared
-// during several runs, as generally the variables bound in rewrite
-// rules do not change.
-/* std::size_t RewriterCompilingJitty::bound_variable_index(const variable& v)
-{
-  if (variable_indices0.count(v)>0)
-  {
-    return variable_indices0[v];
-  }
-  const std::size_t index_for_v=rewriter_bound_variables.size();
-  variable_indices0[v]=index_for_v;
-  rewriter_bound_variables.push_back(v);
-  return index_for_v;
-} */
-
 // Put the sorts with indices between actual arity and requested arity in a vector.
 sort_list_vector RewriterCompilingJitty::get_residual_sorts(const sort_expression& s1, std::size_t actual_arity, std::size_t requested_arity)
 {
@@ -2019,13 +2000,6 @@ class RewriterCompilingJitty::ImplementTree
         m_stream << "if (uint_address(arg" << cur_arg << ") == " << number << ") // MachineNumber (I)\n" << m_padding
                  << "{\n";
       }
-      /* else
-      {
-        assert(0);
-        m_stream << "if (uint_address((is_function_symbol(arg" << cur_arg <<  ") ? arg" << cur_arg << " : down_cast<application>(arg" << cur_arg << ").head())) == "
-                 << number << ") // F1\n" << m_padding
-                 << "{\n";
-      } */
     }
     else
     {
@@ -2037,15 +2011,6 @@ class RewriterCompilingJitty::ImplementTree
                  << "{\n" << m_padding
                  << "  const data_expression& t" << cnt << " = down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "];\n";
       }
-      /* else
-      {
-        assert(0);
-        m_stream << "if (is_application_no_check(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]) && "
-                 <<     "uint_address(down_cast<application>(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]).head()) == "
-                 << number << ") // F2b " << tree.function().name() << "\n" << m_padding
-                 << "{\n" << m_padding
-                 << "  const data_expression& t" << cnt << " = down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "];\n";
-      } */
       const std::string parameters = brackets.current_data_parameters.top();
       brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& t" + std::to_string(cnt));
       const std::string arguments = brackets.current_data_arguments.top();
@@ -2257,13 +2222,6 @@ public:
              std::stack<std::string>& auxiliary_code_fragments,
              std::map<variable,std::string>& type_of_code_variables)
   {
-    /* for (std::size_t i = 0; i < arity; ++i)
-    {
-      if (!m_used[i])
-      {
-        m_nnfvars.push_front(atermpp::aterm_int(i));
-      }
-    } */
 
     std::size_t l = 0;
     while (tree.isC())
@@ -2332,9 +2290,6 @@ public:
   {
     m_stream << m_padding << "// Implement function " << opid << " by calling a user defined rewrite function.\n";
     
-    /* m_stream << m_padding << "stack_increment++;\n"
-             << m_padding << "this_rewriter->m_rewrite_stack.increase(1);\n"
-             << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.top();\n"; */
 
 
     const std::string cplusplus_function_name = data_spec.cpp_implemented_functions().find(opid)->second.second;
@@ -2551,10 +2506,6 @@ public:
 
       ss << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();\n"
          << m_padding << appl_function(arity) << "(local_store, [&](data_expression& r){ local_rewrite(r, m_head); }";
-      /* ss << m_padding << "this_rewriter->m_rewrite_stack.increase(1);\n"
-         << m_padding << "data_expression& local_store=this_rewriter->m_rewrite_stack.top();\n"
-         << m_padding << "stack_increment++;\n"
-         << m_padding << appl_function(arity) << "(local_store, [&](data_expression& r){ local_rewrite(r, m_head); }"; */
       for (std::size_t i = 0; i < arity; ++i)
       {
         ss << ", [&](data_expression& r){ local_rewrite(r, m_arg" << i << "); }";
@@ -2785,9 +2736,6 @@ public:
              << (arity==0?"":"\n") << m_padding << "{}\n\n"
              << m_padding << "data_expression& normal_form() const\n"
              << m_padding << "{\n"
-/*             << m_padding << "  this_rewriter->m_rewrite_stack.increase(1);\n"
-             << m_padding << "  data_expression& local_store=this_rewriter->m_rewrite_stack.top();\n"
-             << m_padding << "  stack_increment++;\n" */
              << m_padding << "  data_expression& local_store=this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();\n"
              << m_padding << "  rewr_" << index << "_" << arity << "(local_store";
     for(std::size_t i = 0; i < arity; ++i)

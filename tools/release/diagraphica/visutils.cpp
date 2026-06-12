@@ -1702,30 +1702,6 @@ void VisUtils::fillDownIcon(
 
 // -- transformations -----------------------------------------------
 
-/*
-void VisUtils::setTransf(
-    const double &xCtr, const double &yCtr,
-    const double &xDOF,  const double &yDOF,
-    const double &xHge,  const double &yHge,
-    const double &aglCtr )
-// This function should be used when in edit mode.
-{
-    double dX = xCtr-xHge;
-    double dY = yCtr-yHge;
-
-    // modelview matrix
-    //glMatrixMode( GL_MODELVIEW );
-    glPushMatrix();
-
-    // move to center pos & rotate
-    glTranslatef( xHge, yHge, 0.0 );
-    glRotatef( aglCtr, 0.0, 0.0, 1.0 );
-
-    // move to center
-    glTranslatef( dX, dY, 0.0 );
-}
-*/
-
 void VisUtils::setTransf(
   const double& xCtr,   const double& yCtr,
   const double& /*xDOF*/,   const double& /*yDOF*/,

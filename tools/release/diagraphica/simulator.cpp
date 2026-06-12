@@ -736,7 +736,6 @@ void Simulator::calcPosBundles()
         {
           for (std::size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
           {
-            ///*
             posTopLft.x = m_previousFramePositions[i].x + 1.0*m_verticalFrameScale + 3.0*pix;
             posTopLft.y = m_previousFramePositions[i].y
                           + 1.0*m_verticalFrameScale
@@ -745,17 +744,6 @@ void Simulator::calcPosBundles()
 
             posBotRgt.x = m_previousBundleLabelPositionTL[ m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex() ].x;
             posBotRgt.y = posTopLft.y;
-            //*/
-            /*
-            posTopLft.x = posBdlLblGridPrevTopLft[ framesPrev[i]->getOutBundle(j)->getParent()->getIndex() ].x - 1.0*pix;
-            posTopLft.y = posBotRgt.y = posFramesPrev[i].y
-                + 1.0*scaleDgrmVert
-                - 0.5*itv*scaleDgrmVert
-                - framesPrev[i]->getOutBundle(j)->getParent()->getIndex()*itv*scaleDgrmVert;
-
-            posBotRgt.x = posFrameCurr.x - 1.0*scaleDgrmHori - 3.0*pix;
-            posBotRgt.y = posTopLft.y;
-            */
             m_previousBundlePositionTL[i].push_back(posTopLft);
             m_previousBundlePositionBR[i].push_back(posBotRgt);
           }
@@ -1317,13 +1305,6 @@ template <Visualizer::Mode mode> void Simulator::drawFrameCurr()
     {
       double x = m_currentFramePosition.x;
       double y = m_currentFramePosition.y;
-      /*
-      for ( int j = 0; j < attributes.size(); ++j )
-          valsFrame.push_back(
-              attributes[j]->mapToValue(
-                  frameCurr->getNode(0)->getTupleVal(
-                      attributes[j]->getIndex() ) )->getIndex() );
-      */
       Attribute* attr;
       Node* node;
       for (auto & m_attribute : m_attributes)
@@ -1445,13 +1426,6 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
 
         if (2.0*m_verticalFrameScale > 30.0*pix)
         {
-          /*
-          for ( int j = 0; j < attributes.size(); ++j )
-              valsFrame.push_back(
-                  attributes[j]->mapToValue(
-                      framesPrev[i]->getNode(0)->getTupleVal(
-                          attributes[j]->getIndex() ) )->getIndex() );
-          */
           Attribute* attr;
           Node* node;
           for (auto & m_attribute : m_attributes)
@@ -1491,13 +1465,6 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
     {
       if (0 <= m_currentSelectionIndex &&  static_cast <std::size_t>(m_currentSelectionIndex) < m_previousFramePositions.size())
       {
-        /*
-        for ( int j = 0; j < attributes.size(); ++j )
-            valsFrame.push_back(
-                attributes[j]->mapToValue(
-                    framesPrev[focusFrameIdx]->getNode(0)->getTupleVal(
-                        attributes[j]->getIndex() ) )->getIndex() );
-        */
         Attribute* attr;
         Node* node;
         for (auto & m_attribute : m_attributes)
@@ -1607,13 +1574,6 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
 
         if (2.0*m_verticalFrameScale > 30.0*pix)
         {
-          /*
-          for ( int j = 0; j < attributes.size(); ++j )
-              valsFrame.push_back(
-                  attributes[j]->mapToValue(
-                      framesNext[i]->getNode(0)->getTupleVal(
-                          attributes[j]->getIndex() ) )->getIndex() );
-          */
           Attribute* attr;
           Node* node;
           for (auto & m_attribute : m_attributes)
@@ -1653,13 +1613,6 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
     {
       if (0 <= m_currentSelectionIndex &&  static_cast <std::size_t>(m_currentSelectionIndex) < m_nextFramePositions.size())
       {
-        /*
-        for ( int j = 0; j < attributes.size(); ++j )
-            valsFrame.push_back(
-                attributes[j]->mapToValue(
-                    framesNext[focusFrameIdx]->getNode(0)->getTupleVal(
-                        attributes[j]->getIndex() ) )->getIndex() );
-        */
         Attribute* attr;
         Node* node;
         for (auto & m_attribute : m_attributes)

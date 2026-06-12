@@ -330,13 +330,6 @@ data_expression_list get_arguments(const HEAD& h, const ARGUMENTS&... args)
   return result;
 }
 
-/* template <class HEAD, class... CONTAINER>
-inline bool check_whether_sorts_match(const HEAD& head_lambda, const CONTAINER&... l)
-{
-  data_expression_list arguments=get_arguments(l...);
-  return check_whether_sorts_match(head_lambda, arguments);
-} */
-
 } // namespace detail
 
 /// \brief An application of a data expression to a number of arguments

@@ -336,26 +336,6 @@ public:
       apply(result, and_(x.arg2(), x.arg3()));
       return;
     }
-    /* if (data::is_data_application(result))
-    {
-      const data::application& d=atermpp::down_cast<data::application>(result);
-      if (d.sort()==data::sort_real::real_())
-      {
-        pres_expression aux;
-        apply(aux, static_cast<pres_expression>(data::less(d, data::sort_real::real_zero())));   // NOTE: arg1() is sometimes ewritten twice.
-     
-        if (is_true(aux))
-        {
-          apply(result, x.arg3());
-          return;
-        }
-        if (is_false(aux))
-        {
-          apply(result, and_(x.arg2(), x.arg3()));
-          return;
-        }
-      }
-    } */
 
     pres_expression result1;
     pres_expression result2;
@@ -384,26 +364,6 @@ public:
       apply(result, x.arg2());
       return;
     }
-    /* if (data::is_application(result))
-    { 
-      const data::application& d=atermpp::down_cast<data::application>(result);
-      if (d.sort()==data::sort_real::real_())
-      { 
-        data::data_expression aux;
-        apply(aux, static_cast<pres_expression>(less(data::sort_real::real_zero(), d)));   // NOTE: arg1() is sometimes rewritten twice.
-        
-        if (is_true(aux))
-        { 
-          apply(result, x.arg2());
-          return;
-        }
-        if (is_false(aux))
-        { 
-          apply(result, or_(x.arg2(), x.arg3()));
-          return;
-        }
-      }
-    } */
 
     pres_expression result1;
     pres_expression result2;

@@ -62,13 +62,6 @@ variable_list get_nonreal_variables(const variable_list& l)
   return r;
 }
 
-/* static data::function_symbol& negate_function_symbol(const sort_expression& s)
-{
-  static data::function_symbol f = data::function_symbol("negate",data::make_function_sort(s,s));
-  assert(data::make_function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
-  return f;
-}*/
-
 /// \brief Returns a list of all real assignments in l
 /// \param l a list of data assignments
 /// \return The list of all x := e in l such that x.sort() == e.sort() == real()
@@ -421,11 +414,6 @@ static void normalize_specification(
           // Add for all real sum variables x of this summand an inequality 0<=x. CODE BELOW ADDS 0<x.
           // And it is not always reqruired, if this is not explicitly indicated. Certainly does not belong here.
           // If somebody wants to add this as a constraint, he should do this explicitly in the input code.
-          /* for (variable_list::const_iterator k=real_sum_variables.begin(); k!=real_sum_variables.end(); k++)
-          {
-            const data_expression e=(atermpp::aterm)*k;
-            inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less,r));
-          } */
 
           // Construct replacements to contain the nextstate values for real variables in a map
 

@@ -81,16 +81,6 @@ inline bool head_matches_undefined_symbol(const data_expression& x, const core::
   return false;
 }
 
-/* inline
-data_expression remove_numeric_casts(data_expression x)
-{
-  while (is_numeric_cast(x))
-  {
-    x = *atermpp::down_cast<application>(x).begin();
-  }
-  return x;
-} */
-
 inline
 bool is_plus(const application& x)
 {
@@ -1649,26 +1639,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print(max_machine_number_string());
       derived().print(" )");
     }
-    /* else if (sort_machine_word::is_minus_word_application(x))
-    {
-      derived().print("(if(");
-      derived().print_binary_operation(x, " >= ");
-      derived().print(", ");
-      derived().print_binary_operation(x, " - ");
-      derived().print(", ");
-      derived().print(max_machine_number_string());
-      derived().print(" + ");
-      derived().print_binary_operation(x, " - ");
-      derived().print(")");
-    } 
-    else if (sort_machine_word::is_div_word_application(x))
-    {
-      derived().print_binary_operation(x, " div ");
-    }
-    else if (sort_machine_word::is_mod_word_application(x))
-    {
-      derived().print_binary_operation(x, " mod ");
-    } */
 
 /* TODO: Handle the following cases. 
  

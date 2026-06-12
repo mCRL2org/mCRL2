@@ -611,13 +611,6 @@ template <Visualizer::Mode mode> void Examiner::drawFrame()
       1.0 - 4*pix/scaleFrame, -1.0 - 4*pix/scaleFrame);
 
     std::vector< double > valsFrame;
-    /*
-    for ( int i = 0; i < attributes.size(); ++i )
-        valsFrame.push_back(
-           attributes[i]->mapToValue(
-                frame->getNode(0)->getTupleVal(
-                    attributes[i]->getIndex() ) )->getIndex() );
-    */
     Attribute* attr;
     Node* node;
     for (auto & attribute : attributes)
@@ -680,13 +673,6 @@ template <Visualizer::Mode mode> void Examiner::drawFramesHist()
     for (std::size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
     {
       valsFrame.clear();
-      /*
-      for ( int j = 0; j < attrsHist[i].size(); ++j )
-          valsFrame.push_back(
-              attrsHist[i][j]->mapToValue(
-                  framesHist[i]->getNode(0)->getTupleVal(
-                      attrsHist[i][j]->getIndex() ) )->getIndex() );
-      */
       Attribute* attr;
       Node* node;
       for (std::size_t j = 0; j < attrsHist[i].size(); ++j)

@@ -36,41 +36,6 @@ void Graph::setFileName(QString filename)
   m_filename = filename;
 }
 
-/*
-void Graph::addAttribute(
-    const std::string &name,
-    const std::string &type,
-    const int &idx,
-    const std::vector< std::string > &vals )
-{
-    Attribute* attribute = new Attribute(
-        name,
-        type,
-        idx,
-        vals );
-    attributes.push_back( attribute );
-    attribute = 0;
-}
-
-
-void Graph::addAttribute(
-    const std::string &name,
-    const std::string &type,
-    const int &idx,
-    const double &lwrBnd,
-    const double &uprBnd )
-{
-    Attribute* attribute = new Attribute(
-        name,
-        type,
-        idx,
-        lwrBnd,
-        uprBnd );
-    attributes.push_back( attribute );
-    attribute = 0;
-}
-*/
-
 void Graph::addAttrDiscr(
   QString name,
   QString type,
@@ -1539,42 +1504,6 @@ void Graph::updateLeaves(Cluster* clust)
     }
   }
 }
-
-/*
-void Graph::updateLeaves( std::vector< Cluster* > &clusts )
-{
-    if ( clusts.size() > 0 )
-    {
-        Cluster* c = clusts[0];
-
-        if ( c->getSizeChildren() > 0 )
-        {
-            // reset index
-            c->setIndex( -1 );
-
-            // update clusts
-            for ( int i = 0; i < c->getSizeChildren(); ++i )
-                clusts.push_back( c->getChild( i ) );
-        }
-        else
-        {
-            // set index
-            c->setIndex( leaves.size() );
-
-            // update leaves
-            leaves.push_back( c );
-
-            std::vector< int > coord;
-            c->getCoord( coord );
-        }
-
-        c = 0;
-
-        clusts.erase( clusts.begin() );
-        updateLeaves( clusts );
-    }
-}
-*/
 
 void Graph::clearLeaves()
 {

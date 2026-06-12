@@ -20,20 +20,6 @@
 namespace mcrl2::lps
 {
 
-/* inline
-const data::data_expression& real_zero()
-{
-  static data::data_expression result = data::sort_real::creal(data::sort_int::cint(data::sort_nat::c0()), data::sort_pos::c1());
-  return result;
-}
-
-inline
-const data::data_expression& real_one()
-{
-  static data::data_expression result = data::sort_real::creal(data::sort_int::cint(data::sort_nat::cnat(data::sort_pos::c1())), data::sort_pos::c1());
-  return result;
-} */
-
 // invariant: the elements of states must be unique
 // invariant: the elements of probabilities must be >= 0
 // invariant: the elements of probabilities must sum up to 1

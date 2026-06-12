@@ -234,7 +234,7 @@ void RewriterJitty::subst_values(
   }
   if (is_function_symbol(t))
   {
-    // result=t;  The following is more efficient as it avoids a call to thread local variables. Should be removed in due time. 
+    // The following is more efficient than a plain assignment, as it avoids a call to thread local variables. Should be removed in due time.
     result.assign(t, *m_thread_aterm_pool);
     return;
   }
