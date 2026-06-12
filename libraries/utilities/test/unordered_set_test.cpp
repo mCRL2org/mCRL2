@@ -147,7 +147,7 @@ class Object
 {
 public:
   Object(std::vector<int>&& reference)
-    : m_vector(std::forward<std::vector<int>>(reference))
+    : m_vector(std::move(reference))
   {}
 
   bool operator==(const Object& other) const

@@ -8,6 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <memory>
+#include <iostream>
 
 #include "mcrl2/pg/PredecessorLiftingStrategy.h"
 #include "mcrl2/pg/RecursiveSolver.h"
@@ -23,7 +24,7 @@ int main(int argc, char *argv[])
 
   if (argc != 2)
   {
-    printf("usage: %s <pbes>\n", argv[0]);
+    std::cerr << "usage: " << argv[0] << " <pbes>\n";
     return 0;
   }
 
@@ -46,7 +47,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    printf("no solver chosen!\n");
+    std::cerr << "no solver chosen!\n";
     return 1;
   }
 
@@ -74,25 +75,25 @@ int main(int argc, char *argv[])
   ParityGame::Strategy solution = solver->solve();
   if (solution.empty())
   {
-    printf("solving failed!\n");
+    std::cerr << "solving failed!\n";
     return 1;
   }
 
   // Optional: verify the solution
   if (verify && !pg.verify(solution, nullptr))
   {
-    printf("verification failed!\n");
+    std::cerr << "verification failed!\n";
     return 1;
   }
 
   // Print winner:
   if (pg.winner(solution, goal_v) == PLAYER_EVEN)
   {
-    printf("Property holds.\n");
+    std::cout << "Property holds.\n";
   }
   else
   {
-    printf("Property DOES NOT hold.\n");
+    std::cout << "Property DOES NOT hold.\n";
   }
 
   return 0;

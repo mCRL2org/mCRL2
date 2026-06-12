@@ -10,6 +10,8 @@
 #include "mcrl2/pg/ComponentSolver.h"
 #include "mcrl2/pg/attractor.h"
 
+#include <array>
+
 ComponentSolver::ComponentSolver(
     const ParityGame &game, ParityGameSolverFactory &pgsf,
     int max_depth, const verti *vmap, verti vmap_size )
@@ -127,7 +129,7 @@ int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
     mCRL2log(mcrl2::log::verbose) << "Building attractor sets for winning regions..." << std::endl;
 
     // Extract winning sets from subgame:
-    std::deque<verti> todo[2];
+    std::array<std::deque<verti>, 2> todo;
     for (std::size_t n = 0; n < unsolved.size(); ++n)
     {
         ParityGame::Player pl = subgame.winner(substrat, n);

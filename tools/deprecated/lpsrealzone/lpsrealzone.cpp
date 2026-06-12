@@ -8,8 +8,8 @@
 //
 /// \file lpsrealzone.cpp
 
-#define TOOLNAME "lpsrealzone"
-#define AUTHORS "Thomas Neele"
+static constexpr const char* TOOLNAME = "lpsrealzone";
+static constexpr const char* AUTHORS = "Thomas Neele";
 
 //C++
 #include <exception>

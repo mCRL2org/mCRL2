@@ -23,6 +23,7 @@
   #include <sys/wait.h>
 #endif // MCRL2_PLATFORM_WINDOWS
 
+#include <array>
 #include <cstring>
 #include <csignal>
 #include <cerrno>
@@ -172,9 +173,9 @@ child_process::~child_process()
 struct child_process::platform_impl
 {
   pid_t child_pid;
-  int pipe_stdin[2];
-  int pipe_stdout[2];
-  int pipe_stderr[2];
+  std::array<int, 2> pipe_stdin;
+  std::array<int, 2> pipe_stdout;
+  std::array<int, 2> pipe_stderr;
 };
 
 void child_process::write(const std::string& command) const
@@ -187,20 +188,20 @@ void child_process::write(const std::string& command) const
 
 std::string child_process::read() const
 {
-  char output[512];
+  std::array<char, 512> output{};
   // check return value
-  int count = ::read(m_pimpl->pipe_stdout[0], output, 512);
+  ssize_t count = ::read(m_pimpl->pipe_stdout[0], output.data(), output.size());
   if(count > 0)
   {
-    return std::string(output, count);
+    return std::string(output.data(), count);
   }
   else
   {
     std::string message;
 
-    while(int i = ::read(m_pimpl->pipe_stderr[0], output, 512))
+    while(ssize_t i = ::read(m_pimpl->pipe_stderr[0], output.data(), output.size()))
     {
-      message.append(output, 0, i);
+      message.append(output.data(), 0, i);
     }
 
     throw mcrl2::runtime_error("Reading from child process " + m_name + " failed: " + message);
@@ -240,17 +241,17 @@ void child_process::initialize()
   signal(SIGPIPE, SIG_IGN);
   m_pimpl = std::make_shared<child_process::platform_impl>();
   // Create pipes (two pairs r/w)
-  if (::pipe(&m_pimpl->pipe_stdin[0]) < 0)
+  if (::pipe(m_pimpl->pipe_stdin.data()) < 0)
   {
     throw mcrl2::runtime_error("failed to create pipe");
   }
 
-  if (::pipe(&m_pimpl->pipe_stdout[0]) < 0)
+  if (::pipe(m_pimpl->pipe_stdout.data()) < 0)
   {
     throw mcrl2::runtime_error("failed to create pipe");
   }
 
-  if (::pipe(&m_pimpl->pipe_stderr[0]) < 0)
+  if (::pipe(m_pimpl->pipe_stderr.data()) < 0)
   {
     throw mcrl2::runtime_error("failed to create pipe");
   }
@@ -268,7 +269,8 @@ void child_process::initialize()
     ::close(m_pimpl->pipe_stdout[0]);
     ::close(m_pimpl->pipe_stderr[0]);
 
-    ::execlp("z3", "z3", "-smt2", "-in", (char*) nullptr);
+    std::array<char*, 4> argv = { const_cast<char*>("z3"), const_cast<char*>("-smt2"), const_cast<char*>("-in"), nullptr };
+    ::execvp("z3", argv.data());
 
     ::_exit(errno);
   }

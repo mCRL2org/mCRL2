@@ -185,7 +185,7 @@ void test_process(const std::string& text, bool expect_exception = false)
     }
     catch (...)
     {
-      // skip
+      BOOST_CHECK(expect_exception);
     }
   }
 }

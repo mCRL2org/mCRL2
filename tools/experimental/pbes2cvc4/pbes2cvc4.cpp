@@ -8,8 +8,8 @@
 //
 /// \file pbes2cvc4.cpp
 
-#define NAME "pbes2cvc4"
-#define AUTHOR "Ruud Koolen"
+static constexpr const char* NAME = "pbes2cvc4";
+static constexpr const char* AUTHOR = "Ruud Koolen";
 
 #include "pbes2cvc4.h"
 

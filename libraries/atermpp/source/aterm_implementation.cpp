@@ -11,6 +11,8 @@
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
 #include "mcrl2/utilities/shared_mutex.h"
 
+#include <array>
+
 using namespace atermpp;
 using namespace atermpp::detail;
 
@@ -63,4 +65,4 @@ aterm_ostream::~aterm_ostream() = default;
 
 /// Definition of the extern global term pool.
 alignas(aterm_pool)
-std::byte atermpp::detail::g_aterm_pool_storage[sizeof(aterm_pool)] = {};     
+std::array<std::byte, sizeof(aterm_pool)> atermpp::detail::g_aterm_pool_storage = {};     

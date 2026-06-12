@@ -13,6 +13,7 @@
 
 #include "mcrl2/utilities/logger.h"
 
+#include <iostream>
 #include <thread>
 
 using namespace mcrl2::log;
@@ -86,11 +87,9 @@ BOOST_AUTO_TEST_CASE(test_fflush)
 {
   for(int i = 0; i < 10; ++i)
   {
-    fprintf(stderr, "%d", i);
-    fflush(stderr);
+    std::cerr << i << std::flush;
   }
-  fprintf(stderr, "\n");
-  fflush(stderr);
+  std::cerr << '\n' << std::flush;
 }
 
 BOOST_AUTO_TEST_CASE(test_multiline_nonewline)

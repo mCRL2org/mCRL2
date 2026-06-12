@@ -8,8 +8,8 @@
 //
 /// \file ltsinfo.cpp
 
-#define NAME "ltsinfo"
-#define AUTHOR "Muck van Weerdenburg"
+static constexpr const char* NAME = "ltsinfo";
+static constexpr const char* AUTHOR = "Muck van Weerdenburg";
 
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/lts/lts_io.h"

@@ -9,8 +9,8 @@
 /// \file ./txt2pbes.cpp
 /// \brief Parse a textual description of a PBES.
 
-#define NAME "txt2pbes"
-#define AUTHOR "Aad Mathijssen, Wieger Wesselink"
+static constexpr const char* NAME = "txt2pbes";
+static constexpr const char* AUTHOR = "Aad Mathijssen, Wieger Wesselink";
 
 //mCRL2 specific
 #include "mcrl2/utilities/input_output_tool.h"

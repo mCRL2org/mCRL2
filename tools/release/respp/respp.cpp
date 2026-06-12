@@ -47,7 +47,7 @@ class respp_tool: public pres_input_tool<input_output_tool>
 
     void add_options(interface_description& desc) override
     {
-      input_output_tool::add_options(desc);
+      super::add_options(desc);
       desc.add_option("format", make_enum_argument<print_format_type>("FORMAT")
                       .add_value_desc(print_default, "for a RES specification", true),
                       "print the PRES in the specified FORMAT:", 'f');

@@ -8,8 +8,8 @@
 //
 /// \file pbes2yices.cpp
 
-#define NAME "pbes2yices"
-#define AUTHOR "Ruud Koolen"
+static constexpr const char* NAME = "pbes2yices";
+static constexpr const char* AUTHOR = "Ruud Koolen";
 
 #include "pbes2yices.h"
 

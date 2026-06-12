@@ -30,7 +30,6 @@ void Parser::parseFile(QString filename, Graph* graph)
 {
   using namespace mcrl2::lts;
 
-  std::string line = "";
   mcrl2::lts::lts_fsm_t l;
 
   load_lts_as_fsm_file(filename.toStdString(),l);

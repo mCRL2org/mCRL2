@@ -648,7 +648,6 @@ BOOST_AUTO_TEST_CASE(test_substitutions2)
   std::string sigma;
   std::string expr1;
   std::string expr2;
-  std::string expr3;
 
   //------------------------//
   var_decl =
@@ -798,7 +797,6 @@ BOOST_AUTO_TEST_CASE(test_substitutions4)
   std::string sigma;
   std::string expr1;
   std::string expr2;
-  std::string expr3;
 
   //------------------------//
   var_decl =
@@ -856,7 +854,6 @@ BOOST_AUTO_TEST_CASE(test_substitutions5)
   std::string sigma;
   std::string expr1;
   std::string expr2;
-  std::string expr3;
 
   //------------------------//
   var_decl =

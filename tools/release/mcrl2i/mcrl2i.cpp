@@ -9,8 +9,8 @@
 /// \file mcrl2i.cpp
 
 
-#define TOOLNAME "mcrl2i"
-#define AUTHORS "Muck van Weerdenburg; Jan Friso Groote"
+static constexpr const char* TOOLNAME = "mcrl2i";
+static constexpr const char* AUTHORS = "Muck van Weerdenburg; Jan Friso Groote";
 
 #include "mcrl2/data/enumerator_with_iterator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"

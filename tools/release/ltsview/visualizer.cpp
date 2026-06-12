@@ -7,9 +7,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "visualizer.h"
+
+#include <array>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
+#include <vector>
 #include "cluster.h"
 #include "mathutils.h"
 #include "state.h"
@@ -19,7 +22,7 @@
 
 using namespace MathUtils;
 
-#define SELECT_BLEND 0.3f
+static constexpr float SELECT_BLEND = 0.3f;
 
 Visualizer::Visualizer(QObject *parent, Settings* settings_, LtsManager *ltsManager_, MarkManager* markManager_):
   QObject(parent),
@@ -841,23 +844,23 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
       State* s = root->getState(i);
       if (s->isCentered())
       {
-        float M[16];
+        std::array<float, 16> M;
 
         // store the position of this state
-        glGetFloatv(GL_MODELVIEW_MATRIX, M);
+        glGetFloatv(GL_MODELVIEW_MATRIX, M.data());
         QVector3D p1 = QVector3D(M[12], M[13], M[14]);
         s->setPositionAbs(p1);
 
         // The outgoing vector of the state lies settings->clusterHeight.value() above the state.
         glPushMatrix();
         glTranslatef(0.0f, 0.0f, -2 * settings->clusterHeight.value());
-        glGetFloatv(GL_MODELVIEW_MATRIX, M);
+        glGetFloatv(GL_MODELVIEW_MATRIX, M.data());
         QVector3D p2 = QVector3D(M[12], M[13], M[14]);
         s->setIncomingControl(p2);
 
         // The incoming vector of the state lies settings->clusterHeight.value() beneath the state.
         glTranslatef(0.0f, 0.0f, 4 * settings->clusterHeight.value());
-        glGetFloatv(GL_MODELVIEW_MATRIX, M);
+        glGetFloatv(GL_MODELVIEW_MATRIX, M.data());
         QVector3D p3 = QVector3D(M[12], M[13], M[14]);
         s->setOutgoingControl(p3);
 
@@ -865,12 +868,12 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
       }
       else
       {
-        float M[16];
+        std::array<float, 16> M;
         glPushMatrix();
         glRotatef(-s->getPositionAngle(), 0.0f, 0.0f, 1.0f);
 
         glTranslatef(s->getPositionRadius(), 0.0f, 0.0f);
-        glGetFloatv(GL_MODELVIEW_MATRIX, M);
+        glGetFloatv(GL_MODELVIEW_MATRIX, M.data());
         QVector3D p1 = QVector3D(M[12], M[13], M[14]);
         s->setPositionAbs(p1);
         glTranslatef(-s->getPositionRadius(), 0.0f, 0.0f);
@@ -879,18 +882,18 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         // direction the state itself is positioned. Furthermore, it points
         // settings->clusterHeight.value() up.
         glTranslatef(root->getTopRadius() * 3, 0.0f, -settings->clusterHeight.value());
-        glGetFloatv(GL_MODELVIEW_MATRIX, M);
+        glGetFloatv(GL_MODELVIEW_MATRIX, M.data());
         QVector3D p2 = QVector3D(M[12], M[13], M[14]);
         s->setIncomingControl(p2);
 
         glTranslatef(0.0f, 0.0f, 2 * settings->clusterHeight.value());
-        glGetFloatv(GL_MODELVIEW_MATRIX, M);
+        glGetFloatv(GL_MODELVIEW_MATRIX, M.data());
         QVector3D p3 = QVector3D(M[12], M[13], M[14]);
         s->setOutgoingControl(p3);
         glPopMatrix();
       }
 
-      float M[16];
+      std::array<float, 16> M;
       glPushMatrix();
       glRotatef(-s->getPositionAngle(), 0.0f, 0.0f, 1.0f);
       glTranslatef(s->getPositionRadius(), 0.0f, 0.0f);
@@ -898,14 +901,14 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
       glTranslatef(settings->stateSize.value() * 5.0f,
                    settings->stateSize.value() * 5.0f,
                    0.0f);
-      glGetFloatv(GL_MODELVIEW_MATRIX, M);
+      glGetFloatv(GL_MODELVIEW_MATRIX, M.data());
       QVector3D p = QVector3D(M[12], M[13], M[14]);
       s->setLoopControl1(p);
 
       glTranslatef(0.0f,
                    -settings->stateSize.value() * 10.0f,
                    0.0f);
-      glGetFloatv(GL_MODELVIEW_MATRIX, M);
+      glGetFloatv(GL_MODELVIEW_MATRIX, M.data());
       p = QVector3D(M[12], M[13], M[14]);
       s->setLoopControl2(p);
 
@@ -981,16 +984,15 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
             {
               n_colours = n_colours << 1;
             }
-            GLubyte* texture = (GLubyte*)malloc(4 * n_colours *
-                                                sizeof(GLubyte));
+            std::vector<GLubyte> texture(4 * n_colours);
 
             for (int i = 0; i < n_colours; ++i)
             {
               QColor c1 = colors[i % colors.size()];
-              texture[4*i]   = (GLubyte) c1.red();
-              texture[4*i+1] = (GLubyte) c1.green();
-              texture[4*i+2] = (GLubyte) c1.blue();
-              texture[4*i+3] = (GLubyte) 255;
+              texture[4*i]   = static_cast<GLubyte>(c1.red());
+              texture[4*i+1] = static_cast<GLubyte>(c1.green());
+              texture[4*i+2] = static_cast<GLubyte>(c1.blue());
+              texture[4*i+3] = static_cast<GLubyte>(255);
             }
             // Bind the texture created above, set textures on. (From Red Book)
 
@@ -1004,13 +1006,12 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
             glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
             glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, static_cast<int>(n_colours), 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, texture);
+                         GL_RGBA, GL_UNSIGNED_BYTE, texture.data());
 
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
             glBindTexture(GL_TEXTURE_1D, texName);
             glEnable(GL_TEXTURE_1D);
-            free(texture);
           }
         }
 
@@ -1290,13 +1291,12 @@ void Visualizer::drawBackPointer(State* startState, const QColor& startColor, St
   QVector3D endControl = endState->getIncomingControl();
   QVector3D endPoint = endState->getPositionAbs();
 
-  GLfloat ctrlPts [4][3] =
-  {
-    { startPoint.x(), startPoint.y(), startPoint.z() },
-    { startControl.x(), startControl.y(), startControl.z() },
-    { endControl.x(), endControl.y(), endControl.z() },
-    { endPoint.x(), endPoint.y(), endPoint.z() }
-  };
+  std::array<std::array<GLfloat, 3>, 4> ctrlPts = {{
+    {{ startPoint.x(), startPoint.y(), startPoint.z() }},
+    {{ startControl.x(), startControl.y(), startControl.z() }},
+    {{ endControl.x(), endControl.y(), endControl.z() }},
+    {{ endPoint.x(), endPoint.y(), endPoint.z() }}
+  }};
 
   if (startState->isCentered() && endState->isCentered())
   {
@@ -1307,11 +1307,11 @@ void Visualizer::drawBackPointer(State* startState, const QColor& startColor, St
   float t,it,b0,b1,b2,b3,x,y,z;
   int N = settings->quality.value();
 
-  float col[3];
+  std::array<float, 3> col;
   col[0] = startColor.red();
   col[1] = startColor.green();
   col[2] = startColor.blue();
-  float diff[3];
+  std::array<float, 3> diff;
   int steps = N / 2;
   diff[0] = (float)(endColor.red() - startColor.red()) / steps;
   diff[1] = (float)(endColor.green() - startColor.green()) / steps;

@@ -8,8 +8,8 @@
 //
 /// \file tracepp.cpp
 
-#define NAME "tracepp"
-#define AUTHOR "Muck van Weerdenburg"
+static constexpr const char* NAME = "tracepp";
+static constexpr const char* AUTHOR = "Muck van Weerdenburg";
 
 #include "mcrl2/lts/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
