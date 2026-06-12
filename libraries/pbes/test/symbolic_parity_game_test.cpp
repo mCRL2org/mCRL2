@@ -15,7 +15,6 @@ BOOST_AUTO_TEST_CASE(dummy_test)
   // This is an empty test since at least one test is required.
 }
 
-// Commented this test since Sylvan causes some address sanitizer failures that I cannot resolve.
 #ifdef MCRL2_ENABLE_SYLVAN
 
 #include "mcrl2/data/variable.h"
@@ -266,12 +265,12 @@ BOOST_AUTO_TEST_CASE(random_test_attractor)
   for (std::size_t i = 0; i < 100; ++i)
   {
     auto [V, Veven, prio, groups, index] = compute_random_game(5000, 2);
-    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false, false);
 
     ldd U = random_subset(V, 250);
 
     std::array<const ldd, 2> Vplayer = G.players(V);
-    ldd result = G.safe_attractor(U, 0, V, Vplayer);
+    ldd result = G.safe_attractor(U, 0, V, Vplayer).first;
     ldd expected = attr(G, V, 0, U);
     std::cerr << satcount(result) << std::endl;
 
@@ -288,13 +287,13 @@ BOOST_AUTO_TEST_CASE(random_test_safe_attractor)
   for (std::size_t i = 0; i < 100; ++i)
   {
     auto [V, Veven, prio, groups, index] = compute_random_game(5000, 2);
-    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false, false);
 
     ldd U = random_subset(V, 250);
     ldd I = random_subset(minus(V, U), 250);
 
     std::array<const ldd, 2> Vplayer = G.players(V);
-    ldd result = G.safe_attractor(U, 0, V, Vplayer, I);
+    ldd result = G.safe_attractor(U, 0, V, Vplayer, I).first;
     ldd expected = sattr(G, V, 0, U, I);
     std::cerr << satcount(result) << std::endl;
 
@@ -311,13 +310,13 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_safe_attractor)
   for (std::size_t i = 0; i < 100; ++i)
   {
     auto [V, Veven, prio, groups, index] = compute_random_game(5000, 2);
-    symbolic_parity_game G(groups, index, V, Veven, prio, false, true);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, true, false);
 
     ldd U = random_subset(V, 250);
     ldd I = random_subset(minus(V, U), 250);
 
     std::array<const ldd, 2> Vplayer = G.players(V);
-    ldd result = G.safe_attractor(U, 0, V, Vplayer, I);
+    ldd result = G.safe_attractor(U, 0, V, Vplayer, I).first;
     ldd expected = sattr(G, V, 0, U, I);
     std::cerr << satcount(result) << std::endl;
 
@@ -334,7 +333,7 @@ BOOST_AUTO_TEST_CASE(random_test_monotone_attractor)
   for (std::size_t i = 0; i < 100; ++i)
   {
     auto [V, Veven, prio, groups, index] = compute_random_game(5000, 2);
-    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false, false);
 
     ldd U = random_subset(V, 250);
 
@@ -356,7 +355,7 @@ BOOST_AUTO_TEST_CASE(random_test_safe_monotone_attractor)
   for (std::size_t i = 0; i < 100; ++i)
   {
     auto [V, Veven, prio, groups, index] = compute_random_game(5000, 2);
-    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false, false);
 
     ldd U = random_subset(V, 250);
     ldd I = random_subset(minus(V, U), 250);
@@ -379,7 +378,7 @@ BOOST_AUTO_TEST_CASE(random_test_chaining_monotone_attractor)
   for (std::size_t i = 0; i < 100; ++i)
   {
     auto [V, Veven, prio, groups, index] = compute_random_game(5000, 2);
-    symbolic_parity_game G(groups, index, V, Veven, prio, false, true);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, true, false);
 
     ldd U = random_subset(V, 250);
     ldd I = random_subset(minus(V, U), 250);
@@ -402,50 +401,52 @@ BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
   for (std::size_t i = 0; i < 1; ++i)
   {
     auto [V, Veven, prio, groups, index] = compute_random_game(100, 2);
-    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false, false);
     mcrl2::pbes_system::symbolic_pbessolve_algorithm solver(G);
 
     ldd initial = random_subset(V, 1);
     ldd I;
 
     // Use V as initial vertex so it does not terminate early.
-    std::pair<ldd, ldd> Vresult = solver.detect_solitair_cycles(V, V, I, false, G.sinks(V, V));
+    symbolic_solution_t Vresult = solver.detect_solitair_cycles(V, V, I, false, G.sinks(V, V), symbolic_solution_t(false));
 
     std::array<ldd, 2> winning;
-    ldd Vtotal = G.compute_total_graph(V, sylvan::ldds::empty_set(), G.sinks(V, V), winning);
+    std::array<std::optional<ldd>, 2> strategy;
+    ldd Vtotal = G.compute_total_graph(V, sylvan::ldds::empty_set(), G.sinks(V, V), winning, strategy);
 
     std::pair<ldd, ldd> Vexpected = { union_(winning[0], attr(G, V, 0, solitair_cycles(G, V, 0))), 
                                       union_(winning[1], attr(G, V, 1, solitair_cycles(G, V, 1))) };
-    BOOST_CHECK_EQUAL(Vresult.first, Vexpected.first);
-    BOOST_CHECK_EQUAL(Vresult.second, Vexpected.second);
+    BOOST_CHECK_EQUAL(Vresult.winning[0], Vexpected.first);
+    BOOST_CHECK_EQUAL(Vresult.winning[1], Vexpected.second);
   }
   
   quit_sylvan();
 }
 
-BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
+BOOST_AUTO_TEST_CASE(random_test_forced_cycles)
 {
   initialise_sylvan();
   
   for (std::size_t i = 0; i < 1; ++i)
   {
     auto [V, Veven, prio, groups, index] = compute_random_game(500, 2);
-    symbolic_parity_game G(groups, index, V, Veven, prio, false, false);
+    symbolic_parity_game G(groups, index, V, Veven, prio, false, false, false);
     mcrl2::pbes_system::symbolic_pbessolve_algorithm solver(G);
 
     ldd initial = random_subset(V, 1);
     ldd I;
 
     // Use V as initial vertex so it does not terminate early.
-    std::pair<ldd, ldd> Vresult = solver.detect_forced_cycles(V, V, I, false, G.sinks(V, V));
+    symbolic_solution_t Vresult = solver.detect_forced_cycles(V, V, I, false, G.sinks(V, V), symbolic_solution_t(false));
 
     std::array<ldd, 2> winning;
-    ldd Vtotal = G.compute_total_graph(V, sylvan::ldds::empty_set(), G.sinks(V, V), winning);
+    std::array<std::optional<ldd>, 2> strategy;
+    ldd Vtotal = G.compute_total_graph(V, sylvan::ldds::empty_set(), G.sinks(V, V), winning, strategy);
 
     std::pair<ldd, ldd> Vexpected = { union_(winning[0], attr(G, V, 0, forced_cycles(G, V, 0, I))), 
                                       union_(winning[1], attr(G, V, 1, forced_cycles(G, V, 1, I))) };
-    BOOST_CHECK_EQUAL(Vresult.first, Vexpected.first);
-    BOOST_CHECK_EQUAL(Vresult.second, Vexpected.second);
+    BOOST_CHECK_EQUAL(Vresult.winning[0], Vexpected.first);
+    BOOST_CHECK_EQUAL(Vresult.winning[1], Vexpected.second);
   }
   
   quit_sylvan();

@@ -161,8 +161,10 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
           load_lps(s, infilename);
           return s.data();
         }
-        catch (mcrl2::runtime_error&)
-          {}
+        catch (mcrl2::runtime_error& e)
+        {         
+          throw mcrl2::runtime_error("The file '" + infilename + "' does not contain an LPS: " + std::string(e.what()));
+        }
 
         try
         {
@@ -170,10 +172,10 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
           load_pbes(p, infilename);
           return p.data();
         }
-        catch (mcrl2::runtime_error&)
-          {}
-
-        throw mcrl2::runtime_error("The file '" + infilename + "' does not contain an LPS, PBES or data specification");
+        catch (mcrl2::runtime_error& e)
+        {
+           throw mcrl2::runtime_error("The file '" + infilename + "' does not contain a PBES: " + std::string(e.what()));
+        }
       }
       return data_specification();
     }
