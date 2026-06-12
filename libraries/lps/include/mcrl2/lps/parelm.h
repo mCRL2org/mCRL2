@@ -207,7 +207,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "initial significant variables: ";
-      for (unsigned long& k: v)
+      for (std::size_t k: v)
       {
         std::clog << k << " ";
       }
@@ -218,7 +218,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       std::vector<std::size_t> r1 = mcrl2::utilities::reachable_nodes(G, v.begin(), v.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "reachable nodes: ";
-      for (unsigned long& k: r1)
+      for (std::size_t k: r1)
       {
         std::clog << k << " ";
       }

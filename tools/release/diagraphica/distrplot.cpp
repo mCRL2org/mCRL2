@@ -256,11 +256,11 @@ void DistrPlot::mouseMoveEvent(QMouseEvent* event)
 void DistrPlot::calcMaxNumber()
 {
   maxNumber = 0;
-  for (unsigned long i : number)
+  for (std::size_t count : number)
   {
-    if (i > maxNumber)
+    if (count > maxNumber)
     {
-      maxNumber = i;
+      maxNumber = count;
     }
   }
 }
