@@ -15,7 +15,6 @@ BOOST_AUTO_TEST_CASE(dummy_test)
   // This is an empty test since at least one test is required.
 }
 
-/*
 // Commented this test since Sylvan causes some address sanitizer failures that I cannot resolve.
 #ifdef MCRL2_ENABLE_SYLVAN
 
@@ -453,4 +452,3 @@ BOOST_AUTO_TEST_CASE(random_test_solitair_cycles)
 }
 
 #endif // MCRL2_ENABLE_SYLVAN
-*/
