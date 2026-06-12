@@ -407,7 +407,7 @@ class big_natural_number
     std::size_t divide_by(std::size_t n)
     {
       std::size_t remainder=0;
-      for (unsigned long& i: std::ranges::reverse_view(m_number))
+      for (std::size_t& i: std::ranges::reverse_view(m_number))
       {
         i = detail::divide_single_number(i, n, remainder);
       }
