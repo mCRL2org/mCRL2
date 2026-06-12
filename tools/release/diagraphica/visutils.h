@@ -324,62 +324,62 @@ class VisUtils
 
     // -- text ------------------------------------------------------
     static void genCharTextures(
-      GLuint texCharId[CHARSETSIZE],
-      GLubyte texChar[CHARSETSIZE][CHARHEIGHT* CHARWIDTH]);
+      GLuint* texCharId,
+      GLubyte (*texChar)[CHARHEIGHT * CHARWIDTH]);
     static int getCharIdx(const char& c);
 
     static void drawLabel(
-      GLuint texCharId[CHARSETSIZE],
+      GLuint* texCharId,
       const double& xCoord,
       const double& yCoord,
       const double& scaling,
       const std::string& label);
     static void drawLabelRight(
-      GLuint texCharId[CHARSETSIZE],
+      GLuint* texCharId,
       const double& xCoord,
       const double& yCoord,
       const double& scaling,
       const std::string& label);
     static void drawLabelLeft(
-      GLuint texCharId[CHARSETSIZE],
+      GLuint* texCharId,
       const double& xCoord,
       const double& yCoord,
       const double& scaling,
       const std::string& label);
     static void drawLabelCenter(
-      GLuint texCharId[CHARSETSIZE],
+      GLuint* texCharId,
       const double& xCoord,
       const double& yCoord,
       const double& scaling,
       const std::string& label);
 
     static void drawLabelVert(
-      GLuint texCharId[CHARSETSIZE],
+      GLuint* texCharId,
       const double& xCoord,
       const double& yCoord,
       const double& scaling,
       const std::string& label);
     static void drawLabelVertAbove(
-      GLuint texCharId[CHARSETSIZE],
+      GLuint* texCharId,
       const double& xCoord,
       const double& yCoord,
       const double& scaling,
       const std::string& label);
     static void drawLabelVertBelow(
-      GLuint texCharId[CHARSETSIZE],
+      GLuint* texCharId,
       const double& xCoord,
       const double& yCoord,
       const double& scaling,
       const std::string& label);
     static void drawLabelVertCenter(
-      GLuint texCharId[CHARSETSIZE],
+      GLuint* texCharId,
       const double& xCoord,
       const double& yCoord,
       const double& scaling,
       const std::string& label);
 
     static void drawLabelInBoundBox(
-      GLuint texCharId[CHARSETSIZE],
+      GLuint* texCharId,
       const double& xLft,
       const double& xRgt,
       const double& yTop,
@@ -391,7 +391,7 @@ class VisUtils
 
     static void genCushTextures(
       GLuint& texCushId,
-      float texCush[CUSHSIZE]);
+      float* texCush);
     static float cushionProfile1D(
       const float& x,
       const float& D,

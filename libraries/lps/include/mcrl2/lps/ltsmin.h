@@ -816,7 +816,7 @@ class pins
       state initial_state(m_generator.initial_state().begin(), static_cast<int>(m_generator.initial_state().size()));
       for (std::size_t i = 0; i < m_state_length; i++)
       {
-        s[i] = state_type_map(i)[initial_state[i]];
+        s[i] = static_cast<int>(state_type_map(i)[initial_state[i]]);
       }
     }
 
@@ -864,7 +864,7 @@ class pins
         state destination = t.state;
         for (std::size_t j = 0; j < nparams; j++)
         {
-          dest[j] = state_type_map(j)[destination[j]];
+          dest[j] = static_cast<int>(state_type_map(j)[destination[j]]);
         }
         labels[0] = static_cast<int>(action_label_type_map()[t.action]);
         f(dest, labels);
@@ -925,7 +925,7 @@ class pins
         state destination = t.state;
         for (std::size_t j = 0; j < nparams; j++)
         {
-          dest[j] = state_type_map(j)[destination[j]];
+          dest[j] = static_cast<int>(state_type_map(j)[destination[j]]);
         }
         labels[0] = static_cast<int>(action_label_type_map()[t.action]);
         f(dest, labels);

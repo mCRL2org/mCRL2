@@ -1736,8 +1736,8 @@ void VisUtils::clrTransf()
 
 
 void VisUtils::genCharTextures(
-  GLuint texCharId[CHARSETSIZE],
-  GLubyte texChar[CHARSETSIZE][CHARHEIGHT* CHARWIDTH])
+  GLuint* texCharId,
+  GLubyte (*texChar)[CHARHEIGHT * CHARWIDTH]) // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 {
   // allocate memory
   glGenTextures(CHARSETSIZE, texCharId);
@@ -1777,7 +1777,7 @@ void VisUtils::genCharTextures(
         32, // height
         GL_ALPHA, // format
         GL_UNSIGNED_BYTE, // type
-        texChar[i] // data
+        static_cast<const GLubyte*>(texChar[i]) // data
         );
   }
 }
@@ -1786,7 +1786,7 @@ void VisUtils::genCharTextures(
 int VisUtils::getCharIdx(const char& c)
 {
   int result = 80;
-  int asci = (int) c;
+  int asci = static_cast<int>(static_cast<unsigned char>(c));
 
   // lowercase alphabet
   if (97 <= asci && asci <= 122)
@@ -1921,7 +1921,7 @@ int VisUtils::getCharIdx(const char& c)
 
 
 void VisUtils::drawLabel(
-  GLuint texCharId[CHARSETSIZE],
+  GLuint* texCharId,
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
@@ -1934,8 +1934,8 @@ void VisUtils::drawLabel(
 
     for (std::size_t i = 0; i < label.length(); ++i)
     {
-      double xLft = xCoord + i*scaling*CHARWIDTH;
-      double xRgt = xCoord + (i+1)*scaling*CHARWIDTH;
+      double xLft = xCoord + static_cast<double>(i) * scaling * CHARWIDTH;
+      double xRgt = xCoord + static_cast<double>(i + 1) * scaling * CHARWIDTH;
       double yTop = yCoord + 0.5*scaling*CHARHEIGHT;
       double yBot = yCoord - 0.5*scaling*CHARHEIGHT;
 
@@ -1958,13 +1958,13 @@ void VisUtils::drawLabel(
 
       glBegin(GL_QUADS);
       glTexCoord2d(0.0, 0.0);
-      glVertex3f(xLft, yTop, 0.5);
+      glVertex3d(xLft, yTop, 0.5);
       glTexCoord2d(0.0, 1.0);
-      glVertex3f(xLft, yBot, 0.5);
+      glVertex3d(xLft, yBot, 0.5);
       glTexCoord2d(1.0, 1.0);
-      glVertex3f(xRgt, yBot, 0.5);
+      glVertex3d(xRgt, yBot, 0.5);
       glTexCoord2d(1.0, 0.0);
-      glVertex3f(xRgt, yTop, 0.5);
+      glVertex3d(xRgt, yTop, 0.5);
       glEnd();
 
       glDisable(GL_BLEND);
@@ -1976,7 +1976,7 @@ void VisUtils::drawLabel(
 
 
 void VisUtils::drawLabelRight(
-  GLuint texCharId[CHARSETSIZE],
+  GLuint* texCharId,
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
@@ -1992,13 +1992,13 @@ void VisUtils::drawLabelRight(
 
 
 void VisUtils::drawLabelLeft(
-  GLuint texCharId[CHARSETSIZE],
+  GLuint* texCharId,
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
 {
-  double translate = label.length()*CHARWIDTH*scaling;
+  double translate = static_cast<double>(label.length()) * CHARWIDTH * scaling;
   drawLabel(
     texCharId,
     xCoord-translate,
@@ -2009,13 +2009,13 @@ void VisUtils::drawLabelLeft(
 
 
 void VisUtils::drawLabelCenter(
-  GLuint texCharId[CHARSETSIZE],
+  GLuint* texCharId,
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
 {
-  double translate = 0.5*label.length()*CHARWIDTH*scaling;
+  double translate = 0.5 * static_cast<double>(label.length()) * CHARWIDTH * scaling;
   drawLabel(
     texCharId,
     xCoord-translate,
@@ -2026,7 +2026,7 @@ void VisUtils::drawLabelCenter(
 
 
 void VisUtils::drawLabelVert(
-  GLuint texCharId[CHARSETSIZE],
+  GLuint* texCharId,
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
@@ -2041,8 +2041,8 @@ void VisUtils::drawLabelVert(
     {
       double xLft = xCoord - 0.5*scaling*CHARHEIGHT;
       double xRgt = xCoord + 0.5*scaling*CHARHEIGHT;
-      double yTop = yCoord + (i+1)*scaling*CHARWIDTH;
-      double yBot = yCoord + i*scaling*CHARWIDTH;
+      double yTop = yCoord + static_cast<double>(i + 1) * scaling * CHARWIDTH;
+      double yBot = yCoord + static_cast<double>(i) * scaling * CHARWIDTH;
 
       // bind textures
       glBindTexture(GL_TEXTURE_2D, texCharId[ getCharIdx(label[i]) ]);
@@ -2077,7 +2077,7 @@ void VisUtils::drawLabelVert(
 
 
 void VisUtils::drawLabelVertAbove(
-  GLuint texCharId[CHARSETSIZE],
+  GLuint* texCharId,
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
@@ -2093,13 +2093,13 @@ void VisUtils::drawLabelVertAbove(
 
 
 void VisUtils::drawLabelVertBelow(
-  GLuint texCharId[CHARSETSIZE],
+  GLuint* texCharId,
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
 {
-  double translate = label.length()*CHARWIDTH*scaling;
+  double translate = static_cast<double>(label.length()) * CHARWIDTH * scaling;
   drawLabelVert(
     texCharId,
     xCoord,
@@ -2110,13 +2110,13 @@ void VisUtils::drawLabelVertBelow(
 
 
 void VisUtils::drawLabelVertCenter(
-  GLuint texCharId[CHARSETSIZE],
+  GLuint* texCharId,
   const double& xCoord,
   const double& yCoord,
   const double& scaling,
   const std::string& label)
 {
-  double translate = 0.5*label.length()*CHARWIDTH*scaling;
+  double translate = 0.5 * static_cast<double>(label.length()) * CHARWIDTH * scaling;
   drawLabelVert(
     texCharId,
     xCoord,
@@ -2127,7 +2127,7 @@ void VisUtils::drawLabelVertCenter(
 
 
 void VisUtils::drawLabelInBoundBox(
-  GLuint texCharId[CHARSETSIZE],
+  GLuint* texCharId,
   const double& xLft,
   const double& xRgt,
   const double& yTop,
@@ -2140,7 +2140,7 @@ void VisUtils::drawLabelInBoundBox(
 
   double charWidth = (CHARWIDTH*scaling);
   double charHeight = (CHARHEIGHT*scaling);
-  double lblLength = label.size()*charWidth;
+  double lblLength = static_cast<double>(label.size()) * charWidth;
   std::string cropLbl = label;
 
   int numToCropHorizontal = (int)ceil((lblLength-w)/charWidth);
@@ -2188,7 +2188,7 @@ void VisUtils::drawLabelInBoundBox(
 
 void VisUtils::genCushTextures(
   GLuint& texCushId,
-  float texCush[CUSHSIZE])
+  float* texCush)
 {
   glGenTextures(1, &texCushId);
   glBindTexture(GL_TEXTURE_1D, texCushId);
@@ -2229,12 +2229,12 @@ float VisUtils::cushionProfile1D(
 // Code adapted from Lucian Voinea.
 {
   double pi = std::numbers::pi;
-  float alphaNew = (float)(pi*alpha)/180;
+  float alphaNew = static_cast<float>((pi * alpha) / 180.0);
 
-  float a= -(float)(4*h)/(D*D);
-  float b= (float)(4*h)/D;
-  float r = -(2.0*a*x+b)*cos(alphaNew)+sin(alphaNew);
-  r= (float)r/pow(4.0f*a*a*x*x+4.0f*a*b*x+b*b+1.0f,0.5f);
+  float a = -static_cast<float>(4.0 * h) / (D * D);
+  float b = static_cast<float>(4.0 * h) / D;
+  float r = static_cast<float>(-(2.0f * a * x + b) * std::cos(alphaNew) + std::sin(alphaNew));
+  r = static_cast<float>(r / std::pow(4.0f * a * a * x * x + 4.0f * a * b * x + b * b + 1.0f, 0.5f));
   if (r>1)
   {
     r=1;

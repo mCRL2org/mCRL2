@@ -70,7 +70,7 @@ inline void decimal_number_multiply_by_two(std::vector< char >& number)
 
   if (5 <= number[0])
   {
-    *(j++) = number[0] / 5;
+    *(j++) = static_cast<char>(number[0] / 5);
   }
 
   for (std::vector< char >::const_iterator i = number.begin(); i < number.end(); ++i, ++j)
@@ -78,11 +78,11 @@ inline void decimal_number_multiply_by_two(std::vector< char >& number)
     // result[a] = 2*(number[b] mod 5) + number[b+1] div 5   where result[a] = *j and number[b] = *(i)
     if (i == number.end() - 1)
     {
-      *j = 2 * (*i % 5);
+      *j = static_cast<char>(2 * (*i % 5));
     }
     else
     {
-      *j = 2 * (*i % 5) + *(i+1) / 5;
+      *j = static_cast<char>(2 * (*i % 5) + *(i + 1) / 5);
     }
   }
 
@@ -150,13 +150,13 @@ inline void decimal_number_divide_by_two(std::vector< char >& number)
 
   if (2 <= number[0])
   {
-    *(j++) = number[0] / 2;
+    *(j++) = static_cast<char>(number[0] / 2);
   }
 
   for (std::vector< char >::const_iterator i = number.begin() + 1; i != number.end(); ++i, ++j)
   {
     // result[a] = 5*(number[b - 1] mod 2) + number[b] div 2   where result[a] = *j, number[b - 1] = *(i - 1)
-    *j = 5 * (*(i - 1) % 2) + *i / 2;
+    *j = static_cast<char>(5 * (*(i - 1) % 2) + *i / 2);
   }
 
   result.resize(j - result.begin());
