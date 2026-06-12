@@ -32,7 +32,7 @@ class DocumentManager : public mcrl2::gui::qt::ExtendedTabWidget
      * @brief Constructor
      * @param parent The parent QWidget for the manager
      */
-    DocumentManager(QWidget *parent = 0);
+    DocumentManager(QWidget* parent = nullptr);
 
     void setAtermThread(QThread *atermThread) { m_atermThread = atermThread; }
     void setRewriteStrategy(mcrl2::data::rewrite_strategy strategy) { m_strategy = strategy; }
@@ -125,7 +125,7 @@ class DocumentManager : public mcrl2::gui::qt::ExtendedTabWidget
     /**
      * @brief Overridden function used to guarantee there is at least 1 document at all times
      */
-    void showEvent(QShowEvent *event);
+    void showEvent(QShowEvent* event) override;
 
   private:
     QThread *m_atermThread;

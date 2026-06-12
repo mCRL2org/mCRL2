@@ -18,7 +18,7 @@ class CopyDialog : public QDialog
     Q_OBJECT
     
   public:
-    explicit CopyDialog(QWidget *parent = 0);
+    explicit CopyDialog(QWidget* parent = nullptr);
 
     void init(int count, bool move = false);
 

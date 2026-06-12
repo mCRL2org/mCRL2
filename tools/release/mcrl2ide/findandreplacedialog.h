@@ -32,20 +32,20 @@ class FindAndReplaceDialog : public QDialog
    * @param editor The editor to find/replace in
    * @param parent The parent of this widget
    */
-  explicit FindAndReplaceDialog(QPlainTextEdit* editor, QWidget* parent = 0);
-  ~FindAndReplaceDialog();
+  explicit FindAndReplaceDialog(QPlainTextEdit* editor, QWidget* parent = nullptr);
+  ~FindAndReplaceDialog() override;
 
   /**
-   * @brief resetAndFocus Resets the focus to the find and replace window. The
-   *   find and replace fields are not reset for reuse, unless there is selected
-   *   text, in which case this is put in the find field.
-   */
+    * @brief resetAndFocus Resets the focus to the find and replace window. The
+    *   find and replace fields are not reset for reuse, unless there is selected
+    *   text, in which case this is put in the find field.
+    */
   void resetFocus();
 
   /**
-   * @brief findNext Find the next string in the editor
-   * @param down Whether the direction to find is down
-   */
+    * @brief findNext Find the next string in the editor
+    * @param down Whether the direction to find is down
+    */
   void findNext(bool down);
 
   public slots:

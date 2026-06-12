@@ -66,9 +66,9 @@ class ConsoleWidget : public QPlainTextEdit
    * @param parent The parent of this widget
    */
   explicit ConsoleWidget(QWidget* parent);
-  ~ConsoleWidget();
+  ~ConsoleWidget() override;
 
-  private slots:
+private slots:
   /**
    * @brief showContextMenu Creates and shows a context menu
    * @param position The position where to create the context menu
@@ -91,7 +91,7 @@ class ConsoleDock : public QDockWidget
    * @param parent The parent of this widget
    */
   explicit ConsoleDock(QWidget* parent);
-  ~ConsoleDock();
+  ~ConsoleDock() override;
 
   /**
    * @brief setConsoleTab Set which tab should be visible

@@ -131,7 +131,7 @@ public:
    * @param fileSystem The file system
    */
   ProcessSystem(FileSystem* fileSystem);
-  ~ProcessSystem();
+  ~ProcessSystem() override;
 
   /**
    * @brief setConsoleDock Assigns the console dock to the process system for

@@ -17,14 +17,14 @@ class MovableTableWidget : public QTableWidget
 {
     Q_OBJECT
   public:
-    explicit MovableTableWidget(QWidget *parent = 0);
+    explicit MovableTableWidget(QWidget* parent = nullptr);
 
   protected:
-    int sizeHintForColumn(int column) const;
-    void paintEvent(QPaintEvent *e);
-    void dragEnterEvent(QDragEnterEvent *event);
-    void dragMoveEvent(QDragMoveEvent *event);
-    void dropEvent(QDropEvent *event);
+    int sizeHintForColumn(int column) const override;
+    void paintEvent(QPaintEvent* e) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
     int dropRow(QPoint pos);
 
   private:

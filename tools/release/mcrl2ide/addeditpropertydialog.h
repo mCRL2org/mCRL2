@@ -38,22 +38,23 @@ class AddEditPropertyDialog : public QDialog
    * @param findAndReplaceDialog The find and replace dialog
    * @param parent The parent of this widget
    */
-  AddEditPropertyDialog(bool add, ProcessSystem* processSystem,
-                        FileSystem* fileSystem,
-                        FindAndReplaceDialog* findAndReplaceDialog,
-                        QWidget* parent = 0);
-  ~AddEditPropertyDialog();
+  AddEditPropertyDialog(bool add,
+    ProcessSystem* processSystem,
+    FileSystem* fileSystem,
+    FindAndReplaceDialog* findAndReplaceDialog,
+    QWidget* parent = nullptr);
+  ~AddEditPropertyDialog() override;
 
   /**
-   * @brief activateDialog Activates the dialog, making it visible
-   * @param property Fill in a property if applicable
-   */
+    * @brief activateDialog Activates the dialog, making it visible
+    * @param property Fill in a property if applicable
+    */
   void activateDialog(const Property& property = Property());
 
   /**
-   * @brief getProperty Gets the property as entered in the text fields
-   * @return The new or edited property
-   */
+    * @brief getProperty Gets the property as entered in the text fields
+    * @return The new or edited property
+    */
   Property getProperty();
 
   public slots:

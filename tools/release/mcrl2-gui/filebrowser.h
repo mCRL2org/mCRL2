@@ -29,7 +29,7 @@ class FileBrowser : public QTreeView
 {
     Q_OBJECT
   public:
-    explicit FileBrowser(QWidget *parent = 0);
+    explicit FileBrowser(QWidget* parent = nullptr);
     void setCatalog(ToolCatalog catalog);
     QMenu* menu() { return m_menu; }
     void save(QSettings& settings);
@@ -56,9 +56,9 @@ class FileBrowser : public QTreeView
     void openProperties(QString filename);
 
   protected:
-    void contextMenuEvent(QContextMenuEvent* event);
-    void mouseDoubleClickEvent(QMouseEvent* event);
-    void keyPressEvent(QKeyEvent* event);
+    void contextMenuEvent(QContextMenuEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
   private:
     enum CopyMode { cm_none, cm_copy, cm_cut };

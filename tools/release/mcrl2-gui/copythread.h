@@ -17,7 +17,7 @@ class CopyThread : public QThread
 {
     Q_OBJECT
   public:
-    void run();
+    void run() override;
   signals:
     void busy(int num, QString filename);
     void remove(QString filename);
