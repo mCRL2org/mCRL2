@@ -2432,15 +2432,6 @@ void Simulator::animate()
       // 'new' current frame
       double x = m_animationCurrentPosition.x;
       double y = m_animationCurrentPosition.y;
-      /*
-      {
-      for ( int j = 0; j < attributes.size(); ++j )
-          valsFrame.push_back(
-              attributes[j]->mapToValue(
-                  keyFrameFr->getNode(0)->getTupleVal(
-                      attributes[j]->getIndex() ) )->getIndex() );
-      }
-      */
       Attribute* attr;
       Node* node;
       for (auto & m_attribute : m_attributes)
@@ -2473,15 +2464,6 @@ void Simulator::animate()
       y = m_animationEndPosition.y;
 
       valsFrame.clear();
-      /*
-      {
-      for ( int j = 0; j < attributes.size(); ++j )
-          valsFrame.push_back(
-              attributes[j]->mapToValue(
-                  keyFrameTo->getNode(0)->getTupleVal(
-                      attributes[j]->getIndex() ) )->getIndex() );
-      }
-      */
       for (auto & m_attribute : m_attributes)
       {
         attr = m_attribute;
@@ -2512,15 +2494,6 @@ void Simulator::animate()
       // 'new' current frame
       double x = m_animationCurrentPosition.x;
       double y = m_animationCurrentPosition.y;
-      /*
-      {
-      for ( int j = 0; j < attributes.size(); ++j )
-          valsFrame.push_back(
-              attributes[j]->mapToValue(
-                  keyFrameFr->getNode(0)->getTupleVal(
-                      attributes[j]->getIndex() ) )->getIndex() );
-      }
-      */
       Attribute* attr;
       Node* node;
       for (auto & m_attribute : m_attributes)
@@ -2553,15 +2526,6 @@ void Simulator::animate()
       y = m_animationEndPosition.y;
 
       valsFrame.clear();
-      /*
-      {
-      for ( int j = 0; j < attributes.size(); ++j )
-          valsFrame.push_back(
-              attributes[j]->mapToValue(
-                  keyFrameTo->getNode(0)->getTupleVal(
-                      attributes[j]->getIndex() ) )->getIndex() );
-      }
-      */
       for (auto & m_attribute : m_attributes)
       {
         attr = m_attribute;

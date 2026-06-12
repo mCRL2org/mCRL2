@@ -137,8 +137,6 @@ void test_data_expression(const std::string& de_in,
 
       std::string de_out = data::pp(x);
       BOOST_CHECK_EQUAL(de_in, de_out);
-      // TODO: this check should be uncommented
-      //BOOST_CHECK(!search_sort_expression(x.sort(), data::untyped_sort()));
       if (expected_sort != "")
       {
         BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
@@ -652,37 +650,6 @@ BOOST_AUTO_TEST_CASE(test_sort_as_variable)
     false
   );
 }
-
-/* BOOST_AUTO_TEST_CASE(test_predefined_aliases)   // This test case leads to a parse error, not a typecheck error.
-{
-  test_data_specification(
-    "sort Nat = Int;\n",
-    false, // parse error
-    false  // so do not test type checker
-  );
-} */
-
-/* BOOST_AUTO_TEST_CASE(test_conflicting_aliases) // This test case leads to a parse error, due to the use of Nat.
-                                                  // This is not a typecheck error. Therefore this case is outcommented.
-{
-  test_data_specification(
-    "sort S = Nat;\n"
-    "     S = T;\n"
-    "     T = Int;\n",
-    false
-  );
-} */
-
-/* BOOST_AUTO_TEST_CASE(test_conflicting_aliases_predefined_left)  // This test case leads to a parse error, due to the use of Nat.
-{
-  test_data_specification(
-    "sort Nat = S;\n"
-    "     S = T;\n"
-    "     T = Int;\n",
-    false, // parse error
-    false  // so do not test type checker
-  );
-} */
 
 BOOST_AUTO_TEST_CASE(test_cyclic_aliases)
 {

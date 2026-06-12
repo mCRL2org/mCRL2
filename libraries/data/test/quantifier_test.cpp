@@ -108,50 +108,6 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   quantifier_expression_test("exists s: S.( s == s2 && is_s2(s) )", "true", dataspec, r);
   quantifier_expression_test("forall y: T. y in [t]", "true", dataspec, r);
 
-/* Should work but takes too much time.
-  dataspec = parse_data_specification(
-  " sort A = struct ac( first: Bool, args: List(Bool));"
-  " "
-  " map COMM: List(Bool)#Bool#List(A) -> List(A);"
-  "     COMM: List(Bool)#Bool#List(A)#(List(Bool)->FBag(Bool))#FBag(Bool) -> List(A);"
-  "     MAC: List(Bool) -> FBag(Bool);"
-  "     PART: List(A)#(List(Bool) -> FBag(Bool)) -> (List(Bool) -> FBag(Bool));"
-  "     ELM: List(Bool)#Bool#List(A)#List(Bool)#List(Bool) -> List(A);"
-  "     RM: A#List(A)->List(A);"
-  " var func: List(Bool)->FBag(Bool);"
-  "     as: List(A);"
-  "     ca: Bool;"
-  "     cal: List(Bool);"
-  "     cal_const: List(Bool);"
-  "     al: Bool;"
-  "     lsa: List(A);"
-  "     m: FBag(Bool);"
-  "     args: List(Bool);"
-  "     a, b: A;"
-  " eqn PART( [] , func ) = func;"
-  "     PART( a |> as , func ) = PART( as, func[ args(a) -> func(args(a)) + {first(a):1}]  );"
-  "     MAC( [] ) = {:};"
-  "     MAC( ca |> cal ) = {ca:1} + MAC(cal);"
-  " "
-  "     COMM( cal, al, lsa ) = COMM( cal, al, lsa,  PART( lsa, lambda x: List(Bool). {:} ), MAC(cal) );"
-  "     COMM( cal, al, [] , func, m ) = [];"
-  "     COMM( cal, al, a |> lsa, func, m ) = if( m <= func(args(a)), "
-  "                                                      ELM( cal, al, a |> lsa, args(a) , cal ) , "
-  "                                                      a |> COMM( cal, al, lsa, func, m)"
-  "                                                    );"
-  "     ELM( [] , al, lsa, args, cal_const ) = [ac(al, args)] ++ COMM( cal_const, al, lsa );"
-  "     ELM( ca |> cal, al, lsa, args, cal_const ) = ELM( cal, al , RM( ac( ca ,args), lsa), args, cal_const );"
-  "     RM( a, [] ) = [];"
-  "     RM( a, b |> lsa ) = if(a == b , lsa,  b |> RM( a, lsa)) ;"
-  );
-  r = rewriter(dataspec, s);
-
-  quantifier_expression_test("exists x_0: List(A). x_0 == [ac( false, []), ac(true, []), ac(false, [])] && [ac(true, []), ac(true, [])] == COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {:}), {false: 2}) ", "true", dataspec, r);
-  quantifier_expression_test("exists x_0: List(A). [ac(true, []), ac(true, [])] == "
-       "        COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {:}), {false: 2}) &&  "
-       "        x_0 == [ac( false, []), ac(true, []), ac(false, [])]", "true", dataspec, r);
-*/
-
   // tests for Set
   dataspec = parse_data_specification( "sort A = Set(Bool);");
   r = rewriter(dataspec, s);

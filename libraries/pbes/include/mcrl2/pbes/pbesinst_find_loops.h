@@ -88,12 +88,8 @@ inline void find_loops(const simple_structure_graph& G,
 
   // compute todo_
   boost::dynamic_bitset<> todo_(n);
-  /* for (const propositional_variable_instantiation& X: todo.all_elements())  range::join does not seem to work.
-                                                                               Hence split in todo.elements() and todo.irrelevant_elements() below. 
-  {
-    structure_graph::index_type u = graph_builder.find_vertex(X);
-    todo_[u] = true;
-  } */
+  // Iterating over todo.all_elements() with range::join does not seem to work.
+  // Hence the loops below are split into todo.elements() and todo.irrelevant_elements().
 
   for (const propositional_variable_instantiation& X: todo.elements())
   {

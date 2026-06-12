@@ -49,12 +49,8 @@ void partial_solve(structure_graph& G,
 
   // Si_todo := Si U todo
   std::array<vertex_set, 2> S_todo = S;
-  /* for (const propositional_variable_instantiation& X: todo.all_elements()) all_elements does not seem to work. Therefore split into the two cases below. 
-  {
-    structure_graph::index_type u = graph_builder.find_vertex(X);
-    S_todo[0].insert(u);
-    S_todo[1].insert(u);
-  } */
+  // Iterating over todo.all_elements() does not seem to work.
+  // Hence the loops below are split into todo.elements() and todo.irrelevant_elements().
 
   for (const propositional_variable_instantiation& X: todo.elements())
   {

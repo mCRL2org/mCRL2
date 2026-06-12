@@ -616,13 +616,6 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
         if (i == animIdxDgrm)
         {
           std::vector< double > vals;
-          /*
-          for ( int j = 0; j < attrsDgrm[i].size(); ++j )
-              vals.push_back(
-                  attrsDgrm[i][j]->mapToValue(
-                      framesDgrm[i][frameIdxDgrm[i]]->getNode(0)->getTupleVal(
-                          attrsDgrm[i][j]->getIndex() ) )->getIndex() );
-          */
           Attribute* attr;
           Node* node;
           for (std::size_t j = 0; j < attrsDgrm[i].size(); ++j)
@@ -648,13 +641,6 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
         else
         {
           std::vector< double > vals;
-          /*
-          for ( int j = 0; j < attrsDgrm[i].size(); ++j )
-              vals.push_back(
-                  attrsDgrm[i][j]->mapToValue(
-                      framesDgrm[i][frameIdxDgrm[i]]->getNode(0)->getTupleVal(
-                          attrsDgrm[i][j]->getIndex() ) )->getIndex() );
-          */
           Attribute* attr;
           Node* node;
           for (std::size_t j = 0; j < attrsDgrm[i].size(); ++j)
