@@ -141,9 +141,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     using transition_key_type = std::size_t;
     using state_key_type = std::size_t;
     using label_type = std::size_t;
-    // typedef probabilistic_arbitrary_precision_fraction probability_label_type;
     using probability_label_type = typename LTS_TYPE::probabilistic_state_t::probability_t;
-    // typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
     using probability_fraction_type = typename LTS_TYPE::probabilistic_state_t::probability_t;
 
     struct action_transition_type : public embedded_list_node <action_transition_type>
@@ -788,7 +786,6 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
         // Refine action blocks if a non-trivial probabilistic constellation exists.
         if (!non_trivial_probabilistic_constellations.empty())
         {
-// print_structure("REFINE II");
 
           probabilistic_constellation_type* non_trivial_probabilistic_const = non_trivial_probabilistic_constellations.top();
           non_trivial_probabilistic_constellations.pop();
@@ -849,7 +846,6 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
           }
         }
       }
-      // print_structure("END REFINE");
       assert(check_data_structure());
     }
 

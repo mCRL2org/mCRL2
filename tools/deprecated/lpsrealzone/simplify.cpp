@@ -480,22 +480,6 @@ namespace mcrl2::data
 
           if (!((inequalities.size()>0) && (inequalities.front().is_false(r))))
           {
-            // Add for all real parameters x of the process an inequality 0<=x
-            // Also this is extremely confusing, and should not be done by lpsrealem.
-            // for (variable_list::const_iterator k=real_parameters.begin(); k!=real_parameters.end(); k++)
-            // {
-            //   data_expression e=(atermpp::aterm)*k;
-            //   inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less_eq,r));
-            // }
-
-            // Add for all real sum variables x of this summand an inequality 0<=x. CODE BELOW ADDS 0<x.
-            // And it is not always reqruired, if this is not explicitly indicated. Certainly does not belong here.
-            // If somebody wants to add this as a constraint, he should do this explicitly in the input code.
-            /* for (variable_list::const_iterator k=real_sum_variables.begin(); k!=real_sum_variables.end(); k++)
-            {
-              const data_expression e=(atermpp::aterm)*k;
-              inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less,r));
-            } */
 
             // First check whether a similar summand with the same action, sum variables, and assignment already
             // exists.
@@ -590,13 +574,6 @@ namespace mcrl2::data
 
           if (!((inequalities.size()>0) && (inequalities.front().is_false(r))))
           {
-            // Add for all real parameters x of the process an inequality 0<=x
-            // Also this is extremely confusing, and should not be done by lpsrealem.
-            // for (variable_list::const_iterator k=real_parameters.begin(); k!=real_parameters.end(); k++)
-            // {
-            //   data_expression e=(atermpp::aterm)*k;
-            //   inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less_eq,r));
-            // }
 
             // Add for all real sum variables x of this summand an inequality 0<=x. CODE BELOW ADDS 0<x.
             // And it is not always reqruired, if this is not explicitly indicated. Certainly does not belong here.

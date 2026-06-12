@@ -176,7 +176,6 @@ namespace detail
 
 } // namespace detail
 
-// class big_natural_number;
 inline std::string pp(const big_natural_number& l);
 
 class big_natural_number
@@ -422,8 +421,6 @@ class big_natural_number
       is_well_defined();
       other.is_well_defined();
 
-      // big_natural_number result;
-      // result.m_number.reserve((std::max)(m_number.size(),other.m_number.size()));
       std::size_t carry=0;
       for(std::size_t i=0; i < (std::max)(m_number.size(),other.m_number.size()); ++i)
       {

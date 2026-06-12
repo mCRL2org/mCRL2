@@ -136,10 +136,7 @@ void test_data_expression(const std::string& de_in,
       std::clog << "  inferred type: " << pp(x.sort()) << " (after typechecking) " << std::endl;
 
       std::string de_out = data::pp(x);
-      //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-//#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
       BOOST_CHECK_EQUAL(de_in, de_out);
-//#endif
       // TODO: this check should be uncommented
       //BOOST_CHECK(!search_sort_expression(x.sort(), data::untyped_sort()));
       if (expected_sort != "")
@@ -1551,7 +1548,6 @@ class testable_sort_type_checker: public data::sort_type_checker
           break;
         }
       }
-      // if (x_iter == m_normalized_aliases.end())
       if (!found)
       {
         throw mcrl2::runtime_error("could not find alias " + data::pp(x));
@@ -1570,7 +1566,6 @@ class testable_sort_type_checker: public data::sort_type_checker
       {
         first = true;
 
-        // check_alias_recursion(x.name(), x.reference());
         check_for_sort_alias_loop_through_function_sort(x.name(),x.reference(),sort_already_seen, false, alias_map);
         assert(sort_already_seen.size()==0);
       }
@@ -1582,7 +1577,6 @@ class testable_sort_type_checker: public data::sort_type_checker
       try
       {
         second = true;
-        // check_alias_circularity(x.name(), x.reference());
         check_alias_circularity(x.name(), x.reference(),sort_already_seen, alias_map);
         assert(sort_already_seen.size()==0);
       }

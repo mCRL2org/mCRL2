@@ -133,7 +133,6 @@ void lts_type::add_state(const std::string& name, const std::string& type)
         this->state_type_index[type] = type_index;
     }
     this->state_type_no.push_back(type_index);
-    //std::clog << "  type_no = " << type_index << ": " << this->state_type_list->at(type_index) << std::endl;
 }
 
 
@@ -168,7 +167,6 @@ lts_info::lts_info(pbes& p, detail::pbes_greybox_interface* pgg, bool reset = fa
     {
         throw std::runtime_error("PBES is not a PPG! Please rewrite with pbesrewr -pppg.");
     }
-    //std::clog << "info: resetOption = " << (this->resetOption ? "true":"false") << ", reset = " << reset << std::endl;
     compute_lts_type();
     compute_transition_groups();
     compute_dependency_matrix();
@@ -177,7 +175,6 @@ lts_info::lts_info(pbes& p, detail::pbes_greybox_interface* pgg, bool reset = fa
 
 void lts_info::compute_lts_type()
 {
-    //std::clog << "pbes_type:" << std::endl;
     mCRL2log(log::verbose) << "Compute LTS type." << std::endl;
     std::vector<std::string> params;
     std::map<std::string,std::string> paramtypes;
@@ -204,13 +201,11 @@ void lts_info::compute_lts_type()
             {
                 params.push_back(signature);
                 paramtypes[signature] = core::pp(varparam.sort());
-                //std::clog << "paramtypes[" << signature << "] = " << paramtypes[signature] << std::endl;
                 data_expression e(default_expression_generator(varparam.sort()));
                 pbes_expression e1 = pgg->rewrite_and_simplify_expression(atermpp::down_cast<pbes_expression>(e),false);
                 this->param_default_values.push_back(atermpp::down_cast<const data::data_expression>(e1));
             }
         }
-        //params.sort();
     }
     this->type = lts_type(1 + params.size());
     this->type.add_state("var", "string"); // Propositional variable name
@@ -225,8 +220,6 @@ void lts_info::compute_lts_type()
     this->type.add_state_label("priority", "int");
     this->type.add_state_label("type", "int");
 
-    //this->type->add_edge_label("", "");
-    //std::clog << "-- end of pbes_type." << std::endl;
     mCRL2log(log::verbose) << "end of compute_lts_type." << std::endl;
 }
 
@@ -537,7 +530,6 @@ void lts_info::compute_transition_groups()
         }
     }
     number_of_groups = group;
-    //std::clog << "Added " << group << " transition groups." << std::endl;
     mCRL2log(log::debug) << "end of compute_transition_groups." << std::endl;
 }
 
@@ -951,7 +943,6 @@ std::set<std::string> lts_info::used(const pbes_expression& expr)
 
 std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set<std::string>& L)
 {
-    //std::clog << "lts_info::used(" << bqnf_visitor<equation_type, term_type>::print_brief(expr) << ", L)" << std::endl;
     std::set<std::string> result;
     if (is_data(expr))
     {
@@ -1024,7 +1015,6 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr)
 
 std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::set<std::string>& L)
 {
-    //std::clog << "lts_info::copied(" << bqnf_visitor<equation_type, term_type>::print_brief(expr) << ", L)" << std::endl;
     std::set<std::string> result;
     if (is_data(expr))
     {
@@ -1083,7 +1073,6 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
 
 std::string lts_info::state_to_string(const ltsmin_state& state)
 {
-    //std::clog << "info::to_string" << std::endl;
     std::string result;
     std::stringstream ss;
     operation_type type = detail::map_at(get_variable_types(), state.get_variable());
@@ -1201,11 +1190,9 @@ ltsmin_state::ltsmin_state(const std::string& varname,
                        const pbes_expression& e)
 {
     data_expression novalue;
-    //std::clog << "ltsmin_state v = " << pp(v) << std::endl;
     this->var = varname;
     if (is_propositional_variable_instantiation(e)) {
         assert(std::string(atermpp::down_cast<propositional_variable_instantiation>(e).name()) == varname);
-        //std::clog << "ltsmin_state: var = " << atermpp::down_cast<propositional_variable_instantiation>(e).name() << std::endl;
         const data::data_expression_list& values = atermpp::down_cast<propositional_variable_instantiation>(e).parameters();
         for (const auto & value : values)
         {
@@ -1215,9 +1202,7 @@ ltsmin_state::ltsmin_state(const std::string& varname,
                                     + pp(e)));
             }
             this->add_parameter_value(value);
-            //std::clog << "ltsmin_state: " << *val << std::endl;
         }
-        //std::clog << std::endl;
     } else {
         throw(std::runtime_error("Not a valid state expression! " + pp(e)));
     }
@@ -1317,7 +1302,6 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
     load_pbes(p, filename);
     for (auto & eqn : p.equations()) {
         std::string variable_name = eqn.variable().name();
-        //std::clog << "varname = " << variable_name << std::endl;
     }
     pbes_system::algorithms::normalize(p);
     if (!detail::is_ppg(p))
@@ -1328,14 +1312,12 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
     }
     this->pgg = new detail::pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
-    //std::clog << "explorer" << std::endl;
     for (std::size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); ++i) {
         std::map<data_expression,int> data2int_map;
         this->localmaps_data2int.push_back(data2int_map);
         std::vector<data_expression> int2data_map;
         this->localmaps_int2data.push_back(int2data_map);
     }
-    //std::clog << "-- end of explorer." << std::endl;
 }
 
 
@@ -1344,14 +1326,12 @@ explorer::explorer(const pbes& p_, const std::string& rewrite_strategy = "jittyc
     p = p_;
     this->pgg = new detail::pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
-    //std::clog << "explorer" << std::endl;
     for (std::size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
         std::map<data_expression,int> data2int_map;
         this->localmaps_data2int.push_back(data2int_map);
         std::vector<data_expression> int2data_map;
         this->localmaps_int2data.push_back(int2data_map);
     }
-    //std::clog << "-- end of explorer." << std::endl;
 }
 
 
@@ -1385,12 +1365,9 @@ void explorer::initial_state(int* state)
 
 ltsmin_state explorer::get_state(const propositional_variable_instantiation& expr) const
 {
-    //std::clog << "-- get_state --" << std::endl;
-    //std::clog << "  expr = " << expr << std::endl;
     propositional_variable_instantiation novalue;
     assert(is_propositional_variable_instantiation(expr) && expr != novalue);
     std::string varname = expr.name();
-    //std::clog << "  varname = " << varname << std::endl;
     ltsmin_state s(varname, expr);
     return s;
 }
@@ -1438,19 +1415,14 @@ int explorer::get_string_index(const std::string& s)
     } else {
         this->localmap_int2string.push_back(s);
         index = this->localmap_int2string.size() - 1;
-        //std::clog << "[" << getpid() << "] get_string_index DEBUG push_back " << index << ": " << s << std::endl;
         this->localmap_string2int.insert(std::make_pair(s,index));
     }
-    //std::clog << "get_string_index result =" << index << " (" << this->localmap_int2string->size() << ")" << std::endl;
     return index;
 }
 
 
 int explorer::get_value_index(int type_no, const data_expression& value)
 {
-    //std::clog << "    get_value_index type_no=" << type_no << " (" << info->get_lts_type().get_number_of_state_types() << ")" << std::endl;
-    //std::clog << "                type=" << info->get_lts_type().get_state_type_name(type_no) << std::endl;
-    //std::clog << "                value=" << value << std::endl;
     std::map<data_expression,int>& data2int_map = this->localmaps_data2int.at(type_no);
     std::map<data_expression,int>::iterator it = data2int_map.find(value);
     std::size_t index;
@@ -1467,10 +1439,8 @@ int explorer::get_value_index(int type_no, const data_expression& value)
 
 void explorer::to_state_vector(const ltsmin_state& dst_state, int* dst, const ltsmin_state& src_state, int* const& src)
 {
-    //std::clog << "to_state_vector: " << dst_state.to_string() << std::endl;
 
     data_expression novalue;
-    //std::clog << "-- to_state_vector -- " << std::endl;
     int state_length = info->get_lts_type().get_state_length();
 
     std::string varname = dst_state.get_variable();
@@ -1487,7 +1457,6 @@ void explorer::to_state_vector(const ltsmin_state& dst_state, int* dst, const lt
         varindex = this->get_string_index(varname);
     }
     dst[0] = varindex;
-    //std::clog << "  to_state_vector: DEBUG: varname = " << varname << " index = " << varindex << (same_var ? " SAME VAR": "") << std::endl;
 
 
     // data_expression values[state_length]; N.B. This is not portable C++
@@ -1556,13 +1525,11 @@ void explorer::to_state_vector(const ltsmin_state& dst_state, int* dst, const lt
         throw(std::runtime_error("Error in to_state_vector: NoValue in parameters of dst_state: "
                             + info->state_to_string(dst_state) + "."));
     }
-    //std::clog << "-- to_state_vector: done --" << std::endl;
 }
 
 
 std::string explorer::get_value(int type_no, int index)
 {
-    //std::clog << "get_value type_no = " << type_no << " index = " << index << std::endl;
     if (type_no==0)
     {
         return this->get_string_value(index);
@@ -1570,10 +1537,6 @@ std::string explorer::get_value(int type_no, int index)
     else
     {
         data_expression value = get_data_value(type_no, index);
-        //std::stringstream os;
-        //write_term_to_text_stream(value, os);
-        //std::string s = atermpp::pp(value);
-        //return os.str();
         atermpp::aterm t = data::detail::remove_index(value);
         return pp(t);
     }
@@ -1604,12 +1567,10 @@ const data_expression& explorer::get_data_value(int type_no, int index)
 
 ltsmin_state explorer::from_state_vector(int* const& src)
 {
-    //std::clog << "-- from_state_vector(model, src) --" << std::endl;
     data_expression novalue;
     int state_length = info->get_lts_type().get_state_length();
 
     std::string varname = this->get_string_value(src[0]);
-    //std::clog << "from_state_vector: varname = " << varname << std::endl;
 
     bool error = false;
 
@@ -1618,12 +1579,9 @@ ltsmin_state explorer::from_state_vector(int* const& src)
 
     int type_no;
     for (int i = 1; i < state_length; i++) {
-        //std::clog << "from_state_vector: values: " << i << " (" << src[i] << "): " << std::endl;
         type_no = info->get_lts_type().get_state_type_no(i);
         values[i] = this->get_data_value(type_no, src[i]);
-        //std::clog << "from_state_vector:   " << values[i].to_string() << std::endl;
     }
-    //std::clog << "from_state_vector: values done." << std::endl;
     data::data_expression_vector parameters;
     std::vector<int> parameter_indices =
             detail::map_at(info->get_variable_parameter_indices(), varname);
@@ -1631,7 +1589,6 @@ ltsmin_state explorer::from_state_vector(int* const& src)
         if (values[parameter_indice+1]==novalue)
         {
             error = true;
-            //std::clog << "from_state_vector: varname = " << varname << ", values[" << *param_index+1 << "] = " << values[*param_index+1].to_string() << "(" << src[*param_index+1] << ")" << std::endl;
         }
         parameters.push_back(values[parameter_indice+1]);
     }
@@ -1641,16 +1598,13 @@ ltsmin_state explorer::from_state_vector(int* const& src)
     }
     data::data_expression_list paramlist(parameters.begin(), parameters.end());
     propositional_variable_instantiation state_expression(varname, paramlist);
-    //std::clog << "from_state_vector: state_expression = " << state_expression.to_string() << std::endl;
     ltsmin_state state = this->get_state(state_expression);
-    //std::clog << "from_state_vector: state = " << state->to_string() << std::endl;
     return state;
 }
 
 
 std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
 {
-    //std::cout << "get_successors: " << state->to_string() << std::endl;
     std::vector<ltsmin_state> result;
 
     pbes_expression e = state.to_pbes_expression();
@@ -1695,7 +1649,6 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
 std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
                                                      int group)
 {
-    //std::clog << "get_successors: group=" << group << std::endl;
     std::vector<ltsmin_state> result;
 
     if (group == 0 && state.get_variable()=="true")
@@ -1720,7 +1673,6 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
                                              info->get_transition_expressions()[group]);
             operation_type type = detail::map_at(info->get_variable_types(), state.get_variable());
             for (const auto & successor : successors) {
-                //std::clog << " * successor: " << pp(*expr) << std::endl;
                 if (is_propositional_variable_instantiation(successor)) {
                     result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(successor)));
                 } else if (is_true(successor)) {

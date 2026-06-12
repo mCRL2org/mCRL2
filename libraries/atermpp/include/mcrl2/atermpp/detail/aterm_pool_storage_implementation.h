@@ -165,7 +165,6 @@ void store_in_argument_array_(std::array<unprotected_aterm_core, N>& argument_ar
   // Otherwise function_or_term is supposed to  have type void(term& result), putting the term in result. 
   else
   {
-    // function_or_term(static_cast<Term&>(argument_array[I]));
 
     using traits = mcrl2::utilities::function_traits<decltype(&FUNCTION_OR_TERM_TYPE::operator())>;
     function_or_term(static_cast<typename traits::template arg<0>::type&>(argument_array[I]));

@@ -42,7 +42,6 @@ class pres_rewriter : public pres_input_tool<pres_output_tool<pres_rewriter_tool
     std::set<pres_system::pres_rewriter_type> available_rewriters() const override
     {
       std::set<pres_system::pres_rewriter_type> result = super::available_rewriters();
-      // result.insert(pres_system::quantifier_one_point);
       return result;
     }
 
@@ -79,7 +78,6 @@ class pres_rewriter : public pres_input_tool<pres_output_tool<pres_rewriter_tool
       {
         case simplify:
         {
-          // simplify_quantifiers_data_rewriter<data::rewriter> presr(datar);
           simplify_data_rewriter<data::rewriter> presr(p.data(), datar);
           pres_rewrite(p, presr);
           break;

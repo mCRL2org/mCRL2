@@ -270,7 +270,6 @@ class explorer: public abortable
           {
             // There is only one solution that is generated as there are no variables. 
             check_enumerator_solution(condition, summand,sigma,rewr);
-            // state_type s1;
             if constexpr (Stochastic)
             {
               compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);

@@ -77,7 +77,6 @@ void AsyncMpiAttractorImpl::solve(bool quick_start)
                 // Add vertex v to the attractor set:
                 attr.insert(v);
                 queue.push_back(v);
-                //debug("added %d to attractor set", part.global(v));
                 notify_others(v);
             }
         }
@@ -85,7 +84,6 @@ void AsyncMpiAttractorImpl::solve(bool quick_start)
         idle();
         if (recv())
         {
-            //debug("received %d (a)", vertex_val);
             verti i = part.local(vertex_val);
             start();
             assert(!attr.count(i));
@@ -119,7 +117,6 @@ void AsyncMpiAttractorImpl::notify_others(verti i)
     {
         if (recipients[dest] && dest != mpi_rank)
         {
-            //debug("sending %d to %d", v, dest);
             send(&v, 1, dest);
         }
     }
@@ -127,7 +124,6 @@ void AsyncMpiAttractorImpl::notify_others(verti i)
     // Receive pending vertex updates:
     while (test())
     {
-        //debug("received %d (b)", vertex_val);
         i = part.local(vertex_val);
         assert(!attr.count(i));
         attr.insert(i);

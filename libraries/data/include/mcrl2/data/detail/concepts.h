@@ -2,7 +2,6 @@
 #define MCRL2_DATA_DETAIL_CONCEPTS_H
 
 #include <boost/concept_check.hpp>
-// #include <boost/type_traits/is_convertible.hpp>
 #include <boost/iterator/iterator_concepts.hpp>
 
 #include <boost/concept/detail/concept_def.hpp>

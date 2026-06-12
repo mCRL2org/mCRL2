@@ -172,9 +172,6 @@ private:
   /// \brief A linear process specification.
   Specification& f_lps;
 
-  /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
-  // bool f_no_marking;
-
   /// \brief Flag indicating whether or not the process of checking the confluence of a summand stops when
   /// \brief a summand is encountered that is not confluent with the tau summand at hand.
   bool f_check_all;
@@ -607,7 +604,6 @@ void Confluence_Checker<Specification>::uniquely_rename_summutation_variables(
   for (const data::variable& summation_variable : summation_variables)
   {
     core::identifier_string new_name = f_set_identifier_generator(summation_variable.name());
-    // mCRL2log(log::verbose) << "Renamed " << i->name() << " to " << new_name << std::endl;
 
     data::variable renamed_variable = data::variable(new_name, summation_variable.sort());
     new_summation_variables.push_front(renamed_variable);

@@ -12,9 +12,4 @@
 #ifndef MCRL2_PRES_REWRITER_H
 #define MCRL2_PRES_REWRITER_H
 
-// #include "mcrl2/pbes/rewriters/bqnf_rewriter.h"
-// #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-// #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
-// #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
-
 #endif // MCRL2_PRES_REWRITER_H

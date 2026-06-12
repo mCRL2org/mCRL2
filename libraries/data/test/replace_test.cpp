@@ -16,7 +16,6 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
-// #include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
 
 using namespace mcrl2;
 
@@ -203,7 +202,6 @@ BOOST_AUTO_TEST_CASE(test_variables)
   // this will lead to an assertion failure, because an attempt will be made to store
   // a data expression in a variable
   sigma[d1] = data::sort_bool::and_(d1, d2);
-  // data::data_expression z1 = replace_variables(d1, sigma);
 
   // therefore one should first convert d1 to a data expression:
   data::data_expression z2 = replace_variables(data::data_expression(d1), sigma);

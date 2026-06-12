@@ -1058,8 +1058,6 @@ class RewriterCompilingJitty::ImplementTree
   padding m_padding;
   std::size_t m_locvar_counter=0;
 
-  // variable_or_number_list m_nnfvars;
-
   ///
   /// \brief opid_is_nf establishes whether a function symbol is always in normal form.
   ///        this is the case when there are no rewrite rules for the symbol.
@@ -2032,7 +2030,6 @@ class RewriterCompilingJitty::ImplementTree
     else
     {
       const char* arg_or_t = level == 1 ? "arg" : "t";
-      // if (!is_function_sort(tree.function().sort()))
       assert(is_machine_number(tree.number()));
       {
         m_stream << "if (uint_address(down_cast<application>(" << arg_or_t << parent << ")[" << cur_arg-1 << "]) == "
@@ -2349,13 +2346,9 @@ public:
       if (target_for_output.empty())
       {
         assert(0);
-        // m_stream << ss.str();
       }
       else
       {
-        // m_stream << m_padding << target_for_output << " = " << ss.str() << ";\n";
-        // m_stream << m_padding << target_for_output << ".assign(" << ss.str() 
-        //          << ", *this_rewriter->m_thread_aterm_pool);\n";
         std::stringstream ss1;
         m_stream << m_padding << cplusplus_function_name << "(" << target_for_output;
         
@@ -2424,7 +2417,6 @@ public:
     m_stream << m_padding << "std::size_t old_stack_size=this_rewriter->m_rewrite_stack.stack_size();\n";
     bool added_new_parameters_in_brackets=false;
     m_used=nfs_array(arity); // This vector maintains which arguments are in normal form.
-    // m_nnfvars=variable_or_number_list();
     std::map<variable,std::string> type_of_code_variables;
     while (!strat.empty())
     {
@@ -2434,7 +2426,6 @@ public:
         std::size_t arg = match_tree_A(strat.front()).variable_index();
         if (!m_used[arg])
         {
-          // m_stream << m_padding << "const data_expression& arg" << arg << " = local_rewrite(arg_not_nf" << arg << ");\n"; 
           /* m_stream << m_padding << "data_expression& arg" << arg << " = this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();\n"
                    << m_padding << "local_rewrite(arg" << arg << ", arg_not_nf" << arg << ");\n"; */
        
@@ -2846,7 +2837,6 @@ public:
 
 void RewriterCompilingJitty::CleanupRewriteSystem()
 {
-  // m_nf_cache.clear();
   if (so_rewr_cleanup != nullptr)
   {
     so_rewr_cleanup();

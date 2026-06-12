@@ -90,7 +90,6 @@ void drawCenteredText(QPainter& painter, float x, float y, const QString& text, 
 inline
 void drawCenteredStaticText(QPainter& painter, float x, float y, const QStaticText& text, const QColor& color = Qt::black)
 {
-  // QFontMetrics metrics(painter.font());
   qreal w = text.size().width();
   qreal h = text.size().height();
   painter.setPen(color);

@@ -1478,7 +1478,6 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
     inert_out_per_block(1, 0),
     states_per_block(1, l.num_states())
 {
-    // log::logger::set_reporting_level(log::debug);
 
     mCRL2log(log::verbose) << "O(m log n) "
                     << (preserve_divergence ? "Divergence preserving b" : "B")

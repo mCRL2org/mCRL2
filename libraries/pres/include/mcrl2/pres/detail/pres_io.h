@@ -32,39 +32,6 @@ pres load_pres(const std::string& filename);
 /// \brief Saves an PRES to filename, or to stdout if filename equals "".
 void save_pres(const pres& presspec, const std::string& filename);
 
-// inline
-// std::string file_extension(const std::string& filename)
-// {
-//   auto pos = filename.find_last_of('.');
-//   if (pos == std::string::npos)
-//   {
-// 	return "";
-//   }
-//   return filename.substr(pos + 1);
-// }
-//
-// inline
-// void my_save_pres(const pres& p, const std::string& filename)
-// {
-//   auto ext = file_extension(filename);
-//   if (ext == "pres")
-//   {
-//     save_pres(p, filename, pres_format_internal());
-//   }
-//   else if (ext == "res")
-//   {
-//     res::save_pres(p, filename, res::res_format_internal());
-//   }
-//   else if (ext == "pg")
-//   {
-//     res::save_pres(p, filename, res::res_format_pgsolver());
-//   }
-//   else
-//   {
-//     pres_system::save_pres(p, filename);
-//   }
-// }
-
 } // namespace detail
 
 } // namespace mcrl2::pres_system

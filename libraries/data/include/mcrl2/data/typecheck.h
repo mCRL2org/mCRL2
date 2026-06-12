@@ -283,7 +283,6 @@ void typecheck_sort_expression(const sort_expression& sort_expr, const data_spec
 {
   try
   {
-    // sort_type_checker type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases());
     sort_type_checker type_checker(data_spec);
     type_checker(sort_expr);
   }

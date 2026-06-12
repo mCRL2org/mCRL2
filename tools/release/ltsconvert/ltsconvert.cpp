@@ -185,7 +185,6 @@ class ltsconvert_tool : public input_output_tool
         }
         if constexpr (std::is_same_v<LTS_TYPE, probabilistic_lts_lts_t> || std::is_same_v<LTS_TYPE, lts_lts_t>)
         {
-          // l.set_process_parameters(atermpp::term_list<mcrl2::data::variable>(mcrl2::data::variable("state_number",mcrl2::data::sort_nat::nat())));
           l.set_process_parameters({mcrl2::data::variable("state_number",mcrl2::data::sort_nat::nat())});
         }
         l.add_state_number_as_state_information();

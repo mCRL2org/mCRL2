@@ -348,7 +348,6 @@ constraint_ptr make_is_equal_to_constraint(const sort_expression& s1,
   if (is_untyped_sort_variable(s2))
   {
     return make_is_element_of_constraint(s2, { s1 });
-    // return constraint_ptr(new is_equal_to_constraint(make_untyped_sort_variable(s2), s1, cost));
   }
   throw mcrl2::runtime_error("cannot make is_equal_to constraint");
 }

@@ -2718,7 +2718,6 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
 
   if (m_shapeType == TYPE_RECT)
   {
-    //VisUtils::setColor( colFil );
     VisUtils::setColor(colFill);
     VisUtils::fillRect(
       -xD, xD,   // new
@@ -2730,7 +2729,6 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
   }
   else if (m_shapeType == TYPE_RECT)
   {
-    //VisUtils::setColor( colFil );
     VisUtils::setColor(colFill);
     VisUtils::fillRect(
       -xD, xD,   // new
@@ -2742,7 +2740,6 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
   }
   else if (m_shapeType == TYPE_ELLIPSE)
   {
-    //VisUtils::setColor( colFil );
     VisUtils::setColor(colFill);
     VisUtils::fillEllipse(
       0.0, 0.0,
@@ -2756,7 +2753,6 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
   }
   else if (m_shapeType == TYPE_LINE)
   {
-    //VisUtils::setColor( colLin );
     VisUtils::setColor(colFill);
     VisUtils::drawLine(
       -xD, xD,
@@ -2764,7 +2760,6 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
   }
   else if (m_shapeType == TYPE_ARROW)
   {
-    //VisUtils::setColor( colFil );
     VisUtils::setColor(colFill);
     VisUtils::fillArrow(
       -xD, xD,
@@ -2779,7 +2774,6 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
   }
   else if (m_shapeType == TYPE_DARROW)
   {
-    //VisUtils::setColor( colFil );
     VisUtils::setColor(colFill);
     VisUtils::fillDArrow(
       -xD, xD,

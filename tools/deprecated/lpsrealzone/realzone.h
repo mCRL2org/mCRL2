@@ -379,10 +379,6 @@ protected:
         inequalities.push_back(linear_inequality(equal_to(*par_prime, a != nullptr ? a->rhs() : *real_par), r));
       }
 
-      // for(linear_inequality &li: inequalities)
-      // {
-      //   std::cerr << "original system " << pp(li) << std::endl;
-      // }
       variable_list eliminate_variables = summand.get_real_summation_variables();
       for(variable v: global_variables)
       {
@@ -393,11 +389,6 @@ protected:
       std::vector< linear_inequality > new_inequalities;
       fourier_motzkin(inequalities, eliminate_variables.begin(), eliminate_variables.end(), elim_inequalities, r);
       remove_redundant_inequalities(elim_inequalities, new_inequalities,r);
-
-      // for(linear_inequality &li: new_inequalities)
-      // {
-      //   std::cerr << "reduced system " << pp(li) << std::endl;
-      // }
 
       data_expression next_zone, new_condition;
       dbm_add_translated_inequalities(dbm_var, next_zone, new_condition, new_inequalities);
@@ -421,7 +412,6 @@ protected:
         {
           lhs_vars.push_back(v);
         }
-        // std::cerr << "bounds system " << pp(i) << std::endl;
         add_to_split_bounds(dbm_index_pair(lhs_vars, real_parameters.begin(), real_parameters.end(), false),
            sort_bound::cbound(i.rhs(), comp_to_function(i.comparison())));
       }
@@ -497,7 +487,6 @@ protected:
     // TODO: clean this code up
     assignment_list initial_assignments = make_assignment_list(m_spec.process().process_parameters(), m_spec.initial_process().expressions());
     assignment_list al;
-    //for(assignment_list::const_iterator i = m_spec.initial_process().assignments().begin(); i != m_spec.initial_process().assignments().end(); i++)
     for(assignment_list::const_iterator i = initial_assignments.begin(); i != initial_assignments.end(); i++)
     {
       if(i->lhs().sort() != sort_real::real_())
@@ -506,7 +495,6 @@ protected:
       }
     }
     al.push_front(assignment(dbm_var, normalize_sorts(sort_dbm::dbm_zero(), m_spec.data())));
-    //m_spec.initial_process() = stochastic_process_initializer(al, m_spec.initial_process().distribution());
     m_spec.initial_process() = stochastic_process_initializer(right_hand_sides(al), m_spec.initial_process().distribution());
   }
 
@@ -562,11 +550,7 @@ protected:
     add_constructors(m_spec.data(), sort_bound::bound_generate_constructors_code());
     add_mappings(m_spec.data(), sort_bound::bound_generate_functions_code());
     add_equations(m_spec.data(), sort_bound::bound_generate_equations_code());
-    // m_spec.data().add_alias(alias(sort_dbm::dbm(),sort_list::list(sort_list::list(sort_bound::bound()))));
     matrix_struct ms(size, sort_bound::bound());
-    // add_constructors(m_spec.data(),ms.get_definition().constructor_functions());
-    // add_mappings(m_spec.data(),ms.get_definition().projection_functions());
-    // add_equations(m_spec.data(),ms.get_definition().projection_equations());
     m_spec.data().add_alias(alias(sort_dbm::dbm(), ms.get_definition()));
     add_mappings(m_spec.data(), sort_dbm::dbm_generate_functions_code());
     add_equations(m_spec.data(), sort_dbm::dbm_generate_equations_code());

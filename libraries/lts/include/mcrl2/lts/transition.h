@@ -161,7 +161,6 @@ struct hash<mcrl2::lts::transition>
 {
   std::size_t operator()(const mcrl2::lts::transition& t) const
   {
-    // return t.from() << 2 ^ t.label() << 1 ^ t.to();
     return mcrl2::utilities::detail::hash_combine(t.from(),mcrl2::utilities::detail::hash_combine(t.label(), t.to()));
   }
 };

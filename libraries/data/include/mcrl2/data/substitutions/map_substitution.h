@@ -45,8 +45,6 @@ struct map_substitution
     {
       return i->second;
     }
-    // N.B. This does not work!
-    // return i == m_map.end() ? v : i->second;
   }
 
   static constexpr bool is_identity_substitution=false;

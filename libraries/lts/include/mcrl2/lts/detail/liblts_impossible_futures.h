@@ -337,7 +337,6 @@ bool destructive_impossible_futures(LTS& l1,
 
   std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1, l2);
-  // l1.save("merged.aut"); 
 
   const detail::lts_cache<LTS> weak_property_cache(l1, true);
 

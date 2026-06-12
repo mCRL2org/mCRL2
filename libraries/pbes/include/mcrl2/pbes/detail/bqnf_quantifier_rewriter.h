@@ -191,7 +191,6 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// \return the expression resulting from the transformation.
     virtual pbes_expression rewrite_bounded_forall(const pbes_expression& e)
     {
-      //std::clog << "rewrite_bounded_forall: " << pp(e) << std::endl;
       assert(is_forall(e));
       data::variable_list qvars = quantifier_variables(e);
       pbes_expression qexpr = pbes_system::accessors::arg(e);
@@ -282,7 +281,6 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// \return the expression resulting from the transformation.
     virtual pbes_expression rewrite_bounded_exists(const pbes_expression& e)
     {
-      //std::clog << "rewrite_bounded_exists" << pp(e) << std::endl;
       assert(is_exists(e));
       pbes_expression qexpr = pbes_system::accessors::arg(e);
       data::variable_list qvars = quantifier_variables(e);
@@ -302,7 +300,6 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// \return the expression resulting from the transformation.
     virtual pbes_expression rewrite_and(const pbes_expression& e)
     {
-      //std::clog << "rewrite_and: " << pp(e) << std::endl;
       pbes_expression conjunction = true_();
       std::vector<pbes_equation> new_eqns;
       std::vector<pbes_expression> conjuncts = split_conjuncts(e);
@@ -325,7 +322,6 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// \return the expression resulting from the transformation.
     virtual pbes_expression rewrite_or(const pbes_expression& e)
     {
-      //std::clog << "rewrite_or: " << pp(e) << std::endl;
       pbes_expression disjunction = false_();
       std::vector<pbes_expression> new_exprs;
       std::vector<pbes_expression> disjuncts = split_disjuncts(e);
@@ -349,7 +345,6 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// \return the expression resulting from the transformation.
     virtual pbes_expression rewrite_imp(const pbes_expression& e)
     {
-      //std::clog << "rewrite_imp: " << pp(e) << std::endl;
       pbes_expression l = rewrite_bqnf_expression(pbes_system::accessors::left(e));
       pbes_expression r = rewrite_bqnf_expression(pbes_system::accessors::right(e));
       pbes_expression result = imp(l, r);
@@ -368,7 +363,6 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// \return the expression resulting from the transformation.
     virtual pbes_expression rewrite_bqnf_expression(const pbes_expression& e)
     {
-      //std::clog << "rewrite_bqnf_expression: " << pp(e) << std::endl;
       pbes_expression result;
       if (is_propositional_variable_instantiation(e) || is_simple_expression(e, false)) {
         // Eqn of the form sigma X(d: D) = phi && Y(h(d, l)), with phi a simple formula.

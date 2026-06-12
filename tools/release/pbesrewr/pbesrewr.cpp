@@ -86,7 +86,6 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
         case pbes_rewriter_type::simplify:
         {
           simplify_quantifiers_data_rewriter<data::rewriter> pbesr(datar);
-          //simplify_data_rewriter<data::rewriter> pbesr(datar);
           pbes_rewrite(p, pbesr);
           break;
         }
@@ -129,8 +128,6 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
         }
         case pbes_rewriter_type::ppg:
         {
-          //bool bqnf = detail::is_bqnf(p);
-          //std::clog << "bqnf_traverser says: p is " << (bqnf ? "" : "NOT ") << "in BQNF." << std::endl;
           bool ppg = pbes_system::detail::is_ppg(p);
           if (ppg)
           {

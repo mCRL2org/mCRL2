@@ -141,12 +141,8 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
   std::set < state_type > states_reachable_in_one_visible_action;
   std::set < state_type > states_reachable_in_one_hidden_action;
 
-  // for(outgoing_transitions_per_state_t::const_iterator i=outgoing_transitions.begin(); i!=outgoing_transitions.end(); ++i)
-
-  // for(const outgoing_transitions_t& vec: outgoing_transitions)
   for(state_type from=0; from < l.num_states(); from++)
   {
-    // for(const outgoing_pair_t& p: vec)
     for(size_t j=outgoing_transitions.lowerbound(from); j<outgoing_transitions.upperbound(from); ++j)
     {
       const outgoing_pair_t& p = outgoing_transitions.get_transitions()[j];
@@ -158,8 +154,6 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
       states_reachable_in_one_hidden_action.clear();
 
       // For every transition from-label->to we calculate the sets { s | from -a->s } and { s | from -tau-> s }.
-      // assert(from_<outgoing_transitions.size());
-      // for(const outgoing_pair_t& j: outgoing_transitions[from_])
       for(size_t j_=outgoing_transitions.lowerbound(from_); j_<outgoing_transitions.upperbound(from_); ++j_)
       {
         const outgoing_pair_t& j = outgoing_transitions.get_transitions()[j_];
@@ -237,7 +231,6 @@ void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CL
         l.add_transition(transition(from_, label_, to_));
       }
     }  
-    // from++;
   }
 }
 

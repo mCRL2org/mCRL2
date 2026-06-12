@@ -97,8 +97,6 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
                                        const std::size_t tau_label_index=0,
                                        std::vector<std::size_t>& todo_stack=bogus_todo_stack)
 {
-// std::cerr << "START SORTING TRANSITIONS\n";
-// std::cerr << "==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
 #ifndef NDEBUG
   for(std::pair<std::size_t, std::size_t> p: count_sum_transitions_per_action){ assert(p.first==0); }
   assert(todo_stack.empty());
@@ -116,10 +114,8 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
     {
       todo_stack.push_back(label);
     }
-// std::cerr << "COUNT LABEL " << label << "\n";
     count_sum_transitions_per_action[label].first++;
   }
-// std::cerr << "+++++++++++++++++++++\n"; for(auto p: count_sum_transitions_per_action) { std::cerr << "AAAA1 " << p.first << "    " << p.second << "\n"; }
 
   // Sum the number of transitions per label. By summing these numbers up, count_sum_transitions_per_action[a].second indicates the starting
   // position where a transition with label a must be placed. 
@@ -141,7 +137,6 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
       p.second=sum;
     }
   }
-// std::cerr << "+++++++++++++++++++++\n"; for(auto p: count_sum_transitions_per_action) { std::cerr << "AAAA2 " << p.first << "    " << p.second << "\n"; }
 
   // Move from left to right through the transitions and move them to the required place. 
   std::vector<transition>::iterator current_leftmost_position=begin;
@@ -149,15 +144,11 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
   std::size_t current_label=USE_STACK?*current_leftmost_label:0;
   while (current_leftmost_position!=end)
   {
-// std::cerr << "POINTERS  " << &*current_leftmost_position << "    " << &*end << "\n";
-// std::cerr << "POINTERS1 " << &*current_leftmost_label << "    " << &*todo_stack.end() << "\n";
-// std::cerr << "AAAAA==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
     if (USE_STACK)
     {
       assert(current_leftmost_label!=todo_stack.end());
       while (count_sum_transitions_per_action[current_label].first==0)
       {
-// std::cerr << "HIER\n";
         current_leftmost_label++;
         if (current_leftmost_label==todo_stack.end())
         {
@@ -176,7 +167,6 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
       while (current_label<count_sum_transitions_per_action.size() &&
              count_sum_transitions_per_action[current_label].first==0)
       {
-// std::cerr << "HIER\n";
         current_label++;
       }
       // Move to the first position with the current label that is potentially not correct.
@@ -196,7 +186,6 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
     {
       current_leftmost_position++;
       count_sum_transitions_per_action[current_label].first--;
-      // count_sum_transitions_per_action[current_label].second;
     }
     
     // Check whether a transition with the current label is expected at the current_leftmost_position.
@@ -205,24 +194,19 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
       // At the current position there is a transition that needs to be moved. Move transitions out of the way, until
       // the transitions that belongs here is found and is moved in place. 
       transition transition_on_the_move= *current_leftmost_position;
-// std::cerr << "Transition on the move " << ptr(transition_on_the_move) << "\n";
       do
       {
-// std::cerr << "CCCCC==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
         std::size_t label=get_label(transition_on_the_move);
         std::size_t new_position=count_sum_transitions_per_action[label].second-count_sum_transitions_per_action[label].first;
-// std::cerr << "FIrst NEW POSITION " << new_position << "\n";
         assert(0<std::distance(begin,end)-new_position);
         count_sum_transitions_per_action[label].first--;
         // Search for a target position with a non-matching label. 
         while (get_label(*(begin+new_position))==label)
         {
           new_position++;
-          // count_sum_transitions_per_action[label].second++;
           count_sum_transitions_per_action[label].first--;
         }
         assert(get_label(transition_on_the_move)!=get_label(*(begin+new_position)));
-// std::cerr << "DEFINITIVE NEW POSITION " << new_position << "\n";
         std::swap(transition_on_the_move,*(begin+new_position));
       }
       while (get_label(transition_on_the_move)!=current_label);
@@ -230,11 +214,8 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
       *current_leftmost_position=transition_on_the_move;
       current_leftmost_position++;
       count_sum_transitions_per_action[current_label].first--;
-      // count_sum_transitions_per_action[current_label].second++;
     }
   }
-// std::cerr << "==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
-// std::cerr << "END SORTING TRANSITIONS\n";
 }
 
 inline void group_transitions_on_label(std::vector<transition>& transitions, 
@@ -263,13 +244,9 @@ void group_in_situ(const ITERATOR& begin,
   // Initialise the action counter.
   todo_stack.clear();
 
-//std::cerr << "GROUP IN SITU " << &*begin << "   " << &*end << "   " << std::distance(begin,end) << "\n";
-//std::cerr << "VALUE COUNTER IN "; for(auto s:  value_counter){ std::cerr << s.label_counter << "  "; } std::cerr << "\n";
-//std::cerr << "RANGE IN  "; for(auto s=begin; s!=end; s++){ std::cerr << *s << "  "; } std::cerr << "\n";
   for(ITERATOR i=begin; i!=end; ++i)
   {     
     std::size_t n=get_value(*i);
-//std::cerr << "CONSIDER IN SITU " << &*i << " with value " << n << "\n";
     if (value_sum_counter[n].first==0)
     {           
       todo_stack.push_back(n);
@@ -284,21 +261,14 @@ void group_in_situ(const ITERATOR& begin,
     sum=sum+value_sum_counter[n].first;
     value_sum_counter[n].second=sum;
   }
-//std::cerr << "VALUE COUNTER1 count  "; for(auto s:  value_counter){ std::cerr << s.label_counter << "  "; } std::cerr << "\n";
-//std::cerr << "VALUE COUNTER1 not_in "; for(auto s:  value_counter){ std::cerr << s.not_investigated << "  "; } std::cerr << "\n";
                                         
-  // std::vector<std::size_t>::iterator current_value=todo_stack.begin();
-
   // Move from left to right through the transitions and move them to the required place. 
   std::vector<transition>::iterator current_leftmost_position=begin;
   std::vector<std::size_t>::iterator current_leftmost_value=todo_stack.begin();
   while (current_leftmost_position!=end)
   {
-// std::cerr << "POINTERS " << &*current_leftmost_position << "    " << &*transitions.end() << "\n";
-// std::cerr << "AAAAA==============\n"; for(auto t: transitions){ std::cerr << ptr(t) << "\n";} std::cerr << "---------\n";
     while (current_leftmost_value!=todo_stack.end() && value_sum_counter[*current_leftmost_value].first==0)
     {
-// std::cerr << "HIER\n";
       current_leftmost_value++;
     }
     // Move to the first position with the current label that is potentially not correct.
@@ -315,7 +285,6 @@ void group_in_situ(const ITERATOR& begin,
     {
       current_leftmost_position++;
       value_sum_counter[*current_leftmost_value].first--;
-      // sum_counter[*current_leftmost_value]++;
     }
 
     // Check whether a transition with the current valuel is expected at the current_leftmost_position.
@@ -324,14 +293,11 @@ void group_in_situ(const ITERATOR& begin,
       // At the current position there is a transition that needs to be moved. Move transitions out of the way, until
       // the transitions that belongs here is found and is moved in place. 
       transition transition_on_the_move= *current_leftmost_position;
-//std::cerr << "Transition on the move " << ptr(transition_on_the_move) << "\n";
       do
       {
-        // std::size_t value=get_value(transition_on_the_move);
         std::size_t value=transition_on_the_move.to();
         assert(value<value_sum_counter.size());
         std::size_t new_position=value_sum_counter[value].second-value_sum_counter[value].first;
-// std::cerr << "FIrst NEW POSITION " << new_position << "    " << std::distance(begin,end) << "\n";
         assert(std::distance(begin,end)-new_position>0);
         value_sum_counter[value].first--;
         // Search for a target position with a non-matching label. 
@@ -339,29 +305,21 @@ void group_in_situ(const ITERATOR& begin,
         while ((begin+new_position)->to()==value)
         {
           new_position++;
-          // value_sum_counter[value]++;
           value_sum_counter[value].first--;
         }
         assert(get_value(transition_on_the_move)!=get_value(*(begin+new_position)));
-//std::cerr << "DEFINITIVE NEW POSITION " << new_position << "\n";
         std::swap(transition_on_the_move,*(begin+new_position));
       }
-      // while (get_value(transition_on_the_move)!=*current_leftmost_value);
       while (transition_on_the_move.to()!=*current_leftmost_value);
       // We found the transition that we must put at the current place. 
       *current_leftmost_position=transition_on_the_move;
       current_leftmost_position++;
       value_sum_counter[*current_leftmost_value].first--;
-      // sum_counter[*current_leftmost_value]++;
     }
   }
-//std::cerr << "END SORTING TRANSITIONS\n";
 
 
 
-//std::cerr << "TODO STACK "; for(auto s:  todo_stack){ std::cerr << s << "  "; } std::cerr << "\n";
-//std::cerr << "VALUE COUNTER2 "; for(auto s:  value_counter){ std::cerr << s << "  "; } std::cerr << "\n";
-//std::cerr << "RANGE OUT  "; for(auto s=begin; s!=end; s++){ std::cerr << *s << "  "; } std::cerr << "\n"; 
 } */
 
 
@@ -378,14 +336,11 @@ inline void group_transitions_on_label_tgt(std::vector<transition>& transitions,
                                    count_sum_transitions_per_action, 
                                    tau_label_index, 
                                    todo_stack);
-//std::cerr << "HIER\n";
   std::vector<std::size_t> todo_stack_target;
-  // std::vector<std::size_t> value_counter(number_of_states,0);
   std::vector<std::pair<std::size_t, std::size_t>> value_sum_counter(number_of_states, {0,0});
   std::vector<transition>::iterator begin=transitions.begin();
   for(std::size_t label: todo_stack)
   {
-//std::cerr << "SORT " << &*begin << "   tot   " << &*end << "    " << current_label << "    " << std::distance(begin,end) << "\n";
     todo_stack_target.clear();
     std::vector<transition>::iterator end=transitions.begin()+count_sum_transitions_per_action[label].second;
     group_transitions_on_label<true>(begin, end, [](const std::vector<transition>::value_type& t){ return t.to(); }, value_sum_counter, 0, todo_stack_target); 
@@ -420,8 +375,6 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
   }
   relevant_bits=shift;
 
-// std::cerr << "SHIFT MASK1 " << shift << "    " << mask << "\n";
-
   std::vector<std::pair<std::size_t, std::size_t>> count_sum_transitions_per_tgt1(mask+1, {0,0});
   std::vector<std::size_t> todo_stack;
   
@@ -429,8 +382,6 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
                                     transitions.end(),
                                     [shift](const transition& t){ return (t.to()>>shift); },
                                     count_sum_transitions_per_tgt1);
-// std::cerr << "==============\n"; for(transition& t: transitions){ std::cerr << ptr(t) << "\n";} std::cerr << "---------\n";
-//std::cerr << "END SORTING TRANSITIONS\n";
   
   if (relevant_bits>0)
   {
@@ -442,20 +393,16 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
     std::vector<transition>::iterator begin=transitions.begin();
     for(std::pair<std::size_t, std::size_t>& p1: count_sum_transitions_per_tgt1)
     {
-// std::cerr << "P1: " << p1.first << "    " << p1.second << "\n";
       std::vector<transition>::iterator end=transitions.begin()+p1.second;
-// std::cerr << "SHIFT MASK2 " << shift << "    " << mask << "\n";
       group_transitions_on_label<false>(begin, 
                                         end, 
                                         [mask](const transition& t){ return (t.to() & mask); }, 
                                         count_sum_transitions_per_tgt2);
-// std::cerr << "QQQQQ==============\n"; for(auto t=begin; t!=end; t++){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
       std::vector<transition>::iterator begina=begin;
       for(std::pair<std::size_t, std::size_t>& p2: count_sum_transitions_per_tgt2)
       {
 
         std::vector<transition>::iterator enda=begin+p2.second;
-// std::cerr << "LABEL1 \n";
         group_transitions_on_label<true>(begina, 
                                          enda, 
                                          [](const std::vector<transition>::value_type& t){ return t.label(); }, 
@@ -480,14 +427,11 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
   else 
   {
     std::vector<std::size_t> todo_stack_target;
-    // std::vector<std::size_t> value_counter(number_of_labels,0);
     std::vector<std::pair<std::size_t, std::size_t>> value_sum_counter(number_of_labels, {0,0});
     std::vector<transition>::iterator begin=transitions.begin();
     for(std::pair<std::size_t, std::size_t>& p: count_sum_transitions_per_tgt1)
     {
-//std::cerr << "SORT " << &*begin << "   tot   " << &*end << "    " << current_label << "    " << std::distance(begin,end) << "\n";
       std::vector<transition>::iterator end=transitions.begin()+p.second;
-//std::cerr << "LABEL2 \n";
      group_transitions_on_label<true>(begin, 
                                       end, 
                                       [](const transition& t){ return t.label(); }, 
@@ -499,7 +443,6 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
         value_sum_counter[i]={0,0};
       }
       todo_stack_target.clear(); 
-      // std::sort(begin, end, [](const transition& t1, const transition& t2){ return t1.label()<t2.label(); });
       begin=end;
     }
   }
@@ -507,10 +450,8 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
   std::size_t last_state=0;
   std::size_t last_label=tau_label_index;
   std::unordered_set<std::size_t> seen_labels;
-// std::cerr << "==============\n"; for(transition& t: transitions){ std::cerr << ptr(t) << "\n";} std::cerr << "---------\n";
   for(const transition& t: transitions)
   {
-// std::cerr << "CHECK " << ptr(t) << "\n";
     if (last_state<t.to())
     {
       last_label=tau_label_index;
@@ -565,9 +506,7 @@ inline void group_transitions_on_tgt_lbl_recursive(std::vector<transition>& tran
                                todo_stack);
     
 
-//std::cerr << "HIER\n";
   std::vector<std::size_t> todo_stack_target;
-  // std::vector<std::size_t> value_counter(number_of_states,0);
   std::vector<std::pair<std::size_t, std::size_t>> value_sum_counter(mask+1, {0,0});
 
 */

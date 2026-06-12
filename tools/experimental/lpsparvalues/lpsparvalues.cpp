@@ -71,7 +71,6 @@ class lps_explore_domains_tool: public rewriter_tool<input_tool>
       load_lps(spec, m_input_filename);
       data::rewriter r(spec.data(), rewrite_strategy());
 
-      // lps::lps_explore_domains_algorithm<data::rewriter, stochastic_specification>(spec, r, m_qlimit, m_maximal_number_of_rounds).run();
       auto result = lps::lps_parvalues_algorithm<data::rewriter, stochastic_specification>(spec, r, m_qlimit, m_maximal_number_of_rounds).run();
       for (const auto& [par, values]: result)
       {

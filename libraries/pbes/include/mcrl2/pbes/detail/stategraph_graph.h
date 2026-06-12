@@ -439,7 +439,6 @@ struct control_flow_graph
   std::pair<typename std::set<Vertex>::iterator, bool> insert(const Vertex& u)
   {
     auto result = vertices.insert(u);
-    // self_check();
     return result;
   }
 
@@ -554,7 +553,6 @@ struct local_control_flow_graph: public control_flow_graph<local_control_flow_gr
 
     mCRL2log(log::trace) << " u.outgoing_edges() = " << u.print_outgoing_edges() << std::endl;
     insert_edge(u, edge_label, v);
-    // self_check();
   }
 
   std::string print_marking() const
@@ -653,33 +651,12 @@ class global_control_flow_graph_vertex: public add_edges<global_control_flow_gra
     std::string print() const
     {
       return print_outgoing_edges();
-      // std::ostringstream out;
-      // out << pbes_system::pp(X);
-      // out << " edges:";
-      // for (auto i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
-      // {
-      //   out << " " << pbes_system::pp(i->target->X);
-      // }
-      // out << " sig: " << core::detail::print_set(sig);
-      // return out.str();
     }
 
     // also print the parameters
     std::string print(const data::variable_list&) const
     {
       return print_outgoing_edges();
-      // std::ostringstream out;
-      // out << core::pp(X.name());
-      // out << "(";
-      // out << data::pp(data::make_assignment_list(d_X, X.parameters()));
-      // out << ")";
-      // out << " edges:";
-      // for (auto i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
-      // {
-      //   out << " " << i->print();
-      // }
-      // out << " sig: " << core::detail::print_set(sig);
-      // return out.str();
     }
 
     std::set<std::size_t> marking_variable_indices(const stategraph_pbes& p) const

@@ -353,7 +353,6 @@ void Graph::initGraph()
 // This function initializes the graph and should be called after all
 // nodes and edges have been added.
 {
-  //initRoot();
   updateLeaves();
   updateBundles();
 }

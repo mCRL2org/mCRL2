@@ -45,9 +45,6 @@ void test_div_mod(const std::string& xs, const std::string& ys)
   if (!y.is_zero())
   { 
     std::cerr << "Check div mod for " << xs << " and " << ys << "\n";
-    // std::cerr << "x/y " << (x/y) << "\n";
-    // std::cerr << "y*(x/y) " << (y*(x/y)) << "\n";
-    // std::cerr << "x%y " << (x%y) << "\n";
     std::cerr << "LHS: " << x << "\n";
     std::cerr << "RHS: " << y*(x/y)+(x % y) << "\n";
     BOOST_CHECK(x==y*(x/y)+(x % y));
@@ -78,10 +75,6 @@ void test_plus_minus_multiply(const std::string& xs, const std::string& ys)
 
   std::cerr << "Check plus minus " << xs << " and " << ys << "\n";
 
-  // std::cerr << "x+y: " << (x+y) << "\n";
-  // std::cerr << "x-y: " << (x-y) << "\n";
-  // std::cerr << "x*x: " << x*x << "\n";
-  // std::cerr << "y*y: " << y*y << "\n";
   std::cerr << "LHS: " << (x+y)*(x-y) << "\n";
   std::cerr << "RHS: " << x*x-y*y << "\n";
   BOOST_CHECK((x+y)*(x-y)==x*x-y*y);

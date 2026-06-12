@@ -26,7 +26,6 @@ void make_state(state& result,
                 const std::size_t size,
                 Transformer transformer)
 {
-  // make_term_balanced_tree<data::data_expression>(result, p, size, transformer);
   make_term_balanced_tree(result, p, size, transformer);
 }
  
@@ -35,7 +34,6 @@ void make_state(state& result,
                 ForwardTraversalIterator p,
                 const std::size_t size)
 {
-  // make_term_balanced_tree<data::data_expression>(result, p, size, transformer);
   make_term_balanced_tree(result, 
                           p, 
                           size, 

@@ -32,7 +32,6 @@ class PrimitiveFactory: public QObject
     int makeObliqueCone(float a,float r,float s);
     int makeSphere();
     int makeTruncatedCone(float r,bool topClosed,bool bottomClosed);
-    //int  makeTube();
 
   private slots:
     void qualityChanged();

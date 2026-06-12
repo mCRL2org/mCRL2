@@ -417,10 +417,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     data_expression intersection(normalize_sorts(sort_set::intersection(sort_nat::nat(),sort_set::complement(sort_nat::nat(),
                   sort_set::constructor(sort_nat::nat(),sort_set::false_function(sort_nat::nat()), sort_fset::empty(sort_nat::nat()))),
                   sort_set::constructor(sort_nat::nat(),sort_set::false_function(sort_nat::nat()),sort_fset::empty(sort_nat::nat()))),specification));
-    //data_rewrite_test(R, normalize_sorts(less_equal(empty_complement,empty),specification), false_());
     data_rewrite_test(R, normalize_sorts(less_equal(empty_set,empty_complement),specification), sort_bool::true_());
-    //data_rewrite_test(R, normalize_sorts(equal_to(intersection, empty_complement),specification), true_());
-    //data_rewrite_test(R, normalize_sorts(equal_to(empty_complement, intersection),specification), true_());
 
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p0, s),specification), sort_bool::false_());
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p1, s),specification), sort_bool::true_());
@@ -525,8 +522,6 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
   using namespace sort_nat;
 
 
-  //data_specification specification;
-
   std::vector< structured_sort_constructor_argument > arguments;
 
   arguments.emplace_back("a0", bool_());
@@ -555,9 +550,6 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
       "is_c");
 
   data::structured_sort ls(constructors);
-
-//  specification.add_alias(alias(basic_sort("D"), ls));
-  // specification.normalize_sorts();
 
   data_specification specification = data::parse_data_specification("sort D = struct c0 | c1?is_one | a(a0: Bool) | b(Bool)?is_b | c(n0: Nat, n1: Nat)?is_c; ");
 
@@ -1652,7 +1644,6 @@ BOOST_AUTO_TEST_CASE(compile_complex_application)   // Compilation of a term: h(
     "  (exists c':Products. (c' > c && h(p')(c') > 0))  ->  update_order(p,c,p'|>l,h) = p'|>update_order(p,c,l,h);\n"
   );
     
-  // data::detail::set_enumerator_iteration_limit(5);
   data_specification specification(parse_data_specification(s));
     
   rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));

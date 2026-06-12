@@ -816,7 +816,6 @@ class stategraph_local_algorithm: public stategraph_algorithm
               for (auto ei = EXi.begin(); ei != EXi.end(); ++ei)
               {
                 const local_control_flow_graph_vertex& u = *ei->u;
-                // const local_control_flow_graph_vertex& v = *ei->v;
                 std::size_t j = ei->k;
                 auto const& Bj = m_belongs[j];
                 if (u.marking().size() == Bj[X].size())
@@ -825,7 +824,6 @@ class stategraph_local_algorithm: public stategraph_algorithm
                 }
                 for (const auto& ej: EXi)
                 {
-                  // const local_control_flow_graph_vertex& u1 = *ej->u;
                   const local_control_flow_graph_vertex& v1 = *ej.v;
                   std::size_t k = ej.k;
                   if (j == k)
@@ -1074,7 +1072,6 @@ class stategraph_local_algorithm: public stategraph_algorithm
           }
         }
       }
-      // V.self_check();
       m_local_control_flow_graphs.push_back(V);
       m_local_control_flow_graphs.back().compute_index();
     }

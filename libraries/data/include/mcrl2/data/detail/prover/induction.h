@@ -36,9 +36,6 @@ class Induction
     variable_vector f_list_variables;
 
     /// \brief
-    // BDD_Info f_bdd_info;
-
-    /// \brief
     variable_vector recurse_expression_for_lists(const data_expression& a_expression) const
     {
       variable_vector result;

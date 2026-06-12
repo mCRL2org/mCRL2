@@ -288,7 +288,6 @@ BOOST_AUTO_TEST_CASE(test_allow1)
 {
   test_allow("{a|b, a|b|b, c}", "{ab, abbc, c}", "{ab, c}", "allow");
   test_allow("{a, b, c}", "{ab}@", "{a, b}", "allow");
-  // test_allow("{a|b}", "{a}@{b, c}", "{a|b}", "allow");
 }
 
 void test_block(const std::string& block_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
@@ -347,7 +346,6 @@ BOOST_AUTO_TEST_CASE(test_alphabet_parallel)
   A.insert(make_multi_action_name("a20"));
 
   multi_action_name_set B = detail::alphabet_intersection(procspec.init(), procspec.equations(), A);
-  //BOOST_CHECK_EQUAL(lps::pp(B),"{a1, a2, a3, a4, a5, a6, a7, a8, a9, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20}");
   BOOST_CHECK_EQUAL(process::pp(B), process::pp(A));
 }
 

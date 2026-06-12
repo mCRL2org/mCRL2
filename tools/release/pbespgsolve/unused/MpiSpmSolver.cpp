@@ -36,9 +36,7 @@ public:
         while ((v = ls_->next()) != NO_VERTEX)
         {
             if (part_.is_internal(v)) break;
-            //Logger::debug("Skipping %d", v);
         }
-        //if (v != NO_VERTEX) Logger::debug("Lifting %d", part_.global(v));
         return v;
     }
 
@@ -117,7 +115,6 @@ void MpiSpmSolver::update( SmallProgressMeasures &spm,
                            verti global_v, const verti vec[] )
 {
     verti v = part_.local(global_v);
-    //debug("Received vertex %d (top %d)", global_v, spm.is_top(vec));
     if (v == NO_VERTEX)
     {
         // Opponent-controlled non-local vertex lifted to top:
@@ -175,14 +172,9 @@ void MpiSpmSolver::solve_all(SmallProgressMeasures &spm)
 #ifdef DEBUG
         if (lift_result.second)
         {
-            //std::ostringstream oss;
-            //if (spm.is_top(spm.vec(v))) oss << " T"; else
-            //for (int i = 0; i < spm.len(v); ++i) oss << ' ' << spm.vec(v)[i];
-            //debug("Vertex %d lifted to%s", part_.global(v), oss.str().c_str());
         }
         else
         {
-            //debug("Vertex %d not lifted", part_.global(v));
         }
 #endif
 
@@ -219,7 +211,6 @@ void MpiSpmSolver::solve_all(SmallProgressMeasures &spm)
                 const verti *vec = spm.vec(v);
                 data_out[0] = global_v;
                 std::copy(vec, vec + spm.len(), &data_out[1]);
-                //debug("Sending vertex %d (top %d)", global_v, spm.is_top(vec));
 
                 // Remove duplicates
                 std::sort(procs.begin(), procs.end());

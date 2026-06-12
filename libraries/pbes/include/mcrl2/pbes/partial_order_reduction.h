@@ -820,7 +820,6 @@ class partial_order_reduction_algorithm
           const data::forall& f = atermpp::down_cast<data::forall>(expr);
           expr = data::make_exists_(f.variables(), data::sort_bool::not_(f.body()));
         }
-        // data::data_expression result = data::one_point_rule_rewrite(m_rewr(expr));
         switch(m_solver->solve(data::variable_list(), expr, m_options.smt_timeout))
         {
           case smt::answer::SAT: return negate ^ true;
@@ -1217,8 +1216,6 @@ class partial_order_reduction_algorithm
         ++it1_k; ++it2_k;
       }
       data::data_expression condition = make_forall_(parameters + qvars1_k + qvars2_k, data::sort_bool::implies(antecedent, consequent));
-
-      // mCRL2log(log::verbose) << "Determinism condition for " << k << ": " << m_rewr(condition) << " original " << condition << std::endl;
 
       return is_true(condition);
     }

@@ -374,7 +374,6 @@ struct enumerate_quantifiers_rewriter
   protected:
     /// \brief A data rewriter
     data::rewriter m_rewriter;
-    // pres_system::data_rewriter m_rewriter;
 
     /// \brief A data specification
     data::data_specification m_dataspec;

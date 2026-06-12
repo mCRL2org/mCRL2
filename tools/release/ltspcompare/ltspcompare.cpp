@@ -16,8 +16,6 @@
 #include "mcrl2/lts/detail/liblts_pbisim_bem.h"
 #include "mcrl2/lts/lts_io.h"
 
-// #include "mcrl2/lps/exploration_strategy.h"
-
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;

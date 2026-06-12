@@ -158,15 +158,9 @@ public:
     /// && param_values==param_values.
     bool operator==( const ltsmin_state& other ) const;
 
-    /// \brief Returns the priority for the state, which depends on the fixpoint operator of
-    /// the equation of the propositional variable of the state and on the equation order.
-    //int get_priority() const;
 
     /// \brief Returns a string representation of the propositional variable of the state.
     std::string get_variable() const;
-
-    /// \brief Returns the player or type of the state (And/Or, Abelard/Eloise, Odd/Even).
-    //operation_type get_type() const;
 
     /// \brief Returns a string representation of the state.
     std::string state_to_string() const;
@@ -580,7 +574,6 @@ public:
     {
         int state_length = this->info->get_lts_type().get_state_length();
         ltsmin_state state = this->from_state_vector(src);
-        //std::clog << "next_state_all: " << state->to_string() << std::endl;
         std::vector<ltsmin_state> successors = this->get_successors(state);
         // int dst[state_length]; N.B. This is not portable C++
         int* dst = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
@@ -588,7 +581,6 @@ public:
 
             this->to_state_vector(successor, dst, state, src);
             cb(dst);
-            //std::clog << "  succ: " << (*succ)->to_string() << std::endl;
         }
     }
 

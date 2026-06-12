@@ -817,7 +817,6 @@ class enumerator_algorithm
         if (dataspec.is_certainly_finite(element_sort))
         {
           const data_expression false_term = sort_set::false_function(element_sort);
-          // const data_expression lambda_term = abstraction(lambda_binder(), { variable(id_generator(), element_sort) }, sort_bool::false_());
           const variable fset_variable(id_generator(), sort_fset::fset(element_sort));
           data_expression e = sort_set::constructor(element_sort, false_term, fset_variable);
           sigma[v1] = e;
@@ -893,7 +892,6 @@ class enumerator_algorithm
             }
             else
             {
-              // const data_expression e1 = r(c);
               r(P.scratch_data_expression,c,sigma); // sigma is not used, but in this way no dummy sigma needs to be created. 
               sigma[v1] = P.scratch_data_expression;
               if (add_element(v_tail, phi, v1, P.scratch_data_expression))

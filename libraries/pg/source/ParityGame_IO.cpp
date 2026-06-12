@@ -328,7 +328,6 @@ void ParityGame::write_dot(std::ostream &os) const
                   it != graph_.succ_end(v); ++it )
             {
                 os << v << " -> " << *it;
-                // if (*it < v) os << " [color=red]";
                 os << ";\n";
             }
         }

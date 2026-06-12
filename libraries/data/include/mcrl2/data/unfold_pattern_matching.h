@@ -108,14 +108,7 @@ function_symbol get_top_fs(const data_expression& expr)
 inline
 data_expression construct_condition_rhs(const std::vector<rule>& rules, const data_expression& representative)
 {
-  // data_expression_vector negated_conditions;
-  // for (const rule& r: rules)
-  // {
-  //   negated_conditions.push_back(sort_bool::not_(r.condition));
-  // }
-  // data_expression else_clause = join_and(negated_conditions.begin(), negated_conditions.end());
   // TODO: Check whether else_clause is equivalent to false. Can we use the enumerator for this?
-
   if (rules.size() == 0)
   {
     return representative;
@@ -286,7 +279,6 @@ data_expression construct_rhs(
       std::set<data_expression> subexpr = find_data_expressions(rule.rhs);
       if (!parameters.empty() && std::none_of(subexpr.begin(), subexpr.end(), [](const data_expression& e) { return is_abstraction(e); }))
       {
-        // auto sigma = [&](const data_expression& x) { return x == pattern ? matching_target : x; };
         data_expression_assignment sigma(pattern,matching_target);
         rule.rhs = replace_data_expressions(rule.rhs, sigma, true);
         rule.condition = replace_data_expressions(rule.condition, sigma, true);

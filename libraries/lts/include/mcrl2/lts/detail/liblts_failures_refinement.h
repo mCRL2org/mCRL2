@@ -542,7 +542,6 @@ inline bool antichain_insert(anti_chain_type& anti_chain,
   {
     const set_of_states s = i->second;
     // if s is a superset of impl_spec.states()
-    // if (std::includes(impl_spec.states().begin(),impl_spec.states().end(),s.begin(),s.end()))
     if (std::includes(s.begin(), s.end(), spec.begin(), spec.end()))
     {
       // set s must be removed.

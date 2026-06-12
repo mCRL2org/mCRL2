@@ -385,7 +385,6 @@ class bisim_partitioner
         }
       }
 
-      // block_is_active.push_back(true);
       initial_partition.block_index=0;
       initial_partition.state_index=0;
       max_state_index=1;
@@ -437,7 +436,6 @@ class bisim_partitioner
         }
 
         const block_index_type splitter_index=to_be_processed.back();
-        // assert(block_is_in_to_be_processed[splitter_index]||!block_is_active[splitter_index]);
         to_be_processed.pop_back();
         block_is_in_to_be_processed[splitter_index]=false;
 
@@ -495,7 +493,6 @@ class bisim_partitioner
     {
       for (unsigned long i1: BL)
       {
-        // assert(block_is_active[*i1]);
         block_flags[i1] = false;
         std::vector < state_type > flagged_states;
         std::vector < state_type > non_flagged_states;
@@ -536,7 +533,6 @@ class bisim_partitioner
           // Create a first new block.
           blocks.push_back(block());
           block_index_type new_block1=blocks.size()-1;
-          // block_is_active.push_back(true);
           blocks.back().state_index=max_state_index;
           max_state_index++;
           blocks.back().block_index=new_block1;
@@ -550,7 +546,6 @@ class bisim_partitioner
           // Create a second new block.
           blocks.push_back(block());
           block_index_type new_block2=blocks.size()-1;
-          // block_is_active.push_back(true);
           blocks.back().state_index = blocks[i1].state_index;
           blocks.back().block_index=new_block2;
           reset_state_flags_block=new_block2;
@@ -618,7 +613,6 @@ class bisim_partitioner
 
           // reset the flag of block *i1, which is being split.
           block_is_in_to_be_processed[i1] = false;
-          // block_is_active[*i1]=false;
 
           // The flag fields of the new blocks is set to false;
           block_flags.push_back(false);

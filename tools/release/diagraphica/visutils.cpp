@@ -1752,7 +1752,6 @@ void VisUtils::setTransf(
 
 void VisUtils::clrTransf()
 {
-  //glMatrixMode( GL_MODELVIEW );
   glPopMatrix();
 }
 

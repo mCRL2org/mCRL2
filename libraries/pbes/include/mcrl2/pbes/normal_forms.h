@@ -228,7 +228,6 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     {
       standard_form_pair p = pop();
       m_equations.emplace_back(eq.symbol(), eq.variable(), p.first);
-      // m_table[p.first] = eq.variable();
     }
 
     /// \brief Enter a pbes equation system.

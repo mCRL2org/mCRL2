@@ -168,7 +168,6 @@ namespace detail
      }
   };
 
-  // typedef atermpp::term_list<variable_with_a_rational_factor> lhs_t;
   using map_based_lhs_t = std::map<variable, data_expression>;
 
   class lhs_t: public atermpp::term_list<variable_with_a_rational_factor>
@@ -889,12 +888,10 @@ class linear_inequality: public atermpp::aterm
       const data_expression new_rhs=rewrite_with_memory(real_negate(rhs()),r);
       if (comparison()==detail::less)
       {
-        // set_comparison(detail::less_eq);
         return linear_inequality(new_lhs,new_rhs,detail::less_eq);
       }
       else if (comparison()==detail::less_eq)
       {
-        // set_comparison(detail::less);
         return linear_inequality(new_lhs,new_rhs,detail::less);
       }
       return linear_inequality(new_lhs,new_rhs,detail::equal);

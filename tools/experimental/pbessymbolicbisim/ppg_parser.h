@@ -484,10 +484,6 @@ inline std::string pp(const ppg_equation& eq)
   std::string connecting_operator = eq.is_conjunctive() ? "&&" : "||";
   std::ostringstream out;
   out << "pbes " << pp(eq.symbol()) << " " << pp(eq.variable()) << " =\n";
-  // if(!is_false(eq.simple_formula()) && !is_true(eq.simple_formula()))
-  // {
-  //   out << "     val(" << pp(eq.simple_formula()) << ") " << connecting_operator << "\n";
-  // }
   bool print_operator = false;
   for(const ppg_summand& summ: eq.summands())
   {

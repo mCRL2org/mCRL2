@@ -163,7 +163,6 @@ class Graph : public QObject
 
     void updateLeaves();
     void updateLeaves(Cluster* clust);
-    //void updateLeaves( std::vector< Cluster* > &clusts );
     void clearLeaves();
     void deleteClusters();
 

@@ -25,9 +25,6 @@ class BDD_Info
     {
       const mcrl2::data::application& a = atermpp::down_cast<mcrl2::data::application>(x);
       return a[n]; 
-      // mcrl2::data::application::const_iterator i = a.begin();
-      // std::advance(i, n);
-      // return *i;
     }
 
   public:

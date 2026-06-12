@@ -11,7 +11,6 @@
 #define MCRL2_SPLIT_CONDITION_H_
 
 #include "mcrl2/data/data_expression.h"
-// #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/join.h"
 #include "lpscleave_utility.h"
 

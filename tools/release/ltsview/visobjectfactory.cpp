@@ -206,12 +206,10 @@ void VisObjectFactory::drawObjects(PrimitiveFactory* pf,unsigned char alpha,
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-    //glEnable(GL_TEXTURE_1D);
     for (auto & i : objects_sorted)
     {
       i->drawWithTexture(pf,alpha);
     }
-    //glDisable(GL_TEXTURE_1D);
   }
   else
   {

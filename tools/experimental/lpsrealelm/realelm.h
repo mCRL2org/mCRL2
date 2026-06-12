@@ -152,7 +152,6 @@ class summand_information
       summand_real_conditions=s.summand_real_conditions;
       summand_real_nextstate_map=s.summand_real_nextstate_map;
       nextstate_context_combinations=s.nextstate_context_combinations;
-      // residual_inequalities=s.residual_inequalities;
     }
 
     ~summand_information() = default;

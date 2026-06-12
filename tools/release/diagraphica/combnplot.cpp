@@ -622,10 +622,7 @@ void CombnPlot::calcPosBC()
   }
 
   // calc width
-  //if ( fracX < maxWthHintPixBC*pix )
   widthBC = fracX;
-  //else
-  //    widthBC = maxWthHintPixBC*pix;
 
   // calc positions
   posBC.clear();

@@ -9,8 +9,6 @@
 /// \file probabilistic_data_expression_test.cpp
 /// \brief Test whether calculations with fractions go well. 
 
-//#define MCRL2_LPS_PARELM_DEBUG
-
 #define BOOST_TEST_MODULE probabilistic_data_expression_test
 #include <boost/test/included/unit_test.hpp>
 

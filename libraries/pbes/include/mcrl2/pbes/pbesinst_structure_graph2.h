@@ -246,9 +246,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         else if (is_false(b_1) && !is_false(b_2))
         {
           b_1 = false_();
-          // f1_prime = f1_prime;
           g0_1 = true_();
-          // g1_1 = g1_1;
         }
         else if (!is_false(b_1) && is_false(b_2))
         {
@@ -262,9 +260,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           if (less(f1_prime, f2_prime))
           {
             b_1 = false_();
-            // f1_prime = f1_prime;
             g0_1 = true_();
-            // g1_1 = g1_1;
           }
           else
           {
@@ -307,8 +303,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         else if (is_true(b_1) && !is_true(b_2))
         {
           b_1 = true_();
-          // f1_prime = f1_prime;
-          // g0_1 = g0_1;
           g1_1 = false_();
         }
         else if (!is_true(b_1) && is_true(b_2))
@@ -323,8 +317,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           if (less(f1_prime, f2_prime))
           {
             b_1 = true_();
-            // f1_prime = f1_prime;
-            // g0_1 = g0_1;
             g1_1 = false_();
           }
           else
@@ -501,7 +493,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       simple_structure_graph G(m_graph_builder.vertices());
       for (structure_graph::index_type u: S[0].vertices())
       {
-        // if (G.decoration(u) == structure_graph::d_disjunction && G.strategy(u) == undefined_vertex())
         if (G.decoration(u) == structure_graph::d_disjunction && tau[0][u] == undefined_vertex())
         {
           mCRL2log(log::debug) << "Error: no strategy has been set for disjunctive node " << u << " in S0." << std::endl;
@@ -513,7 +504,6 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
       for (structure_graph::index_type u: S[1].vertices())
       {
-        // if (G.decoration(u) == structure_graph::d_conjunction && G.strategy(u) == undefined_vertex())
         if (G.decoration(u) == structure_graph::d_conjunction && tau[1][u] == undefined_vertex())
         {
           mCRL2log(log::debug) << "Error: no strategy has been set for conjunctive node " << u << " in S1." << std::endl;

@@ -177,7 +177,6 @@ struct bqnf_visitor
     inc_indent();
     bool result = true;
     if (is_propositional_variable_instantiation(e) || is_simple_expression(e, false)) {
-      // std::clog << pp(e) << std::endl;
     } else {
       result = false;
       if (debug) {
@@ -207,7 +206,6 @@ struct bqnf_visitor
       pbes_expression r = pbes_system::accessors::right(e);
       if (is_simple_expression(l, false)) {
         result &= visit_simple_expression(sigma, var, l);
-        // std::clog << pp(l) << " /\\ " << std::endl;
         result &= visit_inner_and(sigma, var, r);
       } else {
         result &= visit_propositional_variable(sigma, var, e);
@@ -288,7 +286,6 @@ struct bqnf_visitor
       pbes_expression r = pbes_system::accessors::right(qexpr);
       if (is_simple_expression(l, false)) {
         result &= visit_simple_expression(sigma, var, l);
-        // std::clog << pp(l) << (is_or(qexpr) ? " \\/ " : " => ") << std::endl;
         result &= visit_or(sigma, var, r);
       } else {
         result &= visit_or(sigma, var, qexpr);
@@ -316,7 +313,6 @@ struct bqnf_visitor
       pbes_expression l = pbes_system::accessors::left(e);
       pbes_expression r = pbes_system::accessors::right(e);
       result &= visit_and(sigma, var, l);
-      // std::clog << " /\\ " << std::endl;
       result &= visit_and(sigma, var, r);
     } else {
       result &= visit_inner_bounded_forall(sigma, var, e);
@@ -343,14 +339,12 @@ struct bqnf_visitor
       qvars = qvars + atermpp::down_cast<forall>(qexpr).variables();
       qexpr = pbes_system::accessors::arg(qexpr);
     }
-    //std::clog << "  Bounded forall: " << pp(qvars) << " . " << std::endl;
     bool result = true;
     if (is_or(qexpr) || is_imp(qexpr)) {
       pbes_expression l = pbes_system::accessors::left(qexpr);
       pbes_expression r = pbes_system::accessors::right(qexpr);
       if (is_simple_expression(l, false)) {
         result &= visit_simple_expression(sigma, var, l);
-        // std::clog << pp(l) << (is_or(qexpr) ? " \\/ " : " => ") << std::endl;
         result &= visit_bqnf_expression(sigma, var, r);
       } else {
         result &= visit_bqnf_expression(sigma, var, qexpr);

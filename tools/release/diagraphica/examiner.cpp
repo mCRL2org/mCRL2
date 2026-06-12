@@ -656,7 +656,6 @@ template <Visualizer::Mode mode> void Examiner::drawFramesHist()
   if constexpr (mode == Marking)
   {
     glPushName(ID_FRAME_HIST);
-    //for ( int i = 0; i < framesHist.size(); ++i )
     for (std::size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
     {
       glPushMatrix();
@@ -678,7 +677,6 @@ template <Visualizer::Mode mode> void Examiner::drawFramesHist()
     double pix = pixelSize();
     std::vector< double > valsFrame;
 
-    //for ( int i = 0; i < framesHist.size(); ++i )
     for (std::size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
     {
       valsFrame.clear();
@@ -945,7 +943,6 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
     glTranslatef(6*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
 
     VisUtils::enableLineAntiAlias();
-    //VisUtils::setColor(VisUtils::coolRed);
     VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::fillPlayIcon(
       -5.0*pix,  5.0*pix,

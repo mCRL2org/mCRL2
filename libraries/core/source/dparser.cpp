@@ -346,7 +346,6 @@ void print_ambiguous_nodes(D_ParseNode* nodes[], int n, const char* type, const 
   for (int i = 0; i < n; ++i)
   {
     core::parse_node vi(nodes[i]);
-    // mCRL2log(log::verbose) << vi.tree() << " " << table.tree(vi) << std::endl;
     mCRL2log(log::verbose) << "ALT " << table.tree(vi) << std::endl;
   }
 }

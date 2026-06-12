@@ -63,11 +63,6 @@ class RewriterProver: public Rewriter
         prover_obj.set_formula(t);
         result=prover_obj.get_bdd();
         return;
-      // }
-      // else
-      //{
-      //  return prover_obj.get_rewriter()->rewrite(t,sigma);
-      //}
     }
 
     data_expression rewrite(const data_expression& t, substitution_type& sigma) override

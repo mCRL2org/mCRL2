@@ -54,9 +54,6 @@ public:
     /*! Swaps the elements at indices i and j in the heap. */
     void swap(verti i, verti j);
 
-    /*! Removes the vertex from the queue, if it is present. */
-    //void remove(verti v);
-
     /*! Compares the vertices referred through indices i and j in the heap. */
     int cmp(verti i, verti j);
 

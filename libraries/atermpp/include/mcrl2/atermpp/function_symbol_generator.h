@@ -105,7 +105,6 @@ public:
     // if (m_index<=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix))
     if (m_index<=*m_central_index)
     {
-      // m_index=*detail::g_term_pool().get_symbol_pool().register_prefix(m_prefix);
       m_index=*m_central_index;
       m_initial_index=m_index;
     } 

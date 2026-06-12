@@ -291,7 +291,6 @@ struct stategraph_global_graph
       u.outgoing_edges = std::set<stategraph_edge>(oedges.begin(), oedges.end());
     }
     create_index();
-    // self_check();
   }
 
   // \pre x is not present in m_control_vertices
@@ -299,7 +298,6 @@ struct stategraph_global_graph
   {
     std::pair<vertex_iterator, bool> p = m_control_vertices.insert(std::make_pair(x, stategraph_vertex(x)));
     assert(p.second);
-    // self_check();
     return p.first;
   }
 

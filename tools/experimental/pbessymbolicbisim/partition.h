@@ -436,7 +436,6 @@ public:
   {
     // Move all the blocks to the other set while keeping the order m_proof_blocks ++ m_other_blocks
     std::vector< block_t > all_blocks(m_proof_blocks.begin(), m_proof_blocks.end());
-    // all_blocks.swap(m_proof_blocks);
     all_blocks.insert(all_blocks.end(), m_other_blocks.begin(), m_other_blocks.end());
     m_proof_blocks.clear();
     m_other_blocks.clear();
@@ -471,8 +470,6 @@ public:
    */
   bool refine_n_steps(std::size_t num_steps, bool is_positive_pg)
   {
-    // mCRL2log(log::verbose) << "Initial partition:" << std::endl;
-    // print_partition(m_proof_blocks);
 
     // First check whether the current proof graph is stable under optimisations.
     // This will not affect the cache.

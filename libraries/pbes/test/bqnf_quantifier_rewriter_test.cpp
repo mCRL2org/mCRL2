@@ -27,7 +27,6 @@ void rewrite_bqnf_quantifier(const std::string& source_text, const std::string& 
   bqnf_rewriter pbesr;
   pbes_rewrite(p, pbesr);
   normalize(p);
-  //std::clog << pp(p);
   pbes target = txt2pbes(target_text);
   normalize(target);
   BOOST_CHECK(p==target);

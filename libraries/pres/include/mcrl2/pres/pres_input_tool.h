@@ -12,7 +12,6 @@
 #ifndef MCRL2_RES_PRES_INPUT_TOOL_H
 #define MCRL2_RES_PRES_INPUT_TOOL_H
 
-// #include "mcrl2/res/io.h"
 #include "mcrl2/pres/io.h"
 #include "mcrl2/utilities/command_line_interface.h"
 

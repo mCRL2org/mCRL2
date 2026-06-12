@@ -46,7 +46,6 @@ class ppg_visitor
     /// \return true if the expression e is a simple expression.
     virtual bool visit_simple_expression(const pbes_expression& e)
     {
-      //std::clog << "visit_simple_expression: " << print_brief(e) << std::endl;
       bool result = is_simple_expression(e, false);
       return result;
     }
@@ -56,10 +55,8 @@ class ppg_visitor
     /// \return true if the expression is a propositional variable or a simple expression.
     virtual bool visit_propositional_variable(const pbes_expression& e)
     {
-      //std::clog << "visit_propositional_variable: " << print_brief(e) << std::endl;
       bool result = true;
       if (!(is_propositional_variable_instantiation(e) || visit_simple_expression(e))) {
-        //std::clog << "Not a propositional variable or simple expression!" << std::endl;
         result = false;
       }
       return result;
@@ -70,7 +67,6 @@ class ppg_visitor
     /// \return true if the expression e conforms to PPG.
     virtual bool visit_inner_and(const pbes_expression& e)
     {
-      //std::clog << "visit_inner_and: " << print_brief(e) << std::endl;
       bool result = true;
       if (is_and(e)) {
         pbes_expression l = pbes_system::accessors::left(e);
@@ -91,7 +87,6 @@ class ppg_visitor
     /// \return true if the expression e conforms to PPG.
     virtual bool visit_inner_bounded_exists(const pbes_expression& e)
     {
-      //std::clog << "visit_inner_bounded_exists: " << print_brief(e) << std::endl;
       pbes_expression qexpr = e;
       data::variable_list qvars;
       while (is_exists(qexpr)) {
@@ -106,7 +101,6 @@ class ppg_visitor
     /// \return true if the expression e conforms to PPG.
     virtual bool visit_or(const pbes_expression& e)
     {
-      //std::clog << "visit_or: " << print_brief(e) << std::endl;
       bool result = true;
       if (is_or(e)) {
         pbes_expression l = pbes_system::accessors::left(e);
@@ -124,7 +118,6 @@ class ppg_visitor
     /// \return true if the expression e conforms to PPG.
     virtual bool visit_inner_implies(const pbes_expression& e)
     {
-      //std::clog << "visit_inner_implies: " << print_brief(e) << std::endl;
       bool result = true;
       if (is_or(e) || is_imp(e)) {
         pbes_expression l = pbes_system::accessors::left(e);
@@ -145,7 +138,6 @@ class ppg_visitor
     /// \return true if the expression e conforms to PPG.
     virtual bool visit_inner_bounded_forall(const pbes_expression& e)
     {
-      //std::clog << "visit_inner_bounded_forall: " << print_brief(e) << std::endl;
       pbes_expression qexpr = e;
       data::variable_list qvars;
       while (is_forall(qexpr)) {
@@ -160,7 +152,6 @@ class ppg_visitor
     /// \return true if the expression e conforms to PPG.
     virtual bool visit_and(const pbes_expression& e)
     {
-      //std::clog << "visit_and: " << print_brief(e) << std::endl;
       bool result = true;
       if (is_and(e)) {
         pbes_expression l = pbes_system::accessors::left(e);
@@ -178,7 +169,6 @@ class ppg_visitor
     /// \return true if the expression e is in PPG form.
     virtual bool visit_ppg_expression(const pbes_expression& e)
     {
-      //std::clog << "visit_ppg_expression." << std::endl;
       bool result = true;
       if (visit_propositional_variable(e)) {
         result = true;
@@ -195,7 +185,6 @@ class ppg_visitor
       } else {
 
       }
-      //std::clog << "visit_ppg_expression: equation is " << (result ? "" : "NOT ") << "in PPG form." << std::endl;
       return result;
     }
   };

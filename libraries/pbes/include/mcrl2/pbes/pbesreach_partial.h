@@ -35,7 +35,6 @@ public:
     time_exploring += explore_timer.seconds();
     ++iteration_count;
 
-    // if (iteration_count % 10 == 0 || m_options.aggressive)
     if (time_solving * 10 < (time_solving + time_exploring) || m_options.aggressive)
     {
       mCRL2log(log::verbose) << "start partial solving\n";

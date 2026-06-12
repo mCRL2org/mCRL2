@@ -28,9 +28,6 @@ class diagraphica_tool : public diagraphica_base
         // There are no Core profile features explicitly used, but some MacOS versions require Core profile as a 'hint' to 
         //   properly use OpenGL 3.x functionality. Removing this line will cause issues with MacOS eventually.
         surfaceFormat.setProfile(QSurfaceFormat::CompatibilityProfile);
-        //surfaceFormat.setStencilBufferSize(1);
-        //surfaceFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-        //surfaceFormat.setSwapInterval(1);
 
         // Enable a surface with multisampling.
         surfaceFormat.setSamples(16);

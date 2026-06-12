@@ -119,11 +119,9 @@ class sim_partitioner
     std::vector<std::size_t> contents;
 
     void initialise_datastructures();
-    //void read_partition_from_file(char *parfile);
 
     void refine(bool& change);
     void update();
-    //void update_lts();
 
     void touch(std::size_t a,std::size_t alpha);
     void untouch(std::size_t alpha);
@@ -236,8 +234,6 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithmG()
 template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::initialise_datastructures()
 {
-  // aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
-  // trans_index = aut.get_transition_pre_table();
   trans_index=transitions_per_outgoing_state_action_pair_reversed(aut.get_transitions(),aut.hidden_label_set());
 
   std::size_t N = aut.num_states();

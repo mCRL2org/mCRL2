@@ -77,7 +77,6 @@ class xinput_tool: public tool
     /// \brief Adds a message about input files to the given description.
     std::string make_tool_description(const std::string& description) const
     {
-      // return utilities::word_wrap_text(description + " If INFILE is not present, standard input is used.");
       return description;
     }
 

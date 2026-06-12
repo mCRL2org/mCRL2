@@ -321,7 +321,6 @@ void LtsManager::updateSimulationHistory()
     for (auto & i : history)
     {
       // TODO: this should only select states that are part of the current zoomed LTS!
-      //if (history[i]->getBeginState()->
       {
         m_simulationStateHistory += i->getBeginState();
         m_simulationTransitionHistory += i;
@@ -334,7 +333,6 @@ void LtsManager::unselectNonsimilated()
 {
   if (m_simulation->isStarted() == (transitionTo(selectedState()) == nullptr))
   {
-    //unselect();
   }
 }
 

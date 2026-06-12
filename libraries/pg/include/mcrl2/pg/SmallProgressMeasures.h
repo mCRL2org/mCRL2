@@ -184,7 +184,6 @@ public:
     /*! Return the SPM vector for vertex `v`.
         This array contains only the components with odd (for Even) or even
         (for Odd) indices of the vector (since the reset is fixed at zero). */
-    // virtual verti *vec(verti v) = 0;
     virtual const verti *vec(verti v) const = 0;
 
     /*! Assign the first `len(v)` elements of the vector for vertex `w` to the

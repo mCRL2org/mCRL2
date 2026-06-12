@@ -214,14 +214,12 @@ struct find_left_merge_merge
 inline
 void warn_and_or(const parse_node& /* node */)
 {
-  // core::detail::foreach_parse_node(node, core::detail::find_and_or(parser_tables_mcrl2));
 }
 
 /// \brief Prints a warning for each occurrence of 'x ||_ y || z' in the parse tree.
 inline
 void warn_left_merge_merge(const parse_node& /* node */)
 {
-  // core::detail::foreach_parse_node(node, core::detail::find_left_merge_merge(parser_tables_mcrl2));
 }
 
 } // namespace mcrl2::core

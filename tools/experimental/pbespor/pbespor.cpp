@@ -8,9 +8,6 @@
 //
 /// \file pbespor.cpp
 
-// #define MCRL2_PBES_CONSTELM_DEBUG
-// #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/partial_order_reduction.h"
 #include "mcrl2/utilities/input_output_tool.h"

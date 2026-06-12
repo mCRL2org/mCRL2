@@ -730,7 +730,6 @@ DebugView::DebugView(std::size_t log_duration, std::size_t min_interval)
 
 void DebugView::push(double value){
   std::size_t current_time = m_timer.elapsed();
-  //mCRL2log(mcrl2::log::debug) << "current_time: " << current_time << " current interval time: " << m_current_interval_start << " min interval time: " << m_min_interval << std::endl;
 
   bool changed = false;
   if (m_lock->tryLock(0))
@@ -800,10 +799,8 @@ void DebugView::drawLine(QPainter& painter, std::vector<QPointF>& line, double c
 void DebugView::draw(QPainter& painter, QBrush& brush, QPen& pen){
   if (m_values.size() <= 1)
   {
-    //mCRL2log(mcrl2::log::debug) << "Not enough values to draw: " << m_values.size() << std::endl;
       return;
   }
-  //mCRL2log(mcrl2::log::debug) << "Drawing." << std::endl;
   std::vector<QPointF> pointsMin;
   std::vector<QPointF> pointsMax;
   std::vector<QPointF> pointsAvg;

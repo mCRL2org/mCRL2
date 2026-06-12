@@ -119,7 +119,6 @@ void MpiRecursiveSolver::solve(GamePart &part)
     int prio;
     while ((prio = mpi_first_inversion(part.game())) < part.game().d())
     {
-        //debug("part=%s prio=%d", part.debug_str().c_str(), prio);
 
         const verti V = part.total_size();
         if (mpi_rank == 0 && aborted())

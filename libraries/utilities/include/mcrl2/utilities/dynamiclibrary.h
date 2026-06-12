@@ -72,7 +72,6 @@ using library_proc = void*;
 
 inline library_handle get_module_handle(const std::string& fname)
 {
-  // return dlopen(fname.c_str(), RTLD_LAZY);
   return dlopen(fname.c_str(), RTLD_NOW);
   }
 

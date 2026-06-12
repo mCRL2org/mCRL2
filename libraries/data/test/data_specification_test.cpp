@@ -121,8 +121,6 @@ void test_sorts()
   spec1.add_sort(s0);
   spec1.add_sort(s);
 
-  //BOOST_CHECK(equal_content(sl, spec.user_defined_sorts()));
-  //BOOST_CHECK(equal_content(sl, spec1.user_defined_sorts()));
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   basic_sort s2("S2");
@@ -146,8 +144,6 @@ void test_aliases()
   alias      s2(basic_sort("S2"), s);
 
   data_specification spec;
-
-  // BOOST_CHECK(spec.aliases().size()) == 0);
 
   std::set<basic_sort> sorts = { s, t };
   std::for_each(sorts.begin(), sorts.end(), [&spec](const basic_sort& s){ spec.add_sort(s); });

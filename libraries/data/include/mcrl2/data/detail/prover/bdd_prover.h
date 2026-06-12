@@ -125,9 +125,6 @@ class BDD_Prover: protected rewriter
   private:
     /// \brief A flag indicating whether or not induction on lists is applied.
     bool f_apply_induction;
-
-    /// \brief A data specification.
-    // const data_specification& f_data_spec;
   
     /// \brief The variables in the expression in order.
     std::vector<variable> f_variables;

@@ -1160,7 +1160,6 @@ void ArcDiagram::calcSettingsBundles()
         }
 
         markBundles.push_back(false);
-        //updateMarkBundles();
       }
     }
   }

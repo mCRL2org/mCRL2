@@ -405,8 +405,6 @@ public:
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;
 
-  //static_assert(std::is_same_v<value_type, typename Allocator::value_type>, "Types should be equal");
-
   template <class U>
   struct rebind
   {

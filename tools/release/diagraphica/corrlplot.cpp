@@ -125,7 +125,6 @@ template <Visualizer::Mode mode> void CorrlPlot::drawPlot()
         double rad = radii[i][j];
 
         glPushName((GLuint) j);
-        //VisUtils::fillCirc( x, y, rad, 21);
         VisUtils::fillEllipse(x, y, rad, rad, 21);
         glPopName();
       }
@@ -148,15 +147,12 @@ template <Visualizer::Mode mode> void CorrlPlot::drawPlot()
         VisUtils::setColor(VisUtils::coolGreen, 0.35);
 
         VisUtils::enableBlending();
-        //VisUtils::fillCirc( x, y, rad, 21);
         VisUtils::fillEllipse(x, y, rad, rad, 21);
         VisUtils::disableBlending();
 
         VisUtils::enableLineAntiAlias();
-        //VisUtils::drawCirc( x, y, rad, 21);
         VisUtils::drawEllipse(x, y, rad, rad, 21);
         VisUtils::setColor(Qt::black, 0.1);
-        //VisUtils::drawCirc( x, y, rad, 21);
         VisUtils::drawEllipse(x, y, rad, rad, 21);
         VisUtils::disableLineAntiAlias();
 

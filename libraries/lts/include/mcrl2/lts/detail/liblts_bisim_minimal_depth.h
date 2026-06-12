@@ -372,7 +372,6 @@ private:
         // Create a second new block.
         block BlockLeft = block();
 
-        // block_is_active.push_back(true);
         BlockLeft.state_index = blocks[Bsplit].state_index;
         BlockLeft.level = lvl;
         BlockLeft.parent_block_index = Bparent;

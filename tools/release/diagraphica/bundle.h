@@ -14,8 +14,6 @@
 #include "edge.h"
 #include "cluster.h"
 
-//class Cluster;
-
 class Bundle
 {
   public:

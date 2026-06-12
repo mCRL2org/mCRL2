@@ -129,8 +129,6 @@ protected:
       // std::pair<outgoing_transitions_per_state_t::const_iterator, outgoing_transitions_per_state_t::const_iterator> pred_range
       //    = m_prev_transitions.equal_range(t);
 
-      // for(outgoing_transitions_per_state_t::const_iterator i = pred_range.first; i != pred_range.second; ++i)
-      // for(const outgoing_pair_t& p: m_prev_transitions[t])
       for (std::size_t i=m_prev_transitions.lowerbound(t); i<m_prev_transitions.upperbound(t); ++i)
       {
         const outgoing_pair_t& p = m_prev_transitions.get_transitions()[i];
@@ -230,9 +228,6 @@ protected:
           low[vi] = unused++;
           sccstack.push(vi);
 
-          // for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
-          // for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
-          // for (const outgoing_pair_t& t: m_lts_succ_transitions[vi]) 
           for (std::size_t i=m_lts_succ_transitions.lowerbound(vi); i<m_lts_succ_transitions.upperbound(vi); ++i)
           {
             const outgoing_pair_t& t=m_lts_succ_transitions.get_transitions()[i];
@@ -244,7 +239,6 @@ protected:
         }
         else
         {
-          // for (outgoing_transitions_per_state_t::const_iterator t = succ_range.first; t != succ_range.second; ++t)
           for (std::size_t i=m_lts_succ_transitions.lowerbound(vi); i<m_lts_succ_transitions.upperbound(vi); ++i)
           {
             const outgoing_pair_t& t=m_lts_succ_transitions.get_transitions()[i];
@@ -272,8 +266,6 @@ protected:
             // if the scc consists of a single schate, check whether it has a tau-loop
             if(this_scc.size() == 1)
             {
-              // for(outgoing_transitions_per_state_t::const_iterator i = succ_range.first; i != succ_range.second; ++i)
-              // for (const outgoing_pair_t& i: m_lts_succ_transitions[vi]) 
               for (std::size_t i_=m_lts_succ_transitions.lowerbound(vi); i_<m_lts_succ_transitions.upperbound(vi); ++i_)
               {
                 const outgoing_pair_t& i=m_lts_succ_transitions.get_transitions()[i_];

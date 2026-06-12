@@ -146,12 +146,10 @@ struct absinthe_algorithm
       if (i == sigmaS.end())
       {
         super::apply(result, x);
-        //pbes_system::detail::absinthe_check_expression(result);
       }
       else
       {
         result = i->second;
-        //pbes_system::detail::absinthe_check_expression(result);
       }
     }
 
@@ -161,7 +159,6 @@ struct absinthe_algorithm
       auto i = sigmaF.find(x);
       if (i != sigmaF.end())
       {
-        //pbes_system::detail::absinthe_check_expression(i->second);
         result = i->second;
         return;
       }
@@ -196,12 +193,10 @@ struct absinthe_algorithm
     {
       data::data_expression body;
       super::apply(body, x);
-      //pbes_system::detail::absinthe_check_expression(body);
       data::sort_expression s = body.sort();
       generator.add_identifiers(data::find_identifiers(x));
       data::variable v(generator("v"), s);
       result = data::detail::create_set_comprehension(v, data::equal_to(v, body));
-      //pbes_system::detail::absinthe_check_expression(result);
     }
 
     template <class T>
@@ -211,7 +206,6 @@ struct absinthe_algorithm
       {
         super::apply(result, x);
         result = data::detail::create_finite_set(result);
-        //pbes_system::detail::absinthe_check_expression(result);
       }
       else
       {
@@ -221,13 +215,11 @@ struct absinthe_algorithm
         {
           data::data_expression_list args = { x };
           result = data::detail::create_finite_set(data::application(i->second, args));
-          //pbes_system::detail::absinthe_check_expression(result);
         }
         else
         {
           // first apply the sort and function symbol transformations
           super::apply(result, x);
-          //pbes_system::detail::absinthe_check_expression(result);
         }
       }
     }
@@ -540,7 +532,6 @@ struct absinthe_algorithm
     {
     	using utilities::detail::contains;
 
-      //mCRL2log(log::debug) << "lift_function_symbol_1_2 f = " << print_symbol(f) << std::endl;
       std::string name = std::string(f.name());
 
       bool print_sort = contains(suffix_with_sort, std::string(f.name()));
@@ -585,7 +576,6 @@ struct absinthe_algorithm
     data::function_symbol operator()(const data::function_symbol& f) const
     {
       using namespace data;
-      //mCRL2log(log::debug) << "lift_function_symbol_2_3 f = " << print_symbol(f) << std::endl;
       std::string name = "Lift" + utilities::trim_copy(std::string(f.name()));
       const sort_expression &s = f.sort();
       if (is_basic_sort(s))
@@ -632,7 +622,6 @@ struct absinthe_algorithm
       data::data_expression rhs;
 
       data::sort_expression s1 = f1.sort();
-      //data::function_symbol f1a(f1.name(), sigma(s1));
 
       if (data::is_basic_sort(s1))
       {
@@ -648,7 +637,6 @@ struct absinthe_algorithm
         {
           data::function_symbol h = i->second;
           rhs = data::application(h, f1);
-          //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }
       else if (data::is_function_sort(s1))
@@ -678,13 +666,11 @@ struct absinthe_algorithm
         {
           data::application f1_sigma_x(f1_sigma, x.begin(), x.end());
           rhs = data::detail::create_finite_set(f_x);
-          //pbes_system::detail::absinthe_check_expression(rhs);
         }
         else
         {
           data::function_symbol h = i->second;
           rhs = data::detail::create_finite_set(data::application(h, f_x));
-          //pbes_system::detail::absinthe_check_expression(rhs);
         }
       }
       else if (data::is_container_sort(s1))
@@ -697,7 +683,6 @@ struct absinthe_algorithm
         lhs = f2;
         data::function_symbol f1_sigma(f1.name(), sigma(f1.sort()));
         rhs = f1_sigma;
-        //pbes_system::detail::absinthe_check_expression(rhs);
       }
       else
       {
@@ -747,7 +732,6 @@ struct absinthe_algorithm
 
     data::data_equation operator()(const data::function_symbol& f2, const data::function_symbol& f3, sort_function sigma) const
     {
-      //mCRL2log(log::debug) << "lift_equation_2_3 f2 = " << print_symbol(f2) << " f3 = " << print_symbol(f3) << std::endl;
       data::variable_list variables;
       const data::data_expression& condition = data::true_();
       data::data_expression lhs;
@@ -844,7 +828,6 @@ struct absinthe_algorithm
       {
         check_consistency(*i1, *i2, f1, sigmaS);
       }
-      // check_consistency(fs1.codomain(), fs2.codomain(), f1, sigmaS);
     }
 //    else if (data::is_container_sort(s1))
 //    {
@@ -904,7 +887,6 @@ struct absinthe_algorithm
 
     for (auto& i : sigmaF)
     {
-      // data::function_symbol f1 = i->first;
       data::function_symbol f2 = i.second;
       data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 

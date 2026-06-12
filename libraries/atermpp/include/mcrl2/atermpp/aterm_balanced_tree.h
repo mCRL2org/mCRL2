@@ -239,7 +239,6 @@ class term_balanced_tree : public aterm
         }
         else
         {
-          // down_cast<term_balanced_tree<Term>>(right_branch()).element_at(position-left_size, size - left_size);
           const aterm& right(right_branch());
           if (right.function() == tree_node_function())
           {

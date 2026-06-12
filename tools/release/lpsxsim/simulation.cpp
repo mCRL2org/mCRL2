@@ -13,7 +13,6 @@
 
 void Simulation::init(const QString& filename, bool do_not_use_dummies)
 {
-  // mcrl2::lps::stochastic_specification spec;
   try
   {
     load_lps(m_stochastic_spec, filename.toStdString());

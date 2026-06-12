@@ -61,7 +61,6 @@ class input_output_tool: public input_tool
     /// \brief Adds a message about input and output files to the given description.
     std::string make_tool_description(const std::string& description) const
     {
-      // return utilities::word_wrap_text(description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.");
       return description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.";
     }
 

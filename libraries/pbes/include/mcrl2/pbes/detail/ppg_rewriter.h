@@ -40,7 +40,6 @@ struct fresh_variable_name_generator
   /// \param s A string.
   /// \return a fresh variable name.
   std::string generate_name(const std::string& s) {
-    //std::clog << "fresh_variable_name: ";
     std::string base; std::string name;
     name = base = s;
     int suffix = 1;
@@ -54,7 +53,6 @@ struct fresh_variable_name_generator
       ss >> name;
     }
     variable_names.insert(name);
-    //std::clog << name << std::endl;
     return name;
   }
 };

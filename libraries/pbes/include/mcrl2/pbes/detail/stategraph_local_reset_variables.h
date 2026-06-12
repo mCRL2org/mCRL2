@@ -125,12 +125,6 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         p_eqn[k].formula() = local_reset_variables(*this, p_eqn[k].formula(), s_eqn[k]);
       }
 
-      // Commented out, since Tim thinks this should not have any effect
-      // if (m_simplify)
-      // {
-      //   pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
-      //   pbes_system::pbes_rewrite(p, pbesr);
-      // }
     }
 
     local_reset_variables_algorithm(const pbes& p, const pbesstategraph_options& options)
@@ -271,7 +265,6 @@ inline data::data_expression_list local_reset_variables_algorithm::reset_variabl
 {
   using utilities::detail::contains;
 
-  // mCRL2log(log::debug) << "--- resetting variable Y(e) = " << x << " with index " << i << std::endl;
   assert(i < eq_X.predicate_variables().size());
   const predicate_variable& Ye = eq_X.predicate_variables()[i];
   assert(Ye.variable() == x);

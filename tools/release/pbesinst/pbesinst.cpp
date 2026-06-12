@@ -9,11 +9,6 @@
 /// \file pbesinst.cpp
 /// \brief Add your file description here.
 
-//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-
 #include <boost/algorithm/string.hpp>
 
 #include "mcrl2/utilities/input_output_tool.h"

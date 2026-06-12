@@ -93,8 +93,6 @@ inline void bisim(const symbolic_lts& lts)
     {
       // Explore all transitions in the LDD.
       result res;
-      //res.action_index = lts.action_index.index(action);
-      //sat_all_nopar(group.L, project_transitions<result>, &res);
       res.projected = project_transitions(group.L, height(group.L), lts.action_index.index(action));
 
       if (res.projected != sylvan::ldds::empty_set())

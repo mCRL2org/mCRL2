@@ -80,7 +80,6 @@ void test_pbespgsolve(const std::string& pbes_spec)
       {
         end = w + 1;
       }
-      // edges.push_back(std::make_pair(v - begin, w - begin));
     }
 
     int max_prio = 0;

@@ -603,7 +603,6 @@ class symbolic_pbessolve_algorithm
               && solution.winning[1] == solution_prime.winning[1]
               && result != alpha))
         {
-          //mCRL2log(log::trace) << "V = " << m_G.print_nodes(V) << "\n";
           mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << "\n";
           mCRL2log(log::trace) << "W0' = " << m_G.print_nodes(solution_prime.winning[0]) << "\n";
           mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << "\n";
@@ -620,7 +619,6 @@ class symbolic_pbessolve_algorithm
               && includes(solution_prime.winning[1], solution.winning[1])
               && result != alpha))
         {
-          //mCRL2log(log::trace) << "V = " << m_G.print_nodes(V) << "\n";
           mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << "\n";
           mCRL2log(log::trace) << "W0' = " << m_G.print_nodes(solution_prime.winning[0]) << "\n";
           mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << "\n";

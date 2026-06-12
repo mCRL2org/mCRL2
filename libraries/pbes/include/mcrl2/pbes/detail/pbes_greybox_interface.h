@@ -53,9 +53,7 @@ namespace mcrl2::pbes_system::detail {
     /// \return the initial state.
     propositional_variable_instantiation get_initial_state() override
     {
-      //std::clog << "get_initial_state()" << std::endl;
       propositional_variable_instantiation phi = atermpp::down_cast<propositional_variable_instantiation>(rewrite_and_simplify_expression(m_pbes.initial_state()));
-      //std::clog << "  phi = " << phi << std::endl;
       return phi;
     }
 
@@ -87,7 +85,6 @@ namespace mcrl2::pbes_system::detail {
     /// right hand side expression.
     std::set<pbes_expression> get_successors(const pbes_expression& phi)
     {
-      //std::clog << "get_successors(psi)" << std::endl;
       initialize_generation();
 
       std::set<pbes_expression> result;

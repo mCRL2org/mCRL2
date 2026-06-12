@@ -445,8 +445,6 @@ static std::map<mcrl2::data::function_symbol, function_definition> builtin_funct
   output[nat_two] = "2";
   function_symbol nat_minus("-", function_sort(sort_expression_list({nat, nat}), nat));
   output[nat_minus] = "-";
-  //function_symbol nat_do_exp("exp", function_sort(make_list(pos, nat), pos));
-  //output[nat_do_exp] = data_equation(atermpp::make_vector(p, n), nat_do_exp(p, n), if_(equal_to(n, nat_one), p, if_(equal_to(sort_nat::mod(n, nat_two), nat_one), sort_pos::times(p, nat_do_exp(sort_pos::times(p, p), sort_nat::div(n, nat_two))), nat_do_exp(sort_pos::times(p, p), sort_nat::div(n, nat_two)))));
   
   output[less(nat)] = "<";
   output[less_equal(nat)] = "<=";
@@ -466,8 +464,6 @@ static std::map<mcrl2::data::function_symbol, function_definition> builtin_funct
   output[sort_nat::mod()] = "mod";
   output[sort_nat::exp(nat, nat)] = function_definition::unavailable();
   output[sort_nat::exp(pos, nat)] = function_definition::unavailable();
-  //output[sort_nat::exp(nat, nat)] = data_equation(atermpp::make_vector(n, n2), sort_nat::exp(n, n2), if_(equal_to(n2, nat_zero), n, if_(less(n, nat_two), n, sort_nat::pos2nat(nat_do_exp(sort_nat::nat2pos(n), n2)))));
-  //output[sort_nat::exp(pos, nat)] = data_equation(atermpp::make_vector(p, n2), sort_nat::exp(p, n2), if_(equal_to(n2, nat_zero), p, if_(equal_to(p, pos_one), p, nat_do_exp(p, n2))));
   
   
   function_symbol int_zero("zero", int_);
@@ -502,7 +498,6 @@ static std::map<mcrl2::data::function_symbol, function_definition> builtin_funct
   output[sort_int::div(int_, pos)] = "div";
   output[sort_int::mod(int_, pos)] = "mod";
   output[sort_int::exp(int_, nat)] = function_definition::unavailable();
-  //output[sort_int::exp(int_, nat)] = data_equation(atermpp::make_vector(i, n), sort_int::exp(i, n), if_(equal_to(sort_nat::mod(n, nat_two), nat_zero), sort_int::nat2int(sort_nat::exp(sort_int::abs(i), n)), sort_int::minus(int_zero, sort_int::nat2int(sort_nat::exp(sort_int::abs(i), n)))));
   
   
   function_symbol real_zero("zero", real);
@@ -513,8 +508,6 @@ static std::map<mcrl2::data::function_symbol, function_definition> builtin_funct
   output[real_half] = "(/ 1 2)";
   function_symbol real_div("div", function_sort(sort_expression_list({real, pos}), int_));
   output[real_div] = "div";
-  //function_symbol real_do_exp("exp", function_sort(make_list(real, nat), real));
-  //output[real_do_exp] = data_equation(atermpp::make_vector(r, n), real_do_exp(r, n), if_(equal_to(n, nat_one), r, if_(equal_to(sort_nat::mod(n, nat_two), nat_one), sort_real::times(r, real_do_exp(sort_pos::times(r, r), sort_nat::div(n, nat_two))), real_do_exp(sort_real::times(r, r), sort_nat::div(n, nat_two)))));
   
   output[less(real)] = "<";
   output[less_equal(real)] = "<=";
@@ -539,7 +532,6 @@ static std::map<mcrl2::data::function_symbol, function_definition> builtin_funct
   output[sort_real::divides(int_, int_)] = "/";
   output[sort_real::divides(real, real)] = "/";
   output[sort_real::exp(real, int_)] = function_definition::unavailable();
-  //output[sort_real::exp(real, int_)] = data_equation(atermpp::make_vector(r, i), sort_real::exp(r, i), if_(equal_to(i, int_zero), real_one, if_(less(i, int_zero), real_do_exp(sort_real::divides(real_one, r), sort_int::abs(i)), real_do_exp(r, sort_int::int2nat(i)))));
   output[sort_real::floor()] = "to_int";
   output[sort_real::ceil()] = data_equation(variable_list({r}), sort_real::ceil(r), sort_real::negate(sort_real::floor(sort_real::negate(r))));
   output[sort_real::round()] = data_equation(variable_list({r}), sort_real::round(r), sort_real::floor(sort_real::plus(r, real_half)));
@@ -667,10 +659,6 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
       std::set<sort_expression> sorts = find_sort_expressions(instantiation.parameters());
       used_sorts.insert(sorts.begin(), sorts.end());
     }
-    //std::set<sort_expression> equation_sorts = pbes_system::find_sort_expressions(i->formula());
-    //used_sorts.insert(equation_sorts.begin(), equation_sorts.end());
-    //equation_sorts = pbes_system::find_sort_expressions(i->variable());
-    //used_sorts.insert(equation_sorts.begin(), equation_sorts.end());
   }
   
   

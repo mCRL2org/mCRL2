@@ -76,7 +76,6 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     bool simple_body = is_simple_expression(x.body(), false);
     if (!simple_body)
     {
-      //std::clog << "Note: 'forall' in mode " << print_mode(mode) << std::endl;
       switch(mode)
       {
       case UNDETERMINED:
@@ -106,7 +105,6 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     bool simple_body = is_simple_expression(x.body(), false);
     if (!simple_body)
     {
-      //std::clog << "Note: 'exists' in mode " << print_mode(mode) << std::endl;
       switch(mode)
       {
       case UNDETERMINED:
@@ -116,7 +114,6 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
         break;
       case CONJUNCTIVE:
       case UNIVERSAL:
-        //std::clog << "Invalid: 'exists' in mode " << print_mode(mode) << std::endl;
         result = false;
         break;
       default:
@@ -137,17 +134,13 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     bool is_simple = is_simple_expression(x, false);
     if (!is_simple)
     {
-      //std::clog << "Note: 'and' in mode " << print_mode(mode) << std::endl;
       switch(mode)
       {
       case UNDETERMINED:
         mode = CONJUNCTIVE;
-        //std::clog << "Note: to mode " << print_mode(mode) << std::endl;
       case CONJUNCTIVE:
         break;
       case UNIVERSAL:
-        //std::clog << "and: " << core::pp(x) << std::endl;
-        //std::clog << "Invalid: 'and' in mode " << print_mode(mode) << std::endl;
         result = false;
         break;
       case EXISTENTIAL:
@@ -159,11 +152,9 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
         {
           if (!is_simple_expression(conjunct, false))
           {
-            //std::clog << "and: " << core::pp(*it) << std::endl;
             count++;
             if (count > 1 || !is_propositional_variable_instantiation(conjunct))
             {
-              //std::clog << "Invalid: 'and' in mode " << print_mode(mode) << std::endl;
               result = false;
               break;
             }
@@ -189,7 +180,6 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     bool is_simple = is_simple_expression(x, false);
     if (!is_simple)
     {
-      //std::clog << "Note: 'or' in mode " << print_mode(mode) << std::endl;
       switch(mode)
       {
       case UNDETERMINED:
@@ -197,7 +187,6 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
       case DISJUNCTIVE:
         break;
       case EXISTENTIAL:
-        //std::clog << "Invalid: 'or' in mode " << print_mode(mode) << std::endl;
         result = false;
         break;
       case UNIVERSAL:
@@ -234,7 +223,6 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
 
   void enter(const pbes_equation& /*x*/)
   {
-    //std::clog << "Equation " << x.variable().name() << std::endl;
     mode_stack.push(UNDETERMINED);
   }
 

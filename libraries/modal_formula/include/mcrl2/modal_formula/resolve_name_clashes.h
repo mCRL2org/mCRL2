@@ -187,15 +187,6 @@ class state_formula_data_variable_name_clash_resolver: public state_formulas::da
     data::assignment_list apply_assignments(const data::assignment_list& x)
     {
       mapvector_substitution sigma(substitutions); 
-      // auto sigma = [&](const data::variable& v) -> data::data_expression
-      // {
-      //   auto i = substitutions.find(v);
-      //   if (i == substitutions.end())
-      //   {
-      //     return v;
-      //   }
-      //   return i->second.back();
-      // };
       return data::assignment_list(x.begin(), 
                                    x.end(), 
                                    [&](const data::assignment& a)

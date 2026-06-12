@@ -69,12 +69,6 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
     {
       super::parse_options(parser);
 
-//      if (((0 == parser.options.count("index")) && (0 == parser.options.count("sort"))) ||
-//          ((0 < parser.options.count("index") && (0 < parser.options.count("sort")))))
-//      {
-//        parser.error("Use either --sort or --index to unfold process parameters.");
-//      }
-
       // Parse string argument to [NUM] (a set of indices)
       if (0 < parser.options.count("index"))
       {

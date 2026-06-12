@@ -127,10 +127,6 @@ void translate_sort_definitions(const data::data_specification& dataspec,
                                std::map<data::structured_sort, std::string>& struct_name_map)
 {
   auto sort_dependencies = find_sorts_and_dependencies(dataspec, struct_name_map);
-  // for(const auto& p: sort_dependencies)
-  // {
-  //   std::cout << p.first << " := " << core::detail::print_set(p.second) << std::endl;
-  // }
   auto sorts = topological_sort(sort_dependencies);
   for(const data::sort_expression& s: sorts)
   {

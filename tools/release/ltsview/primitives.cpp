@@ -125,13 +125,10 @@ void P_Sphere::reshape(int N,float* coss,float* sins)
   glTexCoordPointer(1, GL_FLOAT, 0, texCoords.data());
 
   glNewList(disp_list,GL_COMPILE);
-  //glDrawElements(GL_TRIANGLE_FAN,M,GL_UNSIGNED_INT,is_bot.data());
-  //glDrawElements(GL_TRIANGLE_FAN,M,GL_UNSIGNED_INT,is_top.data());
 
   M += N;
   for (int i=0; i<N-2; ++i)
   {
-    //glDrawElements(GL_QUAD_STRIP,M,GL_UNSIGNED_INT,is_mid.data() + i*M);
   }
   glEndList();
 }

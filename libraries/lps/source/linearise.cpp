@@ -1227,13 +1227,11 @@ class specification_basic_type
 
       if (is_abstraction(t))
       {
-        // mCRL2log(mcrl2::log::warning) << "filtering of variables expression with binders" << std::endl;
         return;
       }
 
       if (is_where_clause(t))
       {
-        // mCRL2log(mcrl2::log::warning) << "filtering of variables expression with where clause" << std::endl;
         return;
       }
 
@@ -1672,7 +1670,6 @@ class specification_basic_type
       const process_expression& p,
       Substitution& sigma)
     {
-      // return process::replace_variables_capture_avoiding(p, sigma, fresh_identifier_generator);
       if (is_choice(p))
       {
         process_expression left=substitute_pCRLproc(choice(p).left(),sigma);
@@ -2471,7 +2468,6 @@ class specification_basic_type
 
       if (is_process_instance_assignment(body))
       {
-        // return transform_process_assignment_to_process(body);
         return body;
       }
 
@@ -2603,7 +2599,6 @@ class specification_basic_type
       if (is_tau(body1))
       {
         return seq(body1,body2);
-        // throw mcrl2::runtime_error("Expect only multiactions, not a tau.");
       }
 
       if (is_at(body1))
@@ -3750,7 +3745,6 @@ class specification_basic_type
 
       /* Take care that id1 is the last identifier or that id2 is arger than id1. This guarantees
          that there will be no loops in the mapping of identifiers. */
-      // make_substitution sigma(identifier_identifier_map);
       process_identifier id1= get_last(id1_,identifier_identifier_map);
       process_identifier id2= get_last(id2_,identifier_identifier_map);
       if (id1==initial_process)
@@ -6125,10 +6119,8 @@ class specification_basic_type
       {
         data_expression_list resultf;
         // fcnt is the arity of the action with index multiactioncount-1;
-        // const action a= *(multiActionList[0].begin()+(multiactioncount-1));
         action_list::const_iterator a=multiActionList[0].begin();
         for (std::size_t i=1 ; i<multiactioncount ; ++i,++a) {}
-        // const action a= *((multiActionList[0]).begin()+(multiactioncount-1));
         std::size_t fcnt=(a->arguments()).size();
         data_expression f;
 
@@ -6904,7 +6896,6 @@ class specification_basic_type
             }
             else
             {
-              // result=w1 + result;
               for(const stochastic_action_summand& summand: result)
               {
                 w1.push_back(summand);

@@ -197,7 +197,6 @@ verti SmallProgressMeasures::solve_one(LiftingStrategy2 &ls)
     lift_to(v, vec(get_successor(v)), compare_strict(v));
     assert(success);
     dirty_[v] = false;
-    // debug_print_vertex(v);
 
     for ( const verti *it  = game_.graph().pred_begin(v),
                       *end = game_.graph().pred_end(v); it != end; ++it )

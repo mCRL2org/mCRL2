@@ -124,7 +124,6 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
           // Additional variables are put at the end of the list!
           P.push_back(enumerator_list_element<Expression>(variables + added_variables, phi1, p, v, e));
         }
-        //mCRL2log(log::debug) << "  <add-element> " << P.back() << " with assignment " << v << " := " << e << std::endl;
       }
     }
 
@@ -160,7 +159,6 @@ class enumerator_algorithm_without_callback: public enumerator_algorithm<Rewrite
       auto p = P.front();
       const auto& v = p.variables();
       const auto& phi = p.expression();
-      //mCRL2log(log::debug) << "  <process-element> " << p << std::endl;
       P.pop_front();
 
       const auto& v1 = v.front();

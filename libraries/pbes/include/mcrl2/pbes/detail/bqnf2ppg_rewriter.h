@@ -61,7 +61,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param s A string.
     /// \return a fresh variable name.
     virtual std::string fresh_variable_name(const std::string& s) {
-      //std::clog << "fresh_variable_name: ";
       std::string base; std::string name;
       name = base = s;
       int suffix = 1;
@@ -75,7 +74,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         ss >> name;
       }
       variable_names.insert(name);
-      //std::clog << name << std::endl;
       return name;
     }
 
@@ -93,7 +91,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     {
       bool result = true;
       inc_indent();
-      //indent(); std::clog << "visit_inner_implies: " << print_brief(e) << std::endl;
       if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr, false)) {
         // Eqn of the form sigma X(d: D) = Forall l: D . phi => Y(h(d, l)), with phi a simple formula.
         // Add sigma X(d) = e.
@@ -171,7 +168,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     visit_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
-      //indent(); std::clog << "visit_bounded_forall: " << print_brief(e) << std::endl;
       assert(is_forall(e));
       data::variable_list qvars = atermpp::down_cast<forall>(e).variables();
       term_type qexpr = pbes_system::accessors::arg(e);
@@ -203,13 +199,11 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     {
       bool result = true;
       inc_indent();
-      //indent(); std::clog << "visit_inner_and: " << print_brief(e) << std::endl;
       if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr, false)) {
         // Eqn of the form sigma X(d: D) = Exists l: D . phi && Y(h(d, l)), with phi a simple formula.
         // Add sigma X(d) = e.
         equation_type eqn = equation_type(sigma, var, e);
         equations.push_back(eqn);
-        //std::clog << "visit_inner_and: simple expr." << std::endl;
       } else {
         term_type phi = true_();
         term_type psi = qexpr;
@@ -227,7 +221,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
           // Add sigma X(d) = e.
           equation_type eqn = equation_type(sigma, var, e);
           equations.push_back(eqn);
-          //std::clog << "visit_inner_and: phi /\\ psi. psi is propvar." << std::endl;
         } else if (!qvars.empty() || !is_true(phi)) {
           std::string fresh_varname = fresh_variable_name(var.name());
           data::variable_list variable_parameters = var.parameters() + qvars;
@@ -252,7 +245,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
 
           // Rewrite new equation: sigma fresh_X(d+qvars) = psi.
           equation_type new_eqn = equation_type(sigma, fresh_var, psi);
-          //std::clog << "visit_inner_and: phi /\\ psi. fresh_var = " << pp(e) << ", phi = " << pp(phi) << ", psi = " << pp(psi) << std::endl;
           visit_bqnf_equation(new_eqn);
         } else {
           //std::clog << "visit_inner_and: false." << std::endl;
@@ -276,7 +268,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     visit_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
-      //indent(); std::clog << "visit_bounded_exists" << print_brief(e) << std::endl;
       assert(is_exists(e));
       term_type qexpr = pbes_system::accessors::arg(e);
       data::variable_list qvars = atermpp::down_cast<exists>(e).variables();
@@ -306,7 +297,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     virtual std::pair<term_type,equation_type> rewrite_inner_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e, const equation_type& dummy)
     {
       inc_indent();
-      //indent(); std::clog << "rewrite_inner_bounded_forall: " << print_brief(e) << std::endl;
       term_type qexpr = e;
       data::variable_list qvars;
       while (is_forall(qexpr)) {
@@ -377,7 +367,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     bool visit_and(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
-      //indent(); std::clog << "visit_and: " << print_brief(e) << std::endl;
       equation_type dummy;
       term_type conjunction = true_();
       std::vector<equation_type> new_eqns;
@@ -419,7 +408,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     virtual std::pair<term_type,equation_type> rewrite_inner_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e, const equation_type& dummy)
     {
       inc_indent();
-      //indent(); std::clog << "rewrite_inner_bounded_exists: " << print_brief(e) << std::endl;
       term_type qexpr = e;
       data::variable_list qvars;
       while (is_exists(qexpr)) {
@@ -482,7 +470,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     bool visit_or(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
-      //indent(); std::clog << "visit_or: " << print_brief(e) << std::endl;
       equation_type dummy;
       term_type disjunction = false_();
       std::vector<equation_type> new_eqns;
@@ -521,7 +508,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     visit_bqnf_expression(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e) override
     {
       inc_indent();
-      //indent(); std::clog << "visit_bqnf_expression: " << print_brief(e) << std::endl;
       if (is_propositional_variable_instantiation(e) || is_simple_expression(e, false)) {
         // Eqn of the form sigma X(d: D) = phi && Y(h(d, l)), with phi a simple formula.
         // Add sigma X(d) = e.
@@ -549,7 +535,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       const fixpoint_symbol& sigma = eqn.symbol();
       const propositional_variable& var = eqn.variable();
       const term_type& e = eqn.formula();
-      //std::clog << "visit_bqnf_equation: rewrite equation: " << pp(sigma) << " " << var.name() << " = ..." << std::endl;
       if (is_propositional_variable_instantiation(e) || is_simple_expression(e, false)) {
         // Eqn of the form sigma X(d: D) = g(d) && Y(h(d)), with g(d) a simple formula
         // Add eqn
@@ -558,7 +543,6 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         // Postpone processing of the equation to the next level.
         visit_bqnf_expression(sigma, var, e);
       }
-      //std::clog << "visit_bqnf_equation: generated " << equations.size() << " equations." << std::endl;
       return true;
     }
 

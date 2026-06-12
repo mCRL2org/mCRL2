@@ -8,9 +8,6 @@
 //
 /// \file presparelm.cpp
 
-// #define MCRL2_PRES_CONSTELM_DEBUG
-// #define MCRL2_PRES_EXPRESSION_BUILDER_DEBUG
-
 #include "mcrl2/pres/parelm.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pres/pres_output_tool.h"

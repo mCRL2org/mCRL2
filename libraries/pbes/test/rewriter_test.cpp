@@ -252,12 +252,6 @@ BOOST_AUTO_TEST_CASE(test_simplifying_rewriter)
   // ticket 1273
   test_simplify(R, r, "exists m: Nat. val(n == 0)"                                      , "val(n == 0)");
 
-  // test_expressions(R, "Y(n+p) && Y(p+n)"                                                , "Y(n+p)");
-  // test_expressions(R, "exists m:Nat. val( m== p) && Y(m)"                               , "Y(p)");
-  // test_expressions(R, "X && (Y(p) || X)"                                                , "X");
-  // test_expressions(R, "X || (Y(p) && X)"                                                , "X");
-  // test_expressions(R, "val(b || !b)"                                                    , "val(true)");
-  // test_expressions(R, "Y(n1 + n2)"                                                      , "Y(n2 + n1)");
 }
 
 BOOST_AUTO_TEST_CASE(test_simplifying_rewriter_with_pbes_substitution)
@@ -392,7 +386,6 @@ BOOST_AUTO_TEST_CASE(test_enumerate_quantifiers_rewriter)
   pbes_system::data_rewriter<data::rewriter> r(datar);
   enumerate_quantifiers_rewriter R(datar, dataspec);
 
-  // test_rewriters(N(R), N(r),  "(Y(0) && Y(1)) => (Y(1) && Y(0))"                                , "true");
   test_rewriters(N(R), N(r),  "forall n, m: Nat. val(n > 3) || val(b)"                          , "val(b)");
   test_rewriters(N(R), N(r),  "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "Y(2) && Y(1) && Y(3) && Y(0)");
   test_rewriters(N(R), N(r),  "(Y(0) && Y(1)) => (Y(0) && Y(1))"                                , "true");
@@ -466,7 +459,6 @@ BOOST_AUTO_TEST_CASE(test_enumerate_quantifiers_rewriter_with_pbes_substitution)
     return R(x, data_substitution, substitution);
   };
 
-  // test_rewriters(N(R), N(r),  "(Y(0) && Y(1)) => (Y(1) && Y(0))"                                , "true");
   test_rewriters(N(R_substitution), N(r), "forall n, m: Nat. val(n > 3) || val(b)", "val(b)");
   test_rewriters(N(R_substitution), N(r), "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)", "false");
   test_rewriters(N(R_substitution), N(r), "(Y(0) && Y(1)) => (Y(0) && Y(1))", "true");

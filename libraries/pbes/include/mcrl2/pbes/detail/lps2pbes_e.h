@@ -242,8 +242,6 @@ struct e_structured_traverser: public e_traverser<Derived, TermTraits, Parameter
   using super::epsilon;
   using super::parameters;
 
-  // typedef std::vector<pbes_equation> result_type;
-
   e_structured_traverser(Parameters& parameters,
                          TermTraits tr
                         )

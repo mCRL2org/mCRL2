@@ -39,7 +39,6 @@ struct add_data_rewriter: public Builder<Derived>
   using super = Builder<Derived>;
   using super::enter;
   using super::leave;
-  // using super::operator();
 
   const DataRewriter& m_R;
   SubstitutionFunction& m_sigma;

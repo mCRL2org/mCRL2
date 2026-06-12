@@ -48,7 +48,6 @@ struct alphabet_efficient_traverser: public alphabet_traverser<Derived>
       W.insert(x.identifier());
       const process_equation& eqn = find_equation(super::equations, x.identifier());
       derived().apply(eqn.expression());
-      // W.erase(x.identifier());
     }
     else
     {
@@ -64,7 +63,6 @@ struct alphabet_efficient_traverser: public alphabet_traverser<Derived>
       W.insert(x.identifier());
       const process_equation& eqn = find_equation(super::equations, x.identifier());
       derived().apply(eqn.expression());
-      // W.erase(x.identifier());
     }
     else
     {

@@ -620,7 +620,6 @@ class prob_bisim_partitioner_bem
         blocks_to_move_to_front.clear();
         new_blocks_to_move_to_front.clear();
         // for all blocks B in X_old
-        //for (block_type* b_to_split : state_partition_old)
         for (typename std::list<block_type*>::iterator block_iter = state_partition_old.begin(); 
           block_iter != state_partition_old.end(); ++block_iter)
         {
@@ -685,7 +684,6 @@ class prob_bisim_partitioner_bem
               // the current block is already in new blocks; hence, just add the new block
               // to the front of the partition as well.
 
-              //new_blocks.push_back(new_block_ptr);
               new_block_ptr->is_in_new_blocks = true;
 
               // add new block to the back of the state_partition list

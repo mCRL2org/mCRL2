@@ -126,7 +126,6 @@ public:
           " seconds." << std::endl;
     }
 
-    // m_partition.save_bes();
     std::cout << (latest_solution ? "true" : "false") << std::endl;
   }
 };

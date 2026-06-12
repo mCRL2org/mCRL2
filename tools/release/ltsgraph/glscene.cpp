@@ -683,11 +683,8 @@ void GLScene::render()
     }
     else
     {
-      // mCRL2log(mcrl2::log::debug) << "Skipping \"" << di_ptr->identifier <<
-      // "\" because it is empty." << std::endl;
     }
   }
-  // delete[] matValues;
   m_vaoNode.release();
   m_node_shader.release();
 
@@ -703,8 +700,6 @@ void GLScene::render()
   // unpredictably.
   glDisable(GL_CULL_FACE);
 
-  // mCRL2log(mcrl2::log::debug) << "Frame time: " << render_timer.elapsed() <<
-  // " OpenGL: " << openglTimer.elapsed() << std::endl;
 }
 
 void GLScene::renderText(QPainter& painter)

@@ -266,11 +266,6 @@ class todo_state_vector
       return m_vec.front();
     }
 
-    //const state_in_block_pointer& back() const
-    //{
-    //  return m_vec.back();
-    //}
-
     void reserve(std::vector<state_in_block_pointer>::size_type new_cap)
     {
       m_vec.reserve(new_cap);
@@ -1826,7 +1821,6 @@ class bisim_partitioner_gj
         }
 
         m_aut.set_num_states(num_eq_classes(), false);                          assert(0==m_aut.num_state_labels());
-        //m_aut.clear_state_labels();
         m_aut.state_labels()=std::move(new_labels);
       }
       else
@@ -2810,7 +2804,6 @@ class bisim_partitioner_gj
                                            from=m_states.begin()+in_it->from(); assert(m_states[in_it->to()].ref_states_in_blocks==start_bottom);
           if (NewBotSt_block_index==from->block)
           {
-            // make_transition_non_block_inert(*in_it);
             if (0== --from->no_of_outgoing_block_inert_transitions)
             {
               change_non_bottom_state_to_bottom_state(from);
@@ -4011,7 +4004,6 @@ class bisim_partitioner_gj
                   // if (1<no_of_running_searches)
                   // {
                     running_searches[0]=running_searches[1];
-                  // }
                   if (0==current_search_index)
                   {
                     --current_search_index;
@@ -5762,8 +5754,6 @@ class bisim_partitioner_gj
       group_transitions_on_tgt_label(m_aut);
 
       /* Count the number of occurring action labels.                        */ assert((unsigned) m_preserve_divergence <= 1);
-      // mCRL2log(log::verbose) << "Start initialisation of the BLC list in the "
-      //                                    "initialisation, after sorting.\n";
       constellation_type* const initial_constellation=
                 #ifdef USE_POOL_ALLOCATOR
                     simple_list<BLC_indicators>::get_pool().
@@ -5899,8 +5889,6 @@ class bisim_partitioner_gj
           // already stored
         }                                                                       assert(m_outgoing_transitions.end()==current_outgoing_transitions);
 
-        // mCRL2log(log::verbose) << "Moving incoming and outgoing transitions\n";
-
         for (BLC_list_iterator ti=m_BLC_transitions.data();
                                          ti<m_BLC_transitions.data_end(); ++ti)
         {                                                                       // mCRL2complexity(&m_transitions[*ti], add_work(..., 1), *this);
@@ -6017,7 +6005,6 @@ class bisim_partitioner_gj
       }                                                                         assert(lower_i == upper_i);
       initial_block->sta.rt_non_bottom_states = lower_i;
 #ifndef INIT_WITHOUT_BLC_SETS
-      // mCRL2log(log::verbose) << "Start refining in the initialisation WITH BLC sets\n";
       for (linked_list<BLC_indicators>::iterator
                                     blc_it=temporary_BLC_list.begin();
                                     temporary_BLC_list.end()!=blc_it; ++blc_it)
@@ -6162,7 +6149,6 @@ class bisim_partitioner_gj
 #endif
       /* Algorithm 1, line 1.3                                               */ //print_data_structures("End initialisation");
                                                                                 assert(check_stability("End initialisation"));
-      // mCRL2log(log::verbose) << "Start stabilizing in the initialisation\n";    
                                                                                 assert(check_data_structures("End initialisation", false, false));
       #ifdef INIT_WITHOUT_BLC_SETS
         stabilizeB();
@@ -6759,7 +6745,6 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
     // Algorithm 1, Line 1.1: Find tau-SCCs and contract each of them to a
     // single state
     const std::clock_t start_SCC=std::clock();
-    // mCRL2log(log::verbose) << "Start SCC\n";
     if (branching)
     {
         scc_reduce(l, preserve_divergence);
@@ -6768,12 +6753,10 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
     // Now apply the branching bisimulation reduction algorithm.  If there
     // are no taus, this will automatically yield strong bisimulation.
     const std::clock_t start_part=std::clock();
-    // mCRL2log(log::debug) << "Start Partitioning\n";
     bisim_partitioner_gj<LTS_TYPE> bisim_part(l,branching,preserve_divergence);
 
     // Assign the reduced LTS
     const std::clock_t end_part=std::clock();
-    // mCRL2log(log::debug) << "Start finalizing\n";
     bisim_part.finalize_minimized_LTS();
 
     if (mCRL2logEnabled(log::debug))

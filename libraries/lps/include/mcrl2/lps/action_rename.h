@@ -144,10 +144,6 @@ class action_rename_rule
     }
 };
 
-
-/// \brief Read-only singly linked list of action rename rules
-// typedef atermpp::term_list<action_rename_rule> action_rename_rule_list;
-
 /// \brief Action rename specification
 class action_rename_specification
 {

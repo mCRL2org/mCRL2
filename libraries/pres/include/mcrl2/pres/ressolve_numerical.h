@@ -28,7 +28,6 @@ namespace detail {
 
 inline double evaluate(const pres_expression& p, const std::unordered_map<core::identifier_string, double>& solution)
 {
-// std::cerr << "Evaluate: " << p << "\n";
 using value_cache_type = std::unordered_map<data::data_expression, double>;
 static value_cache_type value_cache;
 if (is_propositional_variable_instantiation(p))
@@ -135,9 +134,6 @@ class ressolve_by_numerical_iteration
       }
       mCRL2log(log::debug) << "Current solution: " << std::setprecision(m_options.precision) << detail::evaluate(m_input_pres.initial_state(),m_new_solution) << "   " 
                            << " Difference with previous iteration: " << error << "\n";     
-// std::cerr << "Next solution0 " << m_new_solution[m_equations[0].variable().name()] << "\n";
-// std::cerr << "Next solution1 " << m_new_solution[m_equations[1].variable().name()] << "\n";
-// std::cerr << "Next solution2 " << m_new_solution[m_equations[2].variable().name()] << "\n";
       return error<=pow(0.1,m_options.precision);
     }
 
@@ -157,18 +153,14 @@ class ressolve_by_numerical_iteration
     {
       if (base_equation_index<m_equations.size())
       {
-// std::cerr << "RECURSIVE ALGORITHM " << base_equation_index << "---------------------------\n";
         std::size_t i=base_equation_index;
         for( ; i<m_equations.size() && m_equations[i].symbol()==m_equations[base_equation_index].symbol() ; ++i)
         {
-// std::cerr << "SET " << m_equations[i].variable().name() << "\n";
           const double sol = (m_equations[i].symbol().is_mu()?
                                              -1*std::numeric_limits<double>::infinity():
                                              std::numeric_limits<double>::infinity());
           m_new_solution[m_equations[i].variable().name()] = sol;
-//          m_previous_solution[m_equations[i].variable().name()] = sol;
                                                                   
-// std::cerr << "INITIAL SOLUTION " << m_equations[i].variable().name() << " := " << m_new_solution[m_equations[i].variable().name()] << "\n";
         }
 
         apply_numerical_recursive_algorithm(i);
@@ -184,11 +176,9 @@ class ressolve_by_numerical_iteration
           {
             calculate_new_solution(base_equation_index, i);
           } while (!stable_solution_found(base_equation_index, i));
-// std::cerr << "HIJERERE\n";
           apply_numerical_recursive_algorithm(i);
           calculate_new_solution(base_equation_index, i);
         } while (!stable_solution_found(base_equation_index, i));
-// std::cerr << "RECURSIVE ALGORITHM TERMINATE " << base_equation_index << "---------------------------\n";
       }
     };
 
@@ -228,7 +218,6 @@ class ressolve_by_numerical_iteration
       apply_numerical_recursive_algorithm(0);
 
       double solution = detail::evaluate(m_input_pres.initial_state(),m_new_solution);
-      // mCRL2log(log::info) << "Solution " << solution << "\n";
       return solution;
     }
 };

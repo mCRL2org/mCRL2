@@ -16,7 +16,6 @@
 #define MCRL2_PBES_TOOLS_PBESBACKELM_H
 
 #include "mcrl2/pbes/algorithms.h"
-// #include "mcrl2/pbes/replace_capture_avoiding.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/io.h"
@@ -128,7 +127,6 @@ void self_substitute(pbes_equation& equation, substitute_propositional_variables
 inline
 void substitute(pbes_equation& into, const pbes_equation& by, substitute_propositional_variables_builder<pbes_system::pbes_expression_builder>& substituter)
 {
-  // substitute_propositional_variables_builder<pbes_system::pbes_expression_builder> substituter(by,r);
   substituter.set_equation(by);
   substituter.set_name(into.variable().name());
   pbes_expression p;

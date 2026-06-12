@@ -115,7 +115,6 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
         // Compute attractor set of minimum priority vertices:
         {
             ParityGame::Player player = (ParityGame::Player)((prio - 1)%2);
-            //std::set<verti> min_prio_attr;
             DenseSet<verti> min_prio_attr(0, V);
             for (verti v = 0; v < V; ++v)
             {
@@ -148,7 +147,6 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
 
             // Compute attractor set of all vertices won by the opponent:
             ParityGame::Player opponent = (ParityGame::Player)(prio%2);
-            //std::set<verti> lost_attr;
             DenseSet<verti> lost_attr(0, V);
             for (unsigned long it : unsolved)
             {

@@ -62,17 +62,14 @@ void SyncMpiAttractorImpl::solve(bool quick_start)
                 // Add vertex v to the attractor set:
                 attr.insert(v);
                 queue.push_back(v);
-                //debug("added %d to attractor set", part.global(v));
             }
         }
         // Synchronize with other processes, obtaining a fresh queue of
         // external vertices that were added in parallel:
         queue.erase(queue.begin(), queue.begin() + local_begin);
-        //debug("queue size: %d", queue.size());
         std::deque<verti> next_queue;
         exchange_queues(next_queue);
         next_queue.swap(queue);
-        //debug("next queue size: %d", queue.size());
         local_begin = queue.size();
     }
 }
@@ -106,7 +103,6 @@ void SyncMpiAttractorImpl::exchange_queues(std::deque<verti> &next_queue)
                     {
                         int val = (int)part.global(*it);
                         MPI::COMM_WORLD.Send(&val, 1, MPI_INT, j, 0);
-                        //debug("sending %d to %d", val, j);
                     }
                 }
                 int val = -1;
@@ -121,7 +117,6 @@ void SyncMpiAttractorImpl::exchange_queues(std::deque<verti> &next_queue)
                     int val = -1;
                     MPI::COMM_WORLD.Recv(&val, 1, MPI_INT, i, 0);
                     if (val == -1) break;
-                    //debug("received %d from %d", val, i);
                     const verti v = part.local((verti)val);
                     assert(!attr.count(v));
                     attr.insert(v);

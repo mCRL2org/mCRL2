@@ -181,10 +181,6 @@ struct compare_progress_measures_vertex
       return true;
     }
     int n = lexicographical_compare_3way(x->alpha.v.begin(), x->alpha.v.begin() + m + 1, y->alpha.v.begin(), y->alpha.v.begin() + m + 1);
-    //if (n == 0)
-    //{
-    //  return is_even(x->rank) && is_odd(y->rank);
-    //}
     return n < 0;
   }
 };

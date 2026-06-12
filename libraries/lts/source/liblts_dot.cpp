@@ -22,7 +22,6 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
 {
   // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
   os << "digraph G {" << std::endl;
-  // os << "size=\"7,10.5\";" << std::endl;
   os << "center = TRUE;" << std::endl;
   os << "mclimit = 10.0;" << std::endl;
   os << "nodesep = 0.05;" << std::endl;

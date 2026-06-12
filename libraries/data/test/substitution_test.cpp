@@ -49,9 +49,6 @@ void test_basic()
 
   using mcrl2::data::concepts::MutableSubstitution;
 
-//  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< std::map< variable, data_expression > > >));
-//  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< std::map< variable, variable > > >));
-
   mutable_map_substitution< std::map< variable, data_expression > > s;
 
   BOOST_CHECK(static_cast< variable >(s(x)) == x);
@@ -90,9 +87,6 @@ void test_indexed_substitution()
   data_expression e(variable("z", sort_nat::nat()) + (x + y));
 
   using mcrl2::data::concepts::MutableSubstitution;
-
-//  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< data_expression > > >));
-//  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< variable > > >));
 
   mutable_indexed_substitution< variable, data_expression > s;
 
@@ -191,9 +185,6 @@ void test_my_list_substitution()
   variable v("v", sort_nat::nat());
 
   const data_expression& y1 = y;
-  // const data_expression& z1 = z;
-  // const data_expression& u1 = u;
-  // const data_expression& v1 = v;
 
   assignment xy(x,y);
   assignment uz(u,z);
@@ -201,11 +192,6 @@ void test_my_list_substitution()
   assignment_list r = { assignment(x, y1) };
 
 // TODO: This does not longer work, can it be fixed?
-//  BOOST_CHECK(replace_variables(x,  my_assignment_sequence_substitution(r)) == v1);
-//  BOOST_CHECK(replace_variables(y,  my_assignment_sequence_substitution(r)) == y1);
-//  BOOST_CHECK(replace_variables(z,  my_assignment_sequence_substitution(r)) == z1);
-//  BOOST_CHECK(replace_variables(u,  my_assignment_sequence_substitution(r)) == u1);
-//  BOOST_CHECK(replace_variables(uz, my_assignment_sequence_substitution(r)) == uz);
 }
 
 void test_assignment_sequence_substitution()
@@ -251,11 +237,6 @@ void test_list_substitution()
   assignment_list r = { assignment(x, y1) };
 
 // TODO: This does not longer work, can it be fixed?
-//  BOOST_CHECK(replace_variables(x, assignment_sequence_substitution(r)) == y1);
-//  BOOST_CHECK(replace_variables(y, assignment_sequence_substitution(r)) == y);
-//  BOOST_CHECK(replace_variables(z, assignment_sequence_substitution(r)) == z);
-//  BOOST_CHECK(replace_variables(u, assignment_sequence_substitution(r)) == u);
-//  BOOST_CHECK(replace_variables(uz, assignment_sequence_substitution(r)) == uz);
 }
 
 void test_mutable_substitution_composer()

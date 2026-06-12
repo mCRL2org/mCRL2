@@ -96,7 +96,6 @@ public:
         // convert to snoc list
         sort_expression element_sort(*function_sort(head.sort()).domain().begin());
         
-        // result = sort_list::list(element_sort, derived().apply(data_expression_list(x.begin(), x.end())));
         result = sort_list::list(element_sort, 
                                  data_expression_list(
                                            x.begin(), 

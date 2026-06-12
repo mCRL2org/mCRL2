@@ -186,12 +186,6 @@ public:
                                       get_distribution());
   }
 
-  // void update_assignments()
-  // {
-  //   m_assignments = update_assignments(m_assignments);
-  //   summand_real_nextstate_map.clear();
-  // }
-
   const bool& is_delta_summand() const
   {
     return m_is_delta_summand;

@@ -80,8 +80,6 @@ BOOST_AUTO_TEST_CASE(test_pfnf_visitor)
 {
   test_pfnf_expression("forall m:Nat. false");
   test_pfnf_expression("X && (Y(3) || X)");
-  //test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
-  //test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
 }
 
 void test_pfnf(const std::string& pbes_spec)
@@ -163,7 +161,6 @@ BOOST_AUTO_TEST_CASE(test_pfnf_rewriter_2)
     "                                                                                       \n"
     "init X;                                                                                \n"
     ;
-//  test_pfnf_rewriter2(text);
 
   // problematic case found by random tests 15-1-2011
   text =

@@ -16,7 +16,6 @@
 //DATA
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/utilities/input_output_tool.h"
-// #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
@@ -419,7 +418,6 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
               }
             }
             for(data_expression_list& l: new_enumerated_domain_elements)
-            // for(std::size_t i=0; i<new_enumerated_domain_elements.size(); ++i)
             {
               new_parameters.emplace_back(fresh_name_generator(v.name()), s.codomain());
               l=reverse(l); // Then new_enumerated_domain_elements were stored in the wrong order. 
@@ -502,8 +500,6 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 
       data::mutable_indexed_substitution sigma;
       std::vector<data::variable> new_parameters;
-      // data::variable_list old_parameters=spec.process().process_parameters();
-      // for(const replaced_function_parameter& rfp: representation_for_the_new_parameters)
       for(const variable& v: spec.process().process_parameters())
       {
         const std::unordered_map<variable, replaced_function_parameter>::const_iterator i=representation_for_the_new_parameters.find(v);

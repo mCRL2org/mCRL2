@@ -115,7 +115,6 @@ class probabilistic_arbitrary_precision_fraction
     */
     bool operator==(const probabilistic_arbitrary_precision_fraction& other) const
     {
-      // return this->m_enumerator*other.m_denominator==other.m_enumerator*this->m_denominator;
       buffer1().clear();
       this->m_enumerator.multiply(other.m_denominator, buffer1(), buffer3());
       buffer2().clear();
@@ -134,7 +133,6 @@ class probabilistic_arbitrary_precision_fraction
     */
     bool operator<(const probabilistic_arbitrary_precision_fraction& other) const
     {
-      // return this->m_enumerator*other.m_denominator<other.m_enumerator*this->m_denominator;
       buffer1().clear();
       this->m_enumerator.multiply(other.m_denominator, buffer1(), buffer3());
       buffer2().clear();
@@ -255,13 +253,11 @@ class probabilistic_arbitrary_precision_fraction
       {
         utilities::swap(x,y);
       }
-      // utilities::big_natural_number remainder=y % x;
       y.div_mod(x,buffer_divide,buffer_remainder,buffer);  // buffer_remainder contains remainder.
       while (!buffer_remainder.is_zero())
       {
         y=x;
         x=buffer_remainder;
-        // remainder=y % x;
         y.div_mod(x,buffer_divide,buffer_remainder,buffer);
       }
       return;  // the value x is now the result.

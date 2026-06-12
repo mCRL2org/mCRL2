@@ -319,7 +319,6 @@ int precedence(const application& x)
   {
     const data_expression& numerator = sort_real::left(x);
     const data_expression& denominator = sort_real::right(x);
-    // if (sort_pos::is_c1_function_symbol(denominator))
     if (detail::is_one(denominator))
     {
       return precedence(numerator);
@@ -2512,7 +2511,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       print_variables(variables, true, true, true, "var  ", ";\n", ";\n     ");
 
       // N.B. We print normalized equations instead of user defined equations.
-      // print_list(std::vector<data_equation>(first, i), opener, closer, separator);
       auto first1 = normalized_equations.begin() + (first - equations.begin());
       auto i1 = normalized_equations.begin() + (i - equations.begin());
       print_list(std::vector<data_equation>(first1, i1), opener, closer, separator);

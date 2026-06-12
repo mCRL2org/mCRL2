@@ -191,9 +191,6 @@ class type_checker: public sort_type_checker
       add_system_function(sort_real::minimum(sort_nat::nat(), sort_nat::nat()));
       add_system_function(sort_real::minimum(sort_int::int_(), sort_int::int_()));
       add_system_function(sort_real::minimum(sort_real::real_(), sort_real::real_()));
-      //more
-      // add_system_function(sort_real::abs(sort_pos::pos()));
-      // add_system_function(sort_real::abs(sort_nat::nat()));
       add_system_function(sort_real::abs(sort_int::int_()));
       add_system_function(sort_real::abs(sort_real::real_()));
       //more
@@ -228,7 +225,6 @@ class type_checker: public sort_type_checker
       // add_system_function(sort_int::div(sort_pos::pos(), sort_pos::pos()));
       add_system_function(sort_int::div(sort_nat::nat(), sort_pos::pos()));
       add_system_function(sort_int::div(sort_int::int_(), sort_pos::pos()));
-      // add_system_function(sort_int::mod(sort_pos::pos(), sort_pos::pos()));
       add_system_function(sort_int::mod(sort_nat::nat(), sort_pos::pos()));
       add_system_function(sort_int::mod(sort_int::int_(), sort_pos::pos()));
       add_system_function(sort_real::divides(sort_pos::pos(), sort_pos::pos()));
@@ -268,20 +264,10 @@ class type_checker: public sort_type_checker
       add_system_function(sort_set::intersection(data::untyped_sort(), sort_set::set_(data::untyped_sort()), sort_set::set_(data::untyped_sort())));
       add_system_function(sort_set::false_function(data::untyped_sort())); // Needed as it is used within the typechecker.
       add_system_function(sort_set::constructor(data::untyped_sort())); // Needed as it is used within the typechecker.
-      //**** add_system_function(sort_bag::set2bag(data::untyped_sort()));
-      // add_system_constant(sort_set::empty(data::untyped_sort()));
-      // add_system_function(sort_set::in(data::untyped_sort()));
-      // add_system_function(sort_set::union_(data::untyped_sort()));
-      // add_system_function(sort_set::difference(data::untyped_sort()));
-      // add_system_function(sort_set::intersection(data::untyped_sort()));
       add_system_function(sort_set::complement(data::untyped_sort()));
 
       //FSets
       add_system_constant(sort_fset::empty(data::untyped_sort()));
-      // add_system_function(sort_fset::in(data::untyped_sort()));
-      // add_system_function(sort_fset::union_(data::untyped_sort()));
-      // add_system_function(sort_fset::intersection(data::untyped_sort()));
-      // add_system_function(sort_fset::difference(data::untyped_sort()));
       add_system_function(sort_fset::count(data::untyped_sort()));
       add_system_function(sort_fset::insert(data::untyped_sort())); // Needed as it is used within the typechecker.
 
@@ -297,23 +283,11 @@ class type_checker: public sort_type_checker
       add_system_function(sort_bag::intersection(data::untyped_sort(), sort_bag::bag(data::untyped_sort()), sort_bag::bag(data::untyped_sort())));
       add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_fbag::fbag(data::untyped_sort())));
       add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_bag::bag(data::untyped_sort())));
-      // add_system_constant(sort_bag::empty(data::untyped_sort()));
-      // add_system_function(sort_bag::in(data::untyped_sort()));
-      //**** add_system_function(sort_bag::count(data::untyped_sort()));
-      // add_system_function(sort_bag::count(data::untyped_sort(), data::untyped_sort(), sort_fset::fset(data::untyped_sort())));
-      //add_system_function(sort_bag::join(data::untyped_sort()));
-      // add_system_function(sort_bag::difference(data::untyped_sort()));
-      // add_system_function(sort_bag::intersection(data::untyped_sort()));
       add_system_function(sort_bag::zero_function(data::untyped_sort())); // Needed as it is used within the typechecker.
       add_system_function(sort_bag::constructor(data::untyped_sort())); // Needed as it is used within the typechecker.
 
       //FBags
       add_system_constant(sort_fbag::empty(data::untyped_sort()));
-      // add_system_function(sort_fbag::count(data::untyped_sort()));
-      // add_system_function(sort_fbag::in(data::untyped_sort()));
-      // add_system_function(sort_fbag::union_(data::untyped_sort()));
-      // add_system_function(sort_fbag::intersection(data::untyped_sort()));
-      // add_system_function(sort_fbag::difference(data::untyped_sort()));
       add_system_function(sort_fbag::count_all(data::untyped_sort()));
       add_system_function(sort_fbag::cinsert(data::untyped_sort())); // Needed as it is used within the typechecker.
 

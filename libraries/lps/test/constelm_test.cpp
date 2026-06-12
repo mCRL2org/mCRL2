@@ -407,7 +407,6 @@ void test_constelm()
   test_constelm("case_6a", case_6a, expected_6a);
   test_constelm("case_6b", case_6b, expected_6b);
   test_constelm("case_7" , case_7,  expected_7);
-  // test_constelm("case_8" , case_8,  expected_8);
   test_constelm("case_9" , case_9,  expected_9);
   test_constelm("case_10" , case_10,  expected_10);
 }

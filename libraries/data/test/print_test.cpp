@@ -235,19 +235,13 @@ BOOST_AUTO_TEST_CASE(test_list_print)
   BOOST_CHECK(print_check(empty(bool_()), "[]"));
   BOOST_CHECK(print_check(cons_(bool_(), true_(), empty_), "[true]"));
   BOOST_CHECK(print_check(cons_(bool_(), false_(), cons_(bool_(), true_(), empty_)), "[false, true]"));
-  //BOOST_CHECK(print_check(snoc(bool_(), cons_(bool_(), true_(), empty), false_()), "[true, false]"));
   BOOST_CHECK(print_check(snoc(bool_(), cons_(bool_(), true_(), empty_), false_()), "[true] <| false"));
   BOOST_CHECK(print_check(snoc(bool_(), snoc(bool_(), empty_, true_()), false_()), "[true, false]"));
   BOOST_CHECK(print_check(cons_(bool_(), in(bool_(), false_(), cons_(bool_(), true_(), empty_)), empty_), "[false in [true]]"));
-  //BOOST_CHECK(print_check(snoc(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_())), true_()), "[false, true, true]"));
   BOOST_CHECK(print_check(snoc(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty_, true_())), true_()), "(false |> [true]) <| true"));
-  //BOOST_CHECK(print_check(in(bool_(), true_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_()))), "true in [false, true]"));
   BOOST_CHECK(print_check(in(bool_(), true_(), cons_(bool_(), false_(), snoc(bool_(), empty_, true_()))), "true in false |> [true]"));
-  //BOOST_CHECK(print_check(count(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_()))), "#[false, true]"));
   BOOST_CHECK(print_check(count(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty_, true_()))), "#(false |> [true])"));
-  //BOOST_CHECK(print_check(concat(bool_(), cons_(bool_(), true_(), empty), cons_(bool_(), false_(), snoc(bool_(), empty, true_()))), "[true] ++ [false, true]"));
   BOOST_CHECK(print_check(concat(bool_(), cons_(bool_(), true_(), empty_), cons_(bool_(), false_(), snoc(bool_(), empty_, true_()))), "[true] ++ (false |> [true])"));
-  //BOOST_CHECK(print_check(element_at(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty, true_())), sort_nat::nat(1)), "[false, true].1"));
   BOOST_CHECK(print_check(element_at(bool_(), cons_(bool_(), false_(), snoc(bool_(), empty_, true_())), sort_nat::nat(1)), "(false |> [true]) . 1"));
   BOOST_CHECK(print_check(head(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty_))), "head([false, true])"));
   BOOST_CHECK(print_check(tail(bool_(), cons_(bool_(), false_(), cons_(bool_(), true_(), empty_))), "tail([false, true])"));
@@ -539,7 +533,6 @@ BOOST_AUTO_TEST_CASE(printing_terms_takes_a_lot_of_memory)
   std::cerr << t << "\n";
 
   for(size_t i=0; i<40; ++i)
-  // for(size_t i=0; i<40000000; ++i)
   {
     t=application(f,t);
     std::cerr << t << "\n";

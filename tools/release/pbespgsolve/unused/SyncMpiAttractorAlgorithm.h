@@ -69,12 +69,8 @@ class SyncMpiAttractorAlgorithm : public MpiAttractorAlgorithm
         DenseSet<verti> &attr, std::deque<verti> &queue,
         bool quick_start, ParityGame::Strategy &strategy )
     {
-        /* Logger::debug( "enter make_attractor_set(%s, %d, %d) in %s",
-            part.debug_str(attr).c_str(), (int)player, (int)quick_start,
-            part.debug_str().c_str() ); */
         SyncMpiAttractorImpl impl(vpart, part, player, attr, queue, strategy);
         impl.solve(quick_start);
-        // Logger::debug("return -> %s", part.debug_str(attr).c_str());
     }
 };
 

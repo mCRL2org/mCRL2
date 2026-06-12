@@ -365,7 +365,6 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     std::vector<pfnf_traverser_quantifier> q = concat(left.quantifiers, right.quantifiers);
     pbes_expression h = make_and(left, right);
     std::vector<pfnf_traverser_implication> g = concat(left.implications, right.implications);
-//std::cout << "AND RESULT\n"; print_expression(pfnf_traverser_expression(h, q, g));
     expression_stack.emplace_back(h, q, g);
   }
 
@@ -412,7 +411,6 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
         g.emplace_back(make_and(i.g, k.g), concat(i.rhs, k.rhs));
       }
     }
-//std::cout << "OR RESULT\n"; print_expression(pfnf_traverser_expression(h, q, g));
     expression_stack.emplace_back(h, q, g);
   }
 

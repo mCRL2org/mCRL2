@@ -60,7 +60,6 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
         break;
       case DISJUNCTIVE:
       case EXISTENTIAL:
-        //std::clog << "forall in mode " << mode << std::endl;
         result = false;
         break;
       default:
@@ -147,7 +146,6 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
             count++;
             if (count > 1 || !is_propositional_variable_instantiation(conjunct))
             {
-              //std::clog << "and in mode " << mode << std::endl;
               result = false;
             }
           }
@@ -198,7 +196,6 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
         break;
       }
       case EXISTENTIAL:
-        //std::clog << "or in mode " << mode << std::endl;
         result = false;
         break;
       default:

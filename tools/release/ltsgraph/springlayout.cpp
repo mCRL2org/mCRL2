@@ -326,27 +326,6 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool 
 
   // The code commented out below calculates a cube around all points to have a 'perfect' octree
 
-  // QVector2D _extents, cubic_extents;
-  // float _width;
-
-  // _extents = node_max - node_min;
-  // _width = std::max({_extents.x(), _extents.y()});
-  // cubic_extents = QVector2D(_width, _width);
-  // node_min -= (cubic_extents - _extents)*0.5f;
-  // node_max = node_min + cubic_extents;
-
-  // _extents = handle_max - handle_min;
-  // _width = std::max({_extents.x(), _extents.y()});
-  // cubic_extents = QVector2D(_width, _width);
-  // handle_min -= (cubic_extents - _extents)*0.5f;
-  // handle_max = handle_min + cubic_extents;
-
-  // _extents = trans_max - trans_min;
-  // _width = std::max({_extents.x(), _extents.y()});
-  // cubic_extents = QVector2D(_width, _width);
-  // trans_min -= (cubic_extents - _extents)*0.5f;
-  // trans_max = trans_min + cubic_extents;
-
   m_node_tree2D.setMinBounds(node_min);
   m_node_tree2D.setMaxBounds(node_max);
 
@@ -400,7 +379,6 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::quadtree>(bool 
     m_hforces[i] += approxRepulsionForce<Quadtree>(m_graph.handle(n).pos(), m_handle_tree2D, m_handleDeviation);
     m_lforces[i] += approxRepulsionForce<Quadtree>(m_graph.transitionLabel(n).pos(), m_trans_tree2D, m_labelDistance);
   }
-  // m_repulsion = temp;
 }
 
 template <>
@@ -456,27 +434,6 @@ void SpringLayout::repulsionAccumulation<SpringLayout::TreeMode::octree>(bool se
   handle_max += QVector3D(1, 1, 1);
   trans_min -= QVector3D(1, 1, 1);
   trans_max += QVector3D(1, 1, 1);
-
-  // QVector3D _extents, cubic_extents;
-  // float _width;
-
-  // _extents = node_max - node_min;
-  // _width = std::max({_extents.x(), _extents.y(), _extents.z()});
-  // cubic_extents = QVector3D(_width, _width, _width);
-  // node_min -= (cubic_extents - _extents)*0.5f;
-  // node_max = node_min + cubic_extents;
-
-  // _extents = handle_max - handle_min;
-  // _width = std::max({_extents.x(), _extents.y(), _extents.z()});
-  // cubic_extents = QVector3D(_width, _width, _width);
-  // handle_min -= (cubic_extents - _extents)*0.5f;
-  // handle_max = handle_min + cubic_extents;
-
-  // _extents = trans_max - trans_min;
-  // _width = std::max({_extents.x(), _extents.y(), _extents.z()});
-  // cubic_extents = QVector3D(_width, _width, _width);
-  // trans_min -= (cubic_extents - _extents)*0.5f;
-  // trans_max = trans_min + cubic_extents;
 
   m_node_tree.setMinBounds(node_min);
   m_node_tree.setMaxBounds(node_max);
@@ -757,7 +714,6 @@ void SpringLayout::apply()
     m_max_num_nodes = 0;
     m_total_num_nodes = 0;
 
-    // float stability = std::abs((m_previous_energy - energy) / m_previous_energy);
     float stability = std::abs(m_previous_energy - energy)/(edgeCount+nodeCount);
 
     if (m_glwidget.getDebugDrawGraphs())
@@ -953,7 +909,6 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, CustomQWidget* advancedDial
   m_ui.sldBalance->setValue(m_layout.repulsion());
   m_ui.sldHandleWeight->setValue(m_layout.handleDeviation());
   m_ui.sldNatLength->setValue(m_layout.naturalTransitionLength());
-  // m_ui_advanced.chk_enableTree->setChecked(false);
   m_layout.setTreeEnabled(m_ui_advanced.chk_enableTree->isChecked());
 
   m_ui_advanced.sld_spd->setValue(m_layout.speed());
@@ -977,12 +932,6 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, CustomQWidget* advancedDial
 
   connect(m_ui_advanced.cmd_reset_positions, &QPushButton::pressed, this, &SpringLayoutUi::onResetPositionsPressed);
 
-  // connect(m_ui_advanced_dialog, SIGNAL(finished(int)), this,
-  //         SLOT(onAdvancedDialogShow(false)));
-  // connect(m_ui_advanced_dialog, SIGNAL(accepted()), this,
-  //         SLOT(onAdvancedDialogShow(false)));
-  // connect(m_ui_advanced_dialog, SIGNAL(rejected()), this,
-  //         SLOT(onAdvancedDialogShow(false)));
 }
 
 SpringLayoutUi::~SpringLayoutUi()

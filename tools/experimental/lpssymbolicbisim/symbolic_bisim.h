@@ -268,7 +268,6 @@ protected:
       }
     }
     arguments_equal = rewr(arguments_equal);
-    // mCRL2log(log::verbose) << "Constructing block expression ..." << std::endl;
     data_expression prime_condition =
       arguments_equal == sort_bool::true_() ?
         variable("b'", sort_bool::bool_()) :
@@ -515,7 +514,6 @@ protected:
     {
       if(rewr(application(block, m_spec.initial_process().expressions())) == sort_bool::true_())
       {
-        // mCRL2log(log::verbose) << "Found initial block " << block << std::endl;
         return block;
       }
     }
@@ -739,8 +737,6 @@ protected:
     for(const data_expression& block: blocks)
     {
       mCRL2log(log::verbose) << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(rewr(block)) << std::endl;
-      // detail::BDD2Dot bddwriter;
-      // bddwriter.output_bdd(atermpp::down_cast<abstraction>(block).body(), ("block" + std::to_string(i) + ".dot").c_str());
       i++;
     }
   }
