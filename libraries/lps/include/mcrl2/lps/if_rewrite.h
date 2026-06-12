@@ -40,7 +40,8 @@ struct if_rewrite_builder: public lps::data_expression_builder<if_rewrite_builde
 /// \brief Applies the one point rule rewriter to all embedded data expressions in an object x
 /// \param x an object containing data expressions
 template <typename T>
-void if_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
+void if_rewrite(T& x)
 {
   detail::if_rewrite_builder f{};
   f.update(x);
@@ -50,7 +51,8 @@ void if_rewrite(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* =
 /// \param x an object containing data expressions
 /// \return the rewrite result
 template <typename T>
-T if_rewrite(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+  requires(std::is_base_of_v<atermpp::aterm, T>)
+T if_rewrite(const T& x)
 {
   T result;
   detail::if_rewrite_builder f{};

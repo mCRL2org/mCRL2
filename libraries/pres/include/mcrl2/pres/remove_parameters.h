@@ -103,9 +103,9 @@ struct remove_parameters_builder: public pres_system::pres_expression_builder<De
 /// \param to_be_removed The indices of parameters that are to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T remove_parameters(const T& x,
-    const std::vector<std::size_t>& to_be_removed,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const std::vector<std::size_t>& to_be_removed)
 {
   T result;
   core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed).apply(result, x);
@@ -117,9 +117,9 @@ T remove_parameters(const T& x,
 /// \param to_be_removed The indices of parameters that are to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void remove_parameters(T& x,
-    const std::vector<std::size_t>& to_be_removed,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    const std::vector<std::size_t>& to_be_removed)
 {
   core::make_apply_builder_arg1<detail::remove_parameters_builder>(to_be_removed).update(x);
 }
@@ -202,9 +202,9 @@ struct map_based_remove_parameters_builder: public pres_expression_builder<Deriv
 /// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T remove_parameters(const T& x,
-    const std::map<core::identifier_string, std::vector<std::size_t>>& to_be_removed,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const std::map<core::identifier_string, std::vector<std::size_t>>& to_be_removed)
 {
   T result;
   core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed).apply(result, x);
@@ -217,9 +217,9 @@ T remove_parameters(const T& x,
 /// need to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void remove_parameters(T& x,
-    const std::map<core::identifier_string, std::vector<std::size_t>>& to_be_removed,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const std::map<core::identifier_string, std::vector<std::size_t>>& to_be_removed)
 {
   core::make_apply_builder_arg1<detail::map_based_remove_parameters_builder>(to_be_removed).update(x);
 }
@@ -310,9 +310,9 @@ struct set_based_remove_parameters_builder: public pres_expression_builder<Deriv
 /// \param to_be_removed A set of parameters that are to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T remove_parameters(const T& x,
-    const std::set<data::variable>& to_be_removed,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    const std::set<data::variable>& to_be_removed)
 {
   T result;
   core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed).apply(result, x);
@@ -324,9 +324,9 @@ T remove_parameters(const T& x,
 /// \param to_be_removed A set of parameters that are to be removed
 /// \return The expression \p x with parameters removed according to the mapping \p to_be_removed
 template <typename T>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void remove_parameters(T& x,
-    const std::set<data::variable>& to_be_removed,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const std::set<data::variable>& to_be_removed)
 {
   core::make_apply_builder_arg1<detail::set_based_remove_parameters_builder>(to_be_removed).update(x);
 }

@@ -837,6 +837,7 @@ class Class:
         arguments1 = []
         arguments2 = []
         template_parameters = []
+        requires_conditions = []
 
         for i, p in enumerate(self.constructor.parameters()):
             parameters.append(p.name())
@@ -851,7 +852,7 @@ class Class:
                     template_parameter = 'Container'
                 template_parameters.append(template_parameter)
                 arguments1.append('const %s& %s' % (template_parameter, p.name()))
-                arguments2.append('typename atermpp::enable_if_container<%s, %s>::type* = nullptr' % (template_parameter, p.type(False)[:-5]))
+                requires_conditions.append('atermpp::is_container<%s, %s>::value' % (template_parameter, p.type(False)[:-5]))
                 parameters1.append('%s(%s.begin(), %s.end())' % (p.type(False), p.name(),p.name()))
             else:
                 parameters1.append(p.name())
@@ -861,11 +862,12 @@ class Class:
         arguments   = ', '.join(arguments)
 
         if len(template_parameters) > 0:
-            template_parameters = 'template <typename %s>\n    ' % ', typename'.join(template_parameters)
+            requires_clause = ' requires(' + ' && '.join(requires_conditions) + ')' if requires_conditions else ''
+            template_parameters = 'template <typename %s>%s\n    ' % (', typename '.join(template_parameters), requires_clause)
         else:
             template_parameters = ''
         parameters1 = ', '.join(parameters1)
-        arguments1  = ', '.join(arguments1 + arguments2)
+        arguments1  = ', '.join(arguments1)
 
         if superclass == None:
             superclass = 'atermpp::aterm'

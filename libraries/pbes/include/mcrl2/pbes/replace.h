@@ -231,18 +231,18 @@ T replace_free_variables(const T& x,
 
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void replace_propositional_variables(T& x,
-    const Substitution& sigma,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const Substitution& sigma)
 {
   pbes_system::detail::make_replace_propositional_variables_builder<pbes_system::pbes_expression_builder>(sigma).update(x);
 }
 
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T replace_propositional_variables(const T& x,
-    const Substitution& sigma,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const Substitution& sigma)
 {
   T result;
   pbes_system::detail::make_replace_propositional_variables_builder<pbes_system::pbes_expression_builder>(sigma).apply(result, x);
@@ -251,28 +251,28 @@ T replace_propositional_variables(const T& x,
 
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 void replace_propositional_variables(T& result,
     const T& x,
-    const Substitution& sigma,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const Substitution& sigma)
 {
   pbes_system::detail::make_replace_propositional_variables_builder<pbes_system::pbes_expression_builder>(sigma).apply(result, x);
 }
 
 template <typename T, typename Substitution>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void replace_pbes_expressions(T& x,
     const Substitution& sigma,
-    bool innermost = true,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    bool innermost = true)
 {
   pbes_system::detail::make_replace_pbes_expressions_builder<pbes_system::pbes_expression_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T replace_pbes_expressions(const T& x,
     const Substitution& sigma,
-    bool innermost = true,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    bool innermost = true)
 {
   T result;
   pbes_system::detail::make_replace_pbes_expressions_builder<pbes_system::pbes_expression_builder>(sigma, innermost).apply(result, x);

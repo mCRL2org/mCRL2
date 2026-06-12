@@ -17,13 +17,13 @@
 namespace atermpp
 {
 
-/// type condition for use with std::enable_if
+/// Type condition for detecting containers.
 /// T the type to be tested
 /// \pre V is void or T::value_type convertible to V
 template < typename T, typename V = void >
 struct is_container;
 
-/// type condition for use with std::enable_if
+/// Type condition for detecting containers.
 /// T is the container type
 template <typename T>
 struct is_container<T, void> : public detail::is_container_impl<std::remove_reference_t<std::remove_const_t<T>>>
@@ -33,23 +33,35 @@ template < typename T, typename V >
 struct is_container : public detail::lazy_check_value_type< is_container< T, void >::value, T, V >
   { };
 
-/// type condition for use with std::enable_if
-/// T the type to be tested
-/// \pre V is void or T::value_type convertible to V
+/// Type condition for use in legacy SFINAE-based code.
+/// T the type to be tested.
+/// \pre V is void or T::value_type convertible to V.
 template < typename T, typename V = void >
-struct enable_if_container : public
-    std::enable_if< is_container< T, V >::value >
-  { };
+struct enable_if_container
+{ };
 
-/// type condition for use with std::enable_if
-/// T the type to be tested
-/// \pre V is void or T::value_type convertible to V
+template <typename T, typename V>
+  requires is_container<T, V>::value
+struct enable_if_container<T, V>
+{
+  using type = void;
+};
+
+/// Type condition for use in legacy SFINAE-based code.
+/// T the type to be tested.
+/// \pre V is void or T::value_type convertible to V.
 template < typename T, typename V = void >
-struct disable_if_container : public
-    std::enable_if< !is_container< T, V >::value >
-  { };
+struct disable_if_container
+{ };
 
-// type condition for use with std::enable_if
+template <typename T, typename V>
+  requires (!is_container<T, V>::value)
+struct disable_if_container<T, V>
+{
+  using type = void;
+};
+
+// Type condition for detecting sets.
   template <typename T>
   struct is_set : public detail::is_set_impl<std::remove_reference_t<std::remove_const_t<T>>>
   { };

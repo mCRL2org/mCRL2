@@ -52,7 +52,8 @@ struct traverser
 
   // traverse containers
   template <typename Container>
-  void apply(const Container& container, typename atermpp::enable_if_container<Container>::type* = nullptr)
+    requires atermpp::is_container<Container>::value
+  void apply(const Container& container)
   {
     for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
     {

@@ -24,11 +24,11 @@ namespace atermpp::detail
 ///        to each element in the iterator.
 template <std::size_t N,
     typename InputIterator,
-    typename TermConverter,
-    std::enable_if_t<mcrl2::utilities::is_iterator<InputIterator>::value, void>* = nullptr>
+    typename TermConverter>
 inline std::array<unprotected_aterm_core, N>
 construct_arguments(InputIterator it, [[maybe_unused]] InputIterator end, TermConverter converter)
-  requires std::is_convertible_v<std::invoke_result_t<TermConverter, typename InputIterator::value_type>, aterm>
+  requires (mcrl2::utilities::is_iterator<InputIterator>::value
+        && std::is_convertible_v<std::invoke_result_t<TermConverter, typename InputIterator::value_type>, aterm>)
 {
   // Copy the arguments into this array.
   std::array<unprotected_aterm_core, N> arguments;
@@ -48,13 +48,13 @@ construct_arguments(InputIterator it, [[maybe_unused]] InputIterator end, TermCo
 ///        to each element in the iterator.
 template <std::size_t N,
     typename InputIterator,
-    typename TermConverter,
-    std::enable_if_t<mcrl2::utilities::is_iterator<InputIterator>::value, void>* = nullptr>
+    typename TermConverter>
 inline std::array<unprotected_aterm_core, N>
 construct_arguments(InputIterator it, [[maybe_unused]] InputIterator end, TermConverter converter)
-  requires std::is_same_v<
+  requires (mcrl2::utilities::is_iterator<InputIterator>::value
+        && std::is_same_v<
       std::invoke_result_t<TermConverter, typename InputIterator::value_type&, typename InputIterator::value_type>,
-      void>
+      void>)
 {
   // Copy the arguments into this array. Doesn't change any reference count, because they are unprotected terms.
   std::array<unprotected_aterm_core, N> arguments;

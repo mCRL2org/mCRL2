@@ -19,17 +19,17 @@ namespace mcrl2::lps
 {
 
 template <typename T>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void normalize_sorts(T& x,
-    const data::sort_specification& sortspec,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const data::sort_specification& sortspec)
 {
   core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).update(x);
 }
 
 template <typename T>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T normalize_sorts(const T& x,
-    const data::sort_specification& sortspec,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const data::sort_specification& sortspec)
 {
   T result;
   core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(result, x);

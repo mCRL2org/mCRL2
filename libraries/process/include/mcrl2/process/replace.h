@@ -183,17 +183,17 @@ struct process_identifier_assignment
 };
 
 template <typename T, typename Substitution>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void replace_process_identifiers(T& x,
-    const Substitution& sigma,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    const Substitution& sigma)
 {
   core::make_update_apply_builder<process::process_identifier_builder>(sigma).update(x);
 }
 
 template <typename T, typename Substitution>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T replace_process_identifiers(const T& x,
-    const Substitution& sigma,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const Substitution& sigma)
 {
   T result;
   core::make_update_apply_builder<process::process_identifier_builder>(sigma).apply(result, x);

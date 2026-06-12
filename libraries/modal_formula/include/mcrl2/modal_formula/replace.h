@@ -503,19 +503,19 @@ make_replace_state_formulas_builder(Substitution sigma, bool innermost)
 } // namespace detail
 
 template <typename T, typename Substitution>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void replace_state_formulas(T& x,
     Substitution sigma,
-    bool innermost = true,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    bool innermost = true)
 {
   state_formulas::detail::make_replace_state_formulas_builder<state_formulas::state_formula_builder>(sigma, innermost).update(x);
 }
 
 template <typename T, typename Substitution>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T replace_state_formulas(const T& x,
     Substitution sigma,
-    bool innermost = true,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    bool innermost = true)
 {
   T result;
   state_formulas::detail::make_replace_state_formulas_builder<state_formulas::state_formula_builder>(sigma, innermost).apply(result, x);

@@ -153,7 +153,8 @@ T rewrite(const T& x,
 /// \param x an object containing expressions
 /// \param R a pres rewriter
 template <typename T, typename Rewriter>
-void pres_rewrite(T& x, const Rewriter& R, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
+void pres_rewrite(T& x, const Rewriter& R)
 {
   pres_system::detail::make_rewrite_pres_expressions_builder<pres_system::pres_expression_builder>(R).update(x);
 }
@@ -163,7 +164,8 @@ void pres_rewrite(T& x, const Rewriter& R, std::enable_if_t<!std::is_base_of_v<a
 /// \param R a pres rewriter
 /// \return the rewrite result
 template <typename T, typename Rewriter>
-T pres_rewrite(const T& x, const Rewriter& R, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
+  requires(std::is_base_of_v<atermpp::aterm, T>)
+T pres_rewrite(const T& x, const Rewriter& R)
 {
   T result;
   pres_system::detail::make_rewrite_pres_expressions_builder<pres_system::pres_expression_builder>(R).apply(result, x);
@@ -175,10 +177,10 @@ T pres_rewrite(const T& x, const Rewriter& R, std::enable_if_t<std::is_base_of_v
 /// \param R a pres rewriter
 /// \param sigma a substitution
 template <typename T, typename Rewriter, typename Substitution>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void pres_rewrite(T& x,
     const Rewriter& R,
-    Substitution sigma,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    Substitution sigma)
 {
   pres_system::detail::make_rewrite_pres_expressions_with_substitution_builder<pres_system::pres_expression_builder>(R, sigma).update(x);
 }
@@ -189,10 +191,10 @@ void pres_rewrite(T& x,
 /// \param sigma a substitution
 /// \return the rewrite result
 template <typename T, typename Rewriter, typename Substitution>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T pres_rewrite(const T& x,
     const Rewriter& R,
-    Substitution sigma,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = 0)
+    Substitution sigma)
 {
   T result;
   pres_system::detail::make_rewrite_pres_expressions_with_substitution_builder<pres_system::pres_expression_builder>(R, sigma).apply(result, x);

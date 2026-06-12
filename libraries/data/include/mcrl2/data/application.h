@@ -267,8 +267,8 @@ inline const data_expression& evaluate_lambda_data_expression(const data_express
 }
 
 template <class TERM>
-inline data_expression evaluate_lambda_data_expression(const TERM& t,
-    std::enable_if_t<std::is_invocable_r_v<void, TERM, data_expression&>>* = nullptr)
+  requires(std::is_invocable_r_v<void, TERM, data_expression&>)
+inline data_expression evaluate_lambda_data_expression(const TERM& t)
 {
   data_expression result;
   t(result);
@@ -276,8 +276,8 @@ inline data_expression evaluate_lambda_data_expression(const TERM& t,
 }
 
 template <class TERM>
-inline data_expression evaluate_lambda_data_expression(const TERM& t,
-    std::enable_if_t<std::is_invocable_r_v<const data_expression, TERM, void>>* = nullptr)
+  requires(std::is_invocable_r_v<const data_expression, TERM, void>)
+inline data_expression evaluate_lambda_data_expression(const TERM& t)
 {
   return t();
 }
@@ -363,9 +363,10 @@ class application: public data_expression
 
     /// \brief Constructor.
     template <typename Container>
+      requires(std::ranges::forward_range<Container> && 
+               std::is_convertible_v<std::ranges::range_value_t<Container>, data_expression>)
     application(const data_expression& head,
-                const Container& arguments,
-                typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
+                const Container& arguments)
       : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(arguments.size() + 1),
                                          detail::term_appl_prepend_iterator<typename Container::const_iterator>(arguments.begin(), &head),
                                          detail::term_appl_prepend_iterator<typename Container::const_iterator>(arguments.end())))
@@ -394,10 +395,10 @@ class application: public data_expression
 
     /// \brief Constructor.
     template <typename FwdIter>
+      requires(!std::is_base_of_v<data_expression, FwdIter>)
     application(const data_expression& head,
         FwdIter first,
-        FwdIter last,
-        std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr)
+        FwdIter last)
         : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
               detail::term_appl_prepend_iterator<FwdIter>(first, &head),
               detail::term_appl_prepend_iterator<FwdIter>(last)))
@@ -408,11 +409,11 @@ class application: public data_expression
 
     /// \brief Constructor.
     template <typename FwdIter>
+      requires(!std::is_base_of_v<data_expression, FwdIter>)
     application(const std::size_t arity,
         const data_expression& head,
         FwdIter first,
-        FwdIter last,
-        std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = 0)
+        FwdIter last)
         : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(arity + 1),
               detail::term_appl_prepend_iterator<FwdIter>(first, &head),
               detail::term_appl_prepend_iterator<FwdIter>(last)))
@@ -432,15 +433,12 @@ class application: public data_expression
     /// \parameter convert_arguments This is a function applied to optionally the head and the arguments.
     /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
     template <typename FwdIter, class ArgumentConverter>
+      requires(!std::is_base_of_v<data_expression, FwdIter> && !std::is_base_of_v<data_expression, ArgumentConverter>)
     application(const data_expression& head,
         FwdIter first,
         FwdIter last,
         ArgumentConverter convert_arguments,
-        const bool skip_first_argument = false,
-        std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr,
-        std::enable_if_t<!std::is_base_of_v<data_expression, ArgumentConverter>>* = nullptr)
-        // typename std::enable_if< std::is_convertible<typename std::invoke_result<ArgumentConverter,typename
-        // FwdIter::value_type>::type, data_expression>::value>::type* = nullptr)
+        const bool skip_first_argument = false)
         : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
               detail::term_appl_prepend_iterator<FwdIter>(first, &head),
               detail::term_appl_prepend_iterator<FwdIter>(last),
@@ -459,16 +457,15 @@ class application: public data_expression
     /// \parameter convert_arguments This is a function applied to optionally the head and the arguments.
     /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
     template <typename FwdIter, class ArgumentConverter>
+      requires(!std::is_base_of_v<data_expression, FwdIter> && 
+               !std::is_base_of_v<data_expression, ArgumentConverter> &&
+               std::is_same_v<std::invoke_result_t<ArgumentConverter, data_expression&, typename FwdIter::value_type>,
+                   void>)
     application(const data_expression& head,
         FwdIter first,
         FwdIter last,
         ArgumentConverter convert_arguments,
-        const bool skip_first_argument = false,
-        std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr,
-        std::enable_if_t<!std::is_base_of_v<data_expression, ArgumentConverter>>* = nullptr,
-        std::enable_if_t<
-            std::is_same_v<std::invoke_result_t<ArgumentConverter, data_expression&, typename FwdIter::value_type>,
-                void>>* = nullptr)
+        const bool skip_first_argument = false)
 
         : data_expression(atermpp::aterm(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
               detail::term_appl_prepend_iterator<FwdIter>(first, &head),
@@ -552,15 +549,15 @@ struct yields_a_data_expression<TERM,
 /// \param result variable into which the application is constructed.
 template <typename HEAD,
     typename TERM,
-    typename... Terms,
-    typename = std::enable_if_t<std::disjunction_v<typename std::is_convertible<HEAD, data_expression>,
+    typename... Terms>
+  requires(std::disjunction_v<typename std::is_convertible<HEAD, data_expression>,
         typename std::is_invocable_r<void, HEAD, data_expression&>,
-        typename std::is_invocable_r<const data_expression, HEAD, void>>>>
-inline void
-make_application(atermpp::aterm& result, const HEAD& head, const TERM& arg1, const Terms&... other_arguments)
-  requires(std::conjunction_v<std::disjunction<typename std::is_convertible<Terms, data_expression>,
+        typename std::is_invocable_r<const data_expression, HEAD, void>> &&
+      std::conjunction_v<std::disjunction<typename std::is_convertible<Terms, data_expression>,
           typename std::is_invocable_r<void, Terms, data_expression&>,
           typename std::is_invocable_r<const data_expression, Terms, void>>...>)
+inline void
+make_application(atermpp::aterm& result, const HEAD& head, const TERM& arg1, const Terms&... other_arguments)
 {
   assert(detail::check_whether_sorts_match(head, detail::get_arguments(arg1, other_arguments...)));
   atermpp::make_term_appl(result,
@@ -573,10 +570,11 @@ make_application(atermpp::aterm& result, const HEAD& head, const TERM& arg1, con
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
 template <typename Container>
+  requires(std::ranges::forward_range<Container> && 
+           std::is_convertible_v<std::ranges::range_value_t<Container>, data_expression>)
 inline void make_application(data_expression& result,
                       const data_expression& head,
-                      const Container& arguments,
-                      typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
+                      const Container& arguments)
 {
   assert(arguments.size()>0);
   assert(detail::check_whether_sorts_match(head,arguments));
@@ -589,11 +587,11 @@ inline void make_application(data_expression& result,
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
 template <typename FwdIter>
+  requires(!std::is_base_of_v<data_expression, FwdIter>)
 inline void make_application(atermpp::aterm& result,
     const data_expression& head,
     FwdIter first,
-    FwdIter last,
-    std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr)
+    FwdIter last)
 {
   assert(first!=last);
   atermpp::make_term_appl(result,
@@ -608,12 +606,12 @@ inline void make_application(atermpp::aterm& result,
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
 template <typename FwdIter>
+  requires(!std::is_base_of_v<data_expression, FwdIter>)
 inline void make_application(atermpp::aterm& result,
     const std::size_t arity,
     const data_expression& head,
     FwdIter first,
-    FwdIter last,
-    std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = 0)
+    FwdIter last)
 {
   assert(arity>0);
   assert(std::distance(first, last)==arity);
@@ -637,16 +635,16 @@ inline void make_application(atermpp::aterm& result,
 /// \parameter convert_arguments This is a function applied to optionally the head and the arguments.
 /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
 template <typename FwdIter, class ArgumentConverter>
+  requires(!std::is_base_of_v<data_expression, FwdIter> && 
+           !std::is_base_of_v<data_expression, ArgumentConverter> &&
+           std::is_same_v<std::invoke_result_t<ArgumentConverter, typename FwdIter::value_type>,
+               data_expression>)
 inline void make_application(atermpp::aterm& result,
     const data_expression& head,
     FwdIter first,
     FwdIter last,
     ArgumentConverter convert_arguments,
-    const bool skip_first_argument = false,
-    std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr,
-    std::enable_if_t<!std::is_base_of_v<data_expression, ArgumentConverter>>* = nullptr,
-    std::enable_if_t<std::is_same_v<std::invoke_result_t<ArgumentConverter, typename FwdIter::value_type>,
-        data_expression>>* = nullptr)
+    const bool skip_first_argument = false)
 {
   assert(first!=last);
   atermpp::make_term_appl(result,
@@ -669,17 +667,16 @@ inline void make_application(atermpp::aterm& result,
 /// \parameter convert_arguments This is a function applied to optionally the head and the arguments.
 /// \parameter skip_first_argument A boolean which is true if the function must not be applied to the head.
 template <typename FwdIter, class ArgumentConverter>
+  requires(!std::is_base_of_v<data_expression, FwdIter> && 
+           !std::is_base_of_v<data_expression, ArgumentConverter> &&
+           std::is_same_v<std::invoke_result_t<ArgumentConverter, data_expression&, typename FwdIter::value_type>,
+               void>)
 static inline void make_application(atermpp::aterm& result,
     const data_expression& head,
     FwdIter first,
     FwdIter last,
     ArgumentConverter convert_arguments,
-    const bool skip_first_argument = false,
-    std::enable_if_t<!std::is_base_of_v<data_expression, FwdIter>>* = nullptr,
-    std::enable_if_t<!std::is_base_of_v<data_expression, ArgumentConverter>>* = nullptr,
-    std::enable_if_t<
-        std::is_same_v<std::invoke_result_t<ArgumentConverter, data_expression&, typename FwdIter::value_type>,
-            void>>* = nullptr)
+    const bool skip_first_argument = false)
 {
   atermpp::make_term_appl(
                           result,

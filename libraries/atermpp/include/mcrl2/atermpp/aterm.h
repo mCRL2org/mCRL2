@@ -176,9 +176,7 @@ extern void add_deletion_hook(const function_symbol&, term_callback);
 /// \param begin The start of a range of elements.
 /// \param end The end of a range of elements.
 template <class Term,
-    class ForwardIterator,
-    std::enable_if_t<mcrl2::utilities::is_iterator<ForwardIterator>::value>* = nullptr,
-    std::enable_if_t<!std::is_same_v<typename ForwardIterator::iterator_category, std::input_iterator_tag>>* = nullptr>
+  class ForwardIterator>
 void make_term_appl(Term& target, const function_symbol& sym, ForwardIterator begin, ForwardIterator end)
   requires (mcrl2::utilities::is_iterator<ForwardIterator>::value
         && !std::is_same_v<typename ForwardIterator::iterator_category, std::input_iterator_tag>

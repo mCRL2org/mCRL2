@@ -163,7 +163,8 @@ bool is_normalized(const T& x)
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing pbes expressions
 template <typename T>
-void normalize(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
+void normalize(T& x)
 {
   normalize_builder f;
   f.update(x);
@@ -173,7 +174,8 @@ void normalize(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing pbes expressions
 template <typename T>
-T normalize(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+  requires(std::is_base_of_v<atermpp::aterm, T>)
+T normalize(const T& x)
 {
   T result;
   normalize_builder f;

@@ -36,10 +36,10 @@ struct replace_constants_by_variables_builder: public data::detail::replace_cons
 /// with the assignment v := r(c). This can be used in rewriting, to avoid that c is rewritten by the rewriter
 /// multiple times.
 template <typename T>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void replace_constants_by_variables(T& x,
     const data::rewriter& r,
-    data::mutable_indexed_substitution<>& sigma,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    data::mutable_indexed_substitution<>& sigma)
 {
   detail::replace_constants_by_variables_builder f(r, sigma);
   f.update(x);
@@ -49,10 +49,10 @@ void replace_constants_by_variables(T& x,
 /// with the assignment v := r(c). This can be used in rewriting, to avoid that c is rewritten by the rewriter
 /// multiple times.
 template <typename T>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T replace_constants_by_variables(const T& x,
     const data::rewriter& r,
-    data::mutable_indexed_substitution<>& sigma,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    data::mutable_indexed_substitution<>& sigma)
 {
   T result;
   detail::replace_constants_by_variables_builder f(r, sigma);
