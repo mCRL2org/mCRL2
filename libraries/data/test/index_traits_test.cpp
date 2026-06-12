@@ -22,18 +22,3 @@ void f()
 {
   data::variable x("x", data::sort_bool::bool_());
 }
-
-BOOST_AUTO_TEST_CASE(test_io)
-{
-/*
-  data::variable b("b", data::sort_bool::bool_());
-  data::variable c("c", data::sort_bool::bool_());
-  std::size_t b_index = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(b);
-  std::size_t c_index = atermpp::detail::index_traits<data::variable, data::variable_key_type, 2>::index(c);
-  data::data_expression b_and_c = data::sort_bool::and_(b, c);
-  atermpp::aterm t1 = data::add_index(b_and_c);
-  std::cout << t1 << std::endl;
-  atermpp::aterm t2 = data::remove_index(t1);
-  BOOST_CHECK(b_and_c == t2);
-*/
-}

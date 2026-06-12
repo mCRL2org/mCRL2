@@ -11,7 +11,8 @@
 
 #include "visobjectfactory.h"
 #include <algorithm>
-#include <cstdlib>
+#include <array>
+#include <vector>
 #include "primitivefactory.h"
 
 #include <QtOpenGL>
@@ -33,7 +34,7 @@ class VisObject
     void drawWithTexture(PrimitiveFactory* pf, unsigned char alpha);
     void addIdentifier(int id);
   private:
-    float* matrix;
+    std::array<float, 16> matrix;
     QColor color;
     GLuint texName;
     int numColours;
@@ -43,7 +44,6 @@ class VisObject
 
 VisObject::VisObject()
 {
-  matrix = (float*)malloc(16*sizeof(float));
   color = QColor(150, 150, 150);
   numColours = 0;
   primitive = 0;
@@ -55,12 +55,11 @@ VisObject::VisObject()
 VisObject::~VisObject()
 {
   glDeleteTextures(1, &texName);
-  free(matrix);
 }
 
 float* VisObject::getMatrixP() const
 {
-  return matrix;
+  return const_cast<float*>(matrix.data());
 }
 
 QColor VisObject::getColor() const
@@ -95,15 +94,15 @@ void VisObject::setTextureColours(std::vector<QColor>& colours)
       numColours = numColours << 1;
     }
 
-    GLubyte* texture = (GLubyte*)malloc(4*numColours*sizeof(GLubyte));
+    std::vector<GLubyte> texture(static_cast<std::size_t>(4 * numColours));
 
     for (int i = 0; i < numColours; ++i)
     {
-      int j = i % colours.size();
-      texture[4*i]   = colours[j].red();
-      texture[4*i+1] = colours[j].green();
-      texture[4*i+2] = colours[j].blue();
-      texture[4*i+3] = 255; // alpha value
+      int j = i % static_cast<int>(colours.size());
+      texture[static_cast<std::size_t>(4*i)]   = static_cast<GLubyte>(colours[j].red());
+      texture[static_cast<std::size_t>(4*i+1)] = static_cast<GLubyte>(colours[j].green());
+      texture[static_cast<std::size_t>(4*i+2)] = static_cast<GLubyte>(colours[j].blue());
+      texture[static_cast<std::size_t>(4*i+3)] = 255; // alpha value
     }
 
     glBindTexture(GL_TEXTURE_1D, texName);
@@ -113,8 +112,7 @@ void VisObject::setTextureColours(std::vector<QColor>& colours)
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, numColours, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, texture);
-    free(texture);
+                 GL_UNSIGNED_BYTE, texture.data());
   }
   else
   {
@@ -131,7 +129,7 @@ void VisObject::draw(PrimitiveFactory* pf,unsigned char alpha)
 {
   glColor4ub(color.red(), color.green(), color.blue(), alpha);
   glPushMatrix();
-  glMultMatrixf(matrix);
+  glMultMatrixf(matrix.data());
   for (int identifier : identifiers)
   {
     glPushName(identifier);

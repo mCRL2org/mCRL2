@@ -256,7 +256,7 @@ ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
 
   for (int ring = 0; ring < num_rings; ++ring)
   {
-    float circumference = 2 * static_cast<float>(PI) * ring * delta_ring;
+    float circumference = 2 * static_cast<float>(PI) * static_cast<float>(ring) * delta_ring;
     // max with 1 to ensure that ring 0 also has a slot
     int size = std::max(1, static_cast<int>(circumference / MIN_DELTA_SLOT));
     num_slots.push_back(size);
@@ -281,8 +281,8 @@ inline int ClusterSlotInfo::getNumSlots(int ring)
 void ClusterSlotInfo::getPolarCoordinates(int ring, int slot, float& angle,
     float& radius)
 {
-  radius = delta_ring * ring;
-  angle = rad_to_deg(2 * static_cast<float>(PI) * slot / num_slots[ring]);
+  radius = delta_ring * static_cast<float>(ring);
+  angle = rad_to_deg(2 * static_cast<float>(PI) * static_cast<float>(slot) / static_cast<float>(num_slots[ring]));
 }
 
 QVector2D ClusterSlotInfo::getVector(int ring, int slot)
@@ -298,7 +298,7 @@ void ClusterSlotInfo::findNearestSlot(QVector2D& position, int& ring, int
   float angle, radius;
   Vectors::toPolar(angle, radius, position);
   ring = std::min(round_to_int(radius / delta_ring), getNumRings() - 1);
-  slot = round_to_int(num_slots[ring] * deg_to_rad(angle) / (2 * static_cast<float>(PI))) %
+  slot = round_to_int(static_cast<float>(num_slots[ring]) * deg_to_rad(angle) / (2 * static_cast<float>(PI))) %
          getNumSlots(ring);
 }
 
@@ -336,7 +336,7 @@ void ClusterSlotInfo::findNearestFreeSlot(int& ring, int& slot)
         if (next_ring > 0)
         {
           next_slot = round_to_int(static_cast<float>(slot) /
-                                   static_cast<float>(getNumSlots(ring)) * getNumSlots(next_ring)) %
+                                   static_cast<float>(getNumSlots(ring)) * static_cast<float>(getNumSlots(next_ring))) %
                       getNumSlots(ring);
         }
         if (visited_slots.find(Slot(next_ring, next_slot)) == visited_slots.end())

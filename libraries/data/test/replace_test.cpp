@@ -122,35 +122,6 @@ BOOST_AUTO_TEST_CASE(test_assignment_list)
   BOOST_CHECK(t0 == t2);
 }
 
-/* DEPRECATED as sequence_sequence_substitution is phased out. 
-BOOST_AUTO_TEST_CASE(test_variable_replace)
-{
-  using namespace mcrl2::data::sort_bool;
-
-  data::variable d1("d1", data::basic_sort("D"));
-  data::variable d2("d2", data::basic_sort("D"));
-  data::variable d3("d3", data::basic_sort("D"));
-  data::variable x("x", data::basic_sort("D"));
-  data::variable y("y", data::basic_sort("D"));
-  data::variable z("z", data::basic_sort("D"));
-
-  data::variable_vector variables{d1, d2, d3};
-  data::data_expression_vector replacements{x, y, z};
-  std::vector<data::variable> v{d1, d2, d3};
-  std::list<data::data_expression> l{x, y, z};
-
-  data::data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
-  data::data_expression t1 = data::replace_variables(t, make_sequence_sequence_substitution(variables, replacements));
-  data::data_expression t2 = data::replace_variables(t, make_sequence_sequence_substitution(v, l));
-  BOOST_CHECK(t1 == t2);
-
-  t = and_(equal_to(d1, d2), not_equal_to(d2, d3));
-  BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(v, l)));
-  BOOST_CHECK(t1 == replace_variables(t, make_mutable_map_substitution(variables, replacements)));
-} */
-
 BOOST_AUTO_TEST_CASE(test_replace_with_binders)
 {
   data::mutable_map_substitution< > sigma;

@@ -512,18 +512,18 @@ StaticGraph::edge_list StaticGraph::get_edges() const
 
 void StaticGraph::write_raw(std::ostream &os) const
 {
-    os.write((const char*)&V_, sizeof(V_));
-    os.write((const char*)&E_, sizeof(E_));
-    os.write((const char*)&edge_dir_, sizeof(edge_dir_));
+    os.write(reinterpret_cast<const char*>(&V_), sizeof(V_));
+    os.write(reinterpret_cast<const char*>(&E_), sizeof(E_));
+    os.write(reinterpret_cast<const char*>(&edge_dir_), sizeof(edge_dir_));
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
-        os.write((const char*)successors_, sizeof(verti)*E_);
-        os.write((const char*)successor_index_, sizeof(edgei)*(V_ + 1));
+        os.write(reinterpret_cast<const char*>(successors_), static_cast<std::streamsize>(sizeof(verti)*E_));
+        os.write(reinterpret_cast<const char*>(successor_index_), static_cast<std::streamsize>(sizeof(edgei)*(V_ + 1)));
     }
     if (edge_dir_ & EDGE_PREDECESSOR)
     {
-        os.write((const char*)predecessors_, sizeof(verti)*E_);
-        os.write((const char*)predecessor_index_, sizeof(edgei)*(V_ + 1));
+        os.write(reinterpret_cast<const char*>(predecessors_), static_cast<std::streamsize>(sizeof(verti)*E_));
+        os.write(reinterpret_cast<const char*>(predecessor_index_), static_cast<std::streamsize>(sizeof(edgei)*(V_ + 1)));
     }
 }
 
@@ -533,21 +533,21 @@ void StaticGraph::read_raw(std::istream &is)
     edgei E;
     EdgeDirection edge_dir;
 
-    is.read((char*)&V, sizeof(V));
-    is.read((char*)&E, sizeof(E));
-    is.read((char*)&edge_dir, sizeof(edge_dir));
+    is.read(reinterpret_cast<char*>(&V), sizeof(V));
+    is.read(reinterpret_cast<char*>(&E), sizeof(E));
+    is.read(reinterpret_cast<char*>(&edge_dir), sizeof(edge_dir));
 
     reset(V, E, edge_dir);
 
     if (edge_dir & EDGE_SUCCESSOR)
     {
-        is.read((char*)successors_, sizeof(verti)*E_);
-        is.read((char*)successor_index_, sizeof(edgei)*(V_ + 1));
+        is.read(reinterpret_cast<char*>(successors_), static_cast<std::streamsize>(sizeof(verti)*E_));
+        is.read(reinterpret_cast<char*>(successor_index_), static_cast<std::streamsize>(sizeof(edgei)*(V_ + 1)));
     }
     if (edge_dir & EDGE_PREDECESSOR)
     {
-        is.read((char*)predecessors_, sizeof(verti)*E_);
-        is.read((char*)predecessor_index_, sizeof(edgei)*(V_ + 1));
+        is.read(reinterpret_cast<char*>(predecessors_), static_cast<std::streamsize>(sizeof(verti)*E_));
+        is.read(reinterpret_cast<char*>(predecessor_index_), static_cast<std::streamsize>(sizeof(edgei)*(V_ + 1)));
     }
 }
 
@@ -631,7 +631,7 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
                 }
             }
             verti *end = &successors_[e];
-            if (!std::is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<>()))
             {
                 std::sort(begin, end);
             }
@@ -665,7 +665,7 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
                 }
             }
             verti *end = &predecessors_[e];
-            if (!std::is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<>()))
             {
                 std::sort(begin, end);
             }

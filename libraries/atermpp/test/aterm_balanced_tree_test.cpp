@@ -28,7 +28,7 @@ struct counter
 
   void operator()(const atermpp::aterm& t) const
   {
-    m_sum += down_cast<aterm_int>(t).value();
+    m_sum += static_cast<int>(down_cast<aterm_int>(t).value());
   }
 };
 

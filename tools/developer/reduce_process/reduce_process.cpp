@@ -8,8 +8,8 @@
 //
 /// \file reduce_process.cpp
 
-#define NAME "reduce_process"
-#define AUTHOR "Wieger Wesselink"
+constexpr const char* NAME = "reduce_process";
+constexpr const char* AUTHOR = "Wieger Wesselink";
 
 #include "mcrl2/process/is_well_typed.h"
 #include "mcrl2/process/parse.h"

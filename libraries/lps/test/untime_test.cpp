@@ -102,7 +102,7 @@ void test_case_3()
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(!i->has_time());
-    sumvar_count += i->summation_variables().size();
+    sumvar_count += static_cast<int>(i->summation_variables().size());
   }
   BOOST_CHECK(sumvar_count == 1);
 }
@@ -134,7 +134,7 @@ void test_case_4()
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(!i->has_time());
-    sumvar_count += i->summation_variables().size();
+    sumvar_count += static_cast<int>(i->summation_variables().size());
   }
   BOOST_CHECK(sumvar_count == 1);
 }

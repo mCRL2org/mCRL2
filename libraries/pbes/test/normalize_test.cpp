@@ -184,7 +184,7 @@ void test_normalize_and_or_equality(const std::string& expr1, const std::string&
     expr1,
     expr2,
     parse,
-    std::equal_to<pbes_expression>(),
+    std::equal_to<>(),
     norm,
     "normalize_and_or",
     norm,

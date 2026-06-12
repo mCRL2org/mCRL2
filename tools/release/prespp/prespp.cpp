@@ -84,6 +84,7 @@ class prespp_tool: public pres_input_tool<input_output_tool>
 
     void add_options(interface_description& desc) override
     {
+      // NOLINTNEXTLINE(bugprone-parent-virtual-call) -- intentional: add_options chain
       input_output_tool::add_options(desc);
       desc.add_option("format", make_enum_argument<core::print_format_type>("FORMAT")
                       .add_value_desc(core::print_default, "a PRES specification", true)

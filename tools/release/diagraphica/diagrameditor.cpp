@@ -459,7 +459,7 @@ void DiagramEditor::sendBackward()
 
 void DiagramEditor::clear()
 {
-  VisUtils::clear(QColor(255 * 0.65, 255 * 0.79, 255 * 0.94));
+  VisUtils::clear(QColor(166, 201, 240));
 }
 
 double DiagramEditor::snapIfNeeded(double input)
