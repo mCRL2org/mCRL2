@@ -149,7 +149,7 @@ void binary_ldd_ostream::put(const ldd& U)
 
 unsigned int binary_ldd_ostream::ldd_index_width()
 {
-  return std::log2(m_nodes.size()) + 1;
+  return static_cast<unsigned int>(std::log2(m_nodes.size())) + 1;
 }
 
 binary_ldd_istream::binary_ldd_istream(std::shared_ptr<mcrl2::utilities::ibitstream> stream)
@@ -206,7 +206,7 @@ ldd binary_ldd_istream::get()
 
 unsigned int binary_ldd_istream::ldd_index_width(bool input)
 {
-  return std::log2(m_nodes.size() + input) + 1; // Assume that size is one larger to contain the input ldd.
+  return static_cast<unsigned int>(std::log2(m_nodes.size() + input)) + 1; // Assume that size is one larger to contain the input ldd.
 }
 
 #endif // MCRL2_ENABLE_SYLVAN

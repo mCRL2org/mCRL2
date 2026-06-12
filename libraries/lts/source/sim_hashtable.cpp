@@ -9,9 +9,11 @@
 /// \file sim_hashtable.cpp
 #include "mcrl2/lts/detail/sim_hashtable.h"
 
-#define NOT_FOUND   (std::size_t)(-1)
-#define END_OF_LIST (std::size_t)(-1)
-#define REMOVED     (std::size_t)(-2)
+#include <limits>
+
+static constexpr std::size_t NOT_FOUND   = std::numeric_limits<std::size_t>::max();
+static constexpr std::size_t END_OF_LIST = std::numeric_limits<std::size_t>::max();
+static constexpr std::size_t REMOVED     = std::numeric_limits<std::size_t>::max() - 1;
 
 /* ---------------- hash_table_iterator ----------------------------- */
 

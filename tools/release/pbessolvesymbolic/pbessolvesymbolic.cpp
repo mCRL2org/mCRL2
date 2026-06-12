@@ -717,6 +717,12 @@ void solve(pbes_system::pbes pbesspec,
         pbessolve_options.number_of_threads
           = 1; // If we spawn multiple threads here, the threads of Sylvan and the explicit exploration will interfere
 
+        // At this point compute_strategy=true, so both strategies must have been populated by solve().
+        if (!solution.strategy[0].has_value() || !solution.strategy[1].has_value())
+        {
+          throw mcrl2::runtime_error("Expected strategies to be computed, but they were not.");
+        }
+
         PbesInstAlgorithm second_instantiate(SG,
           pbessolve_options,
           pbesspec_simplified,
@@ -725,7 +731,7 @@ void solve(pbes_system::pbes pbesspec,
           reach.data_index(),
           G.players(V)[result ? 0 : 1],
           V,
-          result ? solution.strategy[0].value() : solution.strategy[1].value(),
+          result ? *solution.strategy[0] : *solution.strategy[1],
           reach.rewriter());
 
         // Perform the second instantiation given the proof graph.

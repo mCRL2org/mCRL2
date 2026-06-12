@@ -94,8 +94,6 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
     {
       super::parse_options(parser);
 
-      input_output_tool::parse_options(parser);
-
       m_erase_unused_bes_variables= parser.option_argument_as<remove_level>("erase");
       m_data_elm                  = parser.options.count("unused-data") == 0;
       m_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
