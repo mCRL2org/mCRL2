@@ -13,6 +13,7 @@
 #include "mcrl2/pg/SmallProgressMeasures.h"
 
 #include <memory>
+#include <vector>
 
 /*! \ingroup LiftingStrategies
  
@@ -57,8 +58,8 @@ public:
   private:
     const SmallProgressMeasures &spm_;
     const bool stack_;
-    std::unique_ptr<bool[]> queued_;
-    std::unique_ptr<verti[]> queue_;
+    std::vector<bool> queued_;
+    std::vector<verti> queue_;
     std::size_t queue_size_, queue_capacity_, queue_begin_, queue_end_;
 };
 

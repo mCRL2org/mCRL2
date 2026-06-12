@@ -295,9 +295,9 @@ class term_balanced_tree : public aterm
     
         friend class boost::iterator_core_access;
     
-        static constexpr std::size_t maximal_size_of_stack = 20;      // We assume here that a tree never has more than 2^20 leaves, o
-                                                           // equivalently that states consist of not more than 2^20 data_expressions.
-        unprotected_aterm_core m_stack[maximal_size_of_stack];
+        static constexpr std::size_t maximal_size_of_stack = 20;  // We assume here that a tree never has more than 2^20 leaves, o
+                                                                  // equivalently that states consist of not more than 2^20 data_expressions.
+        std::array<unprotected_aterm_core, maximal_size_of_stack> m_stack;
         std::size_t m_top_of_stack;                             // First element in the stack that is empty.
     
         /// \brief Dereference operator

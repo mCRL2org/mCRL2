@@ -8,6 +8,7 @@
 
 #include <locale>
 #include <regex>
+#include <array>
 
 #include "mcrl2/utilities/platform.h"
 #include "mcrl2/utilities/command_line_interface.h"
@@ -525,14 +526,14 @@ std::string interface_description::man_page() const
   // Determine month and year, to prevent using boost date/time
   time_t rawtime;
   struct tm* timeinfo;
-  char buffer [80];
+  std::array<char, 80> buffer{};
   time(&rawtime);
   timeinfo = localtime(&rawtime);
-  strftime(buffer,80,"%B %Y",timeinfo);
+  strftime(buffer.data(), buffer.size(), "%B %Y", timeinfo);
 
   std::string name_upper = m_name;
   std::transform(name_upper.begin(), name_upper.end(), name_upper.begin(), ::toupper);
-  s << ".TH " << name_upper << R"( "1" ")" << std::string(buffer) << "\" \"" << m_name << " mCRL2 toolset "
+  s << ".TH " << name_upper << R"( "1" ")" << std::string(buffer.data()) << "\" \"" << m_name << " mCRL2 toolset "
     << get_toolset_version() << R"(" "User Commands")" << std::endl;
 
   s << ".SH NAME" << std::endl

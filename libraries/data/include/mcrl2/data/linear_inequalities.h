@@ -1183,7 +1183,7 @@ inline void remove_redundant_inequalities(
     else
     {
       if (is_a_redundant_inequality(resulting_inequalities,
-                                    resulting_inequalities.begin()+i,
+                                    resulting_inequalities.begin()+static_cast<std::ptrdiff_t>(i),
                                     r))
       {
         /* The code below does not preserve the ordering in inequalities.
@@ -1193,7 +1193,7 @@ inline void remove_redundant_inequalities(
           resulting_inequalities[i].swap(resulting_inequalities.back());
         }
         resulting_inequalities.pop_back(); */
-        resulting_inequalities.erase(resulting_inequalities.begin()+i);
+        resulting_inequalities.erase(resulting_inequalities.begin()+static_cast<std::ptrdiff_t>(i));
       }
       else
       {
@@ -1339,10 +1339,10 @@ enum node_type
     protected:
       std::unique_ptr<inequality_inconsistency_cache_base> m_cache;
 
+    public:
+
       inequality_inconsistency_cache(const inequality_inconsistency_cache& )=delete;
       inequality_inconsistency_cache& operator=(const inequality_consistency_cache& )=delete;
-
-    public:
 
       inequality_inconsistency_cache()
         : m_cache(std::make_unique<inequality_inconsistency_cache_base>(false_end_node))
@@ -1436,10 +1436,10 @@ enum node_type
     protected:
       std::unique_ptr<inequality_inconsistency_cache_base> m_cache;
 
+    public:
+
       inequality_consistency_cache(const inequality_consistency_cache& )=delete;
       inequality_consistency_cache& operator=(const inequality_consistency_cache& )=delete;
-
-    public:
 
       inequality_consistency_cache()
         : m_cache(std::make_unique<inequality_inconsistency_cache_base>(false_end_node))

@@ -136,7 +136,7 @@ void ParityGame::shuffle(const std::vector<verti> &perm)
     vertex_ = new_vertex;
 }
 
-void ParityGame::compress_priorities( const verti cardinality[],
+void ParityGame::compress_priorities( const verti* cardinality,
                                                     bool preserve_parity )
 {
   if (cardinality == nullptr)

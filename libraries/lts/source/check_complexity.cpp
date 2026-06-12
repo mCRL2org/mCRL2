@@ -117,7 +117,7 @@ trans_type check_complexity::no_of_waiting_cycles = 0;
 /// in the pseudocode in the article [Groote/Jansen/Keiren/Wijs: An O(m log n)
 /// algorithm for computing stuttering equivalence and branching bisimulation.
 /// Accepted for publication in ACM TOCL 2017].
-const char *check_complexity::work_names[TRANS_gj_MAX - BLOCK_MIN + 1] =
+const std::array<const char*, check_complexity::TRANS_gj_MAX - check_complexity::BLOCK_MIN + 1> check_complexity::work_names =
 {
     // block counters
     "2.4: while C contains a nontrivial constellation",

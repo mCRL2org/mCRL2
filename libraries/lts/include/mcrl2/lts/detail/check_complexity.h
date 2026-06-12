@@ -89,6 +89,7 @@
 //#define TEST_WORK_COUNTER_NAMES
 
 #include <cstring>       // for std::size_t and std::memset()
+#include <array>
 #include <cassert>
 #include <cmath>         // for std::log2()
 #include <climits>       // for CHAR_BIT
@@ -506,7 +507,7 @@ class check_complexity
   public:
 #ifndef NDEBUG
     /// \brief printable names of the counter types (for error messages)
-    static const char *work_names[TRANS_gj_MAX - BLOCK_MIN + 1];
+    static const std::array<const char*, TRANS_gj_MAX - BLOCK_MIN + 1> work_names;
 #endif
 
     /// \brief do some work that cannot be assigned directly

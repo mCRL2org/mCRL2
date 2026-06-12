@@ -196,7 +196,7 @@ public:
         remapped to preserve winning sets. The function returns the parity of
         the priority that was mapped to zero.
     */
-    void compress_priorities(const verti cardinality[] = nullptr, bool preserve_parity = true);
+    void compress_priorities(const verti* cardinality = nullptr, bool preserve_parity = true);
 
     /*! Propagate priorities in the graph, by changing the priority for a vertex
         to the maximum of the priorities of its successors, if this is less than

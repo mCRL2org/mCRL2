@@ -12,6 +12,7 @@
 
 #include "mcrl2/gui/arcball.h"
 #include "mcrl2/gui/glu.h"
+#include <array>
 
 #include "icons/zoom_cursor.xpm"
 #include "icons/pan_cursor.xpm"
@@ -112,11 +113,11 @@ void LtsCanvas::setActiveTool(Tool tool)
 
 void LtsCanvas::initializeGL()
 {
-  GLfloat gray[] = { 0.35f, 0.35f, 0.35f, 1.0f };
-  GLfloat light_pos[] = { 50.0f, 50.0f, 50.0f, 1.0f };
-  glLightfv(GL_LIGHT0, GL_AMBIENT, gray);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, gray);
-  glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+  std::array<GLfloat, 4> gray = { 0.35f, 0.35f, 0.35f, 1.0f };
+  std::array<GLfloat, 4> light_pos = { 50.0f, 50.0f, 50.0f, 1.0f };
+  glLightfv(GL_LIGHT0, GL_AMBIENT, gray.data());
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, gray.data());
+  glLightfv(GL_LIGHT0, GL_POSITION, light_pos.data());
 
   glEnable(GL_NORMALIZE);
   glEnable(GL_LIGHTING);
@@ -127,8 +128,8 @@ void LtsCanvas::initializeGL()
   glBlendFunc(GL_ONE, GL_ZERO);
   glDisable(GL_BLEND);
 
-  GLfloat light_col[] = { 0.2f, 0.2f, 0.2f };
-  glMaterialfv(GL_FRONT, GL_SPECULAR, light_col);
+  std::array<GLfloat, 3> light_col = { 0.2f, 0.2f, 0.2f };
+  glMaterialfv(GL_FRONT, GL_SPECULAR, light_col.data());
   glMaterialf(GL_FRONT, GL_SHININESS, 8.0f);
   glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_COLOR_MATERIAL);
@@ -278,8 +279,8 @@ void LtsCanvas::render(bool light)
     glTranslatef(0.0f, 0.0f, halfHeight);
     mcrl2::gui::applyRotation(m_rotation, /*reverse=*/true);
     glTranslatef(-m_position.x(), -m_position.y(), -m_position.z() + m_baseDepth);
-    GLfloat matrix[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
+    std::array<GLfloat, 16> matrix;
+    glGetFloatv(GL_MODELVIEW_MATRIX, matrix.data());
     QVector3D viewpoint = QVector3D(matrix[12], matrix[13], matrix[14]);
     glPopMatrix();
     // sort clusters on distance to viewpoint
@@ -425,9 +426,9 @@ LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
   glLoadIdentity();
   glViewport(0, 0, m_width, m_height);
 
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
-  gluPickMatrix((GLdouble)position.x(), (GLdouble)(viewport[3] - position.y()), 3.0, 3.0, viewport);
+  std::array<GLint, 4> viewport;
+  glGetIntegerv(GL_VIEWPORT, viewport.data());
+  gluPickMatrix((GLdouble)position.x(), (GLdouble)(viewport[3] - position.y()), 3.0, 3.0, viewport.data());
 
   gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
 
@@ -478,7 +479,7 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint* selectionBuffer, GLint it
       continue;
     }
 
-    GLuint itemData[3] = {0, 0, 0};
+    std::array<GLuint, 3> itemData = {0, 0, 0};
     for (GLuint j = 0; j < size; j++)
     {
       itemData[j] = *buffer++;

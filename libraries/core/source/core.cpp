@@ -18,7 +18,7 @@ namespace mcrl2::core {
 namespace detail {
 
 std::vector<std::unique_ptr<atermpp::function_symbol>> function_symbols_DataAppl;
-atermpp::function_symbol function_symbols_DataApplFixed[DataApplFixed];
+std::array<atermpp::function_symbol, DataApplFixed> function_symbols_DataApplFixed;
 
 } // namespace detail
 

@@ -9,6 +9,7 @@
 /// \file logger.cpp
 
 #include "mcrl2/utilities/logger.h"
+#include <array>
 #include <cassert>
 
 
@@ -19,14 +20,14 @@ namespace mcrl2::log {
     struct tm* r;
     r = localtime(t);
 
-    char buffer[11];
-    std::size_t res = strftime(buffer, sizeof(buffer), "%H:%M:%S", r);
+    std::array<char, 11> buffer{};
+    std::size_t res = strftime(buffer.data(), buffer.size(), "%H:%M:%S", r);
     if(res == 0)
     {
       std::clog << "Could not write time to buffer" << std::endl;
       return std::string();
     }
-    return buffer;
+    return buffer.data();
   }
 
   std::string formatter::format(const log_level_t level, 

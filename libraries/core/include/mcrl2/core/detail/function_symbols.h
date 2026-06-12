@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include <array>
 
 namespace mcrl2::core::detail
 {
@@ -24,7 +25,7 @@ namespace mcrl2::core::detail
 
 // Use a fixed size array for the "smaller" DataAppl and the dynamic
 constexpr std::size_t DataApplFixed = 100;
-extern atermpp::function_symbol function_symbols_DataApplFixed[DataApplFixed];
+extern std::array<atermpp::function_symbol, DataApplFixed> function_symbols_DataApplFixed;
 
 // We use a vector of pointers here, and not a vector of objects. The latter would
 // result in references becoming invalid when the vector is resized, i.e., when a new
