@@ -404,19 +404,21 @@ void rewrite_cleanup()
 {
 }
 
-inline bool init(rewriter_interface* i, RewriterCompilingJitty* this_rewriter)
-{
-  if (mcrl2::utilities::MCRL2_VERSION != i->caller_toolset_version)
+extern "C" {
+  MCRL2_EXPORT bool init(rewriter_interface* i, RewriterCompilingJitty* this_rewriter) // NOLINT
   {
-    i->status = "rewriter version does not match the version of the calling application.";
-    return false;
-  }
+    if (mcrl2::utilities::MCRL2_VERSION != i->caller_toolset_version)
+    {
+      i->status = "rewriter version does not match the version of the calling application.";
+      return false;
+    }
 
-  i->rewrite_external = &rewrite;
-  i->rewrite_cleanup = &rewrite_cleanup;
-  set_the_precompiled_rewrite_functions_in_a_lookup_table(this_rewriter);
-  i->status = "rewriter loaded successfully.";
-  return true;
+    i->rewrite_external = &rewrite;
+    i->rewrite_cleanup = &rewrite_cleanup;
+    set_the_precompiled_rewrite_functions_in_a_lookup_table(this_rewriter);
+    i->status = "rewriter loaded successfully.";
+    return true;
+  }
 }
 
 #endif // MCRL2_DATA_DETAIL_REWR_JITTYC_PREAMBLE_H
