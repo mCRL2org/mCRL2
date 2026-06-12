@@ -787,8 +787,8 @@ inline data_expression real_(const std::string& n)
 /// \brief Yields the real value of a data expression.
 /// \param r A data expression of sort real in normal form.
 template <class NUMERIC_TYPE>
-inline NUMERIC_TYPE value(const data_expression& r,
-    std::enable_if_t<std::is_floating_point_v<NUMERIC_TYPE>>* = nullptr)
+  requires(std::is_floating_point_v<NUMERIC_TYPE>)
+inline NUMERIC_TYPE value(const data_expression& r)
 {
   if (is_creal_application(r))
   {

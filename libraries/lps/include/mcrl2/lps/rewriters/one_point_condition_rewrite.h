@@ -162,9 +162,9 @@ struct one_point_condition_rewrite_builder: public lps::data_expression_builder<
 /// \brief Applies the one point condition rewriter to all embedded data expressions in an object x
 /// \param x an object containing data expressions
 template <typename T, typename DataRewriter>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void one_point_condition_rewrite(T& x,
-    const DataRewriter& R,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const DataRewriter& R)
 {
   detail::one_point_condition_rewrite_builder<DataRewriter>  f(R);
   f.update(x);
@@ -174,9 +174,9 @@ void one_point_condition_rewrite(T& x,
 /// \param x an object containing data expressions
 /// \return the rewrite result
 template <typename T, typename DataRewriter>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T one_point_condition_rewrite(const T& x,
-    const DataRewriter& R,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const DataRewriter& R)
 {
   T result;
   detail::one_point_condition_rewrite_builder<DataRewriter> f(R);

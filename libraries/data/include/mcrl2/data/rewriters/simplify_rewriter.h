@@ -145,13 +145,15 @@ struct simplify_rewriter
 };
 
 template <typename T>
-void simplify(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
+void simplify(T& x)
 {
   core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).update(x);
 }
 
 template <typename T>
-T simplify(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+  requires(std::is_base_of_v<atermpp::aterm, T>)
+T simplify(const T& x)
 {
   T result;
   core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).apply(result, x);

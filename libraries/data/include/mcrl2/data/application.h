@@ -529,22 +529,6 @@ inline void make_application(atermpp::aterm& result)
   atermpp::make_term_appl(result,core::detail::function_symbol_DataAppl(1));
 }
 
-/* 
-// ---------------------------------------------------------------------------------
-// ---------------------------- TYPEDEF --------------------------------------------
-// ---------------------------------------------------------------------------------
-template <typename TERM, typename = void>
-struct yields_a_data_expression
-    : public std::false_type
-{
-};
-
-template <typename TERM>
-struct yields_a_data_expression<TERM,
-                                typename std::enable_if<std::is_convertible<TERM, data_expression>::type>::type >
-    : public std::true_type
-{}; */
-
 /// \brief Constructor.
 /// \param result variable into which the application is constructed.
 template <typename HEAD,

@@ -30,15 +30,16 @@ class data_property_map
 
     /// \brief Add start/end separators for non-set container types
     template <typename Container>
-    static std::string add_separators(std::string const& c,
-        std::enable_if_t<atermpp::is_set<Container>::value>* = nullptr)
+      requires(atermpp::is_set<Container>::value)
+    static std::string add_separators(std::string const& c)
     {
       return "[" + c + "]";
     }
 
     /// \brief Add start/end separators for set container types
     template <typename Container>
-    static std::string add_separators(std::string const& c, std::enable_if_t<!atermpp::is_set<Container>::value>* = 0)
+      requires(!atermpp::is_set<Container>::value)
+    static std::string add_separators(std::string const& c)
     {
       return "{" + c + "}";
     }

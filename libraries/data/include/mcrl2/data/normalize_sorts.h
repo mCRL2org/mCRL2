@@ -104,18 +104,18 @@ struct normalize_sorts_function
 } // namespace detail
 
 template <typename T>
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
 void normalize_sorts(T& x,
-    const data::sort_specification& sort_spec,
-    std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const data::sort_specification& sort_spec)
 {
   core::make_update_apply_builder<data::sort_expression_builder>
   (data::detail::normalize_sorts_function(sort_spec)).update(x);
 }
 
 template <typename T>
+  requires(std::is_base_of_v<atermpp::aterm, T>)
 T normalize_sorts(const T& x,
-    const data::sort_specification& sort_spec,
-    std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+    const data::sort_specification& sort_spec)
 {
   T result;
   core::make_update_apply_builder<data::sort_expression_builder>

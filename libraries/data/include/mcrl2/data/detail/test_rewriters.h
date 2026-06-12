@@ -80,7 +80,8 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
 };
 
 template <typename T>
-T normalize_and_or(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+  requires(std::is_base_of_v<atermpp::aterm, T>)
+T normalize_and_or(const T& x)
 {
   T result;
   core::make_apply_builder<normalize_and_or_builder>().apply(result, x);
@@ -88,7 +89,8 @@ T normalize_and_or(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm
 }
 
 template <typename T>
-void normalize_and_or(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
+void normalize_and_or(T& x)
 {
   core::make_apply_builder<normalize_and_or_builder>().update(x);
 }
@@ -142,7 +144,8 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
 };
 
 template <typename T>
-T normalize_equality(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::aterm, T>>* = nullptr)
+  requires(std::is_base_of_v<atermpp::aterm, T>)
+T normalize_equality(const T& x)
 {
   T result;
   core::make_apply_builder<normalize_equality_builder>().apply(result, x);
@@ -150,7 +153,8 @@ T normalize_equality(const T& x, std::enable_if_t<std::is_base_of_v<atermpp::ate
 }
 
 template <typename T>
-void normalize_equality(T& x, std::enable_if_t<!std::is_base_of_v<atermpp::aterm, T>>* = 0)
+  requires(!std::is_base_of_v<atermpp::aterm, T>)
+void normalize_equality(T& x)
 {
   core::make_apply_builder<normalize_equality_builder>().update(x);
 }
