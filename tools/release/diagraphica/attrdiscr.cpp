@@ -222,10 +222,10 @@ void AttrDiscr::configValues(
     // re-init mapping to current values
     Value** mapping;
     {
-      for (unsigned long i : origToCurDomain)
+      for (const std::pair<std::size_t, std::size_t>& p : origToCurDomain)
       {
         mapping  = new Value*;
-        *mapping = curValues[ i ];
+        *mapping = curValues[ p.second ];
         curMap.push_back(mapping);
       }
     }

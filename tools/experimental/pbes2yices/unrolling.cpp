@@ -215,6 +215,8 @@ bool parse_pbes(const pbes &pbes, bool disjunctive, parsed_pbes &output)
 	output.initial_state = pbes.initial_state();
 	output.disjunctive = disjunctive;
 	output.global_variables = pbes.global_variables();
+	return true;
+}
 
 struct unrolling_variables
 {
