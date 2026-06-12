@@ -2202,7 +2202,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                                                                                 mCRL2complexity(s, finalise_work(check_complexity::
                                                                                                                   while_Test_is_not_empty_3_6l_s_is_blue_3_11l,
                                                                                                                   check_complexity::refine_bottom_state_3_6l,
-                                                                                                                  max_NewB) );
+                                                                                                                  max_NewB), );
                                                                                                 mCRL2complexity(s, finalise_work(check_complexity::
                                                                                                                    while_Blue_contains_unvisited_states_3_15l,
                                                                                                                    check_complexity::refine_visited_state_3_15,
@@ -2233,7 +2233,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                                                                         for (auto s : *RedB)
                                                                                         {
                                                                                             mCRL2complexity(s, cancel_work(check_complexity::
-                                                                                                                 while_Red_contains_unvisited_states_3_15r) );
+                                                                                                                 while_Red_contains_unvisited_states_3_15r), );
                                                                                             for (succ_iter_t succ=s->succ_begin(); s->succ_end()!=succ; ++succ)
                                                                                             {
                                                                                                 mCRL2complexity(succ->B_to_C->pred, cancel_work(
@@ -2288,7 +2288,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                                                                         for (auto s : *BlueB)
                                                                                         {
                                                                                             mCRL2complexity(s, cancel_work(check_complexity::
-                                                                                                              while_Test_is_not_empty_3_6l_s_is_blue_3_11l) );
+                                                                                                              while_Test_is_not_empty_3_6l_s_is_blue_3_11l), );
                                                                                             mCRL2complexity(s, cancel_work(check_complexity::
                                                                                                                 while_Blue_contains_unvisited_states_3_15l), );
                                                                                             for (succ_iter_t succ=s->succ_begin(); s->succ_end()!=succ; ++succ)
@@ -2309,7 +2309,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                                                                         {
                                                                                             mCRL2complexity(s, finalise_work(check_complexity::
                                                                                                      while_Red_contains_unvisited_states_3_15r,
-                                                                                                     check_complexity::refine_visited_state_3_15, max_NewB) );
+                                                                                                     check_complexity::refine_visited_state_3_15, max_NewB), );
                                                                                             for (succ_iter_t succ=s->succ_begin(); s->succ_end()!=succ; ++succ)
                                                                                             {
                                                                                                 mCRL2complexity(succ->B_to_C->pred, finalise_work(
