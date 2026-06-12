@@ -114,21 +114,21 @@ public:
   { }
  
   reference_aterm(T_type&& other) noexcept
-   : m_t(std::forward(other))
+   : m_t(std::move(other))
   {}
 
-  const reference_aterm& operator=(const T_type& other) noexcept
+  reference_aterm& operator=(const T_type& other) noexcept
   {
     static_assert(std::is_base_of_v<aterm_core, T_type>);
-    m_t=other;
-    return m_t;
+    m_t = other;
+    return *this;
   }
 
-  const reference_aterm& operator=(T_type&& other) noexcept
+  reference_aterm& operator=(T_type&& other) noexcept
   {
     static_assert(std::is_base_of_v<aterm_core, T_type>);
-    m_t = std::forward(other);
-    return m_t;
+    m_t = std::move(other);
+    return *this;
   }
 
   /// Converts implicitly to a protected term of type T.
@@ -159,7 +159,8 @@ public:
 /// \brief A reference aterm_core applied to fundamental types, such as int, bool. Nothing needs to happen with such
 ///       terms. But a special class is needed, because such types are not classes, and we cannot derive from it.
 template <class T>
-class reference_aterm<T, std::enable_if_t<std::is_fundamental_v<std::decay_t<T>>>>
+  requires std::is_fundamental_v<std::decay_t<T>>
+class reference_aterm<T, void>
 {
 protected:
   using T_type = std::decay_t<T>;
@@ -178,16 +179,16 @@ public:
    : m_t(std::move(other))
   {} 
   
-  const T& operator=(const T& other) noexcept
+  reference_aterm& operator=(const T& other) noexcept
   {
-    m_t=other;
-    return m_t;
+    m_t = other;
+    return *this;
   }
 
-  const T& operator=(T&& other) noexcept
+  reference_aterm& operator=(T&& other) noexcept
   {
     m_t = std::move(other);
-    return m_t;
+    return *this;
   }
 
   /// Converts implicitly to a protected term of type T.
@@ -215,7 +216,8 @@ public:
 
 /// \brief An unprotected term that is stored inside an aterm_container.
 template <typename T>
-class reference_aterm<T, std::enable_if_t<std::is_base_of_v<aterm_core, T>>> : public unprotected_aterm_core
+  requires std::is_base_of_v<aterm_core, T>
+class reference_aterm<T, void> : public unprotected_aterm_core
 {
 public:
   /// \brief Default constructor.
@@ -235,8 +237,8 @@ public:
   {
   }
 
-  const reference_aterm& operator=(const unprotected_aterm_core& other) noexcept;
-  const reference_aterm& operator=(unprotected_aterm_core&& other) noexcept;
+  reference_aterm& operator=(const unprotected_aterm_core& other) noexcept;
+  reference_aterm& operator=(unprotected_aterm_core&& other) noexcept;
 
   /// Converts implicitly to a protected term of type T.
   operator T&()
@@ -299,7 +301,8 @@ reference_aterm_pair_constructor_helper(const T& other)
 /// \brief A pair that is stored into an atermpp container. This class takes care that all aterms that occur (recursively) inside
 ///        such a pair are marked, whears non-aterm_core types are not marked.
 template <typename T>
-class reference_aterm<T, std::enable_if_t<is_pair<T>::value>>
+  requires is_pair<T>::value
+class reference_aterm<T, void>
     : public std::pair<std::conditional_t<is_reference_aterm<typename T::first_type>::value,
                            typename T::first_type,
                            reference_aterm<typename T::first_type>>,
@@ -342,7 +345,7 @@ public:
     return *this;
   }
 
-  const reference_aterm& operator=(const std_pair& other)
+  reference_aterm& operator=(const std_pair& other)
   {
     super::first=other.first;
     super::second=other.second;
@@ -356,10 +359,10 @@ public:
     return *this;
   }
 
-  const reference_aterm& operator=(std_pair&& other)
+  reference_aterm& operator=(std_pair&& other)
   {
-    super::first = other.first;
-    super::second = other.second;
+    super::first = std::move(other.first);
+    super::second = std::move(other.second);
     return *this;
   }
 
@@ -367,7 +370,7 @@ public:
   /// Converts implicitly to a protected term of type std::pair<T,U>..
   operator std_pair&()
   {
-    return reinterpret_cast<std_pair>(*this);
+    return *reinterpret_cast<std_pair*>(this);
   }
 
   operator const std_pair&() const
@@ -471,7 +474,7 @@ public:
     return *this;
   };
 
-  generic_aterm_container& operator=(generic_aterm_container&) 
+  generic_aterm_container& operator=(generic_aterm_container&&) 
   {
     return *this;
   }

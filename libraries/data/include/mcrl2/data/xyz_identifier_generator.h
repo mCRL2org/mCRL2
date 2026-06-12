@@ -49,6 +49,10 @@ class xyz_identifier_generator: public multiset_identifier_generator
           m_index++;
           break;
         }
+        default:
+        {
+          throw mcrl2::runtime_error("Unexpected character in xyz_identifier_generator: " + std::string(1, m_char));
+        }
       }
       return m_index < 0 ? std::string(1, m_char) : std::string(1, m_char) + std::to_string(m_index);
     }

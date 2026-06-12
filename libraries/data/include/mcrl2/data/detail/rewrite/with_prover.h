@@ -81,6 +81,7 @@ class RewriterProver: public Rewriter
   protected:
 
     // Protected copy constructor.
+  public:
     RewriterProver(const RewriterProver& other) = delete;
 
     // Copy constructor intended for cloning. 

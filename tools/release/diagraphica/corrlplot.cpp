@@ -100,12 +100,12 @@ template <Visualizer::Mode mode> void CorrlPlot::drawLabels()
     // x-axis label
     double x =  0.0;
     double y = -0.5*size.height()+9*pix;
-    VisUtils::drawLabelCenter(texCharId, x, y, scaling, xLabel);
+    VisUtils::drawLabelCenter(&texCharId[0], x, y, scaling, xLabel);
 
     // y-axis labels
     x = -0.5*size.width()+9*pix;
     y =  0;
-    VisUtils::drawLabelVertCenter(texCharId, x, y, scaling, yLabel);
+    VisUtils::drawLabelVertCenter(&texCharId[0], x, y, scaling, yLabel);
   }
 }
 
@@ -178,12 +178,12 @@ template <Visualizer::Mode mode> void CorrlPlot::drawDiagram()
   attrs.push_back(attribute2);
 
   std::vector< double > vals;
-  vals.push_back(attrValIdx1Dgrm);
-  vals.push_back(attrValIdx2Dgrm);
+  vals.push_back(static_cast<double>(attrValIdx1Dgrm));
+  vals.push_back(static_cast<double>(attrValIdx2Dgrm));
 
   glPushMatrix();
-  glTranslatef(posDgrm.x, posDgrm.y, 0.0);
-  glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
+  glTranslatef(static_cast<GLfloat>(posDgrm.x), static_cast<GLfloat>(posDgrm.y), 0.0F);
+  glScalef(static_cast<GLfloat>(scaleDgrm), static_cast<GLfloat>(scaleDgrm), static_cast<GLfloat>(scaleDgrm));
 
   // drop shadow
   VisUtils::setColor(VisUtils::mediumGray);
@@ -196,7 +196,7 @@ template <Visualizer::Mode mode> void CorrlPlot::drawDiagram()
   diagram->draw<mode>(pixelSize(), attrs, vals);
 
   VisUtils::setColor(Qt::black);
-  VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
+  VisUtils::drawLabelRight(&texCharId[0], -0.98, 1.1, scaleTxt, msgDgrm);
 
   glPopMatrix();
 }
@@ -374,8 +374,8 @@ void CorrlPlot::calcPositions()
     double yBot = -0.5*size.height()+20*pix;
 
     // get number of values per axis
-    double numX = attribute1->getSizeCurValues();
-    double numY = attribute2->getSizeCurValues();
+    double numX = static_cast<double>(attribute1->getSizeCurValues());
+    double numY = static_cast<double>(attribute2->getSizeCurValues());
 
     // calc intervals per axis
     double fracX = 1.0;
@@ -420,8 +420,8 @@ void CorrlPlot::calcPositions()
         }
         radii[i].push_back(radius);
 
-        double x = xLft + 0.5*fracX + i*fracX;
-        double y = yBot + 0.5*fracY + mapXToY[i][j]*fracY;
+        double x = xLft + 0.5*fracX + static_cast<double>(i) * fracX;
+        double y = yBot + 0.5*fracY + static_cast<double>(mapXToY[i][j]) * fracY;
         Position2D pos;
         pos.x = x;
         pos.y = y;

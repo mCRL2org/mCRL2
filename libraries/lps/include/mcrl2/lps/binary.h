@@ -90,15 +90,15 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
           m = n;
         }
 
-        data::data_expression_vector left_list(enumerated_elements.begin(), enumerated_elements.begin() + m);
+        data::data_expression_vector left_list(enumerated_elements.begin(), enumerated_elements.begin() + static_cast<std::ptrdiff_t>(m));
         data::data_expression_vector right_list;
         if (m == n)
         {
-          right_list = data::data_expression_vector(enumerated_elements.begin() + m - 1, enumerated_elements.end());
+          right_list = data::data_expression_vector(enumerated_elements.begin() + static_cast<std::ptrdiff_t>(m) - 1, enumerated_elements.end());
         }
         else
         {
-          right_list = data::data_expression_vector(enumerated_elements.begin() + m, enumerated_elements.end());
+          right_list = data::data_expression_vector(enumerated_elements.begin() + static_cast<std::ptrdiff_t>(m), enumerated_elements.end());
         }
 
         data::data_expression condition = new_parameters.back();

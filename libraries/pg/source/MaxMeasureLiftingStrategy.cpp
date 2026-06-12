@@ -8,6 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <ranges>
+#include <type_traits>
 
 #include "mcrl2/pg/MaxMeasureLiftingStrategy.h"
 
@@ -197,13 +198,18 @@ static int cmp_ids(uint64_t x, uint64_t y)
    the results are still somewhat sensible, but it may be possible that two
    vectors compare unequal even though their steps are equally large.)
 */
-static int cmp_step( const verti *v1, const verti *v2, int v_len, bool v_carry,
-                     const verti *w1, const verti *w2, int w_len, bool w_carry )
+static int cmp_step(const verti* v1, const verti* v2, std::size_t v_len, bool v_carry,
+                    const verti* w1, const verti* w2, std::size_t w_len, bool w_carry)
 {
-    for (int i = 0; i < v_len || i < w_len; ++i)
+    using signed_verti = std::make_signed_t<verti>;
+    for (std::size_t i = 0; i < v_len || i < w_len; ++i)
     {
-        int a = i < v_len ? v2[i] - v1[i] : 0;
-        int b = i < w_len ? w2[i] - w1[i] : 0;
+        const signed_verti a = i < v_len
+          ? static_cast<signed_verti>(v2[i]) - static_cast<signed_verti>(v1[i])
+          : signed_verti{0};
+        const signed_verti b = i < w_len
+          ? static_cast<signed_verti>(w2[i]) - static_cast<signed_verti>(w1[i])
+          : signed_verti{0};
         if (a != b)
         {
           return (a > b) - (a < b);
@@ -240,11 +246,11 @@ int MaxMeasureLiftingStrategy2::cmp(verti i, verti j)
   switch (metric_)
   {
   case MAX_VALUE:
-    d = spm_.vector_cmp(spm_.get_successor(v), spm_.get_successor(w), spm_.len_);
+    d = spm_.vector_cmp(spm_.get_successor(v), spm_.get_successor(w), static_cast<int>(spm_.len_));
     break;
 
   case MIN_VALUE:
-    d = -spm_.vector_cmp(spm_.get_successor(v), spm_.get_successor(w), spm_.len_);
+    d = -spm_.vector_cmp(spm_.get_successor(v), spm_.get_successor(w), static_cast<int>(spm_.len_));
     break;
 
   case MAX_STEP:

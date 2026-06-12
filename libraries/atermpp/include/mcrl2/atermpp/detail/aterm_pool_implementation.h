@@ -31,8 +31,8 @@ aterm_pool::aterm_pool() :
   ),
   m_appl_dynamic_storage(*this)
 {
-  m_count_until_collection = capacity();
-  m_count_until_resize = m_int_storage.capacity();
+  m_count_until_collection = static_cast<long>(capacity());
+  m_count_until_resize = static_cast<long>(m_int_storage.capacity());
 
   if constexpr (EnableAggressiveGarbageCollection) 
   {
@@ -266,7 +266,7 @@ void aterm_pool::collect_impl(mcrl2::utilities::shared_mutex& shared_mutex)
     print_performance_statistics();
 
     // Use some heuristics to determine when the next collect should be called automatically.
-    m_count_until_collection = size() + protection_set_size();
+    m_count_until_collection = static_cast<long>(size() + protection_set_size());
 
     if constexpr (EnableAggressiveGarbageCollection) 
     {

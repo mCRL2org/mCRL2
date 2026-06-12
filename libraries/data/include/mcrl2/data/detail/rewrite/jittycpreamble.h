@@ -404,7 +404,7 @@ void rewrite_cleanup()
 {
 }
 
-bool init(rewriter_interface* i, RewriterCompilingJitty* this_rewriter)
+inline bool init(rewriter_interface* i, RewriterCompilingJitty* this_rewriter)
 {
   if (mcrl2::utilities::MCRL2_VERSION != i->caller_toolset_version)
   {

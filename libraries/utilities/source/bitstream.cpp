@@ -153,9 +153,9 @@ void obitstream::write_string(const std::string& string)
 
 void obitstream::write_integer(std::size_t val)
 {
-  std::size_t nr_bytes = encode_variablesize_int(val, integer_buffer);
+  const std::size_t nr_bytes = encode_variablesize_int(val, static_cast<std::uint8_t*>(integer_buffer));
 
-  write(integer_buffer, nr_bytes);
+  write(static_cast<const std::uint8_t*>(integer_buffer), nr_bytes);
 }
 
 ibitstream::ibitstream(std::istream& stream)

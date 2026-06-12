@@ -9,6 +9,8 @@
 
 #include "dofdialog.h"
 
+#include <QtGlobal>
+
 DofDialog::DofDialog(Graph* graph, Shape* shape, QWidget *parent) :
   QDialog(parent),
   m_graph(graph),
@@ -67,7 +69,7 @@ void DofDialog::attributeSelected(int index)
     QComboBox* comboBox = dynamic_cast<QComboBox*>(sender);
     if (comboBox != nullptr)
     {
-      int dofIndex = m_comboBoxes.indexOf(comboBox);
+      const int dofIndex = static_cast<int>(m_comboBoxes.indexOf(comboBox));
       if (dofIndex != -1)
       {
         DOF* dof = m_shape->dof(dofIndex);
@@ -94,7 +96,7 @@ bool DofDialog::eventFilter(QObject *object, QEvent *event)
     QComboBox* comboBox = dynamic_cast<QComboBox*>(object);
     if (comboBox != nullptr)
     {
-      int dofIndex = m_comboBoxes.indexOf(comboBox);
+      const int dofIndex = static_cast<int>(m_comboBoxes.indexOf(comboBox));
       if (dofIndex != -1)
       {
         emit(dofActivated(dofIndex));

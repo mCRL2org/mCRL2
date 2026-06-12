@@ -39,7 +39,7 @@ public:
 
   /// \brief Defines a function symbol from a name and arity combination.
   function_symbol(std::string&& name, const std::size_t arity_)
-   : function_symbol(std::forward<std::string>(name), arity_, true)
+    : function_symbol(std::move(name), arity_, true)
   {}
 
   /// This class has non-trivial destructor so declare default copy and move operators.
@@ -128,7 +128,7 @@ public:
 private:
   /// \brief Constructor for internal use only.
   function_symbol(detail::_function_symbol::ref&& f)
-   : m_function_symbol(std::forward<detail::_function_symbol::ref>(f))
+    : m_function_symbol(std::move(f))
   {}
 
   /// \brief Constructor for internal use only

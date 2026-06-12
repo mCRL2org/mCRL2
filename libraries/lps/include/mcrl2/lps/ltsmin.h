@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_LTSMIN_H
 #define MCRL2_LPS_LTSMIN_H
 
-#define MCRL2_GUARDS 1
+constexpr int MCRL2_GUARDS = 1;
 
 #include <memory>
 
@@ -105,7 +105,7 @@ class pins_data_type
 
         std::ptrdiff_t distance_to(const index_iterator& other) const
         {
-          return other.m_index - this->m_index;
+          return static_cast<std::ptrdiff_t>(other.m_index) - static_cast<std::ptrdiff_t>(this->m_index);
         }
 
         std::size_t m_index;
@@ -813,7 +813,7 @@ class pins
     /// \brief Assigns the initial state to s.
     void get_initial_state(ltsmin_state_type& s)
     {
-      state initial_state(m_generator.initial_state().begin(), m_generator.initial_state().size());
+      state initial_state(m_generator.initial_state().begin(), static_cast<int>(m_generator.initial_state().size()));
       for (std::size_t i = 0; i < m_state_length; i++)
       {
         s[i] = state_type_map(i)[initial_state[i]];
@@ -856,7 +856,7 @@ class pins
       {
         state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
-      state source(state_arguments.begin(),nparams);
+      state source(state_arguments.begin(), static_cast<int>(nparams));
 
       std::list<generator_type::transition> transitions = m_generator.out_edges(source);
       for (const generator_type::transition& t: transitions)
@@ -866,7 +866,7 @@ class pins
         {
           dest[j] = state_type_map(j)[destination[j]];
         }
-        labels[0] = action_label_type_map()[t.action];
+        labels[0] = static_cast<int>(action_label_type_map()[t.action]);
         f(dest, labels);
       }
     }
@@ -916,7 +916,7 @@ class pins
       {
         state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
-      state source(state_arguments.begin(),nparams);
+      state source(state_arguments.begin(), static_cast<int>(nparams));
 
       std::list<generator_type::transition> transitions = generator->out_edges(source, group);
 
@@ -927,7 +927,7 @@ class pins
         {
           dest[j] = state_type_map(j)[destination[j]];
         }
-        labels[0] = action_label_type_map()[t.action];
+        labels[0] = static_cast<int>(action_label_type_map()[t.action]);
         f(dest, labels);
       }
     }

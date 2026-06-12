@@ -35,7 +35,7 @@ inline std::vector< char > string_to_vector_number(const std::string& s)
   {
     assert('0' <= i && i <= '9');
 
-    result.push_back(i - '0');
+    result.push_back(static_cast<char>(i - '0'));
   }
 
   return result;
@@ -52,7 +52,7 @@ inline std::string vector_number_to_string(const std::vector< char >& v)
 
   for (char i: v)
   {
-    result.push_back(i + '0');
+    result.push_back(static_cast<char>(i + '0'));
   }
 
   return result;
@@ -127,7 +127,7 @@ inline std::string as_decimal_string(T t)
 
     while (0 < t)
     {
-      result.append(1, '0' + static_cast< char >(t % 10));
+      result.append(1, static_cast<char>('0' + static_cast<char>(t % 10)));
 
       t /= 10;
     }

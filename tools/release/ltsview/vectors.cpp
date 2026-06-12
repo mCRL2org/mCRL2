@@ -17,7 +17,7 @@ namespace Vectors {
 
 void toPolar(float &angle, float &radius, const QVector2D& v)
 {
-  angle = MathUtils::rad_to_deg(atan2(v.y(), v.x()));
+  angle = static_cast<float>(MathUtils::rad_to_deg(std::atan2(v.y(), v.x())));
   if (angle < 0.0f)
   {
     angle += 360.0f;
@@ -27,8 +27,8 @@ void toPolar(float &angle, float &radius, const QVector2D& v)
 
 QVector2D fromPolar(float angle, float radius)
 {
-  float angle_rad = MathUtils::deg_to_rad(angle);
-  return QVector2D(radius * cos(angle_rad), radius * sin(angle_rad));
+  const float angle_rad = static_cast<float>(MathUtils::deg_to_rad(angle));
+  return QVector2D(radius * std::cos(angle_rad), radius * std::sin(angle_rad));
 }
 
 }

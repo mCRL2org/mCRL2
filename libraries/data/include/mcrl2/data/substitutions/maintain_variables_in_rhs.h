@@ -72,7 +72,7 @@ class maintain_variables_in_rhs: public Substitution
         { }
   
         /// \brief Actual assignment
-        void operator=(const expression_type& e)
+        assignment& operator=(const expression_type& e)
         {
           assert(e.defined());
 
@@ -95,7 +95,8 @@ class maintain_variables_in_rhs: public Substitution
             m_scratch_set.clear();
           }
           // Set the new variable;
-          m_sigma.operator[](m_variable)=e; 
+          m_sigma.operator[](m_variable)=e;
+          return *this;
         }
     };
   

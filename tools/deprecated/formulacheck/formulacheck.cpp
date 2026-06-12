@@ -9,9 +9,6 @@
 /// \file formcheck.cpp
 /// \brief Add your file description here.
 
-#define NAME "formulacheck"
-#define AUTHOR "Luc Engelen"
-
 #include "mcrl2/data/detail/prover/formula_checker.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/io.h"

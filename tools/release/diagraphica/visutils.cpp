@@ -22,17 +22,17 @@ float   VisUtils::cushAngle = 70.0f;
 float   VisUtils::cushDepth =  1.0f;
 
 
-QColor interpolateRgb(QColor from, QColor to, float t)
+QColor interpolateRgb(QColor from, QColor to, double t)
 {
   if (!from.isValid() || !to.isValid())
   {
     return QColor();
   }
   return QColor(
-    from.red() + (int)((to.red() - from.red()) * t),
-    from.green() + (int)((to.green() - from.green()) * t),
-    from.blue() + (int)((to.blue() - from.blue()) * t),
-    from.alpha() + (int)((to.alpha() - from.alpha()) * t)
+    static_cast<int>(from.red() + (to.red() - from.red()) * t),
+    static_cast<int>(from.green() + (to.green() - from.green()) * t),
+    static_cast<int>(from.blue() + (to.blue() - from.blue()) * t),
+    static_cast<int>(from.alpha() + (to.alpha() - from.alpha()) * t)
     );
 }
 
@@ -50,37 +50,37 @@ QColor VisUtils::BlueYellow::operator()(double fraction) const
 {
   if (fraction < 0.5)
   {
-    return QColor::fromHsvF(4/6.0, 1.0 - fraction * 2.0, 1.0);
+    return QColor::fromHsvF(4.0 / 6.0, static_cast<float>(1.0 - fraction * 2.0), 1.0F);
   }
   else
   {
-    return QColor::fromHsvF(1/6.0, fraction * 2.0 - 1.0, 1.0);
+    return QColor::fromHsvF(1.0 / 6.0, static_cast<float>(fraction * 2.0 - 1.0), 1.0F);
   }
 }
 
 QColor VisUtils::Spectral::operator()(double fraction) const
 {
-  return QColor::fromHsvF(fraction, 1.0, 1.0);
+  return QColor::fromHsvF(static_cast<float>(fraction), 1.0F, 1.0F);
 }
 
 QColor VisUtils::ListColorMap::operator()(double fraction) const
 {
-  double scaled = fraction * (m_colors.size() - 1);
-  int index = (int)scaled;
+  const double scaled = fraction * static_cast<double>(m_colors.size() - 1);
+  const int index = static_cast<int>(scaled);
   if (index < 0)
   {
     return m_colors.front();
   }
-  if (index + 1 >= m_colors.size())
+  if (index + 1 >= static_cast<int>(m_colors.size()))
   {
     return m_colors.back();
   }
-  return interpolateRgb(m_colors[index], m_colors[index + 1], scaled - index);
+  return interpolateRgb(m_colors[index], m_colors[index + 1], scaled - static_cast<double>(index));
 }
 
 QColor VisUtils::ListColorMap::operator()(int numerator, int denominator) const
 {
-  if (denominator <= m_colors.size())
+  if (denominator >= 0 && static_cast<std::size_t>(denominator) <= m_colors.size())
   {
     return m_colors[numerator];
   }
@@ -243,7 +243,7 @@ void VisUtils::disableBlending()
 
 void VisUtils::setLineWidth(const double& px)
 {
-  glLineWidth(px);
+  glLineWidth(static_cast<GLfloat>(px));
 }
 
 
@@ -255,8 +255,8 @@ void VisUtils::drawLine(
   const double& yFr, const double& yTo)
 {
   glBegin(GL_LINES);
-  glVertex2f(xFr, yFr);
-  glVertex2f(xTo, yTo);
+  glVertex2d(xFr, yFr);
+  glVertex2d(xTo, yTo);
   glEnd();
 }
 
@@ -268,8 +268,8 @@ void VisUtils::drawLineDashed(
   glLineStipple(2, 0xAAAA);
   glEnable(GL_LINE_STIPPLE);
   glBegin(GL_LINES);
-  glVertex2f(xFr, yFr);
-  glVertex2f(xTo, yTo);
+  glVertex2d(xFr, yFr);
+  glVertex2d(xTo, yTo);
   glEnd();
   glDisable(GL_LINE_STIPPLE);
 }
@@ -300,7 +300,7 @@ void VisUtils::drawArc(
   {
     double xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg+i*slice));
     double yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg+i*slice));
-    glVertex2f(xCur, yCur);
+    glVertex2d(xCur, yCur);
   }
   glEnd();
 }
@@ -350,7 +350,7 @@ void VisUtils::drawArcCW(
   {
     double xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg-i*slice));
     double yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg-i*slice));
-    glVertex2f(xCur, yCur);
+    glVertex2d(xCur, yCur);
   }
   glEnd();
 }
@@ -404,7 +404,7 @@ void VisUtils::drawArc(
 
       double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
-      glVertex2f(xCur, yCur);
+      glVertex2d(xCur, yCur);
     }
   }
   // inside
@@ -415,7 +415,7 @@ void VisUtils::drawArc(
 
       double xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
-      glVertex2f(xCur, yCur);
+      glVertex2d(xCur, yCur);
     }
   }
   glEnd();
@@ -453,12 +453,12 @@ void VisUtils::fillArc(
       // outside
       double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
-      glVertex2f(xCur, yCur);
+      glVertex2d(xCur, yCur);
 
       // inside
       xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos(Utils::degrToRad(aglBegDg+i*slice));
       yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin(Utils::degrToRad(aglBegDg+i*slice));
-      glVertex2f(xCur, yCur);
+      glVertex2d(xCur, yCur);
     }
   }
   glEnd();
@@ -472,11 +472,11 @@ void VisUtils::drawTriangle(
 {
   glBegin(GL_LINE_LOOP);
   setValidColor(col1);
-  glVertex2f(x1, y1);
+  glVertex2d(x1, y1);
   setValidColor(col2);
-  glVertex2f(x2, y2);
+  glVertex2d(x2, y2);
   setValidColor(col3);
-  glVertex2f(x3, y3);
+  glVertex2d(x3, y3);
   glEnd();
 }
 
@@ -488,11 +488,11 @@ void VisUtils::fillTriangle(
 {
   glBegin(GL_POLYGON);
   setValidColor(col1);
-  glVertex2f(x1, y1);
+  glVertex2d(x1, y1);
   setValidColor(col2);
-  glVertex2f(x2, y2);
+  glVertex2d(x2, y2);
   setValidColor(col3);
-  glVertex2f(x3, y3);
+  glVertex2d(x3, y3);
   glEnd();
 }
 
@@ -505,13 +505,13 @@ void VisUtils::drawRect(
 {
   glBegin(GL_LINE_LOOP);
   setValidColor(colTopLft);
-  glVertex2f(xLft, yTop);
+  glVertex2d(xLft, yTop);
   setValidColor(colBotLft);
-  glVertex2f(xLft, yBot);
+  glVertex2d(xLft, yBot);
   setValidColor(colBotRgt);
-  glVertex2f(xRgt, yBot);
+  glVertex2d(xRgt, yBot);
   setValidColor(colTopRgt);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yTop);
   glEnd();
 }
 
@@ -524,13 +524,13 @@ void VisUtils::fillRect(
 {
   glBegin(GL_POLYGON);
   setValidColor(colTopLft);
-  glVertex2f(xLft, yTop);
+  glVertex2d(xLft, yTop);
   setValidColor(colBotLft);
-  glVertex2f(xLft, yBot);
+  glVertex2d(xLft, yBot);
   setValidColor(colBotRgt);
-  glVertex2f(xRgt, yBot);
+  glVertex2d(xRgt, yBot);
   setValidColor(colTopRgt);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yTop);
   glEnd();
 }
 
@@ -547,7 +547,7 @@ void VisUtils::drawEllipse(
   {
     double xCur = xCtr + xDOF*sin(i*slice);
     double yCur = yCtr + yDOF*cos(i*slice);
-    glVertex2f(xCur, yCur);
+    glVertex2d(xCur, yCur);
   }
   glEnd();
 }
@@ -565,7 +565,7 @@ void VisUtils::fillEllipse(
   {
     double xCur = xCtr + xDOF*sin(i*slice);
     double yCur = yCtr + yDOF*cos(i*slice);
-    glVertex2f(xCur, yCur);
+    glVertex2d(xCur, yCur);
   }
   glEnd();
 }
@@ -589,9 +589,9 @@ void VisUtils::fillEllipse(
     glBegin(GL_POLYGON);
 
     setColor(cOut);
-    glVertex2f(xCurOut, yCurOut);
+    glVertex2d(xCurOut, yCurOut);
     setColor(cIn);
-    glVertex2f(xCurIn,  yCurIn);
+    glVertex2d(xCurIn,  yCurIn);
 
     xCurIn  = xCtr + xDOFIn*cos(i*slice);
     yCurIn  = yCtr + yDOFIn*sin(i*slice);
@@ -599,9 +599,9 @@ void VisUtils::fillEllipse(
     yCurOut = yCtr + yDOFOut*sin(i*slice);
 
     setColor(cIn);
-    glVertex2f(xCurIn,  yCurIn);
+    glVertex2d(xCurIn,  yCurIn);
     setColor(cOut);
-    glVertex2f(xCurOut, yCurOut);
+    glVertex2d(xCurOut, yCurOut);
 
     glEnd();
   }
@@ -637,9 +637,9 @@ void VisUtils::fillEllipse(
     glBegin(GL_POLYGON);
 
     setColor(cOut);
-    glVertex2f(xOutside, yOutside);
+    glVertex2d(xOutside, yOutside);
     setColor(cIn);
-    glVertex2f(xInside, yInside);
+    glVertex2d(xInside, yInside);
 
     xInside  = xCtr + xDOFIn*cos(aglBegRd + i*sliceRd);
     yInside  = yCtr + yDOFIn*sin(aglBegRd + i*sliceRd);
@@ -647,9 +647,9 @@ void VisUtils::fillEllipse(
     yOutside = yCtr + yDOFOut*sin(aglBegRd + i*sliceRd);
 
     setColor(cIn);
-    glVertex2f(xInside, yInside);
+    glVertex2d(xInside, yInside);
     setColor(cOut);
-    glVertex2f(xOutside, yOutside);
+    glVertex2d(xOutside, yOutside);
 
     glEnd();
   }
@@ -672,8 +672,8 @@ void VisUtils::drawArrow(
   double lenBase = lenArw - lHead;
 
   glPushMatrix();
-  glTranslatef(xFr, yFr, 0.0);
-  glRotatef(angl, 0.0, 0.0, 1.0);
+  glTranslated(xFr, yFr, 0.0);
+  glRotated(angl, 0.0, 0.0, 1.0);
 
   // arrow head
   drawTriangle(
@@ -706,21 +706,21 @@ void VisUtils::drawArrow(
   QColor cJnc = interpolateRgb(cFr, cTo, lenBase/lenArw);
 
   glPushMatrix();
-  glTranslatef(xFr, yFr, 0.0);
-  glRotatef(angl, 0.0, 0.0, 1.0);
+  glTranslated(xFr, yFr, 0.0);
+  glRotated(angl, 0.0, 0.0, 1.0);
 
   glBegin(GL_LINE_LOOP);
   setValidColor(cFr);
-  glVertex2f(0.0, 0.5*wBase);
-  glVertex2f(0.0, -0.5*wBase);
+  glVertex2d(0.0, 0.5*wBase);
+  glVertex2d(0.0, -0.5*wBase);
   setValidColor(cJnc);
-  glVertex2f(lenArw-lHead, -0.5*wBase);
-  glVertex2f(lenArw-lHead, -0.5*wHead);
+  glVertex2d(lenArw-lHead, -0.5*wBase);
+  glVertex2d(lenArw-lHead, -0.5*wHead);
   setValidColor(cTo);
-  glVertex2f(lenArw, 0.0);
+  glVertex2d(lenArw, 0.0);
   setValidColor(cJnc);
-  glVertex2f(lenArw-lHead,  0.5*wHead);
-  glVertex2f(lenArw-lHead,  0.5*wBase);
+  glVertex2d(lenArw-lHead,  0.5*wHead);
+  glVertex2d(lenArw-lHead,  0.5*wBase);
   glEnd();
 
   glPopMatrix();
@@ -743,8 +743,8 @@ void VisUtils::fillArrow(
   double lenBase = lenArw - lHead;
 
   glPushMatrix();
-  glTranslatef(xFr, yFr, 0.0);
-  glRotatef(angl, 0.0, 0.0, 1.0);
+  glTranslated(xFr, yFr, 0.0);
+  glRotated(angl, 0.0, 0.0, 1.0);
 
   // arrow head
   fillTriangle(
@@ -777,27 +777,27 @@ void VisUtils::fillArrow(
   QColor cJnc = interpolateRgb(cFr, cTo, lenBase/lenArw);
 
   glPushMatrix();
-  glTranslatef(xFr, yFr, 0.0);
-  glRotatef(angl, 0.0, 0.0, 1.0);
+  glTranslated(xFr, yFr, 0.0);
+  glRotated(angl, 0.0, 0.0, 1.0);
 
   // base
   glBegin(GL_POLYGON);
   setValidColor(cFr);
-  glVertex2f(0.0, 0.5*wBase);
-  glVertex2f(0.0, -0.5*wBase);
+  glVertex2d(0.0, 0.5*wBase);
+  glVertex2d(0.0, -0.5*wBase);
   setValidColor(cJnc);
-  glVertex2f(lenArw-lHead, -0.5*wBase);
-  glVertex2f(lenArw-lHead,  0.5*wBase);
+  glVertex2d(lenArw-lHead, -0.5*wBase);
+  glVertex2d(lenArw-lHead,  0.5*wBase);
   glEnd();
 
   // head
   glBegin(GL_POLYGON);
   setValidColor(cJnc);
-  glVertex2f(lenArw-lHead, -0.5*wHead);
+  glVertex2d(lenArw-lHead, -0.5*wHead);
   setValidColor(cTo);
-  glVertex2f(lenArw, 0.0);
+  glVertex2d(lenArw, 0.0);
   setValidColor(cJnc);
-  glVertex2f(lenArw-lHead,  0.5*wHead);
+  glVertex2d(lenArw-lHead,  0.5*wHead);
   glEnd();
 
   glPopMatrix();
@@ -817,8 +817,8 @@ void VisUtils::drawDArrow(
   double lenArw = Utils::dist(xFr, yFr, xTo, yTo);
 
   glPushMatrix();
-  glTranslatef(xFr, yFr, 0.0);
-  glRotatef(angl, 0.0, 0.0, 1.0);
+  glTranslated(xFr, yFr, 0.0);
+  glRotated(angl, 0.0, 0.0, 1.0);
 
   // arrow heads
   drawTriangle(
@@ -849,8 +849,8 @@ void VisUtils::fillDArrow(
   double lenArw = Utils::dist(xFr, yFr, xTo, yTo);
 
   glPushMatrix();
-  glTranslatef(xFr, yFr, 0.0);
-  glRotatef(angl, 0.0, 0.0, 1.0);
+  glTranslated(xFr, yFr, 0.0);
+  glRotated(angl, 0.0, 0.0, 1.0);
 
   // arrow heads
   fillTriangle(
@@ -893,14 +893,14 @@ void VisUtils::drawArrowArcCW(
   {
     xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg+i*slice));
     yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg+i*slice));
-    glVertex2f(xCur, yCur);
+    glVertex2d(xCur, yCur);
   }
   glEnd();
 
   // draw arrow head
   glPushMatrix();
-  glTranslatef(xCur, yCur, 0.0);
-  glRotatef(aglEndDg-90.0, 0.0, 0.0, 1.0);
+  glTranslated(xCur, yCur, 0.0);
+  glRotated(aglEndDg-90.0, 0.0, 0.0, 1.0);
 
   drawTriangle(
     0.0,    0.0,
@@ -936,14 +936,14 @@ void VisUtils::fillArrowArcCW(
   {
     xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg+i*slice));
     yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg+i*slice));
-    glVertex2f(xCur, yCur);
+    glVertex2d(xCur, yCur);
   }
   glEnd();
 
   // draw arrow head
   glPushMatrix();
-  glTranslatef(xCur, yCur, 0.0);
-  glRotatef(aglEndDg-90.0, 0.0, 0.0, 1.0);
+  glTranslated(xCur, yCur, 0.0);
+  glRotated(aglEndDg-90.0, 0.0, 0.0, 1.0);
 
   fillTriangle(
     0.0,    0.0,
@@ -979,14 +979,14 @@ void VisUtils::drawArrowArcCCW(
   {
     xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg-i*slice));
     yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg-i*slice));
-    glVertex2f(xCur, yCur);
+    glVertex2d(xCur, yCur);
   }
   glEnd();
 
   // draw arrow head
   glPushMatrix();
-  glTranslatef(xCur, yCur, 0.0);
-  glRotatef(aglEndDg+90.0, 0.0, 0.0, 1.0);
+  glTranslated(xCur, yCur, 0.0);
+  glRotated(aglEndDg+90.0, 0.0, 0.0, 1.0);
 
   drawTriangle(
     0.0,    0.0,
@@ -1022,14 +1022,14 @@ void VisUtils::fillArrowArcCCW(
   {
     xCur = xCtr + radius*cos(Utils::degrToRad(aglBegDg-i*slice));
     yCur = yCtr + radius*sin(Utils::degrToRad(aglBegDg-i*slice));
-    glVertex2f(xCur, yCur);
+    glVertex2d(xCur, yCur);
   }
   glEnd();
 
   // draw arrow head
   glPushMatrix();
-  glTranslatef(xCur, yCur, 0.0);
-  glRotatef(aglEndDg+90.0, 0.0, 0.0, 1.0);
+  glTranslated(xCur, yCur, 0.0);
+  glRotated(aglEndDg+90.0, 0.0, 0.0, 1.0);
 
   fillTriangle(
     0.0,    0.0,
@@ -1045,34 +1045,34 @@ void VisUtils::drawFwrdIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(
+  glVertex2d(xLft, yTop);
+  glVertex2d(xLft, yBot);
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     0.5*(yTop+yBot));
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.8*(xRgt-xLft),
     0.5*(yTop+yBot));
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.8*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.8*(xRgt-xLft),
     yBot);
-  glVertex2f(xRgt, yBot);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yBot);
+  glVertex2d(xRgt, yTop);
   glEnd();
 }
 
@@ -1082,34 +1082,34 @@ void VisUtils::fillFwrdIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(
+  glVertex2d(xLft, yTop);
+  glVertex2d(xLft, yBot);
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     0.5*(yTop+yBot));
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.8*(xRgt-xLft),
     0.5*(yTop+yBot));
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.8*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.8*(xRgt-xLft),
     yBot);
-  glVertex2f(xRgt, yBot);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yBot);
+  glVertex2d(xRgt, yTop);
   glEnd();
 }
 
@@ -1119,21 +1119,21 @@ void VisUtils::drawNextIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(
+  glVertex2d(xLft, yTop);
+  glVertex2d(xLft, yBot);
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     0.5*(yTop+yBot));
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt,
     0.5*(yTop+yBot));
   glEnd();
@@ -1145,21 +1145,21 @@ void VisUtils::fillNextIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(
+  glVertex2d(xLft, yTop);
+  glVertex2d(xLft, yBot);
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     0.5*(yTop+yBot));
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt,
     0.5*(yTop+yBot));
   glEnd();
@@ -1171,31 +1171,31 @@ void VisUtils::drawPauseIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.125*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.125*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     yTop);
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xRgt - 0.4*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xRgt - 0.4*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt - 0.125*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt - 0.125*(xRgt-xLft),
     yTop);
   glEnd();
@@ -1207,31 +1207,31 @@ void VisUtils::fillPauseIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.125*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.125*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.4*(xRgt-xLft),
     yTop);
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xRgt - 0.4*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xRgt - 0.4*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt - 0.125*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt - 0.125*(xRgt-xLft),
     yTop);
   glEnd();
@@ -1243,9 +1243,9 @@ void VisUtils::drawPlayIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(xRgt, 0.5*(yTop+yBot));
+  glVertex2d(xLft, yTop);
+  glVertex2d(xLft, yBot);
+  glVertex2d(xRgt, 0.5*(yTop+yBot));
   glEnd();
 }
 
@@ -1255,9 +1255,9 @@ void VisUtils::fillPlayIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(xRgt, 0.5*(yTop+yBot));
+  glVertex2d(xLft, yTop);
+  glVertex2d(xLft, yBot);
+  glVertex2d(xRgt, 0.5*(yTop+yBot));
   glEnd();
 }
 
@@ -1267,10 +1267,10 @@ void VisUtils::drawStopIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(xLft + 0.125*(xRgt-xLft), yTop);
-  glVertex2f(xLft + 0.125*(xRgt-xLft), yBot);
-  glVertex2f(xRgt - 0.125*(xRgt-xLft), yBot);
-  glVertex2f(xRgt - 0.125*(xRgt-xLft), yTop);
+  glVertex2d(xLft + 0.125*(xRgt-xLft), yTop);
+  glVertex2d(xLft + 0.125*(xRgt-xLft), yBot);
+  glVertex2d(xRgt - 0.125*(xRgt-xLft), yBot);
+  glVertex2d(xRgt - 0.125*(xRgt-xLft), yTop);
   glEnd();
 }
 
@@ -1280,10 +1280,10 @@ void VisUtils::fillStopIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(xLft + 0.125*(xRgt-xLft), yTop);
-  glVertex2f(xLft + 0.125*(xRgt-xLft), yBot);
-  glVertex2f(xRgt - 0.125*(xRgt-xLft), yBot);
-  glVertex2f(xRgt - 0.125*(xRgt-xLft), yTop);
+  glVertex2d(xLft + 0.125*(xRgt-xLft), yTop);
+  glVertex2d(xLft + 0.125*(xRgt-xLft), yBot);
+  glVertex2d(xRgt - 0.125*(xRgt-xLft), yBot);
+  glVertex2d(xRgt - 0.125*(xRgt-xLft), yTop);
   glEnd();
 }
 
@@ -1293,23 +1293,23 @@ void VisUtils::drawPrevIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft,
     0.5*(yTop+yBot));
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop);
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     0.5*(yTop+yBot));
-  glVertex2f(xRgt, yBot);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yBot);
+  glVertex2d(xRgt, yTop);
   glEnd();
 }
 
@@ -1319,23 +1319,23 @@ void VisUtils::fillPrevIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft,
     0.5*(yTop+yBot));
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop);
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     0.5*(yTop+yBot));
-  glVertex2f(xRgt, yBot);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yBot);
+  glVertex2d(xRgt, yTop);
   glEnd();
 }
 
@@ -1345,34 +1345,34 @@ void VisUtils::drawRwndIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(
+  glVertex2d(xLft, yTop);
+  glVertex2d(xLft, yBot);
+  glVertex2d(
     xLft + 0.2*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.2*(xRgt-xLft),
     yTop);
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.2*(xRgt-xLft),
     0.5*(yTop+yBot));
-  glVertex2f(
+  glVertex2d(
     xLft + 0.6*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.6*(xRgt-xLft),
     yTop);
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.6*(xRgt-xLft),
     0.5*(yTop+yBot));
-  glVertex2f(xRgt, yBot);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yBot);
+  glVertex2d(xRgt, yTop);
   glEnd();
 }
 
@@ -1382,34 +1382,34 @@ void VisUtils::fillRwndIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(xLft, yTop);
-  glVertex2f(xLft, yBot);
-  glVertex2f(
+  glVertex2d(xLft, yTop);
+  glVertex2d(xLft, yBot);
+  glVertex2d(
     xLft + 0.2*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.2*(xRgt-xLft),
     yTop);
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.2*(xRgt-xLft),
     0.5*(yTop+yBot));
-  glVertex2f(
+  glVertex2d(
     xLft + 0.6*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.6*(xRgt-xLft),
     yTop);
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.6*(xRgt-xLft),
     0.5*(yTop+yBot));
-  glVertex2f(xRgt, yBot);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yBot);
+  glVertex2d(xRgt, yTop);
   glEnd();
 }
 
@@ -1423,31 +1423,31 @@ void VisUtils::drawCloseIcon(
 
   glBegin(GL_LINE_LOOP);
   // top left
-  glVertex2f(xLft+1.5*hori, yTop);
-  glVertex2f(xLft,          yTop-1.5*vert);
+  glVertex2d(xLft+1.5*hori, yTop);
+  glVertex2d(xLft,          yTop-1.5*vert);
   // center left
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft)-1.5*hori,
     yBot + 0.5*(yTop-yBot));
   // bottom left
-  glVertex2f(xLft,          yBot+1.5*vert);
-  glVertex2f(xLft+1.5*hori, yBot);
+  glVertex2d(xLft,          yBot+1.5*vert);
+  glVertex2d(xLft+1.5*hori, yBot);
   // center bottom
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot + 0.5*(yTop-yBot)-1.5*vert);
   // bottom right
-  glVertex2f(xRgt-1.5*hori, yBot);
-  glVertex2f(xRgt,          yBot+1.5*vert);
+  glVertex2d(xRgt-1.5*hori, yBot);
+  glVertex2d(xRgt,          yBot+1.5*vert);
   // center right
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft)+1.5*hori,
     yBot + 0.5*(yTop-yBot));
   // top right
-  glVertex2f(xRgt,          yTop-1.5*vert);
-  glVertex2f(xRgt-1.5*hori, yTop);
+  glVertex2d(xRgt,          yTop-1.5*vert);
+  glVertex2d(xRgt-1.5*hori, yTop);
   // center top
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot + 0.5*(yTop-yBot)+1.5*vert);
   glEnd();
@@ -1463,20 +1463,20 @@ void VisUtils::fillCloseIcon(
 
   glBegin(GL_POLYGON);
   // top left
-  glVertex2f(xLft+1.5*hori, yTop);
-  glVertex2f(xLft,          yTop-1.5*vert);
+  glVertex2d(xLft+1.5*hori, yTop);
+  glVertex2d(xLft,          yTop-1.5*vert);
   // bottom right
-  glVertex2f(xRgt-1.5*hori, yBot);
-  glVertex2f(xRgt,          yBot+1.5*vert);
+  glVertex2d(xRgt-1.5*hori, yBot);
+  glVertex2d(xRgt,          yBot+1.5*vert);
   glEnd();
 
   glBegin(GL_POLYGON);
   // bottom left
-  glVertex2f(xLft,          yBot+1.5*vert);
-  glVertex2f(xLft+1.5*hori, yBot);
+  glVertex2d(xLft,          yBot+1.5*vert);
+  glVertex2d(xLft+1.5*hori, yBot);
   // top right
-  glVertex2f(xRgt,          yTop-1.5*vert);
-  glVertex2f(xRgt-1.5*hori, yTop);
+  glVertex2d(xRgt,          yTop-1.5*vert);
+  glVertex2d(xRgt-1.5*hori, yTop);
   glEnd();
 }
 
@@ -1486,24 +1486,24 @@ void VisUtils::drawMoreIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(xLft, yTop);
-  glVertex2f(
+  glVertex2d(xLft, yTop);
+  glVertex2d(
     xLft,
     yTop - 0.2*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop - 0.2*(yTop-yBot));
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yTop);
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft,
     yTop - 0.3*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop - 0.3*(yTop-yBot));
   glEnd();
@@ -1515,24 +1515,24 @@ void VisUtils::fillMoreIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(xLft, yTop);
-  glVertex2f(
+  glVertex2d(xLft, yTop);
+  glVertex2d(
     xLft,
     yTop - 0.2*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop - 0.2*(yTop-yBot));
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yTop);
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft,
     yTop - 0.3*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop - 0.3*(yTop-yBot));
   glEnd();
@@ -1544,18 +1544,18 @@ void VisUtils::drawClearIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_STRIP);
-  glVertex2f(xLft + 0.3*(xRgt-xLft), yTop - 0.6*(yTop-yBot));
-  glVertex2f(xLft + 0.3*(xRgt-xLft), yBot);
-  glVertex2f(xRgt,                   yBot);
-  glVertex2f(xRgt,                   yTop - 0.3*(yTop-yBot));
-  glVertex2f(xLft + 0.6*(xRgt-xLft), yTop - 0.3*(yTop-yBot));
+  glVertex2d(xLft + 0.3*(xRgt-xLft), yTop - 0.6*(yTop-yBot));
+  glVertex2d(xLft + 0.3*(xRgt-xLft), yBot);
+  glVertex2d(xRgt,                   yBot);
+  glVertex2d(xRgt,                   yTop - 0.3*(yTop-yBot));
+  glVertex2d(xLft + 0.6*(xRgt-xLft), yTop - 0.3*(yTop-yBot));
   glEnd();
 
   glBegin(GL_LINES);
-  glVertex2f(xLft,                   yTop);
-  glVertex2f(xLft + 0.6*(xRgt-xLft), yTop-0.6*(yTop-yBot));
-  glVertex2f(xLft,                   yTop-0.6*(yTop-yBot));
-  glVertex2f(xLft + 0.6*(xRgt-xLft), yTop);
+  glVertex2d(xLft,                   yTop);
+  glVertex2d(xLft + 0.6*(xRgt-xLft), yTop-0.6*(yTop-yBot));
+  glVertex2d(xLft,                   yTop-0.6*(yTop-yBot));
+  glVertex2d(xLft + 0.6*(xRgt-xLft), yTop);
   glEnd();
 }
 
@@ -1565,17 +1565,17 @@ void VisUtils::fillClearIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(xLft + 0.3*(xRgt-xLft), yTop - 0.3*(yTop-yBot));
-  glVertex2f(xLft + 0.3*(xRgt-xLft), yBot);
-  glVertex2f(xRgt,                   yBot);
-  glVertex2f(xRgt,                   yTop - 0.3*(yTop-yBot));
+  glVertex2d(xLft + 0.3*(xRgt-xLft), yTop - 0.3*(yTop-yBot));
+  glVertex2d(xLft + 0.3*(xRgt-xLft), yBot);
+  glVertex2d(xRgt,                   yBot);
+  glVertex2d(xRgt,                   yTop - 0.3*(yTop-yBot));
   glEnd();
 
   glBegin(GL_LINES);
-  glVertex2f(xLft,                   yTop);
-  glVertex2f(xLft + 0.6*(xRgt-xLft), yTop-0.6*(yTop-yBot));
-  glVertex2f(xLft,                   yTop-0.6*(yTop-yBot));
-  glVertex2f(xLft + 0.6*(xRgt-xLft), yTop);
+  glVertex2d(xLft,                   yTop);
+  glVertex2d(xLft + 0.6*(xRgt-xLft), yTop-0.6*(yTop-yBot));
+  glVertex2d(xLft,                   yTop-0.6*(yTop-yBot));
+  glVertex2d(xLft + 0.6*(xRgt-xLft), yTop);
   glEnd();
 }
 
@@ -1585,25 +1585,25 @@ void VisUtils::drawUpIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft,
     yTop - 0.5*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop - 0.5*(yTop-yBot));
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop - 0.5*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xLft,
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yBot);
   glEnd();
@@ -1615,25 +1615,25 @@ void VisUtils::fillUpIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft,
     yTop - 0.5*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop - 0.5*(yTop-yBot));
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop - 0.5*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xLft,
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yBot);
   glEnd();
@@ -1645,25 +1645,25 @@ void VisUtils::drawDownIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft,
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop - 0.5*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop);
   glEnd();
 
   glBegin(GL_LINE_LOOP);
-  glVertex2f(
+  glVertex2d(
     xLft,
     yTop - 0.5*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop - 0.5*(yTop-yBot));
   glEnd();
@@ -1675,25 +1675,25 @@ void VisUtils::fillDownIcon(
   const double& yTop, const double& yBot)
 {
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft,
     yTop);
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yTop - 0.5*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop);
   glEnd();
 
   glBegin(GL_POLYGON);
-  glVertex2f(
+  glVertex2d(
     xLft,
     yTop - 0.5*(yTop-yBot));
-  glVertex2f(
+  glVertex2d(
     xLft + 0.5*(xRgt-xLft),
     yBot);
-  glVertex2f(
+  glVertex2d(
     xRgt,
     yTop - 0.5*(yTop-yBot));
   glEnd();
@@ -1717,12 +1717,12 @@ void VisUtils::setTransf(
   glPushMatrix();
 
   // move to hinge pos & rotate
-  glTranslatef(xHge, yHge, 0.0);
-  glRotatef(aglHge, 0.0, 0.0, 1.0);
+  glTranslated(xHge, yHge, 0.0);
+  glRotated(aglHge, 0.0, 0.0, 1.0);
 
   // move to center pos & rotate
-  glTranslatef(dX, dY, 0.0);
-  glRotatef(aglCtr, 0.0, 0.0, 1.0);
+  glTranslated(dX, dY, 0.0);
+  glRotated(aglCtr, 0.0, 0.0, 1.0);
 }
 
 
@@ -1957,13 +1957,13 @@ void VisUtils::drawLabel(
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       glBegin(GL_QUADS);
-      glTexCoord2f(0.0, 0.0);
+      glTexCoord2d(0.0, 0.0);
       glVertex3f(xLft, yTop, 0.5);
-      glTexCoord2f(0.0, 1.0);
+      glTexCoord2d(0.0, 1.0);
       glVertex3f(xLft, yBot, 0.5);
-      glTexCoord2f(1.0, 1.0);
+      glTexCoord2d(1.0, 1.0);
       glVertex3f(xRgt, yBot, 0.5);
-      glTexCoord2f(1.0, 0.0);
+      glTexCoord2d(1.0, 0.0);
       glVertex3f(xRgt, yTop, 0.5);
       glEnd();
 
@@ -2058,14 +2058,14 @@ void VisUtils::drawLabelVert(
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       glBegin(GL_QUADS);
-      glTexCoord2f(0.0, 0.0);
-      glVertex2f(xLft, yBot);
-      glTexCoord2f(0.0, 1.0);
-      glVertex2f(xRgt, yBot);
-      glTexCoord2f(1.0, 1.0);
-      glVertex2f(xRgt, yTop);
-      glTexCoord2f(1.0, 0.0);
-      glVertex2f(xLft, yTop);
+      glTexCoord2d(0.0, 0.0);
+      glVertex2d(xLft, yBot);
+      glTexCoord2d(0.0, 1.0);
+      glVertex2d(xRgt, yBot);
+      glTexCoord2d(1.0, 1.0);
+      glVertex2d(xRgt, yTop);
+      glTexCoord2d(1.0, 0.0);
+      glVertex2d(xLft, yTop);
       glEnd();
 
       glDisable(GL_BLEND);
@@ -2258,13 +2258,13 @@ void VisUtils::drawCushDiag(
   // map texture
   glBegin(GL_QUADS);
   glTexCoord1f(0.5);
-  glVertex2f(xLft, yTop);
+  glVertex2d(xLft, yTop);
   glTexCoord1f(0.0);
-  glVertex2f(xLft, yBot);
+  glVertex2d(xLft, yBot);
   glTexCoord1f(0.5);
-  glVertex2f(xRgt, yBot);
+  glVertex2d(xRgt, yBot);
   glTexCoord1f(1.0);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yTop);
   glEnd();
 
   // disable texture mapping
@@ -2287,13 +2287,13 @@ void VisUtils::drawCushHori(
   // map texture
   glBegin(GL_QUADS);
   glTexCoord1f(0.0);
-  glVertex2f(xLft, yTop);
+  glVertex2d(xLft, yTop);
   glTexCoord1f(0.0);
-  glVertex2f(xLft, yBot);
+  glVertex2d(xLft, yBot);
   glTexCoord1f(1.0);
-  glVertex2f(xRgt, yBot);
+  glVertex2d(xRgt, yBot);
   glTexCoord1f(1.0);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yTop);
   glEnd();
 
   // disable texture mapping
@@ -2316,13 +2316,13 @@ void VisUtils::drawCushVert(
   // map texture
   glBegin(GL_QUADS);
   glTexCoord1f(1.0);
-  glVertex2f(xLft, yTop);
+  glVertex2d(xLft, yTop);
   glTexCoord1f(0.0);
-  glVertex2f(xLft, yBot);
+  glVertex2d(xLft, yBot);
   glTexCoord1f(0.0);
-  glVertex2f(xRgt, yBot);
+  glVertex2d(xRgt, yBot);
   glTexCoord1f(1.0);
-  glVertex2f(xRgt, yTop);
+  glVertex2d(xRgt, yTop);
   glEnd();
 
   // disable texture mapping

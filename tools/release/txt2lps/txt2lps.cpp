@@ -10,8 +10,8 @@
 /// \brief This tool reads a mcrl2 specification of a linear process,
 /// and translates it directly into LPS format.
 
-#define TOOLNAME "txt2lps"
-#define AUTHOR "Wieger Wesselink"
+constexpr const char* TOOLNAME = "txt2lps";
+constexpr const char* AUTHOR = "Wieger Wesselink";
 
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/stochastic_specification.h"

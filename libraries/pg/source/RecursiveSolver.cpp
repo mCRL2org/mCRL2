@@ -48,16 +48,16 @@ static std::vector<verti> get_complement(verti V, const DenseSet<verti> &s)
     cardinality(q) > 0 && cardinality(p) > 0 && q < p && q%2 != p%2.
 
     If there are no inversions, the priority limit, d, is returned instead. */
-int first_inversion(const ParityGame &game)
+priority_t first_inversion(const ParityGame &game)
 {
-    int d = game.d();
-    int q = 0;
-    while (q < d && game.cardinality(q) == 0)
+    const priority_t d = game.d();
+    priority_t q = 0;
+    while (q < d && game.cardinality(static_cast<int>(q)) == 0)
     {
       ++q;
     }
-    int p = q + 1;
-    while (p < d && game.cardinality(p) == 0)
+    priority_t p = q + 1;
+    while (p < d && game.cardinality(static_cast<int>(p)) == 0)
     {
       p += 2;
     }

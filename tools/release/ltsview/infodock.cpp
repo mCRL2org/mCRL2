@@ -70,7 +70,7 @@ void InfoDock::markStatisticsChanged()
 void InfoDock::selectionChanged()
 {
   LTS *lts = m_ltsManager->lts();
-  int parameters = lts->getNumParameters();
+  const int parameters = static_cast<int>(lts->getNumParameters());
   m_ui.clusterTable->setRowCount(parameters + 3);
   m_ui.stateTable->setRowCount(parameters);
   Cluster *cluster = m_ltsManager->selectedCluster();

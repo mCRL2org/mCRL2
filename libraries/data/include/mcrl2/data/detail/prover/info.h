@@ -80,7 +80,7 @@ class Info
         {
           // Use the ordering provided by f_variables.
           auto res = std::find(f_variables.begin(), f_variables.end(), v_term2);
-          int index = std::distance(f_variables.begin(), res);
+          auto index = std::distance(f_variables.begin(), res);
           if (res != f_variables.end())
           {
             return 1 + (index / ((double)f_variables.size()));
