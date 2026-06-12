@@ -129,9 +129,9 @@ verti MaxMeasureLiftingStrategy2::pop()
         std::sort(bumped_.begin(), bumped_.end());
         bumped_.erase( std::unique(bumped_.begin(), bumped_.end()),
                        bumped_.end() );
-        for (unsigned long & it : bumped_)
+        for (verti v : bumped_)
         {
-          move_up(it);
+          move_up(v);
         }
 
         // CHECKME: why is this necessary for MAX_STEP too?
@@ -150,9 +150,9 @@ verti MaxMeasureLiftingStrategy2::pop()
             */
 
             // Move bumped vertices down the heap.
-            for (unsigned long & it : std::ranges::reverse_view(bumped_))
+            for (verti v : std::ranges::reverse_view(bumped_))
             {
-              move_down(it);
+              move_down(v);
             }
         }
         bumped_.clear();

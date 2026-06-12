@@ -402,7 +402,7 @@ private:
         if (BlockLeft.block_index != Bsplit)
         {
           std::vector<state_type>& reference_to_flagged_states_of_block2 = blocks.back().states;
-          for (unsigned long j: reference_to_flagged_states_of_block2)
+          for (state_type j: reference_to_flagged_states_of_block2)
           {
             block_index_of_a_state[j] = BlockLeft.block_index;
           }

@@ -368,12 +368,12 @@ static void normalize_specification(
 
 
 
-  const lps::deadlock_summand_vector& deadlock_smds = s.process().deadlock_summands();
-  for (const auto & deadlock_smd : deadlock_smds)
+  const lps::deadlock_summand_vector& deadlock_summands = s.process().deadlock_summands();
+  for (const auto & deadlock_summand : deadlock_summands)
   {
     std::vector <data_expression_list> real_conditions;
     std::vector <data_expression> non_real_conditions;
-    detail::split_condition(deadlock_smd.condition(),real_conditions,non_real_conditions);
+    detail::split_condition(deadlock_summand.condition(),real_conditions,non_real_conditions);
 
     std::vector <data_expression>::const_iterator j_n=non_real_conditions.begin();
     for (std::vector <data_expression_list>::const_iterator
@@ -383,7 +383,7 @@ static void normalize_specification(
       const data_expression c=*j_n;
       if (!sort_bool::is_false_function_symbol(c))
       {
-        const summand_base t(deadlock_smd.summation_variables(),c);
+        const summand_base t(deadlock_summand.summation_variables(),c);
 
         std::vector < linear_inequality > inequalities;
         // Collect all real conditions from the condition from this summand and put them
@@ -397,7 +397,7 @@ static void normalize_specification(
         // this sum operator and the condition.
 
 
-        const variable_list eliminatable_real_sum_variables=get_real_variables(deadlock_smd.summation_variables());
+        const variable_list eliminatable_real_sum_variables=get_real_variables(deadlock_summand.summation_variables());
 
         std::vector < linear_inequality > new_inequalities;
         fourier_motzkin(inequalities,
@@ -422,7 +422,7 @@ static void normalize_specification(
                                       assignment_list(),
                                       lps::stochastic_distribution(),
                                       lps::multi_action(),
-                                      deadlock_smd.deadlock(),
+                                      deadlock_summand.deadlock(),
                                       variable_list(), // All sum variables over reals have been eliminated.
                                       get_nonreal_variables(t.summation_variables()),
                                       inequalities,
@@ -458,11 +458,11 @@ static void add_postponed_inequalities_to_context(
   // We add new next state arguments with increasing sizes of their lhs's.
   std::set <std::size_t> sorted_lhs_sizes(inequalities_to_add_lhs_size.begin(),inequalities_to_add_lhs_size.end());
 
-  for (unsigned long sorted_lhs_size : sorted_lhs_sizes)
+  for (std::size_t lhs_size : sorted_lhs_sizes)
   {
     for (std::size_t i=0; i<inequalities_to_add_lhs.size(); ++i)
     {
-      if (inequalities_to_add_lhs_size[i]== sorted_lhs_size)
+      if (inequalities_to_add_lhs_size[i]== lhs_size)
       {
         variable xi(variable_generator("xi"), sort_bool::bool_());
         context.emplace_back(xi,inequalities_to_add_lhs[i], inequalities_to_add_rhs[i], inequalities_to_add_comparison_operator[i]);

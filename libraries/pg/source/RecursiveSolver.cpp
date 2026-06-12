@@ -148,11 +148,11 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
             // Compute attractor set of all vertices won by the opponent:
             ParityGame::Player opponent = (ParityGame::Player)(prio%2);
             DenseSet<verti> lost_attr(0, V);
-            for (unsigned long it : unsolved)
+            for (verti v : unsolved)
             {
-                if (strat.winner(it, game.player(it)) == opponent)
+                if (strat.winner(v, game.player(v)) == opponent)
                 {
-                    lost_attr.insert(it);
+                    lost_attr.insert(v);
                 }
             }
             mCRL2log(mcrl2::log::debug) << "|lost|=" << lost_attr.size() << std::endl;

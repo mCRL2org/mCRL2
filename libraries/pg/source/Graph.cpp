@@ -101,7 +101,7 @@ void StaticGraph::make_random_scc(edge_list &edges)
     for (verti i = 0; i < sccs.size(); ++i)
     {
         const std::vector<verti> scc;
-        for (unsigned long j : scc)
+        for (verti j : scc)
         {
           index[j] = i;
         }

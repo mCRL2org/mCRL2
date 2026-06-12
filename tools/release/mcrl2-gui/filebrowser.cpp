@@ -86,11 +86,11 @@ void FileBrowser::setCatalog(ToolCatalog catalog)
   removeToolActions();
   m_catalog = catalog;
   QStringList categories = m_catalog.categories();
-  for (auto & categorie : categories)
+  for (auto & category : categories)
   {
-    QMenu* catMenu = new QMenu(categorie, m_menu);
+    QMenu* catMenu = new QMenu(category, m_menu);
     m_menu->insertMenu(m_sep3, catMenu);
-    QList<ToolInformation> tools = m_catalog.tools(categorie);
+    QList<ToolInformation> tools = m_catalog.tools(category);
     for (auto & tool : tools)
     {
       catMenu->addAction(new ToolAction(tool, catMenu));
@@ -127,10 +127,10 @@ void FileBrowser::onContextMenu()
   if (singleton)
   {
     QString ext = QFileInfo(m_model.filePath(selectedIndexes()[0])).suffix();
-    for (auto & m_categorie : m_categories)
+    for (auto & category : m_categories)
     {
       bool catVisible = false;
-      QList<QAction*> actions = m_categorie->actions();
+      QList<QAction*> actions = category->actions();
       for (auto & action : actions)
       {
         if (dynamic_cast<ToolAction*>(action)->information().inputMatchesAny(m_catalog.fileTypes(ext)))
@@ -144,7 +144,7 @@ void FileBrowser::onContextMenu()
         }
       }
       toolsVisible = toolsVisible || catVisible;
-      m_categorie->menuAction()->setVisible(catVisible);
+      category->menuAction()->setVisible(catVisible);
     }
   }
   m_sep2->setVisible(toolsVisible);
@@ -234,9 +234,9 @@ void FileBrowser::onNewFolder()
 void FileBrowser::onOpenFiles()
 {
   QModelIndexList indexes = selectedIndexes();
-  for (auto & indexe : indexes)
+  for (auto & index : indexes)
   {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(m_model.filePath(indexe)));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(m_model.filePath(index)));
   }
 }
 
@@ -245,9 +245,9 @@ void FileBrowser::onDeleteFiles()
   QModelIndexList indexes = selectedIndexes();
   if (askRemove(indexes))
   {
-    for (auto & indexe : indexes)
+    for (auto & index : indexes)
     {
-      m_model.remove(indexe);
+      m_model.remove(index);
     }
   }
 }
@@ -273,9 +273,9 @@ void FileBrowser::onPasteFiles()
 
   QDir targetDir = QDir(m_model.filePath(selectedIndexes()[0]));
   m_copyMode = cm_none;
-  for (auto & m_selectedFile : m_selectedFiles)
+  for (auto & selectedFile : m_selectedFiles)
   {
-    QModelIndex pastefile = m_model.index(m_selectedFile);
+    QModelIndex pastefile = m_model.index(selectedFile);
     if (pastefile.isValid())
     {
       QString newName = targetDir.absoluteFilePath(m_model.fileName(pastefile));
@@ -285,11 +285,11 @@ void FileBrowser::onPasteFiles()
         {
         case cm_cut:
             QFile::remove(newName);
-            if (!QFile::rename(m_selectedFile, newName))
-              copyDirectory(m_selectedFile, newName, true);
+            if (!QFile::rename(selectedFile, newName))
+              copyDirectory(selectedFile, newName, true);
             break;
         case cm_copy:
-            copyDirectory(m_selectedFile, newName);
+            copyDirectory(selectedFile, newName);
             break;
         default:
             break;
@@ -359,9 +359,9 @@ void FileBrowser::copyDirectory(QString oldPath, QString newPath, bool move)
       QString curPath = todo.takeFirst();
       curDir.setPath(curPath);
       QStringList entries = curDir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
-      for (const auto & entrie : entries)
+      for (const auto & entryName : entries)
       {
-        QString entry = curDir.absoluteFilePath(entrie);
+        QString entry = curDir.absoluteFilePath(entryName);
         if (QFileInfo(entry).isDir())
         {
           todo.append(entry);

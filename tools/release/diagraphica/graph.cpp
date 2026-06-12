@@ -179,11 +179,11 @@ void Graph::duplAttributes(const std::vector< std::size_t > &idcs)
 
   // get insertion index
   {
-    for (unsigned long idc : idcs)
+    for (std::size_t idx : idcs)
     {
-      if (idc > insIdx)
+      if (idx > insIdx)
       {
-        insIdx = idc;
+        insIdx = idx;
       }
     }
   }
@@ -240,7 +240,7 @@ void Graph::deleteAttribute(const std::size_t& idx)
 
   // get intersection of idcsToDelete & idcsCurClust
   {
-    for (unsigned long i : idcsCurClust)
+    for (std::size_t i : idcsCurClust)
     {
       // if not found, insert into new clustering
       if (idx != i)
@@ -700,9 +700,9 @@ void Graph::calcAttrCombn(
     if (keyToCombn.find(key) == keyToCombn.end())
     {
       std::vector< std::size_t > v;
-      for (unsigned long attrIndc : attrIndcs)
+      for (std::size_t attrIdx : attrIndcs)
       {
-        attr = getAttribute(attrIndc);
+        attr = getAttribute(attrIdx);
         card = attr->getSizeCurValues();
 
         if (card > 0)
@@ -711,7 +711,7 @@ void Graph::calcAttrCombn(
               (int)node->getTupleVal( attrIndcs[j] ) )->getIndex() );
           */
           v.push_back(attr->mapToValue(
-                        node->getTupleVal(attrIndc))->getIndex());
+                        node->getTupleVal(attrIdx))->getIndex());
       }
 
       keyToCombn.insert(std::pair< std::size_t, std::vector< std::size_t > >(key, v));
@@ -811,9 +811,9 @@ void Graph::calcAttrCombn(
     if (keyToCombn.find(key) == keyToCombn.end())
     {
       std::vector< std::size_t > v;
-      for (unsigned long attrIndc : attrIndcs)
+      for (std::size_t attrIdx : attrIndcs)
       {
-        attr = getAttribute(attrIndc);
+        attr = getAttribute(attrIdx);
         card = attr->getSizeCurValues();
 
         if (card > 0)
@@ -822,7 +822,7 @@ void Graph::calcAttrCombn(
               (int)node->getTupleVal( attrIndcs[j] ) )->getIndex() );
           */
           v.push_back(attr->mapToValue(
-                        node->getTupleVal(attrIndc))->getIndex());
+                        node->getTupleVal(attrIdx))->getIndex());
       }
 
       keyToCombn.insert(std::pair< std::size_t, std::vector< std::size_t > >(
@@ -1104,9 +1104,9 @@ void Graph::clustNodesOnAttr(const std::vector< std::size_t > &attrIdcs)
   std::vector< std::size_t > idcs = attrIdcs;
 
   disconnect(this, SLOT(recluster()));
-  for (unsigned long attrIdc : attrIdcs)
+  for (std::size_t attrIdx : attrIdcs)
   {
-    connect(getAttribute(attrIdc), SIGNAL(changed()), this, SLOT(recluster()));
+    connect(getAttribute(attrIdx), SIGNAL(changed()), this, SLOT(recluster()));
   }
 
   // cluster nodes
@@ -1223,9 +1223,9 @@ std::size_t Graph::calcMaxNumCombns(const std::vector< std::size_t > &attrIdcs)
   Attribute* attribute = nullptr;
   std::size_t cardinality      = 0;
 
-  for (unsigned long attrIdc : attrIdcs)
+  for (std::size_t attrIdx : attrIdcs)
   {
-    attribute   = getAttribute(attrIdc);
+    attribute   = getAttribute(attrIdx);
     cardinality = attribute->getSizeCurValues();
     if (cardinality > 0)
     {
@@ -1507,9 +1507,9 @@ void Graph::updateLeaves(Cluster* clust)
 
 void Graph::clearLeaves()
 {
-  for (auto & leave : leaves)
+  for (auto & leaf : leaves)
   {
-    leave = nullptr;
+    leaf = nullptr;
   }
   leaves.clear();
 }

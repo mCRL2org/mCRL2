@@ -50,9 +50,9 @@ ParityGame::Strategy DeloopSolver::solve()
         }
 
         // Compute attractor set and associated strategy:
-        for (unsigned long it : winning)
+        for (verti v : winning)
         {
-          solved.insert(it);
+          solved.insert(v);
         }
         make_attractor_set( game_, (ParityGame::Player)player,
                             solved, winning, strategy );

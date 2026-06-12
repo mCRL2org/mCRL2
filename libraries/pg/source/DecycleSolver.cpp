@@ -59,10 +59,10 @@ void CycleFinder::run( ParityGame::Strategy &strategy,
                             winning_set_, winning_queue_, substrat_ );
 
         // Map computed winning set and strategy back to global game:
-        for (unsigned long it : winning_set_)
+        for (verti u : winning_set_)
         {
-          verti v = mapping_[it];
-          verti w = substrat_[it];
+          verti v = mapping_[u];
+          verti w = substrat_[u];
           if (w != NO_VERTEX)
           {
             w = mapping_[w];

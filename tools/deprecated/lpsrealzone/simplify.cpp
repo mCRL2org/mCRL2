@@ -532,12 +532,12 @@ namespace mcrl2::data
 
 
 
-    const lps::deadlock_summand_vector& deadlock_smds = s.process().deadlock_summands();
-    for (const auto & deadlock_smd : deadlock_smds)
+    const lps::deadlock_summand_vector& deadlock_summands = s.process().deadlock_summands();
+    for (const auto & deadlock_summand : deadlock_summands)
     {
       std::vector <data_expression_list> real_conditions;
       std::vector <data_expression> non_real_conditions;
-      split_condition(deadlock_smd.condition(),real_conditions,non_real_conditions);
+      split_condition(deadlock_summand.condition(),real_conditions,non_real_conditions);
 
       std::vector <data_expression>::const_iterator j_n=non_real_conditions.begin();
       for (std::vector <data_expression_list>::const_iterator
@@ -547,7 +547,7 @@ namespace mcrl2::data
         const data_expression c=*j_n;
         if (!sort_bool::is_false_function_symbol(c))
         {
-          const summand_base t(deadlock_smd.summation_variables(),c);
+          const summand_base t(deadlock_summand.summation_variables(),c);
 
           std::vector < linear_inequality > inequalities;
           // Collect all real conditions from the condition from this summand and put them
@@ -561,7 +561,7 @@ namespace mcrl2::data
           // this sum operator and the condition.
 
 
-          const variable_list eliminatable_real_sum_variables=get_real_variables(deadlock_smd.summation_variables());
+          const variable_list eliminatable_real_sum_variables=get_real_variables(deadlock_summand.summation_variables());
 
           std::vector < linear_inequality > new_inequalities;
           fourier_motzkin(inequalities,
@@ -582,7 +582,7 @@ namespace mcrl2::data
                                         assignment_list(),
                                         lps::stochastic_distribution(),
                                         lps::multi_action(),
-                                        deadlock_smd.deadlock(),
+                                        deadlock_summand.deadlock(),
                                         variable_list(), // All sum variables over reals have been eliminated.
                                         get_nonreal_variables(t.summation_variables()),
                                         inequalities,

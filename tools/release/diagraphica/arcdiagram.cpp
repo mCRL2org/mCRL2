@@ -88,9 +88,9 @@ void ArcDiagram::getAttrsTree(std::vector< std::size_t >& idcs)
 void ArcDiagram::setAttrsTree(const std::vector< std::size_t > idcs)
 {
   attrsTree.clear();
-  for (unsigned long idc : idcs)
+  for (std::size_t idx : idcs)
   {
-    attrsTree.push_back(m_graph->getAttribute(idc));
+    attrsTree.push_back(m_graph->getAttribute(idx));
   }
 }
 

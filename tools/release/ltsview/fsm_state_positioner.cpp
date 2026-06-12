@@ -28,9 +28,9 @@ FSMStatePositioner::FSMStatePositioner(LTS* l)
 
 FSMStatePositioner::~FSMStatePositioner()
 {
-  for (auto & slot_info_it : slot_info)
+  for (auto & entry : slot_info)
   {
-    delete slot_info_it.second;
+    delete entry.second;
   }
 }
 

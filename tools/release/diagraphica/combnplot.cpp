@@ -27,9 +27,9 @@ CombnPlot::CombnPlot(QWidget* parent, Graph* graph, const std::vector<std::size_
   diagram        = nullptr;
   showDgrm       = false;
 
-  for (unsigned long attributeIndice : attributeIndices)
+  for (std::size_t attributeIndex : attributeIndices)
   {
-    Attribute *attribute = m_graph->getAttribute(attributeIndice);
+    Attribute *attribute = m_graph->getAttribute(attributeIndex);
     attributes.push_back(attribute);
     connect(attribute, SIGNAL(deleted()), this, SLOT(close()));
   }
@@ -527,11 +527,11 @@ void CombnPlot::calcMaxAttrCard()
 void CombnPlot::calcMaxNumberPerComb()
 {
   maxNumberPerComb = 0;
-  for (unsigned long i : numberPerComb)
+  for (std::size_t count : numberPerComb)
   {
-    if (i > maxNumberPerComb)
+    if (count > maxNumberPerComb)
     {
-      maxNumberPerComb = i;
+      maxNumberPerComb = count;
     }
   }
 }

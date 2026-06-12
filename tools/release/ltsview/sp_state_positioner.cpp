@@ -215,9 +215,9 @@ void LeafClusterStatePositioner::positionStates()
 void LeafClusterStatePositioner::computeNumRingStates()
 {
   int total_slots = 0;
-  for (int num_ring_slot : num_ring_slots)
+  for (int slots_in_ring : num_ring_slots)
   {
-    total_slots += num_ring_slot;
+    total_slots += slots_in_ring;
   }
   int todo_states = cluster->getNumStates();
   num_ring_states.assign(num_ring_slots.size(), 0);

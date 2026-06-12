@@ -129,9 +129,9 @@ void Simulator::initFrameCurr(
   {
     // update new data
     m_attributes = attrs;
-    for (auto & m_attribute : m_attributes)
+    for (auto & attribute : m_attributes)
     {
-      connect(m_attribute, SIGNAL(deleted()), this, SLOT(reset()));
+      connect(attribute, SIGNAL(deleted()), this, SLOT(reset()));
     }
 
     m_currentFrame = new Cluster(*frame);
@@ -363,11 +363,11 @@ void Simulator::initBundles()
   // get all edges from previous frames to current frame
   lbls.clear();
   {
-    for (auto & m_previousFrame : m_previousFrames)
+    for (auto & previousFrame : m_previousFrames)
     {
       bdls.clear();
 
-      clst = m_previousFrame;
+      clst = previousFrame;
       for (std::size_t j = 0; j < clst->getSizeNodes(); ++j)
       {
         node = clst->getNode(j);
@@ -431,10 +431,10 @@ void Simulator::initBundles()
   // get all edges from current frame to next frames
   lbls.clear();
   {
-    for (auto & m_nextFrame : m_nextFrames)
+    for (auto & nextFrame : m_nextFrames)
     {
       bdls.clear();
-      clst = m_nextFrame;
+      clst = nextFrame;
       for (std::size_t j = 0; j < clst->getSizeNodes(); ++j)
       {
         node = clst->getNode(j);
@@ -569,15 +569,15 @@ void Simulator::sortFramesPrevNext()
 
   // sort previous frames
   {
-    for (auto & m_previousFrame : m_previousFrames)
+    for (auto & previousFrame : m_previousFrames)
     {
       int key = 0;
-      for (std::size_t j = 0; j < m_previousFrame->getSizeOutBundles(); ++j)
+      for (std::size_t j = 0; j < previousFrame->getSizeOutBundles(); ++j)
       {
-        key += (int)pow(10.0, (int) m_previousFrame->getOutBundle(j)->getParent()->getIndex());
+        key += (int)pow(10.0, (int) previousFrame->getOutBundle(j)->getParent()->getIndex());
       }
 
-      sorted.insert(std::pair< int, Cluster* >(key, m_previousFrame));
+      sorted.insert(std::pair< int, Cluster* >(key, previousFrame));
     }
   }
 
@@ -590,15 +590,15 @@ void Simulator::sortFramesPrevNext()
   sorted.clear();
 
   // sort previous frames
-  for (auto & m_nextFrame : m_nextFrames)
+  for (auto & nextFrame : m_nextFrames)
   {
     int key = 0;
-    for (std::size_t j = 0; j < m_nextFrame->getSizeInBundles(); ++j)
+    for (std::size_t j = 0; j < nextFrame->getSizeInBundles(); ++j)
     {
-      key += (int)pow(10.0, (int) m_nextFrame->getInBundle(j)->getParent()->getIndex());
+      key += (int)pow(10.0, (int) nextFrame->getInBundle(j)->getParent()->getIndex());
     }
 
-    sorted.insert(std::pair< int, Cluster* >(key, m_nextFrame));
+    sorted.insert(std::pair< int, Cluster* >(key, nextFrame));
   }
 
   m_nextFrames.clear();
@@ -1062,17 +1062,17 @@ void Simulator::clearFrames()
   }
 
   {
-    for (auto & m_previousFrame : m_previousFrames)
+    for (auto & previousFrame : m_previousFrames)
     {
-      delete m_previousFrame;
+      delete previousFrame;
     }
   }
   m_previousFrames.clear();
 
   {
-    for (auto & m_nextFrame : m_nextFrames)
+    for (auto & nextFrame : m_nextFrames)
     {
-      delete m_nextFrame;
+      delete nextFrame;
     }
   }
   m_nextFrames.clear();
@@ -1085,9 +1085,9 @@ void Simulator::clearFrames()
 void Simulator::clearBundles()
 {
   {
-    for (auto & m_bundle : m_bundles)
+    for (auto & bundle : m_bundles)
     {
-      delete m_bundle;
+      delete bundle;
     }
     m_bundles.clear();
   }
@@ -1307,9 +1307,9 @@ template <Visualizer::Mode mode> void Simulator::drawFrameCurr()
       double y = m_currentFramePosition.y;
       Attribute* attr;
       Node* node;
-      for (auto & m_attribute : m_attributes)
+      for (auto & attribute : m_attributes)
       {
-        attr = m_attribute;
+        attr = attribute;
         node = m_currentFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
@@ -1428,9 +1428,9 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
         {
           Attribute* attr;
           Node* node;
-          for (auto & m_attribute : m_attributes)
+          for (auto & attribute : m_attributes)
           {
-            attr = m_attribute;
+            attr = attribute;
             node = m_previousFrames[i]->getNode(0);
             if (attr->getSizeCurValues() > 0)
             {
@@ -1467,9 +1467,9 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
       {
         Attribute* attr;
         Node* node;
-        for (auto & m_attribute : m_attributes)
+        for (auto & attribute : m_attributes)
         {
-          attr = m_attribute;
+          attr = attribute;
           node = m_previousFrames[m_currentSelectionIndex]->getNode(0);
           if (attr->getSizeCurValues() > 0)
           {
@@ -1576,9 +1576,9 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
         {
           Attribute* attr;
           Node* node;
-          for (auto & m_attribute : m_attributes)
+          for (auto & attribute : m_attributes)
           {
-            attr = m_attribute;
+            attr = attribute;
             node = m_nextFrames[i]->getNode(0);
             if (attr->getSizeCurValues() > 0)
             {
@@ -1615,9 +1615,9 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
       {
         Attribute* attr;
         Node* node;
-        for (auto & m_attribute : m_attributes)
+        for (auto & attribute : m_attributes)
         {
-          attr = m_attribute;
+          attr = attribute;
           node = m_nextFrames[m_currentSelectionIndex]->getNode(0);
           if (attr->getSizeCurValues() > 0)
           {
@@ -2434,9 +2434,9 @@ void Simulator::animate()
       double y = m_animationCurrentPosition.y;
       Attribute* attr;
       Node* node;
-      for (auto & m_attribute : m_attributes)
+      for (auto & attribute : m_attributes)
       {
-        attr = m_attribute;
+        attr = attribute;
         node = m_animationOldFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
@@ -2464,9 +2464,9 @@ void Simulator::animate()
       y = m_animationEndPosition.y;
 
       valsFrame.clear();
-      for (auto & m_attribute : m_attributes)
+      for (auto & attribute : m_attributes)
       {
-        attr = m_attribute;
+        attr = attribute;
         node = m_animationNewFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
@@ -2496,9 +2496,9 @@ void Simulator::animate()
       double y = m_animationCurrentPosition.y;
       Attribute* attr;
       Node* node;
-      for (auto & m_attribute : m_attributes)
+      for (auto & attribute : m_attributes)
       {
-        attr = m_attribute;
+        attr = attribute;
         node = m_animationOldFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
@@ -2526,9 +2526,9 @@ void Simulator::animate()
       y = m_animationEndPosition.y;
 
       valsFrame.clear();
-      for (auto & m_attribute : m_attributes)
+      for (auto & attribute : m_attributes)
       {
-        attr = m_attribute;
+        attr = attribute;
         node = m_animationNewFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {

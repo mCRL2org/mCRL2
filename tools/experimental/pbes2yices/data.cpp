@@ -165,28 +165,28 @@ static std::vector<mcrl2::data::sort_expression> required_sorts(const mcrl2::pbe
   std::set<sort_expression> all_sorts(pbes.data().sorts().begin(), pbes.data().sorts().end());
   
   std::map<sort_expression, std::set<sort_expression> > sort_dependencies;
-  for (const auto & all_sort : all_sorts) {
-    if (is_container_sort(all_sort)) {
+  for (const auto & used_sort : all_sorts) {
+    if (is_container_sort(used_sort)) {
       std::set<sort_expression> dependencies;
-      sort_expression base_sort = container_sort(all_sort).element_sort();
+      sort_expression base_sort = container_sort(used_sort).element_sort();
       dependencies.insert(base_sort);
-      sort_dependencies[all_sort] = dependencies;
-    } else if (is_basic_sort(all_sort)) {
+      sort_dependencies[used_sort] = dependencies;
+    } else if (is_basic_sort(used_sort)) {
       std::set<sort_expression> dependencies;
-      function_symbol_vector constructors = pbes.data().constructors(all_sort);
+      function_symbol_vector constructors = pbes.data().constructors(used_sort);
       for (auto & constructor : constructors) {
         if (is_function_sort(constructor.sort())) {
           sort_expression_list domain = function_sort(constructor.sort()).domain();
           for (const mcrl2::data::sort_expression& k : domain)
           {
-            if (sort_expression(k) != all_sort)
+            if (sort_expression(k) != used_sort)
             {
               dependencies.insert(sort_expression(k));
             }
           }
         }
       }
-      sort_dependencies[all_sort] = dependencies;
+      sort_dependencies[used_sort] = dependencies;
     }
   }
   
@@ -888,9 +888,9 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
         }
         dependencies.erase(function);
         
-        for (const auto & dependencie : dependencies) {
-          if (definition_dependencies.count(dependencie) == 0) {
-            queue.insert(dependencie);
+        for (const auto & dependency : dependencies) {
+          if (definition_dependencies.count(dependency) == 0) {
+            queue.insert(dependency);
           }
         }
       }

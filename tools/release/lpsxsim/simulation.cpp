@@ -99,15 +99,15 @@ void Simulation::updateTrace(unsigned long long firstChangedState)
 Simulation::State Simulation::renderState(const mcrl2::lps::state& state)
 {
   State output;
-  for (const auto & i : state)
+  for (const auto & argument : state)
   {
-    if (mcrl2::data::is_variable(i))
+    if (mcrl2::data::is_variable(argument))
     {
       output += "_";
     }
     else
     {
-      output += QString::fromStdString(mcrl2::data::pp(i));
+      output += QString::fromStdString(mcrl2::data::pp(argument));
     }
   }
   return output;

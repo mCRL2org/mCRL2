@@ -69,12 +69,12 @@ void Parser::parseFile(QString filename, Graph* graph)
   }
 
   const std::vector<transition>& trans=l.get_transitions();
-  for (const auto & tran : trans)
+  for (const auto & transition : trans)
   {
     graph->addEdge(
-          pp(l.action_label(tran.label())),
-          tran.from(),
-          tran.to());
+          pp(l.action_label(transition.label())),
+          transition.from(),
+          transition.to());
     emit progressed(++progress);
   }
 }
@@ -635,19 +635,19 @@ void Parser::parseShape(
                                               "Alpha";
 
     // Construct QColor objects for each Color property
-    for (auto & colorPropertie : colorProperties)
+    for (auto & colorProperty : colorProperties)
     {
       try
       {
-        QMap<QString, float> colorPartValues = findFloatValues(colorPropertyElements[colorPropertie], colorParts);
-        colorPropertyValues.insert(colorPropertie, QColor::fromRgbF(colorPartValues["Red"],
+        QMap<QString, float> colorPartValues = findFloatValues(colorPropertyElements[colorProperty], colorParts);
+        colorPropertyValues.insert(colorProperty, QColor::fromRgbF(colorPartValues["Red"],
                                                                         colorPartValues["Green"],
                                                                         colorPartValues["Blue"],
                                                                         colorPartValues["Alpha"]));
       }
       catch (const mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(QString("Invalid %1 value.\n%2").arg(colorPropertie, e.what()).toStdString());
+        throw mcrl2::runtime_error(QString("Invalid %1 value.\n%2").arg(colorProperty, e.what()).toStdString());
       }
     }
 

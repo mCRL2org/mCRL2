@@ -72,10 +72,10 @@ void run_linearisation_test_case(const std::string& spec, const lts::probabilist
   // Set various rewrite strategies
   rewrite_strategy_vector rewrite_strategies = data::detail::get_test_rewrite_strategies(false);
 
-  for (auto rewrite_strategie : rewrite_strategies)
+  for (auto rewrite_strategy : rewrite_strategies)
   {
     t_lin_options options;
-    options.rewrite_strategy=rewrite_strategie;
+    options.rewrite_strategy=rewrite_strategy;
 
     run_linearisation_instance(spec, options, expected_statespace);
 
