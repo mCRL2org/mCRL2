@@ -166,7 +166,7 @@ public:
     return m_smd;
   }
 
-  mcrl2::lps::deadlock_summand get_represented_deadlock_summand(sort_specification s)
+  mcrl2::lps::deadlock_summand get_represented_deadlock_summand(const sort_specification& s)
   {
     assert(m_is_delta_summand);
     variable_list sumvars = non_real_summation_variables + real_summation_variables;
@@ -175,7 +175,7 @@ public:
                                deadlock(get_deadlock().time()));
   }
 
-  mcrl2::lps::action_summand get_represented_action_summand(sort_specification s)
+  mcrl2::lps::action_summand get_represented_action_summand(const sort_specification& s)
   {
     assert(!m_is_delta_summand);
     variable_list sumvars = non_real_summation_variables + real_summation_variables;

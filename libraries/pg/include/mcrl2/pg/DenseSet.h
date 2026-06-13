@@ -214,7 +214,7 @@ private:
 
     friend class Iterator;
 
-private:
+public:
   DenseSet(const DenseSet&) = delete;
   DenseSet& operator=(const DenseSet&) = delete;
 };

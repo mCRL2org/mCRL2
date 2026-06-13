@@ -141,7 +141,7 @@ void Visualizer::paintGL()
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glViewport(0, 0, widthC(), heightC());
+  glViewport(0, 0, static_cast<GLsizei>(widthC()), static_cast<GLsizei>(heightC()));
   visualize();
 }
 
@@ -241,8 +241,8 @@ void Visualizer::initMouse()
 void Visualizer::genCharTex()
 {
   VisUtils::genCharTextures(
-    texCharId,
-    texChar);
+    &texCharId[0],
+    &texChar[0]);
   texCharOK = true;
 }
 
@@ -251,7 +251,7 @@ void Visualizer::genCushTex()
 {
   VisUtils::genCushTextures(
     texCushId,
-    texCush);
+    &texCush[0]);
   texCushOK = true;
 }
 

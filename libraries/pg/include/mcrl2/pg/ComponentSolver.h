@@ -10,6 +10,8 @@
 #ifndef MCRL2_PG_COMPONENT_SOLVER_H
 #define MCRL2_PG_COMPONENT_SOLVER_H
 
+#include <array>
+
 #include "mcrl2/pg/SmallProgressMeasures.h"
 #include "mcrl2/pg/DenseSet.h"
 #include "mcrl2/pg/SCC.h"
@@ -53,7 +55,7 @@ protected:
     const verti              *vmap_;        //!< Current vertex map
     const verti              vmap_size_;    //!< Size of vertex map
     ParityGame::Strategy     strategy_;     //!< Resulting strategy
-    DenseSet<verti>* winning_[2]{};         //!< Resulting winning sets
+    std::array<DenseSet<verti>*, 2> winning_{};   //!< Resulting winning sets
 };
 
 //! Factory class for ComponentSolver instances.

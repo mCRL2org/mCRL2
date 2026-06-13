@@ -52,7 +52,7 @@ inline QString svgColor(const QVector3D& color, const QVector3D defaultColor = Q
 inline QString svgNode(const Export::Node& node, const GLScene& scene)
 {
   QVector3D pos = scene.camera().worldToWindow(node.pos());
-  float size = scene.sizeOnScreen(node.pos(), scene.nodeSize()) / 2.0;
+  float size = static_cast<float>(scene.sizeOnScreen(node.pos(), static_cast<float>(scene.nodeSize())) / 2.0);
 
   return QString("\t<circle class=\"%5%6%7node\" cx=\"%1\" cy=\"%2\" r=\"%3\"%4/>\n")
     .arg(pos.x(), 6, 'f').arg(pos.y(), 6, 'f').arg(size)
@@ -89,9 +89,9 @@ inline QString svgEdge(const Export::Edge& edge, const GLScene& scene)
   const QVector3D to = control[3];
 
   // Calculate node and arrowhead sizes
-  const float fromNodeRadius = scene.sizeOnScreen(edge.from().pos(), scene.nodeSize()) / 2.0;
-  const float toNodeRadius = scene.sizeOnScreen(edge.to().pos(), scene.nodeSize()) / 2.0;
-  const float headLength = scene.sizeOnScreen(edge.to().pos(), scene.arrowheadSize);
+  const float fromNodeRadius = static_cast<float>(scene.sizeOnScreen(edge.from().pos(), static_cast<float>(scene.nodeSize())) / 2.0);
+  const float toNodeRadius = static_cast<float>(scene.sizeOnScreen(edge.to().pos(), static_cast<float>(scene.nodeSize())) / 2.0);
+  const float headLength = scene.sizeOnScreen(edge.to().pos(), static_cast<float>(scene.arrowheadSize));
 
   try
   {
@@ -141,7 +141,7 @@ inline QString escapeXML(const QString& str)
 {
   // Based on QString::toHtmlEscaped(), but added unicode escaping
   QString rich;
-  const int len = str.length();
+  const int len = static_cast<int>(str.length());
   rich.reserve(int(len * 1.1));
   for (int i = 0; i < len; ++i)
   {

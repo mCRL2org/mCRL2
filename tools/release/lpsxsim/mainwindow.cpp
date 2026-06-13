@@ -212,10 +212,10 @@ void MainWindow::updateSimulation()
   }
   update_simulation_is_running=true;
 
-  int selectedState = static_cast<long long>(m_selected_state) < m_trace.size() ? m_selected_state : m_trace.size() - 1;
+  int selectedState = static_cast<long long>(m_selected_state) < m_trace.size() ? static_cast<int>(m_selected_state) : static_cast<int>(m_trace.size() - 1);
 
   int oldSize = m_ui.traceTable->rowCount();
-  m_ui.traceTable->setRowCount(m_trace.size());
+  m_ui.traceTable->setRowCount(static_cast<int>(m_trace.size()));
   for (int i = oldSize; i < m_trace.size(); i++)
   {
     m_ui.traceTable->setItem(i, 0, item());
@@ -232,14 +232,14 @@ void MainWindow::updateSimulation()
     }
     else
     {
-      m_ui.traceTable->item(i, 1)->setText(m_trace[i - 1].transitions[m_trace[i - 1].transitionNumber].action_or_probability); 
+      m_ui.traceTable->item(i, 1)->setText(m_trace[i - 1].transitions[static_cast<qsizetype>(m_trace[i - 1].transitionNumber)].action_or_probability); 
       m_ui.traceTable->item(i, 2)->setText(renderStateChange(m_trace[i - 1].state, m_trace[i].state));
     }
   }
   m_ui.traceTable->setCurrentCell(selectedState, 0);
 
   m_ui.transitionTable->setRowCount(0);
-  m_ui.transitionTable->setRowCount(m_trace[selectedState].transitions.size());
+  m_ui.transitionTable->setRowCount(static_cast<int>(m_trace[selectedState].transitions.size()));
   for (int i = 0; i < m_trace[selectedState].transitions.size(); i++)
   {
     m_ui.transitionTable->setItem(i, 0, item());
@@ -331,7 +331,7 @@ void MainWindow::onInitializedSimulation()
 
   QStringList parameters = m_simulation->parameters();
   m_ui.stateTable->setRowCount(0);
-  m_ui.stateTable->setRowCount(parameters.size());
+  m_ui.stateTable->setRowCount(static_cast<int>(parameters.size()));
   for (int i = 0; i < parameters.size(); i++)
   {
     m_ui.stateTable->setItem(i, 0, item());
@@ -394,13 +394,13 @@ void MainWindow::selectTransition(int transition)
 
   reset(m_selected_state, false);
   assert(static_cast<long long>(m_selected_state) < m_trace.size());
-  bool original_state_is_probabilistic=m_trace[m_selected_state].is_probabilistic;
+  bool original_state_is_probabilistic=m_trace[static_cast<qsizetype>(m_selected_state)].is_probabilistic;
   select(transition);
   if (!original_state_is_probabilistic) 
   {
     m_selected_state++;
   }
-  m_ui.traceTable->scrollToItem(m_ui.traceTable->item(m_selected_state, 1));
+  m_ui.traceTable->scrollToItem(m_ui.traceTable->item(static_cast<int>(m_selected_state), 1));
   m_ui.actionUndo_last->setEnabled(true);
   updateSimulation();
 }
@@ -426,7 +426,7 @@ void MainWindow::animationStep()
       m_selected_state = m_trace.size() - 1;
     }
 
-    bool original_state_is_probabilistic=m_trace[m_selected_state].is_probabilistic;
+    bool original_state_is_probabilistic=m_trace[static_cast<qsizetype>(m_selected_state)].is_probabilistic;
 
     if (!original_state_is_probabilistic && m_trace.last().transitions.size() == 0)
     {

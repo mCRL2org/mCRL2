@@ -522,7 +522,7 @@ inline pbes fill_pvi(pbes& p, data::rewriter data_rewriter)
   return res;
 }
 
-pbes tosrf(pbes_system::pbes pbesspec)
+inline pbes tosrf(pbes_system::pbes pbesspec)
 {
   pbes_system::detail::instantiate_global_variables(pbesspec);
   auto result = pbes2pre_srf(pbesspec, true);

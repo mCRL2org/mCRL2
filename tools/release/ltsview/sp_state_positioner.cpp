@@ -120,12 +120,12 @@ void NodeClusterStatePositioner::buildRTree()
   PackedRTreeBuilder rtree_builder = PackedRTreeBuilder();
   for (std::size_t ring = 0; ring < num_ring_slots.size(); ++ring)
   {
-    float radius = ring * delta_ring;
+    float radius = static_cast<float>(ring) * delta_ring;
     int num_slots = num_ring_slots[ring];
     float delta_deg = 360.0f / static_cast<float>(num_slots);
     for (int slot = 0; slot < num_slots; ++slot)
     {
-      rtree_builder.addPoint(Vectors::fromPolar(delta_deg * slot, radius));
+      rtree_builder.addPoint(Vectors::fromPolar(delta_deg * static_cast<float>(slot), radius));
     }
   }
   rtree_builder.buildRTree();
@@ -198,7 +198,7 @@ void LeafClusterStatePositioner::positionStates()
   }
   for (std::size_t ring = 1; ring < num_ring_states.size(); ++ring)
   {
-    float radius = delta_ring * ring;
+    float radius = delta_ring * static_cast<float>(ring);
     int num_states = num_ring_states[ring];
     float delta_deg = 360.0f / static_cast<float>(num_states);
     float angle = (ring % 2 == 1) ? 0.0f : 0.5f * delta_deg;
@@ -231,7 +231,7 @@ void LeafClusterStatePositioner::computeNumRingStates()
     {
       float rel_slots = static_cast<float>(num_ring_slots[ring]) /
                         static_cast<float>(total_slots);
-      int num_states = MathUtils::round_to_int(cluster->getNumStates() *
+      int num_states = MathUtils::round_to_int(static_cast<float>(cluster->getNumStates()) *
                        rel_slots);
       num_ring_states[ring] = num_states;
       todo_states -= num_states;

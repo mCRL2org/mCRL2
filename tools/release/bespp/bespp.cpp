@@ -8,8 +8,8 @@
 //
 /// \file bespp.cpp
 
-#define NAME "bespp"
-#define AUTHOR "Jeroen Keiren"
+constexpr const char* NAME = "bespp";
+constexpr const char* AUTHOR = "Jeroen Keiren";
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pbes/pbes_input_tool.h"

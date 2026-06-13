@@ -220,6 +220,7 @@ struct guard_expression
           mCRL2log(log::debug) << "guard error: X = " << X << " g1 = " << pbes_rewrite(g1, R) << " g2 = " << pbes_rewrite(g2, R) << std::endl;
         }
       }
+      // NOLINTNEXTLINE(bugprone-empty-catch) intentional: do not check multiple instances of predicate variables
       catch (mcrl2::runtime_error&)
       {
         // do not check multiple instances of predicate variables

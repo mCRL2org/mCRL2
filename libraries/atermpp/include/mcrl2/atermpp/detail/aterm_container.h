@@ -232,6 +232,7 @@ public:
    : unprotected_aterm_core(detail::address(other))
   { }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) unprotected_aterm_core is a non-owning handle; there is nothing to move.
   reference_aterm(unprotected_aterm_core&& other) noexcept
    : unprotected_aterm_core(detail::address(other))
   {
@@ -333,10 +334,11 @@ public:
     : super(reference_aterm_pair_constructor_helper(other))
   {}
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) both members of other are moved individually below.
   reference_aterm(std_pair&& other)
    : super(reference_aterm<typename T::first_type >(std::move(other.first)),
            reference_aterm<typename T::second_type>(std::move(other.second)))
-  {} 
+  {}
 
   reference_aterm& operator=(const reference_aterm& other)
   {
@@ -359,6 +361,7 @@ public:
     return *this;
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) both members of other are moved individually below.
   reference_aterm& operator=(std_pair&& other)
   {
     super::first = std::move(other.first);

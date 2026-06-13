@@ -99,10 +99,10 @@ void VisObject::setTextureColours(std::vector<QColor>& colours)
     for (int i = 0; i < numColours; ++i)
     {
       int j = i % static_cast<int>(colours.size());
-      texture[static_cast<std::size_t>(4*i)]   = static_cast<GLubyte>(colours[j].red());
-      texture[static_cast<std::size_t>(4*i+1)] = static_cast<GLubyte>(colours[j].green());
-      texture[static_cast<std::size_t>(4*i+2)] = static_cast<GLubyte>(colours[j].blue());
-      texture[static_cast<std::size_t>(4*i+3)] = 255; // alpha value
+      texture[4*static_cast<std::size_t>(i)]   = static_cast<GLubyte>(colours[j].red());
+      texture[4*static_cast<std::size_t>(i)+1] = static_cast<GLubyte>(colours[j].green());
+      texture[4*static_cast<std::size_t>(i)+2] = static_cast<GLubyte>(colours[j].blue());
+      texture[4*static_cast<std::size_t>(i)+3] = 255; // alpha value
     }
 
     glBindTexture(GL_TEXTURE_1D, texName);

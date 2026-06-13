@@ -46,8 +46,8 @@ class PrimitiveFactory: public QObject
     int     simple_sphere;
     int     sphere;
     int     hemisphere;
-    float*   cos_theta;
-    float*   sin_theta;
+    std::vector<float>   cos_theta;
+    std::vector<float>   sin_theta;
 
     int  make_ring(float r);
     void make_disc();

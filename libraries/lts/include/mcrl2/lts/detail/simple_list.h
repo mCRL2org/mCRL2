@@ -265,7 +265,7 @@ namespace mcrl2::lts::detail
             static_assert(std::is_trivially_destructible_v<U>);
 #ifndef NDEBUG
                                                                                     // ensure that old_el points to an element in some block
-                                                                                    static std::less<const void*> const total_order;
+                                                                                    static std::less<const void*> const total_order; // NOLINT(modernize-use-transparent-functors) explicit type required to compare differing pointer types
                                                                                     for (const pool_block_t* block(first_block);
                                                                                                 assert(nullptr != block),
                                                                                                 total_order(old_el, block->data) ||
@@ -481,9 +481,10 @@ namespace mcrl2::lts::detail
 
             bool is_null() const  {  return nullptr == const_iterator::ptr;  }
 
-            void operator=(std::nullptr_t)
+            iterator_or_null& operator=(std::nullptr_t)
             {
                 const_iterator::ptr = nullptr;
+                return *this;
             }
         };
 

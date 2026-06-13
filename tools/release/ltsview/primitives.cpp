@@ -317,8 +317,8 @@ void P_Disc::draw()
 void P_Disc::reshape(int N,float* coss,float* sins)
 {
   assert(N>0);
-  GLfloat* vertices = (GLfloat*)malloc(3*N*sizeof(GLfloat));
-  GLfloat* texCoords = (GLfloat*)malloc(N*sizeof(GLfloat));
+  std::vector<GLfloat> vertices(3*N);
+  std::vector<GLfloat> texCoords(N);
   int i,j, k;
   j = 0;
   k = 0;
@@ -340,16 +340,13 @@ void P_Disc::reshape(int N,float* coss,float* sins)
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
-  glVertexPointer(3,GL_FLOAT,0,vertices);
-  glTexCoordPointer(1,GL_FLOAT,0,texCoords);
+  glVertexPointer(3,GL_FLOAT,0,vertices.data());
+  glTexCoordPointer(1,GL_FLOAT,0,texCoords.data());
 
   glNewList(disp_list,GL_COMPILE);
   glNormal3f(0.0f,0.0f,1.0f);
   glDrawArrays(GL_POLYGON,0,N);
   glEndList();
-
-  free(vertices);
-  free(texCoords);
 }
 
 /* -------- P_Ring ------------------------------------------------------ */
@@ -401,9 +398,9 @@ void P_Ring::reshape(int N,float* coss,float* sins)
     ++m;
   }
 
-  GLfloat* normals = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
+  std::vector<GLfloat> normals(2*N3);
   float nz = 1.0f - r_top;
-  float r = sqrt(1.0f + nz*nz);
+  float r = static_cast<float>(sqrt(1.0f + nz*nz));
   float nx = 1.0f / r;
   nz = nz / r;
   k = 0;
@@ -414,9 +411,9 @@ void P_Ring::reshape(int N,float* coss,float* sins)
     normals[k+2] = nz;
     k += 3;
   }
-  memcpy(normals+N3,normals,N3*sizeof(float));
+  memcpy(normals.data()+N3,normals.data(),N3*sizeof(float));
 
-  GLuint* is = (GLuint*)malloc((2*N+2)*sizeof(GLuint));
+  std::vector<GLuint> is(2*N+2);
   k = 0;
   for (i=0; i<N; ++i)
   {
@@ -439,13 +436,11 @@ void P_Ring::reshape(int N,float* coss,float* sins)
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
   glVertexPointer(3,GL_FLOAT,0,vertices.data());
-  glNormalPointer(GL_FLOAT,0,normals);
+  glNormalPointer(GL_FLOAT,0,normals.data());
   glTexCoordPointer(1, GL_FLOAT, 0, texCoords.data());
   glNewList(disp_list,GL_COMPILE);
-  glDrawElements(GL_QUAD_STRIP,2*N+2,GL_UNSIGNED_INT,is);
+  glDrawElements(GL_QUAD_STRIP,2*N+2,GL_UNSIGNED_INT,is.data());
   glEndList();
-  free(normals);
-  free(is);
 }
 
 float P_Ring::getTopRadius()
@@ -519,11 +514,11 @@ void P_ObliqueCone::reshape(int N,float* coss,float* sins,float obt)
 {
   assert(N>0);
   float a = 0.5f*static_cast<float>(PI) - alpha - sign*obt;
-  float sin_a = -sign*sin(a);
-  float cos_a = cos(a);
+  float sin_a = -sign*static_cast<float>(sin(a));
+  float cos_a = static_cast<float>(cos(a));
   int i,j,k;
-  GLfloat* vertices = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
-  GLfloat* texCoords = (GLfloat*)malloc((N + 1) * sizeof(GLfloat));
+  std::vector<GLfloat> vertices(3 * (N+1));
+  std::vector<GLfloat> texCoords(N + 1);
 
   vertices[0] = 0.0f;
   vertices[1] = 0.0f;
@@ -542,9 +537,9 @@ void P_ObliqueCone::reshape(int N,float* coss,float* sins,float obt)
     ++k;
   }
 
-  GLfloat* normals = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
+  std::vector<GLfloat> normals(3 * (N+1));
   float nz = -radius;
-  float r = sqrt(1.0f + nz*nz);
+  float r = static_cast<float>(sqrt(1.0f + nz*nz));
   float nx = 1.0f / r;
   nz = nz / r;
   normals[0] = 0.0f;
@@ -559,7 +554,7 @@ void P_ObliqueCone::reshape(int N,float* coss,float* sins,float obt)
     j += 3;
   }
 
-  GLuint* is = (GLuint*)malloc((N+2) * sizeof(GLuint));
+  std::vector<GLuint> is(N+2);
   is[0] = 0;
   for (i = 1; i <= N; ++i)
   {
@@ -575,14 +570,10 @@ void P_ObliqueCone::reshape(int N,float* coss,float* sins,float obt)
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
-  glVertexPointer(3,GL_FLOAT,0,vertices);
-  glNormalPointer(GL_FLOAT,0,normals);
-  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
+  glVertexPointer(3,GL_FLOAT,0,vertices.data());
+  glNormalPointer(GL_FLOAT,0,normals.data());
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords.data());
   glNewList(disp_list,GL_COMPILE);
-  glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is);
+  glDrawElements(GL_TRIANGLE_FAN,N+2,GL_UNSIGNED_INT,is.data());
   glEndList();
-  free(vertices);
-  free(texCoords);
-  free(normals);
-  free(is);
 }

@@ -34,7 +34,7 @@ void Parser::parseFile(QString filename, Graph* graph)
 
   load_lts_as_fsm_file(filename.toStdString(),l);
 
-  emit started(l.process_parameters().size() + l.num_states() + l.get_transitions().size());
+  emit started(static_cast<int>(l.process_parameters().size() + l.num_states() + l.get_transitions().size()));
   int progress = 0;
 
   const std::vector < std::pair < std::string, std::string > > process_parameters=l.process_parameters();
@@ -62,7 +62,7 @@ void Parser::parseFile(QString filename, Graph* graph)
     std::vector< double > stateVector;
     for (unsigned int i = 0; i < process_parameters.size(); ++i)
     {
-      stateVector.push_back(l.state_label(si)[i]);
+      stateVector.push_back(static_cast<double>(l.state_label(si)[i]));
     }
     graph->addNode(stateVector);
     emit progressed(++progress);
@@ -95,7 +95,7 @@ void Parser::writeFSMFile(
   int lineCnt = 0;
   std::size_t lineTot = graph->getSizeAttributes() + graph->getSizeNodes() + graph->getSizeEdges();
 
-  emit started(lineTot);
+  emit started(static_cast<int>(lineTot));
 
   // write state variable description
   for (std::size_t i = 0; i < graph->getSizeAttributes(); ++i)
@@ -250,7 +250,7 @@ void Parser::writeAttrConfig(
     QDomElement originalToCurrentElement = xml.createElement("OriginalToCurrent");
     for (std::size_t j = 0; j < attribute->getSizeCurValues(); ++j)
     {
-      appendValue(xml, originalToCurrentElement, "CurrentPosition", QString::number(int(attribute->mapToValue(j)->getIndex())));
+      appendValue(xml, originalToCurrentElement, "CurrentPosition", QString::number(int(attribute->mapToValue(static_cast<double>(j))->getIndex())));
     }
     attributeElement.appendChild(originalToCurrentElement);
 

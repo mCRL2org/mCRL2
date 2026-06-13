@@ -160,7 +160,6 @@ inline void convert_to_lts_lts(LTS_TYPE_IN& src,
                                const data_file_type_t extra_data_file_type,
                                const std::string& extra_data_file_name)
 {
-  std::string data_file;
   data::data_specification data;
   process::action_label_list action_labels;
   data::variable_list process_parameters;

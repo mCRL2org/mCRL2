@@ -91,7 +91,7 @@ template <Visualizer::Mode mode> void DistrPlot::drawLabels()
   // y-axis labels
   double x = -0.5*size.width()+9*pix;
   double y =  0;
-  VisUtils::drawLabelVertCenter(texCharId, x, y, scaling, "Number");
+  VisUtils::drawLabelVertCenter(&texCharId[0], x, y, scaling, "Number");
 
   if (number.size() > 0)
   {
@@ -99,16 +99,16 @@ template <Visualizer::Mode mode> void DistrPlot::drawLabels()
     std::string xLabel = attribute->name().toStdString();
     x =  0.0;
     y = -0.5*size.height()+9*pix;
-    VisUtils::drawLabelCenter(texCharId, x, y, scaling, xLabel);
+    VisUtils::drawLabelCenter(&texCharId[0], x, y, scaling, xLabel);
 
     std::string max = Utils::size_tToStr(maxNumber);
     x = -0.5*size.width()+13*pix;
     y =  0.5*size.height()-10*pix;
-    VisUtils::drawLabelVertBelow(texCharId, x, y, scaling, max);
+    VisUtils::drawLabelVertBelow(&texCharId[0], x, y, scaling, max);
 
     std::string min = "0";
     y = -0.5*size.height()+20*pix;
-    VisUtils::drawLabelVertAbove(texCharId, x, y, scaling, min);
+    VisUtils::drawLabelVertAbove(&texCharId[0], x, y, scaling, min);
   }
 }
 
@@ -172,11 +172,11 @@ template <Visualizer::Mode mode> void DistrPlot::drawDiagram()
     std::vector< Attribute* > attrs;
     attrs.push_back(attribute);
     std::vector< double > vals;
-    vals.push_back(attrValIdxDgrm);
+    vals.push_back(static_cast<double>(attrValIdxDgrm));
 
     glPushMatrix();
-    glTranslatef(posDgrm.x, posDgrm.y, 0.0);
-    glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
+    glTranslatef(static_cast<GLfloat>(posDgrm.x), static_cast<GLfloat>(posDgrm.y), 0.0f);
+    glScalef(static_cast<GLfloat>(scaleDgrm), static_cast<GLfloat>(scaleDgrm), static_cast<GLfloat>(scaleDgrm));
 
     // drop shadow
     VisUtils::setColor(VisUtils::mediumGray);
@@ -189,7 +189,7 @@ template <Visualizer::Mode mode> void DistrPlot::drawDiagram()
     diagram->draw<mode>(pixelSize(), attrs, vals);
 
     VisUtils::setColor(Qt::black);
-    VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
+    VisUtils::drawLabelRight(&texCharId[0], -0.98, 1.1, scaleTxt, msgDgrm);
 
     glPopMatrix();
   }
@@ -325,7 +325,7 @@ void DistrPlot::calcPositions()
     double yBot = -0.5*size.height()+20*pix;
 
     // get number of values per axis
-    double numX = attribute->getSizeCurValues();
+    double numX = static_cast<double>(attribute->getSizeCurValues());
 
     // get intervals for x-axis
     double fracX = 1.0;
@@ -352,7 +352,7 @@ void DistrPlot::calcPositions()
       double ratio = (double)number[i]/(double)maxNumber;
 
       // center, top
-      double x = xLft + 0.5*fracX + i*fracX;
+      double x = xLft + 0.5*fracX + static_cast<double>(i)*fracX;
       double y = yBot + ratio*(yTop-yBot);
       if (y-yBot < pix*minHgtHintPx)
       {

@@ -32,14 +32,14 @@ QVector3D ArcballCameraView::worldToWindow(QVector3D world) const
 
   // Flip the y-coordinate as Qt coordinate system is different from OpenGl.
   return QVector3D(eye.x(),
-                 (m_viewport.height() - eye.y()),
+                 (static_cast<float>(m_viewport.height()) - eye.y()),
                  eye.z());
 }
 
 QVector3D ArcballCameraView::windowToWorld(QVector3D eye) const
 {
   // Flip the y-coordinate as Qt coordinate system is different from OpenGl.
-  eye.setY(m_viewport.height() - eye.y());
+  eye.setY(static_cast<float>(m_viewport.height()) - eye.y());
 
   return eye.unproject(m_viewMatrix, m_projectionMatrix, m_viewport);
 }

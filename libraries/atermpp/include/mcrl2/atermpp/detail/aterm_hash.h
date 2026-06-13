@@ -86,7 +86,7 @@ struct aterm_hasher
 
   std::size_t operator()(const _aterm& term) const noexcept;
   std::size_t operator()(const function_symbol& symbol) const noexcept;
-  std::size_t operator()(const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept;
+  std::size_t operator()(const function_symbol& symbol, unprotected_aterm_core* arguments) const noexcept;
 
   template <typename ForwardIterator>
   std::size_t operator()(const function_symbol& symbol, ForwardIterator begin, ForwardIterator end) const noexcept 
@@ -126,7 +126,7 @@ struct aterm_equals
 
   bool operator()(const _aterm& first, const _aterm& second) const noexcept;
   bool operator()(const _aterm& term, const function_symbol& symbol) const noexcept;
-  bool operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept;
+  bool operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm_core* arguments) const noexcept;
 
   template <typename ForwardIterator>
   bool operator()(const _aterm& term,
@@ -191,7 +191,7 @@ std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol) const noe
 }
 
 template<std::size_t N>
-std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept
+std::size_t aterm_hasher<N>::operator()(const function_symbol& symbol, unprotected_aterm_core* arguments) const noexcept
 {
   // The arity is defined by the function symbol iff N is unchanged and the arity is N otherwise.
   const std::size_t arity = (N == DynamicNumberOfArguments) ? symbol.arity() : N;
@@ -318,7 +318,7 @@ bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symb
 }
 
 template<std::size_t N>
-bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm_core arguments[]) const noexcept
+bool aterm_equals<N>::operator()(const _aterm& term, const function_symbol& symbol, unprotected_aterm_core* arguments) const noexcept
 {
   // Each argument should be equal.
   for (std::size_t i = 0; i < symbol.arity(); ++i)

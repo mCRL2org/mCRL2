@@ -94,8 +94,8 @@ void MarkStateRuleDialog::parameterSelected()
     for (std::size_t i = 0; i < domain.size(); i++)
     {
       m_ui.valueList->addItem(QString::fromStdString(domain[i]));
-      m_ui.valueList->item(i)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-      m_ui.valueList->item(i)->setCheckState(Qt::Unchecked);
+      m_ui.valueList->item(static_cast<int>(i))->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+      m_ui.valueList->item(static_cast<int>(i))->setCheckState(Qt::Unchecked);
     }
   }
 }

@@ -135,7 +135,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
                 }
             }
             verti *end = &successors_[e];
-            if (!std::is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<>()))
             {
                 std::sort(begin, end);
             }
@@ -168,7 +168,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
                 }
             }
             verti *end = &predecessors_[e];
-            if (!std::is_sorted(begin, end, std::less<verti>()))
+            if (!std::is_sorted(begin, end, std::less<>()))
             {
                 std::sort(begin, end);
             }

@@ -212,15 +212,15 @@ void MainWindow::updateAttributes()
   {
     for (int j = 0; j < m_ui.attributes->columnCount(); ++j)
     {
-      m_ui.attributes->setItem(i, j, new QTableWidgetItem());
-      m_ui.attributes->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+      m_ui.attributes->setItem(static_cast<int>(i), j, new QTableWidgetItem());
+      m_ui.attributes->item(static_cast<int>(i), j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
     }
 
     Attribute *attribute = m_graph->getAttribute(i);
-    m_ui.attributes->item(i, 0)->setText(QString::number(i));
-    m_ui.attributes->item(i, 1)->setText(attribute->name());
-    m_ui.attributes->item(i, 2)->setText(attribute->type());
-    m_ui.attributes->item(i, 3)->setText(QString::number(attribute->getSizeCurValues()));
+    m_ui.attributes->item(static_cast<int>(i), 0)->setText(QString::number(i));
+    m_ui.attributes->item(static_cast<int>(i), 1)->setText(attribute->name());
+    m_ui.attributes->item(static_cast<int>(i), 2)->setText(attribute->type());
+    m_ui.attributes->item(static_cast<int>(i), 3)->setText(QString::number(attribute->getSizeCurValues()));
   }
 
   m_ui.attributes->resizeColumnsToContents();
@@ -230,7 +230,7 @@ void MainWindow::updateAttributes()
 void MainWindow::updateAttributeOperations()
 {
   QList<int> attributes = selectedAttributes();
-  int items = attributes.size();
+  int items = static_cast<int>(attributes.size());
 
   m_ui.actionClusterNodes->setEnabled(items > 0);
   m_ui.actionDistributionPlot->setEnabled(items == 1);
@@ -261,14 +261,14 @@ void MainWindow::updateValues()
 
       for (int j = 0; j < m_ui.attributes->columnCount(); ++j)
       {
-        m_ui.domain->setItem(i, j, new QTableWidgetItem());
-        m_ui.domain->item(i, j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+        m_ui.domain->setItem(static_cast<int>(i), j, new QTableWidgetItem());
+        m_ui.domain->item(static_cast<int>(i), j)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
       }
 
-      m_ui.domain->item(i, 0)->setText(QString::number(i));
-      m_ui.domain->item(i, 1)->setText(QString::fromStdString(value->getValue()));
-      m_ui.domain->item(i, 2)->setText(QString::number(valueDistribution[i]));
-      m_ui.domain->item(i, 3)->setText(QString::number(100 * valueDistribution[i] / (double)m_graph->getSizeNodes()));
+      m_ui.domain->item(static_cast<int>(i), 0)->setText(QString::number(i));
+      m_ui.domain->item(static_cast<int>(i), 1)->setText(QString::fromStdString(value->getValue()));
+      m_ui.domain->item(static_cast<int>(i), 2)->setText(QString::number(valueDistribution[i]));
+      m_ui.domain->item(static_cast<int>(i), 3)->setText(QString::number(100 * static_cast<double>(valueDistribution[i]) / (double)m_graph->getSizeNodes()));
     }
   }
   else
@@ -282,7 +282,7 @@ void MainWindow::updateValues()
 void MainWindow::updateValueOperations()
 {
   QList<int> values = selectedValues();
-  int items = values.size();
+  int items = static_cast<int>(values.size());
   m_ui.actionGroup->setEnabled(items > 1);
   m_ui.actionUngroup->setEnabled(items > 0);
   m_ui.actionRenameValue->setEnabled(items == 1);

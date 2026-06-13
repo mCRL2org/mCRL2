@@ -14,6 +14,7 @@
 
 #include "mcrl2/utilities/platform.h"
 
+#include <array>
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -41,18 +42,13 @@ namespace mcrl2::utilities
       std::string path;
 #ifdef MCRL2_PLATFORM_LINUX
       path = "";
-      pid_t pid = getpid();
-      char buf[10];
-      sprintf(buf,"%d",pid);
-      std::string _link = "/proc/";
-      _link.append(buf);
-      _link.append("/exe");
-      char proc[512];
-      int ch = readlink(_link.c_str(),proc,512);
+      std::string _link = "/proc/" + std::to_string(getpid()) + "/exe";
+      std::array<char, 512> proc;
+      ssize_t ch = readlink(_link.c_str(), proc.data(), proc.size());
       if (ch != -1)
       {
         proc[ch] = 0;
-        path = proc;
+        path = proc.data();
         std::string::size_type t = path.find_last_of('/');
         path = path.substr(0,t);
       }

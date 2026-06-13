@@ -98,9 +98,10 @@ class propositional_variable_substitution
          *    assert(s(v) == e);
          * \endcode
          **/
-        void operator=(const pres_expression& e)
+        assignment& operator=(const pres_expression& e)
         {
           m_map[m_variable.name()] = std::make_pair(e, m_variable.parameters());
+          return *this;
         }
     };
 

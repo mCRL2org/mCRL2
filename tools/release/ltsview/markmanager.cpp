@@ -333,7 +333,7 @@ void MarkManager::flushClusters()
     {
       if (m_markedActions[j])
       {
-        cluster->setActionMark(j, true);
+        cluster->setActionMark(static_cast<int>(j), true);
       }
     }
   }
@@ -441,5 +441,5 @@ void MarkManager::unapplyRule(MarkRuleIndex index)
 
 bool MarkManager::matchesRule(State *state, const MarkRule& rule) const
 {
-  return rule.negated ^ (rule.values.count(m_lts->getStateParameterValue(state, rule.parameter))>0);
+  return rule.negated ^ (rule.values.count(static_cast<int>(m_lts->getStateParameterValue(state, rule.parameter)))>0);
 }

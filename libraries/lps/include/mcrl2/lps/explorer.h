@@ -923,6 +923,7 @@ private:
     );
 
     /// \brief Abort the state space generation
+    // NOLINTNEXTLINE(portability-template-virtual-member-function)
     void abort() override
     {
       m_must_abort = true;

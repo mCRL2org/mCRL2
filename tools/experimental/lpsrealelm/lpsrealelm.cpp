@@ -8,10 +8,10 @@
 //
 /// \file lpsrealelm.cpp
 
-#define TOOLNAME "lpsrealelm"
-#define AUTHORS "Jan Friso Groote and Jeroen Keiren"
+constexpr const char* TOOLNAME = "lpsrealelm";
+constexpr const char* AUTHORS = "Jan Friso Groote and Jeroen Keiren";
 
-#define DEFAULT_MAX_ITERATIONS 10
+constexpr int DEFAULT_MAX_ITERATIONS = 10;
 
 //C++
 #include <exception>

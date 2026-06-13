@@ -231,7 +231,7 @@ void fatal_attractors(const simple_structure_graph& G,
                       std::size_t equation_count
                      )
 {
-  fatal_attractors_generic(G, S, tau, calculation_steps, equation_count, std::greater_equal<structure_graph::index_type>());
+  fatal_attractors_generic(G, S, tau, calculation_steps, equation_count, std::greater_equal<>());
 }
 
 // calculation_steps returns how many steps were needed to find the loops. 
@@ -243,7 +243,7 @@ void find_loops2(const simple_structure_graph& G,
                  std::size_t equation_count
 )
 {
-  fatal_attractors_generic(G, S, tau, calculation_steps, equation_count, std::equal_to<structure_graph::index_type>());
+  fatal_attractors_generic(G, S, tau, calculation_steps, equation_count, std::equal_to<>());
 }
 
 // Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.

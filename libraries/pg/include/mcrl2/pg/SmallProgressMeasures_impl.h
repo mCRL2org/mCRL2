@@ -21,8 +21,8 @@ inline int SmallProgressMeasures::vector_cmp(verti v, verti w, int N) const
     return vector_cmp(vec(v), vec(w), N);
 }
 
-inline int SmallProgressMeasures::vector_cmp( const verti vec1[],
-                                              const verti vec2[], int N ) const
+inline int SmallProgressMeasures::vector_cmp( const verti* vec1,
+                                              const verti* vec2, int N ) const
 {
   if (is_top(vec1))
   {

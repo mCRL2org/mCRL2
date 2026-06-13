@@ -602,12 +602,12 @@ static std::string match_pattern(
       }
       
       std::vector<std::string> base_arguments;
-      base_arguments.insert(base_arguments.end(), arguments.begin(), arguments.begin() + i);
-      base_arguments.insert(base_arguments.end(), arguments.begin() + i + 1, arguments.end());
+      base_arguments.insert(base_arguments.end(), arguments.begin(), arguments.begin() + static_cast<std::ptrdiff_t>(i));
+      base_arguments.insert(base_arguments.end(), arguments.begin() + static_cast<std::ptrdiff_t>(i) + 1, arguments.end());
       
       std::vector<variable> base_argument_variables;
-      base_argument_variables.insert(base_argument_variables.end(), argument_variables.begin(), argument_variables.begin() + i);
-      base_argument_variables.insert(base_argument_variables.end(), argument_variables.begin() + i + 1, argument_variables.end());
+      base_argument_variables.insert(base_argument_variables.end(), argument_variables.begin(), argument_variables.begin() + static_cast<std::ptrdiff_t>(i));
+      base_argument_variables.insert(base_argument_variables.end(), argument_variables.begin() + static_cast<std::ptrdiff_t>(i) + 1, argument_variables.end());
       
       std::string output;
       for (size_t j = 0; j < constructors.size(); ++j) {

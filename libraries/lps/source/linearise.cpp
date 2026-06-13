@@ -5407,13 +5407,7 @@ class specification_basic_type
         }
 
         enumeratedtype& operator=(const enumeratedtype& e)
-        {
-          size=e.size;
-          sortId=e.sortId;
-          elementnames=e.elementnames;
-          functions=e.functions;
-          return *this;
-        }
+        = default;
 
         ~enumeratedtype() = default;
     };

@@ -60,7 +60,7 @@ public:
     /*! Checks if the queue satisfies the heap property (used for debugging) */
     bool check();
 
-private:
+public:
   MaxMeasureLiftingStrategy2(const MaxMeasureLiftingStrategy2&) = delete;
   MaxMeasureLiftingStrategy2& operator=(const MaxMeasureLiftingStrategy2&) = delete;
 

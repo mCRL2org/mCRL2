@@ -351,12 +351,12 @@ template <Visualizer::Mode mode> void Shape::drawText(double pixelSize)
 
     if (!m_texturesGenerated)
     {
-      VisUtils::genCharTextures(m_texCharId, m_texChar);
+      VisUtils::genCharTextures(&m_texCharId[0], &m_texChar[0]);
       m_texturesGenerated = true;
     }
 
     VisUtils::setColor(colTxt);
-    VisUtils::drawLabelInBoundBox(m_texCharId, -m_xDistance, m_xDistance, m_yDistance, -m_yDistance, m_textSize*pixelSize/CHARHEIGHT, text.toStdString());
+    VisUtils::drawLabelInBoundBox(&m_texCharId[0], -m_xDistance, m_xDistance, m_yDistance, -m_yDistance, static_cast<double>(m_textSize)*pixelSize/CHARHEIGHT, text.toStdString());
   }
 }
 
@@ -829,7 +829,7 @@ template <Visualizer::Mode mode> void Shape::drawDOFXCtr(double pixelSize)
   double xEnd   = m_xCenterDOF->max();
 
   glPushMatrix();
-  glRotatef(-m_angle, 0.0, 0.0, 1.0);
+  glRotatef(static_cast<GLfloat>(-m_angle), 0.0, 0.0, 1.0);
 
   if constexpr (mode == Visualizer::Marking)
   {}
@@ -950,7 +950,7 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFXCtr(double pixelSize)
   double xEnd   = m_xCenterDOF->max();
 
   glPushMatrix();
-  glRotatef(-m_angle, 0.0, 0.0, 1.0);
+  glRotatef(static_cast<GLfloat>(-m_angle), 0.0, 0.0, 1.0);
 
   if constexpr (mode == Visualizer::Marking)
   {
@@ -1121,7 +1121,7 @@ template <Visualizer::Mode mode> void Shape::drawDOFYCtr(double pixelSize)
   double yEnd   = m_yCenterDOF->max();
 
   glPushMatrix();
-  glRotatef(-m_angle, 0.0, 0.0, 1.0);
+  glRotatef(static_cast<GLfloat>(-m_angle), 0.0, 0.0, 1.0);
 
   if constexpr (mode == Visualizer::Marking)
   {}
@@ -1241,7 +1241,7 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFYCtr(double pixelSize)
   double yEnd   = m_yCenterDOF->max();
 
   glPushMatrix();
-  glRotatef(-m_angle, 0.0, 0.0, 1.0);
+  glRotatef(static_cast<GLfloat>(-m_angle), 0.0, 0.0, 1.0);
 
   if constexpr (mode == Visualizer::Marking)
   {
@@ -2063,7 +2063,7 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
   double hdlDOF = hdlSzeHnt*pixelSize;
 
   glPushMatrix();
-  glRotatef(-m_angle, 0.0, 0.0, 1.0);
+  glRotatef(static_cast<GLfloat>(-m_angle), 0.0, 0.0, 1.0);
 
   if constexpr (mode == Visualizer::Marking)
   {
@@ -2106,8 +2106,8 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
     {
       // start
       glPushMatrix();
-      glTranslatef(xBeg, yBeg, 0.0);
-      glRotatef(aglBeg, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xBeg), static_cast<GLfloat>(yBeg), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglBeg), 0.0, 0.0, 1.0);
 
       /*
       glPushName( ID_HDL_DOF_BEG );
@@ -2128,8 +2128,8 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
 
       // end
       glPushMatrix();
-      glTranslatef(xEnd, yEnd, 0.0);
-      glRotatef(aglEnd, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xEnd), static_cast<GLfloat>(yEnd), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglEnd), 0.0, 0.0, 1.0);
 
       glPushName(ID_HDL_DOF_END);
       VisUtils::fillTriangle(
@@ -2145,8 +2145,8 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
     {
       // start
       glPushMatrix();
-      glTranslatef(xBeg, yBeg, 0.0);
-      glRotatef(aglBeg, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xBeg), static_cast<GLfloat>(yBeg), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglBeg), 0.0, 0.0, 1.0);
 
       /*
       glPushName( ID_HDL_DOF_BEG );
@@ -2167,8 +2167,8 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
 
       // end
       glPushMatrix();
-      glTranslatef(xEnd, yEnd, 0.0);
-      glRotatef(aglEnd, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xEnd), static_cast<GLfloat>(yEnd), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglEnd), 0.0, 0.0, 1.0);
 
       glPushName(ID_HDL_DOF_END);
       VisUtils::fillTriangle(
@@ -2254,8 +2254,8 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
 
       // start
       glPushMatrix();
-      glTranslatef(xBeg, yBeg, 0.0);
-      glRotatef(aglBeg, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xBeg), static_cast<GLfloat>(yBeg), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglBeg), 0.0, 0.0, 1.0);
 
       /*
       VisUtils::fillRect(
@@ -2294,8 +2294,8 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
 
       // end
       glPushMatrix();
-      glTranslatef(xEnd, yEnd, 0.0);
-      glRotatef(aglEnd, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xEnd), static_cast<GLfloat>(yEnd), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglEnd), 0.0, 0.0, 1.0);
       VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
             0.0,     0.0,
@@ -2328,8 +2328,8 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
 
       // start
       glPushMatrix();
-      glTranslatef(xBeg, yBeg, 0.0);
-      glRotatef(aglBeg, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xBeg), static_cast<GLfloat>(yBeg), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglBeg), 0.0, 0.0, 1.0);
 
       /*
       VisUtils::fillRect(
@@ -2368,8 +2368,8 @@ template <Visualizer::Mode mode> void Shape::drawEditDOFAgl(double pixelSize)
 
       // end
       glPushMatrix();
-      glTranslatef(xEnd, yEnd, 0.0);
-      glRotatef(aglEnd, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xEnd), static_cast<GLfloat>(yEnd), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglEnd), 0.0, 0.0, 1.0);
       VisUtils::setColor(Qt::green);
       VisUtils::fillTriangle(
             hdlDOF, 2.0*hdlDOF,
@@ -2396,7 +2396,7 @@ template <Visualizer::Mode mode> void Shape::drawDOFAgl(double pixelSize)
   double hdlDOF = hdlSzeHnt*pixelSize;
 
   glPushMatrix();
-  glRotatef(-m_angle, 0.0, 0.0, 1.0);
+  glRotatef(static_cast<GLfloat>(-m_angle), 0.0, 0.0, 1.0);
 
   if constexpr (mode == Visualizer::Marking)
   {}
@@ -2478,8 +2478,8 @@ template <Visualizer::Mode mode> void Shape::drawDOFAgl(double pixelSize)
 
       // end
       glPushMatrix();
-      glTranslatef(xEnd, yEnd, 0.0);
-      glRotatef(aglEnd, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xEnd), static_cast<GLfloat>(yEnd), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglEnd), 0.0, 0.0, 1.0);
       VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
             0.0,     0.0,
@@ -2530,8 +2530,8 @@ template <Visualizer::Mode mode> void Shape::drawDOFAgl(double pixelSize)
 
       // end
       glPushMatrix();
-      glTranslatef(xEnd, yEnd, 0.0);
-      glRotatef(aglEnd, 0.0, 0.0, 1.0);
+      glTranslatef(static_cast<GLfloat>(xEnd), static_cast<GLfloat>(yEnd), 0.0f);
+      glRotatef(static_cast<GLfloat>(aglEnd), 0.0, 0.0, 1.0);
       VisUtils::setColor(Qt::white);
       VisUtils::fillTriangle(
             hdlDOF, 2.0*hdlDOF,
@@ -2562,8 +2562,8 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize)
 
   // set up transf
   glPushMatrix();
-  glTranslatef(m_xCenter, m_yCenter, 0.0);
-  glRotatef(m_angle, 0.0, 0.0, 1.0);
+  glTranslatef(static_cast<GLfloat>(m_xCenter), static_cast<GLfloat>(m_yCenter), 0.0f);
+  glRotatef(static_cast<GLfloat>(m_angle), 0.0, 0.0, 1.0);
 
   if (m_drawMode == MODE_NORMAL)
   {
@@ -2660,11 +2660,11 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
 
       if (intPtVal < m_colorDOF->valueCount() - 1)
       {
-        colFill = QColor::fromHsvF((1.0 - dblPtVal) * m_colorDOF->value((int)intPtVal) + dblPtVal * m_colorDOF->value((int)intPtVal + 1), 1.0, 1.0);
+        colFill = QColor::fromHsvF(static_cast<float>((1.0 - dblPtVal) * m_colorDOF->value((int)intPtVal) + dblPtVal * m_colorDOF->value((int)intPtVal + 1)), 1.0, 1.0);
       }
       else
       {
-        colFill = QColor::fromHsvF(m_colorDOF->value((int)intPtVal), 1.0, 1.0);
+        colFill = QColor::fromHsvF(static_cast<float>(m_colorDOF->value((int)intPtVal)), 1.0, 1.0);
       }
     }
 
@@ -2677,11 +2677,11 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
 
       if (intPtVal < m_opacityDOF->valueCount() - 1)
       {
-        colFill.setAlphaF((1.0 - dblPtVal) * m_opacityDOF->value((int)intPtVal) + dblPtVal * m_opacityDOF->value((int)intPtVal + 1));
+        colFill.setAlphaF(static_cast<float>((1.0 - dblPtVal) * m_opacityDOF->value((int)intPtVal) + dblPtVal * m_opacityDOF->value((int)intPtVal + 1)));
       }
       else
       {
-        colFill.setAlphaF(m_opacityDOF->value((int)intPtVal));
+        colFill.setAlphaF(static_cast<float>(m_opacityDOF->value((int)intPtVal)));
       }
     }
     if (attrs[i] == m_textDOF->attribute() && attrs[i]->getSizeCurValues() > 0)
@@ -2690,22 +2690,22 @@ template <Visualizer::Mode mode> void Shape::draw(double pixelSize,
     }
   }
 
-  colFill.setAlphaF(colFill.alphaF() * opacity);
+  colFill.setAlphaF(static_cast<float>(colFill.alphaF() * opacity));
 
   QColor colLine = m_lineColor;
-  colLine.setAlphaF(colLine.alphaF() * opacity);
+  colLine.setAlphaF(static_cast<float>(colLine.alphaF() * opacity));
 
   // set up transf
   glPushMatrix();
 
   // move to center pos & rotate
-  glTranslatef(xC, yC, 0.0);
-  glRotatef(m_angle, 0.0, 0.0, 1.0);
+  glTranslatef(static_cast<GLfloat>(xC), static_cast<GLfloat>(yC), 0.0f);
+  glRotatef(static_cast<GLfloat>(m_angle), 0.0, 0.0, 1.0);
 
   // move to hinge pos & rotate
-  glTranslatef(m_xHinge, m_yHinge, 0.0);
-  glRotatef(aglH, 0.0, 0.0, 1.0);
-  glTranslatef(-m_xHinge, -m_yHinge, 0.0);
+  glTranslatef(static_cast<GLfloat>(m_xHinge), static_cast<GLfloat>(m_yHinge), 0.0f);
+  glRotatef(static_cast<GLfloat>(aglH), 0.0, 0.0, 1.0);
+  glTranslatef(static_cast<GLfloat>(-m_xHinge), static_cast<GLfloat>(-m_yHinge), 0.0f);
 
   VisUtils::enableLineAntiAlias();
   VisUtils::enableBlending();

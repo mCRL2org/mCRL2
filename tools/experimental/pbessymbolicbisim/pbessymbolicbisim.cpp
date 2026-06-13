@@ -8,8 +8,8 @@
 //
 /// \file pbessymbolicbisim.cpp
 
-#define TOOLNAME "pbessymbolicbisim"
-#define AUTHORS "Thomas Neele"
+constexpr const char* TOOLNAME = "pbessymbolicbisim";
+constexpr const char* AUTHORS = "Thomas Neele";
 
 //C++
 #include <exception>

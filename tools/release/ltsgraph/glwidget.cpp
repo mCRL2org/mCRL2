@@ -164,7 +164,7 @@ GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
   setAttribute(Qt::WA_OpaquePaintEvent, true);
   setAttribute(Qt::WA_NoSystemBackground, true);
   m_current_device_pixel_ratio = devicePixelRatio();
-  m_scene.setDevicePixelRatio(devicePixelRatio());
+  m_scene.setDevicePixelRatio(static_cast<float>(devicePixelRatio()));
   mCRL2log(mcrl2::log::debug)
       << "Devicepixelratio: " << devicePixelRatio() << std::endl;
 }
@@ -194,7 +194,7 @@ inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
 
 void GLWidget::updateSelection()
 {
-  m_scene.setDevicePixelRatio(devicePixelRatio());
+  m_scene.setDevicePixelRatio(static_cast<float>(devicePixelRatio()));
 
   // Determine the mouse position relative for the GLWidget.
   QPoint pos = mapFromGlobal(QCursor::pos()) * m_current_device_pixel_ratio;
@@ -338,7 +338,7 @@ void GLWidget::initializeGL()
 
 void GLWidget::resizeGL(int width, int height)
 {
-  m_scene.resize(devicePixelRatio() * width, devicePixelRatio() * height);
+  m_scene.resize(static_cast<std::size_t>(devicePixelRatio() * width), static_cast<std::size_t>(devicePixelRatio() * height));
 }
 
 void GLWidget::paintGL()
@@ -346,9 +346,9 @@ void GLWidget::paintGL()
   if (devicePixelRatio() != m_current_device_pixel_ratio)
   {
     m_current_device_pixel_ratio = devicePixelRatio();
-    m_scene.resize(size().width() * m_current_device_pixel_ratio,
-                   size().height() * m_current_device_pixel_ratio);
-    m_scene.setDevicePixelRatio(devicePixelRatio());
+    m_scene.resize(static_cast<std::size_t>(size().width() * m_current_device_pixel_ratio),
+                   static_cast<std::size_t>(size().height() * m_current_device_pixel_ratio));
+    m_scene.setDevicePixelRatio(static_cast<float>(devicePixelRatio()));
   }
 
   QPainter painter(this);
@@ -515,7 +515,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 void GLWidget::wheelEvent(QWheelEvent* e)
 {
   ArcballCameraView& camera = m_scene.camera();
-  camera.zoom(camera.zoom() * pow(1.0005f, -e->angleDelta().y()));
+  camera.zoom(static_cast<float>(camera.zoom() * pow(1.0005f, -e->angleDelta().y())));
   update();
   m_graph.hasNewFrame(true);
 }
@@ -563,14 +563,14 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
       int new_y = pos.y();
       float z = camera.worldToWindow(camera.center()).z();
       QVector3D translation(
-          camera.windowToWorld(QVector3D(new_x, new_y, z)) -
-          camera.windowToWorld(QVector3D(m_dragstart.x(), m_dragstart.y(), z)));
+          camera.windowToWorld(QVector3D(static_cast<float>(new_x), static_cast<float>(new_y), z)) -
+          camera.windowToWorld(QVector3D(static_cast<float>(m_dragstart.x()), static_cast<float>(m_dragstart.y()), z)));
       camera.center(camera.center() + translation);
       break;
     }
     case dm_dragnode:
     {
-      QVector3D position(pos.x(), pos.y(),
+      QVector3D position(static_cast<float>(pos.x()), static_cast<float>(pos.y()),
                          camera.worldToWindow(m_dragnode->pos()).z());
       m_dragnode->move(camera.windowToWorld(position));
       m_graph.hasForcedUpdate() = true;
@@ -578,7 +578,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
       break;
     }
     case dm_zoom:
-      camera.zoom(camera.zoom() * pow(1.0005f, vec.y()));
+      camera.zoom(static_cast<float>(camera.zoom() * pow(1.0005f, vec.y())));
       break;
     default:
       break;

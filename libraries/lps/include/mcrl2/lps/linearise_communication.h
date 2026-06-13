@@ -81,6 +81,7 @@ struct tuple_list
 /// and make it explicit that L should not be used by the caller afterwards.
 /// If firstaction == action(), it is not added to the multiactions in L', but the conditions will be strengthened.
 /// \pre condition != sort_bool::false_()
+// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) L is consumed: its actions are moved into S via move-iterators (see note above).
 inline void addActionCondition(const process::action& a, const data::data_expression& c, tuple_list&& L, tuple_list& S)
 {
   assert(c != data::sort_bool::false_()); // It makes no sense to add an action with condition false, as it cannot

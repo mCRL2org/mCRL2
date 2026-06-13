@@ -51,7 +51,7 @@ public:
         : pos_(pos) {};
     Iterator(const Iterator& it)
         : pos_(it.pos_) {};
-    Iterator& operator=(const Iterator& it) { pos_ = it.pos_; }
+    Iterator& operator=(const Iterator&) = default;
 
     bool operator==(const Iterator& other) { return pos_ == other.pos_; }
     bool operator!=(const Iterator& other) { return pos_ != other.pos_; }
@@ -166,7 +166,7 @@ private:
     std::vector<value_type> values_;
     std::size_t used_ = 0;
 
-  private:
+  public:
     DenseMap(const DenseMap&) = delete;
     DenseMap& operator=(const DenseMap&) = delete;
 };

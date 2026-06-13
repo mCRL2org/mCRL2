@@ -40,14 +40,17 @@ class identifier_generator
     virtual ~identifier_generator() = default;
 
     /// \brief Clears the context.
+    // NOLINTNEXTLINE(portability-template-virtual-member-function)
     virtual void clear_context() = 0;
 
     /// \brief Adds the identifier s to the context.
     /// \param s An identifier.
+    // NOLINTNEXTLINE(portability-template-virtual-member-function)
     virtual void add_identifier(const core::identifier_string& s) = 0;
 
     /// \brief Removes the identifier s from the context.
     /// \param s An identifier.
+    // NOLINTNEXTLINE(portability-template-virtual-member-function)
     virtual void remove_identifier(const core::identifier_string& s) = 0;
 
     /// \brief Add a set of identifiers to the context.
@@ -71,6 +74,7 @@ class identifier_generator
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s An identifier.
     /// \return True if the identifier appears in the context.
+    // NOLINTNEXTLINE(portability-template-virtual-member-function)
     virtual bool has_identifier(const core::identifier_string& s) const = 0;
 
     /// \brief Returns a fresh identifier, with the given hint as prefix.
@@ -79,6 +83,7 @@ class identifier_generator
     /// \param add_to_context If true, the freshly generated identifier is added
     /// to the context to make sure no duplicates are generated.
     /// \return A fresh identifier.
+    // NOLINTNEXTLINE(portability-template-virtual-member-function)
     virtual core::identifier_string operator()(const std::string& hint, bool add_to_context = true)
     {
       core::identifier_string id(add_to_context?hint:m_generator(hint));

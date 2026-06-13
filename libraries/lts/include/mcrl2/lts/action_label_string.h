@@ -80,6 +80,7 @@ class action_label_string: public std::string
             {
               case '(': ++nd; break;
               case ')': --nd; break;
+              default: break;
             }
           }
           while (nd > 0 && c != end());

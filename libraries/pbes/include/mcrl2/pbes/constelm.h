@@ -123,10 +123,8 @@ struct edge_traverser_stack_elem
   edge_map edges;
 
   edge_traverser_stack_elem(const data::data_expression& cond_pos, const data::data_expression& cond_neg, std::set<data::variable>&& free_vars)
-    : Cpos(cond_pos), Cneg(cond_neg)
-  {
-    std::swap(FV, free_vars);
-  }
+    : Cpos(cond_pos), Cneg(cond_neg), FV(std::move(free_vars))
+  {}
 };
 
 struct edge_condition_traverser: public pbes_expression_traverser<edge_condition_traverser>
@@ -180,10 +178,12 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   // is expensive (observed by Jeroen Keiren, 27/6/2025), and ec1 and ec2 are
   // not used in the calling context, we here explicitly accept them as
   // rvalue reference; this allows us to move the edges out of ec1 and ec2.
+  // NOLINTBEGIN(cppcoreguidelines-rvalue-reference-param-not-moved) ec1 and ec2 are consumed: their edges are moved into ec below.
   void merge_conditions(stack_elem&& ec1, bool negate1,
                         stack_elem&& ec2, bool negate2,
                         stack_elem& ec, bool is_conjunctive
                        )
+  // NOLINTEND(cppcoreguidelines-rvalue-reference-param-not-moved)
   {
     for (auto& i: ec1.edges)
     {

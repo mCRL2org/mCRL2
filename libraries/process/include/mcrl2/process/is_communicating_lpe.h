@@ -29,9 +29,7 @@ struct communicating_lpe_traverser: public process_expression_traverser<communic
 
   bool result = true;
 
-  communicating_lpe_traverser()
-    :
-  {}
+  communicating_lpe_traverser() = default;
 
   void enter(const process::process_instance&)
   {

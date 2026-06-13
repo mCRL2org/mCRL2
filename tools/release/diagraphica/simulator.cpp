@@ -641,7 +641,7 @@ void Simulator::calcPosFrames()
   QSizeF size = worldSize();
   double pix = pixelSize();
   double itvHori = size.width()/6;
-  double itvVert = (size.height()-itvHori)/Utils::maxx(1, Utils::maxx(m_previousFrames.size(), m_nextFrames.size()));
+  double itvVert = (size.height()-itvHori)/Utils::maxx(1, Utils::maxx(static_cast<double>(m_previousFrames.size()), static_cast<double>(m_nextFrames.size())));
   m_horizontalFrameScale = 0.5*itvHori;
   m_verticalFrameScale = Utils::minn(m_horizontalFrameScale, 0.45*itvVert);
 
@@ -651,7 +651,7 @@ void Simulator::calcPosFrames()
   m_currentFramePosition = pos;
 
   pos.x = -0.5*size.width() + 0.5*itvHori + 4.0*pix;
-  pos.y = 0.5*m_previousFrames.size()*itvVert - 0.5*itvVert;
+  pos.y = 0.5*static_cast<double>(m_previousFrames.size())*itvVert - 0.5*itvVert;
   {
     for (std::size_t i = 0; i < m_previousFrames.size(); ++i)
     {
@@ -661,7 +661,7 @@ void Simulator::calcPosFrames()
   }
 
   pos.x = 0.5*size.width() - 0.5*itvHori - 4.0*pix;
-  pos.y = 0.5*m_nextFrames.size()*itvVert - 0.5*itvVert;
+  pos.y = 0.5*static_cast<double>(m_nextFrames.size())*itvVert - 0.5*itvVert;
   {
     for (std::size_t i = 0; i < m_nextFrames.size(); ++i)
     {
@@ -690,7 +690,7 @@ void Simulator::calcPosBundles()
   QSizeF size = worldSize();
   double pix = pixelSize();
   double itvHori = size.width()/6;
-  double itvVert = (size.height()-itvHori)/Utils::maxx(1, Utils::maxx(m_previousFrames.size(), m_nextFrames.size()));
+  double itvVert = (size.height()-itvHori)/Utils::maxx(1, Utils::maxx(static_cast<double>(m_previousFrames.size()), static_cast<double>(m_nextFrames.size())));
 
   // calc new positions
   if (m_previousFramePositions.size() > 0 && m_bundlesPreviousByLabel.size() > 0)
@@ -707,12 +707,12 @@ void Simulator::calcPosBundles()
       posBotRgt.y = m_nextFramePositions[m_nextFramePositions.size()-1].y - 1.0*m_verticalFrameScale - 0.125*itvVert;
     }
 
-    double itvGrid = (1.5*itvHori)/(m_bundlesPreviousByLabel.size()+1);
+    double itvGrid = (1.5*itvHori)/(static_cast<double>(m_bundlesPreviousByLabel.size())+1);
 
     {
       for (std::size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
       {
-        posTopLft.x = -2.0*itvHori + (i+1)*itvGrid;
+        posTopLft.x = -2.0*itvHori + static_cast<double>(i+1)*itvGrid;
         posTopLft.y =  0.5*size.height() - labelHeight*pix;
         posBotRgt.x =  posTopLft.x;
         posBotRgt.y = -0.5*size.height() + labelHeight*pix;
@@ -732,7 +732,7 @@ void Simulator::calcPosBundles()
         m_previousBundlePositionBR.push_back(v);
 
         // incoming bundles
-        double itv = 2.0/m_bundlesPreviousByLabel.size();
+        double itv = 2.0/static_cast<double>(m_bundlesPreviousByLabel.size());
         {
           for (std::size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
           {
@@ -740,7 +740,7 @@ void Simulator::calcPosBundles()
             posTopLft.y = m_previousFramePositions[i].y
                           + 1.0*m_verticalFrameScale
                           - 0.5*itv*m_verticalFrameScale
-                          - m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex()*itv*m_verticalFrameScale;
+                          - static_cast<double>(m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex())*itv*m_verticalFrameScale;
 
             posBotRgt.x = m_previousBundleLabelPositionTL[ m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex() ].x;
             posBotRgt.y = posTopLft.y;
@@ -767,12 +767,12 @@ void Simulator::calcPosBundles()
     }
 
     // grid next
-    double itvGrid = (1.5*itvHori)/(m_bundlesNextByLabel.size()+1);
+    double itvGrid = (1.5*itvHori)/(static_cast<double>(m_bundlesNextByLabel.size())+1);
 
     {
       for (std::size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
       {
-        posTopLft.x = 2.0*itvHori - (m_bundlesNextByLabel.size()-i)*itvGrid;
+        posTopLft.x = 2.0*itvHori - static_cast<double>(m_bundlesNextByLabel.size()-i)*itvGrid;
         posTopLft.y =  0.5*size.height() - labelHeight*pix;
         posBotRgt.x = posTopLft.x;
         posBotRgt.y = -0.5*size.height() + labelHeight*pix;
@@ -792,7 +792,7 @@ void Simulator::calcPosBundles()
         m_nextBundlePositionBR.push_back(v);
 
         // outgoing bundles
-        double itv = 2.0/m_bundlesNextByLabel.size();
+        double itv = 2.0/static_cast<double>(m_bundlesNextByLabel.size());
         {
           for (std::size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); ++j)
           {
@@ -800,7 +800,7 @@ void Simulator::calcPosBundles()
             posTopLft.y = posBotRgt.y = m_nextFramePositions[i].y
                                         + 1.0*m_verticalFrameScale
                                         - 0.5*itv*m_verticalFrameScale
-                                        - m_nextFrames[i]->getInBundle(j)->getParent()->getIndex()*itv*m_verticalFrameScale;
+                                        - static_cast<double>(m_nextFrames[i]->getInBundle(j)->getParent()->getIndex())*itv*m_verticalFrameScale;
 
             posBotRgt.x = m_nextFramePositions[i].x - 1.0*m_verticalFrameScale - 3.0*pix;
             posBotRgt.y = posTopLft.y;
@@ -1260,7 +1260,7 @@ void Simulator::clear()
 
 QColor Simulator::calcColor(std::size_t iter, std::size_t numr)
 {
-  return VisUtils::qualPair(iter, numr);
+  return VisUtils::qualPair(static_cast<int>(iter), static_cast<int>(numr));
 }
 
 
@@ -1274,8 +1274,8 @@ template <Visualizer::Mode mode> void Simulator::drawFrameCurr()
       double y = m_currentFramePosition.y;
 
       glPushMatrix();
-      glTranslatef(x, y, 0.0);
-      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+      glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
+      glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
 
       glPushName(ID_FRAME_CURR);
 
@@ -1313,7 +1313,7 @@ template <Visualizer::Mode mode> void Simulator::drawFrameCurr()
         node = m_currentFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
-          valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+          valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
         }
         else
         {
@@ -1325,8 +1325,8 @@ template <Visualizer::Mode mode> void Simulator::drawFrameCurr()
       node = nullptr;
 
       glPushMatrix();
-      glTranslatef(x, y, 0.0);
-      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+      glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
+      glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
 
       if (m_currentSelection == ID_FRAME_CURR)
       {
@@ -1374,15 +1374,15 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
       double y = m_previousFramePositions[i].y;
 
       glPushMatrix();
-      glTranslatef(x, y, 0.0);
+      glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
 
       if (m_currentSelection == ID_FRAME_PREV &&  std::cmp_equal(m_currentSelectionIndex, i))
       {
-        glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+        glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
       }
       else
       {
-        glScalef(m_verticalFrameScale, m_verticalFrameScale, m_verticalFrameScale);
+        glScalef(static_cast<GLfloat>(m_verticalFrameScale), static_cast<GLfloat>(m_verticalFrameScale), static_cast<GLfloat>(m_verticalFrameScale));
       }
 
       glPushName((GLuint) i);
@@ -1416,8 +1416,8 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
         double y = m_previousFramePositions[i].y;
 
         glPushMatrix();
-        glTranslatef(x, y, 0.0);
-        glScalef(m_verticalFrameScale, m_verticalFrameScale, m_verticalFrameScale);
+        glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
+        glScalef(static_cast<GLfloat>(m_verticalFrameScale), static_cast<GLfloat>(m_verticalFrameScale), static_cast<GLfloat>(m_verticalFrameScale));
 
         VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::fillRect(
@@ -1434,7 +1434,7 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
             node = m_previousFrames[i]->getNode(0);
             if (attr->getSizeCurValues() > 0)
             {
-              valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+              valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
             }
             else
             {
@@ -1473,7 +1473,7 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
           node = m_previousFrames[m_currentSelectionIndex]->getNode(0);
           if (attr->getSizeCurValues() > 0)
           {
-            valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+            valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
           }
           else
           {
@@ -1486,10 +1486,10 @@ template <Visualizer::Mode mode> void Simulator::drawFramesPrev()
 
         glPushMatrix();
         glTranslatef(
-          m_previousFramePositions[m_currentSelectionIndex].x,
-          m_previousFramePositions[m_currentSelectionIndex].y,
-          0.0);
-        glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+          static_cast<GLfloat>(m_previousFramePositions[m_currentSelectionIndex].x),
+          static_cast<GLfloat>(m_previousFramePositions[m_currentSelectionIndex].y),
+          0.0f);
+        glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
 
         VisUtils::setColor(SelectColor());
         VisUtils::fillRect(
@@ -1524,15 +1524,15 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
       double y = m_nextFramePositions[i].y;
 
       glPushMatrix();
-      glTranslatef(x, y, 0.0);
+      glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
 
       if (m_currentSelection == ID_FRAME_NEXT &&  std::cmp_equal(m_currentSelectionIndex, i))
       {
-        glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+        glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
       }
       else
       {
-        glScalef(m_verticalFrameScale, m_verticalFrameScale, m_verticalFrameScale);
+        glScalef(static_cast<GLfloat>(m_verticalFrameScale), static_cast<GLfloat>(m_verticalFrameScale), static_cast<GLfloat>(m_verticalFrameScale));
       }
 
       glPushName((GLuint) i);
@@ -1564,8 +1564,8 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
         double y = m_nextFramePositions[i].y;
 
         glPushMatrix();
-        glTranslatef(x, y, 0.0);
-        glScalef(m_verticalFrameScale, m_verticalFrameScale, m_verticalFrameScale);
+        glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
+        glScalef(static_cast<GLfloat>(m_verticalFrameScale), static_cast<GLfloat>(m_verticalFrameScale), static_cast<GLfloat>(m_verticalFrameScale));
 
         VisUtils::setColor(VisUtils::mediumGray);
         VisUtils::fillRect(
@@ -1582,7 +1582,7 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
             node = m_nextFrames[i]->getNode(0);
             if (attr->getSizeCurValues() > 0)
             {
-              valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+              valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
             }
             else
             {
@@ -1621,7 +1621,7 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
           node = m_nextFrames[m_currentSelectionIndex]->getNode(0);
           if (attr->getSizeCurValues() > 0)
           {
-            valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+            valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
           }
           else
           {
@@ -1634,10 +1634,10 @@ template <Visualizer::Mode mode> void Simulator::drawFramesNext()
 
         glPushMatrix();
         glTranslatef(
-          m_nextFramePositions[m_currentSelectionIndex].x,
-          m_nextFramePositions[m_currentSelectionIndex].y,
-          0.0);
-        glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+          static_cast<GLfloat>(m_nextFramePositions[m_currentSelectionIndex].x),
+          static_cast<GLfloat>(m_nextFramePositions[m_currentSelectionIndex].y),
+          0.0f);
+        glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
 
         VisUtils::setColor(SelectColor());
         VisUtils::fillRect(
@@ -1677,26 +1677,26 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridPrev()
 
       glPushMatrix();
       glTranslatef(
-        m_previousBundleLabelPositionTL[i].x,
-        m_previousBundleLabelPositionTL[i].y,
-        0.0);
+        static_cast<GLfloat>(m_previousBundleLabelPositionTL[i].x),
+        static_cast<GLfloat>(m_previousBundleLabelPositionTL[i].y),
+        0.0f);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::fillRect(
-        0.0, (lbl.size()+1)*CHARWIDTH*(m_settings->textSize.value()*pix/CHARHEIGHT),
+        0.0, (static_cast<double>(lbl.size())+1)*CHARWIDTH*(m_settings->textSize.value()*pix/CHARHEIGHT),
         0.5*m_settings->textSize.value()*pix, -0.5*m_settings->textSize.value()*pix);
 
       glPopMatrix();
 
       glPushMatrix();
       glTranslatef(
-        m_previousBundleLabelPositionBR[i].x,
-        m_previousBundleLabelPositionBR[i].y,
-        0.0);
+        static_cast<GLfloat>(m_previousBundleLabelPositionBR[i].x),
+        static_cast<GLfloat>(m_previousBundleLabelPositionBR[i].y),
+        0.0f);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::fillRect(
-        -((lbl.size()+1)*CHARWIDTH*(m_settings->textSize.value()*pix/CHARHEIGHT)),  0.0,
+        -((static_cast<double>(lbl.size())+1)*CHARWIDTH*(m_settings->textSize.value()*pix/CHARHEIGHT)),  0.0,
         0.5*m_settings->textSize.value()*pix,                                     -0.5*m_settings->textSize.value()*pix);
 
       glPopMatrix();
@@ -1730,14 +1730,14 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridPrev()
 
         glPushMatrix();
         glTranslatef(
-          m_previousBundleLabelPositionTL[i].x,
-          m_previousBundleLabelPositionTL[i].y,
-          0.0);
+          static_cast<GLfloat>(m_previousBundleLabelPositionTL[i].x),
+          static_cast<GLfloat>(m_previousBundleLabelPositionTL[i].y),
+          0.0f);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
         VisUtils::setColor(m_settings->textColor.value());
         VisUtils::drawLabel(
-          texCharId,
+          &texCharId[0],
           0.0 + 3*pix,
           0.0,
           txt*pix/CHARHEIGHT,
@@ -1747,14 +1747,14 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridPrev()
 
         glPushMatrix();
         glTranslatef(
-          m_previousBundleLabelPositionBR[i].x,
-          m_previousBundleLabelPositionBR[i].y,
-          0.0);
+          static_cast<GLfloat>(m_previousBundleLabelPositionBR[i].x),
+          static_cast<GLfloat>(m_previousBundleLabelPositionBR[i].y),
+          0.0f);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
         VisUtils::setColor(m_settings->textColor.value());
         VisUtils::drawLabelLeft(
-          texCharId,
+          &texCharId[0],
           0.0 - 3*pix,
           0.0,
           txt*pix/CHARHEIGHT,
@@ -1782,25 +1782,25 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridPrev()
 
       glPushMatrix();
       glTranslatef(
-        m_previousBundleLabelPositionTL[idxHiLite].x,
-        m_previousBundleLabelPositionTL[idxHiLite].y,
-        0.0);
+        static_cast<GLfloat>(m_previousBundleLabelPositionTL[idxHiLite].x),
+        static_cast<GLfloat>(m_previousBundleLabelPositionTL[idxHiLite].y),
+        0.0f);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::enableLineAntiAlias();
       VisUtils::setColor(m_settings->backgroundColor.value());
       VisUtils::fillRect(
-        0.0, (lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
+        0.0, (static_cast<double>(lbl.size())+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
         0.5*txt*pix, -0.5*txt*pix - pix);
       VisUtils::setColor(colLne);
       VisUtils::drawRect(
-        0.0, (lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
+        0.0, (static_cast<double>(lbl.size())+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
         0.5*txt*pix, -0.5*txt*pix - pix);
       VisUtils::disableLineAntiAlias();
 
       VisUtils::setColor(m_settings->textColor.value());
       VisUtils::drawLabel(
-        texCharId,
+        &texCharId[0],
         0.0 + 3*pix,
         0.0,
         txt*pix/CHARHEIGHT,
@@ -1810,25 +1810,25 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridPrev()
 
       glPushMatrix();
       glTranslatef(
-        m_previousBundleLabelPositionBR[idxHiLite].x,
-        m_previousBundleLabelPositionBR[idxHiLite].y,
-        0.0);
+        static_cast<GLfloat>(m_previousBundleLabelPositionBR[idxHiLite].x),
+        static_cast<GLfloat>(m_previousBundleLabelPositionBR[idxHiLite].y),
+        0.0f);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::enableLineAntiAlias();
       VisUtils::setColor(m_settings->backgroundColor.value());
       VisUtils::fillRect(
-        -((lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
+        -((static_cast<double>(lbl.size())+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
         0.5*txt*pix,                                   -0.5*txt*pix - pix);
       VisUtils::setColor(colLne);
       VisUtils::drawRect(
-        -((lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
+        -((static_cast<double>(lbl.size())+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
         0.5*txt*pix,                                   -0.5*txt*pix - pix);
       VisUtils::disableLineAntiAlias();
 
       VisUtils::setColor(m_settings->textColor.value());
       VisUtils::drawLabelLeft(
-        texCharId,
+        &texCharId[0],
         0.0 - 3*pix,
         0.0,
         txt*pix/CHARHEIGHT,
@@ -1862,26 +1862,26 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridNext()
 
       glPushMatrix();
       glTranslatef(
-        m_nextBundleLabelPositionTL[i].x,
-        m_nextBundleLabelPositionTL[i].y,
-        0.0);
+        static_cast<GLfloat>(m_nextBundleLabelPositionTL[i].x),
+        static_cast<GLfloat>(m_nextBundleLabelPositionTL[i].y),
+        0.0f);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::fillRect(
-        0.0, (lbl.size()+1)*CHARWIDTH*(m_settings->textSize.value()*pix/CHARHEIGHT),
+        0.0, (static_cast<double>(lbl.size())+1)*CHARWIDTH*(m_settings->textSize.value()*pix/CHARHEIGHT),
         0.5*m_settings->textSize.value()*pix, -0.5*m_settings->textSize.value()*pix);
 
       glPopMatrix();
 
       glPushMatrix();
       glTranslatef(
-        m_nextBundleLabelPositionBR[i].x,
-        m_nextBundleLabelPositionBR[i].y,
-        0.0);
+        static_cast<GLfloat>(m_nextBundleLabelPositionBR[i].x),
+        static_cast<GLfloat>(m_nextBundleLabelPositionBR[i].y),
+        0.0f);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::fillRect(
-        -((lbl.size()+1)*CHARWIDTH*(m_settings->textSize.value()*pix/CHARHEIGHT)), 0.0,
+        -((static_cast<double>(lbl.size())+1)*CHARWIDTH*(m_settings->textSize.value()*pix/CHARHEIGHT)), 0.0,
         0.5*m_settings->textSize.value()*pix,                                    -0.5*m_settings->textSize.value()*pix);
 
       glPopMatrix();
@@ -1915,14 +1915,14 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridNext()
 
         glPushMatrix();
         glTranslatef(
-          m_nextBundleLabelPositionTL[i].x,
-          m_nextBundleLabelPositionTL[i].y,
-          0.0);
+          static_cast<GLfloat>(m_nextBundleLabelPositionTL[i].x),
+          static_cast<GLfloat>(m_nextBundleLabelPositionTL[i].y),
+          0.0f);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
         VisUtils::setColor(m_settings->textColor.value());
         VisUtils::drawLabel(
-          texCharId,
+          &texCharId[0],
           0.0 + 3*pix,
           0.0,
           txt*pix/CHARHEIGHT,
@@ -1932,14 +1932,14 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridNext()
 
         glPushMatrix();
         glTranslatef(
-          m_nextBundleLabelPositionBR[i].x,
-          m_nextBundleLabelPositionBR[i].y,
-          0.0);
+          static_cast<GLfloat>(m_nextBundleLabelPositionBR[i].x),
+          static_cast<GLfloat>(m_nextBundleLabelPositionBR[i].y),
+          0.0f);
         glRotatef(45.0, 0.0, 0.0, 1.0);
 
         VisUtils::setColor(m_settings->textColor.value());
         VisUtils::drawLabelLeft(
-          texCharId,
+          &texCharId[0],
           0.0 - 3*pix,
           0.0,
           txt*pix/CHARHEIGHT,
@@ -1967,25 +1967,25 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridNext()
 
       glPushMatrix();
       glTranslatef(
-        m_nextBundleLabelPositionTL[idxHiLite].x,
-        m_nextBundleLabelPositionTL[idxHiLite].y,
-        0.0);
+        static_cast<GLfloat>(m_nextBundleLabelPositionTL[idxHiLite].x),
+        static_cast<GLfloat>(m_nextBundleLabelPositionTL[idxHiLite].y),
+        0.0f);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::enableLineAntiAlias();
       VisUtils::setColor(m_settings->backgroundColor.value());
       VisUtils::fillRect(
-        0.0, (lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
+        0.0, (static_cast<double>(lbl.size())+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
         0.5*txt*pix, -0.5*txt*pix - pix);
       VisUtils::setColor(colLne);
       VisUtils::drawRect(
-        0.0, (lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
+        0.0, (static_cast<double>(lbl.size())+1)*CHARWIDTH*(txt*pix/CHARHEIGHT) + pix,
         0.5*txt*pix, -0.5*txt*pix - pix);
       VisUtils::disableLineAntiAlias();
 
       VisUtils::setColor(m_settings->textColor.value());
       VisUtils::drawLabel(
-        texCharId,
+        &texCharId[0],
         0.0 + 3*pix,
         0.0,
         txt*pix/CHARHEIGHT,
@@ -1995,25 +1995,25 @@ template <Visualizer::Mode mode> void Simulator::drawBdlLblGridNext()
 
       glPushMatrix();
       glTranslatef(
-        m_nextBundleLabelPositionBR[idxHiLite].x,
-        m_nextBundleLabelPositionBR[idxHiLite].y,
-        0.0);
+        static_cast<GLfloat>(m_nextBundleLabelPositionBR[idxHiLite].x),
+        static_cast<GLfloat>(m_nextBundleLabelPositionBR[idxHiLite].y),
+        0.0f);
       glRotatef(45.0, 0.0, 0.0, 1.0);
 
       VisUtils::enableLineAntiAlias();
       VisUtils::setColor(m_settings->backgroundColor.value());
       VisUtils::fillRect(
-        -((lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
+        -((static_cast<double>(lbl.size())+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
         0.5*txt*pix,                                   -0.5*txt*pix - pix);
       VisUtils::setColor(colLne);
       VisUtils::drawRect(
-        -((lbl.size()+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
+        -((static_cast<double>(lbl.size())+1)*CHARWIDTH*(txt*pix/CHARHEIGHT)), 0.0 + pix,
         0.5*txt*pix,                                   -0.5*txt*pix - pix);
       VisUtils::disableLineAntiAlias();
 
       VisUtils::setColor(m_settings->textColor.value());
       VisUtils::drawLabelLeft(
-        texCharId,
+        &texCharId[0],
         0.0 - 3*pix,
         0.0,
         txt*pix/CHARHEIGHT,
@@ -2440,7 +2440,7 @@ void Simulator::animate()
         node = m_animationOldFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
-          valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+          valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
         }
         else
         {
@@ -2452,8 +2452,8 @@ void Simulator::animate()
       node = nullptr;
 
       glPushMatrix();
-      glTranslatef(x, y, 0.0);
-      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+      glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
+      glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
 
       m_diagram->draw<Visualizing>(pixelSize(), m_attributes, valsFrame);
 
@@ -2470,7 +2470,7 @@ void Simulator::animate()
         node = m_animationNewFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
-          valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+          valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
         }
         else
         {
@@ -2482,8 +2482,8 @@ void Simulator::animate()
       node = nullptr;
 
       glPushMatrix();
-      glTranslatef(x, y, 0.0);
-      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+      glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
+      glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
 
       m_diagram->draw<Visualizing>(pixelSize(), m_attributes, valsFrame);
 
@@ -2502,7 +2502,7 @@ void Simulator::animate()
         node = m_animationOldFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
-          valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+          valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
         }
         else
         {
@@ -2514,8 +2514,8 @@ void Simulator::animate()
       node = nullptr;
 
       glPushMatrix();
-      glTranslatef(x, y, 0.0);
-      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+      glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
+      glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
 
       m_diagram->draw<Visualizing>(pixelSize(), m_attributes, valsFrame);
 
@@ -2532,7 +2532,7 @@ void Simulator::animate()
         node = m_animationNewFrame->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
-          valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+          valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
         }
         else
         {
@@ -2544,8 +2544,8 @@ void Simulator::animate()
       node = nullptr;
 
       glPushMatrix();
-      glTranslatef(x, y, 0.0);
-      glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
+      glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
+      glScalef(static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale), static_cast<GLfloat>(m_horizontalFrameScale));
 
       m_diagram->draw<Visualizing>(pixelSize(), m_attributes, valsFrame, m_animationNewFrameOpacity);
 

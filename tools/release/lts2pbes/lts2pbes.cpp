@@ -9,8 +9,8 @@
 /// \file lts2pbes.cpp
 /// \brief This tool reads an LTS and translates it into a PBES.
 
-#define TOOLNAME "lts2pbes"
-#define AUTHOR "Wieger Wesselink"
+constexpr const char* TOOLNAME = "lts2pbes";
+constexpr const char* AUTHOR = "Wieger Wesselink";
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/lts/detail/lts_load.h"

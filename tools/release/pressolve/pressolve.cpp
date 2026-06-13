@@ -179,13 +179,13 @@ class pressolve_tool
     { 
       ressolve_by_numerical_iteration solver(options, resulting_res);
       double result = solver.run();
-      std::cout << std::setprecision(options.precision) << result << std::endl;
+      std::cout << std::setprecision(static_cast<int>(options.precision)) << result << std::endl;
     }  
     else if (options.algorithm==numerical_directed)
     { 
       ressolve_by_numerical_iteration_directed solver(options, resulting_res);
       double result = solver.run();
-      std::cout << std::setprecision(options.precision) << result << std::endl;
+      std::cout << std::setprecision(static_cast<int>(options.precision)) << result << std::endl;
     }  
     timer().finish("solving");
     return true;

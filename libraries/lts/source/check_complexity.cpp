@@ -361,7 +361,7 @@ void check_complexity::test_work_names()
     test_work_name(i,
                     while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing);
     test_work_name(i, for_all_s_prime_in_pred_s_setminus_Red_3_18l);
-    test_work_name(i, if___s_prime_has_transition_to_SpC_3_23l);
+    test_work_name(i, if_s_prime_has_transition_to_SpC_3_23l);
 
     // temporary transition counters (red):
     test_work_name(i, while_FromRed_is_not_empty_3_6r);
@@ -389,10 +389,10 @@ void check_complexity::test_work_names()
 
     // state counters
     assert(check_complexity::STATE_dnj_MIN == i);
-    test_work_name(i, split__find_predecessors_of_R_or_U_state);
+    test_work_name(i, split_find_predecessors_of_R_or_U_state);
     assert(check_complexity::STATE_dnj_MIN_TEMP == i);
-    test_work_name(i, split_U__find_predecessors_of_U_state);
-    test_work_name(i, split_R__find_predecessors_of_R_state);
+    test_work_name(i, split_U_find_predecessors_of_U_state);
+    test_work_name(i, split_R_find_predecessors_of_R_state);
     assert(check_complexity::STATE_dnj_MAX_TEMP + 1 == i);
     test_work_name(i, handle_new_noninert_transns);
     assert(check_complexity::STATE_dnj_MAX + 1 == i);
@@ -400,101 +400,101 @@ void check_complexity::test_work_names()
     // bunch counters (only for small bunches, i. e. bunches that have been
     // split off from a large bunch)
     assert(check_complexity::BUNCH_dnj_MIN == i);
-    test_work_name(i, refine_partition_until_stable__find_pred);
+    test_work_name(i, refine_partition_until_stable_find_pred);
     assert(check_complexity::BUNCH_dnj_MAX + 1 == i);
 
     // block_bunch-slice counters (only for block_bunch-slices that are
     // part of a small bunch)
     assert(check_complexity::BLOCK_BUNCH_dnj_MIN == i);
-    test_work_name(i, refine_partition_until_stable__stabilize);
+    test_work_name(i, refine_partition_until_stable_stabilize);
     test_work_name(i,
-                  refine_partition_until_stable__stabilize_for_large_splitter);
+                  refine_partition_until_stable_stabilize_for_large_splitter);
     assert(check_complexity::BLOCK_BUNCH_dnj_MIN_TEMP == i);
-    test_work_name(i, handle_new_noninert_transns__make_unstable_temp);
+    test_work_name(i, handle_new_noninert_transns_make_unstable_temp);
     assert(check_complexity::BLOCK_BUNCH_dnj_MAX_TEMP + 1 == i);
     assert(check_complexity::BLOCK_BUNCH_dnj_MAX + 1 == i);
 
     // transition counters
     assert(check_complexity::TRANS_dnj_MIN == i);
     test_work_name(i, move_out_slice_to_new_block);
-    test_work_name(i, split__handle_transition_from_R_or_U_state);
-    test_work_name(i, split__handle_transition_to_R_or_U_state);
+    test_work_name(i, split_handle_transition_from_R_or_U_state);
+    test_work_name(i, split_handle_transition_to_R_or_U_state);
     assert(check_complexity::TRANS_dnj_MIN_TEMP == i);
-    test_work_name(i, split_U__handle_transition_to_U_state);
-    test_work_name(i, split_U__test_noninert_transitions);
-    test_work_name(i, split_R__handle_transition_from_R_state);
-    test_work_name(i, split_R__handle_transition_to_R_state);
+    test_work_name(i, split_U_handle_transition_to_U_state);
+    test_work_name(i, split_U_test_noninert_transitions);
+    test_work_name(i, split_R_handle_transition_from_R_state);
+    test_work_name(i, split_R_handle_transition_to_R_state);
     assert(check_complexity::TRANS_dnj_MAX_TEMP + 1 == i);
-    test_work_name(i, split__test_noninert_transitions_found_new_bottom_state);
-    test_work_name(i, handle_new_noninert_transns__make_unstable_a_priori);
-    test_work_name(i, handle_new_noninert_transns__make_unstable_a_posteriori);
+    test_work_name(i, split_test_noninert_transitions_found_new_bottom_state);
+    test_work_name(i, handle_new_noninert_transns_make_unstable_a_priori);
+    test_work_name(i, handle_new_noninert_transns_make_unstable_a_posteriori);
     test_work_name(i,
-               refine_partition_until_stable__stabilize_new_noninert_a_priori);
+               refine_partition_until_stable_stabilize_new_noninert_a_priori);
     test_work_name(i,
-           refine_partition_until_stable__stabilize_new_noninert_a_posteriori);
+           refine_partition_until_stable_stabilize_new_noninert_a_posteriori);
     assert(check_complexity::TRANS_dnj_MAX + 1 == i);
 
     /*----------------- counters for the bisim_gj algorithm -----------------*/
 
     // block counters
     assert(check_complexity::BLOCK_gj_MIN == i);
-    test_work_name(i, refine_partition_until_it_becomes_stable__find_splitter);
-    test_work_name(i, splitB__update_BLC_of_smaller_subblock);
+    test_work_name(i, refine_partition_until_it_becomes_stable_find_splitter);
+    test_work_name(i, splitB_update_BLC_of_smaller_subblock);
     assert(check_complexity::BLOCK_gj_MAX + 1 == i);
 
     // state counters
     assert(check_complexity::STATE_gj_MIN == i);
-    test_work_name(i, split_block_B_into_R_and_BminR__carry_out_split);
-    test_work_name(i, split_block_B_into_R_and_BminR__skip_over_state);
-    test_work_name(i, simple_splitB__find_bottom_state);
-    test_work_name(i, simple_splitB__find_predecessors_of_R_or_U_state);
+    test_work_name(i, split_block_B_into_R_and_BminR_carry_out_split);
+    test_work_name(i, split_block_B_into_R_and_BminR_skip_over_state);
+    test_work_name(i, simple_splitB_find_bottom_state);
+    test_work_name(i, simple_splitB_find_predecessors_of_R_or_U_state);
     test_work_name(i,
-             multiple_swap_states_in_block__account_for_swap_in_aborted_block);
-    test_work_name(i,multiple_swap_states_in_block__swap_state_in_small_block);
+             multiple_swap_states_in_block_account_for_swap_in_aborted_block);
+    test_work_name(i,multiple_swap_states_in_block_swap_state_in_small_block);
     assert(check_complexity::STATE_gj_MIN_TEMP == i);
-    test_work_name(i, simple_splitB_R__find_predecessors);
-    test_work_name(i, simple_splitB_U__find_predecessors);
+    test_work_name(i, simple_splitB_R_find_predecessors);
+    test_work_name(i, simple_splitB_U_find_predecessors);
     assert(check_complexity::STATE_gj_MAX_TEMP + 1 == i);
-    test_work_name(i, stabilizeB__prepare_block);
-    test_work_name(i, stabilizeB__distribute_states_over_Phat);
-    test_work_name(i,create_initial_partition__set_start_incoming_transitions);
+    test_work_name(i, stabilizeB_prepare_block);
+    test_work_name(i, stabilizeB_distribute_states_over_Phat);
+    test_work_name(i,create_initial_partition_set_start_incoming_transitions);
     assert(check_complexity::STATE_gj_MAX + 1 == i);
 
     // BLC slice counters
     assert(check_complexity::BLC_gj_MIN == i);
     test_work_name(i,
-                    refine_partition_until_it_becomes_stable__prepare_cosplit);
+                    refine_partition_until_it_becomes_stable_prepare_cosplit);
     test_work_name(i,
-                refine_partition_until_it_becomes_stable__correct_end_of_calM);
+                refine_partition_until_it_becomes_stable_correct_end_of_calM);
     test_work_name(i,
-                 refine_partition_until_it_becomes_stable__execute_main_split);
-    test_work_name(i, four_way_splitB__handle_transitions_in_main_splitter);
+                 refine_partition_until_it_becomes_stable_execute_main_split);
+    test_work_name(i, four_way_splitB_handle_transitions_in_main_splitter);
     assert(check_complexity::BLC_gj_MAX + 1 == i);
 
     // transition counters
     assert(check_complexity::TRANS_gj_MIN == i);
-    test_work_name(i, simple_splitB__handle_transition_from_R_or_U_state);
-    test_work_name(i, simple_splitB__handle_transition_to_R_or_U_state);
+    test_work_name(i, simple_splitB_handle_transition_from_R_or_U_state);
+    test_work_name(i, simple_splitB_handle_transition_to_R_or_U_state);
     test_work_name(i,
-                  refine_partition_until_it_becomes_stable__find_cotransition);
-    test_work_name(i, order_BLC_transitions__sort_transition);
+                  refine_partition_until_it_becomes_stable_find_cotransition);
+    test_work_name(i, order_BLC_transitions_sort_transition);
     assert(check_complexity::TRANS_gj_MIN_TEMP == i);
-    test_work_name(i, simple_splitB_R__handle_transition_from_R_state);
-    test_work_name(i, simple_splitB_R__handle_transition_to_R_state);
-    test_work_name(i, simple_splitB_U__handle_transition_to_U_state);
+    test_work_name(i, simple_splitB_R_handle_transition_from_R_state);
+    test_work_name(i, simple_splitB_R_handle_transition_to_R_state);
+    test_work_name(i, simple_splitB_U_handle_transition_to_U_state);
     test_work_name(i,
-                    simple_splitB_U__handle_transition_from_potential_U_state);
+                    simple_splitB_U_handle_transition_from_potential_U_state);
     assert(check_complexity::TRANS_gj_MAX_TEMP + 1 == i);
     test_work_name(i,
-              simple_splitB__test_outgoing_transitions_found_new_bottom_state);
-    test_work_name(i, splitB__unmark_transitions_out_of_new_bottom_block);
+              simple_splitB_test_outgoing_transitions_found_new_bottom_state);
+    test_work_name(i, splitB_unmark_transitions_out_of_new_bottom_block);
     test_work_name(i,
-                splitB__unmark_transitions_out_of_new_bottom_block_afterwards);
-    test_work_name(i, stabilizeB__initialize_Qhat);
-    test_work_name(i, stabilizeB__initialize_Qhat_afterwards);
-    test_work_name(i, stabilizeB__main_loop);
-    test_work_name(i, stabilizeB__main_loop_afterwards);
-    test_work_name(i, create_initial_partition__refine_block);
+                splitB_unmark_transitions_out_of_new_bottom_block_afterwards);
+    test_work_name(i, stabilizeB_initialize_Qhat);
+    test_work_name(i, stabilizeB_initialize_Qhat_afterwards);
+    test_work_name(i, stabilizeB_main_loop);
+    test_work_name(i, stabilizeB_main_loop_afterwards);
+    test_work_name(i, create_initial_partition_refine_block);
     assert(check_complexity::TRANS_gj_MAX + 1 == i);
 
     exit(EXIT_SUCCESS);

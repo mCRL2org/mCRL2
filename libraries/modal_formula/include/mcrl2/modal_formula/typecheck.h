@@ -74,6 +74,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
         result = atermpp::down_cast<T>(data::typecheck_untyped_data_parameter(m_data_type_checker, y.name(), y.arguments(), data::sort_bool::bool_(), m_variable_context));
         return;
       }
+      // NOLINTNEXTLINE(bugprone-empty-catch) intentional: fall through to multi-action typecheck below
       catch (mcrl2::runtime_error& )
       {
         // skip

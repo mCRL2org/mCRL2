@@ -29,7 +29,7 @@ class sim_partitioner
     sim_partitioner(LTS_TYPE& l);
 
     /** Destroys this partitioner. */
-    ~sim_partitioner();
+    virtual ~sim_partitioner();
 
     /** Computes the simulation equivalence classes and preorder
      * relations of the LTS. */

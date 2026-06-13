@@ -12,8 +12,14 @@
 #include "conedb.h"
 #include "mathutils.h"
 
-#define ohash(k1,k2,b,m) (((k1)*11408669 + (k2)*97416181 + (b)*71053447) & (m))
-#define thash(k,tb,m) (((k)*11408669 + (tb)*97416181) & (m))
+constexpr std::size_t ohash(int k1, int k2, bool b, std::size_t m)
+{
+  return (static_cast<std::size_t>(k1)*11408669 + static_cast<std::size_t>(k2)*97416181 + static_cast<std::size_t>(b)*71053447) & m;
+}
+constexpr std::size_t thash(int k, unsigned char tb, std::size_t m)
+{
+  return (static_cast<std::size_t>(k)*11408669 + static_cast<std::size_t>(tb)*97416181) & m;
+}
 constexpr int BOT_BIT = 1;
 constexpr int TOP_BIT = 2;
 
@@ -40,7 +46,7 @@ void ConeDB::addTruncatedCone(float r,bool t,bool b,int c)
   else
   {
     check_thashtable();
-    i = thash(k,tb,(thashtable.size()-1));
+    i = static_cast<int>(thash(k,tb,(thashtable.size()-1)));
     tcone_bucket cb = { .key=k, .cone=c, .next=thashtable[i], .top_bot=tb };
     thashtable[i] = static_cast<int>(tbuckets.size());
     tbuckets.push_back(cb);
@@ -71,7 +77,7 @@ void ConeDB::check_thashtable()
     unsigned int i,h;
     for (i = 0; i < tbuckets.size(); ++i)
     {
-      h = thash(tbuckets[i].key,tbuckets[i].top_bot,(thashtable.size()-1));
+      h = static_cast<unsigned int>(thash(tbuckets[i].key,tbuckets[i].top_bot,(thashtable.size()-1)));
       tbuckets[i].next = thashtable[h];
       thashtable[h] = static_cast<int>(i);
     }
@@ -80,7 +86,7 @@ void ConeDB::check_thashtable()
 
 int ConeDB::find_tbucket(int k,unsigned char tb)
 {
-  int h = thash(k,tb,(thashtable.size()-1));
+  int h = static_cast<int>(thash(k,tb,(thashtable.size()-1)));
   for (h = thashtable[h]; h != -1; h = tbuckets[h].next)
   {
     if (tbuckets[h].key == k  &&  tbuckets[h].top_bot == tb)
@@ -105,7 +111,7 @@ void ConeDB::addObliqueCone(float a,float r,float s,int c)
   else
   {
     check_ohashtable();
-    i = ohash(k1,k2,b,(ohashtable.size()-1));
+    i = static_cast<int>(ohash(k1,k2,b,(ohashtable.size()-1)));
     ocone_bucket cb = { .alpha=k1, .radius=k2, .sign=b, .cone=c, .next=ohashtable[i] };
     ohashtable[i] = static_cast<int>(obuckets.size());
     obuckets.push_back(cb);
@@ -134,8 +140,8 @@ void ConeDB::check_ohashtable()
     unsigned int i,h;
     for (i = 0; i < obuckets.size(); ++i)
     {
-      h = ohash(obuckets[i].alpha,obuckets[i].radius,obuckets[i].sign,
-                (ohashtable.size()-1));
+      h = static_cast<unsigned int>(ohash(obuckets[i].alpha,obuckets[i].radius,obuckets[i].sign,
+                (ohashtable.size()-1)));
       obuckets[i].next = ohashtable[h];
       ohashtable[h] = static_cast<int>(i);
     }
@@ -144,7 +150,7 @@ void ConeDB::check_ohashtable()
 
 int ConeDB::find_obucket(int k1,int k2,bool b)
 {
-  int h = ohash(k1,k2,b,(ohashtable.size()-1));
+  int h = static_cast<int>(ohash(k1,k2,b,(ohashtable.size()-1)));
   for (h = ohashtable[h]; h != -1; h = obuckets[h].next)
   {
     if (obuckets[h].alpha == k1 && obuckets[h].radius == k2 && obuckets[h].sign == b)

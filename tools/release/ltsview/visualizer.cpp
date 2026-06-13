@@ -60,8 +60,8 @@ Visualizer::Visualizer(QObject *parent, Settings* settings_, LtsManager *ltsMana
 
   connect(markManager, SIGNAL(marksChanged()), this, SLOT(dirtyColors()));
 
-  sin_obt = float(sin(deg_to_rad(settings->branchTilt.value())));
-  cos_obt = float(cos(deg_to_rad(settings->branchTilt.value())));
+  sin_obt = float(sin(deg_to_rad(static_cast<float>(settings->branchTilt.value()))));
+  cos_obt = float(cos(deg_to_rad(static_cast<float>(settings->branchTilt.value()))));
 
   update_objects = true;
   update_matrices = false;
@@ -75,21 +75,21 @@ float Visualizer::getHalfStructureHeight() const
   {
     return 0.0f;
   }
-  return settings->clusterHeight.value() * (ltsManager->lts()->getNumRanks() - 1) / 2.0f;
+  return settings->clusterHeight.value() * static_cast<float>(ltsManager->lts()->getNumRanks() - 1) / 2.0f;
 }
 
 void Visualizer::setClusterHeight()
 {
   float ratio = ltsManager->lts()->getInitialState()->getCluster()->getBCRadius() /
                 ltsManager->lts()->getInitialState()->getCluster()->getBCHeight();
-  settings->clusterHeight.setValue(std::max(4,round_to_int(40.0f * ratio)) / 10.0f);
+  settings->clusterHeight.setValue(static_cast<float>(std::max(4,round_to_int(40.0f * ratio))) / 10.0f);
   dirtyObjects();
 }
 
 void Visualizer::branchTiltChanged(int value)
 {
-  sin_obt = float(sin(deg_to_rad(value)));
-  cos_obt = float(cos(deg_to_rad(value)));
+  sin_obt = float(sin(deg_to_rad(static_cast<float>(value))));
+  cos_obt = float(cos(deg_to_rad(static_cast<float>(value))));
   dirtyMatrices();
 }
 
@@ -160,7 +160,7 @@ void Visualizer::drawStructure()
   {
     updateColors();
   }
-  visObjectFactory.drawObjects(&primitiveFactory,(int)((100 - settings->transparency.value()) * 2.55f),
+  visObjectFactory.drawObjects(&primitiveFactory,(int)(static_cast<float>(100 - settings->transparency.value()) * 2.55f),
                                 markManager->stateMatchStyle() == MATCH_MULTI);
 }
 
@@ -240,13 +240,13 @@ void Visualizer::traverseTreeC(Cluster* root,bool topClosed,int rot)
         }
         else
         {
-          glRotatef(-desc->getPosition() - rot, 0.0f, 0.0f, 1.0f);
+          glRotatef(-desc->getPosition() - static_cast<float>(rot), 0.0f, 0.0f, 1.0f);
           glTranslatef(root->getBaseRadius(), 0.0f, 0.0f);
-          glRotatef(settings->branchTilt.value(), 0.0f, 1.0f, 0.0f);
+          glRotatef(static_cast<GLfloat>(settings->branchTilt.value()), 0.0f, 1.0f, 0.0f);
           traverseTreeC(desc, true, drot);
-          glRotatef(-settings->branchTilt.value(), 0.0f, 1.0f, 0.0f);
+          glRotatef(static_cast<GLfloat>(-settings->branchTilt.value()), 0.0f, 1.0f, 0.0f);
           glTranslatef(-root->getBaseRadius(), 0.0f, 0.0f);
-          glRotatef(desc->getPosition() + rot, 0.0f, 0.0f, 1.0f);
+          glRotatef(desc->getPosition() + static_cast<float>(rot), 0.0f, 0.0f, 1.0f);
         }
       }
     }
@@ -377,27 +377,27 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
         {
           // make the connecting cone
           float d_rad = root->getBaseRadius() - root->getTopRadius();
-          float sz = sqrt(settings->clusterHeight.value() *
-                          settings->clusterHeight.value() + d_rad * d_rad);
+          float sz = static_cast<float>(sqrt(settings->clusterHeight.value() *
+                          settings->clusterHeight.value() + d_rad * d_rad));
           float alpha, sign;
           if (d_rad < 0.0f)
           {
             sign = -1.0f;
-            alpha = atan(settings->clusterHeight.value() / -d_rad);
+            alpha = static_cast<float>(atan(settings->clusterHeight.value() / -d_rad));
           }
           else
           {
             sign = 1.0f;
             if (d_rad > 0.0f)
             {
-              alpha = atan(settings->clusterHeight.value() / d_rad);
+              alpha = static_cast<float>(atan(settings->clusterHeight.value() / d_rad));
             }
             else
             {
-              alpha = 0.5f * PI;
+              alpha = static_cast<float>(0.5f * PI);
             }
           }
-          glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
+          glRotatef(-desc->getPosition()-static_cast<float>(rot),0.0f,0.0f,1.0f);
           glPushMatrix();
           glTranslatef(root->getTopRadius(),0.0f,0.0f);
           glRotatef(sign*(90.0f-rad_to_deg(alpha)),0.0f,1.0f,0.0f);
@@ -420,12 +420,12 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
           // recurse into the subtree
           glTranslatef(root->getBaseRadius(),0.0f,
                        settings->clusterHeight.value());
-          glRotatef(settings->branchTilt.value(),0.0f,1.0f,0.0f);
+          glRotatef(static_cast<GLfloat>(settings->branchTilt.value()),0.0f,1.0f,0.0f);
           traverseTreeT(desc,false,drot);
-          glRotatef(-settings->branchTilt.value(),0.0f,1.0f,0.0f);
+          glRotatef(static_cast<GLfloat>(-settings->branchTilt.value()),0.0f,1.0f,0.0f);
           glTranslatef(-root->getBaseRadius(),0.0f,
                        -settings->clusterHeight.value());
-          glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+          glRotatef(desc->getPosition()+static_cast<float>(rot),0.0f,0.0f,1.0f);
         }
       }
     }
@@ -513,9 +513,9 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
 
 static inline QColor blend(QColor from, QColor to, float factor)
 {
-  unsigned char red = (unsigned char)(from.red() * factor + to.red() * (1.0 - factor));
-  unsigned char green = (unsigned char)(from.green() * factor + to.green() * (1.0 - factor));
-  unsigned char blue = (unsigned char)(from.blue() * factor + to.blue() * (1.0 - factor));
+  unsigned char red = (unsigned char)(static_cast<float>(from.red()) * factor + to.red() * (1.0 - factor));
+  unsigned char green = (unsigned char)(static_cast<float>(from.green()) * factor + to.green() * (1.0 - factor));
+  unsigned char blue = (unsigned char)(static_cast<float>(from.blue()) * factor + to.blue() * (1.0 - factor));
   return QColor(red, green, blue);
 }
 
@@ -573,7 +573,7 @@ void Visualizer::updateColors()
       }
       else
       {
-        float t = cl->getRank() / (float)(ranks);
+        float t = static_cast<float>(cl->getRank()) / (float)(ranks);
         float hue = hueFrom + t * hueDelta;
         if (hue < 0.0f)
         {
@@ -715,7 +715,7 @@ void Visualizer::drawSimStates(QList<State*> historicStates,
 
     // Make the current state a bit larger, to make it easier to find it in the
     // simulation
-    glScalef(1.5 *ns, 1.5* ns, 1.5 * ns);
+    glScalef(1.5f *ns, 1.5f* ns, 1.5f * ns);
     primitiveFactory.drawSimpleSphere();
     glPopMatrix();
 
@@ -758,7 +758,7 @@ void Visualizer::drawSimStates(QList<State*> historicStates,
       glTranslatef(p.x(), p.y(), p.z());
       if (currState->getOutTransition(i) == chosenTrans)
       {
-        glScalef(1.5 * ns, 1.5 * ns, 1.5* ns);
+        glScalef(1.5f * ns, 1.5f * ns, 1.5f* ns);
       }
       else
       {
@@ -934,13 +934,13 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         }
         else
         {
-          glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
+          glRotatef(-desc->getPosition()-static_cast<float>(rot),0.0f,0.0f,1.0f);
           glTranslatef(root->getBaseRadius(),0.0f,0.0f);
-          glRotatef(settings->branchTilt.value(),0.0f,1.0f,0.0f);
+          glRotatef(static_cast<GLfloat>(settings->branchTilt.value()),0.0f,1.0f,0.0f);
           computeStateAbsPos(desc,drot);
-          glRotatef(-settings->branchTilt.value(),0.0f,1.0f,0.0f);
+          glRotatef(static_cast<GLfloat>(-settings->branchTilt.value()),0.0f,1.0f,0.0f);
           glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
-          glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
+          glRotatef(desc->getPosition()+static_cast<float>(rot),0.0f,0.0f,1.0f);
         }
       }
     }
@@ -1300,7 +1300,7 @@ void Visualizer::drawBackPointer(State* startState, const QColor& startColor, St
 
   if (startState->isCentered() && endState->isCentered())
   {
-    ctrlPts[1][0] = startPoint.x() * 1.25;
+    ctrlPts[1][0] = startPoint.x() * 1.25f;
     ctrlPts[2][0] = startControl.x();
   }
 
@@ -1308,20 +1308,20 @@ void Visualizer::drawBackPointer(State* startState, const QColor& startColor, St
   int N = settings->quality.value();
 
   std::array<float, 3> col;
-  col[0] = startColor.red();
-  col[1] = startColor.green();
-  col[2] = startColor.blue();
+  col[0] = static_cast<float>(startColor.red());
+  col[1] = static_cast<float>(startColor.green());
+  col[2] = static_cast<float>(startColor.blue());
   std::array<float, 3> diff;
   int steps = N / 2;
-  diff[0] = (float)(endColor.red() - startColor.red()) / steps;
-  diff[1] = (float)(endColor.green() - startColor.green()) / steps;
-  diff[2] = (float)(endColor.blue() - startColor.blue()) / steps;
+  diff[0] = (float)(endColor.red() - startColor.red()) / static_cast<float>(steps);
+  diff[1] = (float)(endColor.green() - startColor.green()) / static_cast<float>(steps);
+  diff[2] = (float)(endColor.blue() - startColor.blue()) / static_cast<float>(steps);
 
   glBegin(GL_LINE_STRIP);
 
   for (int k = 0; k < N; ++k)
   {
-    t  = (float)k / (N-1);
+    t  = (float)k / static_cast<float>(N-1);
     it = 1.0f - t;
     b3 =      t *  t *  t;
     b2 = 3 *  t *  t * it;
@@ -1366,7 +1366,7 @@ void Visualizer::drawLoop(State* state)
   glBegin(GL_LINE_STRIP);
   for (int k = 0; k < N; ++k)
   {
-    t  = (float)k / (N-1);
+    t  = (float)k / static_cast<float>(N-1);
     it = 1.0f - t;
     b0 =      t *  t *  t;
     b1 = 3 *  t *  t * it;

@@ -28,9 +28,9 @@ LtsCanvas::LtsCanvas(QWidget* parent, Settings* settings, LtsManager* ltsManager
   m_dragging(false)
 {
   m_selectCursor = QCursor(Qt::ArrowCursor);
-  m_panCursor = QCursor(QPixmap(pan_cursor));
-  m_zoomCursor = QCursor(QPixmap(zoom_cursor));
-  m_rotateCursor = QCursor(QPixmap(rotate_cursor));
+  m_panCursor = QCursor(QPixmap(&pan_cursor[0]));
+  m_zoomCursor = QCursor(QPixmap(&zoom_cursor[0]));
+  m_rotateCursor = QCursor(QPixmap(&rotate_cursor[0]));
 
   connect(m_visualizer, SIGNAL(dirtied()), this, SLOT(update()));
   connect(m_ltsManager, SIGNAL(clusterPositionsChanged()), this, SLOT(clusterPositionsChanged()));
@@ -165,9 +165,9 @@ void LtsCanvas::render(bool light)
   glDepthFunc(GL_LESS);
 
   glClearColor(
-    m_settings->backgroundColor.value().red() / 255.0,
-    m_settings->backgroundColor.value().green() / 255.0,
-    m_settings->backgroundColor.value().blue() / 255.0,
+    static_cast<GLfloat>(m_settings->backgroundColor.value().red() / 255.0),
+    static_cast<GLfloat>(m_settings->backgroundColor.value().green() / 255.0),
+    static_cast<GLfloat>(m_settings->backgroundColor.value().blue() / 255.0),
     1.0f
   );
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -370,8 +370,8 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
   if (m_activeTool == PanTool)
   {
     m_position += QVector3D(
-      -0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.x() - event->position().x()),
-       0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->position().y()),
+      static_cast<float>(-0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.x() - event->position().x())),
+       static_cast<float>(0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->position().y())),
        0.0f
     );
     event->accept();
@@ -382,7 +382,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
     m_position += QVector3D(
       0.0f,
       0.0f,
-      0.01f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->position().y())
+      static_cast<float>(0.01f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->position().y()))
     );
     event->accept();
     update();
@@ -397,7 +397,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
 
 void LtsCanvas::wheelEvent(QWheelEvent* event)
 {
-  m_position += QVector3D(0.0f, 0.0f, 0.001f * (m_baseDepth - m_position.z()) * event->angleDelta().y());
+  m_position += QVector3D(0.0f, 0.0f, 0.001f * (m_baseDepth - m_position.z()) * static_cast<float>(event->angleDelta().y()));
   event->accept();
   update();
 }
@@ -461,7 +461,7 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint* selectionBuffer, GLint it
   float minimumStateDepth = -1;
   int stateID = -1;
 
-  float clusterFound = false;
+  bool clusterFound = false;
   float minimumClusterDepth = -1;
   int rank = -1;
   int position = -1;

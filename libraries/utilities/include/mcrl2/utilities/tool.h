@@ -176,7 +176,7 @@ class tool
     /// \param argv Command line arguments
     /// \return The execution result
     /// \post If timing was enabled, timer().report() has been called
-    int execute(int argc, char* argv[])
+    int execute(int argc, char** argv)
     {
 #ifdef MCRL2_PLATFORM_WINDOWS
       // All tools expect their std::cin to be binary streams. In Windows, 

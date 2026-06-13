@@ -53,7 +53,7 @@ public:
 
   /// \brief Constructor.
   explicit stack( Container&& cont )
-   : m_container(cont)
+   : m_container(std::move(cont))
   {}
 
   stack(const stack& other) = default;
@@ -84,7 +84,7 @@ public:
 
   template< class Alloc >
   stack( Container&& cont, const Alloc& alloc )
-    : m_container(cont, alloc)
+    : m_container(std::move(cont), alloc)
   {}
 
   template< class Alloc >
@@ -93,6 +93,7 @@ public:
   {}
 
   template< class Alloc >
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) other.m_container is moved below.
   stack( stack&& other, const Alloc& alloc)
     : m_container(std::move(other.m_container), alloc)
   {}

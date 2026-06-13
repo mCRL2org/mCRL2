@@ -155,7 +155,7 @@ std::string print_preorder(const lts_preorder pre)
     case lts_preorder::lts_pre_impossible_futures:
       return "impossible-futures";
     default:
-      throw new mcrl2::runtime_error("unknown preorder");
+      throw mcrl2::runtime_error("unknown preorder");
   }
 }
 

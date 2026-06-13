@@ -68,7 +68,7 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
                                                                                 assert(unmarked_nonbottom_begin() <= blue_nonbottom_end);
                                                                                 assert(0 != unmarked_bottom_size());
     permutation_iter_t const splitpoint = blue_nonbottom_end +
-                                                        unmarked_bottom_size(); assert(splitpoint < end());  assert(begin() < splitpoint);
+                                                        static_cast<permutation_iter_t::difference_type>(unmarked_bottom_size()); assert(splitpoint < end());  assert(begin() < splitpoint);
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     unsigned const max_counter = check_complexity::log_n -
     /* It is not necessary to reset the nottoblue counters; these counters   */                   check_complexity::ilog2((state_type) (splitpoint - begin()));
@@ -2211,7 +2211,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                                                                                 {
                                                                                                     mCRL2complexity(succ->B_to_C->pred,finalise_work(
                                                                                                            check_complexity::
-                                                                                                           if___s_prime_has_transition_to_SpC_3_23l,
+                                                                                                           if_s_prime_has_transition_to_SpC_3_23l,
                                                                                                            check_complexity::
                                                                                                            refine_outgoing_transition_3_6_or_23l, max_NewB), );
                                                                                                 }
@@ -2258,7 +2258,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                                                                                 // the same time as when it is discovered to be a new bottom
                                                                                                 // state
                                                                                                 mCRL2complexity(succ->B_to_C->pred, finalise_work(
-                                                                                                    check_complexity::if___s_prime_has_transition_to_SpC_3_23l,
+                                                                                                    check_complexity::if_s_prime_has_transition_to_SpC_3_23l,
                                                                                                     check_complexity::
                                                                                                     refine_outgoing_transition_from_new_bottom_3_23l, 1), );
                                                                                             }
@@ -2294,7 +2294,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                                                                             {
                                                                                                 mCRL2complexity(succ->B_to_C->pred, cancel_work(
                                                                                                                   check_complexity::
-                                                                                                                  if___s_prime_has_transition_to_SpC_3_23l), );
+                                                                                                                  if_s_prime_has_transition_to_SpC_3_23l), );
                                                                                             }
                                                                                             for (pred_iter_t pred=s->pred_begin(); s->pred_end()!=pred; ++pred)
                                                                                             {
@@ -2323,7 +2323,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                                                                                  while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing), );
                                                                                                 mCRL2complexity(succ->B_to_C->pred, cancel_work(
                                                                                                                   check_complexity::
-                                                                                                                  if___s_prime_has_transition_to_SpC_3_23l), );
+                                                                                                                  if_s_prime_has_transition_to_SpC_3_23l), );
                                                                                             }
                                                                                             for (pred_iter_t pred=s->pred_begin(); s->pred_end()!=pred; ++pred)
                                                                                             {
@@ -2717,7 +2717,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
                                 }
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     bisim_gjkw::succ_entry::slice_add_work_to_transns(mid,
-                                                                                                check_complexity::if___s_prime_has_transition_to_SpC_3_23l, 1);
+                                                                                                check_complexity::if_s_prime_has_transition_to_SpC_3_23l, 1);
                                                                                 #endif
                             }
                             END_COROUTINE_FOR;

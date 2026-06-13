@@ -71,7 +71,7 @@ public:
         @param scc an array of length `size` giving indices of the vertices 
         @param size the size of the component
         @return zero */
-    int operator()(const verti scc[], std::size_t size)
+    int operator()(const verti* scc, std::size_t size)
     {
         sccs.resize(sccs.size() + 1);
         sccs.back().assign(&scc[0], &scc[size]); 

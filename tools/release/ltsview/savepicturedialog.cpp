@@ -17,10 +17,10 @@ SavePictureDialog::SavePictureDialog(QWidget *parent, LtsCanvas *canvas, QString
 {
   m_ui.setupUi(this);
 
-  m_width = canvas->viewWidth();
-  m_height = canvas->viewHeight();
-  m_ui.width->setValue(m_width);
-  m_ui.height->setValue(m_height);
+  m_width = static_cast<float>(canvas->viewWidth());
+  m_height = static_cast<float>(canvas->viewHeight());
+  m_ui.width->setValue(static_cast<int>(m_width));
+  m_ui.height->setValue(static_cast<int>(m_height));
 
   connect(m_ui.width, SIGNAL(valueChanged(int)), this, SLOT(widthChanged(int)));
   connect(m_ui.height, SIGNAL(valueChanged(int)), this, SLOT(heightChanged(int)));
@@ -38,7 +38,7 @@ void SavePictureDialog::widthChanged(int value)
   if (m_ui.maintainAspectRatio->isChecked())
   {
     m_inChange = true;
-    m_ui.height->setValue((int)(value * m_height / m_width));
+    m_ui.height->setValue((int)(static_cast<float>(value) * m_height / m_width));
     m_inChange = false;
   }
 }
@@ -53,7 +53,7 @@ void SavePictureDialog::heightChanged(int value)
   if (m_ui.maintainAspectRatio->isChecked())
   {
     m_inChange = true;
-    m_ui.height->setValue((int)(value * m_width / m_height));
+    m_ui.height->setValue((int)(static_cast<float>(value) * m_width / m_height));
     m_inChange = false;
   }
 }

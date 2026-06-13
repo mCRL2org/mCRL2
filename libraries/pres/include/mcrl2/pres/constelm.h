@@ -121,10 +121,8 @@ struct edge_traverser_stack_elem
   edge_map edges;
 
   edge_traverser_stack_elem(const data::data_expression& cond_pos, const data::data_expression& cond_neg, std::set<data::variable>&& free_vars)
-    : Cpos(cond_pos), Cneg(cond_neg)
-  {
-    std::swap(FV, free_vars);
-  }
+    : Cpos(cond_pos), Cneg(cond_neg), FV(std::move(free_vars))
+  {}
 };
 
 struct edge_condition_traverser: public pres_expression_traverser<edge_condition_traverser>

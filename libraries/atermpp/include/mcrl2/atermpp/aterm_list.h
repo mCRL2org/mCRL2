@@ -218,6 +218,7 @@ public:
   /// \brief Creates a term_list from the elements in the range.
   template<std::ranges::range R>
     requires std::is_convertible_v<std::ranges::range_value_t<R>, Term>
+  // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward) r is consumed via begin/end iterators; forwarding an rvalue range would be ill-formed for non-borrowed ranges.
   explicit term_list(R&& r)
     : aterm(detail::make_list_forward<Term, std::ranges::iterator_t<R>, detail::do_not_convert_term<Term> >
                 (std::ranges::begin(r), std::ranges::end(r), detail::do_not_convert_term<Term>()))

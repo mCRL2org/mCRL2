@@ -205,7 +205,7 @@ QVector3D SpringLayout::approxRepulsionForce<Octree>(const QVector3D& a, Octree&
   auto& super_nodes = tree.getSuperNodes(a);
   for (auto super_node : super_nodes)
   {
-    force += super_node->children * (*m_repFunc)(a, super_node->pos, ideal_distance);
+    force += static_cast<float>(super_node->children) * (*m_repFunc)(a, super_node->pos, ideal_distance);
   }
   force *= m_repulsion;
   num_nodes = super_nodes.size();
@@ -223,7 +223,7 @@ QVector3D SpringLayout::approxRepulsionForce<Quadtree>(const QVector3D& a, Quadt
   auto& super_nodes = tree.getSuperNodes({a.x(), a.y()});
   for (auto super_node : super_nodes)
   {
-    force += super_node->children * (*m_repFunc)(a, {super_node->pos.x(), super_node->pos.y(), 0}, ideal_distance);
+    force += static_cast<float>(super_node->children) * (*m_repFunc)(a, {super_node->pos.x(), super_node->pos.y(), 0}, ideal_distance);
   }
   force *= m_repulsion;
   num_nodes = super_nodes.size();
@@ -623,7 +623,7 @@ void SpringLayout::apply()
     bool new_anchored = false;
 
     // Offset the nodeCount to avoid multiplying by zero
-    float use_speed = m_speed * std::log2f(nodeCount+2) * 0.25f;
+    float use_speed = m_speed * std::log2f(static_cast<float>(nodeCount+2)) * 0.25f;
 
     for (std::size_t i = 0; i < nodeCount; ++i)
     {
@@ -640,7 +640,7 @@ void SpringLayout::apply()
       }
     }
 
-    float drift_secs = drift_timer.elapsed() * 0.001f; // seconds
+    float drift_secs = static_cast<float>(drift_timer.elapsed()) * 0.001f; // seconds
     QVector3D center_of_mass = slicedAverage(m_graph);
     if (new_anchored ^ any_anchored)
     {
@@ -714,7 +714,7 @@ void SpringLayout::apply()
     m_max_num_nodes = 0;
     m_total_num_nodes = 0;
 
-    float stability = std::abs(m_previous_energy - energy)/(edgeCount+nodeCount);
+    float stability = static_cast<float>(std::abs(m_previous_energy - energy)/static_cast<double>(edgeCount+nodeCount));
 
     if (m_glwidget.getDebugDrawGraphs())
     {
@@ -742,7 +742,7 @@ void SpringLayout::apply()
       m_stabilityCounter = 0;
       m_ui->m_ui.lblStable->setText("");
     }
-    m_previous_energy = energy;
+    m_previous_energy = static_cast<float>(energy);
 
     notifyNewFrame();
     m_graph.unlock(GRAPH_LOCK_TRACE);
@@ -866,7 +866,7 @@ void SpringLayout::resetPositions()
   std::size_t n_nodes = exploration ? m_graph.explorationNodeCount() : m_graph.nodeCount();
   std::size_t n_edges = exploration ? m_graph.explorationEdgeCount() : m_graph.edgeCount();
   bool is3D = m_glwidget.get3D();
-  float hwidth = 5 * std::pow(m_natLength * n_nodes, 1.0f / (is3D ? 3 : 2));
+  float hwidth = 5 * std::pow(m_natLength * static_cast<float>(n_nodes), 1.0f / static_cast<float>(is3D ? 3 : 2));
   for (std::size_t i = 0; i < n_nodes; i++)
   {
     std::size_t n = exploration ? m_graph.explorationNode(i) : i;
@@ -975,7 +975,7 @@ void SpringLayoutUi::onStabilityThresholdChanged(const QString& text)
 void SpringLayoutUi::onStabilityIterationsChanged(const QString& text)
 {
   bool success;
-  float num = text.toInt(&success);
+  int num = text.toInt(&success);
   if (success && num > 0)
   {
     m_layout.m_stabilityMaxCount = num;

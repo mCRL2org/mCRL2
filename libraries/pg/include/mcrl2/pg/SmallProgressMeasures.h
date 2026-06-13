@@ -173,7 +173,7 @@ public:
     int len(verti v) const { return (game_.priority(v) + 1 + p_)/2; }
 
     /*! Return whether the given SPM vector has top value. */
-    bool is_top(const verti vec[]) const { return vec[0] == NO_VERTEX; }
+    bool is_top(const verti* vec) const { return vec[0] == NO_VERTEX; }
 
     /*! Return whether the SPM vector for vertex `v` has top value. */
     bool is_top(verti v) const { return is_top(vec(v)); }
@@ -215,7 +215,7 @@ private:
     /*! Compares the first `N` elements of the given SPM vectors and returns
         -1, 0 or 1 to indicate that v is smaller than, equal to, or larger than
         w (respectively). */
-    inline int vector_cmp(const verti vec1[], const verti vec2[], int N) const;
+    inline int vector_cmp(const verti* vec1, const verti* vec2, int N) const;
 
     /*! Compares `N` elements of the SPM vectors for the given vertices. */
     inline int vector_cmp(verti v, verti w, int N) const;
@@ -359,7 +359,7 @@ public:
       which does more general preprocessing. */
   static void preprocess_game(ParityGame& game);
 
-private:
+public:
   SmallProgressMeasuresSolver(const SmallProgressMeasuresSolver&) = delete;
   SmallProgressMeasuresSolver& operator=(const SmallProgressMeasuresSolver&) = delete;
 
@@ -387,7 +387,7 @@ public:
   ParityGame::Strategy solve_normal() override;
   ParityGame::Strategy solve_alternate() override;
 
-private:
+public:
   SmallProgressMeasuresSolver2(const SmallProgressMeasuresSolver2&) = delete;
   SmallProgressMeasuresSolver2& operator=(const SmallProgressMeasuresSolver2&) = delete;
 };

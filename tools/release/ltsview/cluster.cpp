@@ -244,7 +244,7 @@ void Cluster::computeSizeAndPositions_FSM()
    * So: N * pi * 0.1^2 = 0.25 * pi * r^2
    * Hence: r = sqrt( N * 0.04 )
    */
-  topRadius = states.size()/(2*static_cast<float>(PI));
+  topRadius = static_cast<float>(states.size())/(2*static_cast<float>(PI));
 
   if (descendants.size() == 0)
   {
@@ -340,11 +340,11 @@ void Cluster::computeSizeAndPositions_FSM()
     bc_height += 1.0f;
 
     // Divide the remaining descendants over the rim of the circle.
-    float angle = 360.0f / (y-x);
+    float angle = 360.0f / static_cast<float>(y-x);
     int i = 0;
     while (x+i != y)
     {
-      descendants[x+i]->setPosition(i*angle);
+      descendants[x+i]->setPosition(static_cast<float>(i)*angle);
       ++i;
     }
   }
@@ -368,7 +368,7 @@ void Cluster::computeSizeAndPositions()
    * So: N * pi * 0.1^2 = 0.25 * pi * r^2
    * Hence: r = sqrt( N * 0.04 )
    */
-  topRadius = sqrt(states.size()*0.04f);
+  topRadius = static_cast<float>(sqrt(static_cast<float>(states.size())*0.04f));
 
   if (descendants.size() == 0)
   {
@@ -457,26 +457,26 @@ void Cluster::computeSizeAndPositions()
 
     int i = 0;
     int h = (y-x) / 2 + (y-x) % 2;
-    float angle = 360.0f / (y-x);
+    float angle = 360.0f / static_cast<float>(y-x);
     while (x != y)
     {
       if (i % 2 == 1)
       {
-        descendants[x]->setPosition(i*angle);
+        descendants[x]->setPosition(static_cast<float>(i)*angle);
         ++x;
         if (x != y)
         {
-          descendants[x]->setPosition((h+i)*angle);
+          descendants[x]->setPosition(static_cast<float>(h+i)*angle);
           ++x;
         }
       }
       else
       {
-        descendants[y-1]->setPosition(i*angle);
+        descendants[y-1]->setPosition(static_cast<float>(i)*angle);
         --y;
         if (x != y)
         {
-          descendants[y-1]->setPosition((h+i)*angle);
+          descendants[y-1]->setPosition(static_cast<float>(h+i)*angle);
           --y;
         }
       }

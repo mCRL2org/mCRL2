@@ -138,7 +138,7 @@ public:
   iterator insert( const_iterator pos, T&& value )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::insert(pos, value);
+    return super::insert(pos, std::move(value));
   }
   
   iterator insert( const_iterator pos, size_type count, const T& value )
@@ -165,7 +165,7 @@ public:
   iterator emplace( const_iterator pos, Args&&... args )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::emplace(pos, args...);
+    return super::emplace(pos, std::forward<Args>(args)...);
   }
 
   iterator erase( const_iterator pos )
@@ -189,14 +189,14 @@ public:
   void push_back( T&& value )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::push_back(value);
+    return super::push_back(std::move(value));
   }
 
   template< class... Args >
   reference emplace_back( Args&&... args )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    return super::emplace_back(args...);
+    return super::emplace_back(std::forward<Args>(args)...);
   }
 
   void pop_back()
@@ -214,14 +214,14 @@ public:
   void push_front( T&& value )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    super::push_front(value);
+    super::push_front(std::move(value));
   }
 
   template< class... Args >
   reference emplace_front( Args&&... args )
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    super::emplace_front(args...);
+    return super::emplace_front(std::forward<Args>(args)...);
   }
 
   void resize( size_type count )

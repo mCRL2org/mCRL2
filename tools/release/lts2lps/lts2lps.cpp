@@ -10,8 +10,8 @@
 /// \brief This tool reads a mcrl2 specification of a linear process,
 /// and translates it directly into LPS format.
 
-#define TOOLNAME "lts2lps"
-#define AUTHOR "Frank Stappers"
+constexpr const char* TOOLNAME = "lts2lps";
+constexpr const char* AUTHOR = "Frank Stappers";
 
 #include "mcrl2/utilities/input_output_tool.h"
 

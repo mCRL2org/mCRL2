@@ -25,11 +25,11 @@ Simulation::~Simulation()
   stop();
 }
 
-void Simulation::operator=(const Simulation &other)
+Simulation& Simulation::operator=(const Simulation &other)
 {
   if (&other == this)
   {
-    return;
+    return *this;
   }
 
   stop();
@@ -49,6 +49,8 @@ void Simulation::operator=(const Simulation &other)
   }
 
   emit changed();
+
+  return *this;
 }
 
 QList<Transition *> Simulation::availableTransitions() const

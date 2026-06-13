@@ -263,7 +263,7 @@ protected:
                         bool proper,
                         EdgeDirection edge_dir = EDGE_NONE );
 
-private:
+public:
   explicit StaticGraph(const StaticGraph& graph) = delete;
   StaticGraph& operator=(const StaticGraph& graph) = delete;
 

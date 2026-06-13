@@ -377,7 +377,7 @@ void FileBrowser::copyDirectory(QString oldPath, QString newPath, bool move)
     all.append(info.fileName());
   }
   QMetaObject::invokeMethod(&m_copythread, "init", Qt::QueuedConnection, Q_ARG(QString, oldPath), Q_ARG(QString, newPath), Q_ARG(QStringList, all), Q_ARG(bool, move));
-  m_copydialog.init(all.count(), move);
+  m_copydialog.init(static_cast<int>(all.count()), move);
   m_copythread.start(QThread::IdlePriority);
 }
 

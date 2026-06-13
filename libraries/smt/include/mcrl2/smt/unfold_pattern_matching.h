@@ -9,6 +9,8 @@
 #ifndef MCRL2_SMT_UNFOLD_PATTERN_MATCHING_H
 #define MCRL2_SMT_UNFOLD_PATTERN_MATCHING_H
 
+#include <utility>
+
 #include "mcrl2/data/join.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"
@@ -238,7 +240,7 @@ find_structured_sort_functions(const data::data_specification& dataspec, Skip sk
           if (find_result != constructor_application.end() && all_args_are_vars && all_vars_are_unique)
           {
             data::application::const_iterator::difference_type index = find_result - constructor_application.begin();
-            assert(index >= 0 && index < static_cast<data::application::const_iterator::difference_type>(constructor_application.size()));
+            assert(index >= 0 && std::cmp_less(index, constructor_application.size()));
             ssf.projection_func[constructor].resize(constructor_application.size());
             ssf.projection_func[constructor][index] = mapping;
           }

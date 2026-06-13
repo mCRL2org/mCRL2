@@ -99,18 +99,23 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     QByteArray localMsg = msg.toLocal8Bit();
     switch (type) {
     case QtDebugMsg:
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg) Maurice: waiting for std::format to be supported.
         fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         break;
     case QtInfoMsg:
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg) Maurice: waiting for std::format to be supported.
         fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         break;
     case QtWarningMsg:
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg) Maurice: waiting for std::format to be supported.
         fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         break;
     case QtCriticalMsg:
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg) Maurice: waiting for std::format to be supported.
         fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         break;
     case QtFatalMsg:
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg) Maurice: waiting for std::format to be supported.
         fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         abort();
     }

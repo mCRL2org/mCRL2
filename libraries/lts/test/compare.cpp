@@ -22,14 +22,14 @@ static lts_aut_t parse_aut(const std::string& s)
 }
 
 // a.(b+c)
-const std::string l1 =
+const std::string lts1 =
   "des(0,3,4)\n"
   "(0,\"a\",1)\n"
   "(1,\"b\",2)\n"
   "(1,\"c\",3)\n";
 
 // a.b+a.c
-const std::string l2 =
+const std::string lts2 =
   "des(0,4,5)\n"
   "(0,\"a\",1)\n"
   "(0,\"a\",2)\n"
@@ -101,130 +101,130 @@ BOOST_AUTO_TEST_CASE(test_reflexive)
 
 BOOST_AUTO_TEST_CASE(test_sim_1_2)
 {
-  BOOST_CHECK(!preorder_compare(l1,l2,lts_preorder::lts_pre_sim));  
-  BOOST_CHECK(preorder_compare(l2,l1,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!compare(l2,l1,lts_eq_sim));
-  BOOST_CHECK(!compare(l1,l2,lts_eq_sim));    
+  BOOST_CHECK(!preorder_compare(lts1,lts2,lts_preorder::lts_pre_sim));  
+  BOOST_CHECK(preorder_compare(lts2,lts1,lts_preorder::lts_pre_sim));
+  BOOST_CHECK(!compare(lts2,lts1,lts_eq_sim));
+  BOOST_CHECK(!compare(lts1,lts2,lts_eq_sim));    
 }
 
 BOOST_AUTO_TEST_CASE(test_sim_2_2a)
 {
-  BOOST_CHECK(preorder_compare(l2,l2a,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!preorder_compare(l2a,l2,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!compare(l2a,l2,lts_eq_sim));
-  BOOST_CHECK(!compare(l2,l2a,lts_eq_sim));    
+  BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_sim));
+  BOOST_CHECK(!preorder_compare(l2a,lts2,lts_preorder::lts_pre_sim));
+  BOOST_CHECK(!compare(l2a,lts2,lts_eq_sim));
+  BOOST_CHECK(!compare(lts2,l2a,lts_eq_sim));    
 }
 
 BOOST_AUTO_TEST_CASE(test_sim_1_3)
 {
-  BOOST_CHECK(!preorder_compare(l1,l3,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!preorder_compare(l3,l1,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!compare(l3,l1,lts_eq_sim));
-  BOOST_CHECK(!compare(l1,l3,lts_eq_sim));    
+  BOOST_CHECK(!preorder_compare(lts1,l3,lts_preorder::lts_pre_sim));
+  BOOST_CHECK(!preorder_compare(l3,lts1,lts_preorder::lts_pre_sim));
+  BOOST_CHECK(!compare(l3,lts1,lts_eq_sim));
+  BOOST_CHECK(!compare(lts1,l3,lts_eq_sim));    
 }
 
 
 BOOST_AUTO_TEST_CASE(test_sim_1_4)
 {
-  BOOST_CHECK(!preorder_compare(l1,l4,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(preorder_compare(l4,l1,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!compare(l1,l4,lts_eq_sim));
-  BOOST_CHECK(!compare(l4,l1,lts_eq_sim));
+  BOOST_CHECK(!preorder_compare(lts1,l4,lts_preorder::lts_pre_sim));
+  BOOST_CHECK(preorder_compare(l4,lts1,lts_preorder::lts_pre_sim));
+  BOOST_CHECK(!compare(lts1,l4,lts_eq_sim));
+  BOOST_CHECK(!compare(l4,lts1,lts_eq_sim));
 }
 
 
 BOOST_AUTO_TEST_CASE(test_ready_sim_1_2)
 {
-  BOOST_CHECK(!preorder_compare(l1,l2,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!preorder_compare(l2,l1,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!compare(l2,l1,lts_eq_ready_sim));
-  BOOST_CHECK(!compare(l1,l2,lts_eq_ready_sim));  
+  BOOST_CHECK(!preorder_compare(lts1,lts2,lts_preorder::lts_pre_ready_sim));
+  BOOST_CHECK(!preorder_compare(lts2,lts1,lts_preorder::lts_pre_ready_sim));
+  BOOST_CHECK(!compare(lts2,lts1,lts_eq_ready_sim));
+  BOOST_CHECK(!compare(lts1,lts2,lts_eq_ready_sim));  
 }
 
 BOOST_AUTO_TEST_CASE(test_ready_sim_2_2a)
 {
-  BOOST_CHECK(preorder_compare(l2,l2a,lts_preorder::lts_pre_ready_sim));      
-  BOOST_CHECK(!preorder_compare(l2a,l2,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!compare(l2,l2a,lts_eq_ready_sim));      
-  BOOST_CHECK(!compare(l2a,l2,lts_eq_ready_sim));  
+  BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_ready_sim));      
+  BOOST_CHECK(!preorder_compare(l2a,lts2,lts_preorder::lts_pre_ready_sim));
+  BOOST_CHECK(!compare(lts2,l2a,lts_eq_ready_sim));      
+  BOOST_CHECK(!compare(l2a,lts2,lts_eq_ready_sim));  
 }
 
 BOOST_AUTO_TEST_CASE(test_ready_sim_1_3)
 {
-  BOOST_CHECK(!preorder_compare(l1,l3,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!preorder_compare(l3,l1,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!compare(l3,l1,lts_eq_ready_sim));  
+  BOOST_CHECK(!preorder_compare(lts1,l3,lts_preorder::lts_pre_ready_sim));
+  BOOST_CHECK(!preorder_compare(l3,lts1,lts_preorder::lts_pre_ready_sim));
+  BOOST_CHECK(!compare(l3,lts1,lts_eq_ready_sim));  
 }
 
 BOOST_AUTO_TEST_CASE(test_ready_sim_1_4)
 {
-  BOOST_CHECK(!preorder_compare(l1,l4,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!preorder_compare(l4,l1,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!compare(l1,l4,lts_eq_ready_sim));  
+  BOOST_CHECK(!preorder_compare(lts1,l4,lts_preorder::lts_pre_ready_sim));
+  BOOST_CHECK(!preorder_compare(l4,lts1,lts_preorder::lts_pre_ready_sim));
+  BOOST_CHECK(!compare(lts1,l4,lts_eq_ready_sim));  
 }
 
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2)
 {
-  BOOST_CHECK(compare(l1,l2,lts_eq_trace));
-  BOOST_CHECK(compare(l2,l1,lts_eq_trace));
-  BOOST_CHECK(!compare(l2,l1,lts_eq_bisim));
-  BOOST_CHECK(!compare(l2,l1,lts_eq_bisim_gv));
-  BOOST_CHECK(!compare(l2,l1,lts_eq_bisim_gjkw));
-  BOOST_CHECK(preorder_compare(l1,l2,lts_preorder::lts_pre_trace));
-  BOOST_CHECK(preorder_compare(l2,l1,lts_preorder::lts_pre_trace));
-  BOOST_CHECK(preorder_compare(l1,l2,lts_preorder::lts_pre_trace_anti_chain));
-  BOOST_CHECK(preorder_compare(l2,l1,lts_preorder::lts_pre_trace_anti_chain));
-  BOOST_CHECK(preorder_compare(l1,l2,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(!preorder_compare(l2,l1,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(preorder_compare(l1,l2,lts_preorder::lts_pre_failures_divergence_refinement));
-  BOOST_CHECK(!preorder_compare(l2,l1,lts_preorder::lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(compare(lts1,lts2,lts_eq_trace));
+  BOOST_CHECK(compare(lts2,lts1,lts_eq_trace));
+  BOOST_CHECK(!compare(lts2,lts1,lts_eq_bisim));
+  BOOST_CHECK(!compare(lts2,lts1,lts_eq_bisim_gv));
+  BOOST_CHECK(!compare(lts2,lts1,lts_eq_bisim_gjkw));
+  BOOST_CHECK(preorder_compare(lts1,lts2,lts_preorder::lts_pre_trace));
+  BOOST_CHECK(preorder_compare(lts2,lts1,lts_preorder::lts_pre_trace));
+  BOOST_CHECK(preorder_compare(lts1,lts2,lts_preorder::lts_pre_trace_anti_chain));
+  BOOST_CHECK(preorder_compare(lts2,lts1,lts_preorder::lts_pre_trace_anti_chain));
+  BOOST_CHECK(preorder_compare(lts1,lts2,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(!preorder_compare(lts2,lts1,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(preorder_compare(lts1,lts2,lts_preorder::lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(!preorder_compare(lts2,lts1,lts_preorder::lts_pre_failures_divergence_refinement));
 }
 
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2a)
 {
-  BOOST_CHECK(compare(l2,l2a,lts_eq_trace));
-  BOOST_CHECK(compare(l2a,l2,lts_eq_trace));
-  BOOST_CHECK(!compare(l2a,l2,lts_eq_bisim));
-  BOOST_CHECK(!compare(l2a,l2,lts_eq_bisim_gv));
-  BOOST_CHECK(!compare(l2a,l2,lts_eq_bisim_gjkw));
-  BOOST_CHECK(preorder_compare(l2,l2a,lts_preorder::lts_pre_trace));
-  BOOST_CHECK(preorder_compare(l2a,l2,lts_preorder::lts_pre_trace));
-  BOOST_CHECK(preorder_compare(l2,l2a,lts_preorder::lts_pre_trace_anti_chain));
-  BOOST_CHECK(preorder_compare(l2a,l2,lts_preorder::lts_pre_trace_anti_chain));
-  BOOST_CHECK(preorder_compare(l2,l2a,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(preorder_compare(l2a,l2,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(preorder_compare(l2,l2a,lts_preorder::lts_pre_failures_divergence_refinement));
-  BOOST_CHECK(preorder_compare(l2a,l2,lts_preorder::lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(compare(lts2,l2a,lts_eq_trace));
+  BOOST_CHECK(compare(l2a,lts2,lts_eq_trace));
+  BOOST_CHECK(!compare(l2a,lts2,lts_eq_bisim));
+  BOOST_CHECK(!compare(l2a,lts2,lts_eq_bisim_gv));
+  BOOST_CHECK(!compare(l2a,lts2,lts_eq_bisim_gjkw));
+  BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_trace));
+  BOOST_CHECK(preorder_compare(l2a,lts2,lts_preorder::lts_pre_trace));
+  BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_trace_anti_chain));
+  BOOST_CHECK(preorder_compare(l2a,lts2,lts_preorder::lts_pre_trace_anti_chain));
+  BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(preorder_compare(l2a,lts2,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(preorder_compare(l2a,lts2,lts_preorder::lts_pre_failures_divergence_refinement));
 }
 
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_3)
 {
-  BOOST_CHECK(!compare(l1,l3,lts_eq_trace));
-  BOOST_CHECK(!compare(l3,l1,lts_eq_trace));
-  BOOST_CHECK(compare(l1,l3,lts_eq_weak_trace));
-  BOOST_CHECK(compare(l3,l1,lts_eq_weak_trace));
-  BOOST_CHECK(!preorder_compare(l1,l3,lts_preorder::lts_pre_trace_anti_chain));
-  BOOST_CHECK(!preorder_compare(l3,l1,lts_preorder::lts_pre_trace_anti_chain));
-  BOOST_CHECK(preorder_compare(l1,l3,lts_preorder::lts_pre_weak_trace_anti_chain));
-  BOOST_CHECK(preorder_compare(l3,l1,lts_preorder::lts_pre_weak_trace_anti_chain));
-  BOOST_CHECK(!preorder_compare(l1,l3,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(!preorder_compare(l3,l1,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(preorder_compare(l1,l3,lts_preorder::lts_pre_weak_failures_refinement));
-  BOOST_CHECK(preorder_compare(l3,l1,lts_preorder::lts_pre_weak_failures_refinement));
-  BOOST_CHECK(preorder_compare(l1,l3,lts_preorder::lts_pre_failures_divergence_refinement));
-  BOOST_CHECK(preorder_compare(l3,l1,lts_preorder::lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(!compare(lts1,l3,lts_eq_trace));
+  BOOST_CHECK(!compare(l3,lts1,lts_eq_trace));
+  BOOST_CHECK(compare(lts1,l3,lts_eq_weak_trace));
+  BOOST_CHECK(compare(l3,lts1,lts_eq_weak_trace));
+  BOOST_CHECK(!preorder_compare(lts1,l3,lts_preorder::lts_pre_trace_anti_chain));
+  BOOST_CHECK(!preorder_compare(l3,lts1,lts_preorder::lts_pre_trace_anti_chain));
+  BOOST_CHECK(preorder_compare(lts1,l3,lts_preorder::lts_pre_weak_trace_anti_chain));
+  BOOST_CHECK(preorder_compare(l3,lts1,lts_preorder::lts_pre_weak_trace_anti_chain));
+  BOOST_CHECK(!preorder_compare(lts1,l3,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(!preorder_compare(l3,lts1,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(preorder_compare(lts1,l3,lts_preorder::lts_pre_weak_failures_refinement));
+  BOOST_CHECK(preorder_compare(l3,lts1,lts_preorder::lts_pre_weak_failures_refinement));
+  BOOST_CHECK(preorder_compare(lts1,l3,lts_preorder::lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(preorder_compare(l3,lts1,lts_preorder::lts_pre_failures_divergence_refinement));
 }
 
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_4)
 {
-  BOOST_CHECK(!compare(l1,l4,lts_eq_trace));
-  BOOST_CHECK(!compare(l4,l1,lts_eq_trace));
+  BOOST_CHECK(!compare(lts1,l4,lts_eq_trace));
+  BOOST_CHECK(!compare(l4,lts1,lts_eq_trace));
 }
 
 BOOST_AUTO_TEST_CASE(test_symmetric_weak_trace_2_3)
 {
-  BOOST_CHECK(compare(l2,l3,lts_eq_weak_trace));
-  BOOST_CHECK(compare(l3,l2,lts_eq_weak_trace));
+  BOOST_CHECK(compare(lts2,l3,lts_eq_weak_trace));
+  BOOST_CHECK(compare(l3,lts2,lts_eq_weak_trace));
 }
 
 BOOST_AUTO_TEST_CASE(test_symmetric_weak_trace_3_4)
@@ -293,8 +293,8 @@ BOOST_AUTO_TEST_CASE(laws_for_failures_equivalence)
 // a.(b+c) is typically failure included in a.b+a(b+c), but not vice versa.
 BOOST_AUTO_TEST_CASE(failures_inclusion_test)
 {
-  BOOST_CHECK(preorder_compare(l1,ababc,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(!preorder_compare(ababc,l1,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(preorder_compare(lts1,ababc,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(!preorder_compare(ababc,lts1,lts_preorder::lts_pre_failures_refinement));
 }
 
 // a.(tau.b + tau.c)
@@ -309,14 +309,14 @@ BOOST_AUTO_TEST_CASE(failures_inclusion_test)
 // a.(tau.b+tau.c) and a.b + a.c are weak failure equivalent.
 BOOST_AUTO_TEST_CASE(weak_failures_equivalence_test)
 {
-  BOOST_CHECK(!preorder_compare(l2,a_taub_tauc,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(!preorder_compare(a_taub_tauc,l2,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(preorder_compare(l2,a_taub_tauc,lts_preorder::lts_pre_weak_trace));
-  BOOST_CHECK(preorder_compare(a_taub_tauc,l2,lts_preorder::lts_pre_weak_trace));
-  BOOST_CHECK(preorder_compare(l2,a_taub_tauc,lts_preorder::lts_pre_weak_trace_anti_chain));
-  BOOST_CHECK(preorder_compare(a_taub_tauc,l2,lts_preorder::lts_pre_weak_trace_anti_chain));
-  BOOST_CHECK(preorder_compare(l2,a_taub_tauc,lts_preorder::lts_pre_weak_failures_refinement));
-  BOOST_CHECK(preorder_compare(a_taub_tauc,l2,lts_preorder::lts_pre_weak_failures_refinement));
+  BOOST_CHECK(!preorder_compare(lts2,a_taub_tauc,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(!preorder_compare(a_taub_tauc,lts2,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(preorder_compare(lts2,a_taub_tauc,lts_preorder::lts_pre_weak_trace));
+  BOOST_CHECK(preorder_compare(a_taub_tauc,lts2,lts_preorder::lts_pre_weak_trace));
+  BOOST_CHECK(preorder_compare(lts2,a_taub_tauc,lts_preorder::lts_pre_weak_trace_anti_chain));
+  BOOST_CHECK(preorder_compare(a_taub_tauc,lts2,lts_preorder::lts_pre_weak_trace_anti_chain));
+  BOOST_CHECK(preorder_compare(lts2,a_taub_tauc,lts_preorder::lts_pre_weak_failures_refinement));
+  BOOST_CHECK(preorder_compare(a_taub_tauc,lts2,lts_preorder::lts_pre_weak_failures_refinement));
 }
 
 // a.b + a.(b+c)
@@ -331,16 +331,16 @@ BOOST_AUTO_TEST_CASE(weak_failures_equivalence_test)
 // But a.tau*.(b+c) is not failures-divergence included in a.(b+c). The reverse however holds.
 BOOST_AUTO_TEST_CASE(failures_divergence_inclusion_test)
 {
-  BOOST_CHECK(!preorder_compare(l1,abc_div,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(!preorder_compare(abc_div,l1,lts_preorder::lts_pre_failures_refinement));
-  BOOST_CHECK(preorder_compare(abc_div,l1,lts_preorder::lts_pre_weak_trace));
-  BOOST_CHECK(preorder_compare(l1,abc_div,lts_preorder::lts_pre_weak_trace));
-  BOOST_CHECK(preorder_compare(abc_div,l1,lts_preorder::lts_pre_weak_trace_anti_chain));
-  BOOST_CHECK(preorder_compare(l1,abc_div,lts_preorder::lts_pre_weak_trace_anti_chain));
-  BOOST_CHECK(!preorder_compare(l1,abc_div,lts_preorder::lts_pre_weak_failures_refinement));
-  BOOST_CHECK(preorder_compare(abc_div,l1,lts_preorder::lts_pre_weak_failures_refinement));
-  BOOST_CHECK(preorder_compare(l1,abc_div,lts_preorder::lts_pre_failures_divergence_refinement));
-  BOOST_CHECK(!preorder_compare(abc_div,l1,lts_preorder::lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(!preorder_compare(lts1,abc_div,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(!preorder_compare(abc_div,lts1,lts_preorder::lts_pre_failures_refinement));
+  BOOST_CHECK(preorder_compare(abc_div,lts1,lts_preorder::lts_pre_weak_trace));
+  BOOST_CHECK(preorder_compare(lts1,abc_div,lts_preorder::lts_pre_weak_trace));
+  BOOST_CHECK(preorder_compare(abc_div,lts1,lts_preorder::lts_pre_weak_trace_anti_chain));
+  BOOST_CHECK(preorder_compare(lts1,abc_div,lts_preorder::lts_pre_weak_trace_anti_chain));
+  BOOST_CHECK(!preorder_compare(lts1,abc_div,lts_preorder::lts_pre_weak_failures_refinement));
+  BOOST_CHECK(preorder_compare(abc_div,lts1,lts_preorder::lts_pre_weak_failures_refinement));
+  BOOST_CHECK(preorder_compare(lts1,abc_div,lts_preorder::lts_pre_failures_divergence_refinement));
+  BOOST_CHECK(!preorder_compare(abc_div,lts1,lts_preorder::lts_pre_failures_divergence_refinement));
 }
 
 //  Example by Verum showing an error in the weak failures inclusion check. Did not work with 

@@ -83,7 +83,7 @@ void DiagramEditor::deselectAll()
 
   for (std::size_t i = 0; i < sizeShapes; ++i)
   {
-    m_diagram->shape(i)->setModeNormal();
+    m_diagram->shape(static_cast<int>(i))->setModeNormal();
   }
 }
 
@@ -287,7 +287,7 @@ void DiagramEditor::editTextSize()
   if (s != nullptr)
   {
     bool ok;
-    int size = QInputDialog::getInt(this, "Set Text Size", "Points:", s->textSize(), 6, 72, 1, &ok);
+    int size = QInputDialog::getInt(this, "Set Text Size", "Points:", static_cast<int>(s->textSize()), 6, 72, 1, &ok);
     if (ok)
     {
       s->setTextSize(size);
@@ -327,7 +327,7 @@ void DiagramEditor::cutShapes()
     for (auto & shape : shapes)
     {
       m_clipBoardList.append(new Shape(*shape));
-      m_diagram->removeShape(shape->index());
+      m_diagram->removeShape(static_cast<int>(shape->index()));
     }
   }
   update();

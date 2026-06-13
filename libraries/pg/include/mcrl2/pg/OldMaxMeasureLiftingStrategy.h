@@ -38,9 +38,9 @@ public:
         return std::vector<verti>(spm_.vec(v), spm_.vec(v) + spm_.len(v));
     }
 
-private:
+public:
   OldMaxMeasureLiftingStrategy(const OldMaxMeasureLiftingStrategy&) = delete;
-  OldMaxMeasureLiftingStrategy operator=(const OldMaxMeasureLiftingStrategy&) = delete;
+  OldMaxMeasureLiftingStrategy& operator=(const OldMaxMeasureLiftingStrategy&) = delete;
 
 private:
     const SmallProgressMeasures &spm_;

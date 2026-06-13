@@ -260,7 +260,7 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
     {
       pbes_expression p;
       pbes_expression x = std::accumulate(impl.rhs.begin(), impl.rhs.end(), F, 
-                                          [&p](const pbes_expression& arg1, const pbes_expression& arg2) -> const pbes_expression
+                                          [&p](const pbes_expression& arg1, const pbes_expression& arg2) -> pbes_expression
                                               {
                                                 data::optimized_or(p, arg1, arg2);
                                                 return p;

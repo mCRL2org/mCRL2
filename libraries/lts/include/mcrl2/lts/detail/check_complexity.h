@@ -93,6 +93,7 @@
 #include <cassert>
 #include <cmath>         // for std::log2()
 #include <climits>       // for CHAR_BIT
+#include <utility>       // for std::cmp_less_equal
 
 #include "mcrl2/utilities/logger.h"
 
@@ -281,7 +282,7 @@ class check_complexity
         for_all_s_prime_in_pred_s_setminus_Red_3_18l,
             // The work in the following counter is assigned to red (new
             // bottom) states if the blue block is smaller!
-        if___s_prime_has_transition_to_SpC_3_23l,
+        if_s_prime_has_transition_to_SpC_3_23l,
 
         // temporary transition counters (red):
         while_FromRed_is_not_empty_3_6r,
@@ -324,37 +325,37 @@ class check_complexity
         // state counters
             // If every state of a block is handled by some loop, we
             // abbreviate the counter to a block counter.
-        split__find_predecessors_of_R_or_U_state,
-                    STATE_dnj_MIN = split__find_predecessors_of_R_or_U_state,
+        split_find_predecessors_of_R_or_U_state,
+                    STATE_dnj_MIN = split_find_predecessors_of_R_or_U_state,
 
         // temporary state counters (U-coroutine):
-        split_U__find_predecessors_of_U_state,
-                    STATE_dnj_MIN_TEMP = split_U__find_predecessors_of_U_state,
+        split_U_find_predecessors_of_U_state,
+                    STATE_dnj_MIN_TEMP = split_U_find_predecessors_of_U_state,
 
         // temporary state counters (R-coroutine):
-        split_R__find_predecessors_of_R_state,
-                    STATE_dnj_MAX_TEMP = split_R__find_predecessors_of_R_state,
+        split_R_find_predecessors_of_R_state,
+                    STATE_dnj_MAX_TEMP = split_R_find_predecessors_of_R_state,
         handle_new_noninert_transns,
                     STATE_dnj_MAX = handle_new_noninert_transns,
 
         // bunch counters (only for small bunches, i. e. bunches that have been
         // split off from a large bunch)
-        refine_partition_until_stable__find_pred,
-                    BUNCH_dnj_MIN = refine_partition_until_stable__find_pred,
-                    BUNCH_dnj_MAX = refine_partition_until_stable__find_pred,
+        refine_partition_until_stable_find_pred,
+                    BUNCH_dnj_MIN = refine_partition_until_stable_find_pred,
+                    BUNCH_dnj_MAX = refine_partition_until_stable_find_pred,
 
         // block_bunch-slice counters (only for block_bunch-slices that are
         // part of a small bunch)
-        refine_partition_until_stable__stabilize,
-                  BLOCK_BUNCH_dnj_MIN=refine_partition_until_stable__stabilize,
-        refine_partition_until_stable__stabilize_for_large_splitter,
-        handle_new_noninert_transns__make_unstable_temp,
+        refine_partition_until_stable_stabilize,
+                  BLOCK_BUNCH_dnj_MIN=refine_partition_until_stable_stabilize,
+        refine_partition_until_stable_stabilize_for_large_splitter,
+        handle_new_noninert_transns_make_unstable_temp,
                     BLOCK_BUNCH_dnj_MIN_TEMP =
-                               handle_new_noninert_transns__make_unstable_temp,
+                               handle_new_noninert_transns_make_unstable_temp,
                     BLOCK_BUNCH_dnj_MAX_TEMP =
-                               handle_new_noninert_transns__make_unstable_temp,
+                               handle_new_noninert_transns_make_unstable_temp,
                     BLOCK_BUNCH_dnj_MAX =
-                               handle_new_noninert_transns__make_unstable_temp,
+                               handle_new_noninert_transns_make_unstable_temp,
 
         // transition counters
             // If every transition of a state is handled by some loop, we
@@ -362,63 +363,63 @@ class check_complexity
             // transitivity, to a block counter).
         move_out_slice_to_new_block, // source block size
                     TRANS_dnj_MIN = move_out_slice_to_new_block,
-        split__handle_transition_from_R_or_U_state, // source block size
-        split__handle_transition_to_R_or_U_state, // target block size
+        split_handle_transition_from_R_or_U_state, // source block size
+        split_handle_transition_to_R_or_U_state, // target block size
 
         // temporary transition counters (U-coroutine):
-        split_U__handle_transition_to_U_state, // target block size
-                    TRANS_dnj_MIN_TEMP = split_U__handle_transition_to_U_state,
-        split_U__test_noninert_transitions, // R: new bottom;
+        split_U_handle_transition_to_U_state, // target block size
+                    TRANS_dnj_MIN_TEMP = split_U_handle_transition_to_U_state,
+        split_U_test_noninert_transitions, // R: new bottom;
                                             // U: source block size
 
         // temporary transition counters (R-coroutine):
-        split_R__handle_transition_from_R_state, // source block size
-        split_R__handle_transition_to_R_state, // target block size
-                    TRANS_dnj_MAX_TEMP = split_R__handle_transition_to_R_state,
+        split_R_handle_transition_from_R_state, // source block size
+        split_R_handle_transition_to_R_state, // target block size
+                    TRANS_dnj_MAX_TEMP = split_R_handle_transition_to_R_state,
 
         // transition counters for new bottom states:
-        split__test_noninert_transitions_found_new_bottom_state,
-        handle_new_noninert_transns__make_unstable_a_priori,
-        handle_new_noninert_transns__make_unstable_a_posteriori,
-        refine_partition_until_stable__stabilize_new_noninert_a_priori,
-        refine_partition_until_stable__stabilize_new_noninert_a_posteriori,
+        split_test_noninert_transitions_found_new_bottom_state,
+        handle_new_noninert_transns_make_unstable_a_priori,
+        handle_new_noninert_transns_make_unstable_a_posteriori,
+        refine_partition_until_stable_stabilize_new_noninert_a_priori,
+        refine_partition_until_stable_stabilize_new_noninert_a_posteriori,
             TRANS_dnj_MAX =
-            refine_partition_until_stable__stabilize_new_noninert_a_posteriori,
+            refine_partition_until_stable_stabilize_new_noninert_a_posteriori,
 
         /*--------------- counters for the bisim_gj algorithm ---------------*/
 
         // block counters
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(constellation size)
-        refine_partition_until_it_becomes_stable__find_splitter,
+        refine_partition_until_it_becomes_stable_find_splitter,
             BLOCK_gj_MIN =
-                       refine_partition_until_it_becomes_stable__find_splitter,
+                       refine_partition_until_it_becomes_stable_find_splitter,
             // Invariant: 0 <= (counter value) <= ilog2 n - ilog2(block size)
-        splitB__update_BLC_of_smaller_subblock,
-            BLOCK_gj_MAX = splitB__update_BLC_of_smaller_subblock,
+        splitB_update_BLC_of_smaller_subblock,
+            BLOCK_gj_MAX = splitB_update_BLC_of_smaller_subblock,
 
         // state counters
             // Invariant: 0 <= (counter value) <= ilog2 n - ilog2(block size)
-        split_block_B_into_R_and_BminR__carry_out_split,
-            STATE_gj_MIN = split_block_B_into_R_and_BminR__carry_out_split,
-        split_block_B_into_R_and_BminR__skip_over_state,
-        simple_splitB__find_bottom_state,
-        simple_splitB__find_predecessors_of_R_or_U_state,
-        multiple_swap_states_in_block__account_for_swap_in_aborted_block,
-        multiple_swap_states_in_block__swap_state_in_small_block,
+        split_block_B_into_R_and_BminR_carry_out_split,
+            STATE_gj_MIN = split_block_B_into_R_and_BminR_carry_out_split,
+        split_block_B_into_R_and_BminR_skip_over_state,
+        simple_splitB_find_bottom_state,
+        simple_splitB_find_predecessors_of_R_or_U_state,
+        multiple_swap_states_in_block_account_for_swap_in_aborted_block,
+        multiple_swap_states_in_block_swap_state_in_small_block,
         // temporary state counters
             // Invariant: 0 <= (counter value) <= 1
-        simple_splitB_R__find_predecessors,
-            STATE_gj_MIN_TEMP = simple_splitB_R__find_predecessors,
-        simple_splitB_U__find_predecessors,
-            STATE_gj_MAX_TEMP = simple_splitB_U__find_predecessors,
+        simple_splitB_R_find_predecessors,
+            STATE_gj_MIN_TEMP = simple_splitB_R_find_predecessors,
+        simple_splitB_U_find_predecessors,
+            STATE_gj_MAX_TEMP = simple_splitB_U_find_predecessors,
         // bottom state counters
-        stabilizeB__prepare_block,
-        stabilizeB__distribute_states_over_Phat,
+        stabilizeB_prepare_block,
+        stabilizeB_distribute_states_over_Phat,
         // other state counter
             // Invariant: 0 <= (counter value) <= 1
-        create_initial_partition__set_start_incoming_transitions,
-            STATE_gj_MAX = create_initial_partition__set_start_incoming_transitions,
+        create_initial_partition_set_start_incoming_transitions,
+            STATE_gj_MAX = create_initial_partition_set_start_incoming_transitions,
 
         // BLC slice counters
             // Invariant:
@@ -426,52 +427,52 @@ class check_complexity
                 // Note that it should be the source constellation size,
                 // even though the BLC slice only contains transitions
                 // from a single source block.
-        refine_partition_until_it_becomes_stable__prepare_cosplit,
-            BLC_gj_MIN = refine_partition_until_it_becomes_stable__prepare_cosplit,
+        refine_partition_until_it_becomes_stable_prepare_cosplit,
+            BLC_gj_MIN = refine_partition_until_it_becomes_stable_prepare_cosplit,
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
-            refine_partition_until_it_becomes_stable__correct_end_of_calM,
-            refine_partition_until_it_becomes_stable__execute_main_split,
-            four_way_splitB__handle_transitions_in_main_splitter,
-            BLC_gj_MAX = four_way_splitB__handle_transitions_in_main_splitter,
+            refine_partition_until_it_becomes_stable_correct_end_of_calM,
+            refine_partition_until_it_becomes_stable_execute_main_split,
+            four_way_splitB_handle_transitions_in_main_splitter,
+            BLC_gj_MAX = four_way_splitB_handle_transitions_in_main_splitter,
 
         // transition counters
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(source block size)
-        simple_splitB__handle_transition_from_R_or_U_state,
-            TRANS_gj_MIN = simple_splitB__handle_transition_from_R_or_U_state,
+        simple_splitB_handle_transition_from_R_or_U_state,
+            TRANS_gj_MIN = simple_splitB_handle_transition_from_R_or_U_state,
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target block size)
-        simple_splitB__handle_transition_to_R_or_U_state,
+        simple_splitB_handle_transition_to_R_or_U_state,
             // Invariant:
             // 0 <= (counter value) <= ilog2 n - ilog2(target constln size)
-        refine_partition_until_it_becomes_stable__find_cotransition,
+        refine_partition_until_it_becomes_stable_find_cotransition,
             // Invariant:
             // 0 == (counter value) during the first half of initialisation
             // 0 <= (counter value) <= ilog2 n after the quicksort part of the
             // initialisation
-        order_BLC_transitions__sort_transition,
+        order_BLC_transitions_sort_transition,
         // temporary transition counters
-        simple_splitB_R__handle_transition_from_R_state, // source block size
-            TRANS_gj_MIN_TEMP = simple_splitB_R__handle_transition_from_R_state,
-        simple_splitB_R__handle_transition_to_R_state, // target block size
-        simple_splitB_U__handle_transition_to_U_state, // target block size
-        simple_splitB_U__handle_transition_from_potential_U_state, // source is in U: source block size
+        simple_splitB_R_handle_transition_from_R_state, // source block size
+            TRANS_gj_MIN_TEMP = simple_splitB_R_handle_transition_from_R_state,
+        simple_splitB_R_handle_transition_to_R_state, // target block size
+        simple_splitB_U_handle_transition_to_U_state, // target block size
+        simple_splitB_U_handle_transition_from_potential_U_state, // source is in U: source block size
                                                              // source is in R: new bottom state
-            TRANS_gj_MAX_TEMP = simple_splitB_U__handle_transition_from_potential_U_state,
+            TRANS_gj_MAX_TEMP = simple_splitB_U_handle_transition_from_potential_U_state,
         // counters for transitions starting in (new) bottom states
             // Invariant: 0 <= (counter value) <= (source is a bottom state)
-        simple_splitB__test_outgoing_transitions_found_new_bottom_state,
-        splitB__unmark_transitions_out_of_new_bottom_block,
-        splitB__unmark_transitions_out_of_new_bottom_block_afterwards,
-        stabilizeB__initialize_Qhat,
-        stabilizeB__initialize_Qhat_afterwards,
-        stabilizeB__main_loop,
-        stabilizeB__main_loop_afterwards,
+        simple_splitB_test_outgoing_transitions_found_new_bottom_state,
+        splitB_unmark_transitions_out_of_new_bottom_block,
+        splitB_unmark_transitions_out_of_new_bottom_block_afterwards,
+        stabilizeB_initialize_Qhat,
+        stabilizeB_initialize_Qhat_afterwards,
+        stabilizeB_main_loop,
+        stabilizeB_main_loop_afterwards,
         // other transition counters
             // Invariant: 0 <= (counter value) <= 1
-        create_initial_partition__refine_block,
-            TRANS_gj_MAX = create_initial_partition__refine_block
+        create_initial_partition_refine_block,
+            TRANS_gj_MAX = create_initial_partition_refine_block
     };
 
 #ifndef NDEBUG
@@ -527,7 +528,7 @@ class check_complexity
     {
         #ifndef NDEBUG
             assert(0 <= sensible_work);
-            assert(no_of_waiting_cycles <= (trans_type) sensible_work);
+            assert(std::cmp_less_equal(no_of_waiting_cycles, sensible_work));
             no_of_waiting_cycles = 0;
             cannot_wait_before_reset = true;
         #endif
@@ -1362,7 +1363,7 @@ class check_complexity
             assert((log_n + 1U) / 2U <= max_source_block);
             assert(max_source_block <= log_n);
             for (enum counter_type ctr = TRANS_dnj_MIN;
-                        ctr < split__handle_transition_to_R_or_U_state;
+                        ctr < split_handle_transition_to_R_or_U_state;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - TRANS_dnj_MIN] <= max_source_block);
@@ -1370,7 +1371,7 @@ class check_complexity
             }
             assert((log_n + 1U) / 2U <= max_target_block);
             assert(max_target_block <= log_n);
-            for(enum counter_type ctr=split__handle_transition_to_R_or_U_state;
+            for(enum counter_type ctr=split_handle_transition_to_R_or_U_state;
                         ctr < TRANS_dnj_MIN_TEMP;
                                            ctr = (enum counter_type) (ctr + 1))
             {
@@ -1477,7 +1478,7 @@ class check_complexity
             assert(max_B <= log_n);
             enum counter_type ctr;
             for (ctr = BLOCK_gj_MIN ;
-                       ctr < splitB__update_BLC_of_smaller_subblock;
+                       ctr < splitB_update_BLC_of_smaller_subblock;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - BLOCK_gj_MIN] <= max_C);
@@ -1524,7 +1525,7 @@ class check_complexity
             assert(max_targetC <= log_n);
             enum counter_type ctr;
             for (ctr = BLC_gj_MIN ; ctr <
-                 refine_partition_until_it_becomes_stable__correct_end_of_calM;
+                 refine_partition_until_it_becomes_stable_correct_end_of_calM;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - BLC_gj_MIN] <= max_sourceC);
@@ -1603,7 +1604,7 @@ class check_complexity
             // bottom state counters must be 0 for non-bottom states and 1 for
             // bottom states:
             assert((unsigned) bottom <= 1);
-            for(; ctr<create_initial_partition__set_start_incoming_transitions;
+            for(; ctr<create_initial_partition_set_start_incoming_transitions;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 if (counters[ctr - STATE_gj_MIN] > (unsigned) bottom)
@@ -1675,20 +1676,20 @@ class check_complexity
             assert(max_targetC <= max_targetB);
             enum counter_type ctr;
             for (ctr = TRANS_gj_MIN;
-                        ctr < simple_splitB__handle_transition_to_R_or_U_state;
+                        ctr < simple_splitB_handle_transition_to_R_or_U_state;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - TRANS_gj_MIN] <= max_sourceB);
                 counters[ctr - TRANS_gj_MIN] = max_sourceB;
             }
             for ( ; ctr <
-              refine_partition_until_it_becomes_stable__find_cotransition;
+              refine_partition_until_it_becomes_stable_find_cotransition;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - TRANS_gj_MIN] <= max_targetB);
                 counters[ctr - TRANS_gj_MIN] = max_targetB;
             }
-            for ( ; ctr < order_BLC_transitions__sort_transition;
+            for ( ; ctr < order_BLC_transitions_sort_transition;
                                              ctr = (enum counter_type) (ctr+1))
             {
                 assert(counters[ctr - TRANS_gj_MIN] <= max_targetC);
@@ -1713,7 +1714,7 @@ class check_complexity
             }
             // bottom state counters must be 0 for transitions from non-bottom
             // states and 1 for other transitions
-            for( ; ctr < create_initial_partition__refine_block ;
+            for( ; ctr < create_initial_partition_refine_block ;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 if (counters[ctr - TRANS_gj_MIN] > (unsigned) source_bottom)

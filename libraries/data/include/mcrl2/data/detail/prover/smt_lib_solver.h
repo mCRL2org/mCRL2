@@ -870,6 +870,7 @@ class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_
 
     inline static void exec()
     {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg) execlp is an inherently variadic POSIX API.
       ::execlp("cvc3", "cvc3", "-lang", "smt", (char*)nullptr);
     }
 
@@ -908,6 +909,7 @@ class z3_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< z3_smt_so
 
     inline static void exec()
     {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg) execlp is an inherently variadic POSIX API.
       ::execlp("z3", "z3", "-smt", "-in", (char*)nullptr);
     }
 
@@ -945,6 +947,7 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
 
     inline static void exec()
     {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg) execlp is an inherently variadic POSIX API.
       ::execlp("ario", "ario", (char*)nullptr);
     }
 

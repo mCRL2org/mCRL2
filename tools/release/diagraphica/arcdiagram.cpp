@@ -390,7 +390,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawTreeLvls()
         double xRgt =  posTreeTopLft[i][0].x - 2.0*radLeaves;
 
         VisUtils::setColor(settings->textColor.value());
-        VisUtils::drawLabelRight(texCharId, xLft, yTxt, settings->textSize.value()*pix/CHARHEIGHT, lbl);
+        VisUtils::drawLabelRight(&texCharId[0], xLft, yTxt, settings->textSize.value()*pix/CHARHEIGHT, lbl);
         VisUtils::setColor(VisUtils::lightGray);
         VisUtils::drawLine(xLft, xRgt, yLin, yLin);
 
@@ -399,7 +399,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawTreeLvls()
         xRgt = 0.5*wth - radLeaves;
 
         VisUtils::setColor(settings->textColor.value());
-        VisUtils::drawLabelLeft(texCharId, xRgt, yTxt, settings->textSize.value()*pix/CHARHEIGHT, lbl);
+        VisUtils::drawLabelLeft(&texCharId[0], xRgt, yTxt, settings->textSize.value()*pix/CHARHEIGHT, lbl);
         VisUtils::setColor(VisUtils::lightGray);
         VisUtils::drawLine(xLft, xRgt, yLin, yLin);
       }
@@ -494,7 +494,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
 
         glPushName((GLuint) i);
         glPushMatrix();
-        glTranslatef(x, y, 0.0);
+        glTranslatef(static_cast<GLfloat>(x), static_cast<GLfloat>(y), 0.0f);
         glScalef(0.2f, 0.2f, 0.2f);
 
         std::vector< double > vals;
@@ -506,7 +506,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
           node = framesDgrm[i][frameIdxDgrm[i]]->getNode(0);
           if (attr->getSizeCurValues() > 0)
           {
-            vals.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+            vals.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
           }
           else
           {
@@ -583,8 +583,8 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
           }
 
           glPushMatrix();
-          glTranslatef(xL, yL, 0.0);
-          glRotatef(aglDeg-90.0, 0.0, 0.0, 1.0);
+          glTranslatef(static_cast<GLfloat>(xL), static_cast<GLfloat>(yL), 0.0f);
+          glRotatef(static_cast<GLfloat>(aglDeg-90.0), 0.0, 0.0, 1.0);
           VisUtils::enableLineAntiAlias();
           VisUtils::fillTriangle(0.0, 0.0, -pix, dist, pix, dist);
           VisUtils::drawTriangle(0.0, 0.0, -pix, dist, pix, dist);
@@ -599,7 +599,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
           VisUtils::drawLine(xL, xD, yL, yD);
         }
 
-        glTranslatef(xD, yD, 0.0);
+        glTranslatef(static_cast<GLfloat>(xD), static_cast<GLfloat>(yD), 0.0f);
         if (m_mouseDrag)
         {
           if (i == currIdxDgrm)
@@ -624,7 +624,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
             node = framesDgrm[i][frameIdxDgrm[i]]->getNode(0);
             if (attr->getSizeCurValues() > 0)
             {
-              vals.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+              vals.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
             }
             else
             {
@@ -649,7 +649,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
             node = framesDgrm[i][frameIdxDgrm[i]]->getNode(0);
             if (attr->getSizeCurValues() > 0)
             {
-              vals.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+              vals.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
             }
             else
             {
@@ -667,7 +667,7 @@ template <Visualizer::Mode mode> void ArcDiagram::drawDiagrams()
         QString msg = QString("%1/%2").arg(int(frameIdxDgrm[i]+1)).arg(int(framesDgrm[i].size()));
 
         VisUtils::setColor(settings->textColor.value());
-        VisUtils::drawLabelRight(texCharId, -0.76, -0.89, 5*settings->textSize.value()*pix/CHARHEIGHT, msg.toStdString());
+        VisUtils::drawLabelRight(&texCharId[0], -0.76, -0.89, 5*settings->textSize.value()*pix/CHARHEIGHT, msg.toStdString());
 
         VisUtils::enableLineAntiAlias();
 
@@ -795,8 +795,8 @@ template <Visualizer::Mode mode> void ArcDiagram::drawMarkedLeaves()
 
           for (std::size_t j = 0; j < it->second.size(); ++j)
           {
-            double aglBeg = j*frac*360.0;
-            double aglEnd = (j+1)*frac*360.0;
+            double aglBeg = static_cast<double>(j)*frac*360.0;
+            double aglEnd = static_cast<double>(j+1)*frac*360.0;
 
             QColor colIn = it->second[j];
             QColor colOut = alpha(colIn, 0.0);
@@ -958,21 +958,21 @@ QColor ArcDiagram::calcColor(std::size_t iter, std::size_t numr)
 {
   int colorMap = settings->clusterTreeColorMap.value();
   if (colorMap == VisUtils::COL_MAP_QUAL_PAST_1)
-    return VisUtils::qualPast1(iter, numr);
+    return VisUtils::qualPast1(static_cast<int>(iter), static_cast<int>(numr));
   else if (colorMap == VisUtils::COL_MAP_QUAL_PAST_2)
-    return VisUtils::qualPast2(iter, numr);
+    return VisUtils::qualPast2(static_cast<int>(iter), static_cast<int>(numr));
   else if (colorMap == VisUtils::COL_MAP_QUAL_SET_1)
-    return VisUtils::qualSet1(iter, numr);
+    return VisUtils::qualSet1(static_cast<int>(iter), static_cast<int>(numr));
   else if (colorMap == VisUtils::COL_MAP_QUAL_SET_2)
-    return VisUtils::qualSet2(iter, numr);
+    return VisUtils::qualSet2(static_cast<int>(iter), static_cast<int>(numr));
   else if (colorMap == VisUtils::COL_MAP_QUAL_SET_3)
-    return VisUtils::qualSet3(iter, numr);
+    return VisUtils::qualSet3(static_cast<int>(iter), static_cast<int>(numr));
   else if (colorMap == VisUtils::COL_MAP_QUAL_PAIR)
-    return VisUtils::qualPair(iter, numr);
+    return VisUtils::qualPair(static_cast<int>(iter), static_cast<int>(numr));
   else if (colorMap == VisUtils::COL_MAP_QUAL_DARK)
-    return VisUtils::qualDark(iter, numr);
+    return VisUtils::qualDark(static_cast<int>(iter), static_cast<int>(numr));
   else if (colorMap == VisUtils::COL_MAP_QUAL_ACCENT)
-    return VisUtils::qualAccent(iter, numr);
+    return VisUtils::qualAccent(static_cast<int>(iter), static_cast<int>(numr));
   else
     return QColor();
 }
@@ -1011,7 +1011,7 @@ void ArcDiagram::calcSettingsLeaves()
     double xRgt =  0.5*Utils::minn(size.width(), size.height())-20*pix;
 
     // get number of values on x-axis
-    double numX = m_graph->getSizeLeaves();
+    double numX = static_cast<double>(m_graph->getSizeLeaves());
 
     // calc intervals per axis
     double fracX;
@@ -1075,9 +1075,9 @@ void ArcDiagram::calcSettingsBundles()
     double maxSize = 0;
     {
       for (std::size_t i = 0; i < m_graph->getSizeBundles(); ++i)
-        if (m_graph->getBundle(i)->getSizeEdges() > maxSize)
+        if (static_cast<double>(m_graph->getBundle(i)->getSizeEdges()) > maxSize)
         {
-          maxSize = m_graph->getBundle(i)->getSizeEdges();
+          maxSize = static_cast<double>(m_graph->getBundle(i)->getSizeEdges());
         }
     }
 
@@ -1190,7 +1190,7 @@ void ArcDiagram::calcPositionsTree(
 
   Position2D topLft;
   Position2D botRgt;
-  int        lvl = c->getSizeCoord()-1;
+  int        lvl = static_cast<int>(c->getSizeCoord()-1);
 
   std::vector< std::size_t > v;
   c->getCoord(v);
@@ -1205,14 +1205,14 @@ void ArcDiagram::calcPositionsTree(
                     +  posTreeBotRgt[lvl+1][posTreeBotRgt[lvl+1].size()-1].x);
 
 
-    topLft.y = (((maxLvl-1)-  lvl)*itvHgt);
-    botRgt.y = (((maxLvl-1)-(lvl+1))*itvHgt);
+    topLft.y = (static_cast<double>((maxLvl-1)-  lvl)*itvHgt);
+    botRgt.y = (static_cast<double>((maxLvl-1)-(lvl+1))*itvHgt);
   }
   else
   {
     topLft.x = posLeaves[c->getIndex()].x;
     botRgt.x = posLeaves[c->getIndex()].x;
-    topLft.y = (((maxLvl-1)-  lvl)*itvHgt);
+    topLft.y = (static_cast<double>((maxLvl-1)-  lvl)*itvHgt);
     botRgt.y = posLeaves[c->getIndex()].y;
   }
 
@@ -1274,7 +1274,7 @@ void ArcDiagram::calcPositionsBarTree(
 
   Position2D topLft;
   Position2D botRgt;
-  int        lvl = c->getSizeCoord()-1;
+  int        lvl = static_cast<int>(c->getSizeCoord()-1);
 
   if (c->getSizeChildren() != 0)
   {
@@ -1687,7 +1687,7 @@ void ArcDiagram::handleDragDiagram()
 {
   if (dragIdxDgrm != NON_EXISTING && static_cast<std::size_t>(dragIdxDgrm) < posDgrm.size())
   {
-    handleDragDiagram(dragIdxDgrm);
+    handleDragDiagram(static_cast<int>(dragIdxDgrm));
   }
 }
 

@@ -38,6 +38,7 @@
 
 #ifndef MCRL2_PLATFORM_WINDOWS
 
+#include <array>
 #include <cerrno>
 #include <list>
 #include "mcrl2/utilities/dynamiclibrary.h"
@@ -49,10 +50,10 @@ class uncompiled_library : public dynamic_library
     std::list<std::string> m_tempfiles;
     std::string m_compile_script;
 
+  public:
     uncompiled_library() = delete;
 
-  public:
-    uncompiled_library(const std::string& script) 
+    uncompiled_library(const std::string& script)
      : m_compile_script(script) 
     {}
 
@@ -71,13 +72,12 @@ class uncompiled_library : public dynamic_library
       // Script produces one file per line. Last file is the shared library,
       // preceding files are temporary files that should be removed when the
       // library is unloaded.
-      std::string files;
-      char buf[1024];
+      std::array<char, 1024> buf;
       while(!feof(stream))
-      {        
-        if (fgets(buf, sizeof(buf), stream) != nullptr)
+      {
+        if (fgets(buf.data(), buf.size(), stream) != nullptr)
         {
-          std::string line(buf);
+          std::string line(buf.data());
           assert(*line.rbegin() == '\n');
           line.erase(line.size() - 1);
           mCRL2log(mcrl2::log::debug) << "  Read line: " << line << std::endl;
@@ -88,9 +88,9 @@ class uncompiled_library : public dynamic_library
           {
             mCRL2log(mcrl2::log::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
             mCRL2log(mcrl2::log::error) << line << std::endl;
-            while (fgets(buf, sizeof(buf), stream) != nullptr)
+            while (fgets(buf.data(), buf.size(), stream) != nullptr)
             {
-              mCRL2log(mcrl2::log::error) << std::string(buf);
+              mCRL2log(mcrl2::log::error) << std::string(buf.data());
             }
             pclose(stream);
             throw std::runtime_error("Compile script failed.");

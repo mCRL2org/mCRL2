@@ -53,7 +53,7 @@ SettingsDock::SettingsDock(QWidget *parent, Settings *settings):
 
 void SettingsDock::stateSizeChanged(int value)
 {
-  m_settings->stateSize.setValue(value / 10.0f);
+  m_settings->stateSize.setValue(static_cast<float>(value) / 10.0f);
 }
 
 void SettingsDock::setStateSize(float value)
@@ -63,7 +63,7 @@ void SettingsDock::setStateSize(float value)
 
 void SettingsDock::clusterHeightChanged(int value)
 {
-  m_settings->clusterHeight.setValue(value / 10.0f);
+  m_settings->clusterHeight.setValue(static_cast<float>(value) / 10.0f);
 }
 
 void SettingsDock::setClusterHeight(float value)

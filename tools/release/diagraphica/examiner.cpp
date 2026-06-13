@@ -167,10 +167,10 @@ void Examiner::clrFrameHistCur()
   {
     // composition
     delete framesHist[focusFrameIdx];
-    framesHist.erase(framesHist.begin() + focusFrameIdx);
+    framesHist.erase(framesHist.begin() + static_cast<std::vector<Cluster*>::difference_type>(focusFrameIdx));
 
     // association
-    attrsHist.erase(attrsHist.begin() + focusFrameIdx);
+    attrsHist.erase(attrsHist.begin() + static_cast<std::vector<std::vector<Attribute*>>::difference_type>(focusFrameIdx));
 
     // update focus
     focusFrameIdx = -1;
@@ -313,7 +313,7 @@ void Examiner::calcPosFramesHist()
     pos.y = -0.5*worldSize().height() + 0.5*itvHist*pix;
     for (std::size_t i = 0; i < framesHist.size(); ++i)
     {
-      pos.x = -0.5*worldSize().width() + bdr*pix + 0.5*itvHist*pix + i*itvHist*pix + offset*pix;
+      pos.x = -0.5*worldSize().width() + bdr*pix + 0.5*itvHist*pix + static_cast<double>(i)*itvHist*pix + offset*pix;
       posFramesHist.push_back(pos);
 
       if (pos.x + bdr*pix < -0.5*worldSize().width())
@@ -587,8 +587,8 @@ template <Visualizer::Mode mode> void Examiner::drawFrame()
   if constexpr (mode == Marking)
   {
     glPushMatrix();
-    glTranslatef(posFrame.x, posFrame.y, 0.0);
-    glScalef(scaleFrame, scaleFrame, scaleFrame);
+    glTranslatef(static_cast<GLfloat>(posFrame.x), static_cast<GLfloat>(posFrame.y), 0.0f);
+    glScalef(static_cast<GLfloat>(scaleFrame), static_cast<GLfloat>(scaleFrame), static_cast<GLfloat>(scaleFrame));
 
     glPushName(ID_FRAME);
     VisUtils::fillRect(- 1.0, 1.0, 1.0, -1.0);
@@ -602,8 +602,8 @@ template <Visualizer::Mode mode> void Examiner::drawFrame()
   else
   {
     glPushMatrix();
-    glTranslatef(posFrame.x, posFrame.y, 0.0);
-    glScalef(scaleFrame, scaleFrame, scaleFrame);
+    glTranslatef(static_cast<GLfloat>(posFrame.x), static_cast<GLfloat>(posFrame.y), 0.0f);
+    glScalef(static_cast<GLfloat>(scaleFrame), static_cast<GLfloat>(scaleFrame), static_cast<GLfloat>(scaleFrame));
 
     VisUtils::setColor(colFrm);
     VisUtils::fillRect(
@@ -619,7 +619,7 @@ template <Visualizer::Mode mode> void Examiner::drawFrame()
       node = frame->getNode(0);
       if (attr->getSizeCurValues() > 0)
       {
-        valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+        valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
       }
       else
       {
@@ -652,8 +652,8 @@ template <Visualizer::Mode mode> void Examiner::drawFramesHist()
     for (std::size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
     {
       glPushMatrix();
-      glTranslatef(posFramesHist[i].x, posFramesHist[i].y, 0.0);
-      glScalef(scaleFramesHist, scaleFramesHist, scaleFramesHist);
+      glTranslatef(static_cast<GLfloat>(posFramesHist[i].x), static_cast<GLfloat>(posFramesHist[i].y), 0.0f);
+      glScalef(static_cast<GLfloat>(scaleFramesHist), static_cast<GLfloat>(scaleFramesHist), static_cast<GLfloat>(scaleFramesHist));
 
       glPushName((GLuint) i);
       VisUtils::fillRect(
@@ -681,7 +681,7 @@ template <Visualizer::Mode mode> void Examiner::drawFramesHist()
         node = framesHist[i]->getNode(0);
         if (attr->getSizeCurValues() > 0)
         {
-          valsFrame.push_back(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex());
+          valsFrame.push_back(static_cast<double>(attr->mapToValue(node->getTupleVal(attr->getIndex()))->getIndex()));
         }
         else
         {
@@ -693,8 +693,8 @@ template <Visualizer::Mode mode> void Examiner::drawFramesHist()
       node = nullptr;
 
       glPushMatrix();
-      glTranslatef(posFramesHist[i].x, posFramesHist[i].y, 0.0);
-      glScalef(scaleFramesHist, scaleFramesHist, scaleFramesHist);
+      glTranslatef(static_cast<GLfloat>(posFramesHist[i].x), static_cast<GLfloat>(posFramesHist[i].y), 0.0f);
+      glScalef(static_cast<GLfloat>(scaleFramesHist), static_cast<GLfloat>(scaleFramesHist), static_cast<GLfloat>(scaleFramesHist));
 
       if (i == focusFrameIdx)
       {
@@ -738,7 +738,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
     // rewind
     glPushName(ID_ICON_RWND);
     glPushMatrix();
-    glTranslatef(-18.0*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(-18.0*pix), static_cast<GLfloat>(-0.5*worldSize().height() + itvHist*pix), 0.0f);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -748,7 +748,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
     // left
     glPushName(ID_ICON_LFT);
     glPushMatrix();
-    glTranslatef(-6*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(-6*pix), static_cast<GLfloat>(-0.5*worldSize().height() + itvHist*pix), 0.0f);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -758,7 +758,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
     // left
     glPushName(ID_ICON_LFT);
     glPushMatrix();
-    glTranslatef(-0.5*worldSize().width()+6*pix, -0.5*worldSize().height() + 0.5*itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(-0.5*worldSize().width()+6*pix), static_cast<GLfloat>(-0.5*worldSize().height() + 0.5*itvHist*pix), 0.0f);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -768,7 +768,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
     // play
     glPushName(ID_ICON_PLAY);
     glPushMatrix();
-    glTranslatef(6*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(6*pix), static_cast<GLfloat>(-0.5*worldSize().height() + itvHist*pix), 0.0f);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -778,7 +778,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
     // right
     glPushName(ID_ICON_RGT);
     glPushMatrix();
-    glTranslatef(18*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(18*pix), static_cast<GLfloat>(-0.5*worldSize().height() + itvHist*pix), 0.0f);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -788,7 +788,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
     // right
     glPushName(ID_ICON_RGT);
     glPushMatrix();
-    glTranslatef(0.5*worldSize().width()-6*pix, -0.5*worldSize().height() + 0.5*itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(0.5*worldSize().width()-6*pix), static_cast<GLfloat>(-0.5*worldSize().height() + 0.5*itvHist*pix), 0.0f);
     VisUtils::fillRect(
       -5.0*pix,  5.0*pix,
       5.0*pix, -5.0*pix);
@@ -860,7 +860,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
 
     // rewind
     glPushMatrix();
-    glTranslatef(-18.0*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(-18.0*pix), static_cast<GLfloat>(-0.5*worldSize().height() + itvHist*pix), 0.0f);
 
     VisUtils::enableLineAntiAlias();
     if (dLft > 0)
@@ -884,7 +884,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
 
     // left
     glPushMatrix();
-    glTranslatef(-6*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(-6*pix), static_cast<GLfloat>(-0.5*worldSize().height() + itvHist*pix), 0.0f);
 
     VisUtils::enableLineAntiAlias();
     if (dLft > 0)
@@ -910,7 +910,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
     if (dLft > 0)
     {
       glPushMatrix();
-      glTranslatef(-0.5*worldSize().width()+6*pix, -0.5*worldSize().height() + 0.5*itvHist*pix, 0.0);
+      glTranslatef(static_cast<GLfloat>(-0.5*worldSize().width()+6*pix), static_cast<GLfloat>(-0.5*worldSize().height() + 0.5*itvHist*pix), 0.0f);
       VisUtils::enableLineAntiAlias();
       VisUtils::setColor(VisUtils::coolRed);
       VisUtils::fillPrevIcon(
@@ -926,7 +926,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
 
     // play
     glPushMatrix();
-    glTranslatef(6*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(6*pix), static_cast<GLfloat>(-0.5*worldSize().height() + itvHist*pix), 0.0f);
 
     VisUtils::enableLineAntiAlias();
     VisUtils::setColor(VisUtils::mediumGray);
@@ -943,7 +943,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
 
     // right
     glPushMatrix();
-    glTranslatef(18*pix, -0.5*worldSize().height() + itvHist*pix, 0.0);
+    glTranslatef(static_cast<GLfloat>(18*pix), static_cast<GLfloat>(-0.5*worldSize().height() + itvHist*pix), 0.0f);
 
     VisUtils::enableLineAntiAlias();
     if (dRgt > 0)
@@ -969,7 +969,7 @@ template <Visualizer::Mode mode> void Examiner::drawControls()
     if (dRgt > 0)
     {
       glPushMatrix();
-      glTranslatef(0.5*worldSize().width()-6*pix, -0.5*worldSize().height() + 0.5*itvHist*pix, 0.0);
+      glTranslatef(static_cast<GLfloat>(0.5*worldSize().width()-6*pix), static_cast<GLfloat>(-0.5*worldSize().height() + 0.5*itvHist*pix), 0.0f);
       VisUtils::enableLineAntiAlias();
       VisUtils::setColor(VisUtils::coolRed);
       VisUtils::fillNextIcon(

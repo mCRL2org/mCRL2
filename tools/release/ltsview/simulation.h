@@ -24,7 +24,7 @@ class Simulation : public QObject
   public:
     Simulation(QObject *parent, LTS& lts);
     ~Simulation();
-    void operator=(const Simulation &other);
+    Simulation& operator=(const Simulation &other);
     const LTS& lts() const { return m_ltsRef; }
     bool isStarted() const { return m_currentState != 0; }
     State *initialState() const { return m_initialState; }

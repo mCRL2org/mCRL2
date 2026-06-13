@@ -101,7 +101,7 @@ void Graph::moveAttribute(
     throw mcrl2::runtime_error("Error moving attribute.");
   }
 
-  attributes[idxTo]->emitMoved(idxTo);
+  attributes[idxTo]->emitMoved(static_cast<int>(idxTo));
 }
 
 
@@ -196,7 +196,7 @@ void Graph::duplAttributes(const std::vector< std::size_t > &idcs)
       // add new attribute
       // -*-
       attributes.insert(
-        attributes.begin() + insIdx + i,
+        attributes.begin() + static_cast<std::ptrdiff_t>(insIdx) + static_cast<std::ptrdiff_t>(i),
         new AttrDiscr(*(dynamic_cast<AttrDiscr*>(attributes[ idcs[i] ]))));
 
       attributes[ insIdx + i ]->setIndex(insIdx + i);
@@ -258,7 +258,7 @@ void Graph::deleteAttribute(const std::size_t& idx)
 
   Attribute *attribute = attributes[idx];
   // update attributes & nodes
-  attributes.erase(attributes.begin() + idx);
+  attributes.erase(attributes.begin() + static_cast<std::ptrdiff_t>(idx));
   {
     for (std::size_t i = idx; i < attributes.size(); ++i)
     {
@@ -616,7 +616,7 @@ void Graph::calcAttrCorrl(
         for (std::size_t j = 0; j < toErase.size(); ++j)
         {
           // brackets around (toErase[j] - j) REALLY important
-          number[i].erase(number[i].begin() + (toErase[j] - j));
+          number[i].erase(number[i].begin() + static_cast<std::ptrdiff_t>(toErase[j] - j));
         }
       }
     }

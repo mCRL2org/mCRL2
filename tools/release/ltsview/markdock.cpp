@@ -144,7 +144,7 @@ void MarkDock::addMarkRule()
   if (m_markManager->lts() && m_markManager->lts()->getNumParameters() > 0)
   {
     QColor color = m_markRuleColors[m_markRuleNextColorIndex];
-    m_markRuleNextColorIndex = (m_markRuleNextColorIndex + 1) % m_markRuleColors.size();
+    m_markRuleNextColorIndex = static_cast<int>((m_markRuleNextColorIndex + 1) % m_markRuleColors.size());
 
     MarkStateRuleDialog dialog(this, m_markManager->lts(), color, 0, false, std::set<int>());
     if (dialog.exec() == QDialog::Accepted)

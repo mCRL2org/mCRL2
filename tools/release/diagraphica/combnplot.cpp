@@ -107,7 +107,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawAxesCP()
   double yTop;
   if (numAttr > 0)
   {
-    yTop = yBot + numAttr*(size.height() - (20+10+10)*pix)/(double)(numAttr+1);
+    yTop = yBot + static_cast<double>(numAttr)*(size.height() - (20+10+10)*pix)/(double)(numAttr+1);
   }
   else
   {
@@ -185,7 +185,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawLabelsBC()
   }
 
   VisUtils::drawLabelInBoundBox(
-    texCharId,
+    &texCharId[0],
     xLft,      xRgt,
     yTop,      yBot,
     scaling,   "Number");
@@ -196,12 +196,12 @@ template <Visualizer::Mode mode> void CombnPlot::drawLabelsBC()
     std::string max = Utils::intToStr((int) maxNumberPerComb);
     double x   = -0.5*size.width()+13*pix;
     double y   =  0.5*size.height()-10*pix;
-    VisUtils::drawLabelVertBelow(texCharId, x, y, scaling, max);
+    VisUtils::drawLabelVertBelow(&texCharId[0], x, y, scaling, max);
 
     // min number
     std::string min = "0";
     y   = yBot;
-    VisUtils::drawLabelVertAbove(texCharId, x, y, scaling, min);
+    VisUtils::drawLabelVertAbove(&texCharId[0], x, y, scaling, min);
   }
 }
 
@@ -218,7 +218,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawLabelsCP()
   // calc scaling to use
   double scaling = (12*pix)/(double)CHARHEIGHT;
   // number attributes
-  double numAttr = attributes.size();
+  double numAttr = static_cast<double>(attributes.size());
 
   // color
   VisUtils::setColor(Qt::black);
@@ -226,7 +226,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawLabelsCP()
   // x-axis label
   double x =  0.0;
   double y =  -0.5*size.height()+9*pix;
-  VisUtils::drawLabelCenter(texCharId, x, y, scaling, "Combinations");
+  VisUtils::drawLabelCenter(&texCharId[0], x, y, scaling, "Combinations");
 
   if (numAttr > 0)
   {
@@ -251,7 +251,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawLabelsCP()
       double yBot = posRgtBot[0][i].y;
 
       VisUtils::drawLabelInBoundBox(
-        texCharId,
+        &texCharId[0],
         xLft,      xRgt,
         yTop,      yBot,
         scaling,   attributeLabels[i]);
@@ -362,7 +362,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawPlotCP()
         double xRgt = posRgtBot[i][j].x;
         double yBot = posRgtBot[i][j].y;
 
-        VisUtils::setColor(VisUtils::qualPair(combinations[i][j], maxAttrCard), 0.5);
+        VisUtils::setColor(VisUtils::qualPair(static_cast<int>(combinations[i][j]), static_cast<int>(maxAttrCard)), 0.5);
 
         if (xRgt - xLft > pix)
         {
@@ -421,8 +421,8 @@ template <Visualizer::Mode mode> void CombnPlot::drawDiagram()
     double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;
 
     glPushMatrix();
-    glTranslatef(posDgrm.x, posDgrm.y, 0.0);
-    glScalef(scaleDgrm, scaleDgrm, scaleDgrm);
+    glTranslatef(static_cast<GLfloat>(posDgrm.x), static_cast<GLfloat>(posDgrm.y), 0.0f);
+    glScalef(static_cast<GLfloat>(scaleDgrm), static_cast<GLfloat>(scaleDgrm), static_cast<GLfloat>(scaleDgrm));
 
     // drop shadow
     VisUtils::setColor(VisUtils::mediumGray);
@@ -435,7 +435,7 @@ template <Visualizer::Mode mode> void CombnPlot::drawDiagram()
     diagram->draw<mode>(pixelSize(), attributes, attrValIdcsDgrm);
 
     VisUtils::setColor(Qt::black);
-    VisUtils::drawLabelRight(texCharId, -0.98, 1.1, scaleTxt, msgDgrm);
+    VisUtils::drawLabelRight(&texCharId[0], -0.98, 1.1, scaleTxt, msgDgrm);
 
     glPopMatrix();
   }
@@ -543,7 +543,7 @@ void CombnPlot::showTooltip(const std::size_t& valueIndex, const QPointF& positi
 {
   if (valueIndex < combinations.size())
   {
-    msgDgrm = Utils::dblToStr(numberPerComb[valueIndex]) + " nodes; "
+    msgDgrm = Utils::dblToStr(static_cast<double>(numberPerComb[valueIndex])) + " nodes; "
       + Utils::dblToStr(Utils::perc((double) numberPerComb[valueIndex], (double) m_graph->getSizeNodes())) + '%';
 
     if (diagram == nullptr)
@@ -560,7 +560,7 @@ void CombnPlot::showTooltip(const std::size_t& valueIndex, const QPointF& positi
       attrValIdcsDgrm.clear();
       for (std::size_t i = 0; i < attributes.size(); ++i)
       {
-        attrValIdcsDgrm.push_back(combinations[valueIndex][i]);
+        attrValIdcsDgrm.push_back(static_cast<double>(combinations[valueIndex][i]));
       }
     }
   }
@@ -595,7 +595,7 @@ void CombnPlot::calcPosBC()
   QSizeF size = worldSize();
   double pix = pixelSize();
   // number of attributes
-  double numAttr = attributes.size();
+  double numAttr = static_cast<double>(attributes.size());
 
   // calc size of bounding box
   double xLft = -0.5*size.width()+25*pix;
@@ -612,7 +612,7 @@ void CombnPlot::calcPosBC()
   }
 
   // get number of values per axis
-  double numX = combinations.size();
+  double numX = static_cast<double>(combinations.size());
 
   // get intervals for x-axis
   double fracX = 1.0;
@@ -632,7 +632,7 @@ void CombnPlot::calcPosBC()
     double ratio = (double)numberPerComb[i]/(double)maxNumberPerComb;
 
     // center, top
-    double x = xLft + 0.5*fracX + i*fracX;
+    double x = xLft + 0.5*fracX + static_cast<double>(i)*fracX;
     double y = yBot + ratio*(yTop-yBot);
     if (y-yBot < pix*minHgtHintPixBC)
     {
@@ -659,7 +659,7 @@ void CombnPlot::calcPosCP()
   double yTop;
   if (numAttr > 0)
   {
-    yTop = yBot + numAttr*(size.height() - (20+10+10)*pix)/(double)(numAttr+1);
+    yTop = yBot + static_cast<double>(numAttr)*(size.height() - (20+10+10)*pix)/(double)(numAttr+1);
   }
   else
   {
@@ -667,8 +667,8 @@ void CombnPlot::calcPosCP()
   }
 
   // get number of values per axis
-  double numX = combinations.size();
-  double numY = attributes.size();
+  double numX = static_cast<double>(combinations.size());
+  double numY = static_cast<double>(attributes.size());
 
   // get intervals per axis
   double fracX = 1;
@@ -701,11 +701,11 @@ void CombnPlot::calcPosCP()
         double ratio = 1.0; //(double)(idx+1)/(double)(card+1);
 
         // left
-        double x1 = xLft + i*fracX*(xRgt-xLft);
+        double x1 = xLft + static_cast<double>(i)*fracX*(xRgt-xLft);
         // right
-        double x2 = xLft + (i+1)*fracX*(xRgt-xLft);
+        double x2 = xLft + static_cast<double>(i+1)*fracX*(xRgt-xLft);
         // bot
-        double y2 = yTop - (j+1)*fracY*(yTop-yBot);
+        double y2 = yTop - static_cast<double>(j+1)*fracY*(yTop-yBot);
         // top
         double y1 = y2   + ratio*fracY*(yTop-yBot);
 

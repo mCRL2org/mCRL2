@@ -48,7 +48,7 @@ public:
     //! Return the current reference count. Mostly useful for debugging.
     std::size_t refcount() { return refs_; }
 
-protected:
+public:
     virtual ~RefCounted() { assert(refs_ <= 1); }
 
 protected:

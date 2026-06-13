@@ -68,7 +68,7 @@ void SimDock::changed()
     State *currentState = simulation->currentState();
 
     m_ui.transitionTable->setRowCount(0);
-    m_ui.transitionTable->setRowCount(transitions.size());
+    m_ui.transitionTable->setRowCount(static_cast<int>(transitions.size()));
     for (int i = 0; i < transitions.size(); i++)
     {
       m_ui.transitionTable->setItem(i, 0, item());

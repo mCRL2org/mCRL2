@@ -282,7 +282,7 @@ function_symbol aterm_pool::create_function_symbol(const std::string& name, cons
 
 function_symbol aterm_pool::create_function_symbol(std::string&& name, const std::size_t arity, const bool check_for_registered_functions)
 {
-  return m_function_symbol_pool.create(std::forward<std::string>(name), arity, check_for_registered_functions);
+  return m_function_symbol_pool.create(std::move(name), arity, check_for_registered_functions);
 }
 
 bool aterm_pool::create_int(aterm& term, size_t val)

@@ -118,7 +118,6 @@ class simple_fsm_parser
 
     void parse_initial_distribution(const std::string& line)
     {
-      std::string text = utilities::trim_copy(line);
       std::smatch what;
       if (!std::regex_match(line, what, regex_probabilistic_initial_distribution))
       {

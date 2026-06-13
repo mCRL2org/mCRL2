@@ -116,7 +116,7 @@ Simulation::State Simulation::renderState(const mcrl2::lps::state& state)
 void Simulation::select(unsigned long long transitionNumber, unsigned long long selected_state, QSemaphore *semaphore)
 {
   assert(std::cmp_less(selected_state,m_trace.size()));
-  if (m_trace[selected_state].is_probabilistic)
+  if (m_trace[static_cast<qsizetype>(selected_state)].is_probabilistic)
   {
     m_simulation->select_state(transitionNumber);
   }
@@ -135,7 +135,7 @@ void Simulation::select(unsigned long long transitionNumber, unsigned long long 
 
 void Simulation::auto_select_state_or_probability(unsigned long long selected_state, QSemaphore *semaphore)
 {
-  if (m_trace[selected_state].is_probabilistic)
+  if (m_trace[static_cast<qsizetype>(selected_state)].is_probabilistic)
   {
     m_simulation->randomly_select_state();
   }
