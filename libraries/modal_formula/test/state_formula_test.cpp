@@ -11,7 +11,6 @@
 
 #include "mcrl2/utilities/exception.h"
 #include <boost/core/no_exceptions_support.hpp>
-#define MCRL2_STATE_FORMULA_BUILDER_DEBUG
 
 #define BOOST_TEST_MODULE state_formula
 #include <boost/test/included/unit_test.hpp>

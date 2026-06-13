@@ -10,7 +10,7 @@
 /// \brief Gauss elimination tests.
 
 #define BOOST_TEST_MODULE gauss_elimination_test
-#define MCRL2_GAUSS_ELIMINATION_DEBUG
+
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/detail/test_input.h"

@@ -312,11 +312,6 @@ struct not_equal_multi_actions_builder
 /// \return Necessary conditions for the equality of a and b
 inline data::data_expression equal_multi_actions(const multi_action& a, const multi_action& b)
 {
-#ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-  mCRL2log(debug) << "\n<equal multi actions>" << std::endl;
-  mCRL2log(debug) << "a = " << process::pp(a.actions()) << std::endl;
-  mCRL2log(debug) << "b = " << process::pp(b.actions()) << std::endl;
-#endif
   using namespace data::lazy;
 
   // make copies of a and b and sort them
@@ -327,11 +322,6 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
 
   if (!detail::equal_action_signatures(va, vb))
   {
-#ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-    mCRL2log(debug) << "different action signatures detected!" << std::endl;
-    mCRL2log(debug) << "a = " << process::action_list(va.begin(), va.end()) << std::endl;
-    mCRL2log(debug) << "b = " << process::action_list(vb.begin(), vb.end()) << std::endl;
-#endif
     return data::sort_bool::false_();
   }
 

@@ -16,11 +16,6 @@
 #include "mcrl2/pbes/replace.h"
 #include <numeric>
 
-#ifdef MCRL2_PFNF_VISITOR_DEBUG
-#include "mcrl2/data/print.h"
-#endif
-
-
 
 
 
@@ -204,9 +199,6 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
       }
     }
 
-#ifdef MCRL2_PFNF_VISITOR_DEBUG
-std::cout << "NAME CLASHES: " << core::detail::print_set(name_clashes) << std::endl;
-#endif
 
     if (!name_clashes.empty())
     {
@@ -224,15 +216,7 @@ std::cout << "NAME CLASHES: " << core::detail::print_set(name_clashes) << std::e
       {
         sigma.sigma[v] = data::variable(generator(std::string(v.name())), v.sort());
       }
-#ifdef MCRL2_PFNF_VISITOR_DEBUG
-std::cout << "LEFT\n"; print_expression(left);
-std::cout << "RIGHT BEFORE\n"; print_expression(right);
-std::cout << "SIGMA = " << sigma.to_string() << std::endl;
-#endif
       right.substitute(sigma);
-#ifdef MCRL2_PFNF_VISITOR_DEBUG
-std::cout << "RIGHT AFTER\n"; print_expression(right);
-#endif
     }
   }
 

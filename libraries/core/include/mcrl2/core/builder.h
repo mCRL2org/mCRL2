@@ -20,16 +20,6 @@
 namespace mcrl2::core
 {
 
-#ifdef MCRL2_DEBUG_EXPRESSION_BUILDER
-inline void msg(const std::string& s)
-{
-  std::cout << "--- " << s << " ---" << std::endl;
-}
-#else
-inline void msg(const std::string&)
-{}
-#endif
-
 /**
  * \brief expression builder that visits all sub expressions
  *
@@ -54,7 +44,6 @@ struct builder
     requires (!std::ranges::range<T>)
   void update(T& x)
   {
-    msg("non-container visit");
     T result;
     static_cast<Derived*>(this)->apply(result, x);
     x = result;
@@ -64,7 +53,6 @@ struct builder
   template <std::ranges::range T>
   void update(T& x)
   {
-    msg("container visit");
     for (auto& v: x)
     {
       static_cast<Derived*>(this)->update(v);
@@ -75,7 +63,6 @@ struct builder
   template <typename T>
   void update(std::set<T>& x)
   {
-    msg("set visit");
     std::set<T> result;
     for (T v: x)
     {
@@ -89,7 +76,6 @@ struct builder
   template <atermpp::IsATerm T, atermpp::IsATerm U>
   void apply(atermpp::term_list<T>& result, const atermpp::term_list<U>& x)
   {
-    msg("term_list traversal");
     atermpp::make_term_list<T>(static_cast<atermpp::term_list<T>&>(result), 
                                x.begin(), 
                                x.end(), 
