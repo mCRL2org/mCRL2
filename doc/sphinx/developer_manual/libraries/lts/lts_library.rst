@@ -1,3 +1,10 @@
+.. toctree::
+   :maxdepth: 1
+
+   bisimulation_partitioner
+   ltsgraph3d
+
+
 Introduction
 ============
 The LTS library provides data structures and methods to handle *labelled

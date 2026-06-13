@@ -22,29 +22,17 @@ Core
 
    libraries/core/core_library
    libraries/core/common_functionality
-
-
-*PDF documentation*
-
- * :mcrl2_pdflatex:`mCRL2 syntax definition <libraries/core/latex/mcrl2_syntax_definition.tex>`
+   libraries/core/mcrl2_syntax_definition
 
 Data
 ======
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    libraries/data/data_library
 
 
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Some basic notions concerning the mCRL2 data library <libraries/data/latex/data.tex>`
-* :mcrl2_pdflatex:`Data types for mCRL2 <libraries/data/latex/mcrl2data.tex>`
-* :mcrl2_pdflatex:`Enumerator <libraries/data/latex/enumerator.tex>`
-* :mcrl2_pdflatex:`An algorithm to find a representant for sorts in the context of sort aliases and recursive sorts <libraries/data/latex/algorithm-for-sort-equivalence.tex>`
-* :mcrl2_pdflatex:`substitutions.tex <libraries/data/latex/substitutions.tex>`
-* :mcrl2_pdflatex:`Rewriter Implementation Notes <libraries/data/latex/rewriter.tex>`
 
 GUI
 =====
@@ -54,10 +42,6 @@ GUI
 
    libraries/gui/gui_library
 
-
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Architecture of mcrl2ide <libraries/gui/latex/architecture_mcrl2ide.tex>`
 
 LPS
 ======
@@ -89,10 +73,6 @@ LTS
    libraries/lts/lts_library
 
 
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Implementation of LTSGraph3D <libraries/lts/latex/ltsgraph3d_report.tex>`
-* :mcrl2_pdflatex:`Notes on the bisimulation partitioner <libraries/lts/latex/bisimulation-partitioner-notes.tex>`
 
 
 Modal formula
@@ -111,13 +91,13 @@ PBES
 
    libraries/pbes/pbes_library
    libraries/pbes/pbes-inst-solving
+   libraries/pbes/pbes_rewriters
 
 *PDF documentation*
 
 * :mcrl2_pdflatex:`PBES Abstraction <libraries/pbes/latex/pbes-abstraction.tex>`
 * :mcrl2_pdflatex:`PBES Generation <libraries/pbes/latex/pbes-generation.tex>`
 * :mcrl2_pdflatex:`PBES Implementation Notes <libraries/pbes/latex/pbes-implementation-notes.tex>`
-* :mcrl2_pdflatex:`PBES rewriters <libraries/pbes/latex/pbes-rewriters.tex>`
 * :mcrl2_pdflatex:`PBES Instantiation <libraries/pbes/latex/pbes-instantiation.tex>`
 * :mcrl2_pdflatex:`kant-pbes-greybox-notes.tex <libraries/pbes/latex/kant-pbes-greybox-notes.tex>`
 * :mcrl2_pdflatex:`Some notes on a BES library <libraries/pbes/latex/bes-library.tex>`
@@ -129,12 +109,8 @@ Process
    :maxdepth: 1
 
    libraries/process/process_library
-
-
-*PDF documentation*
-
-* :mcrl2_pdflatex:`On free variables in process specifications, LPSs and PBESs <libraries/process/latex/global-variables.tex>`
-* :mcrl2_pdflatex:`Process Library Implementation Notes <libraries/process/latex/process-implementation-notes.tex>`
+   libraries/process/global_variables
+   libraries/process/process_implementation_notes
 
 SMT
 ======
