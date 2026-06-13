@@ -13,7 +13,7 @@
 #define MCRL2_PBES_PBESINST_STRUCTURE_GRAPH2_H
 
 #include "mcrl2/atermpp/standard_containers/deque.h"
-#include "mcrl2/atermpp/standard_containers/indexed_set.h"
+#include "mcrl2/atermpp/standard_containers/unordered_set.h"
 #include "mcrl2/atermpp/standard_containers/vector.h"
 #include "mcrl2/pbes/pbesinst_fatal_attractors.h"
 #include "mcrl2/pbes/pbesinst_find_loops.h"
@@ -52,19 +52,31 @@ class computation_guard
 class periodic_guard
 {
   protected:
-    std::size_t count = 0;
-    std::size_t regeneration_period = 100;
+    std::size_t m_count = 0;
+    std::size_t m_regeneration_period = 100;
 
   public:
-    bool operator()(std::size_t period)
+    periodic_guard()
+    {}
+
+    periodic_guard(std::size_t initial_regeneration_period)
+      : m_regeneration_period(initial_regeneration_period)
+    {}
+
+    bool is_expired() 
     {
-      if (++count == regeneration_period)
+      ++m_count;
+      if (m_count >= m_regeneration_period)
       {
-        count = 0;
-        regeneration_period = period;
+        m_count=0;
         return true;
       }
       return false;
+    }
+  
+    void set_expiration_steps(const std::size_t p)
+    {
+      m_regeneration_period = p;
     }
 };
 
@@ -79,8 +91,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     std::array<detail::computation_guard, 2> S_guard;
 
     atermpp::vector<pbes_expression> b; // to store the result of the Rplus computation
-    detail::computation_guard find_loops_guard;
-    detail::computation_guard fatal_attractors_guard;
+    detail::periodic_guard on_the_fly_solve_trigger;
     detail::periodic_guard reset_guard;
 
     template<typename T>
@@ -383,18 +394,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     // Returns true if all nodes in the todo list are undefined (i.e. have not been processed yet)
     bool todo_has_only_undefined_nodes() const
     {
-      // Iterating over todo.all_elements() does not seem to work.
-      // Hence the loops below are split into todo.elements() and todo.irrelevant_elements().
       for (const propositional_variable_instantiation& X: todo.elements())
-      {
-        const structure_graph::index_type u = m_graph_builder.find_vertex(X);
-        const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
-        if (u_.is_defined())
-        {
-          return false;
-        }
-      }
-      for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
       {
         const structure_graph::index_type u = m_graph_builder.find_vertex(X);
         const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
@@ -409,21 +409,20 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     void prune_todo_list(
       const propositional_variable_instantiation& init,
       pbesinst_lazy_todo& todo,
-      std::size_t regeneration_period
-    )
+      std::size_t& calculation_steps)
     {
       using utilities::detail::contains;
+      global_current_prune_round++;
 
-      if (!reset_guard(regeneration_period) && !m_options.aggressive && !todo.elements().empty())
-      {
-        return;
-      }
+      std::size_t old_todo_size = todo.elements().size();
 
       simple_structure_graph G(m_graph_builder.vertices());
+
       atermpp::deque<pbes_expression> todo1{init};
       atermpp::indexed_set<pbes_expression> done1;
-      atermpp::indexed_set<propositional_variable_instantiation> new_todo;
-
+      done1.insert(init);
+      
+      atermpp::unordered_set<propositional_variable_instantiation> new_todo;
       pbes_expression X;
       while (!todo1.empty())
       {
@@ -431,10 +430,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
         X = todo1.front();
         todo1.pop_front();
-        done1.insert(X);
         const structure_graph::index_type u = m_graph_builder.find_vertex(X);
         const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
-
+        calculation_steps++;
         if (u_.decoration == structure_graph::d_none && u_.successors.empty())
         {
           assert(is_propositional_variable_instantiation(u_.formula()));
@@ -447,39 +445,89 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
             // todo' := todo' U (succ(u) \ done')
             for (const structure_graph::index_type& v: G.successors(u))
             {
+              calculation_steps++;
               const structure_graph::vertex& v_ = m_graph_builder.vertex(v);
               const pbes_expression& Y = v_.formula();
-              if (contains(done1, Y))
+              if (!contains(done1, Y))
               {
-                continue;
+                todo1.emplace_back(Y);
+                done1.insert(Y);
               }
-              todo1.push_back(Y);
             }
           }
         }
       }
 
-      // new_todo_list := new_todo \cap (todo U irrelevant)
+      // new_todo_list := new_todo \cap todo 
       // N.B. An attempt is made to preserve the order of the current todo list, to not
       // disturb breadth first and depth first search.
       atermpp::deque<propositional_variable_instantiation> new_todo_list;
-      for (const propositional_variable_instantiation& X: todo.irrelevant_elements())
+      calculation_steps=calculation_steps+todo.elements().size();
+      for (const propositional_variable_instantiation& X: todo.elements())
       {
-        if (contains(new_todo, X))
+        if (new_todo.contains(X))
+        {
+          new_todo_list.push_back(X);
+          new_todo.erase(X);
+        }
+      }
+      calculation_steps=calculation_steps+new_todo.size();
+      for(const propositional_variable_instantiation& X: new_todo)
+      {
+        if (m_options.exploration_strategy == breadth_first)
         {
           new_todo_list.push_back(X);
         }
-      }
-      for (const propositional_variable_instantiation& X: todo.elements())
-      {
-        if (contains(new_todo, X))
+        else
         {
-          new_todo_list.push_back(X);
+          new_todo_list.push_front(X);
         }
       }
       todo.set_todo(new_todo_list);
       assert(todo_has_only_undefined_nodes());
-    };
+      if (todo.elements().size() == old_todo_size)
+      { 
+        mCRL2log(log::verbose) << "Pruning of the  todo list had no effect on its size.\n";
+      }
+      else if (todo.elements().size() > old_todo_size)
+      { 
+        mCRL2log(log::verbose) << "Pruned the todo list. Added " << todo.elements().size() - old_todo_size << " elements.\n";
+      }
+      else
+      { 
+        mCRL2log(log::verbose) << "Pruned the todo list. Removed " << old_todo_size - todo.elements().size() << " elements.\n";
+      }
+      mCRL2log(log::verbose) << "The new size of the todo list is " << todo.elements().size() << ".\n";
+   };
+
+   // Execute a prune_todo_list if m_options.prune_todo_list is set. 
+   void prune_todo_list_conditional(
+      const propositional_variable_instantiation& init,
+      pbesinst_lazy_todo& todo,
+      std::size_t& calculation_steps)
+    {
+      if (m_options.prune_todo_list)
+      {
+        prune_todo_list(init, todo, calculation_steps);
+      }
+    }
+
+    // Trigger the prune_todo_list at fixed intervals, provided m_options.prune_todo_list is set, 
+    // keeping the workload limited related to other calculations.
+    // Trigger always when the todo set is empty. 
+    void prune_todo_list_time_triggered(
+      const propositional_variable_instantiation& init,
+      pbesinst_lazy_todo& todo)
+    {
+      if (m_options.prune_todo_list&&
+          (reset_guard.is_expired() || todo.elements().empty()))
+      {
+        std::size_t calculation_steps=0;
+        prune_todo_list(init, todo, calculation_steps);
+        reset_guard.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps);
+      }
+    }
+
 
     bool strategies_are_set_in_solved_nodes() const
     {
@@ -519,7 +567,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       std::optional<data::rewriter> rewriter = std::nullopt
     )
       : pbesinst_structure_graph_algorithm(options, p, G, rewriter),
-        b(options.number_of_threads+1), find_loops_guard(2), fatal_attractors_guard(2)
+        b(options.number_of_threads+1), on_the_fly_solve_trigger(2)
     {}
 
     // Optimization 2 is implemented by overriding the function rewrite_psi.
@@ -574,9 +622,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
     {
       using utilities::detail::contains;
       stopwatch timer;
-
       bool report = false;
-      if (m_options.optimization == partial_solve_strategy::propagate_solved_equations_using_attractor || m_options.aggressive)
+
+      if (m_options.optimization == partial_solve_strategy::propagate_solved_equations_using_attractor)
       {
         if (S_guard[0](S[0].size()))
         {
@@ -590,23 +638,30 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
         assert(strategies_are_set_in_solved_nodes());
       }
-      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_using_fatal_attractor && (m_options.aggressive || find_loops_guard(m_iteration_count)))
+      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_using_fatal_attractor && (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
-        mCRL2log(log::verbose) << "start partial solving\n"; report = true;
+        mCRL2log(log::verbose) << "Start partial solving I. " << m_iteration_count << "\n"; 
+        report = true;
 
+        std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
         simple_structure_graph G(m_graph_builder.vertices());
-        detail::find_loops2(G, S, tau, m_iteration_count); // modifies S[0] and S[1]
+        detail::find_loops2(G, S, tau, calculation_steps, m_iteration_count); // modifies S[0] and S[1]
+        prune_todo_list_conditional(init, todo, calculation_steps);
+        on_the_fly_solve_trigger.set_expiration_steps(calculation_steps/10);
         assert(strategies_are_set_in_solved_nodes());
 
       }
-      else if ((partial_solve_strategy::solve_subgames_using_fatal_attractor_local <= m_options.optimization && m_options.optimization <= partial_solve_strategy::solve_subgames_using_solver) && (m_options.aggressive || fatal_attractors_guard(m_iteration_count)))
+      else if ((partial_solve_strategy::solve_subgames_using_fatal_attractor_local <= m_options.optimization && m_options.optimization <= partial_solve_strategy::solve_subgames_using_solver) && (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
-        mCRL2log(log::verbose) << "start partial solving\n"; report = true;
+        mCRL2log(log::verbose) << "Start partial solving II. " << m_iteration_count << "\n"; 
+        report = true;
+
+        std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
 
         simple_structure_graph G(m_graph_builder.vertices());
         if (m_options.optimization == partial_solve_strategy::solve_subgames_using_fatal_attractor_local)
         {
-          detail::fatal_attractors(G, S, tau, m_iteration_count); // modifies S[0] and S[1]
+          detail::fatal_attractors(G, S, tau, calculation_steps, m_iteration_count); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
         else if (m_options.optimization == partial_solve_strategy::solve_subgames_using_fatal_attractor_original)
@@ -620,30 +675,30 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           detail::partial_solve(m_graph_builder.m_graph, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
+        prune_todo_list_conditional(init, todo, calculation_steps);
+        on_the_fly_solve_trigger.set_expiration_steps(calculation_steps/10);
       }
-      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_original && (m_options.aggressive || find_loops_guard(m_iteration_count)))
+      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_original && (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
-        mCRL2log(log::verbose) << "start partial solving\n"; report = true;
+        mCRL2log(log::verbose) << "Start partial solving III. " << m_iteration_count << "\n"; 
+        report = true;
+
+        std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
 
         simple_structure_graph G(m_graph_builder.vertices());
         detail::find_loops(G, discovered, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
+        prune_todo_list_conditional(init, todo, calculation_steps);
+        on_the_fly_solve_trigger.set_expiration_steps(calculation_steps/10);
         assert(strategies_are_set_in_solved_nodes());
       }
 
       if (report)
       {
-        mCRL2log(log::verbose) << "found solution for" << std::setw(12) << S[0].size() + S[1].size() << " BES equations" << std::endl;
-        mCRL2log(log::verbose) << "finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+        mCRL2log(log::verbose) << "Found solution for" << std::setw(12) << S[0].size() + S[1].size() << " BES equations." << std::endl;
+        mCRL2log(log::verbose) << "Finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s).\n";
       }
 
-      if (m_options.prune_todo_list)
-      {
-        for (const propositional_variable_instantiation& e: elements)
-        {
-          todo.irrelevant_elements().erase(e);
-        }
-        prune_todo_list(init, todo, (discovered.size() - todo.size()) / 2);
-      }
+      prune_todo_list_time_triggered(init, todo);
     }
 
     void on_end_while_loop() override

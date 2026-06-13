@@ -19,6 +19,7 @@
 #include <functional>
 #include <regex>
 
+#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/atermpp/standard_containers/deque.h"
 #include "mcrl2/atermpp/standard_containers/indexed_set.h"
 #include "mcrl2/data/substitution_utility.h"
@@ -35,7 +36,6 @@
 #include "mcrl2/pbes/structure_graph.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/pbes/transformations.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 
 namespace mcrl2::pbes_system
@@ -45,20 +45,12 @@ namespace mcrl2::pbes_system
 class pbesinst_lazy_todo
 {
   protected:
-    std::unordered_set<propositional_variable_instantiation> irrelevant;
     atermpp::deque<propositional_variable_instantiation> todo;
 
     // checks some invariants on the internal state
     bool check_invariants() const
     {
       using utilities::detail::contains;
-      for (const auto& X: irrelevant)
-      {
-        if (contains(todo, X))
-        {
-          return false;
-        }
-      }
       std::unordered_set<propositional_variable_instantiation> tmp(todo.begin(), todo.end());
       return tmp.size() == todo.size();
     }
@@ -76,7 +68,7 @@ class pbesinst_lazy_todo
 
     bool empty() const
     {
-      return todo.empty() && irrelevant.empty();
+      return todo.empty();
     }
 
     std::size_t size() const
@@ -87,16 +79,6 @@ class pbesinst_lazy_todo
     const atermpp::deque<propositional_variable_instantiation>& elements() const
     {
       return todo;
-    }
-
-    const std::unordered_set<propositional_variable_instantiation>& irrelevant_elements() const
-    {
-      return irrelevant;
-    }
-
-    std::unordered_set<propositional_variable_instantiation>& irrelevant_elements()
-    {
-      return irrelevant;
     }
 
     void pop_front()
@@ -111,7 +93,6 @@ class pbesinst_lazy_todo
 
     void insert(const propositional_variable_instantiation& x)
     {
-      irrelevant.erase(x);
       todo.push_back(x);
     }
 
@@ -125,13 +106,7 @@ class pbesinst_lazy_todo
 
       for (FwdIter i = first; i != last; ++i)
       {
-        auto j = irrelevant.find(*i);
-        if (j != irrelevant.end())
-        {
-          todo.push_back(*j);
-          irrelevant.erase(j);
-        }
-        else if (!contains(discovered, *i, thread_index))
+        if (!contains(discovered, *i, thread_index))
         {
           todo.push_back(*i);
         }
@@ -140,32 +115,8 @@ class pbesinst_lazy_todo
 
     void set_todo(atermpp::deque<propositional_variable_instantiation>& new_todo)
     {
-      using utilities::detail::contains;
-      std::size_t size_before = todo.size() + irrelevant.size();
-      std::unordered_set<propositional_variable_instantiation> new_irrelevant;
-      for (const propositional_variable_instantiation& x: todo)
-      {
-        if (!contains(new_todo, x))
-        {
-          new_irrelevant.insert(x);
-        }
-      }
-      for (const propositional_variable_instantiation& x: irrelevant)
-      {
-        if (!contains(new_todo, x))
-        {
-          new_irrelevant.insert(x);
-        }
-      }
       todo.swap(new_todo); // Note: std::swap(todo, new_todo) is wrong when doing multithreading as the atermpp 
                            // wrapper is not moved simultaneously with the content of the deque. 
-      std::swap(irrelevant, new_irrelevant);
-
-      std::size_t size_after = todo.size() + irrelevant.size();
-      if (size_before != size_after)
-      {
-        throw mcrl2::runtime_error("sizes do not match in pbesinst_lazy_todo::set_todo");
-      }
       assert(check_invariants());
     }
 };
@@ -173,7 +124,7 @@ class pbesinst_lazy_todo
 inline
 std::ostream& operator<<(std::ostream& out, const pbesinst_lazy_todo& todo)
 {
-  return out << "todo = " << core::detail::print_list(todo.elements()) << " irrelevant = " << core::detail::print_list(todo.irrelevant_elements()) << std::endl;
+  return out << "todo = " << core::detail::print_list(todo.elements()) << std::endl;
 }
 
 /// \brief A PBES instantiation algorithm that uses a lazy strategy
@@ -210,6 +161,9 @@ class pbesinst_lazy_algorithm
 
     // Mutexes
     utilities::mutex m_todo_access;
+
+    // Prune round counter
+    std::size_t global_current_prune_round = 0;
 
     volatile bool m_must_abort = false;
 
@@ -394,7 +348,7 @@ class pbesinst_lazy_algorithm
         while (!todo.elements().empty() && !m_must_abort)
         {
           ++m_iteration_count;
-
+          std::size_t local_current_prune_round = global_current_prune_round;
           if (std::optional<std::string> message = status_message(m_iteration_count))
           {
             mCRL2log(log::status) << *message;
@@ -424,19 +378,27 @@ class pbesinst_lazy_algorithm
           // report the generated equation
           std::size_t k = m_equation_index.rank(X_e.name());
           m_todo_access.lock();
-          mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e
-                               << " with rank " << k << std::endl;
-          on_report_equation(thread_index, X_e, psi_e, k);
-          todo.insert(occ.begin(), occ.end(), discovered, thread_index);
-          for (const auto& i : occ)
-          {
-            discovered.insert(i, thread_index);
-          }
-          on_discovered_elements(occ);
 
-          if (solution_found(init))
+          // If pruning took place, the current equation may not have been relevant, and therefore we simply
+          // ignore it. If the current equation is not relevant, the newly discovered variables are also possibly
+          // not relevant, and should not be added into the todo set, as otherwise these irrelevant variables
+          // will be explored further, potentially leading to massively wasted exploration and solving effort. 
+          if (local_current_prune_round == global_current_prune_round)
           {
-            break;
+            mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e
+                                 << " with rank " << k << std::endl;
+            on_report_equation(thread_index, X_e, psi_e, k);
+            todo.insert(occ.begin(), occ.end(), discovered, thread_index);
+            for (const propositional_variable_instantiation& i : occ)
+            {
+              discovered.insert(i, thread_index);
+            }
+            on_discovered_elements(occ);
+
+            if (solution_found(init))
+            {
+              break;
+            }
           }
         }
         m_todo_access.unlock();

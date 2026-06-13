@@ -2071,16 +2071,16 @@ In fact, algorithm :ref:`PbesInstStructureGraphPrune <solve-prune>` uses :ref:`P
     \begin{algorithmic}[1]
     \Function {PruneTodo}{$\init, \td, \irr$}
         \State $\td' := \{\init\}$
-        \State $\done' := \emptyset$
+        \State $\done' := \{\init\}$
         \State $\newtd := \emptyset$
         \While {$\td' \neq \emptyset$}
             \State $\mathbf{choose}\ u \in \td'$
             \State $\td' := \td' \setminus \{u\}$
-            \State $\done' := \done' \cup \{u\}$
             \If {$\dec(u) = - \wedge \scc(u) = \emptyset$}
                 \State $\newtd := \newtd \cup \{ u\}$
             \ElsIf {$u \notin S_0 \cup S_1$}
                 \State $\td' := \td' \cup (\scc(u) \setminus \done')$
+                \State $\done' := \done' \cup \scc(u)$
             \EndIf
         \EndWhile
         \State $\newtd := \newtd \cap (\td \cup \irr)$  

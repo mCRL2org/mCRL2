@@ -144,7 +144,8 @@ public:
 
   iterator erase(iterator pos);
 
-  iterator erase(const_iterator pos);
+  // iterator erase(const_iterator pos); TODO: Enable this by making the iterator and const_iterator of aterms different. 
+  //                                           A const_iterator now behaves as an iterator. 
 
   iterator erase(const_iterator first, const_iterator last);
 
@@ -307,4 +308,7 @@ protected:
 } // namespace utilities
 
 } // namespace atermpp
+
+#include "mcrl2/atermpp/standard_containers/detail/unordered_set_implementation.h"
+
 #endif // MCRL2_ATERMPP_STANDARD_CONTAINER_UNORDERED_SET_H

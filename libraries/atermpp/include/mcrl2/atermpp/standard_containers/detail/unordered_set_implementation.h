@@ -119,13 +119,14 @@ namespace atermpp
     return super::erase(pos);
   }
 
+  /* To be enabled again if erase(const_iterator pos) is uncommented in atermpp/standard_containers/unordered_set_implemenation.h
   template<class Key, class Hash, class Pred, class Alloc>
   typename unordered_set<Key,Hash,Pred,Alloc>::iterator
   unordered_set<Key,Hash,Pred,Alloc>::erase(const_iterator pos)
   {
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
     return super::erase(pos);
-  }
+  } */
 
   template<class Key, class Hash, class Pred, class Alloc>
   typename unordered_set<Key,Hash,Pred,Alloc>::iterator

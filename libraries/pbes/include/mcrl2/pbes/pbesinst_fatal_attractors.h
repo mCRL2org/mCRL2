@@ -126,10 +126,12 @@ vertex_set attr_min_rank_generic(const StructureGraph& G, vertex_set A, std::siz
   return A;
 }
 
+// calculation_steps is used to count how many steps are required to calculate a fatal_attractor.
 template <typename Compare>
 void fatal_attractors_generic(const simple_structure_graph& G,
                               std::array<vertex_set, 2>& S,
                               std::array<strategy_vector, 2>& tau,
+                              std::size_t& calculation_steps,
                               std::size_t equation_count,
                               Compare compare
                              )
@@ -146,6 +148,7 @@ void fatal_attractors_generic(const simple_structure_graph& G,
   vertex_set V(n);
   for (std::size_t u = 0; u < n; u++)
   {
+    calculation_steps++;
     V.insert(u);
   }
 
@@ -170,6 +173,7 @@ void fatal_attractors_generic(const simple_structure_graph& G,
 
     while (X != Y)
     {
+      calculation_steps++;
       mCRL2log(log::debug) << "  X = " << X << std::endl;
       mCRL2log(log::debug) << "  Y = " << Y << std::endl;
       X = detail::attr_min_rank_generic(G, set_intersection(U, Y), alpha, V, j, compare);
@@ -180,6 +184,7 @@ void fatal_attractors_generic(const simple_structure_graph& G,
     // set strategy for v \in X \ S[alpha]
     for (structure_graph::index_type v: X.vertices())
     {
+      calculation_steps++;
       if (S[alpha].contains(v))
       {
         continue;
@@ -202,6 +207,7 @@ void fatal_attractors_generic(const simple_structure_graph& G,
     // S_alpha := S_alpha U X
     for (structure_graph::index_type x: X.vertices())
     {
+      calculation_steps++;
       insertion_count++;
       S[alpha].insert(x);
       mCRL2log(log::debug) << "  insert vertex " << x << " in S" << alpha << std::endl;
@@ -221,20 +227,23 @@ inline
 void fatal_attractors(const simple_structure_graph& G,
                       std::array<vertex_set, 2>& S,
                       std::array<strategy_vector, 2>& tau,
+                      std::size_t& calculation_steps,
                       std::size_t equation_count
                      )
 {
-  fatal_attractors_generic(G, S, tau, equation_count, std::greater_equal<structure_graph::index_type>());
+  fatal_attractors_generic(G, S, tau, calculation_steps, equation_count, std::greater_equal<structure_graph::index_type>());
 }
 
+// calculation_steps returns how many steps were needed to find the loops. 
 inline
 void find_loops2(const simple_structure_graph& G,
                  std::array<vertex_set, 2>& S,
                  std::array<strategy_vector, 2>& tau,
+                 std::size_t& calculation_steps,
                  std::size_t equation_count
 )
 {
-  fatal_attractors_generic(G, S, tau, equation_count, std::equal_to<structure_graph::index_type>());
+  fatal_attractors_generic(G, S, tau, calculation_steps, equation_count, std::equal_to<structure_graph::index_type>());
 }
 
 // Computes an attractor set, by extending A. Only predecessors in U are considered with a rank of at least j.
