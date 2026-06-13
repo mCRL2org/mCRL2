@@ -640,7 +640,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
       else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_using_fatal_attractor && (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
-        mCRL2log(log::verbose) << "Start partial solving I. " << m_iteration_count << "\n"; 
+        mCRL2log(log::verbose) << "Start partial solving.\n"; 
         report = true;
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
@@ -653,7 +653,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
       else if ((partial_solve_strategy::solve_subgames_using_fatal_attractor_local <= m_options.optimization && m_options.optimization <= partial_solve_strategy::solve_subgames_using_solver) && (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
-        mCRL2log(log::verbose) << "Start partial solving II. " << m_iteration_count << "\n"; 
+        mCRL2log(log::verbose) << "Start partial solving.\n"; 
         report = true;
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
@@ -680,7 +680,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
       else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_original && (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
-        mCRL2log(log::verbose) << "Start partial solving III. " << m_iteration_count << "\n"; 
+        mCRL2log(log::verbose) << "Start partial solving.\n"; 
         report = true;
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
