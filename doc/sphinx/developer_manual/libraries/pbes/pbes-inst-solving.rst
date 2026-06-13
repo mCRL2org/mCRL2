@@ -2053,11 +2053,22 @@ The above optimisation can be integrated in the instantiation algorithm as follo
 Additional optimizations to PBES instantiation
 ----------------------------------------------
 
-During the execution of the instantiation algorithm (with any solving strategy), the set *todo*  may contain nodes that can be proven to be irrelevant, i.e., the solution of the PBES can already be computed without exploring these irrelevant nodes. 
-To this end we present a routine, :ref:`PruneTodo <prune-todo>`, that partitions the set *todo* into a new set *todo* and a set *irrelevant*. Note that elements from *irrelevant* may be moved to the new set *todo* when new elements are added to the *todo* set.
+During the execution of the instantiation algorithm (with any solving strategy), the set *todo*  may contain nodes that become irrelevant, 
+as the solution of the PBES can already be computed without exploring these irrelevant nodes. This for instance happens in a right hand
+side `X\vee Y` when `X` is true. The variable `Y` does not need to be explored further. 
+To this end we present a routine, :ref:`PruneTodo <prune-todo>`, that recalculates the set *todo*. 
 
 In the tool ``pbessolve``, flag ``--prune-todo-list`` can be used to enable this routine.
-The routine can be used in combination with any solving strategy.
+The routine can be used in combination with any solving strategy, and it takes time at most proportional to the time to instantiate the PBES.
+
+Variables that are removed from the todo set, may become relevant again, but may not be added automatically to *todo*. 
+Consider equations `\mu X=Y, \mu Z=X`. At some point `X` is explored and `Y` is in the todo set. If `X` becomes irrelevant,
+`Y` is removed from the todo set, without being explored. If at a later point `Z` is explored, `X` becomes relevant again, but
+as `X` is explored already `X` will not be investigated further. Hence, `Y` is not added to *todo*. 
+Therefore, it is needed that once pruning has taken place once,
+it must be repeated to detect such variables to be readded to *todo*. 
+
+In particular when *todo* becomes empty, it is necessary to do one more prune, to be sure that all reachable BES variables are being investigated. 
 
 In Algorithm :ref:`PbesInstStructureGraphPrune <solve-prune>` we present the instantiation algorithm in which pruning is applied.
 In fact, algorithm :ref:`PbesInstStructureGraphPrune <solve-prune>` uses :ref:`PruneTodo <prune-todo>`. 
@@ -2069,7 +2080,7 @@ In fact, algorithm :ref:`PbesInstStructureGraphPrune <solve-prune>` uses :ref:`P
     :class: math-left
 
     \begin{algorithmic}[1]
-    \Function {PruneTodo}{$\init, \td, \irr$}
+    \Function {PruneTodo}{$\init, \td$}
         \State $\td' := \{\init\}$
         \State $\done' := \{\init\}$
         \State $\newtd := \emptyset$
@@ -2083,9 +2094,7 @@ In fact, algorithm :ref:`PbesInstStructureGraphPrune <solve-prune>` uses :ref:`P
                 \State $\done' := \done' \cup \scc(u)$
             \EndIf
         \EndWhile
-        \State $\newtd := \newtd \cap (\td \cup \irr)$  
-        \State $\mathit{newirrelevant} := (\td \cup \irr) \setminus \newtd$             
-        \State \Return $\newtd, \mathit{newirrelevant}$
+        \State \Return $\newtd$
     \EndFunction
     \end{algorithmic}
 
@@ -2102,12 +2111,11 @@ The above routine can be integrated in the instantiation algorithm as follows. N
     \Function{\mbox{PbesInstStructureGraphPrune}{$(\E, X_{\init}(e_{\init}), R, E^0, \lsetpre)$}}{}
         \State $ \init := X_{\init}(e_{\init})$
         \State $\td := \{\init\}$
-        \State {\colorbox{lightgray}{$\irr := \emptyset$}} 
         \State $ \discovered := \{\init\}$
         \State $ (V,E,d,r) := (\emptyset, \emptyset, -, -)$
         \State $ S_0 := \emptyset$
         \State $ S_1 := \emptyset$
-        \While {{\colorbox{lightgray}{$(\td \setminus \irr)$}} $\neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1$}
+        \While {$\td \neq \emptyset \wedge X_{\init}(e_{\init}) \notin S_0 \cup S_1$}
             \State $\mathbf{choose}\ X_k(e) \in \td$ 
             \State $\td := \td \setminus \{X_k(e)\}$
             \State $\psi_{X_k}^e := R(\varphi_{X_k}[d_k := e])$
@@ -2124,11 +2132,9 @@ The above routine can be integrated in the instantiation algorithm as follows. N
             \State $\psi_{X_k}^e := Rw^*(\psi_{X_k}^e, \{X \mid (X_k(e), X) \in E^0\}, \lsetpre)$
             \State $(V', E', d', r') := SG^0(X_k(e), \psi_{X_k}^e, \dec(\psi_{X_k}^e), \rnk(X_k(e)))$
             \State $(V,E, d, r) := (V \cup V',E \cup E',d'\lceil d,r' \lceil r)$
-            \State $\td := \td \cup (\occ(\psi_{X_k}^e) \setminus$ {\colorbox{lightgray}{$(\discovered \setminus \irr)$}}$)$
+            \State $\td := \td \cup \occ(\psi_{X_k}^e) \setminus \discovered )$
             \State $\discovered := \discovered \cup \occ(\psi_{X_k}^e)$
-            \State {\colorbox{lightgray}{$\irr := \irr 
-            \setminus \occ(\psi_{X_k}^e)$}} 
-            \State {\colorbox{lightgray}{$\td, \irr := \text{\textsc{PruneTodo}}(\init, \td, \irr) \text{ (executed periodically)}$}} 
+            \State {\colorbox{lightgray}{$\td := \text{\textsc{PruneTodo}}(\init, \td) \text{ (executed periodically)}$}} 
         \EndWhile
         \State $V := \textsc{ExtractMinimalStructureGraph}(V, \init, S_0, S_1, \tau_0, \tau_1)$
         \State \Return $(V,E, d, r)$
