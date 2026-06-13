@@ -9,8 +9,8 @@
 /// \file lpsactionrename.cpp
 /// \brief The tool lpsactionrename renames actions in an LPS
 
-#define TOOLNAME "lpsactionrename"
-#define AUTHOR "Jan Friso Groote and Tom Haenen"
+constexpr auto TOOLNAME = "lpsactionrename";
+constexpr auto AUTHOR = "Jan Friso Groote and Tom Haenen";
 
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/sumelm.h"

@@ -891,7 +891,7 @@ void ProcessSystem::mcrl2ParsingResult(int previousExitCode)
     QString parsingOutput = consoleDock->getConsoleOutput(ProcessType::Parsing);
     QRegularExpression parsingError = QRegularExpression("Line (\\d+), column (\\d+): syntax error");
     QRegularExpressionMatch match;
-    int parsingErrorIndex =
+    qsizetype parsingErrorIndex =
         parsingOutput.indexOf(parsingError, parsingOutput.lastIndexOf("#####"), &match);
     if (parsingErrorIndex >= 0)
     {

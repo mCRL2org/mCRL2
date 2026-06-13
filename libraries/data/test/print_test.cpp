@@ -77,6 +77,8 @@ bool print_container_check(Container const& c)
   return true;
 }
 
+// This must remain a macro: BOOST_CHECK reports the failure at the invocation line.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PRINT_CHECK(x,y) BOOST_CHECK(print_check(x,y))
 
 BOOST_AUTO_TEST_CASE(test_function_symbol_print)

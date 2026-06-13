@@ -68,7 +68,7 @@ SmallProgressMeasures::SmallProgressMeasures(const ParityGame& game,
     for (std::size_t n = 0; n < len_; ++n)
     {
         std::size_t prio = 2*n + 1 - p_;
-        M_[n] = (prio < game.d()) ? game_.cardinality(prio) + 1 : 0;
+        M_[n] = (prio < game.d()) ? game_.cardinality(static_cast<int>(prio)) + 1 : 0;
     }
 }
 
@@ -229,7 +229,7 @@ verti SmallProgressMeasures::solve_one(LiftingStrategy2 &ls)
                 changed = true;
             }
             else
-            if (vector_cmp(vec(v), vec(get_successor(u)), len_) > 0)
+            if (vector_cmp(vec(v), vec(get_successor(u)), static_cast<int>(len_)) > 0)
             {   // maximum successor changed
                 strategy_[u] = v;
                 changed = true;
@@ -507,7 +507,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
 
         /* Note: work size should be large enough so that dumb strategies like
                  linear lifting are still able to detect termination! */
-        for ( long long work = game_.graph().V(); work > 0 && !half_solved;
+        for ( long long work = static_cast<long long>(game_.graph().V()); work > 0 && !half_solved;
               work -= SmallProgressMeasures::work_size )
         {
             half_solved = spm[player]->solve_some(*ls) > 0;
@@ -676,7 +676,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
         std::unique_ptr<LiftingStrategy2> ls(lsf_->create2(game_, *spm[player]));
         spm[player]->initialize_lifting_strategy(*ls);
 
-        for ( long long work = game_.graph().V(); work > 0 && !half_solved;
+        for ( long long work = static_cast<long long>(game_.graph().V()); work > 0 && !half_solved;
               work -= SmallProgressMeasures::work_size )
         {
             half_solved = spm[player]->solve_some(*ls) > 0;

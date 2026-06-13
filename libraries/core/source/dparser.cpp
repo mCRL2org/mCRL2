@@ -239,7 +239,7 @@ unsigned int parser::start_symbol_index(const std::string& name) const
 parse_node parser::parse(const std::string& text, unsigned int start_symbol_index, bool partial_parses)
 {
   detail::reset_dparser_error_message_count();
-  m_parser->start_state = start_symbol_index;
+  m_parser->start_state = static_cast<int>(start_symbol_index);
   m_parser->partial_parses = partial_parses ? 1 : 0;
   D_ParseNode* result = dparse(m_parser, const_cast<char*>(text.c_str()), static_cast<int>(text.size()));
   if (!result || m_parser->syntax_errors)
@@ -326,7 +326,7 @@ std::string add_context(const d_loc_t* loc, const std::string& message)
 }
 
 inline
-bool is_all_of_type(D_ParseNode* nodes[], int n, const char* type, const core::parser_table& table)
+bool is_all_of_type(D_ParseNode** nodes, int n, const char* type, const core::parser_table& table)
 {
   for (int i = 0; i < n; i++)
   {
@@ -340,7 +340,7 @@ bool is_all_of_type(D_ParseNode* nodes[], int n, const char* type, const core::p
 }
 
 inline
-void print_ambiguous_nodes(D_ParseNode* nodes[], int n, const char* type, const core::parser_table& table)
+void print_ambiguous_nodes(D_ParseNode** nodes, int n, const char* type, const core::parser_table& table)
 {
   mCRL2log(log::verbose) << "--- " << type << " ambiguity" << std::endl;
   for (int i = 0; i < n; ++i)
@@ -431,7 +431,7 @@ static void log_location(struct D_Parser *ap)
   // We recover information about the last parsed node by casting D_Parser to Parser, which
   // is the structure that the dparser library internally uses to keep its administration in.
   std::string after;
-  SNode *s = ((Parser*)ap)->snode_hash.last_all;
+  SNode *s = reinterpret_cast<Parser*>(ap)->snode_hash.last_all;
   ZNode *z = s != nullptr ? s->zns.v[0] : nullptr;
   while (z != nullptr && z->pn->parse_node.start_loc.s == z->pn->parse_node.end)
   {
@@ -465,7 +465,7 @@ void syntax_error_fn(struct D_Parser *ap)
   else
   {
     // Dive into the internals of dparser to recover some extra diagnostics.
-    Parser* p = (Parser*)ap;
+    Parser* p = reinterpret_cast<Parser*>(ap);
     if (p->pnode_hash.all && p->pnode_hash.all->latest)
     {
       core::parse_node n(&p->pnode_hash.all->latest->parse_node);

@@ -11,6 +11,8 @@
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/included/unit_test.hpp>
 
+#include <array>
+
 #include "mcrl2/utilities/command_line_interface.h"
 
 using namespace ::mcrl2::utilities;
@@ -126,10 +128,10 @@ BOOST_AUTO_TEST_CASE(conformance)
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --debug"));
 
   // Check conversion with wide characters
-  wchar_t const* arguments[] = { L"test", L"--debug", L"--verbose=2" } ;
+  std::array<wchar_t const*, 3> arguments = { L"test", L"--debug", L"--verbose=2" } ;
 
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, 2, arguments));
-  BOOST_CHECK_THROW(command_line_parser(test_interface, 3, arguments), std::runtime_error);
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, 2, arguments.data()));
+  BOOST_CHECK_THROW(command_line_parser(test_interface, 3, arguments.data()), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(custom_types)

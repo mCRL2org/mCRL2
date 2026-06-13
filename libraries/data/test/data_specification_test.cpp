@@ -102,9 +102,9 @@ void test_sorts()
   basic_sort s0("S0");
   alias s1(s,basic_sort("S1"));
 
-  std::vector< sort_expression > sl;
-  sl.push_back(basic_sort("S1"));
-  sl.push_back(s0);
+  std::vector< sort_expression > sort_list;
+  sort_list.push_back(basic_sort("S1"));
+  sort_list.push_back(s0);
 
   data_specification spec;
   spec.add_sort(s);
@@ -875,7 +875,7 @@ BOOST_AUTO_TEST_CASE(test_abuse_of_tail)
     data_specification data_spec=parse_data_specification(spec_string);
     BOOST_CHECK(false); // Typechecking is supposed to fail; one cannot get here.
   }
-  catch (mcrl2::runtime_error &e)
+  catch (mcrl2::runtime_error&) // NOLINT(bugprone-empty-catch)
   {
     // It is expected that a runtime error is thrown.
   }

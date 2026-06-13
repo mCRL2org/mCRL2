@@ -2470,6 +2470,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
             bisim_gjkw::state_info_ptr red_s;
             bisim_gjkw::pred_iter_t red_pred_iter;
 
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
         COROUTINE_LABELS(   (REFINE_BLUE_PREDECESSOR_HANDLED)
                             (REFINE_BLUE_TESTING)
                             (REFINE_BLUE_STATE_HANDLED)

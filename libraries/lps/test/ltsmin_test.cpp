@@ -63,8 +63,8 @@ void test_data_type(lps::pins_data_type& type)
   // check serialize/deserialize
   for (std::size_t i = 0; i < type.size(); ++i)
   {
-    std::string s = type.serialize(i);
-    std::cout << "serialize(" << i << ") = " << type.serialize(i) << std::endl;
+    std::string s = type.serialize(static_cast<int>(i));
+    std::cout << "serialize(" << i << ") = " << type.serialize(static_cast<int>(i)) << std::endl;
     std::size_t j = type.deserialize(s);
     BOOST_CHECK(i == j);
   }
@@ -72,7 +72,7 @@ void test_data_type(lps::pins_data_type& type)
   // check print/parse
   for (std::size_t i = 0; i < type.size(); ++i)
   {
-    std::string s = type.print(i);
+    std::string s = type.print(static_cast<int>(i));
     std::cout << "print(" <<  i << ") = " << s << std::endl;
     std::size_t j = type.parse(s);
     std::cout << "parse(" <<  s << ") = " << j << std::endl;
@@ -330,7 +330,7 @@ std::cerr << "TYPE " << type << "\n";
 
     data::data_expression d1 = data::parse_data_expression(s, spec.data());
 std::cerr << "DATA EXPRESSION " << d1 << "\n";
-    std::string serialised = p1.data_type(type).serialize(p1.data_type(type)[d1]);
+    std::string serialised = p1.data_type(type).serialize(static_cast<int>(p1.data_type(type)[d1]));
     data::data_expression d2(p2.data_type(type).get(p2.data_type(type).deserialize(serialised)));
     std::cout << "string:     " << s << std::endl;
     std::cout << "expression: " << d1 << std::endl;

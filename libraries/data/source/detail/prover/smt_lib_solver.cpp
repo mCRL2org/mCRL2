@@ -1,4 +1,5 @@
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+#include <array>
 #include <cerrno>       // for errno
 #include <sys/types.h>  // for pid_t
 #include <sys/wait.h>   // for waitpid()
@@ -15,9 +16,9 @@ namespace mcrl2::data::detail::prover
 template < typename T >
 bool binary_smt_solver< T >::execute(std::string const& benchmark)
 {
-  int pipe_stdin[2];
-  int pipe_stdout[2];
-  int pipe_stderr[2];
+  std::array<int, 2> pipe_stdin;
+  std::array<int, 2> pipe_stdout;
+  std::array<int, 2> pipe_stderr;
 
   // Create pipes (two pairs r/w)
   if (::pipe(&pipe_stdin[0]) < 0)
@@ -77,14 +78,14 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
     ::close(pipe_stdout[1]);
     ::close(pipe_stderr[1]);
 
-    char output[64];
+    std::array<char, 64> output;
 
     int return_status;
 
     // check return value
-    if (0 < ::read(pipe_stdout[0], output, 8))
+    if (0 < ::read(pipe_stdout[0], output.data(), 8))
     {
-      if (strncmp(output, "sat", 3) == 0)
+      if (strncmp(output.data(), "sat", 3) == 0)
       {
         mCRL2log(verbose) << "The formula is satisfiable" << std::endl;
 
@@ -95,11 +96,11 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
 
         return true;
       }
-      else if (strncmp(output, "unsat", 5) == 0)
+      else if (strncmp(output.data(), "unsat", 5) == 0)
       {
         mCRL2log(verbose) << "The formula is unsatisfiable" << std::endl;
       }
-      else if (strncmp(output, "unknown", 7) == 0)
+      else if (strncmp(output.data(), "unknown", 7) == 0)
       {
         mCRL2log(verbose) << T::name() << " cannot determine whether this formula is satisfiable or not." << std::endl;
       }
@@ -108,9 +109,9 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
     {
       std::string message;
 
-      while (int i = ::read(pipe_stderr[0], output, 64))
+      while (ssize_t i = ::read(pipe_stderr[0], output.data(), 64))
       {
-        message.append(output, 0, i);
+        message.append(output.data(), static_cast<std::size_t>(i));
       }
 
       throw mcrl2::runtime_error(std::string("The SMT prover ") + T::name() + " does not work properly. " + message );

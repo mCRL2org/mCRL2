@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ltspbisim.cpp
-#define NAME "ltspbisim"
-#define AUTHOR "Hector Joao Rivera Verduzco"
+constexpr auto NAME = "ltspbisim";
+constexpr auto AUTHOR = "Hector Joao Rivera Verduzco";
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/lts/lts_probabilistic_equivalence.h"

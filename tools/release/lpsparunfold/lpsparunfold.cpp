@@ -8,8 +8,8 @@
 //
 /// \file ./lpsparunfold.cpp
 
-#define TOOLNAME "lpsparunfold"
-#define AUTHORS "Frank Stappers, Jeroen Keiren, Thomas Neele"
+constexpr auto TOOLNAME = "lpsparunfold";
+constexpr auto AUTHORS = "Frank Stappers, Jeroen Keiren, Thomas Neele";
 
 // C++
 #include <climits>

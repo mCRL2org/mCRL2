@@ -8,8 +8,8 @@
 //
 /// \file reduce_pbes.cpp
 
-#define NAME "reduce_pbes"
-#define AUTHOR "Wieger Wesselink"
+constexpr auto NAME = "reduce_pbes";
+constexpr auto AUTHOR = "Wieger Wesselink";
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/utilities/input_tool.h"
@@ -64,7 +64,6 @@ void generate_reduced_pbesses(const pbes& p, std::size_t depth, const std::strin
         continue;
       }
       std::string filename = input_filename.substr(0, input_filename.size() - 5) + "_" + utilities::number2string(depth) + "_" + utilities::number2string(x) + "_" + utilities::number2string(index) + ".pbes";
-      std::string text = pbes_system::pp(q);
       pbes_system::detail::save_pbes(q, filename);
       std::cout << "file = " << filename << std::endl;
       index++;

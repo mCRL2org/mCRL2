@@ -29,9 +29,12 @@ using sylvan::ldds::ldd;
 using namespace mcrl2::symbolic;
 
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
 TASK_DECL_0(bool, random_test_ldd_stream_task);
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define random_test_ldd_stream_task(a) RUN(random_test_ldd_stream_task, a)
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
 TASK_IMPL_0(bool, random_test_ldd_stream_task)
 { 
 
@@ -66,9 +69,12 @@ BOOST_AUTO_TEST_CASE(random_test_ldd_stream)
   quit_sylvan();
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
 TASK_DECL_0(bool, random_test_ldd_stream_sequence_task);
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define random_test_ldd_stream_sequence_task(a) RUN(random_test_ldd_stream_sequence_task, a)
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
 TASK_IMPL_0(bool, random_test_ldd_stream_sequence_task)
 { 
   for (std::size_t i = 0; i < 100; ++i)
@@ -115,9 +121,12 @@ BOOST_AUTO_TEST_CASE(random_test_ldd_stream_sequence)
   quit_sylvan();
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
 TASK_DECL_0(bool, random_test_ldd_stream_simple_cases_task);
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define random_test_ldd_stream_simple_cases_task(a) RUN(random_test_ldd_stream_simple_cases_task, a)
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
 TASK_IMPL_0(bool, random_test_ldd_stream_simple_cases_task)
 { 
   std::stringstream stream;

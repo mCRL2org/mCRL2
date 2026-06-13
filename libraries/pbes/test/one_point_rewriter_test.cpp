@@ -81,7 +81,7 @@ void test_one_point_rule_rewriter(const std::string& expr1, const std::string& e
     expr1,
     expr2,
     parser(),
-    std::equal_to<pbes_expression>(),
+    std::equal_to<>(),
     [&](const pbes_expression& x) { return S(R(x)); },
     "R1",
     S,

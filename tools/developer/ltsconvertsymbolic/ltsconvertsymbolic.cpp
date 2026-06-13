@@ -48,7 +48,9 @@ struct arguments
   lps::symbolic_lts input;
 };
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
 TASK_DECL_1(bool, ltsconvertsymbolic_task, arguments*);
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ltsconvertsymbolic_task(a) RUN(ltsconvertsymbolic_task, a)
 
 // \overload
@@ -210,7 +212,7 @@ public:
     {      
       lace_set_stacksize(lace_stacksize);
       lace_start(number_of_threads(), lace_dqsize);
-      sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, std::log2(table_ratio), std::log2(initial_ratio));
+      sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, static_cast<int>(std::log2(table_ratio)), static_cast<int>(std::log2(initial_ratio)));
       sylvan::sylvan_init_package();
       sylvan::sylvan_init_ldd();
 
@@ -229,6 +231,7 @@ public:
     lps::symbolic_lts m_input;
 };
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
 TASK_IMPL_1(bool, ltsconvertsymbolic_task, arguments*, args)
 {
   if (args->input_filename.empty() || args->input_filename == "-")

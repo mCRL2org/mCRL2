@@ -8,7 +8,7 @@
 //
 /// \file ./visualizer.cpp
 
-#include <iostream> // only temporary for std::clog
+#include <array>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLDebugLogger>
 
@@ -53,12 +53,12 @@ Visualizer::SelectionList Visualizer::getSelection(qreal width, qreal height)
   makeCurrent();
   m_selectionBuffer->bind();
 
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
+  std::array<GLint, 4> viewport;
+  glGetIntegerv(GL_VIEWPORT, viewport.data());
 
   constexpr std::size_t buffer_size = 4096;
-  GLuint buffer[buffer_size];
-  glSelectBuffer(buffer_size, buffer);
+  std::array<GLuint, buffer_size> buffer;
+  glSelectBuffer(buffer_size, buffer.data());
   glRenderMode(GL_SELECT);
   glInitNames();
 
@@ -67,7 +67,7 @@ Visualizer::SelectionList Visualizer::getSelection(qreal width, qreal height)
   glLoadIdentity();
   const qreal x = m_lastMouseEvent->position().x() * devicePixelRatio();
   const qreal y = m_lastMouseEvent->position().y() * devicePixelRatio();
-  gluPickMatrix(x, viewport[3] - y, width, height, viewport);
+  gluPickMatrix(x, viewport[3] - y, width, height, viewport.data());
   GLdouble scale = std::min(widthC(), heightC());
   gluOrtho2D(-widthC() / scale, widthC() / scale, -heightC() / scale, heightC() / scale);
 
@@ -79,7 +79,7 @@ Visualizer::SelectionList Visualizer::getSelection(qreal width, qreal height)
 
   GLint hits = glRenderMode(GL_RENDER);
   std::list<Selection> selections;
-  GLuint* hit = buffer;
+  const GLuint* hit = buffer.data();
   while (hits--)
   {
     const size_t size = *hit++;

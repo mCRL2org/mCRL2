@@ -14,8 +14,8 @@
 
 #define ohash(k1,k2,b,m) (((k1)*11408669 + (k2)*97416181 + (b)*71053447) & (m))
 #define thash(k,tb,m) (((k)*11408669 + (tb)*97416181) & (m))
-#define BOT_BIT 1
-#define TOP_BIT 2
+constexpr int BOT_BIT = 1;
+constexpr int TOP_BIT = 2;
 
 ConeDB::ConeDB()
 {
@@ -73,7 +73,7 @@ void ConeDB::check_thashtable()
     {
       h = thash(tbuckets[i].key,tbuckets[i].top_bot,(thashtable.size()-1));
       tbuckets[i].next = thashtable[h];
-      thashtable[h] = i;
+      thashtable[h] = static_cast<int>(i);
     }
   }
 }
@@ -137,7 +137,7 @@ void ConeDB::check_ohashtable()
       h = ohash(obuckets[i].alpha,obuckets[i].radius,obuckets[i].sign,
                 (ohashtable.size()-1));
       obuckets[i].next = ohashtable[h];
-      ohashtable[h] = i;
+      ohashtable[h] = static_cast<int>(i);
     }
   }
 }

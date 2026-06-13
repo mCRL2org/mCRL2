@@ -19,9 +19,9 @@ using namespace atermpp;
 
 struct counter
 {
-  int& m_sum;
+  std::size_t& m_sum;
 
-  counter(int& sum)
+  counter(std::size_t& sum)
     : m_sum(sum)
   {}
 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_aterm_list)
   }
   BOOST_CHECK(os.str() == "[5,6]1234");
 
-  int sum = 0;
+  std::size_t sum = 0;
   std::for_each(r.begin(), r.end(), counter(sum));
   BOOST_CHECK(sum == 10);
 

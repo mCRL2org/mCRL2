@@ -123,13 +123,13 @@ void lts_type::add_state(const std::string& name, const std::string& type)
     //        << std::endl;
     this->state_names.push_back(name);
     this->state_types.push_back(type);
-    std::size_t type_index;
+    int type_index;
     std::map<std::string,int>::iterator type_index_it = this->state_type_index.find(type);
     if (type_index_it != this->state_type_index.end()) {
         type_index = type_index_it->second;
     } else {
         this->state_type_list.push_back(type);
-        type_index = this->state_type_list.size() - 1;
+        type_index = static_cast<int>(this->state_type_list.size() - 1);
         this->state_type_index[type] = type_index;
     }
     this->state_type_no.push_back(type_index);
@@ -207,7 +207,7 @@ void lts_info::compute_lts_type()
             }
         }
     }
-    this->type = lts_type(1 + params.size());
+    this->type = lts_type(static_cast<int>(1 + params.size()));
     this->type.add_state("var", "string"); // Propositional variable name
 
     int i = 0;
@@ -1300,9 +1300,6 @@ std::string ltsmin_state::state_to_string() const
 explorer::explorer(const std::string& filename, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false, bool always_split_flag = false)
 {
     load_pbes(p, filename);
-    for (auto & eqn : p.equations()) {
-        std::string variable_name = eqn.variable().name();
-    }
     pbes_system::algorithms::normalize(p);
     if (!detail::is_ppg(p))
     {
@@ -1417,7 +1414,7 @@ int explorer::get_string_index(const std::string& s)
         index = this->localmap_int2string.size() - 1;
         this->localmap_string2int.insert(std::make_pair(s,index));
     }
-    return index;
+    return static_cast<int>(index);
 }
 
 
@@ -1433,7 +1430,7 @@ int explorer::get_value_index(int type_no, const data_expression& value)
         index = this->localmaps_int2data.at(type_no).size() - 1;
         data2int_map.insert(std::make_pair(value,index));
     }
-    return index;
+    return static_cast<int>(index);
 }
 
 

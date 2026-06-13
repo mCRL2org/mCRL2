@@ -305,7 +305,7 @@ void Rewriter::rewrite_lambda_application(
   // Rewrite the remaining arguments and apply the rewritten lambda term to them.
   make_application(result,
                      result,
-                     t.begin()+vl.size(),
+                     t.begin()+static_cast<std::ptrdiff_t>(vl.size()),
                      t.end(),
                      [this, arguments_are_in_normal_form, &sigma](data_expression& result, const data_expression& t) -> void 
                      { 
@@ -481,7 +481,7 @@ void Rewriter::quantifier_enumeration(
       }
     }
   }
-  catch(const mcrl2::runtime_error& e)
+  catch(const mcrl2::runtime_error&) // NOLINT(bugprone-empty-catch)
   {
     // if (max_count==std::numeric_limits<std::size_t>::max()) // No bound on enumeration.
     // {
@@ -547,7 +547,7 @@ static void check_vars(const data_expression& expr, const std::set <variable>& v
 
     if (vars.count(v)==0)
     {
-      throw v;
+      throw variable(v);
     }
   }
 }

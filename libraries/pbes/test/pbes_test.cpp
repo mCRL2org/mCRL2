@@ -55,8 +55,9 @@ BOOST_AUTO_TEST_CASE(test_pbes)
     load_pbes(p, "non-existing file");
     BOOST_CHECK(false); // loading is expected to fail
   }
-  catch (mcrl2::runtime_error&)
+  catch (mcrl2::runtime_error&) // NOLINT(bugprone-empty-catch)
   {
+    // Loading a non-existing file is expected to throw; the test succeeds.
   }
 
   std::string filename = "write_term_to_text_stream.pbes";

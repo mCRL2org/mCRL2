@@ -171,7 +171,7 @@ void ParityGame::read_pgsolver( std::istream &is,
     if (used < (verti)vertices.size())
     {
         // Remove unused vertices:
-        vertices.erase(vertices.begin() + used, vertices.end());
+        vertices.erase(vertices.begin() + static_cast<std::ptrdiff_t>(used), vertices.end());
 
         // Remap edges to new vertex indices:
         for ( StaticGraph::edge_list::iterator it = edges.begin();
@@ -184,7 +184,7 @@ void ParityGame::read_pgsolver( std::istream &is,
     }
 
     // Assign vertex info and recount cardinalities
-    reset((verti)vertices.size(), max_prio + 1);
+    reset((verti)vertices.size(), static_cast<int>(max_prio + 1));
     for (std::size_t n = 0; n < vertices.size(); ++n)
     {
         assert(vertices[n] != invalid);
@@ -201,7 +201,7 @@ void ParityGame::read_pgsolver( std::istream &is,
 void ParityGame::write_pgsolver(std::ostream &os) const
 {
     // Get max priority and make it even so max_prio - p preserves parity:
-    int max_prio = d();
+    int max_prio = static_cast<int>(d());
     if (max_prio % 2 == 1)
     {
       --max_prio;
@@ -297,19 +297,23 @@ void ParityGame::read_raw(std::istream &is)
     graph_.read_raw(is);
     assert(is.good());
     int d;
-    is.read((char*)&d, sizeof(d));
+    is.read(reinterpret_cast<char*>(&d), sizeof(d));
     reset(graph_.V(), d);
-    is.read((char*)vertex_, sizeof(ParityGameVertex)*graph_.V());
-    is.read((char*)cardinality_, sizeof(verti)*d);
+    is.read(reinterpret_cast<char*>(vertex_),
+            static_cast<std::streamsize>(sizeof(ParityGameVertex)*graph_.V()));
+    is.read(reinterpret_cast<char*>(cardinality_),
+            static_cast<std::streamsize>(sizeof(verti)*d));
 }
 
 void ParityGame::write_raw(std::ostream &os) const
 {
     graph_.write_raw(os);
     assert(os.good());
-    os.write((const char*)&d_, sizeof(d_));
-    os.write((const char*)vertex_, sizeof(ParityGameVertex)*graph_.V());
-    os.write((const char*)cardinality_, sizeof(verti)*d_);
+    os.write(reinterpret_cast<const char*>(&d_), sizeof(d_));
+    os.write(reinterpret_cast<const char*>(vertex_),
+             static_cast<std::streamsize>(sizeof(ParityGameVertex)*graph_.V()));
+    os.write(reinterpret_cast<const char*>(cardinality_),
+             static_cast<std::streamsize>(sizeof(verti)*d_));
 }
 
 void ParityGame::write_dot(std::ostream &os) const

@@ -21,8 +21,8 @@
 // ======================================================================
 
 
-#define NAME "pbes2bes"
-#define AUTHOR "Jan Friso Groote"
+constexpr auto NAME = "pbes2bes";
+constexpr auto AUTHOR = "Jan Friso Groote";
 
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"

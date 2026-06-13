@@ -14,8 +14,6 @@
 
 #ifdef MCRL2_ENABLE_JITTYC
 
-#define NAME "rewr_jittyc"
-
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -1035,7 +1033,7 @@ class RewriterCompilingJitty::ImplementTree
   std::set<rewr_function_spec> m_rewr_functions_implemented;
   std::set<std::size_t>m_delayed_application_functions; // Recalls the arities of the required functions 'delayed_application';
   std::vector<bool> m_used;
-  std::vector<int> m_stack;
+  std::vector<std::size_t> m_stack;
   padding m_padding;
   std::size_t m_locvar_counter=0;
 
@@ -1412,8 +1410,6 @@ class RewriterCompilingJitty::ImplementTree
     const std::size_t arity = a.size();
     nfs_array rewr_args(arity);
     rewr_args.fill(true);
-    std::stringstream dummy_result_type;  // As we rewrite to normal forms, these are always data_expressions.
-    std::stringstream head;
     std::stringstream arguments;
 
     std::string headlocvar;
@@ -2054,9 +2050,9 @@ class RewriterCompilingJitty::ImplementTree
              std::stack<std::string>& auxiliary_code_fragments,
              std::map<variable,std::string>& type_of_code_variables)
   {
-    int i = m_stack.back();
+    std::size_t i = m_stack.back();
     m_stack.pop_back();
-    int j = m_stack.back();
+    std::size_t j = m_stack.back();
     m_stack.pop_back();
     implement_tree(m_stream, tree.subtree(), j, i, level - 1, cnt, arity, opid, brackets, auxiliary_code_fragments, type_of_code_variables);
     m_stack.push_back(j);
@@ -2318,7 +2314,6 @@ public:
       return;
     }
     m_stream << m_padding << "data_expression& local_store1=this_rewriter->m_rewrite_stack.new_stack_position<data_expression>();\n";
-    std::stringstream ss;
 
     m_stream << m_padding << cplusplus_function_name << "(local_store1";
         

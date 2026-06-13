@@ -26,15 +26,15 @@ class tree_set_store
       ptrdiff_t tag;
       ptrdiff_t next;
     };
-    bucket* buckets;
+    std::vector<bucket> buckets;
     ptrdiff_t buckets_size;
     ptrdiff_t buckets_next;
 
-    ptrdiff_t* tags;
+    std::vector<ptrdiff_t> tags;
     ptrdiff_t tags_size;
     ptrdiff_t tags_next;
 
-    ptrdiff_t* hashtable;
+    std::vector<ptrdiff_t> hashtable;
     ptrdiff_t hashmask;
 
     void check_tags();

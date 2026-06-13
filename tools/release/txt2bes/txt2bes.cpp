@@ -9,8 +9,8 @@
 /// \file txt2pbes.cpp
 /// \brief Parse a textual description of a BES.
 
-#define NAME "txt2bes"
-#define AUTHOR "Wieger Wesselink"
+constexpr auto NAME = "txt2bes";
+constexpr auto AUTHOR = "Wieger Wesselink";
 
 //mCRL2 specific
 #include "mcrl2/utilities/input_output_tool.h"

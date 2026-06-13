@@ -161,7 +161,8 @@ void CodeHighlighter::highlightBlock(const QString& text)
   {
     for (const auto& match : rule.pattern.globalMatch(text))
     {      
-      setFormat(match.capturedStart(), match.capturedEnd() - match.capturedStart(), rule.format);
+      setFormat(static_cast<int>(match.capturedStart()),
+                static_cast<int>(match.capturedEnd() - match.capturedStart()), rule.format);
     }
   }
 }
@@ -335,11 +336,11 @@ int CodeEditor::matchingParenthesisPosition(int toMatchPos, int direction)
     /* find the next first parenthesis */
     if (direction > 0)
     {
-      pos = text.indexOf(QRegularExpression("[()]"), pos + 1);
+      pos = static_cast<int>(text.indexOf(QRegularExpression("[()]"), pos + 1));
     }
     else
     {
-      pos = text.lastIndexOf(QRegularExpression("[()]"), pos - 1);
+      pos = static_cast<int>(text.lastIndexOf(QRegularExpression("[()]"), pos - 1));
     }
     /* update how deeply nested we are if the parenthesis is not a comment */
     if (pos > -1 && !characterIsCommentedOut(text, pos))

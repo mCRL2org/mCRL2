@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
   {
     data::data_specification d = data::parse_data_specification(text);
   }
-  catch (std::runtime_error e)
+  catch (const std::runtime_error& e)
   {
     std::cout << e.what() << std::endl;
   }

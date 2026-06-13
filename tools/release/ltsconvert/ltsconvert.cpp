@@ -9,8 +9,8 @@
 /// \file ltsconvert.cpp
 
 #include "mcrl2/lts/lts_equivalence.h"
-#define NAME "ltsconvert"
-#define AUTHOR "Muck van Weerdenburg, Jan Friso Groote"
+constexpr auto NAME = "ltsconvert";
+constexpr auto AUTHOR = "Muck van Weerdenburg, Jan Friso Groote";
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/lts/lts_io.h"

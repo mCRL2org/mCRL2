@@ -74,7 +74,7 @@ static std::string word_wrap(const std::string& input, const std::size_t width, 
 
       if (end != std::string::npos)
       {
-        i              += end - start;
+        i += static_cast<std::ptrdiff_t>(end - start);
         variable_indent = input.substr(start, end - start);
       }
       else

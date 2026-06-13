@@ -35,7 +35,7 @@ FileInformation::FileInformation(QString filename, QWidget *parent) :
 
 QString FileInformation::sizeString(qint64 size)
 {
-    double dsize = size;
+    double dsize = static_cast<double>(size);
     QStringList names;
     names << "bytes" << "kB" << "MB" << "GB" << "TB";
     int factor;

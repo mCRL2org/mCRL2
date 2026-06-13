@@ -2549,7 +2549,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
             NewParList=detail::insert_sort_unique(NewParList,result);
           }
         }
-        catch (mcrl2::runtime_error&)
+        catch (mcrl2::runtime_error&) // NOLINT(bugprone-empty-catch)
         {
           // Ignore the error. Just do not add the type to NewParList
         }
@@ -3241,8 +3241,9 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           {
             Type=UpCastNumericType(NeededType,Type,Arg,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
-          catch (mcrl2::runtime_error&)
+          catch (mcrl2::runtime_error&) // NOLINT(bugprone-empty-catch)
           {
+            // Ignore the error: upcasting is optional, the type check below handles the mismatch.
           }
         }
         if (!EqTypesA(NeededType,Type))
@@ -3306,8 +3307,9 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           {
             Type=UpCastNumericType(NeededType,Type,Arg,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
-          catch (mcrl2::runtime_error&)
+          catch (mcrl2::runtime_error&) // NOLINT(bugprone-empty-catch)
           {
+            // Ignore the error: upcasting is optional, the type check below handles the mismatch.
           }
         }
         if (!EqTypesA(NeededType,Type))

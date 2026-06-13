@@ -114,6 +114,8 @@ void test_bes(const std::string& bes_spec, bool expected_result)
     case 2:
       std::cout << "UNKNOWN" << std::endl;
       break;
+    default:
+      break;
   }
   BOOST_CHECK((!expected_result && result == 0) || (expected_result && result == 1));
 
@@ -155,6 +157,8 @@ void test_abp()
       break;
     case 2:
       std::cout << "UNKNOWN" << std::endl;
+      break;
+    default:
       break;
   }
 

@@ -11,6 +11,7 @@
 
 #include "primitives.h"
 
+#include <array>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -139,7 +140,7 @@ P_SimpleSphere::P_SimpleSphere()
 {
   GLfloat S = GLfloat(sin(PI/4));
   GLfloat C = GLfloat(cos(PI/4));
-  GLfloat vertices[] = { 0,  0, -1,
+  std::array<GLfloat, 42> vertices = { 0,  0, -1,
                          S,  0, -C,
                          0, -S, -C,
                          -S,  0, -C,
@@ -155,7 +156,7 @@ P_SimpleSphere::P_SimpleSphere()
                          0,  0,   1
                        };
 
-  GLfloat texCoords[] = {0.0,
+  std::array<GLfloat, 14> texCoords = {0.0,
                          S,
                          0.0,
                          -S,
@@ -171,25 +172,25 @@ P_SimpleSphere::P_SimpleSphere()
                          0.0
                         };
 
-  GLuint is_bot[] = { 0,1,2,3,4,1 };
-  GLuint is_mid1[] = { 5,1,8,4,7,3,6,2,5,1 };
-  GLuint is_mid2[] = { 9,5,12,8,11,7,10,6,9,5 };
-  GLuint is_top[] = { 13,9,12,11,10,9 };
+  std::array<GLuint, 6> is_bot = { 0,1,2,3,4,1 };
+  std::array<GLuint, 10> is_mid1 = { 5,1,8,4,7,3,6,2,5,1 };
+  std::array<GLuint, 10> is_mid2 = { 9,5,12,8,11,7,10,6,9,5 };
+  std::array<GLuint, 6> is_top = { 13,9,12,11,10,9 };
 
   disp_list = glGenLists(1);
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-  glVertexPointer(3,GL_FLOAT,0,vertices);
-  glNormalPointer(GL_FLOAT,0,vertices);
-  glTexCoordPointer(1, GL_FLOAT, 0, texCoords);
+  glVertexPointer(3,GL_FLOAT,0,vertices.data());
+  glNormalPointer(GL_FLOAT,0,vertices.data());
+  glTexCoordPointer(1, GL_FLOAT, 0, texCoords.data());
 
   glNewList(disp_list,GL_COMPILE);
-  glDrawElements(GL_TRIANGLE_FAN,6,GL_UNSIGNED_INT,is_bot);
-  glDrawElements(GL_QUAD_STRIP,10,GL_UNSIGNED_INT,is_mid1);
-  glDrawElements(GL_QUAD_STRIP,10,GL_UNSIGNED_INT,is_mid2);
-  glDrawElements(GL_TRIANGLE_FAN,6,GL_UNSIGNED_INT,is_top);
+  glDrawElements(GL_TRIANGLE_FAN,6,GL_UNSIGNED_INT,is_bot.data());
+  glDrawElements(GL_QUAD_STRIP,10,GL_UNSIGNED_INT,is_mid1.data());
+  glDrawElements(GL_QUAD_STRIP,10,GL_UNSIGNED_INT,is_mid2.data());
+  glDrawElements(GL_TRIANGLE_FAN,6,GL_UNSIGNED_INT,is_top.data());
   glEndList();
 }
 

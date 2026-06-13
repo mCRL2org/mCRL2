@@ -16,64 +16,40 @@
 #define EMPTY_SET (-1)
 #define EMPTY_LIST (-1)
 #define EMPTY_TAG (-1)
-#define HASH_CLASS 16
-#define TAGS_BLOCK 15000
-#define BUCKETS_BLOCK 25000
-// simple hash function; uses two large primes
-#define hash(l,r,m) ((36425657*(l) + 77673689*(r)) & (m))
-
 
 namespace mcrl2::lts
 {
 
+constexpr ptrdiff_t HASH_CLASS = 16;
+constexpr ptrdiff_t TAGS_BLOCK = 15000;
+constexpr ptrdiff_t BUCKETS_BLOCK = 25000;
+
+// simple hash function; uses two large primes
+constexpr ptrdiff_t hash(ptrdiff_t l, ptrdiff_t r, ptrdiff_t m)
+{
+  return (36425657*l + 77673689*r) & m;
+}
+
 tree_set_store::tree_set_store()
 {
-  buckets = nullptr;
   buckets_size = 0;
   buckets_next = 0;
 
-  tags = nullptr;
   tags_size = 0;
   tags_next = 0;
 
-  hashmask = (1 << HASH_CLASS) - 1;
-  hashtable = (ptrdiff_t*)malloc((hashmask+1)*sizeof(ptrdiff_t));
-  if (hashtable == nullptr)
-  {
-    throw mcrl2::runtime_error("Out of memory.");
-  }
-  for (ptrdiff_t i=0; i<=hashmask; ++i)
-  {
-    hashtable[i] = EMPTY_LIST;
-  }
+  hashmask = (static_cast<ptrdiff_t>(1) << HASH_CLASS) - 1;
+  hashtable.assign(hashmask+1, EMPTY_LIST);
 }
 
-tree_set_store::~tree_set_store()
-{
-  if (tags != nullptr)
-  {
-    free(tags);
-    tags = nullptr;
-  }
-  if (buckets != nullptr)
-  {
-    free(buckets);
-    buckets = nullptr;
-  }
-  free(hashtable);
-  hashtable = nullptr;
-}
+tree_set_store::~tree_set_store() = default;
 
 void tree_set_store::check_tags()
 {
   if (tags_next >= tags_size)
   {
     tags_size += TAGS_BLOCK;
-    tags = (ptrdiff_t*)realloc(tags,tags_size*sizeof(ptrdiff_t));
-    if (tags == nullptr)
-    {
-      throw mcrl2::runtime_error("Out of memory.");
-    }
+    tags.resize(tags_size);
   }
 }
 
@@ -82,29 +58,15 @@ void tree_set_store::check_buckets()
   if (buckets_next >= buckets_size)
   {
     buckets_size += BUCKETS_BLOCK;
-    buckets = (bucket*)realloc(buckets,buckets_size*sizeof(bucket));
-    if (buckets == nullptr)
-    {
-      throw mcrl2::runtime_error("Out of memory.");
-    }
+    buckets.resize(buckets_size);
   }
   if (buckets_next*4 >= hashmask*3)
   {
     hashmask = hashmask + hashmask + 1;
-    hashtable = (ptrdiff_t*)realloc(hashtable,(hashmask+1)*sizeof(ptrdiff_t));
-    if (hashtable == nullptr)
+    hashtable.assign(hashmask+1, EMPTY_LIST);
+    for (ptrdiff_t i=0; i<buckets_next; ++i)
     {
-      throw mcrl2::runtime_error("Out of memory.");
-    }
-    ptrdiff_t i;
-    ptrdiff_t hc;
-    for (i=0; i<=hashmask; ++i)
-    {
-      hashtable[i] = EMPTY_LIST;
-    }
-    for (i=0; i<buckets_next; ++i)
-    {
-      hc = hash(buckets[i].child_l,buckets[i].child_r,hashmask);
+      ptrdiff_t hc = hash(buckets[i].child_l,buckets[i].child_r,hashmask);
       buckets[i].next = hashtable[hc];
       hashtable[hc] = i;
     }

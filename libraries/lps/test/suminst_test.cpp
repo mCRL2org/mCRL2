@@ -197,7 +197,7 @@ void test_case_7()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter, specification>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();
-  int sum_count = 0;
+  std::size_t sum_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (const action_summand& i: summands1)
   {

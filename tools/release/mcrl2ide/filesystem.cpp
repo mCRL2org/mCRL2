@@ -639,7 +639,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
     {
       m_linearisationMethod = mcrl2::lps::parse_lin_method(linearisationElement.text().toStdString());
     }
-    catch (std::exception& ex)
+    catch (std::exception&) // NOLINT(bugprone-empty-catch)
     {
       // Keep the default linearisation method.
     }
@@ -652,7 +652,7 @@ void FileSystem::openProjectFromFolder(const QString& newProjectFolderPath)
     {
       m_enumerationLimit = std::stoi(jittycElement.text().toStdString());
     }
-    catch (std::exception& ex)
+    catch (std::exception&) // NOLINT(bugprone-empty-catch)
     {
       // Keep the default enumeration limithod.
     }
@@ -1086,10 +1086,10 @@ void FileSystem::createReinitialisedSpecification(const Property& property, Spec
     }
     else
     {
-      int initIndex = initKeywordMatch.capturedEnd();
+      int initIndex = static_cast<int>(initKeywordMatch.capturedEnd());
       /* else find the size of the contents of the init block */
       QRegularExpressionMatch initBlockMatch = QRegularExpression("([^;%]|%[^\\n]*\\n)*;").match(spec, initIndex);
-      int initSize = initBlockMatch.capturedEnd() - initIndex - 1;
+      int initSize = static_cast<int>(initBlockMatch.capturedEnd() - initIndex - 1);
       /* and replace them with the given process expression */
       alternateSpec.replace(initIndex, initSize, " " + procExp);
     }

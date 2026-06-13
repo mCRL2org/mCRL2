@@ -5406,12 +5406,13 @@ class specification_basic_type
           functions=e.functions;
         }
 
-        void operator=(const enumeratedtype& e)
+        enumeratedtype& operator=(const enumeratedtype& e)
         {
           size=e.size;
           sortId=e.sortId;
           elementnames=e.elementnames;
           functions=e.functions;
+          return *this;
         }
 
         ~enumeratedtype() = default;
@@ -5729,7 +5730,7 @@ class specification_basic_type
           data_expression unique=representative_generator_internal(v.sort(),false);
           result=lazy::and_(result, equal_to(v,unique));
         }
-        catch (mcrl2::runtime_error&)
+        catch (mcrl2::runtime_error&) // NOLINT(bugprone-empty-catch)
         {
           // No representant for sort v.sort() could be found. No condition is added.
         }
@@ -7125,7 +7126,7 @@ class specification_basic_type
         variable var3=var2;
         for (std::size_t i=0 ; occursin(var3,pars1)||occursin(var3,pars2) ; ++i)
         {
-          var3=get_fresh_variable(var2.name(),var2.sort(),(unique?-1:i));
+          var3=get_fresh_variable(var2.name(),var2.sort(),(unique?-1:static_cast<int>(i)));
         }
         if (var3!=var2)
         {

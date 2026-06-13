@@ -210,12 +210,12 @@ void ParityGame::compress_priorities( const verti* cardinality,
 int ParityGame::propagate_priority( verti v, StaticGraph::const_iterator it,
                                              StaticGraph::const_iterator end )
 {
-  int p = priority(v);
+  int p = static_cast<int>(priority(v));
   int q = 0;
   for (; it != end; ++it)
   {
     verti w = *it;
-    int r = priority(w);
+    int r = static_cast<int>(priority(w));
     if (r >= p)
     {
       return 0;
@@ -329,7 +329,7 @@ void ParityGame::make_subgame_threads( const ParityGame &game,
                                        StaticGraph::EdgeDirection edge_dir )
 {
     assert(this != &game);
-    reset(nvert, game.d());
+    reset(nvert, static_cast<int>(game.d()));
 
     //#pragma omp parallel for
     for (verti v = 0; v < nvert; ++v)
