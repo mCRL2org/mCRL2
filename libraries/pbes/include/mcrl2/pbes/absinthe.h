@@ -511,6 +511,12 @@ struct absinthe_algorithm
       unprintable["@func_update"] = "func_update";
       unprintable["@cInt"] = "cInt";
       unprintable["@cNeg"] = "cNeg";
+      unprintable["@most_significant_digit"] = "most_significant_digit";
+      unprintable["@succ_pos"] = "succpos";
+      unprintable["@most_significant_digitNat"] = "most_significant_digitNat";
+      unprintable["@concat_digit"] = "concat_digit";
+      unprintable["@succ_nat"] = "succ_nat";
+      
 
       suffix_with_sort.insert("[]");
       suffix_with_sort.insert("|>");
