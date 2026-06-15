@@ -95,11 +95,8 @@ PBES
    libraries/pbes/pbes_rewriters
    libraries/pbes/pbesabsinthe
    libraries/pbes/pbes_generation
+   libraries/pbes/pbes_greybox_notes
    libraries/pbes/pbes_implementation_notes
-
-*PDF documentation*
-
-* :mcrl2_pdflatex:`kant-pbes-greybox-notes.tex <libraries/pbes/latex/kant-pbes-greybox-notes.tex>`
 
 Process
 =========
