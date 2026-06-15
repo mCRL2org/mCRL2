@@ -90,6 +90,7 @@ PBES
    :maxdepth: 1
 
    libraries/pbes/pbes_library
+   libraries/pbes/pbesinst
    libraries/pbes/pbes-inst-solving
    libraries/pbes/pbes_rewriters
    libraries/pbes/pbes_implementation_notes
@@ -98,7 +99,6 @@ PBES
 
 * :mcrl2_pdflatex:`PBES Abstraction <libraries/pbes/latex/pbes-abstraction.tex>`
 * :mcrl2_pdflatex:`PBES Generation <libraries/pbes/latex/pbes-generation.tex>`
-* :mcrl2_pdflatex:`PBES Instantiation <libraries/pbes/latex/pbes-instantiation.tex>`
 * :mcrl2_pdflatex:`kant-pbes-greybox-notes.tex <libraries/pbes/latex/kant-pbes-greybox-notes.tex>`
 
 Process
