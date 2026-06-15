@@ -57,9 +57,7 @@ LPS
 
 *PDF documentation*
 
-* :mcrl2_pdflatex:`A rewriting-strategies-based tool for transforming process-algebraic equations <libraries/lps/latex/lin_impl.tex>`
 * :mcrl2_pdflatex:`Next-state computation templates in state space exploration <libraries/lps/latex/next-state-templates-in-state-space-exploration.tex>`
-* :mcrl2_pdflatex:`mcrl2lps.tex <libraries/lps/latex/mcrl2lps.tex>`
 * :mcrl2_pdflatex:`lps-implementation-communication-operator.tex <libraries/lps/latex/lps-implementation-communication-operator.tex>`
 
 LTS
