@@ -53,12 +53,12 @@ LPS
    libraries/lps/lps_implementation_notes
    libraries/lps/confluence_detection
    libraries/lps/state_space_exploration
+   libraries/lps/communication_open_terms
 
 
 *PDF documentation*
 
 * :mcrl2_pdflatex:`Next-state computation templates in state space exploration <libraries/lps/latex/next-state-templates-in-state-space-exploration.tex>`
-* :mcrl2_pdflatex:`lps-implementation-communication-operator.tex <libraries/lps/latex/lps-implementation-communication-operator.tex>`
 
 LTS
 =====
