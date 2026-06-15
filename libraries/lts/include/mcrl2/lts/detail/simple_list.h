@@ -83,7 +83,7 @@ namespace mcrl2::lts::detail
 
 
 #ifdef USE_POOL_ALLOCATOR
-    #define ONLY_IF_POOL_ALLOCATOR(...) __VA_ARGS__
+    #define ONLY_IF_POOL_ALLOCATOR(...) __VA_ARGS__ // NOLINT(cppcoreguidelines-macro-usage)
     #ifndef USE_SIMPLE_LIST
         #error "Using the pool allocator also requires using the simple list"
     #endif
@@ -112,7 +112,7 @@ namespace mcrl2::lts::detail
       class pool_block_t
       {
       public:
-        char data[NR_ELEMENTS * sizeof(T)]{};
+        char data[NR_ELEMENTS * sizeof(T)]{}; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays) raw storage for the pool allocator
         pool_block_t* next_block;
 
         pool_block_t(pool_block_t* const new_next_block)

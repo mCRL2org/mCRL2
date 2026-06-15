@@ -1080,7 +1080,7 @@ namespace detail
 template <class LTS_TYPE>
 void get_trans(const outgoing_transitions_per_state_t& begin,
                tree_set_store& tss,
-               std::size_t d,
+               std::ptrdiff_t d,
                std::vector<transition>& d_trans,
                LTS_TYPE& aut)
 {
@@ -1125,7 +1125,7 @@ void determinise(LTS_TYPE& l)
   std::size_t d_ntransitions = 0;
   std::vector < transition > d_transitions;
 
-  std::size_t s;
+  std::ptrdiff_t s;
   std::size_t i;
   std::size_t to;
   std::size_t lbl;
@@ -1153,7 +1153,7 @@ void determinise(LTS_TYPE& l)
       while (i < n_t && l.apply_hidden_label_map(d_transs[i].label()) == lbl)
       {
         to = d_transs[i].to();
-        d_states.push_back(to);
+        d_states.push_back(static_cast<std::ptrdiff_t>(to));
         while (i < n_t && l.apply_hidden_label_map(d_transs[i].label()) == lbl &&
                d_transs[i].to() == to)
         {

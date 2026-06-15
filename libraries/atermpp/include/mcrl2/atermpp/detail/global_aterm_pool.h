@@ -25,7 +25,14 @@ alignas(aterm_pool)
 extern std::array<std::byte, sizeof(aterm_pool)> g_aterm_pool_storage;
 
 /// \brief A reference to the global term pool storage
-static aterm_pool& g_aterm_pool_instance = *reinterpret_cast<aterm_pool*>(g_aterm_pool_storage.data());
+/// \details Implemented as a function to avoid a static initialisation order
+///          dependency on `g_aterm_pool_storage`.  The returned reference
+///          merely reinterprets the address of the storage array, which is a
+///          link-time constant.
+inline aterm_pool& g_aterm_pool_instance()
+{
+  return *reinterpret_cast<aterm_pool*>(g_aterm_pool_storage.data());
+}
 
 /// \brief obtain a reference to the global aterm pool.
 /// \details provides lazy initialization which should be used when instantiating
@@ -38,13 +45,13 @@ inline aterm_pool& g_term_pool()
     static bool initialized = false;
     if (!initialized)
     {
-      new (&g_aterm_pool_instance) aterm_pool();
+      new (&g_aterm_pool_instance()) aterm_pool();
       start_gc_stress_thread();
       initialized = true;
     }
   }
 
-  return g_aterm_pool_instance;
+  return g_aterm_pool_instance();
 }
 
 // Implemented in a .cpp file. 

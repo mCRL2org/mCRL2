@@ -121,7 +121,7 @@ class rewrite_stack : protected atermpp::vector<data_expression>
     atermpp::vector<data_expression>::const_iterator stack_iterator(std::size_t pos, std::size_t frame_size) const
     {
       assert(m_stack_size+pos>=frame_size && pos<frame_size);
-      return begin()+m_stack_size-frame_size+pos;
+      return begin()+static_cast<std::ptrdiff_t>(m_stack_size-frame_size+pos);
     }
 
     std::size_t stack_size() const

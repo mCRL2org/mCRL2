@@ -75,7 +75,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
       m_variable_context = m_variable_context_copy;
       result = infimum(x.variables(), body);
     }
-    catch (mcrl2::runtime_error& e)
+    catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pres_system::pp(x));
     }
@@ -94,7 +94,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
       m_variable_context = m_variable_context_copy;
       result = supremum(x.variables(), body);
     }
-    catch (mcrl2::runtime_error& e)
+    catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pres_system::pp(x));
     }
@@ -113,7 +113,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
       m_variable_context = m_variable_context_copy;
       result = supremum(x.variables(), body);
     }
-    catch (mcrl2::runtime_error& e)
+    catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pres_system::pp(x));
     }
@@ -128,7 +128,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
       this->apply(result, x.right());
       make_const_multiply(result, factor, result);
     }
-    catch (mcrl2::runtime_error& e)
+    catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pres_system::pp(x));
     }
@@ -143,7 +143,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
       this->apply(result, x.left());
       make_const_multiply_alt(result, result, factor);
     }
-    catch (mcrl2::runtime_error& e)
+    catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + pres_system::pp(x));
     }
@@ -175,7 +175,7 @@ struct typecheck_builder: public pres_expression_builder<typecheck_builder>
       {
         *xi = m_data_type_checker.typecheck_data_expression(*xi, *ei, m_variable_context);
       }
-      catch (mcrl2::runtime_error& e)
+      catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(*xi) + 
                                         " as type " + data::pp(*ei) + " (while typechecking " + pres_system::pp(x) + ")");
@@ -344,7 +344,7 @@ void typecheck_pres(pres& presspec)
   {
     type_checker(presspec);
   }
-  catch (mcrl2::runtime_error &e)
+  catch (mcrl2::runtime_error &e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\nCould not type check " + pres_system::pp(presspec));
   }
@@ -375,7 +375,7 @@ propositional_variable typecheck_propositional_variable(const propositional_vari
     }
     return propositional_variable(x.name(), data::variable_list(typed_parameters.begin(), typed_parameters.end()));
   }
-  catch (mcrl2::runtime_error &e)
+  catch (mcrl2::runtime_error &e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pres_system::pp(x));
   }
@@ -401,7 +401,7 @@ pres_expression typecheck_pres_expression(pres_expression& x,
     pres_type_checker type_checker(dataspec, variables, propositional_variables);
     return type_checker(x);
   }
-  catch (mcrl2::runtime_error &e)
+  catch (mcrl2::runtime_error &e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pres_system::pp(x));
   }

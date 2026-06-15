@@ -157,7 +157,7 @@ inline void number2string(std::size_t number, std::string& buffer, std::size_t s
   while (position>start_position)
   {
     --position;
-    buffer[position] = '0' + number % 10;
+    buffer[position] = static_cast<char>('0' + number % 10);
     number = number/10;
   }
 }

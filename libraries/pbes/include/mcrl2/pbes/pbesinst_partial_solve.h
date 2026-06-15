@@ -61,7 +61,7 @@ void partial_solve(structure_graph& G,
   bool use_toms_optimization = false;
   solve_structure_graph_algorithm algorithm(check_strategy, use_toms_optimization);
 
-  vertex_set W[2] = { vertex_set(N), vertex_set(N) };
+  vertex_set W[2] = { vertex_set(N), vertex_set(N) }; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
   std::tie(W[0], W[1]) = algorithm.solve_recursive(G, set_union(S[1], attr_default_no_strategy(G, S_todo[0], 0)));
   for (structure_graph::index_type v: W[1].vertices())
   {

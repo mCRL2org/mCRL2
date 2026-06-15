@@ -131,9 +131,9 @@ class structured_sort_constructor: public atermpp::aterm
     ///
     /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
     template < typename Container, std::size_t S, std::size_t S0 >
-    structured_sort_constructor(const char(&name)[S],
+    structured_sort_constructor(const char(&name)[S], // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
                                 const Container& arguments,
-                                const char(&recogniser)[S0],
+                                const char(&recogniser)[S0], // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
                                 typename atermpp::enable_if_container< Container, structured_sort_constructor_argument >::type* = nullptr)
       : atermpp::aterm(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
     {}

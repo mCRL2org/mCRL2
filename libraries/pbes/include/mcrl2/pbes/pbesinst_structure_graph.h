@@ -105,7 +105,7 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
       {
         std::ostringstream out;
         out << "Generated " << equation_count << " BES equations (" << std::fixed << std::setprecision(2) <<
-          ((100.0 * equation_count) / m_graph_builder.extent()) << "% explored)" << std::endl;
+          ((100.0 * static_cast<double>(equation_count)) / static_cast<double>(m_graph_builder.extent())) << "% explored)" << std::endl;
         return out.str();
       }
       

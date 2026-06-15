@@ -86,7 +86,7 @@ class execution_timer
         else
         {
           s << "    " << i->first << ": "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(i->second.finish - i->second.start).count() / 1000.0
+            << static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(i->second.finish - i->second.start).count()) / 1000.0
             << "s (user: " << static_cast<double>(i->second.finish_user - i->second.start_user) / CLOCKS_PER_SEC << "s)"
             << std::endl;
         }

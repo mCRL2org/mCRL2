@@ -39,7 +39,7 @@ propositional_variable_instantiation rewrite_PVI(const propositional_variable_in
     data::data_expression_vector params_r;
     for (std::vector<data::data_expression>::size_type i = 0; i < params.size(); i++)
     {
-      if (Rx.find(i) != Rx.end())
+      if (Rx.find(static_cast<int>(i)) != Rx.end())
       {
         continue; // parameter is redundant
       }

@@ -130,11 +130,11 @@ class hash_table3_iterator
     }
     void set(std::size_t i)
     {
-      bucket_it = hash_table->buckets.begin() + i;
+      bucket_it = hash_table->buckets.begin() + static_cast<std::ptrdiff_t>(i);
     }
     void set_end(std::size_t i)
     {
-      end = hash_table->buckets.begin() + i;
+      end = hash_table->buckets.begin() + static_cast<std::ptrdiff_t>(i);
     }
   private:
     std::vector<bucket3>::iterator bucket_it;

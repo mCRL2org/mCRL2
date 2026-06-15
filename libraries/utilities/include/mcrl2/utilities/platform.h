@@ -30,11 +30,11 @@
 /// \brief Define macros to conditionally enable compiler specific code.
 #if defined(__GNUC__) && !defined(__clang)
     // __GNUC__ is defined for all GNU compliant compilers, e.g., gcc, clang and icc so this is not quite perfect.
-    #define MCRL2_COMPILER_GCC 1
+    #define MCRL2_COMPILER_GCC 1 // NOLINT(cppcoreguidelines-macro-usage)
 #endif
 
 #ifdef __clang__
-    #define MCRl2_COMPILER_CLANG 1
+    #define MCRl2_COMPILER_CLANG 1 // NOLINT(cppcoreguidelines-macro-usage)
 #endif
 
 #endif // MCRL2_UTILITIES_PLATFORM_H_

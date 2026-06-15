@@ -557,7 +557,7 @@ template <class LTS_TYPE>
       << "Get coupled simulation from defender's winning area."
       << std::endl;
 
-    char seperator[3] = {'\0', ' ', '\0'};
+    char seperator[3] = {'\0', ' ', '\0'}; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays) null-terminated buffer streamed as a C-string
     mCRL2log(log::verbose) << "R = {";
 
     /* Filter R, where its elemens are coupled similar. */
@@ -584,7 +584,7 @@ template <class LTS_TYPE>
     mCRL2log(log::verbose) << "}" << std::endl;
 
     /* Return true iff root nodes are in R / won by defender. */
-    cs_game_node roots[]
+    cs_game_node roots[] // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
       = { {NODE_ATK, 0, l1.initial_state(), l2.initial_state(), false}
         , {NODE_ATK, 0, l2.initial_state(), l1.initial_state(), true}};
 

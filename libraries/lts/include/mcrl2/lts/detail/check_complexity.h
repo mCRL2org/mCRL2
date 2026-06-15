@@ -140,15 +140,15 @@ class check_complexity
         #ifdef __GNUC__
             if constexpr (sizeof(unsigned) == sizeof(size))
             {
-                return sizeof(size) * CHAR_BIT - 1 - __builtin_clz(size);
+                return static_cast<int>(sizeof(size) * CHAR_BIT - 1 - __builtin_clz(size));
             }
             else if constexpr (sizeof(unsigned long) == sizeof(size))
             {
-                return sizeof(size) * CHAR_BIT - 1 - __builtin_clzl(size);
+                return static_cast<int>(sizeof(size) * CHAR_BIT - 1 - __builtin_clzl(size));
             }
             else if constexpr(sizeof(unsigned long long) == sizeof(size))
             {
-                return sizeof(size) * CHAR_BIT - 1 - __builtin_clzll(size);
+                return static_cast<int>(sizeof(size) * CHAR_BIT - 1 - __builtin_clzll(size));
             }
         #endif
         return (int) std::log2(size);
@@ -538,7 +538,7 @@ class check_complexity
     static void finalise_work_units(trans_type units=1)
     {
         #ifndef NDEBUG
-            sensible_work += units;
+            sensible_work += static_cast<signed_trans_type>(units);
         #endif
         sensible_work_grand_total += units;
     }
@@ -546,7 +546,7 @@ class check_complexity
     static void cancel_work_units(trans_type units=1)
     {
         #ifndef NDEBUG
-            sensible_work -= units;
+            sensible_work -= static_cast<signed_trans_type>(units);
         #endif
         cancelled_work_grand_total += units;
     }
@@ -578,7 +578,7 @@ class check_complexity
                                         (enum counter_type) (LastCounter + 1));
       public:
         /// \brief actual space to store the counters
-        unsigned char counters[LastCounter - FirstCounter + 1]{};
+        std::array<unsigned char, LastCounter - FirstCounter + 1> counters{};
 
         /// \brief cancel temporary work
         /// \details The function registers that all counters from `first` to
@@ -653,7 +653,7 @@ class check_complexity
         /// \brief constructor, initializes all counters to 0
         counter_t()
         {
-            std::memset(counters, '\0', sizeof(counters));
+            std::memset(counters.data(), '\0', sizeof(counters));
         }
 
 
@@ -1830,6 +1830,7 @@ class check_complexity
     {
         trans_type overall_total = sensible_work_grand_total +
                  cancelled_work_grand_total + no_of_waiting_cycles_grand_total;
+        // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
         #define percentage(steps,total)                                       \
             (assert((steps)<=                                                 \
                        (std::numeric_limits<trans_type>::max()-(total))/200), \
@@ -1886,6 +1887,7 @@ class check_complexity
     /// \param unit   the unit to which work is assigned
     /// \param call   a function call that assigns work to a counter of `unit`
 #ifndef NDEBUG
+    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
     #define mCRL2complexity(unit, call, info_for_debug)                       \
             do                                                                \
             {                                                                 \

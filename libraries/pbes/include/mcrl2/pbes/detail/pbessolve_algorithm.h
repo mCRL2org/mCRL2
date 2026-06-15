@@ -299,7 +299,7 @@ class pbessolve_tool
       if (it == X_hatparams.end())
       {
         mCRL2log(log::debug) << params[i] << " is redundant" << std::endl;
-        R.insert(i);
+        R.insert(static_cast<int>(i));
       }
     }
     return R;

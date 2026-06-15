@@ -414,7 +414,7 @@ class strategy_vector
     {
       if (m_strategy.size() > n)
       {
-        m_strategy.erase(m_strategy.begin() + n, m_strategy.end());
+        m_strategy.erase(m_strategy.begin() + static_cast<std::ptrdiff_t>(n), m_strategy.end());
         m_strategy.shrink_to_fit();
       }
     }

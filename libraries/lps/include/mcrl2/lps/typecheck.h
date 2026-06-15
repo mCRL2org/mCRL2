@@ -57,7 +57,7 @@ class multi_action_type_checker
           actions.push_back(process::typecheck_action(a.name(), a.arguments(), m_data_type_checker, m_variable_context, m_action_context));
         }
       }
-      catch (mcrl2::runtime_error& e)
+      catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of multiaction failed (" + process::pp(x) + ")");
       }
@@ -85,7 +85,7 @@ class action_rename_type_checker
   public:
     /** \brief Default constructor for an action rename type checker.
     **/
-    action_rename_type_checker()
+    action_rename_type_checker() // NOLINT(modernize-use-equals-default) member is initialised with a specific default value
       : m_data_type_checker(data::data_specification())
     {}
 

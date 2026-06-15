@@ -148,7 +148,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
   }
 
   std::vector<pbes_expression> result;
-  for (auto i = p.equations().end() - expressions.size(); i != p.equations().end(); ++i)
+  for (auto i = p.equations().end() - static_cast<std::ptrdiff_t>(expressions.size()); i != p.equations().end(); ++i)
   {
     result.push_back(i->formula());
   }

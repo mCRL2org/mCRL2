@@ -220,7 +220,7 @@ struct structure_graph_builder
       }
     }
 
-    vertices().erase(vertices().begin() + vertices().size() - U.size(), vertices().end());
+    vertices().erase(vertices().begin() + static_cast<std::ptrdiff_t>(vertices().size() - U.size()), vertices().end());
 
     // Recreate the index
     m_vertex_map.clear();

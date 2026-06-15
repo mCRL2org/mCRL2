@@ -99,6 +99,9 @@
 #include <cassert>
 #include <boost/preprocessor.hpp>
 
+// This header implements a coroutine framework entirely through function-like
+// macros; they cannot be replaced by constexpr template functions.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 
 
@@ -385,5 +388,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
                             _coroutine_allowance = 0;                         \
                         }                                                     \
                         while (0)
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 #endif // MCRL2_LTS_DETAIL_COROUTINE_H

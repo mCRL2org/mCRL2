@@ -350,8 +350,8 @@ private:
   {
     bool operator()(char const& c1, char const& c2) const
     {
-      char c1u = toupper(c1);
-      char c2u = toupper(c2);
+      char c1u = static_cast<char>(toupper(c1));
+      char c2u = static_cast<char>(toupper(c2));
 
       return c1u < c2u || (c1u == c2u && c2 < c1);
     }

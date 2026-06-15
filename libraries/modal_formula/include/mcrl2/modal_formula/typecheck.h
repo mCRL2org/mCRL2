@@ -102,7 +102,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       m_variable_context = m_variable_context_copy;
       result = atermpp::down_cast<T>(forall(x.variables(), body));
     }
-    catch (mcrl2::runtime_error& e)
+    catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + action_formulas::pp(x));
     }
@@ -120,7 +120,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       m_variable_context = m_variable_context_copy;
       result = atermpp::down_cast<T>(exists(x.variables(), body));
     }
-    catch (mcrl2::runtime_error& e)
+    catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + action_formulas::pp(x));
     }
@@ -383,7 +383,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
         {
           result = atermpp::down_cast<T>(m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context));
         }
-        catch (mcrl2::runtime_error& e2)
+        catch (mcrl2::runtime_error& e2) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
         {
           throw mcrl2::runtime_error("Fail to type data expression as bool or real: " + pp(x) + ".\n" +
                                      e1.what() + "\n" +
@@ -415,7 +415,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
         m_variable_context = m_variable_context_copy;
         result = forall(x.variables(), body);
       }
-      catch (mcrl2::runtime_error& e)
+      catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
       }
@@ -440,7 +440,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
         m_variable_context = m_variable_context_copy;
         result = exists(x.variables(), body);
       }
-      catch (mcrl2::runtime_error& e)
+      catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
       }
@@ -465,7 +465,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
         m_variable_context = m_variable_context_copy;
         result = infimum(x.variables(), body);
       }
-      catch (mcrl2::runtime_error& e)
+      catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
       }
@@ -490,7 +490,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
         m_variable_context = m_variable_context_copy;
         result = supremum(x.variables(), body);
       }
-      catch (mcrl2::runtime_error& e)
+      catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
       }
@@ -515,7 +515,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
         m_variable_context = m_variable_context_copy;
         result = sum(x.variables(), body);
       }
-      catch (mcrl2::runtime_error& e)
+      catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\nwhile typechecking " + state_formulas::pp(x));
       }
@@ -794,7 +794,7 @@ state_formula typecheck_state_formula(const state_formula& x,
     state_formula_type_checker type_checker(dataspec, formula_is_quantitative, action_labels, variables);
     return type_checker.typecheck_state_formula(x);
   }
-  catch (mcrl2::runtime_error& e)
+  catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula " + state_formulas::pp(x));
   }
@@ -831,7 +831,7 @@ void typecheck_state_formula_specification(state_formula_specification& formspec
     formspec.data() = checker.typechecked_data_specification();
     formspec.data().translate_user_notation();
   }
-  catch (mcrl2::runtime_error& e)
+  catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula specification " + state_formulas::pp(formspec));
   }
@@ -852,7 +852,7 @@ void typecheck_state_formula_specification(state_formula_specification& formspec
     formspec.data() = checker.typechecked_data_specification();
     formspec.data().translate_user_notation();
   }
-  catch (mcrl2::runtime_error& e)
+  catch (mcrl2::runtime_error& e) // NOLINT(bugprone-empty-catch) rethrows a wrapped exception with context
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula specification " + state_formulas::pp(formspec));
   }

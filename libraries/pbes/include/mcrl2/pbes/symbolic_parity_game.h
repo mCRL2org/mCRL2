@@ -442,7 +442,7 @@ class symbolic_parity_game
         todo = minus(pred, Z);
         if (m_compute_strategy)
         {
-          strategy = union_(strategy.value(), pred_strategy.value());
+          strategy = union_(strategy.value(), pred_strategy.value()); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
         }
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
@@ -609,8 +609,8 @@ class symbolic_parity_game
         << "compute_total_graph: extending winning sets using attractor set computations. Initial winning sets are:\n"
         << "  W[0] = " << print_nodes(winning[0]) << "\n"
         << "  W[1] = " << print_nodes(winning[1]) << "\n"
-        << (strategy[0].has_value() ? "  S[0] = " + print_strategy(strategy[0].value()) + "\n" : "")
-        << (strategy[1].has_value() ? "  S[1] = " + print_strategy(strategy[1].value()) + "\n" : "");
+        << (strategy[0].has_value() ? "  S[0] = " + print_strategy(strategy[0].value()) + "\n" : "") // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
+        << (strategy[1].has_value() ? "  S[1] = " + print_strategy(strategy[1].value()) + "\n" : ""); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
 
       std::array<std::optional<ldd>, 2> attr_strategy;
       mCRL2log(log::trace) << "compute_total_graph: compute safe attractor into W[0]\n";
@@ -623,19 +623,19 @@ class symbolic_parity_game
                            << "  W[0] = " << print_nodes(winning[0]) << "\n"
                            << "  W[1] = " << print_nodes(winning[1]) << "\n"
                            << "with attractor strategy:\n"
-                           << (attr_strategy[0].has_value() ? "  S[0] = " + print_strategy(attr_strategy[0].value()) + "\n" : "")
-                           << (attr_strategy[1].has_value() ? "  S[1] = " + print_strategy(attr_strategy[1].value()) + "\n" : "");
+                           << (attr_strategy[0].has_value() ? "  S[0] = " + print_strategy(attr_strategy[0].value()) + "\n" : "") // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
+                           << (attr_strategy[1].has_value() ? "  S[1] = " + print_strategy(attr_strategy[1].value()) + "\n" : ""); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
 
       // Update strategy with attractor strategy. Note this is done in-place
       if (m_compute_strategy) 
       {
-          strategy[0] = union_(strategy[0].value_or(empty_set()), attr_strategy[0].value());
-          strategy[1] = union_(strategy[1].value_or(empty_set()), attr_strategy[1].value());
+          strategy[0] = union_(strategy[0].value_or(empty_set()), attr_strategy[0].value()); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
+          strategy[1] = union_(strategy[1].value_or(empty_set()), attr_strategy[1].value()); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
       }
 
       mCRL2log(log::trace) << "compute_total_graph: combined strategies are:\n"
-                           << (strategy[0].has_value() ? "  S[0] = " + print_strategy(strategy[0].value()) + "\n" : "")
-                           << (strategy[1].has_value() ? "  S[1] = " + print_strategy(strategy[1].value()) + "\n" : "");
+                           << (strategy[0].has_value() ? "  S[0] = " + print_strategy(strategy[0].value()) + "\n" : "") // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
+                           << (strategy[1].has_value() ? "  S[1] = " + print_strategy(strategy[1].value()) + "\n" : ""); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
 
       // After removing the deadlock (winning) states the resulting set of states is a total graph.
       return minus(minus(V, winning[0]), winning[1]);
@@ -664,7 +664,7 @@ class symbolic_parity_game
       using namespace sylvan::ldds;
 
       ldd result;
-      for (int i = m_summand_groups.size() - 1; i >= 0; --i)
+      for (int i = static_cast<int>(m_summand_groups.size()) - 1; i >= 0; --i)
       {
         const symbolic::summand_group& group = m_summand_groups[i];
 
@@ -807,7 +807,7 @@ private:
       std::optional<ldd> strategy = m_compute_strategy ?  std::optional<ldd>(empty_set()) : std::nullopt;
 
       ldd todo = V;
-      for (int i = m_summand_groups.size() - 1; i >= 0; --i)
+      for (int i = static_cast<int>(m_summand_groups.size()) - 1; i >= 0; --i)
       {
         const symbolic::summand_group& group = m_summand_groups[i];
 
@@ -820,7 +820,7 @@ private:
         P = union_(P, todo1);
         if (m_compute_strategy) 
         {
-          strategy = union_(strategy.value(), merge(minus(intersect(todo1, Vplayer[alpha]), todo), todo));
+          strategy = union_(strategy.value(), merge(minus(intersect(todo1, Vplayer[alpha]), todo), todo)); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
         }
         todo = union_(todo, intersect(todo1, W));
       }

@@ -595,14 +595,14 @@ class progress_monitor
           {
             mCRL2log(log::status) << std::fixed << std::setprecision(2)
                                   << state_count << "st, " << transition_count << "tr"
-                                  << ", explored " << 100.0 * ((float) count / state_count)
+                                  << ", explored " << 100.0 * (static_cast<float>(count) / static_cast<float>(state_count))
                                   << "%.\n";
           }
           else
           {
             mCRL2log(log::status) << std::fixed << std::setprecision(2)
                                   << state_count << "st, " << transition_count << "tr"
-                                  << ", explored " << 100.0 * ((float) count / state_count)
+                                  << ", explored " << 100.0 * (static_cast<float>(count) / static_cast<float>(state_count))
                                   << "%. Last level: " << level << ", " << lvl_states << "st, " 
                                   << lvl_transitions << "tr.\n";
           }

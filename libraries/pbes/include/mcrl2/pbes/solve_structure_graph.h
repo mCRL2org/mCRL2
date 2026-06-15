@@ -136,8 +136,8 @@ class solve_structure_graph_algorithm
         }
       }
 
-      vertex_set W[2]   = { vertex_set(N), vertex_set(N) };
-      vertex_set W_1[2];
+      vertex_set W[2]   = { vertex_set(N), vertex_set(N) }; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+      vertex_set W_1[2]; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 
       vertex_set A = attr_default(G, U, alpha);
       std::tie(W_1[0], W_1[1]) = solve_recursive(G, A);
@@ -442,7 +442,7 @@ class lps_solve_structure_graph_algorithm: public solve_structure_graph_algorith
                   throw mcrl2::runtime_error("Invalid parameter index");
                 }
 
-                process::action a1(a.label(), data::data_expression_list(e1.begin() + n + index, e1.begin() + n + index + a.arguments().size()));
+                process::action a1(a.label(), data::data_expression_list(e1.begin() + static_cast<std::ptrdiff_t>(n + index), e1.begin() + static_cast<std::ptrdiff_t>(n + index + a.arguments().size())));
                 actions.push_back(a1);
                 index = index + a.arguments().size();
               }

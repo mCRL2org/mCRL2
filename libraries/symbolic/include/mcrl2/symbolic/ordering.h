@@ -178,7 +178,7 @@ std::vector<std::size_t> compute_variable_order_random(std::size_t n, bool exclu
   std::random_device rd;
   std::mt19937 g(rd());
   std::size_t first = exclude_first_variable ? 1 : 0;
-  std::shuffle(result.begin() + first, result.end(), g);
+  std::shuffle(result.begin() + static_cast<std::ptrdiff_t>(first), result.end(), g);
   return result;
 }
 

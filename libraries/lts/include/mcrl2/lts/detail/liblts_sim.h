@@ -415,8 +415,8 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
         /* compute stable(alpha,gamma); use a local boolean variable for
          * efficiency */
         stable_alpha_gamma = false;
-        stable_alpha = stable.begin() + alpha;
-        P_gamma = P.begin() + gamma;
+        stable_alpha = stable.begin() + static_cast<std::ptrdiff_t>(alpha);
+        P_gamma = P.begin() + static_cast<std::ptrdiff_t>(gamma);
         for (delta = 0; delta < s_Sigma && !stable_alpha_gamma; ++delta)
         {
           if ((*stable_alpha)[delta] && (*P_gamma)[delta])
@@ -511,7 +511,7 @@ void sim_partitioner<LTS_TYPE>::touch(std::size_t a,std::size_t alpha)
   {
     state_buckets[contents_t[alpha]].prev = a;
   }
-  contents_t[alpha] = a;
+  contents_t[alpha] = static_cast<ptrdiff_t>(a);
 }
 
 /* PRE: contents_t[alpha] != LIST_END */

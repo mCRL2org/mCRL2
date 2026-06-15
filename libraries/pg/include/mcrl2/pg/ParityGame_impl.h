@@ -27,7 +27,7 @@ void ParityGame::make_subgame( const ParityGame &game,
     ForwardIterator it;
     verti v;
 
-    reset(num_vertices, game.d());
+    reset(num_vertices, static_cast<int>(game.d()));
     for (it = vertices_begin, v = 0; v < num_vertices; ++v, ++it)
     {
         vertex_[v] = game.vertex_[*it];

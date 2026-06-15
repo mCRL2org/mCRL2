@@ -45,7 +45,7 @@ class function_symbol: public data_expression
     }
 //--- start user section function_symbol ---//
     /// \brief Default constructor.
-    function_symbol()
+    function_symbol() // NOLINT(modernize-use-equals-default) base is initialised with a specific default value
       : data_expression(core::detail::default_values::OpId)
     {}
 

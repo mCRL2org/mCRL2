@@ -444,7 +444,7 @@ class trace
     {
       trace_format fmt = tfPlain;
 
-      char c=is.peek();
+      char c=static_cast<char>(is.peek());
       if (is.bad())
       {
         throw runtime_error("Could not read from stream.");

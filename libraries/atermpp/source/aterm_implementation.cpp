@@ -41,10 +41,10 @@ thread_aterm_pool& g_thread_term_pool()
 {
 #ifdef MCRL2_ENABLE_MULTITHREADING
   static_assert(mcrl2::utilities::detail::GlobalThreadSafe);
-  thread_local thread_aterm_pool instance(g_aterm_pool_instance);
+  thread_local thread_aterm_pool instance(g_aterm_pool_instance());
 #else
   static_assert(!mcrl2::utilities::detail::GlobalThreadSafe);
-  static thread_aterm_pool instance(g_aterm_pool_instance);
+  static thread_aterm_pool instance(g_aterm_pool_instance());
 #endif
   // Record the main-thread pool on first call.  This is always safe: the
   // main thread initialises its pool before spawning any worker threads.

@@ -160,7 +160,7 @@ public:
   : m_out(out)
   {}
 
-  ~stack_outstream()
+  ~stack_outstream() // NOLINT(modernize-use-equals-default) destructor flushes the buffer to the output stream
   {
     m_out << buf.str();
   }

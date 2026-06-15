@@ -218,7 +218,7 @@ std::vector<std::uint32_t> optimise_project(const std::vector<std::uint32_t>& Ip
   if (Ip_values.size() > 1)
   {
     // The index after which all values in Ip_values are the same (at least two entries).
-    int i = Ip_values.size() - 1;
+    int i = static_cast<int>(Ip_values.size()) - 1;
     while (i > 0 && Ip_values[i] == Ip_values.back())
     {
       --i;

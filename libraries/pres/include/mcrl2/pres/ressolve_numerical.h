@@ -132,9 +132,9 @@ class ressolve_by_numerical_iteration
       {
         error = std::max(error,std::abs(m_new_solution[m_equations[i].variable().name()]-m_previous_solution[m_equations[i].variable().name()]));
       }
-      mCRL2log(log::debug) << "Current solution: " << std::setprecision(m_options.precision) << detail::evaluate(m_input_pres.initial_state(),m_new_solution) << "   " 
+      mCRL2log(log::debug) << "Current solution: " << std::setprecision(static_cast<int>(m_options.precision)) << detail::evaluate(m_input_pres.initial_state(),m_new_solution) << "   " 
                            << " Difference with previous iteration: " << error << "\n";     
-      return error<=pow(0.1,m_options.precision);
+      return error<=pow(0.1,static_cast<double>(m_options.precision));
     }
 
     void calculate_new_solution(std::size_t base_equation_index, std::size_t to)

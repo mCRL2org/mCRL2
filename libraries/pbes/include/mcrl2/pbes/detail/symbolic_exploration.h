@@ -50,7 +50,7 @@ class symbolic_exploration_algorithm
         return;
       }
       assert (m_variables.size() >= v.size());
-      m_variables.erase(m_variables.end() - v.size(), m_variables.end());
+      m_variables.erase(m_variables.end() - static_cast<std::ptrdiff_t>(v.size()), m_variables.end());
     }
 
     /// \brief Concatenates two variable lists

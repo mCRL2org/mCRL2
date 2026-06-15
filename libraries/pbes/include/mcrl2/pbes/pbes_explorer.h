@@ -11,8 +11,6 @@
 #ifndef MCRL2_PBES_PBES_EXPLORER_H
 #define MCRL2_PBES_PBES_EXPLORER_H
 
-#define PBES_EXPLORER_VERSION 1
-
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/pbes/detail/ppg_traverser.h"

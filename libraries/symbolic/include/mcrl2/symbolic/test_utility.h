@@ -34,7 +34,7 @@ inline std::mt19937& gen()
 /// \brief Generate a random (state) vector.
 inline std::vector<std::uint32_t> random_vector(std::size_t length, std::size_t max_value)
 {    
-  std::uniform_int_distribution<> dist(0, max_value);
+  std::uniform_int_distribution<> dist(0, static_cast<int>(max_value));
 
   std::vector<std::uint32_t> result(length);
   for (std::size_t i = 0; i < length; ++i)
@@ -62,7 +62,7 @@ inline sylvan::ldds::ldd random_set(std::size_t amount, std::size_t length, std:
 /// \brief Returns a random subset of U.
 inline sylvan::ldds::ldd random_subset(const sylvan::ldds::ldd& U, std::size_t amount)
 {
-    std::uniform_int_distribution<> dist(0, satcount(U));
+    std::uniform_int_distribution<> dist(0, static_cast<int>(satcount(U)));
 
     std::vector<std::vector<std::uint32_t>> contained = ldd_solutions(U);
     std::vector<std::vector<std::uint32_t>> result_vector;

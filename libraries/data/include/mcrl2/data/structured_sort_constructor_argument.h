@@ -72,7 +72,7 @@ class structured_sort_constructor_argument: public atermpp::aterm
     ///
     /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
     template < std::size_t S >
-    structured_sort_constructor_argument(const char(&name)[S], const sort_expression& sort)
+    structured_sort_constructor_argument(const char(&name)[S], const sort_expression& sort) // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
       : atermpp::aterm(core::detail::function_symbol_StructProj(), core::identifier_string(name), sort)
     {}
 //--- end user section structured_sort_constructor_argument ---//

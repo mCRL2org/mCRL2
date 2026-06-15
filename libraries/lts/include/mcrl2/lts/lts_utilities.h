@@ -176,8 +176,8 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
       }
     }
     current_leftmost_position=begin+
-                              count_sum_transitions_per_action[current_label].second-
-                              count_sum_transitions_per_action[current_label].first;
+                              static_cast<std::ptrdiff_t>(count_sum_transitions_per_action[current_label].second-
+                              count_sum_transitions_per_action[current_label].first);
     
 // std::cerr << "current_leftmost_position: " << &*current_leftmost_position << "\n";
 // std::cerr << "BBBBB==============\n"; for(auto t=begin; t!=end; ++t){ std::cerr << ptr(*t) << "\n";} std::cerr << "---------\n";
@@ -201,13 +201,13 @@ inline void group_transitions_on_label(const std::vector<transition>::iterator b
         assert(0<std::distance(begin,end)-new_position);
         count_sum_transitions_per_action[label].first--;
         // Search for a target position with a non-matching label. 
-        while (get_label(*(begin+new_position))==label)
+        while (get_label(*(begin+static_cast<std::ptrdiff_t>(new_position)))==label)
         {
           new_position++;
           count_sum_transitions_per_action[label].first--;
         }
         assert(get_label(transition_on_the_move)!=get_label(*(begin+new_position)));
-        std::swap(transition_on_the_move,*(begin+new_position));
+        std::swap(transition_on_the_move,*(begin+static_cast<std::ptrdiff_t>(new_position)));
       }
       while (get_label(transition_on_the_move)!=current_label);
       // We found the transition that we must put at the current place. 
@@ -250,7 +250,7 @@ inline void group_transitions_on_label_tgt(std::vector<transition>& transitions,
   for(std::size_t label: todo_stack)
   {
     todo_stack_target.clear();
-    std::vector<transition>::iterator end=transitions.begin()+count_sum_transitions_per_action[label].second;
+    std::vector<transition>::iterator end=transitions.begin()+static_cast<std::ptrdiff_t>(count_sum_transitions_per_action[label].second);
     group_transitions_on_label<true>(begin, end, [](const std::vector<transition>::value_type& t){ return t.to(); }, value_sum_counter, 0, todo_stack_target); 
     begin=end;
   }
@@ -266,7 +266,7 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
   constexpr std::size_t one=1;
   assert(number_of_states>0);
   assert(number_of_states< (one << 2*log2cache_size));
-  size_t relevant_bits=(number_of_states<2?1:std::log2(number_of_states-1)+1);
+  size_t relevant_bits=(number_of_states<2?1:static_cast<std::size_t>(std::log2(number_of_states-1)+1));
   assert((one<<relevant_bits)>=number_of_states);
   size_t mask = 0;
   size_t shift = 0;
@@ -301,7 +301,7 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
     std::vector<transition>::iterator begin=transitions.begin();
     for(std::pair<std::size_t, std::size_t>& p1: count_sum_transitions_per_tgt1)
     {
-      std::vector<transition>::iterator end=transitions.begin()+p1.second;
+      std::vector<transition>::iterator end=transitions.begin()+static_cast<std::ptrdiff_t>(p1.second);
       group_transitions_on_label<false>(begin, 
                                         end, 
                                         [mask](const transition& t){ return (t.to() & mask); }, 
@@ -310,7 +310,7 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
       for(std::pair<std::size_t, std::size_t>& p2: count_sum_transitions_per_tgt2)
       {
 
-        std::vector<transition>::iterator enda=begin+p2.second;
+        std::vector<transition>::iterator enda=begin+static_cast<std::ptrdiff_t>(p2.second);
         group_transitions_on_label<true>(begina, 
                                          enda, 
                                          [](const std::vector<transition>::value_type& t){ return t.label(); }, 
@@ -339,7 +339,7 @@ inline void group_transitions_on_tgt_label(std::vector<transition>& transitions,
     std::vector<transition>::iterator begin=transitions.begin();
     for(std::pair<std::size_t, std::size_t>& p: count_sum_transitions_per_tgt1)
     {
-      std::vector<transition>::iterator end=transitions.begin()+p.second;
+      std::vector<transition>::iterator end=transitions.begin()+static_cast<std::ptrdiff_t>(p.second);
      group_transitions_on_label<true>(begin, 
                                       end, 
                                       [](const transition& t){ return t.label(); }, 

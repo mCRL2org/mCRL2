@@ -90,7 +90,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
             else
             {
                 queued[v] = true;
-                dirty.push_back(v);
+                dirty.push_back(static_cast<int>(v));
             }
         }
         while (!dirty.empty())
@@ -114,7 +114,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
                         break;
                     }
                 }
-                marked[v] = mark;
+                marked[v] = static_cast<char>(mark);
             }
             else  // v is controlled by opponent
             {
@@ -142,7 +142,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
                     if (!marked[*it] && !queued[*it])
                     {
                         queued[*it] = true;
-                        dirty.push_back(*it);
+                        dirty.push_back(static_cast<int>(*it));
                     }
                 }
             }
@@ -186,7 +186,7 @@ void SmallProgressMeasures::set_top(verti v)
     std::size_t prio = game_.priority(v);
     if (prio % 2 != p_)
     {
-      decr_M(prio / 2);
+      decr_M(static_cast<int>(prio / 2));
     }
 }
 

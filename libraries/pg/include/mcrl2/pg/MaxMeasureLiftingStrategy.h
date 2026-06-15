@@ -70,10 +70,10 @@ private:
     const Metric metric_;               //!< comparison metric
 
     uint64_t next_id_ = 0;                     //!< number of insertions
-    std::unique_ptr<uint64_t[]> insert_id_;    //!< for each vertex: last insertion time
+    std::unique_ptr<uint64_t[]> insert_id_;    //!< for each vertex: last insertion time // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 
-    const std::unique_ptr<verti[]> pq_pos_;      //!< for each vertex: position in the p.q. or -1
-    const std::unique_ptr<verti[]> pq_;          //!< priority queue of lifted vertices
+    const std::unique_ptr<verti[]> pq_pos_;      //!< for each vertex: position in the p.q. or -1 // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+    const std::unique_ptr<verti[]> pq_;          //!< priority queue of lifted vertices // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
     verti pq_size_ = 0;                          //!< priority queue size
 
     std::vector<verti> bumped_;

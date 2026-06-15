@@ -158,7 +158,7 @@ class reverse_term_list_iterator
 
   protected:
     std::size_t m_position;   // m_position refers one above the position to be deliverd. 
-    std::unique_ptr<detail::_aterm_list<Term> const*[]> m_list_element_references;
+    std::unique_ptr<detail::_aterm_list<Term> const*[]> m_list_element_references; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays) unique_ptr array specialization
 
     /// \brief Constructor from an aterm which must be a list.
     /// \param l A sequence of terms

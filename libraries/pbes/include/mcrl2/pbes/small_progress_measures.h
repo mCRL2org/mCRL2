@@ -228,7 +228,7 @@ class small_progress_measures_algorithm
           }
           else
           {
-            m_beta.push_back(block_size);
+            m_beta.push_back(static_cast<int>(block_size));
           }
           block_size = 0;
           last_rank++;
@@ -243,7 +243,7 @@ class small_progress_measures_algorithm
       }
       else
       {
-        m_beta.push_back(block_size);
+        m_beta.push_back(static_cast<int>(block_size));
       }
 
       // add successor information
