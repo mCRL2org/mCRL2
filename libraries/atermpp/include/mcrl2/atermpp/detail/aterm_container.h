@@ -34,6 +34,9 @@ inline void mark_term(const aterm_core& t, term_mark_stack& todo)
 namespace detail
 {
 
+class thread_aterm_pool;
+thread_aterm_pool& g_thread_term_pool();
+
 /// \brief Provides safe storage of unprotected_aterm_core instances in a container by marking
 ///        them during garbage collection.
 /// 
@@ -238,8 +241,19 @@ public:
   {
   }
 
-  reference_aterm& operator=(const unprotected_aterm_core& other) noexcept;
-  reference_aterm& operator=(unprotected_aterm_core&& other) noexcept;
+  reference_aterm& operator=(const unprotected_aterm_core& other) noexcept
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    m_term = detail::address(other);
+    return *this;
+  }
+
+  reference_aterm& operator=(unprotected_aterm_core&& other) noexcept
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    m_term = detail::address(std::move(other));
+    return *this;
+  }
 
   /// Converts implicitly to a protected term of type T.
   operator T&()
