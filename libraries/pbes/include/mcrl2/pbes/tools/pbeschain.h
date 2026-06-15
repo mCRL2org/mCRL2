@@ -512,7 +512,7 @@ inline pbes fill_pvi(pbes& p, data::rewriter data_rewriter)
 
     pbes_expression new_formula;
     substituter.apply(new_formula, eq.formula());
-    pbes_equation new_eq(eq);
+    pbes_equation new_eq(static_cast<const pbes_equation&>(eq));
     new_eq.formula() = new_formula;
     eqn.push_back(new_eq);
   }

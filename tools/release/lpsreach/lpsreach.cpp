@@ -32,8 +32,8 @@ struct arguments
   std::string output_filename;
 };
 
-TASK_DECL_1(bool, lpsreach_task, arguments*);
-#define lpsreach_task(a) RUN(lpsreach_task, a)
+TASK_DECL_1(bool, lpsreach_task, arguments*); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
+#define lpsreach_task(a) RUN(lpsreach_task, a) // NOLINT(cppcoreguidelines-macro-usage)
 
 class lpsreach_tool : public parallel_tool<rewriter_tool<input_output_tool>>
 {
@@ -196,7 +196,7 @@ public:
   }
 };
 
-TASK_IMPL_1(bool, lpsreach_task, arguments*, arguments)
+TASK_IMPL_1(bool, lpsreach_task, arguments*, arguments) // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
 {
   mCRL2log(log::verbose) << arguments->options << std::endl;
 

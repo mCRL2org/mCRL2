@@ -67,7 +67,7 @@ struct symbolic_reachability_options: public symbolic::symbolic_reachability_opt
 inline
 std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options& options)
 {
-  out << static_cast<symbolic::symbolic_reachability_options>(options);
+  out << static_cast<const symbolic::symbolic_reachability_options&>(options);
   out << "solve_strategy = " << options.solve_strategy << std::endl;
   out << "split_conditions = " << options.split_conditions << std::endl;
   out << "total = " << std::boolalpha << options.make_total << std::endl;

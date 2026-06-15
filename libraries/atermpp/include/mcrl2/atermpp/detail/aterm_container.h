@@ -477,10 +477,7 @@ public:
     return *this;
   };
 
-  generic_aterm_container& operator=(generic_aterm_container&&) 
-  {
-    return *this;
-  }
+  generic_aterm_container& operator=(generic_aterm_container&&) noexcept { return *this; }
 
 protected:
   aterm_container m_container;

@@ -57,20 +57,27 @@
 /// how often single-block BLC sets are required in the two situations
 /// mentioned above.
 
-#include <iomanip> // for std::fixed, std::setprecision(), std::setw()
-#include <ctime> // for std::clock_t, std::clock()
-#include <forward_list> // for std::forward_list
-#include <unordered_set> // for std::unordered_set
-#include "mcrl2/lts/detail/liblts_scc.h"
-#include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
+#include "mcrl2/lts/detail/liblts_merge.h"
+#include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/simple_list.h"
+#include <ctime> // for std::clock_t, std::clock()
+#include <forward_list> // for std::forward_list
+#include <iomanip> // for std::fixed, std::setprecision(), std::setw()
+#include <unordered_set> // for std::unordered_set
+#include <utility>
 
 #include "mcrl2/lts/detail/liblts_bisim_gj.h" // for a few definitions that are unchanged at the beginning of this file
 
 namespace mcrl2::lts::detail
 {
+// The bisimulation algorithm below is hand-tuned and deliberately uses C-style
+// arrays, goto-based coroutine control flow, and helper macros.  In addition,
+// misc-static-assert misfires on the many runtime assert() statements that are
+// expanded through macros.  These checks are therefore suppressed for the whole
+// file.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage,misc-static-assert,cppcoreguidelines-avoid-goto,cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 
 template <class LTS_TYPE> class bisim_partitioner_gj_lazy_BLC;
 
@@ -737,12 +744,13 @@ struct block_that_needs_refinement_type
   /// `start_bottom_states[AvoidSml] ... start_bottom_states[AvoidSml+1]` contains the states that might remain in AvoidSml
   /// `start_bottom_states[AvoidLrg] ... start_bottom_states[AvoidLrg+1]` contains the states that are guaranteed to be in AvoidLrg
 
-  state_in_block_pointer_lb* start_bottom_states[4];
+  // NOLINTNEXTLINE(modernize-use-default-member-init) initialized in the constructor from parameter B; cannot be a default member initializer.
+  std::array<state_in_block_pointer_lb*, 4> start_bottom_states;
 
   /// \brief potential non-bottom states
   /// \details These vectors contain non-bottom states that have been found
   /// when going through predecessors of a subblock.
-  std::vector<state_in_block_pointer_lb> potential_non_bottom_states[3];
+  std::array<std::vector<state_in_block_pointer_lb>, 3> potential_non_bottom_states;
   std::vector<state_in_block_pointer_lb> potential_non_bottom_states_HitSmall;
 
   /// \brief large splitter
@@ -1700,14 +1708,28 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                     {
                                                                                       const transition&first_t=m_aut.get_transitions()[*blc_it.start_same_BLC];
                                                                                       const label_index l=label_or_divergence(first_t, (label_index) -2);
-                                                                                      mCRL2log(log::debug) << "\n    BLC set "
-                                                                                          << std::distance<BLC_list_const_iterator>(m_BLC_transitions.data(),
-                                                                                                                               blc_it.start_same_BLC) << " -- "
-                                                                                          << std::distance<BLC_list_const_iterator>(m_BLC_transitions.data(),
-                                                                                                                                  blc_it.end_same_BLC)
-                                                                                          << " of " << ((label_index)-2==l ? "divergent self-loop "
-                                                                                                                           : pp(m_aut.action_label(l))+"-")
-                                                                                          << "transitions to " << m_states[first_t.to()].block->constellation->debug_id(*this) << ":\n";
+                                                                                      mCRL2log(log::debug)
+                                                                                        << "\n    BLC set "
+                                                                                        << std::distance<
+                                                                                             BLC_list_const_iterator>(
+                                                                                             m_BLC_transitions.data(),
+                                                                                             blc_it.start_same_BLC)
+                                                                                        << " -- "
+                                                                                        << std::distance<
+                                                                                             BLC_list_const_iterator>(
+                                                                                             m_BLC_transitions.data(),
+                                                                                             blc_it.end_same_BLC)
+                                                                                        << " of "
+                                                                                        << (std::cmp_equal(-2, l)
+                                                                                               ? "divergent self-loop "
+                                                                                               : pp(m_aut.action_label(
+                                                                                                   l))
+                                                                                                   + "-")
+                                                                                        << "transitions to "
+                                                                                        << m_states[first_t.to()]
+                                                                                             .block->constellation
+                                                                                             ->debug_id(*this)
+                                                                                        << ":\n";
                                                                                       for (BLC_list_const_iterator i=blc_it.start_same_BLC; ; ++i)
                                                                                       {
                                                                                         if (i == blc_it.start_marked_BLC)
@@ -1777,13 +1799,28 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                           const label_index old_t_label=t_label;
                                                                                           t_label=label_or_divergence(t, (label_index) -2);
                                                                                           to_constln=m_states[t.to()].block->constellation;
-                                                                                          mCRL2log(log::debug) << "    -  -  -  - saC slice of "
-                                                                                                << ((label_index) -2==t_label ? "divergent self-loop "
-                                                                                                                        : pp(m_aut.action_label(t_label))+"-")
-                                                                                                << "transitions to " << to_constln->debug_id(*this)
-                                                                                                << (m_aut.is_tau(t_label) && !m_aut.is_tau(old_t_label)
-                                                                                                        ? " -- error: tau-transitions should come first\n"
-                                                                                                        : ":\n");
+                                                                                          mCRL2log(log::debug)
+                                                                                            << "    -  -  -  - saC "
+                                                                                               "slice of "
+                                                                                            << (std::cmp_equal(-2,
+                                                                                                  t_label)
+                                                                                                   ? "divergent "
+                                                                                                     "self-loop "
+                                                                                                   : pp(m_aut
+                                                                                                         .action_label(
+                                                                                                           t_label))
+                                                                                                       + "-")
+                                                                                            << "transitions to "
+                                                                                            << to_constln->debug_id(
+                                                                                                 *this)
+                                                                                            << (m_aut.is_tau(t_label)
+                                                                                                     && !m_aut.is_tau(
+                                                                                                       old_t_label)
+                                                                                                   ? " -- error: "
+                                                                                                     "tau-transitions "
+                                                                                                     "should come "
+                                                                                                     "first\n"
+                                                                                                   : ":\n");
                                                                                         }
                                                                                         mCRL2log(log::debug) << "    " << ptr(t);
                                                                                         if (start_same_saC_valid)
@@ -2172,7 +2209,7 @@ class bisim_partitioner_gj_lazy_BLC
     {                                                                           assert(count<m_aut.num_states());  assert(m_states_in_blocks.data()<=pos1);
       /* if (pos1 > pos2)  std::swap(pos1, pos2);                            */ assert(pos1<pos2);  assert(pos2<=m_states_in_blocks.data_end()-count);
       {
-        std::make_signed_t<state_index> overlap=std::distance(pos2,pos1)+count;
+        std::make_signed_t<state_index> overlap=std::distance(pos2,pos1)+static_cast<std::make_signed_t<state_index>>(count);
         if (overlap > 0)
         {
           count -= overlap;
@@ -2255,9 +2292,9 @@ class bisim_partitioner_gj_lazy_BLC
 
     /// \brief Move the content of i1 to i2, i2 to i3 and i3 to i1.
     void swap_three_iterators_and_update_m_transitions(
-                                                    const BLC_list_iterator i1,
-                                                    const BLC_list_iterator i2,
-                                                    const BLC_list_iterator i3)
+                                                    BLC_list_iterator i1,
+                                                    BLC_list_iterator i2,
+                                                    BLC_list_iterator i3)
     {                                                                           assert(i3<=i2);  assert(i2<=i1);
       if (i1==i3)
       {
@@ -2502,7 +2539,7 @@ class bisim_partitioner_gj_lazy_BLC
         do
         {
           block_type_lb& blk = *start_blocks->ref_state->block;                 assert(start_blocks == blk.start_bottom_states);
-          blk.small_subblock_counter += left_increment;
+          blk.small_subblock_counter = static_cast<char>(blk.small_subblock_counter + left_increment);
           start_blocks = blk.end_states;
         }
         while (start_blocks < splitpoint);                                      assert(start_blocks == splitpoint);
@@ -2514,7 +2551,7 @@ class bisim_partitioner_gj_lazy_BLC
         do
         {
           block_type_lb& blk = *splitpoint->ref_state->block;                   assert(splitpoint == blk.start_bottom_states);
-          blk.small_subblock_counter += right_increment;
+          blk.small_subblock_counter = static_cast<char>(blk.small_subblock_counter + right_increment);
           splitpoint = blk.end_states;
         }
         while (splitpoint < end_blocks);                                        assert(splitpoint == end_blocks);
@@ -2540,7 +2577,7 @@ class bisim_partitioner_gj_lazy_BLC
         block_type_lb& blk = *start_block->ref_state->block;                    assert(start_block == blk.start_bottom_states);
         unsigned char increment = log_old_size - check_complexity::ilog2
                                   (std::distance(start_block, blk.end_states)); // check that at most one increment is zero to ensure that all running time
-        blk.small_subblock_counter += increment;                                // (except O(1)) can be assigned to small sub-blocks:
+        blk.small_subblock_counter = static_cast<char>(blk.small_subblock_counter + increment);                                // (except O(1)) can be assigned to small sub-blocks:
                                                                                 #ifndef NDEBUG
                                                                                   if (0==increment)
                                                                                   {  assert(all_increments_are_nonzero);  all_increments_are_nonzero=false;  }
@@ -3094,7 +3131,7 @@ class bisim_partitioner_gj_lazy_BLC
                                                                        ++in_it)
         {
           const fixed_vector<state_type_gj_lb>::iterator
-                                           from=m_states.begin()+in_it->from(); assert(m_states[in_it->to()].ref_states_in_blocks==start_bottom);
+                                           from=m_states.begin()+static_cast<std::ptrdiff_t>(in_it->from()); assert(m_states[in_it->to()].ref_states_in_blocks==start_bottom);
           if (&NewBotSt_block == from->block)
           {
             if (0== --from->no_of_outgoing_block_inert_transitions)
@@ -3680,7 +3717,7 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                         current_source_iter[current_search])], add_work(check_complexity::
                                                                                                      simple_splitB_U_handle_transition_to_U_state, 1), *this);
             const transition& tr=*current_source_iter[current_search]++;        assert(m_aut.is_tau(m_aut_apply_hidden_label_map(tr.label())));
-            state_in_block_pointer_lb const src = m_states.begin() + tr.from(); assert(m_states[tr.to()].block==&bi);
+            state_in_block_pointer_lb const src = m_states.begin() + static_cast<std::ptrdiff_t>(tr.from()); assert(m_states[tr.to()].block==&bi);
             // Algorithm 3, Line 3.12 left
             if (src.ref_state->block==&bi &&
                 !(m_preserve_divergence && tr.from()==tr.to()))
@@ -4384,7 +4421,7 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                             current_source_iter_NewBotSt)], add_work(check_complexity::
                                                                                                      simple_splitB_R_handle_transition_to_R_state, 1), *this);
           const transition& tr=*current_source_iter_NewBotSt++;                 assert(m_aut.is_tau(m_aut_apply_hidden_label_map(tr.label())));
-          state_in_block_pointer_lb const src=m_states.begin()+tr.from();       assert(m_states[tr.to()].block==&bi);
+          state_in_block_pointer_lb const src=m_states.begin()+static_cast<std::ptrdiff_t>(tr.from());       assert(m_states[tr.to()].block==&bi);
           // Algorithm 3, Line 3.12 right
           if (src.ref_state->block==&bi &&
               !(m_preserve_divergence && tr.from()==tr.to()))
@@ -4662,7 +4699,7 @@ class bisim_partitioner_gj_lazy_BLC
                 // out that NewBotSt has finished all it can do, so AvoidLrg
                 // shall be aborted.
             // Algorithm 3, Line 3.17 right
-            status_NewBotSt=finished;                                           assert(3==++no_of_finished_searches);
+            status_NewBotSt=finished;                                           ++no_of_finished_searches;  assert(3==no_of_finished_searches);
 
             // Algorithm 3, Line 3.39
             // Calculate the placement of subblocks, and also clear state
@@ -4996,7 +5033,7 @@ class bisim_partitioner_gj_lazy_BLC
                                                                                       non_bottom_states[AvoidLrg]=non_bottom_states[AvoidSml];
                                                                                       non_bottom_states[AvoidLrg].add_todo(non_bottom_states[ReachAlw].begin(),
                                                                                                   non_bottom_states[ReachAlw].begin()
-                                                                                                                  +(count-non_bottom_states[AvoidLrg].size()));
+                                                                                                                  +static_cast<std::ptrdiff_t>(count-non_bottom_states[AvoidLrg].size()));
                                                                                       acct_iter=non_bottom_states[AvoidLrg].data();
                                                                                       acct_B_size=std::max(bottom_and_non_bottom_size(AvoidSml),
                                                                                                            bottom_and_non_bottom_size(ReachAlw));
@@ -5502,7 +5539,7 @@ class bisim_partitioner_gj_lazy_BLC
                         : std::next(it->ref_state)->start_outgoing_transitions; assert(out_it < out_it_end);
                 do
                 {
-                  BLC_list_iterator const old_pos=out_it->ref_BLC_transitions;  // mCRL2complexity(&m_transitions[*old_pos], add_work(..., max_B), *this);
+                  BLC_list_iterator old_pos=out_it->ref_BLC_transitions;  // mCRL2complexity(&m_transitions[*old_pos], add_work(..., max_B), *this);
                   const transition& tr = m_aut.get_transitions()[*old_pos];         // subsumed under the above block counter
                   if (m_states[tr.to()].block->constellation !=
                                                            bi->constellation ||
@@ -6335,7 +6372,7 @@ class bisim_partitioner_gj_lazy_BLC
         while (todo_stack_actions.end() != a_it)
         {                                                                       // mCRL2complexity(..., add_work(..., 1), *this);
           const label_index a = *a_it;                                              // not needed because the inner loop is always executed
-          const BLC_list_iterator end_index =
+          BLC_list_iterator end_index =
                       m_BLC_transitions.data()+count_transitions_per_action[a]; assert(end_index<=m_BLC_transitions.data_end());
           // create a BLC_indicator and insert it into the list...
           initial_BLC_source.block_to_constellation.emplace_back
@@ -6388,7 +6425,7 @@ class bisim_partitioner_gj_lazy_BLC
           m_states[s].start_outgoing_transitions=current_outgoing_transitions+
                             m_states[s].no_of_outgoing_block_inert_transitions;
           current_outgoing_transitions+=
-                                       count_outgoing_transitions_per_state[s];
+              static_cast<std::ptrdiff_t>(count_outgoing_transitions_per_state[s]);
           count_outgoing_transitions_per_state[s]=0;
           // meaning of this counter changes to: number of outgoing transitions
           // already stored
@@ -7413,6 +7450,8 @@ inline bool bisimulation_compare_gj_lazy_BLC(const LTS_TYPE& l1,
                                                branching, preserve_divergence);
 }
 
+
+// NOLINTEND(cppcoreguidelines-macro-usage,misc-static-assert,cppcoreguidelines-avoid-goto,cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 
 } // end namespace detail
 // end namespace lts

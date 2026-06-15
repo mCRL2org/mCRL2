@@ -805,9 +805,9 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
 
       const std::vector <transition> trans=sp.get_transitions();
       l.clear_transitions();
-      for (std::vector <transition>::const_iterator i=trans.begin(); i!=trans.end(); ++i)
+      for (const transition& t: trans)
       {
-        l.add_transition(*i);
+        l.add_transition(t);
       }
       // Remove unreachable parts
 
@@ -832,9 +832,9 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
 
       const std::vector <transition> trans=rsp.get_transitions();
       l.clear_transitions();
-      for (std::vector <transition>::const_iterator i=trans.begin(); i!=trans.end(); ++i)
+      for (const transition& t: trans)
       {
-        l.add_transition(*i);
+        l.add_transition(t);
       }
       // Remove unreachable parts
 

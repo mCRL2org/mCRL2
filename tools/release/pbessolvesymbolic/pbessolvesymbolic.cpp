@@ -56,8 +56,8 @@ struct arguments
   mcrl2::utilities::execution_timer& timer;
 };
 
-TASK_DECL_1(bool, pbessolvesymbolic_task, arguments*);
-#define pbessolvesymbolic_task(a) RUN(pbessolvesymbolic_task, a)
+TASK_DECL_1(bool, pbessolvesymbolic_task, arguments*); // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
+#define pbessolvesymbolic_task(a) RUN(pbessolvesymbolic_task, a) // NOLINT(cppcoreguidelines-macro-usage)
 
 namespace mcrl2::pbes_system
 {
@@ -731,7 +731,7 @@ void solve(pbes_system::pbes pbesspec,
           reach.data_index(),
           G.players(V)[result ? 0 : 1],
           V,
-          result ? *solution.strategy[0] : *solution.strategy[1],
+          result ? *solution.strategy[0] : *solution.strategy[1], // NOLINT(bugprone-unchecked-optional-access)
           reach.rewriter());
 
         // Perform the second instantiation given the proof graph.
@@ -763,7 +763,7 @@ void solve(pbes_system::pbes pbesspec,
   }
 }
 
-TASK_IMPL_1(bool, pbessolvesymbolic_task, arguments*, args)
+TASK_IMPL_1(bool, pbessolvesymbolic_task, arguments*, args) // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
 {
   mCRL2log(log::verbose) << args->options << std::endl;
 

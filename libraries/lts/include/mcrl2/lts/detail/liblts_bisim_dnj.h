@@ -91,9 +91,16 @@
 #include "mcrl2/lts/detail/simple_list.h"
 
 #include <cstddef>   // for std::size_t
+#include <utility>
 
 namespace mcrl2::lts::detail
 {
+// The bisimulation algorithm below is hand-tuned and deliberately uses C-style
+// arrays, goto-based coroutine control flow, and helper macros.  In addition,
+// misc-static-assert misfires on the many runtime assert() statements that are
+// expanded through macros.  These checks are therefore suppressed for the whole
+// file.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage,misc-static-assert,cppcoreguidelines-avoid-goto,cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief include something in Debug mode
                                                                                     /// \details In a few places, we have to include an additional parameter to
@@ -307,10 +314,14 @@ class permutation_entry {
     /// to its final place. Therefore, we have to adapt the pos pointer.  Note
     /// that std::swap also uses move assignment, so we automatically get the
     /// correct behaviour there.
-    void operator=(const permutation_entry&& other) noexcept
+    permutation_entry& operator=(const permutation_entry& other) noexcept
     {
-        st = other.st;
-        st->pos = this;
+        if (this != &other)
+        {
+            st = other.st;
+            st->pos = this;
+        }
+        return *this;
     }
 };
 
@@ -1195,8 +1206,12 @@ class block_bunch_slice_t
                                                                                         }
                                                                                         const block_bunch_entry* begin(
                                                                                                                  &partitioner.part_tr.block_bunch.cbegin()[1]);
-                                                                                        if (trans_type bunch_size(bunch->end - bunch->begin);
-                                                                                                                       (trans_type) (end - begin) > bunch_size)
+                                                                                        if (trans_type bunch_size(
+                                                                                              bunch->end
+                                                                                              - bunch->begin);
+                                                                                          std::cmp_greater(
+                                                                                            (end - begin),
+                                                                                            bunch_size))
                                                                                         {
                                                                                             begin = end - bunch_size;
                                                                                         }
@@ -4977,7 +4992,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
     if (mCRL2logEnabled(log::verbose))
     {
         const std::clock_t end_finalizing=std::clock();
-        const int prec=std::lrint(std::log10(CLOCKS_PER_SEC)+0.19897000433602);
+        const int prec=static_cast<int>(std::lrint(std::log10(CLOCKS_PER_SEC)+0.19897000433602));
             // For example, if CLOCKS_PER_SEC>=     20: >=2 digits
             //              If CLOCKS_PER_SEC>=    200: >=3 digits
             //              If CLOCKS_PER_SEC>=2000000: >=7 digits
@@ -4993,7 +5008,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
             int min[sizeof(runtime)/sizeof(runtime[0])];
             for (unsigned i = 0; i < sizeof(runtime)/sizeof(runtime[0]); ++i)
             {
-                min[i] = trunc(runtime[i] / 60.0);
+                min[i] = static_cast<int>(trunc(runtime[i] / 60.0));
                 runtime[i] -= 60 * min[i];
             }
             if (min[0]>=60)
@@ -5004,7 +5019,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
                     h[i] = min[i] / 60;
                     min[i] %= 60;
                 }
-                int width = trunc(log10(h[0])) + 1;
+                int width = static_cast<int>(trunc(log10(h[0])) + 1);
 
                 mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
                     << "Time spent on contracting SCCs: " << std::setw(width) << h[1] << "h " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
@@ -5123,6 +5138,8 @@ inline bool bisimulation_compare_dnj(const LTS_TYPE& l1, const LTS_TYPE& l2,
 }
 
 ///@} (end of group part_interface)
+
+// NOLINTEND(cppcoreguidelines-macro-usage,misc-static-assert,cppcoreguidelines-avoid-goto,cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 
 } // end namespace detail
 // end namespace lts

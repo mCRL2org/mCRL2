@@ -25,6 +25,7 @@
 
 #include <unordered_map> // used during initialisation
 #include <list>          // for the list of B_to_C_descriptors
+#include <utility>       // for std::cmp_less_equal
 
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
@@ -33,6 +34,10 @@
 
 namespace mcrl2::lts::detail
 {
+// The bisimulation algorithm below is hand-tuned and deliberately uses helper
+// macros such as ONLY_IF_DEBUG.  This check is therefore suppressed for the
+// whole file.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
                                                                                 #ifndef NDEBUG
                                                                                     /// \brief include something in Debug mode
                                                                                     /// \details In a few places, we have to include an additional parameter to
@@ -863,7 +868,7 @@ class constln_t
           postprocess_begin(postprocess_none),
           postprocess_end(postprocess_none),
           sort_key(sort_key_)
-    {                                                                           assert(int_begin<int_end);  assert((state_type)(int_end-int_begin)<=sort_key);
+    {                                                                           assert(int_begin<int_end);  assert(std::cmp_less_equal(int_end-int_begin, sort_key));
     }
 
     /// \brief destructor
@@ -1490,7 +1495,7 @@ class part_trans_t
                                                                                 assert(succ_entry::slice_end(pos1->succ) == succ_entry::slice_end(pos2->succ));
         // swap contents, but do not swap slice_begin_or_before_end
         B_to_C_iter_t const temp_B_to_C(pos1->succ->B_to_C);
-        state_info_ptr const temp_target(pos1->succ->target);
+        state_info_ptr temp_target(pos1->succ->target);
         pos1->succ->B_to_C = pos2->succ->B_to_C;
         pos1->succ->target = pos2->succ->target;
         pos2->succ->B_to_C = temp_B_to_C;
@@ -2104,6 +2109,8 @@ inline bool state_info_entry::surely_has_no_transition_to(
     return true;
 }
 
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 } // end namespace bisim_gjkw
 } // end namespace detail

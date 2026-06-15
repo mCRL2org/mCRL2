@@ -43,6 +43,7 @@ transitionLabelToQString(const mcrl2::lts::action_label_string& label)
 }
 
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage) -- thin lock wrappers; macros required to capture call-site context
 #ifndef DEBUG_GRAPH_LOCKS
 #define GRAPH_LOCK(type, where, x) x
 #else
@@ -72,6 +73,7 @@ void debug_lock(const char *type, const char *func)
 #define lockForWrite(lock, where)                                              \
   GRAPH_LOCK("W lock", where, (lock).lockForWrite())
 #define unlockForWrite(lock, where) GRAPH_LOCK("W unlock", where, (lock).unlock())
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 Graph::Graph()
     : m_exploration(nullptr), m_type(mcrl2::lts::lts_lts), m_empty(""),
