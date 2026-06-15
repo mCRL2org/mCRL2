@@ -50,6 +50,7 @@ LPS
    :maxdepth: 1
 
    libraries/lps/lps_library
+   libraries/lps/lps_implementation_notes
 
 
 *PDF documentation*
@@ -57,7 +58,6 @@ LPS
 * :mcrl2_pdflatex:`A rewriting-strategies-based tool for transforming process-algebraic equations <libraries/lps/latex/lin_impl.tex>`
 * :mcrl2_pdflatex:`Next-state computation templates in state space exploration <libraries/lps/latex/next-state-templates-in-state-space-exploration.tex>`
 * :mcrl2_pdflatex:`lpsconstelm <libraries/lps/latex/lpsconstelm.tex>`
-* :mcrl2_pdflatex:`lps-implementation-notes.tex <libraries/lps/latex/lps-implementation-notes.tex>`
 * :mcrl2_pdflatex:`mcrl2lps.tex <libraries/lps/latex/mcrl2lps.tex>`
 * :mcrl2_pdflatex:`lpsparelm <libraries/lps/latex/lpsparelm.tex>`
 * :mcrl2_pdflatex:`State Space Exploration <libraries/lps/latex/state-space-exploration.tex>`
