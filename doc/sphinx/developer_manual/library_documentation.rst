@@ -56,10 +56,6 @@ LPS
    libraries/lps/communication_open_terms
 
 
-*PDF documentation*
-
-* :mcrl2_pdflatex:`Next-state computation templates in state space exploration <libraries/lps/latex/next-state-templates-in-state-space-exploration.tex>`
-
 LTS
 =====
 
