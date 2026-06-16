@@ -8,11 +8,7 @@ ATermpp
    :maxdepth: 1
 
    libraries/atermpp/aterm_library
-
-
-*PDF documentation*
-
- * :mcrl2_pdflatex:`mCRL2 Term Library <libraries/atermpp/latex/term_library.tex>`
+   libraries/atermpp/aterm_implementation_notes
 
 Core
 ======
