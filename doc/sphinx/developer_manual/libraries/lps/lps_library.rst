@@ -2,7 +2,7 @@ Linear process specifications
 =============================
 
 The LPS library contains classes and algorithms for linear processes. The code
-in the LPS library is contained in the namespace =lps=. LPS is shorthand for
+in the LPS library is contained in the namespace ``lps``. LPS is shorthand for
 linear process specification.
 
 Definitions

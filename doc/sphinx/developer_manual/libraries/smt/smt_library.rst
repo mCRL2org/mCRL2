@@ -15,6 +15,6 @@ The library still has a few limitations, among which:
   are not complete. For example, for a function :code:`f: Pos -> Pos`, the
   following assertion is missing:
 
-  .. code::
+  .. code-block:: text
 
     (forall ((p Int)) (>= (f p) 1)).

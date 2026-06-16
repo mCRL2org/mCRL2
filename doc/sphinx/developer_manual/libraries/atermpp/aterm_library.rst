@@ -52,7 +52,7 @@ used variant:
   typedef term_list<aterm> aterm_list;
 
 A :mcrl2:`term_list\<T\> <atermpp::term_list>` models a read-only singly
-linked list with elements of type `T`. The element type should be
+linked list with elements of type ``T``. The element type should be
 :mcrl2:`aterm <atermpp::aterm>` or one of its derivatives, or a user defined
 aterm (see :ref:`atermpp_programming_user_defined`).
 
@@ -108,7 +108,7 @@ Read-only terms
 ^^^^^^^^^^^^^^^
 
 As a result of the maximal sharing, aterms have the property that they are
-read-only. All member functions of the `atermpp` classes (except the assignment
+read-only. All member functions of the ``atermpp`` classes (except the assignment
 operator) are constant.
 
 .. note::
@@ -132,11 +132,11 @@ constructors can be used. There is a disadvantage because constructors
 will generally copy an aterm which will also lead to an increase
 and ultimately a decrease of a reference count.
 
-It is more efficient to use a `cpp:func:`down_cast\<T\> <atermpp::down_cast>`
+It is more efficient to use a :mcrl2:`down_cast\<T\> <atermpp::down_cast>`
 which allows to cast a term of a type derived from an aterm to a term
 of a derived type. The derived type must not have additional fields beyond the
 aterm from which it derived. To transform an aterm based term multiple
-steps through the inheritance hierarchy `cpp:func:`vertical_cast\<T\> <atermpp::vertical_cast>`
+steps through the inheritance hierarchy :mcrl2:`vertical_cast\<T\> <atermpp::vertical_cast>`
 can be used. When the toolset is compiled in debug mode, it is carefully checked
 that terms are well defined and of proper type.
 
@@ -168,7 +168,7 @@ control characters the resul will not be the same.
 
 Comparing aterms
 ^^^^^^^^^^^^^^^^
-For the aterms all standard comparison operators are defined (`==`, `!=`, `<=`, `<`, `>` and `>=`).
+For the aterms all standard comparison operators are defined (``==``, ``!=``, ``<=``, ``<``, ``>`` and ``>=``).
 These operations are very efficient which is made possible as aterms are essentially
 pointers. If two terms are equal they both consist of the same pointer. As it is nondeterministic where aterms are stored,
 the comparison operators can yield different outcomes if terms are destructed and constructed again. The comparison operators
@@ -505,7 +505,7 @@ Now that we have defined :mcrl2:`Expression`, we can use it in standard containe
 ATerm algorithms
 ----------------
 
-For the `atermpp` library a couple of algorithms are defined. Most
+For the ``atermpp`` library a couple of algorithms are defined. Most
 of these algorithms have template parameters for the terms that they
 operate on. These algorithms work on every class for which an :mcrl2:`aterm_traits`
 specialization exists.
@@ -539,14 +539,14 @@ predicate. The program fragment below illustrates this:
   assert(v.front() == read_term_from_string("f(y)"));
   assert(v.back() == read_term_from_string("f(z)"));
 
-The find algorithms also work on user defined types. So if `t` is of type :mcrl2:`Expression`,
+The find algorithms also work on user defined types. So if ``t`` is of type :mcrl2:`Expression`,
 then it is possible to call :mcrl2:`find_if(t, is_f())`
 as well.
 
 Replace algorithms
 ^^^^^^^^^^^^^^^^^^
 There are several algorithms for replacing subterms. The ``replace`` algorithm replaces
-a subterm with another term, `bottom_up_replace` does the same but with a different traversal
+a subterm with another term, ``bottom_up_replace`` does the same but with a different traversal
 order. The latter function also contains a version that maintains a cache of replaced terms,
 which may improve the performance if the same subterms occur often.
 The algorithm :mcrl2:`~atermpp::partial_replace` has the option to abort further replacements
@@ -631,7 +631,7 @@ as building blocks of other algorithms. They have the following interface:
   };
 
 The function ``traverser::apply`` by default visits all subterms of a term, and the
-function `builder::apply` rebuilds a term by reassembling it from the bottom up. By overriding the
+function ``builder::apply`` rebuilds a term by reassembling it from the bottom up. By overriding the
 ``apply`` member functions, the default behaviour can be changed. For example, the following is
 enough to modify all subterms ``x`` by ``y``.
 
