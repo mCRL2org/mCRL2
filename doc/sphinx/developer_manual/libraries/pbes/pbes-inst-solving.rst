@@ -586,17 +586,11 @@ The tool ``pbessolve`` has a flag that is used to set the solving strategy. The 
 
 .. admonition:: List of solving strategies
 
-    .. math::
-        :nowrap:
-        :class: math-left
-
-        \begin{itemize}
-            \item 0- No on-the-fly solving is applied
-            \item 1- Propagate solved equations using an attractor
-            \item 2- Detect winning loops
-            \item 3- Solve subgames using a fatal attractor
-            \item 4- Solve subgames using the solver
-        \end{itemize}
+    - 0- No on-the-fly solving is applied
+    - 1- Propagate solved equations using an attractor
+    - 2- Detect winning loops
+    - 3- Solve subgames using a fatal attractor
+    - 4- Solve subgames using the solver
 
 
 Solving strategy *0- No on-the-fly solving is applied* is the combination of two techniques: *self-loop removal* and *propagation of solved equations*.
@@ -1029,9 +1023,9 @@ Self-loop removal example
 Optimizations 1-4
 """""""""""""""""
 
-Solving strategies 1 to 4 each use a different function for `applyAttractor`, in Algorithm :ref:`PbesInstHolder <placeholder>`. These solving strategies are considered to be *optimizations* of solving strategy 0.
+Solving strategies 1 to 4 each use a different function for `applyAttractor`, in Algorithm :ref:`PbesInstHolder <alg-pbesinstholder>`. These solving strategies are considered to be *optimizations* of solving strategy 0.
 
-.. _placeholder:
+.. _alg-pbesinstholder:
 
 .. math::
     :nowrap:

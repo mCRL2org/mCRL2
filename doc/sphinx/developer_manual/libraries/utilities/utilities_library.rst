@@ -262,17 +262,21 @@ Available tool classes
 The table below gives an overview of the
 available tool classes, and the command line options that they handle.
 
-.. table:: Tool classes and their supported command line arguments
+.. list-table:: Tool classes and their supported command line arguments
+   :header-rows: 1
 
-   ================================================================================  ===================================================================
-   tool class                                                                        command line arguments
-   ================================================================================  ===================================================================
-   class :mcrl2:`mcrl2::utilities::tool`                                              handles =--quiet=, =--verbose=, =--debug=, =--help= and =--version=
-   class :mcrl2:`mcrl2::utilities::input_tool`                                        in addition handles a positional input file argument
-   class :mcrl2:`mcrl2::utilities::input_output_tool`                                 in addition handles a positional output file argument
-   template <typename Tool> class :mcrl2:`mcrl2::data::tools::rewriter_tool`          extends a tool with a =--rewriter= option
-   template <typename Tool> class :mcrl2:`mcrl2::pbes_system::tools::pbes_rewriter_tool`  extends a tool with =--rewriter= and =--pbes-rewriter= options
-   ================================================================================  ===================================================================
+   * - tool class
+     - command line arguments
+   * - class :mcrl2:`mcrl2::utilities::tool`
+     - handles ``--quiet``, ``--verbose``, ``--debug``, ``--help`` and ``--version``
+   * - class :mcrl2:`mcrl2::utilities::input_tool`
+     - in addition handles a positional input file argument
+   * - class :mcrl2:`mcrl2::utilities::input_output_tool`
+     - in addition handles a positional output file argument
+   * - template <typename Tool> class :mcrl2:`mcrl2::data::tools::rewriter_tool`
+     - extends a tool with a ``--rewriter`` option
+   * - template <typename Tool> class :mcrl2:`mcrl2::pbes_system::tools::pbes_rewriter_tool`
+     - extends a tool with ``--rewriter`` and ``--pbes-rewriter`` options
 
 The class :mcrl2:`mcrl2::data::tools::rewriter_tool` makes strategies of the
 data rewriter available to the user. The class
@@ -284,7 +288,7 @@ Example
 
 A good example to look at is the pbesparelm tool. Since this is a tool that
 takes a file as input and also writes output to a file, it derives from the
-class :mcrl2:`mcrl2:utilities:input_output_tool`. It can be found in
+class :mcrl2:`mcrl2::utilities::input_output_tool`. It can be found in
 the directory ``tools/release/pbesparelm/pbesparelm.cpp``.
 
 In the constructor a few settings are provided.

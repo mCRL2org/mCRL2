@@ -822,7 +822,7 @@ Let :math:`\pre{U}{V} = \{ u \in U \mid \exists v \in V: u \rightarrow v \}` the
 
 
 The :math:`\alpha`-attractor into :math:`U`, denoted :math:`\attr{\alpha}{U,V}`, is the set of vertices for which player :math:`\alpha` can force any play into :math:`U`.
-We define :math:`\attr{\alpha}{U,V}` as :math:`\bigcup\limits_{i \ge 0} \attr[i]{\alpha}{U,V}`, the limit of approximations\label{def:attractor} of the sets :math:`\attr[n]{\alpha}{U,V}`, which are inductively defined as follows:
+We define :math:`\attr{\alpha}{U,V}` as :math:`\bigcup\limits_{i \ge 0} \attr[i]{\alpha}{U,V}`, the limit of approximations of the sets :math:`\attr[n]{\alpha}{U,V}`, which are inductively defined as follows:
 
 .. math::
 
@@ -959,7 +959,7 @@ Winning Cycle Detection
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 
-First, we implement cycle detection for a set of vertices :math:`V` by determining the largest subset :math:`U` of :math:`V` such that every vertex in :math:`U` has a predecessor in :math:`U`, as presented in Algorithm~\ref{alg:cycles}.
+First, we implement cycle detection for a set of vertices :math:`V` by determining the largest subset :math:`U` of :math:`V` such that every vertex in :math:`U` has a predecessor in :math:`U`, as presented in the *Cycle detection* algorithm below.
 If :math:`U` satisfies this condition then every vertex in :math:`U` is part of a cycle.
 
 Cycle detection
