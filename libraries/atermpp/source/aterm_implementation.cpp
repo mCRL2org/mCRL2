@@ -55,6 +55,11 @@ thread_aterm_pool& g_thread_term_pool()
   return instance;
 }
 
+mcrl2::utilities::shared_guard lock_shared_aterm_pool()
+{
+  return g_thread_term_pool().lock_shared();
+}
+
 } // end namespace atermpp::detail
 
 aterm_stream::~aterm_stream() = default;

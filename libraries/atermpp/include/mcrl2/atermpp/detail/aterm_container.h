@@ -37,6 +37,14 @@ namespace detail
 class thread_aterm_pool;
 thread_aterm_pool& g_thread_term_pool();
 
+/// \brief Acquires a shared lock on the global thread aterm pool.
+/// \details This free function is declared here but defined in aterm_implementation.cpp, where
+///          thread_aterm_pool is a complete type. It allows reference_aterm::operator= below to be
+///          defined inline, which is required to work around an MSVC limitation regarding out-of-line
+///          definitions of members of constrained partial specializations, without this header needing
+///          the complete definition of thread_aterm_pool, which Clang requires when the body is inline.
+mcrl2::utilities::shared_guard lock_shared_aterm_pool();
+
 /// \brief Provides safe storage of unprotected_aterm_core instances in a container by marking
 ///        them during garbage collection.
 /// 
@@ -241,9 +249,19 @@ public:
   {
   }
 
-  reference_aterm& operator=(const unprotected_aterm_core& other) noexcept;
+  reference_aterm& operator=(const unprotected_aterm_core& other) noexcept
+  {
+    mcrl2::utilities::shared_guard guard = lock_shared_aterm_pool();
+    m_term = detail::address(other);
+    return *this;
+  }
 
-  reference_aterm& operator=(unprotected_aterm_core&& other) noexcept;
+  reference_aterm& operator=(unprotected_aterm_core&& other) noexcept
+  {
+    mcrl2::utilities::shared_guard guard = lock_shared_aterm_pool();
+    m_term = detail::address(std::move(other));
+    return *this;
+  }
 
   /// Converts implicitly to a protected term of type T.
   operator T&()
