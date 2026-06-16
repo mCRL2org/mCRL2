@@ -181,7 +181,7 @@ void aterm_pool::created_term(bool allow_collect, mcrl2::utilities::shared_mutex
 
   if (m_count_until_resize.load(std::memory_order_relaxed) <= 0)
   {
-    if (allow_collect)
+    if (allow_collect && m_enable_resize)
     {
       resize_if_needed(shared_mutex);
     }
@@ -374,6 +374,11 @@ bool aterm_pool::create_appl_dynamic(aterm& term,
 
 void aterm_pool::resize_if_needed(mcrl2::utilities::shared_mutex& mutex)
 {
+  if (m_count_until_resize.load(std::memory_order_relaxed) > 0)
+  {
+    return;
+  }
+
   mcrl2::utilities::lock_guard guard = mutex.lock();
   if (m_count_until_resize > 0)
   {

@@ -163,6 +163,9 @@ public:
   /// Triggers a global garbage collection
   inline void collect() { m_pool.collect(m_shared_mutex); }
 
+  /// Resizes the global hash tables when needed.
+  inline void resize() { m_pool.resize_if_needed(m_shared_mutex); }
+
 private:
   aterm_pool& m_pool;
 

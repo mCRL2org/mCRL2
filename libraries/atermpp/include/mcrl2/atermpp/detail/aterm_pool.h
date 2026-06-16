@@ -132,6 +132,9 @@ public:
   /// \brief Enable garbage collection when passing true and disable otherwise.
   inline void enable_garbage_collection(bool enable) { m_enable_garbage_collection = enable; };
 
+  /// \brief Enable automatic hash table resizing when passing true and disable otherwise.
+  inline void enable_resize(bool enable) { m_enable_resize = enable; };
+
   inline function_symbol_pool& get_symbol_pool() { return m_function_symbol_pool; }
 
   // These functions of the aterm pool should be called through a thread_aterm_pool.
@@ -217,6 +220,8 @@ private:
   std::atomic<long> m_count_until_resize = 0;
 
   std::atomic<bool> m_enable_garbage_collection = EnableGarbageCollection; /// Garbage collection is enabled.
+
+  std::atomic<bool> m_enable_resize = true; /// Automatic hash table resizing is enabled.
 
   /// All the shared mutexes.
   mcrl2::utilities::shared_mutex m_shared_mutex;
