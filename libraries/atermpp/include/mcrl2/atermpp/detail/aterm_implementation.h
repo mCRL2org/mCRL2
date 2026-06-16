@@ -38,6 +38,24 @@ namespace detail
   {
     g_thread_term_pool().deregister_container(this);
   }
+
+  template <typename T>
+    requires std::is_base_of_v<aterm_core, T>
+  reference_aterm<T, void>& reference_aterm<T, void>::operator=(const unprotected_aterm_core& other) noexcept
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    m_term = detail::address(other);
+    return *this;
+  }
+
+  template <typename T>
+    requires std::is_base_of_v<aterm_core, T>
+  reference_aterm<T, void>& reference_aterm<T, void>::operator=(unprotected_aterm_core&& other) noexcept
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    m_term = detail::address(std::move(other));
+    return *this;
+  }
 }
 
 inline aterm_core::aterm_core() noexcept
