@@ -334,9 +334,12 @@ BOOST_AUTO_TEST_CASE(skip_test)
 
 #endif // ndef MCRL2_SKIP_LONG_TESTS
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char** argv)
+struct logging_fixture
 {
-  (void) argc;  (void) argv;  //< avoid warning about unused parameters
-  mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
-  return nullptr;
-}
+  logging_fixture()
+  {
+    mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
+  }
+};
+
+BOOST_GLOBAL_FIXTURE(logging_fixture);
