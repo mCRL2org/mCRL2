@@ -9,6 +9,7 @@
 /// \file pbes_explorer_test.cpp
 /// \brief Test for the PBES_Explorer interface.
 
+#define BOOST_TEST_MODULE pbes_explorer_test
 #include <boost/test/included/unit_test.hpp>
 #include "mcrl2/utilities/logger.h"
 
