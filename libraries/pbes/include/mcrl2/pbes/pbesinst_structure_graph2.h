@@ -487,17 +487,17 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       assert(todo_has_only_undefined_nodes());
       if (todo.elements().size() == old_todo_size)
       { 
-        mCRL2log(log::verbose) << "Pruning of the  todo list had no effect on its size.\n";
+        mCRL2log(log::verbose) << "Pruning of the  todo list had no effect on its size. ";
       }
       else if (todo.elements().size() > old_todo_size)
       { 
-        mCRL2log(log::verbose) << "Pruned the todo list. Added " << todo.elements().size() - old_todo_size << " elements.\n";
+        mCRL2log(log::verbose) << "Pruned the todo list. Added " << todo.elements().size() - old_todo_size << " elements. ";
       }
       else
       { 
-        mCRL2log(log::verbose) << "Pruned the todo list. Removed " << old_todo_size - todo.elements().size() << " elements.\n";
+        mCRL2log(log::verbose) << "Pruned the todo list. Removed " << old_todo_size - todo.elements().size() << " elements. ";
       }
-      mCRL2log(log::verbose) << "The new size of the todo list is " << todo.elements().size() << ".\n";
+      mCRL2log(log::verbose) << "The todo list has size " << todo.elements().size() << ".\n";
    };
 
    // Execute a prune_todo_list if m_options.prune_todo_list is set. 
@@ -524,7 +524,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       {
         std::size_t calculation_steps=0;
         prune_todo_list(init, todo, calculation_steps);
-        reset_guard.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps);
+        reset_guard.set_expiration_steps(m_options.aggressive?calculation_steps:calculation_steps*100);
       }
     }
 
@@ -617,12 +617,16 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
     }
 
+    void report_found_solutions(stopwatch& timer)
+    {
+      mCRL2log(log::verbose) << "Found solution for" << std::setw(12) << S[0].size() + S[1].size() << " BES equations." << std::endl;
+      mCRL2log(log::verbose) << "Finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s).\n";
+    }
 
     void on_discovered_elements(const std::set<propositional_variable_instantiation>& elements) override
     {
       using utilities::detail::contains;
       stopwatch timer;
-      bool report = false;
 
       if (m_options.optimization == partial_solve_strategy::propagate_solved_equations_using_attractor)
       {
@@ -638,23 +642,24 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         }
         assert(strategies_are_set_in_solved_nodes());
       }
-      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_using_fatal_attractor && (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
+      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_using_fatal_attractor && 
+               on_the_fly_solve_trigger.is_expired())
       {
         mCRL2log(log::verbose) << "Start partial solving.\n"; 
-        report = true;
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
         simple_structure_graph G(m_graph_builder.vertices());
         detail::find_loops2(G, S, tau, calculation_steps, m_iteration_count); // modifies S[0] and S[1]
-        prune_todo_list_conditional(init, todo, calculation_steps);
-        on_the_fly_solve_trigger.set_expiration_steps(calculation_steps/10);
+        on_the_fly_solve_trigger.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps/10);
         assert(strategies_are_set_in_solved_nodes());
-
+        report_found_solutions(timer);
+        prune_todo_list_conditional(init, todo, calculation_steps);
       }
-      else if ((partial_solve_strategy::solve_subgames_using_fatal_attractor_local <= m_options.optimization && m_options.optimization <= partial_solve_strategy::solve_subgames_using_solver) && (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
+      else if (partial_solve_strategy::solve_subgames_using_fatal_attractor_local <= m_options.optimization && 
+               m_options.optimization <= partial_solve_strategy::solve_subgames_using_solver && 
+               on_the_fly_solve_trigger.is_expired())
       {
         mCRL2log(log::verbose) << "Start partial solving.\n"; 
-        report = true;
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
 
@@ -675,27 +680,23 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           detail::partial_solve(m_graph_builder.m_graph, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
+        on_the_fly_solve_trigger.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps/10);
+        report_found_solutions(timer);
         prune_todo_list_conditional(init, todo, calculation_steps);
-        on_the_fly_solve_trigger.set_expiration_steps(calculation_steps/10);
       }
-      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_original && (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
+      else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_original && 
+               on_the_fly_solve_trigger.is_expired())
       {
         mCRL2log(log::verbose) << "Start partial solving.\n"; 
-        report = true;
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
 
         simple_structure_graph G(m_graph_builder.vertices());
         detail::find_loops(G, discovered, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
-        prune_todo_list_conditional(init, todo, calculation_steps);
-        on_the_fly_solve_trigger.set_expiration_steps(calculation_steps/10);
+        on_the_fly_solve_trigger.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps/10);
         assert(strategies_are_set_in_solved_nodes());
-      }
-
-      if (report)
-      {
-        mCRL2log(log::verbose) << "Found solution for" << std::setw(12) << S[0].size() + S[1].size() << " BES equations." << std::endl;
-        mCRL2log(log::verbose) << "Finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s).\n";
+        on_the_fly_solve_trigger.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps/10);
+        prune_todo_list_conditional(init, todo, calculation_steps);
       }
 
       prune_todo_list_time_triggered(init, todo);
