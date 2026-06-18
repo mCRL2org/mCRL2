@@ -176,7 +176,7 @@ class pbessolve_tool
           "--strategy)",
           'l');
       desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
-      desc.add_hidden_option("aggressive", "Apply optimizations 4 and 5 at every iteration.");
+      desc.add_option("aggressive", "Apply partial solving and pruning more frequently. ");
       desc.add_option("original-pbes",
         utilities::make_file_argument("NAME"),
         "In the second round of solving, use a different PBES than in the first round. "
