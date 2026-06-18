@@ -520,11 +520,11 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       pbesinst_lazy_todo& todo)
     {
       if (m_options.prune_todo_list&&
-          (reset_guard.is_expired() || todo.elements().empty()))
+          (reset_guard.is_expired() || todo.elements().empty() || m_options.aggressive))
       {
         std::size_t calculation_steps=0;
         prune_todo_list(init, todo, calculation_steps);
-        reset_guard.set_expiration_steps(m_options.aggressive?calculation_steps:calculation_steps*100);
+        reset_guard.set_expiration_steps(m_options.prune_and_solve_frequently?calculation_steps:calculation_steps*100);
       }
     }
 
@@ -643,21 +643,21 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         assert(strategies_are_set_in_solved_nodes());
       }
       else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_using_fatal_attractor && 
-               on_the_fly_solve_trigger.is_expired())
+               (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
         mCRL2log(log::verbose) << "Start partial solving.\n"; 
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
         simple_structure_graph G(m_graph_builder.vertices());
         detail::find_loops2(G, S, tau, calculation_steps, m_iteration_count); // modifies S[0] and S[1]
-        on_the_fly_solve_trigger.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps/10);
+        on_the_fly_solve_trigger.set_expiration_steps(m_options.prune_and_solve_frequently?calculation_steps/1000:calculation_steps/10);
         assert(strategies_are_set_in_solved_nodes());
         report_found_solutions(timer);
         prune_todo_list_conditional(init, todo, calculation_steps);
       }
-      else if (partial_solve_strategy::solve_subgames_using_fatal_attractor_local <= m_options.optimization && 
-               m_options.optimization <= partial_solve_strategy::solve_subgames_using_solver && 
-               on_the_fly_solve_trigger.is_expired())
+      else if ((partial_solve_strategy::solve_subgames_using_fatal_attractor_local <= m_options.optimization && 
+                m_options.optimization <= partial_solve_strategy::solve_subgames_using_solver) && 
+                (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
         mCRL2log(log::verbose) << "Start partial solving.\n"; 
 
@@ -680,12 +680,12 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
           detail::partial_solve(m_graph_builder.m_graph, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
           assert(strategies_are_set_in_solved_nodes());
         }
-        on_the_fly_solve_trigger.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps/10);
+        on_the_fly_solve_trigger.set_expiration_steps(m_options.prune_and_solve_frequently?calculation_steps/1000:calculation_steps/10);
         report_found_solutions(timer);
         prune_todo_list_conditional(init, todo, calculation_steps);
       }
       else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_original && 
-               on_the_fly_solve_trigger.is_expired())
+               (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
         mCRL2log(log::verbose) << "Start partial solving.\n"; 
 
@@ -693,9 +693,9 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
         simple_structure_graph G(m_graph_builder.vertices());
         detail::find_loops(G, discovered, todo, S, tau, m_iteration_count, m_graph_builder); // modifies S[0] and S[1]
-        on_the_fly_solve_trigger.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps/10);
+        on_the_fly_solve_trigger.set_expiration_steps(m_options.prune_and_solve_frequently?calculation_steps/1000:calculation_steps/10);
         assert(strategies_are_set_in_solved_nodes());
-        on_the_fly_solve_trigger.set_expiration_steps(m_options.aggressive?calculation_steps/1000:calculation_steps/10);
+        on_the_fly_solve_trigger.set_expiration_steps(m_options.prune_and_solve_frequently?calculation_steps/1000:calculation_steps/10);
         prune_todo_list_conditional(init, todo, calculation_steps);
       }
 

@@ -65,6 +65,8 @@ struct pbessolve_options
   search_strategy exploration_strategy = breadth_first;
   partial_solve_strategy optimization = partial_solve_strategy::no_optimisation;
 
+  // if true, apply optimization and pruning more frequently than by default.
+  bool prune_and_solve_frequently = false;
   // if true, apply optimizations at every iteration.
   bool aggressive = false;
 
@@ -86,7 +88,7 @@ std::ostream& operator<<(std::ostream& out, const pbessolve_options& options)
   out << "reset-todo = " << std::boolalpha << options.prune_todo_list << std::endl;
   out << "search-strategy = " << options.exploration_strategy << std::endl;
   out << "optimization = " << static_cast<int>(options.optimization) << std::endl;
-  out << "aggressive = " << std::boolalpha << options.aggressive << std::endl;
+  out << "frequent = " << std::boolalpha << options.prune_and_solve_frequently << std::endl;
   out << "check-strategy = " << std::boolalpha << options.check_strategy << std::endl;
   out << "threads = " << options.number_of_threads << std::endl;
   return out;

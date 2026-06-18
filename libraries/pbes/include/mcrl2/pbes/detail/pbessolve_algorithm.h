@@ -176,7 +176,8 @@ class pbessolve_tool
           "--strategy)",
           'l');
       desc.add_hidden_option("no-replace-constants-by-variables", "Do not move constant expressions to a substitution.");
-      desc.add_option("aggressive", "Apply partial solving and pruning more frequently. ");
+      desc.add_option("frequent", "Apply partial solving and pruning more frequently. ");
+      desc.add_hidden_option("aggressive", "Apply partial solving and pruning at every iteration. Slow, and primarily intended for testing purposes.");
       desc.add_option("original-pbes",
         utilities::make_file_argument("NAME"),
         "In the second round of solving, use a different PBES than in the first round. "
@@ -196,6 +197,7 @@ class pbessolve_tool
         !parser.has_option("no-replace-constants-by-variables");
     options.remove_unused_rewrite_rules =
         !parser.has_option("no-remove-unused-rewrite-rules");
+    options.prune_and_solve_frequently = parser.has_option("frequent");
     options.aggressive = parser.has_option("aggressive");
     options.prune_todo_list = parser.has_option("prune-todo-list");
     options.exploration_strategy =
