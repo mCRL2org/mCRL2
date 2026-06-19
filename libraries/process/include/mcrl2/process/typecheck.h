@@ -60,7 +60,7 @@ std::string pp(const std::set<data::sort_expression_list>& ll)
       empty2=false;
     }
     result=result+(empty1?"":", ");
-    empty2=false;
+    empty1=false;
   }
   return result;
 }
