@@ -48,7 +48,6 @@ extensions = [
     'mcrl2_admonitions',
     'mcrl2_dparser',
     'mcrl2_pygment',
-    'myst_parser',
     'sphinx.ext.ifconfig',
     'sphinx.ext.imgmath',
     'sphinx.ext.todo',
