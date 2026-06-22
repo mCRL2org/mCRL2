@@ -166,7 +166,7 @@ class highway_todo_set : public todo_set
 
     void insert(const state& s) override
     {
-      if (new_states.size() < N-1)
+      if (new_states.size() < N)
       {
         new_states.insert(s);
       }
