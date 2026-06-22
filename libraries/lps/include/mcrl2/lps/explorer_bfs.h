@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/explorer_dfs.h
-/// \brief add your file description here.
+/// \file mcrl2/lps/explorer_bfs.h
+/// \brief Breadth-first state space exploration on top of the generic explorer.
 
 #ifndef MCRL2_LPS_EXPLORER_BFS_H
 #define MCRL2_LPS_EXPLORER_BFS_H

@@ -97,7 +97,7 @@ action_rename_specification parse_action_rename_specification(std::istream& in, 
 }
 
 /// \brief Parses an action rename specification.
-/// Parses an acion rename specification.
+/// Parses an action rename specification.
 /// If the action rename specification contains data types that are not
 /// present in the data specification of \p spec they are added to it.
 /// \param spec_string A string containing an action rename specification.

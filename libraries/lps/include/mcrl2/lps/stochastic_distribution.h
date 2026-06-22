@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/stochastic_distribution.h
-/// \brief add your file description here.
+/// \brief The class stochastic_distribution.
 
 #ifndef MCRL2_LPS_STOCHASTIC_DISTRIBUTION_H
 #define MCRL2_LPS_STOCHASTIC_DISTRIBUTION_H

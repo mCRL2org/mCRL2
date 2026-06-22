@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/stochastic_state.h
-/// \brief add your file description here.
+/// \brief The class stochastic_state, a probability distribution over states.
 
 #ifndef MCRL2_LPS_STOCHASTIC_STATE_H
 #define MCRL2_LPS_STOCHASTIC_STATE_H

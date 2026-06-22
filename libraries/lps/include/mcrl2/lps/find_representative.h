@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/find_representative.h
-/// \brief add your file description here.
+/// \brief Finds a representative element in a set reachable from a state.
 
 #ifndef MCRL2_LPS_FIND_REPRESENTATIVE_H
 #define MCRL2_LPS_FIND_REPRESENTATIVE_H

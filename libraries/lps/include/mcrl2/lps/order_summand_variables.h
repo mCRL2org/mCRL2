@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/order_summand_variables.h
-/// \brief add your file description here.
+/// \brief Orders the summation variables of the summands of an LPS.
 
 #ifndef MCRL2_LPS_ORDER_SUMMAND_VARIABLES_H
 #define MCRL2_LPS_ORDER_SUMMAND_VARIABLES_H

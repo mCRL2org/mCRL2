@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/explorer.h
-/// \brief add your file description here.
+/// \brief Generic state space explorer for (stochastic) linear process specifications.
 
 #ifndef MCRL2_LPS_EXPLORER_H
 #define MCRL2_LPS_EXPLORER_H

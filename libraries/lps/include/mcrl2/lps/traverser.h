@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/traverser.h
-/// \brief add your file description here.
+/// \brief Traverser class for linear process specifications.
 
 // To avoid circular inclusion problems
 

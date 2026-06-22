@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/builder.h
-/// \brief add your file description here.
+/// \brief Builder class for linear process specifications.
 
 #ifndef MCRL2_LPS_BUILDER_H
 #define MCRL2_LPS_BUILDER_H

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/print.h
-/// \brief add your file description here.
+/// \brief Pretty printer for linear process specifications.
 
 #ifndef MCRL2_LPS_PRINT_H
 #define MCRL2_LPS_PRINT_H

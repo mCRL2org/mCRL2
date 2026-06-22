@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/confluence.h
-/// \brief add your file description here.
+/// \brief Confluence detection for tau-summands of a linear process.
 
 #ifndef MCRL2_LPS_CONFLUENCE_H
 #define MCRL2_LPS_CONFLUENCE_H

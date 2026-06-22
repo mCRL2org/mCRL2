@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/is_stochastic.h
-/// \brief add your file description here.
+/// \brief Function is_stochastic for detecting stochastic elements in an LPS.
 
 #ifndef MCRL2_LPS_IS_STOCHASTIC_H
 #define MCRL2_LPS_IS_STOCHASTIC_H

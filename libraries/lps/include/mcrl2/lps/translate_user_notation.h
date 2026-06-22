@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/translate_user_notation.h
-/// \brief add your file description here.
+/// \brief Translates user notation in the data expressions of an LPS.
 
 #ifndef MCRL2_LPS_TRANSLATE_USER_NOTATION_H
 #define MCRL2_LPS_TRANSLATE_USER_NOTATION_H

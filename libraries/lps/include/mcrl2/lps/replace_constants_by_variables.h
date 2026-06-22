@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/replace_constants_by_variables.h
-/// \brief add your file description here.
+/// \brief Replaces constant data subexpressions in an LPS by fresh variables.
 
 #ifndef MCRL2_LPS_REPLACE_CONSTANTS_BY_VARIABLES_H
 #define MCRL2_LPS_REPLACE_CONSTANTS_BY_VARIABLES_H

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/ltsmin.h
-/// \brief add your file description here.
+/// \brief PINS interface for exploring an LPS from the LTSmin toolset.
 
 #ifndef MCRL2_LPS_LTSMIN_H
 #define MCRL2_LPS_LTSMIN_H

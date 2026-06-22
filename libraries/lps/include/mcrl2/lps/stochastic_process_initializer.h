@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/stochastic_process_initializer.h
-/// \brief add your file description here.
+/// \brief The class stochastic_process_initializer.
 
 #ifndef MCRL2_LPS_STOCHASTIC_PROCESS_INITIALIZER_H
 #define MCRL2_LPS_STOCHASTIC_PROCESS_INITIALIZER_H

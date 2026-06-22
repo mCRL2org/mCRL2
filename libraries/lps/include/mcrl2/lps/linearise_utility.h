@@ -303,4 +303,4 @@ bool occursinterm(const data::data_expression& t, const data::variable& var)
 
 
 
-#endif // MCRL2_LPS_LINEARISE_RENAME_H
+#endif // MCRL2_LPS_LINEARISE_UTILITY_H

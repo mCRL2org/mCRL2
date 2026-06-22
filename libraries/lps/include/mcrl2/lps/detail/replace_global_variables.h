@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/detail/replace_global_variables.h
-/// \brief
+/// \brief Replaces assignments of global variables to parameters by an assignment of itself.
 
 #ifndef MCRL2_LPS_DETAIL_REPLACE_GLOBAL_VARIABLES_H
 #define MCRL2_LPS_DETAIL_REPLACE_GLOBAL_VARIABLES_H

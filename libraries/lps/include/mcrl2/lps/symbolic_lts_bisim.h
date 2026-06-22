@@ -129,7 +129,7 @@ inline void bisim(const symbolic_lts& lts)
           if (A != sylvan::ldds::empty_set() && A != C)
           {
             // This block must be refined.
-            new_partition.emplace(A),
+            new_partition.emplace(A);
             new_partition.emplace(minus(C, A));
             refined_block = true;
             break;

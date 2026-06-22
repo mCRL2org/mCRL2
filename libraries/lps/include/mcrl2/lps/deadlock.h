@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/deadlock.h
-/// \brief add your file description here.
+/// \brief The class deadlock, representing a (possibly timed) deadlock.
 
 #ifndef MCRL2_LPS_DEADLOCK_H
 #define MCRL2_LPS_DEADLOCK_H

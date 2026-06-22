@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/deadlock_summand.h
-/// \brief add your file description here.
+/// \brief The class deadlock_summand.
 
 #ifndef MCRL2_LPS_DEADLOCK_SUMMAND_H
 #define MCRL2_LPS_DEADLOCK_SUMMAND_H

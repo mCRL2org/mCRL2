@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/detail/make_timed_lps.h
-/// \brief add your file description here.
+/// \brief Helper for constructing a timed linear process specification.
 
 #ifndef MCRL2_LPS_DETAIL_MAKE_TIMED_LPS_H
 #define MCRL2_LPS_DETAIL_MAKE_TIMED_LPS_H

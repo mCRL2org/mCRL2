@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/is_well_typed.h
-/// \brief add your file description here.
+/// \brief Well-typedness checks for linear process specifications.
 
 #ifndef MCRL2_LPS_IS_WELL_TYPED_H
 #define MCRL2_LPS_IS_WELL_TYPED_H

@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/explorer_todo_set.h
-/// \brief add your file description here.
+/// \file mcrl2/lps/explorer_utilities.h
+/// \brief Utility functions and data structures used by the state space explorer.
 
 #ifndef MCRL2_LPS_EXPLORER_UTILITIES_H
 #define MCRL2_LPS_EXPLORER_UTILITIES_H

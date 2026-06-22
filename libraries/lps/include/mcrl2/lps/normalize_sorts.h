@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/normalize_sorts.h
-/// \brief add your file description here.
+/// \brief Normalizes the sorts in a linear process specification.
 
 #ifndef MCRL2_LPS_NORMALIZE_SORTS_H
 #define MCRL2_LPS_NORMALIZE_SORTS_H

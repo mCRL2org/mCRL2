@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/explorer_options.h
-/// \brief add your file description here.
+/// \brief Options used by the state space explorer.
 
 #ifndef MCRL2_LPS_EXPLORER_OPTIONS_H
 #define MCRL2_LPS_EXPLORER_OPTIONS_H
@@ -76,7 +76,7 @@ std::ostream& operator<<(std::ostream& out, const explorer_options& options)
   out << "cached = " << std::boolalpha << options.cached << std::endl;
   out << "global-cache = " << std::boolalpha << options.global_cache << std::endl;
   out << "confluence = " << std::boolalpha << options.confluence << std::endl;
-  out << "confluence-action = " << options.confluence << std::endl;
+  out << "confluence-action = " << options.confluence_action << std::endl;
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;

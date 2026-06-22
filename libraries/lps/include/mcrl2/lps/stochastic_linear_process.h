@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/stochastic_linear_process.h
-/// \brief add your file description here.
+/// \brief The class stochastic_linear_process.
 
 #ifndef MCRL2_LPS_STOCHASTIC_LINEAR_PROCESS_H
 #define MCRL2_LPS_STOCHASTIC_LINEAR_PROCESS_H
