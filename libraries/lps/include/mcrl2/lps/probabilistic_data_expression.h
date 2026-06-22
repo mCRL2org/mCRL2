@@ -162,11 +162,6 @@ class probabilistic_data_expression: public data::data_expression
       return m_r;
     }
 
-    inline static std::size_t to_number_t(const std::string& s)
-    {
-      return std::stoul(s);
-    }
-
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
     probabilistic_data_expression calculate_plus_minus(const data_expression& other, const bool is_minus) const
     {
