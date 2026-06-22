@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/detail/instantiate_global_variables.h
-/// \brief add your file description here.
+/// \brief Instantiates the global variables of an LPS with concrete values.
 
 #ifndef MCRL2_LPS_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H
 #define MCRL2_LPS_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H

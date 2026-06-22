@@ -16,7 +16,6 @@
 
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
-#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/order_summand_variables.h"
 #include "mcrl2/lps/replace_constants_by_variables.h"
@@ -26,8 +25,6 @@
 #include "mcrl2/symbolic/ordering.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
-#include "mcrl2/utilities/parse_numbers.h"
-#include "mcrl2/utilities/stack_array.h"
 #include "mcrl2/utilities/stopwatch.h"
 
 #include <sylvan_ldd.hpp>

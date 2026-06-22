@@ -473,6 +473,10 @@ namespace detail
     bool m_currently_recursing = false;
     std::size_t m_current_depth = 0;
 
+    /// \brief Maximum number of times an expression is unfolded before recursion
+    ///        stops; unfolding this often is enough to rewrite Det() and pi().
+    static constexpr std::size_t max_unfold_depth = 3;
+
     replace_pattern_match_builder(pattern_match_unfolder& unfolder)
       : m_unfolder(unfolder)
     {}
@@ -496,7 +500,7 @@ namespace detail
     {
       if (m_currently_recursing)
       {
-        if (m_current_depth >= 3 || m_unfolder.is_constructor(data::detail::get_top_fs(x)))
+        if (m_current_depth >= max_unfold_depth || m_unfolder.is_constructor(data::detail::get_top_fs(x)))
         {
           // Stop recursing after unfolding three times or when meeting a constructor
           // In the latter case, we have done enough to rewrite Det() and pi()
