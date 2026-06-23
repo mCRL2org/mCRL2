@@ -93,3 +93,42 @@ BOOST_AUTO_TEST_CASE(test_block_unsorted_input_stored_sorted)
   core::identifier_string_list expected = make_id_list({"a", "b", "c"});
   BOOST_CHECK_EQUAL(b.block_set(), expected);
 }
+
+// Regression tests: the make_* factory functions (used by builder.h) call
+// make_term_appl directly and bypass the sorting constructor.  This can break
+// the class invariant if the input is unsorted.
+BOOST_AUTO_TEST_CASE(test_make_action_name_multiset_preserves_sorted_invariant)
+{
+  // Pass an intentionally unsorted list directly to the factory.
+  core::identifier_string_list unsorted = make_id_list({"c", "a", "b"});
+  BOOST_REQUIRE(!std::is_sorted(unsorted.begin(), unsorted.end(),
+                                process::action_name_compare()));
+
+  atermpp::aterm t;
+  process::make_action_name_multiset(t, unsorted);
+
+  const process::action_name_multiset& ms =
+      atermpp::down_cast<process::action_name_multiset>(t);
+  BOOST_CHECK_MESSAGE(
+      std::is_sorted(ms.names().begin(), ms.names().end(),
+                     process::action_name_compare()),
+      "make_action_name_multiset must maintain the sorted-storage invariant");
+  BOOST_CHECK_EQUAL(ms.names(), make_id_list({"a", "b", "c"}));
+}
+
+BOOST_AUTO_TEST_CASE(test_make_block_preserves_sorted_invariant)
+{
+  core::identifier_string_list unsorted = make_id_list({"c", "a", "b"});
+  BOOST_REQUIRE(!std::is_sorted(unsorted.begin(), unsorted.end(),
+                                process::action_name_compare()));
+
+  atermpp::aterm t;
+  process::make_block(t, unsorted, process::delta());
+
+  const process::block& b = atermpp::down_cast<process::block>(t);
+  BOOST_CHECK_MESSAGE(
+      std::is_sorted(b.block_set().begin(), b.block_set().end(),
+                     process::action_name_compare()),
+      "make_block must maintain the sorted-storage invariant");
+  BOOST_CHECK_EQUAL(b.block_set(), make_id_list({"a", "b", "c"}));
+}
