@@ -153,7 +153,7 @@ class action_label_lts: public mcrl2::lps::multi_action
 
     /** \brief Constructor. */
     explicit action_label_lts(const mcrl2::lps::multi_action& a)
-     : mcrl2::lps::multi_action(sort_multiactions(a))
+     : mcrl2::lps::multi_action(a)
     {
     }
 
@@ -182,17 +182,6 @@ class action_label_lts: public mcrl2::lps::multi_action
       return tau_action;
     }
 
-  protected:
-    /// A function to sort a multi action to guarantee that multi-actions are compared properly. 
-    static mcrl2::lps::multi_action sort_multiactions(const mcrl2::lps::multi_action& a)
-    {
-      if (a.actions().size()<=1)
-      {
-        return a;
-      }
-      std::multiset<process::action> sorted_actions(a.actions().begin(), a.actions().end());
-      return  mcrl2::lps::multi_action(process::action_list(sorted_actions.begin(),sorted_actions.end()),a.time());
-    }
 };
 
 /** \brief Print the action label to string. */
