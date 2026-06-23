@@ -111,7 +111,7 @@ class lts: public LTS_BASE
   protected:
 
     states_size_type m_nstates;
-    states_size_type m_init_state;
+    states_size_type m_init_state = 0;
     std::vector<transition> m_transitions;
     std::vector<STATE_LABEL_T> m_state_labels;
     std::vector<ACTION_LABEL_T> m_action_labels; // At position 0 we always find the label that corresponds to tau.
@@ -185,6 +185,12 @@ class lts: public LTS_BASE
     {
       assert(m_action_labels.size()>0 && m_action_labels[const_tau_label_index]==ACTION_LABEL_T::tau_action());
     }
+
+    /** \brief Move constructor. Defaulted to avoid expensive copies when an lts is moved. */
+    lts(lts&&) = default;
+
+    /** \brief Move assignment operator. Defaulted to avoid expensive copies when an lts is moved. */
+    lts& operator=(lts&&) = default;
 
     /** \brief Standard assignment operator.
      *  \param[in] l The lts to be assigned. */
