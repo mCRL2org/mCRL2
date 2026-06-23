@@ -59,7 +59,7 @@ void run_test_case(const std::string& multiaction_str, const data::data_specific
   lps::detail::apply_communication_algorithm alg(terminate, R, comm_exprs, allow_set, true, false);
 
   const multi_action multiaction(parse_multi_action(multiaction_str, act_decls, data_spec));
-  const action_list actions = sort_actions(multiaction.actions());
+  const action_list actions = multiaction.actions();
 
   lps::detail::tuple_list result = alg.apply(actions);
   BOOST_CHECK_EQUAL(result.size(), expected_number_of_multiactions);
@@ -135,7 +135,7 @@ action_name_multiset_list allow_set_large()
     "  a54 | a64 | a68, a54 | a64 | a72, a55, a58, a59, a60, a61, a62, a64, a64 | a63, a64 | a63 | a65, a64 | a66 | a67,"
     "  a75, a77, a78, a79, a80, a81, a82, a83, b4, b5 }"
     );
-  return sort_multi_action_labels(process::detail::parse_allow_set(allow_string));
+  return process::detail::parse_allow_set(allow_string);
 }
 
 inline
@@ -156,7 +156,7 @@ communication_expression_list comm_set_large()
     "a72_r | a72_s -> a72, a73_r | a73_s -> a73, a74_r | a74_s -> a74, a75_r | a75_s -> a75, a76_r | a76_s -> a76, a77_r | a77_s -> a77,"
     "a78_r | a78_s -> a78, a79_r | a79_s -> a79, a80_r | a80_s -> a80, a81_r | a81_s -> a81, a82_r | a82_s -> a82, a83_r | a83_s -> a83 }");
 
-  return sort_communications(process::detail::parse_comm_set(comm_string));
+  return process::detail::parse_comm_set(comm_string);
 }
 
 // Show that the number of multiactions in the result can be dramatically reduced
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(test_multact_19a)
     "a56_r(d12)|a56_s(d13)|a57_r(d9)|a57_s(d14)|a64_r(d15)|a64_s(d47)|a82_r",
     data_spec_large(),
     action_declarations_large(),
-    sort_multi_action_labels(process::detail::parse_allow_set("{ a1|a4|a5|a9|a11|a13|a56|a57|a64|a82_r }")),
+    process::detail::parse_allow_set("{ a1|a4|a5|a9|a11|a13|a56|a57|a64|a82_r }"),
     comm_set_large(),
     1,
     1
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(test_multact_19b)
     "a56_r(d12)|a56_s(d13)|a57_r(d9)|a57_s(d14)|a64_r(d15)|a64_s(d47)|a82_r",
     data_spec_large(),
     action_declarations_large(),
-    sort_multi_action_labels(process::detail::parse_allow_set("{ a1|a4|a5|a9|a11|a13|a56|a57|a64|a82_r, a1|a4_r|a4_s|a5|a9|a11|a13|a56|a57|a64|a82_r }")),
+    process::detail::parse_allow_set("{ a1|a4|a5|a9|a11|a13|a56|a57|a64|a82_r, a1|a4_r|a4_s|a5|a9|a11|a13|a56|a57|a64|a82_r }"),
     comm_set_large(),
     2,
     2
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(test_multact_19c)
     "a56_r(d12)|a56_s(d13)|a57_r(d9)|a57_s(d14)|a64_r(d15)|a64_s(d47)|a82_r",
     data_spec_large(),
     action_declarations_large(),
-    sort_multi_action_labels(process::detail::parse_allow_set("{ a1|a4|a5|a9|a11|a13|a56|a57|a64|a82 }")),
+    process::detail::parse_allow_set("{ a1|a4|a5|a9|a11|a13|a56|a57|a64|a82 }"),
     comm_set_large(),
     0,
     0

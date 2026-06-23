@@ -57,30 +57,11 @@ public:
       lts.push_back(new_lts);
     }
 
-    // Ensure that block and hide sets are sorted
-    std::function<bool(const core::identifier_string&, const core::identifier_string&)> action_name_compare = process::action_name_compare();
-    block_set = atermpp::sort_list(block_set, action_name_compare);
-
-    hide_set = atermpp::sort_list(hide_set, action_name_compare);
-    // Ensure that each of the multi actions names in the allow set is sorted.
-    allow_set = process::action_name_multiset_list(
-      allow_set.begin(),
-      allow_set.end(),
-      [&action_name_compare](const process::action_name_multiset& multi_action_name)
-      {
-        return process::action_name_multiset(atermpp::sort_list(multi_action_name.names(), action_name_compare));
-      });
-
-    // Ensure that the left-hand sides of the synchronisation rules are sorted.
-    comm_set = process::communication_expression_list(
-      comm_set.begin(),
-      comm_set.end(),
-      [&action_name_compare](const process::communication_expression& comm)
-      {
-        return process::communication_expression(
-          process::action_name_multiset(atermpp::sort_list(comm.action_name().names(), action_name_compare)),
-          comm.name());
-      });
+    // Ensure that block and hide sets are sorted (raw identifier_string_lists have no sorting constructor).
+    block_set = atermpp::sort_list(block_set, process::action_name_compare());
+    hide_set = atermpp::sort_list(hide_set, process::action_name_compare());
+    // action_name_multiset and communication_expression constructors sort their names on construction,
+    // so allow_set and comm_set are already sorted.
 
     allow_cache = lps::detail::make_allow_list_cache(allow_set);
 

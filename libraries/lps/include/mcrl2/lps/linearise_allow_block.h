@@ -211,7 +211,7 @@ inline void allowblockcomposition(
   deadlock_summand_vector resultsimpledeltasumlist;
   deadlock_summands.swap(resultdeltasumlist);
 
-  process::action_name_multiset_list allowlist((is_allow) ? sort_multi_action_labels(allowlist1) : allowlist1);
+  process::action_name_multiset_list allowlist(allowlist1);
 
   std::size_t sourcesumlist_length = sourcesumlist.size();
   if (sourcesumlist_length > 2 || is_allow) // This condition prevents this message to be printed

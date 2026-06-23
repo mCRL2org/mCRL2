@@ -8059,7 +8059,7 @@ class specification_basic_type
 
       /* first we enumerate the summands of t1 */
 
-      action_name_multiset_list allowlist((is_allow)?sort_multi_action_labels(allowlist1):allowlist1);
+      action_name_multiset_list allowlist(allowlist1);
       calculate_left_merge(action_summands1, deadlock_summands1,
                            ultimate_delay_condition2, allowlist, is_allow, is_block,
                            action_summands, deadlock_summands);

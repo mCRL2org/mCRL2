@@ -178,7 +178,7 @@ process_identifier(const core::identifier_string& name, const data::variable_lis
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm | CI   | ProcEqn            | A process equation
 rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm | CI   | RenameExpr         | A rename expression
 communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm | CI   | CommExpr           | A communication expression
-action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm | CI   | MultActName        | A multiset of action names
+action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm | CIUs | MultActName        | A multiset of action names
 untyped_multi_action(const data::untyped_data_parameter_list& actions)                                                                                                           : public atermpp::aterm | CI   | UntypedMultiAction | An untyped multi action or data application
 '''
 
@@ -190,7 +190,7 @@ process_instance_assignment(const process_identifier& identifier, const data::as
 delta()                                                                                                                                 : public process::process_expression | EI  | Delta                    | The value delta
 tau()                                                                                                                                   : public process::process_expression | EI  | Tau                      | The value tau
 sum(const data::variable_list& variables, const process_expression& operand)                                                            : public process::process_expression | EI  | Sum                      | The sum operator
-block(const core::identifier_string_list& block_set, const process_expression& operand)                                                 : public process::process_expression | EI  | Block                    | The block operator
+block(const core::identifier_string_list& block_set, const process_expression& operand)                                                 : public process::process_expression | EIUs | Block                    | The block operator
 hide(const core::identifier_string_list& hide_set, const process_expression& operand)                                                   : public process::process_expression | EI  | Hide                     | The hide operator
 rename(const rename_expression_list& rename_set, const process_expression& operand)                                                     : public process::process_expression | EI  | Rename                   | The rename operator
 comm(const communication_expression_list& comm_set, const process_expression& operand)                                                  : public process::process_expression | EI  | Comm                     | The communication operator

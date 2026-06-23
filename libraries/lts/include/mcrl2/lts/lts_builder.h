@@ -40,11 +40,10 @@ struct lts_builder
 
   std::size_t add_action(const lps::multi_action& a)
   {
-    lps::multi_action sorted_multi_action(a.sort_actions());
-    auto i = m_actions.find(sorted_multi_action);
+    auto i = m_actions.find(a);
     if (i == m_actions.end())
     {
-      i = m_actions.emplace(std::make_pair(sorted_multi_action, m_actions.size())).first;
+      i = m_actions.emplace(std::make_pair(a, m_actions.size())).first;
     }
     return i->second;
   }
