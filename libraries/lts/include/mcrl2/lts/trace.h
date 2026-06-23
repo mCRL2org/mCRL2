@@ -139,14 +139,7 @@ class trace
         m_data_specification_and_act_decls_are_defined(true)
     {
       init();
-      try
-      {
-        load(filename,tf);
-      }
-      catch (...)
-      {
-        throw;
-      }
+      load(filename,tf);
     }
 
     bool operator <(const trace& t) const
@@ -244,7 +237,7 @@ class trace
     const lps::state& next_state() const
     {
       assert(m_actions.size()+1 >= m_states.size() && m_pos+1 <=m_actions.size());
-      if (m_pos>=m_states.size())
+      if (m_pos+1>=m_states.size())
       {
         throw mcrl2::runtime_error("Requesting a state in a trace at a non existing position " + std::to_string(m_pos+1) + ".");
       }
@@ -293,6 +286,11 @@ class trace
     mcrl2::data::data_expression current_time()
     {
       assert(m_actions.size()+1 >= m_states.size() && m_pos <=m_actions.size());
+      if (m_pos>=m_actions.size())
+      {
+        // There is no action at the current position, so the time is not defined.
+        return mcrl2::data::data_expression();
+      }
       return m_actions[m_pos].time();
     }
 
