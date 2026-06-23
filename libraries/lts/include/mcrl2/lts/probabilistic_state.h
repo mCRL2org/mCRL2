@@ -98,6 +98,12 @@ class probabilistic_state
       return *this;
     }
 
+    /** \brief Move constructor **/
+    probabilistic_state(probabilistic_state&& other) = default;
+
+    /** \brief Move assignment operator **/
+    probabilistic_state& operator=(probabilistic_state&& other) = default;
+
     /** \brief Creates a probabilistic state on the basis of state_probability_pairs.
      * \param[in] begin Iterator to the first state_probability_pair.
      * \param[in] end Iterator to the last state_probability_pair.
@@ -394,13 +400,21 @@ struct hash< mcrl2::lts::probabilistic_state<STATE, PROBABILITY> >
 {
   std::size_t operator()(const mcrl2::lts::probabilistic_state<STATE, PROBABILITY>& p) const
   {
+    hash<STATE> state_hasher;
+    hash<PROBABILITY> probability_hasher;
+    // A single state (stored as a number with implicit probability 1) and a distribution
+    // of length 1 are treated as equal by operator==, so they must yield the same hash.
     if (p.m_single_state!=STATE(-1))
     {
       assert(p.m_probabilistic_state.size()==0);
-      hash<STATE> state_hasher;
-      hash<PROBABILITY> probability_hasher;
       return mcrl2::utilities::detail::hash_combine(0, 
                    mcrl2::utilities::detail::hash_combine(state_hasher(p.m_single_state), 
+                                                          probability_hasher(PROBABILITY::one())));
+    }
+    if (p.m_probabilistic_state.size()==1)
+    {
+      return mcrl2::utilities::detail::hash_combine(0, 
+                   mcrl2::utilities::detail::hash_combine(state_hasher(p.m_probabilistic_state.front().state()), 
                                                           probability_hasher(PROBABILITY::one())));
     }
     hash<vector<typename mcrl2::lps::state_probability_pair< STATE, PROBABILITY > > > hasher;
