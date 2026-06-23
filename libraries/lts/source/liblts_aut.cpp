@@ -52,7 +52,7 @@ static void read_natural_number_to_string(std::istream& is, std::string& s, cons
   assert(s.empty());
   char ch;
   is >> std::skipws >> ch;
-  for( ; isdigit(ch) ; is.get(ch))
+  for( ; isdigit(static_cast<unsigned char>(ch)) ; is.get(ch))
   {
     s.push_back(ch);
   }
@@ -133,7 +133,7 @@ static void read_probabilistic_state(
   is >> std::skipws >> ch;
   is.putback(ch);
 
-  if (!isdigit(ch))
+  if (!isdigit(static_cast<unsigned char>(ch)))
   {
     // There is only a single state.
     result.set(state);
@@ -172,7 +172,7 @@ static void read_probabilistic_state(
     is >> std::skipws >> ch;
     is.putback(ch);
 
-    if (!isdigit(ch))
+    if (!isdigit(static_cast<unsigned char>(ch)))
     {
       ready=true;
     }
@@ -591,7 +591,6 @@ void probabilistic_lts_aut_t::save(std::string const& filename) const
     if (!os.is_open())
     {
       throw mcrl2::runtime_error("cannot create .aut file '" + filename + ".");
-      return;
     }
     write_to_aut(*this,os);
     os.close();
@@ -636,7 +635,6 @@ void lts_aut_t::save(std::string const& filename) const
     if (!os.is_open())
     {
       throw mcrl2::runtime_error("cannot create .aut file '" + filename + ".");
-      return;
     }
     write_to_aut(*this,os);
     os.close();
