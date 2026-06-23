@@ -80,11 +80,9 @@ lps_statistics_t get_statistics(const stochastic_action_summand_vector& action_s
 
 
 inline
-process::action_list sort_actions(const process::action_list& actions,
-  const std::function<bool(const process::action&, const process::action&)>& cmp
-                                    = [](const process::action& t1, const process::action& t2){ return process::action_compare()(t1, t2);})
+process::action_list sort_actions(const process::action_list& actions)
 {
-  return process::action_list(atermpp::sort_list(actions, cmp));
+  return process::action_list(atermpp::sort_list(actions));
 }
 
 inline

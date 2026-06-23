@@ -97,7 +97,7 @@ inline void addActionCondition(const process::action& a, const data::data_expres
   {
     for (process::action_list& m : L.actions)
     {
-      m = atermpp::insert_sorted(a, m, process::action_compare());
+      m = atermpp::insert_sorted(a, m);
       S.actions.emplace_back(std::move(m));
     }
   }
@@ -148,7 +148,7 @@ protected:
   /// NB: resets temporary data before performing computations.
   bool match_multiaction(const process::action_list& multi_action)
   {
-    assert(std::is_sorted(multi_action.begin(), multi_action.end(), process::action_compare()));
+    assert(std::is_sorted(multi_action.begin(), multi_action.end()));
 
     reset_temporary_data();
 
@@ -248,7 +248,7 @@ public:
   /// if \exists_{(b,c) \in C} b = \mu(m), return c, otherwise return action_label()
   process::action_label can_communicate(const process::action_list& m)
   {
-    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
+    assert(std::is_sorted(m.begin(), m.end()));
 
     process::action_label result; // if no match found, return process::action_label()
 
@@ -281,8 +281,8 @@ public:
   /// a1|...|ak that are not in m are in n. I.e., there is a subbag o of n such that m+o can communicate.
   bool might_communicate(const process::action_list& m, const process::action_list& n)
   {
-    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
-    assert(std::is_sorted(n.begin(), n.end(), process::action_compare()));
+    assert(std::is_sorted(m.begin(), m.end()));
+    assert(std::is_sorted(n.begin(), n.end()));
 
     /* this function indicates whether the actions in m
        consisting of actions and data occur in C, such that
@@ -398,7 +398,7 @@ public:
   /// \param RewriteTerm The rewriter that should be used to simplify the conditions.
   tuple_list apply(const process::action_list& m)
   {
-    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
+    assert(std::is_sorted(m.begin(), m.end()));
     const process::action_list r;
     return makeMultiActionConditionList_aux(m, r);
   }
@@ -730,8 +730,8 @@ protected:
   /// \param RewriteTerm Data rewriter for simplifying expressions.
   inline tuple_list makeMultiActionConditionList_aux(const process::action_list& m, const process::action_list& r)
   {
-    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
-    assert(std::is_sorted(r.begin(), r.end(), process::action_compare()));
+    assert(std::is_sorted(m.begin(), m.end()));
+    assert(std::is_sorted(r.begin(), r.end()));
 
     tuple_list S; // result
 
@@ -764,7 +764,7 @@ protected:
       if (maybe_allowed(a.label()))
       {
         // T = \overline{\gamma}(n, C, [a(d)] \oplus r)
-        tuple_list T = makeMultiActionConditionList_aux(m_tail, atermpp::insert_sorted(a, r, process::action_compare()));
+        tuple_list T = makeMultiActionConditionList_aux(m_tail, atermpp::insert_sorted(a, r));
 
         // S := S \cup \{ (a,true) \oplus t \mid t \in T \}
         // TODO: van Weerdenburg in his note only calculates S := S \cup T. Understand why that is not correct.
@@ -788,10 +788,10 @@ protected:
       const process::action_list& n,
       const process::action_list& r)
   {
-    assert(std::is_sorted(m.begin(), m.end(), process::action_compare()));
-    assert(std::is_sorted(w.begin(), w.end(), process::action_compare()));
-    assert(std::is_sorted(n.begin(), n.end(), process::action_compare()));
-    assert(std::is_sorted(r.begin(), r.end(), process::action_compare()));
+    assert(std::is_sorted(m.begin(), m.end()));
+    assert(std::is_sorted(w.begin(), w.end()));
+    assert(std::is_sorted(n.begin(), n.end()));
+    assert(std::is_sorted(r.begin(), r.end()));
 
     tuple_list S;
 
@@ -827,13 +827,13 @@ protected:
         {
           // a(f) cannot take part in communication as the arguments do not match. Move to w and continue with next
           // action
-          S = phi(m, d, atermpp::insert_sorted(a, w, process::action_compare()), n_tail, r);
+          S = phi(m, d, atermpp::insert_sorted(a, w), n_tail, r);
         }
         else
         {
-          tuple_list T = phi(atermpp::insert_sorted(a, m, process::action_compare()), d, w, n_tail, r);
+          tuple_list T = phi(atermpp::insert_sorted(a, m), d, w, n_tail, r);
 
-          S = phi(m, d, atermpp::insert_sorted(a, w, process::action_compare()), n_tail, r);
+          S = phi(m, d, atermpp::insert_sorted(a, w), n_tail, r);
           addActionCondition(process::action(), condition, std::move(T), S);
         }
       }
@@ -852,7 +852,7 @@ protected:
     }
     else
     {
-      const process::action_list alpha_ = atermpp::insert_sorted(beta.front(), alpha, process::action_compare());
+      const process::action_list alpha_ = atermpp::insert_sorted(beta.front(), alpha);
 
       if (m_comm_table.can_communicate(alpha_) != process::action_label())
       {
@@ -874,7 +874,7 @@ protected:
 
   data::data_expression psi(process::action_list alpha)
   {
-    assert(std::is_sorted(alpha.begin(), alpha.end(), process::action_compare()));
+    assert(std::is_sorted(alpha.begin(), alpha.end()));
     data::data_expression cond = data::sort_bool::false_();
 
     process::action_list actl; // used in inner loop.
@@ -885,8 +885,8 @@ protected:
       while (!beta.empty())
       {
         actl = process::action_list();
-        actl = atermpp::insert_sorted(alpha.front(), actl, process::action_compare());
-        actl = atermpp::insert_sorted(beta.front(), actl, process::action_compare());
+        actl = atermpp::insert_sorted(alpha.front(), actl);
+        actl = atermpp::insert_sorted(beta.front(), actl);
         const process::action_list& beta_tail = beta.tail();
         if (m_comm_table.might_communicate(actl, beta_tail) && xi(actl, beta_tail))
         {

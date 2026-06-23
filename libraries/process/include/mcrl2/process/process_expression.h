@@ -1820,7 +1820,7 @@ bool equal_signatures(const action& a, const action& b)
 }
 
 /// Total ordering on actions: label first, then arguments.
-/// The label ordering uses action_label_compare (name, then sorts).
+/// Consistent with the ordering on action labels (name, then sorts).
 /// Including arguments makes this a proper total order.
 ///
 /// Note that the sort order must be consistent with that on
@@ -1832,18 +1832,6 @@ inline bool operator<(const action& a1, const action& a2)
   const action_label& l2 = a2.label();
   return l1 < l2 || (l1 == l2 && a1.arguments() < a2.arguments());
 }
-
-/// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
-/// consistent.
-/// The sort order is used for efficient application of process operators such as allow and comm
-/// which are defined in terms of action names.
-struct action_compare
-{
-  bool operator()(const process::action& a1, const process::action& a2) const
-  {
-    return a1 < a2;
-  }
-};
 
 } // namespace mcrl2::process
 

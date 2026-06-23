@@ -776,7 +776,7 @@ class specification_basic_type
       action_list result=ma2;
       for (const action& a: ma1)
       {
-        result = atermpp::insert_sorted(a, result, process::action_compare());
+        result = atermpp::insert_sorted(a, result);
       }
       return result;
     }
@@ -4546,7 +4546,7 @@ class specification_basic_type
     }
 
     /// Adapt multiactions to stack by traversing the list.
-    /// Note: the result is sorted w.r.t action_compare().
+    /// Note: the result is sorted w.r.t. operator< on action.
     action_list
     adapt_multiaction_to_stack(const action_list& multiAction, const stacklisttype& stack, const variable_list& vars)
     {
@@ -4561,7 +4561,7 @@ class specification_basic_type
 
       // As the arguments change, sort order w.r.t. action_label is preserved, but order w.r.t. arguments is changed.
       // resort the list.
-      std::sort(result.begin(), result.end(), action_compare());
+      std::sort(result.begin(), result.end());
 
       return action_list(result.begin(), result.end());
     }
@@ -5029,7 +5029,7 @@ class specification_basic_type
       const bool is_deadlock_summand)
     {
       assert(distribution != stochastic_distribution());
-      assert(std::is_sorted(multiAction.begin(), multiAction.end(), action_compare()));
+      assert(std::is_sorted(multiAction.begin(), multiAction.end()));
 
       const data_expression rewritten_condition=RewriteTerm(condition);
       if (rewritten_condition==sort_bool::false_())
@@ -7549,7 +7549,7 @@ class specification_basic_type
 
         variable_list sumvars1 = summand1.summation_variables() + sumvars;
         const action_list& multiaction1 = summand1.multi_action().actions();
-        assert(std::is_sorted(multiaction1.begin(), multiaction1.end(), action_compare()));
+        assert(std::is_sorted(multiaction1.begin(), multiaction1.end()));
         data_expression actiontime1 = summand1.multi_action().time();
         data_expression condition1 = summand1.condition();
         const assignment_list& nextstate1 = summand1.assignments();
@@ -7831,7 +7831,7 @@ class specification_basic_type
             condition3=RewriteTerm(condition3);
             if (condition3!=sort_bool::false_())
             {
-              assert(std::is_sorted(multiaction3.begin(), multiaction3.end(), action_compare()));
+              assert(std::is_sorted(multiaction3.begin(), multiaction3.end()));
               action_summands.emplace_back(allsums,
                   condition3,
                   has_time3 ? multi_action(multiaction3, action_time3) : multi_action(multiaction3),

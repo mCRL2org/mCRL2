@@ -48,7 +48,7 @@ class multi_action: public atermpp::aterm
     explicit multi_action(const process::action_list& actions = process::action_list(),
                           data::data_expression time = data::undefined_real())
       : atermpp::aterm(core::detail::function_symbol_TimedMultAct(),
-                       atermpp::sort_list(actions, process::action_compare()),
+                       atermpp::sort_list(actions),
                        time)
     {
       assert(data::sort_real::is_real(time.sort()));

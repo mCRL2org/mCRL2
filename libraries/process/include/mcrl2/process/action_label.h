@@ -130,16 +130,6 @@ inline bool operator<(const action_label& a1, const action_label& a2)
   return s1 < s2 || (s1 == s2 && a1.sorts() < a2.sorts());
 }
 
-/// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
-/// consistent.
-struct action_label_compare
-{
-  bool operator()(const process::action_label& a1, const process::action_label& a2) const
-  {
-    return a1 < a2;
-  }
-};
-
 } // namespace mcrl2::process
 
 
