@@ -142,7 +142,7 @@ class action_label_string: public std::string
     static std::string sort_multiactions(const std::string& s) 
     {
       // Split this multiaction in actions a1(...)  , a2(...), a3(...)
-      static std::multiset<std::string> split_actions;  // Make a static variable to avoid this multiset being created often. 
+      static thread_local std::multiset<std::string> split_actions;  // Reused per thread to avoid recreating it on every call.
       assert(split_actions.empty());
       size_t nested_bracket_counter=0;
       size_t start_of_current_action=0;

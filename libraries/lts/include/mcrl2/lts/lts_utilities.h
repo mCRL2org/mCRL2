@@ -87,7 +87,7 @@ inline std::string ptr(const transition t)
       return std::to_string(t.from()) + " -" + std::to_string(t.label()) + "-> " + std::to_string(t.to());
     } 
 
-static std::vector<std::size_t> bogus_todo_stack;
+static thread_local std::vector<std::size_t> bogus_todo_stack;
 
 template <bool USE_STACK>
 inline void group_transitions_on_label(const std::vector<transition>::iterator begin,
