@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_PROCESS_EXPRESSION_H
 #define MCRL2_PROCESS_PROCESS_EXPRESSION_H
 
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/untyped_data_parameter.h"
 #include "mcrl2/process/action_label.h"
@@ -553,23 +554,7 @@ inline void swap(sum& t1, sum& t2) noexcept
 class block: public process_expression
 {
   public:
-    /// \\brief Default constructor X3.
-    block()
-      : process_expression(core::detail::default_values::Block)
-    {}
 
-    /// \\brief Constructor Z9.
-    /// \\param term A term
-    explicit block(const atermpp::aterm& term)
-      : process_expression(term)
-    {
-      assert(core::detail::check_term_Block(*this));
-    }
-
-    /// \\brief Constructor Z14.
-    block(const core::identifier_string_list& block_set, const process_expression& operand)
-      : process_expression(atermpp::aterm(core::detail::function_symbol_Block(), block_set, operand))
-    {}
 
     /// Move semantics
     block(const block&) noexcept = default;
@@ -586,6 +571,24 @@ class block: public process_expression
     {
       return atermpp::down_cast<process_expression>((*this)[1]);
     }
+//--- start user section block ---//
+    block()
+      : process_expression(core::detail::default_values::Block)
+    {}
+
+    explicit block(const atermpp::aterm& term)
+      : process_expression(term)
+    {
+      assert(core::detail::check_term_Block(*this));
+    }
+
+    /// \brief Constructor. block_set is sorted lexicographically to establish the sorted-storage invariant.
+    block(const core::identifier_string_list& block_set, const process_expression& operand)
+      : process_expression(atermpp::aterm(core::detail::function_symbol_Block(),
+                                         atermpp::sort_list(block_set, action_name_compare()),
+                                         operand))
+    {}
+//--- end user section block ---//
 };
 
 /// \\brief Make_block constructs a new term into a given address.

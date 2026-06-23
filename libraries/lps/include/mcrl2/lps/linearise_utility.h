@@ -126,42 +126,11 @@ core::identifier_string_list insert(
 }
 
 inline
-process::action_name_multiset sort_action_names(const process::action_name_multiset& action_labels,
-  const std::function<bool(const core::identifier_string&, const core::identifier_string&)>& cmp
-                                    = [](const core::identifier_string& t1, const core::identifier_string& t2){ return process::action_name_compare()(t1, t2);})
-{
-  return process::action_name_multiset(atermpp::sort_list(action_labels.names(), cmp));
-}
-
-inline
-process::action_name_multiset_list sort_multi_action_labels(const process::action_name_multiset_list& l)
-{
-  return process::action_name_multiset_list(l.begin(),l.end(),[](const process::action_name_multiset& al){ return sort_action_names(al); });
-}
-
-inline
 process::action_list sort_actions(const process::action_list& actions,
   const std::function<bool(const process::action&, const process::action&)>& cmp
                                     = [](const process::action& t1, const process::action& t2){ return process::action_compare()(t1, t2);})
 {
   return process::action_list(atermpp::sort_list(actions, cmp));
-}
-
-
-/// Sort the left-hand sides of the communication expressions in communications
-///
-/// Sorting is done using sort_action_labels, so by default, the left-hand sides of the communications are sorted by names of the actions.
-inline
-process::communication_expression_list sort_communications(const process::communication_expression_list& communications)
-{
-  process::communication_expression_list result;
-
-  for (const process::communication_expression& comm: communications)
-  {
-    result.push_front(process::communication_expression(sort_action_names(comm.action_name()),comm.name()));
-  }
-
-  return result;
 }
 
 inline

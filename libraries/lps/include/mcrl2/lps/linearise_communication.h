@@ -370,8 +370,8 @@ public:
       bool is_block)
       : m_terminationAction(termination_action),
         m_data_rewriter(data_rewriter),
-        m_communications(sort_communications(communications)),
-        m_allowlist(sort_multi_action_labels(allowlist)),
+        m_communications(communications),
+        m_allowlist(allowlist),
         m_allow_cache(is_allow ? detail::make_allow_list_cache(allowlist) : detail::allow_list_cache()),
         m_blocked_actions(is_block ? get_actions(allowlist) : std::vector<core::identifier_string>()),
         m_allowed_actions(init_allowed_actions(is_allow, allowlist, termination_action)),

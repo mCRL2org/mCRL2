@@ -195,8 +195,8 @@ lps::multi_action mcrl2::apply_communication(const lps::multi_action& label,
   }
 
   remaining_actions.insert(remaining_actions.end(), communicated_actions.begin(), communicated_actions.end());
-  std::sort(remaining_actions.begin(), remaining_actions.end(), process::action_compare());
 
+  // multi_action constructor sorts the action list, so no explicit sort needed here.
   return lps::multi_action(process::action_list(remaining_actions.begin(), remaining_actions.end()), label.time());
 }
 
@@ -506,8 +506,8 @@ private:
     auto filter_and_report = [this, state_index, &termination_action](const lps::multi_action& candidate_label,
                                                    const std::vector<state_t>& target_state)
     {
-      std::function<bool(const process::action&, const process::action&)> action_compare = process::action_compare();
-      lps::multi_action label(atermpp::sort_list(candidate_label.actions(), action_compare), candidate_label.time());
+      // candidate_label is a multi_action, so its actions are already sorted.
+      lps::multi_action label = candidate_label;
 
       mCRL2log(log::debug) << lps::pp(label) << std::endl;
 

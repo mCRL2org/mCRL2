@@ -44,10 +44,12 @@ class multi_action: public atermpp::aterm
       return atermpp::down_cast<data::data_expression>((*this)[1]);
     }
 //--- start user section multi_action ---//
-    /// \brief Constructor
-    explicit multi_action(const process::action_list& actions = process::action_list(), 
+    /// \brief Constructor. Actions are sorted to establish the sorted-storage invariant.
+    explicit multi_action(const process::action_list& actions = process::action_list(),
                           data::data_expression time = data::undefined_real())
-      : atermpp::aterm(core::detail::function_symbol_TimedMultAct(), actions, time)
+      : atermpp::aterm(core::detail::function_symbol_TimedMultAct(),
+                       atermpp::sort_list(actions, process::action_compare()),
+                       time)
     {
       assert(data::sort_real::is_real(time.sort()));
     }
@@ -89,7 +91,7 @@ class multi_action: public atermpp::aterm
 
     bool operator==(const multi_action& other) const
     {
-      return time()==other.time() && atermpp::sort_list(actions())==atermpp::sort_list(other.actions());
+      return time() == other.time() && actions() == other.actions();
     }
 
    //--- end user section multi_action ---//
