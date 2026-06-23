@@ -97,7 +97,7 @@ inline void addActionCondition(const process::action& a, const data::data_expres
   {
     for (process::action_list& m : L.actions)
     {
-      m = insert(a, m);
+      m = atermpp::insert_sorted(a, m, process::action_compare());
       S.actions.emplace_back(std::move(m));
     }
   }
@@ -764,7 +764,7 @@ protected:
       if (maybe_allowed(a.label()))
       {
         // T = \overline{\gamma}(n, C, [a(d)] \oplus r)
-        tuple_list T = makeMultiActionConditionList_aux(m_tail, insert(a, r));
+        tuple_list T = makeMultiActionConditionList_aux(m_tail, atermpp::insert_sorted(a, r, process::action_compare()));
 
         // S := S \cup \{ (a,true) \oplus t \mid t \in T \}
         // TODO: van Weerdenburg in his note only calculates S := S \cup T. Understand why that is not correct.
@@ -827,13 +827,13 @@ protected:
         {
           // a(f) cannot take part in communication as the arguments do not match. Move to w and continue with next
           // action
-          S = phi(m, d, insert(a, w), n_tail, r);
+          S = phi(m, d, atermpp::insert_sorted(a, w, process::action_compare()), n_tail, r);
         }
         else
         {
-          tuple_list T = phi(insert(a, m), d, w, n_tail, r);
+          tuple_list T = phi(atermpp::insert_sorted(a, m, process::action_compare()), d, w, n_tail, r);
 
-          S = phi(m, d, insert(a, w), n_tail, r);
+          S = phi(m, d, atermpp::insert_sorted(a, w, process::action_compare()), n_tail, r);
           addActionCondition(process::action(), condition, std::move(T), S);
         }
       }
@@ -852,7 +852,7 @@ protected:
     }
     else
     {
-      const process::action_list alpha_ = insert(beta.front(), alpha);
+      const process::action_list alpha_ = atermpp::insert_sorted(beta.front(), alpha, process::action_compare());
 
       if (m_comm_table.can_communicate(alpha_) != process::action_label())
       {
@@ -885,8 +885,8 @@ protected:
       while (!beta.empty())
       {
         actl = process::action_list();
-        actl = insert(alpha.front(), actl);
-        actl = insert(beta.front(), actl);
+        actl = atermpp::insert_sorted(alpha.front(), actl, process::action_compare());
+        actl = atermpp::insert_sorted(beta.front(), actl, process::action_compare());
         const process::action_list& beta_tail = beta.tail();
         if (m_comm_table.might_communicate(actl, beta_tail) && xi(actl, beta_tail))
         {

@@ -776,7 +776,7 @@ class specification_basic_type
       action_list result=ma2;
       for (const action& a: ma1)
       {
-        result=insert(a,result);
+        result = atermpp::insert_sorted(a, result, process::action_compare());
       }
       return result;
     }
