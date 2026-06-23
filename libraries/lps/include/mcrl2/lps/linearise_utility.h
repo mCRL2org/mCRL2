@@ -78,52 +78,6 @@ lps_statistics_t get_statistics(const stochastic_action_summand_vector& action_s
   return statistics;
 }
 
-/// Insert action into an action_list, keeping the action list sorted w.r.t. action_compare.
-/// Complexity: O(n) for an action_list of length n.
-inline
-process::action_list insert(
-  const process::action& act,
-  process::action_list l)
-{
-  if (l.empty())
-  {
-    return process::action_list({ act });
-  }
-  const process::action& head = l.front();
-
-  if (process::action_compare()(act, head))
-  {
-    l.push_front(act);
-    return l;
-  }
-
-  process::action_list result = insert(act, l.tail());
-  result.push_front(head);
-  return result;
-}
-
-/// insert an action name into the list, while preserving the sorting of action names.
-inline
-core::identifier_string_list insert(
-  const core::identifier_string& s,
-  core::identifier_string_list l)
-{
-  if (l.empty())
-  {
-    return core::identifier_string_list({ s });
-  }
-  const core::identifier_string& head = l.front();
-
-  if (process::action_name_compare()(s, head))
-  {
-    l.push_front(s);
-    return l;
-  }
-
-  core::identifier_string_list result = insert(s, l.tail());
-  result.push_front(head);
-  return result;
-}
 
 inline
 process::action_list sort_actions(const process::action_list& actions,
