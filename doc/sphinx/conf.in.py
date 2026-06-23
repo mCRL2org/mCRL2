@@ -7,6 +7,7 @@
 import datetime
 import os
 import re
+import shutil
 import sys
 
 # used to parse mCRL2 version information from CMake file
@@ -57,7 +58,7 @@ extensions = [
 
 imgmath_font_size = 14
 imgmath_image_format = 'svg'
-imgmath_latex_preamble = '\\usepackage{@CMAKE_CURRENT_SOURCE_DIR@/mcrl2_package}'
+imgmath_latex_preamble = '\\usepackage{mcrl2_package}'
 imgmath_use_preview = True
 
 myst_enable_extensions = [
@@ -117,6 +118,13 @@ doxylink = {
 def setup(app):
     os.makedirs(_SPHINX_BUILD_TEMP_DIR, mode = 0o755, exist_ok = True)
     os.makedirs(_SPHINX_BUILD_OUT_DIR, mode = 0o755, exist_ok = True)
+
+    # Copy mcrl2_package.sty to the build temp dir (a path without spaces) and
+    # add it to TEXINPUTS. LaTeX's \usepackage cannot handle paths with spaces,
+    # so we avoid embedding the source path in imgmath_latex_preamble.
+    shutil.copy2(Path(__file__).parent / 'mcrl2_package.sty', _SPHINX_BUILD_TEMP_DIR)
+    tex_inputs = os.environ.get('TEXINPUTS', '')
+    os.environ['TEXINPUTS'] = f'{_SPHINX_BUILD_TEMP_DIR}:{tex_inputs}' if tex_inputs else f'{_SPHINX_BUILD_TEMP_DIR}::'
 
     olddir = os.getcwd()
     try:
