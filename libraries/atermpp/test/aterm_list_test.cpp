@@ -149,3 +149,31 @@ BOOST_AUTO_TEST_CASE(test_concatenation)
   term_list<aterm> l2;
   BOOST_CHECK(l2+l1 == l1+l2);
 }
+
+BOOST_AUTO_TEST_CASE(test_insert_sorted)
+{
+  // Ordering on aterm_int by integer value.
+  auto int_less = [](const aterm_int& a, const aterm_int& b) { return a.value() < b.value(); };
+
+  // Regression test: the inner comparison loop previously checked ordering(t, l.front())
+  // instead of ordering(t, result.front()). Because l.front() never changes, any t with
+  // t >= l.front() would cause the loop to drain the entire list and append t at the end.
+  // For example, insert_sorted(2, [1,3,4]) would produce [1,3,4,2] instead of [1,2,3,4].
+  term_list<aterm_int> l = { aterm_int(1), aterm_int(3), aterm_int(4) };
+  term_list<aterm_int> expected_middle = { aterm_int(1), aterm_int(2), aterm_int(3), aterm_int(4) };
+  BOOST_CHECK(insert_sorted(aterm_int(2), l, int_less) == expected_middle);
+
+  // Insert at the front (early-return path).
+  term_list<aterm_int> l2 = { aterm_int(2), aterm_int(3), aterm_int(4) };
+  term_list<aterm_int> expected_front = { aterm_int(1), aterm_int(2), aterm_int(3), aterm_int(4) };
+  BOOST_CHECK(insert_sorted(aterm_int(1), l2, int_less) == expected_front);
+
+  // Insert at the back.
+  term_list<aterm_int> l3 = { aterm_int(1), aterm_int(2), aterm_int(3) };
+  term_list<aterm_int> expected_back = { aterm_int(1), aterm_int(2), aterm_int(3), aterm_int(4) };
+  BOOST_CHECK(insert_sorted(aterm_int(4), l3, int_less) == expected_back);
+
+  // Insert into an empty list.
+  term_list<aterm_int> expected_single = { aterm_int(5) };
+  BOOST_CHECK(insert_sorted(aterm_int(5), term_list<aterm_int>(), int_less) == expected_single);
+}
