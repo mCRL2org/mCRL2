@@ -182,11 +182,13 @@ term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l, Compare o
 {
   if (l.empty() || ordering(t,l.front()))
   {
-    return insert(t,l);
+    term_list<Term> result = l;
+    result.push_front(t);
+    return result;
   }
-  
+
   const std::size_t len = l.size();
- 
+
   // The resulting list
   term_list<Term> result=l;
 
@@ -199,18 +201,18 @@ term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l, Compare o
     std::size_t j=0;
     while (!result.empty())
     {
-      if (ordering(t,l.front()))
+      if (ordering(t,result.front()))
       {
         break;
       }
       else
       {
-        new (buffer+j) Term(result.front()); // A mcrl2 stack allocator does not handle construction by default. 
+        new (buffer+j) Term(result.front()); // A mcrl2 stack allocator does not handle construction by default.
         result.pop_front();
         ++j;
       }
     }
-    
+
     result.push_front(t);
 
     // Insert elements at the front of the list.
@@ -229,7 +231,7 @@ term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l, Compare o
 
     while (!result.empty())
     {
-      if (ordering(t,l.front()))
+      if (ordering(t,result.front()))
       {
         break;
       }
