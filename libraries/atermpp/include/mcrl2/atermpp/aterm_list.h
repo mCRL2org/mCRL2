@@ -527,14 +527,12 @@ using aterm_list = term_list<aterm>;
 /// \param ordering A total orderings relation on Term, by default the ordering relation on Terms. 
 /// \details This operator has linear complexity. 
 /// \return A boolean indicating whether the list is sorted. 
-template <typename Term>
+template <typename Term, typename Compare = std::less<Term>>
 inline
-bool is_sorted(const term_list<Term>& l,
-               const std::function<bool(const Term&, const Term&)>& ordering
-                                   = [](const Term& t1, const Term& t2){ return t1<t2;} )
+bool is_sorted(const term_list<Term>& l, Compare ordering = Compare{})
 {
   return std::is_sorted(l.begin(), l.end(), ordering);
-} 
+}
 
 
 /// \brief Returns the list with the elements sorted according to the given ordering which is by default standard ordering on Term. 
@@ -554,11 +552,9 @@ term_list<Term> reverse(const term_list<Term>& l);
 /// \param ordering An total orderings relation on Term, by default the ordering relation on Terms. 
 /// \details This operator has complexity nlog n where n is the size of the list.
 /// \return The sorted list.
-template <typename Term>
+template <typename Term, typename Compare = std::less<Term>>
 inline
-term_list<Term> sort_list(const term_list<Term>& l, 
-                          const std::function<bool(const Term&, const Term&)>& ordering 
-                                      = [](const Term& t1, const Term& t2){ return t1<t2;});
+term_list<Term> sort_list(const term_list<Term>& l, Compare ordering = Compare{});
 
 /// \brief Returns the list with element t inserted in l lexicographically according to the provided ordering. 
 /// \param t An element to be inserted.
@@ -566,11 +562,9 @@ term_list<Term> sort_list(const term_list<Term>& l,
 /// \param ordering A total orderings relation on Term, by default the ordering relation on Terms. 
 /// \details This operator has linear complexity. It is assumed that the list l is ordered for it to work. 
 /// \return The sorted list.
-template <typename Term>
+template <typename Term, typename Compare = std::less<Term>>
 inline
-term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l,
-                              const std::function<bool(const Term&, const Term&)>& ordering
-                                       = [](const Term& t1, const Term& t2){ return t1<t2;} );
+term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l, Compare ordering = Compare{});
 
 /// \brief Returns the merged list sorted according to the given ordering, which is by default the ordering of addresses of terms. 
 /// \param l1 An ordered list.
@@ -578,12 +572,9 @@ term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l,
 /// \param ordering A total orderings relation on Term, by default the ordering relation on Terms. 
 /// \details This operator is linear in the cumulative length of l1 and l2. In debug mode it checks whether l1 and l2 are ordered.
 /// \return The sorted list.
-template <typename Term>
+template <typename Term, typename Compare = std::less<Term>>
 inline
-term_list<Term> merge_lists(const term_list<Term>& l1, 
-                            const term_list<Term>& l2,
-                            const std::function<bool(const Term&, const Term&)>& ordering 
-                                      = [](const Term& t1, const Term& t2){ return t1<t2;});
+term_list<Term> merge_lists(const term_list<Term>& l1, const term_list<Term>& l2, Compare ordering = Compare{});
 
 
 /// \brief Returns the concatenation of two lists with convertible element types.

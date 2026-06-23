@@ -117,11 +117,9 @@ term_list<Term> reverse(const term_list<Term>& l)
   return result;
 }
 
-template <typename Term>
+template <typename Term, typename Compare>
 inline
-term_list<Term> sort_list(const term_list<Term>& l, 
-                             const std::function<bool(const Term&, const Term&)>& ordering 
-                                  /* = [](const Term& t1, const Term& t2){ return t1<t2;}*/ )
+term_list<Term> sort_list(const term_list<Term>& l, Compare ordering)
 {
   const std::size_t len = l.size();
   if (len<=1)
@@ -178,11 +176,9 @@ term_list<Term> sort_list(const term_list<Term>& l,
   return result;
 }
 
-template <typename Term>
+template <typename Term, typename Compare>
 inline
-term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l, 
-                             const std::function<bool(const Term&, const Term&)>& ordering 
-                                  /* = [](const Term& t1, const Term& t2){ return t1<t2;}*/ )
+term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l, Compare ordering)
 {
   if (l.empty() || ordering(t,l.front()))
   {
@@ -259,12 +255,9 @@ term_list<Term> insert_sorted(const Term& t, const term_list<Term>& l,
 
 
 
-template <typename Term>
+template <typename Term, typename Compare>
 inline
-term_list<Term> merge_lists(const term_list<Term>& l1, 
-                            const term_list<Term>& l2,
-                            const std::function<bool(const Term&, const Term&)>& ordering 
-                                  /* = [](const Term& t1, const Term& t2){ return t1<t2;}*/ )
+term_list<Term> merge_lists(const term_list<Term>& l1, const term_list<Term>& l2, Compare ordering)
 {
   assert(is_sorted(l1,ordering));
   assert(is_sorted(l2,ordering));
