@@ -82,11 +82,6 @@ class multi_action: public atermpp::aterm
       return multi_action(actions() + other.actions(), time());
     }
 
-    bool operator==(const multi_action& other) const
-    {
-      return time() == other.time() && actions() == other.actions();
-    }
-
    //--- end user section multi_action ---//
 };
 
