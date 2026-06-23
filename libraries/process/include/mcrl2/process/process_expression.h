@@ -597,6 +597,9 @@ template <class... ARGUMENTS>
 inline void make_block(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_Block(), args...);
+  // Re-assign through the sorting constructor to maintain the sorted-storage invariant.
+  t = block(atermpp::down_cast<block>(t).block_set(),
+             atermpp::down_cast<block>(t).operand());
 }
 
 /// \\brief Test for a block expression

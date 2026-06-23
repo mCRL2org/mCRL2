@@ -91,6 +91,10 @@ template <class... ARGUMENTS>
 inline void make_multi_action(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_TimedMultAct(), args...);
+  // Re-assign through the sorting constructor to maintain the sorted-storage invariant
+  // when the action list is rebuilt by a builder traversal (make_term_appl bypasses it).
+  t = multi_action(atermpp::down_cast<multi_action>(t).actions(),
+                   atermpp::down_cast<multi_action>(t).time());
 }
 
 /// \\brief list of multi_actions
@@ -287,6 +291,8 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
 {
   using namespace data::lazy;
 
+  assert(std::is_sorted(a.actions().begin(), a.actions().end()));
+  assert(std::is_sorted(b.actions().begin(), b.actions().end()));
   std::vector<process::action> va(a.actions().begin(), a.actions().end());
   std::vector<process::action> vb(b.actions().begin(), b.actions().end());
 
@@ -322,6 +328,8 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
 {
   using namespace data::lazy;
 
+  assert(std::is_sorted(a.actions().begin(), a.actions().end()));
+  assert(std::is_sorted(b.actions().begin(), b.actions().end()));
   std::vector<process::action> va(a.actions().begin(), a.actions().end());
   std::vector<process::action> vb(b.actions().begin(), b.actions().end());
 
