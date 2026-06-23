@@ -196,23 +196,6 @@ struct compare_action_labels
   }
 };
 
-/// \brief Compares action labels and arguments
-struct compare_action_label_arguments
-{
-  /// \brief Function call operator
-  /// \param a An action
-  /// \param b An action
-  /// \return The function result
-  bool operator()(const process::action& a, const process::action& b) const
-  {
-    if (a.label() != b.label())
-    {
-      return a.label() < b.label();
-    }
-    return a < b;
-  }
-};
-
 /// \brief Used for building an expression for the comparison of data parameters.
 struct equal_data_parameters_builder
 {
@@ -304,11 +287,8 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
 {
   using namespace data::lazy;
 
-  // make copies of a and b and sort them
-  std::vector<process::action> va(a.actions().begin(), a.actions().end()); // protection not needed
-  std::vector<process::action> vb(b.actions().begin(), b.actions().end()); // protection not needed
-  std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
-  std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
+  std::vector<process::action> va(a.actions().begin(), a.actions().end());
+  std::vector<process::action> vb(b.actions().begin(), b.actions().end());
 
   if (!detail::equal_action_signatures(va, vb))
   {
@@ -342,11 +322,8 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
 {
   using namespace data::lazy;
 
-  // make copies of a and b and sort them
   std::vector<process::action> va(a.actions().begin(), a.actions().end());
   std::vector<process::action> vb(b.actions().begin(), b.actions().end());
-  std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
-  std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
 
   if (!detail::equal_action_signatures(va, vb))
   {
