@@ -63,6 +63,8 @@ template <class... ARGUMENTS>
 inline void make_action_name_multiset(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_MultActName(), args...);
+  // Re-assign through the sorting constructor to maintain the sorted-storage invariant.
+  t = action_name_multiset(atermpp::down_cast<action_name_multiset>(t).names());
 }
 
 /// \\brief list of action_name_multisets
