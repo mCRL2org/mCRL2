@@ -82,13 +82,6 @@ class multi_action: public atermpp::aterm
       return multi_action(actions() + other.actions(), time());
     }
 
-    /// \brief Returns the multiaction in which the list of actions is sorted. 
-    /// \return A multi-action with a sorted list.
-    multi_action sort_actions() const
-    {
-      return multi_action(atermpp::sort_list(actions()),time());
-    }
-
     bool operator==(const multi_action& other) const
     {
       return time() == other.time() && actions() == other.actions();
