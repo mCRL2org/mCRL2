@@ -500,7 +500,7 @@ class lts: public LTS_BASE
      *  \details This removes the action labels of an lts.
      *           It also resets the information
      *           regarding to what actions labels are tau.
-     *           It will not change the number of action labels. */
+     *           The number of action labels is reset to one, namely the tau label. */
     void clear_actions()
     {
       m_action_labels.clear();
@@ -523,7 +523,7 @@ class lts: public LTS_BASE
       m_state_labels.resize(num_states());
       for(std::size_t i=0; i<num_states(); ++i)
       {
-        set_state_label(i,STATE_LABEL_T::number_to_label(i));   // YYYYYY TODO FINISH.
+        set_state_label(i,STATE_LABEL_T::number_to_label(i));
       }
     }
 
