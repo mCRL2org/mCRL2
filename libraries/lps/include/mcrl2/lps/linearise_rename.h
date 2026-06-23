@@ -67,7 +67,6 @@ namespace mcrl2::lps
       result.push_front(rename(renamings, a));
     }
 
-    result = sort_actions(result);
     return result;
   }
 
