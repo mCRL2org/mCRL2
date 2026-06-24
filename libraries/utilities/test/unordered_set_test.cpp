@@ -12,6 +12,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <random>
+#include <set>
 #include <unordered_set>
 
 #include "mcrl2/utilities/hash_utility.h"
@@ -100,6 +101,25 @@ BOOST_AUTO_TEST_CASE(test_move)
   // Test the move constructor.
   unordered_set<int> set = construct({5,3,2,5});
   unordered_set<int> moved = std::move(set);
+}
+
+BOOST_AUTO_TEST_CASE(test_postincrement)
+{
+  // Regression test: the post-increment operator previously returned a
+  // dereferenced iterator (return *copy;), so any instantiation failed to
+  // compile. Exercise it over several elements.
+  unordered_set<int> set = construct({5, 3, 2, 1, 4});
+
+  std::set<int> seen;
+  int count = 0;
+  for (int it : set)
+  {
+    seen.insert(it);
+    ++count;
+  }
+
+  BOOST_CHECK_EQUAL(count, 5);
+  BOOST_CHECK_EQUAL(seen.size(), 5u);
 }
 
 BOOST_AUTO_TEST_CASE(test_empty)
