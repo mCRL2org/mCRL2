@@ -374,7 +374,7 @@ struct update_active_cfg_vertices_timer
     const double seconds =
       std::chrono::duration<double>(total_time).count();
 
-    std::cerr << "[timing] update_active_cfg_vertices total time: "
+    mCRL2log(log::debug) << "[timing] update_active_cfg_vertices total time: "
               << seconds << " s\n";
   }
 };
