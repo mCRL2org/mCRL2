@@ -67,3 +67,25 @@ BOOST_AUTO_TEST_CASE(test_has_extension)
 
   BOOST_CHECK(allocator.consolidate() == 1024/16); // Whole allocator should be emptied.
 }
+
+BOOST_AUTO_TEST_CASE(test_partial_block_reclaimed)
+{
+  // Regression test: a block that was only partially bump-allocated must be fully
+  // reclaimable. Previously the entries above bump_offset were never marked free
+  // during consolidate(), so the block could neither be removed nor have those
+  // slots returned to the shared free chunks, leaking them.
+  block_allocator<int, 16> allocator;
+
+  // Allocate a single object: this opens a fresh block with 1 used slot and 15
+  // slots that were never bump-allocated.
+  int* p = allocator.allocate(1);
+
+  // Returning it makes the whole block free (1 freed + 15 never used).
+  allocator.deallocate(p, 1);
+
+  // The block must therefore be reclaimed in its entirety.
+  BOOST_CHECK_EQUAL(allocator.consolidate(), 1u);
+
+  // And the allocator is empty again.
+  BOOST_CHECK_EQUAL(allocator.consolidate(), 0u);
+}

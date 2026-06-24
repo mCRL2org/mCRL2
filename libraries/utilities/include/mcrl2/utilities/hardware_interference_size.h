@@ -13,7 +13,6 @@
 #ifndef MCRL2_UTILITIES_HARDWARE_INTERFERENCE_SIZE_H
 #define MCRL2_UTILITIES_HARDWARE_INTERFERENCE_SIZE_H
 
-#include <cstddef>
 #include <new>
 
 namespace mcrl2::utilities
