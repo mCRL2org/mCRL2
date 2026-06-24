@@ -158,26 +158,33 @@ BOOST_AUTO_TEST_CASE(test_rename_action_list)
   de.push_front(e);
   de.push_front(d);
 
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_ab(), ab), bb);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_ab(), bb), bb);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_ab(), bc), bc);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_ab(), bd), bd);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_ab(), cd), cd);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_ab(), de), de);
+  // Rename on action_lists does not guarantee that the result is sorted,
+  // so we sort the result before comparing it to the expected result.
+  auto rename_and_sort = [](const rename_expression_list& renamings, const action_list& actions)
+  {
+    return atermpp::sort_list(lps::rename(renamings, actions));
+  };
 
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_cd(), ab), ab);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_cd(), bb), bb);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_cd(), bc), bd);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_cd(), bd), bd);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_cd(), cd), dd);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rule_cd(), de), de);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_ab(), ab), bb);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_ab(), bb), bb);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_ab(), bc), bc);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_ab(), bd), bd);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_ab(), cd), cd);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_ab(), de), de);
 
-  BOOST_CHECK_EQUAL(lps::rename(rename_rules_ab_cd(), ab), bb);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rules_ab_cd(), bb), bb);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rules_ab_cd(), bc), bd);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rules_ab_cd(), bd), bd);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rules_ab_cd(), cd), dd);
-  BOOST_CHECK_EQUAL(lps::rename(rename_rules_ab_cd(), de), de);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_cd(), ab), ab);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_cd(), bb), bb);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_cd(), bc), bd);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_cd(), bd), bd);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_cd(), cd), dd);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rule_cd(), de), de);
+
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rules_ab_cd(), ab), bb);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rules_ab_cd(), bb), bb);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rules_ab_cd(), bc), bd);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rules_ab_cd(), bd), bd);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rules_ab_cd(), cd), dd);
+  BOOST_CHECK_EQUAL(rename_and_sort(rename_rules_ab_cd(), de), de);
 }
 
 // TODO: extend with tests for renaming multiactions, summands and lps.
