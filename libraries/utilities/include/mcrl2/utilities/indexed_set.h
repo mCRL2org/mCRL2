@@ -34,7 +34,6 @@ private:
   KeyTable m_keys;
 
   /// \brief Mutex for the m_hashtable and m_keys data structures.
-  mutable std::shared_ptr<std::mutex> m_mutex;
   mutable std::vector<shared_mutex> m_shared_mutexes;
 
   /// m_next_index indicates the next index that 

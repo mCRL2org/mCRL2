@@ -156,8 +156,7 @@ inline INDEXED_SET::indexed_set(
            std::size_t initial_size,
            const hasher& hasher,
            const key_equal& equals)
-  : m_hashtable(std::max(initial_size, detail::minimal_hashtable_size), detail::EMPTY), 
-    m_mutex(new std::mutex()),
+  : m_hashtable(std::max(initial_size, detail::minimal_hashtable_size), detail::EMPTY),
     m_hasher(hasher),
     m_equals(equals)
 {
