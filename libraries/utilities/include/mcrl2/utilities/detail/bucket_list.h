@@ -251,9 +251,13 @@ public:
       new_node->set_next(old_head);
 
       // Check whether the new node is not already contained in the bucket list.
+      // Compare against the already-constructed key of new_node rather than
+      // re-forwarding args: for rvalue arguments those would have been moved
+      // into new_node by construct() above, so re-using them here would compare
+      // against moved-from values.
       for (auto it = iterator(old_head); it != old_end; ++it)
       {
-        if (equals(*it, std::forward<Args>(args)...))
+        if (equals(*it, new_node->key()))
         {
           // Clean up new node and leave bucket as is.          
           std::allocator_traits<NodeAllocator>::destroy(allocator, new_node);

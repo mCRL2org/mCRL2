@@ -10,8 +10,6 @@
 #ifndef MCRL2_UTILITIES_SHARED_REFERENCE_H_
 #define MCRL2_UTILITIES_SHARED_REFERENCE_H_
 
-#include "tagged_pointer.h"
-
 #include <cassert>
 #include <atomic>
 #include <compare>

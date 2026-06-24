@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MCRL2_UTILITY_POWER_OF_TWO_H_
-#define MCRL2_UTILITY_POWER_OF_TWO_H_
+#ifndef MCRL2_UTILITIES_POWER_OF_TWO_H
+#define MCRL2_UTILITIES_POWER_OF_TWO_H
 
 #include <cassert>
 #include <cstddef>
@@ -54,6 +54,5 @@ static T round_up_to_power_of_two(T value)
 }
 
 } // namespace mcrl2::utilities
-// namespace mcrl2`
 
-#endif // MCRL2_UTILITY_POWER_OF_TWO_H_
+#endif // MCRL2_UTILITIES_POWER_OF_TWO_H

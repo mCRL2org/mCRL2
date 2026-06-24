@@ -252,7 +252,7 @@ class big_natural_number
     {
       for(char c: s)
       {
-        if (!isdigit(c))
+        if (!isdigit(static_cast<unsigned char>(c)))
         {
           throw mcrl2::runtime_error("Number " + s + " contains symbol '" + c + "' which is not a digit.");
         }
@@ -696,7 +696,7 @@ class big_natural_number
 
 inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
 {
-  static big_natural_number n; // This code is not re-entrant, but it avoids declaring a vector continuously. 
+  thread_local big_natural_number n; // Reused across calls to avoid reallocating the digit vector; thread_local to keep it free of data races.
   n=l;  
   std::string s; // This string contains the number in reverse ordering.
   for( ; !n.is_zero() ; )

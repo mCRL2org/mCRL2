@@ -125,7 +125,7 @@ public:
     {
       unordered_set_iterator copy(*this);
       ++(*this);
-      return *copy;
+      return copy;
     }
 
     reference operator*() const

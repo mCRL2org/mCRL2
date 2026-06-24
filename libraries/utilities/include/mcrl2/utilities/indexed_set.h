@@ -203,7 +203,7 @@ public:
   const_reverse_iterator crend(std::size_t thread_index = 0) const 
   { 
     shared_guard guard = m_shared_mutexes[thread_index].lock_shared();
-    reverse_iterator i = m_keys.crend();
+    const_reverse_iterator i = m_keys.crend();
     return i;
   }
 

@@ -30,7 +30,7 @@ namespace detail {
 template <typename Iterator>
 Iterator parse_next_natural_number(Iterator first, Iterator last, std::size_t& result)
 {
-  assert((first != last) && !std::isspace(*first));
+  assert((first != last) && !std::isspace(static_cast<unsigned char>(*first)));
 
   Iterator i = first;
   result = 0;
@@ -48,10 +48,10 @@ Iterator parse_next_natural_number(Iterator first, Iterator last, std::size_t& r
     {
       break;
     }
-    if (std::isspace(*i))
+    if (std::isspace(static_cast<unsigned char>(*i)))
     {
       ++i;
-      while (i != last && std::isspace(*i))
+      while (i != last && std::isspace(static_cast<unsigned char>(*i)))
       {
         ++i;
       }
@@ -71,7 +71,7 @@ std::size_t parse_natural_number(const std::string& text)
   auto last = text.end();
 
   // skip leading spaces
-  while (first != last && std::isspace(*first))
+  while (first != last && std::isspace(static_cast<unsigned char>(*first)))
   {
     ++first;
   }
@@ -102,7 +102,7 @@ std::vector<std::size_t> parse_natural_number_sequence(const std::string& text)
   auto last = text.end();
 
   // skip leading spaces
-  while (first != last && std::isspace(*first))
+  while (first != last && std::isspace(static_cast<unsigned char>(*first)))
   {
     ++first;
   }

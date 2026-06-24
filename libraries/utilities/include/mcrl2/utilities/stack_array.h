@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MCRL2_UTILITIES_STACK_VECTOR_H
-#define MCRL2_UTILITIES_STACK_VECTOR_H
+#ifndef MCRL2_UTILITIES_STACK_ARRAY_H
+#define MCRL2_UTILITIES_STACK_ARRAY_H
 
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/noncopyable.h"
@@ -62,7 +62,7 @@ public:
   T* data() { return m_reserved_memory; }
   const T* data() const { return m_reserved_memory; }
 
-  bool empty() const { return size() != 0; }
+  bool empty() const { return size() == 0; }
 
   reverse_iterator rbegin() { return reverse_iterator(data() + size()); }
   const_reverse_iterator rbegin() const { return const_reverse_iterator(data() + size()); }
@@ -98,4 +98,4 @@ private:
   TYPE* MCRL2_STACK_ARRAY_NAME(NAME) = MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE, SIZE); \
   mcrl2::utilities::stack_array<TYPE> NAME (MCRL2_STACK_ARRAY_NAME(NAME), SIZE) 
 
-#endif // MCRL2_UTILITIES_STACK_VECTOR_H
+#endif // MCRL2_UTILITIES_STACK_ARRAY_H
