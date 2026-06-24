@@ -210,7 +210,7 @@ public:
   {
     while(!empty())
     {
-      erase_after(before_begin(), allocator);
+      erase_after(allocator, before_begin());
     }
   }
 

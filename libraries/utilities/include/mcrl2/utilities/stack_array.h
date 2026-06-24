@@ -13,6 +13,7 @@
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/noncopyable.h"
 
+#include <cassert>
 #include <cstddef>
 #include <iterator>
 
