@@ -35,10 +35,7 @@
 #include "mcrl2/lps/replace_constants_by_variables.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/stochastic_state.h"
-
-#ifdef MCRL2_USE_PROJECTIONS
 #include "mcrl2/lps/explorer_projections.h"
-#endif
 
 #ifdef MCRL2_USE_CONTROL_FLOW
 #include <boost/container/small_vector.hpp>
@@ -200,8 +197,7 @@ class explorer: public abortable
         compute_state(result.states.back(),next_state,sigma,rewr);
       }
     }
-
-#ifdef MCRL2_USE_PROJECTIONS
+    
     template <typename DataExpressionSequence, typename IndexSequence>
     void compute_projected_state(
         lps::state& result,
@@ -262,7 +258,6 @@ class explorer: public abortable
         compute_projected_state(result.states.back(), next_state, I_w, sigma, rewr);
       }
     }
-#endif
 
     /// Rewrite action a, and put it back in place.
     lps::multi_action rewrite_action(
@@ -316,7 +311,6 @@ class explorer: public abortable
       }
     }
 
-#ifdef MCRL2_USE_PROJECTIONS
     // Generic enumeration primitive.
     // The callback determines whether solutions are:
     //  - consumed immediately,
@@ -376,7 +370,6 @@ class explorer: public abortable
         }
       );
     }
-#endif
 
     // Generates outgoing transitions for a summand, and reports them via the callback function report_transition.
     // It is assumed that the substitution sigma contains the assignments corresponding to the current state.
@@ -406,7 +399,6 @@ class explorer: public abortable
       }
 #endif
 
-#ifdef MCRL2_USE_PROJECTIONS
       auto process_transition =
         [&](const data::data_expression_list* assignments)
         {
@@ -546,14 +538,12 @@ class explorer: public abortable
             }
           }
         };
-#endif
 
       if (!m_recursive)
       {
         id_generator.clear();
       }
 
-#ifdef MCRL2_USE_PROJECTIONS
       if (m_options.use_projections && !summand.I_r.empty())
       {
         lps::state key;
@@ -621,170 +611,7 @@ class explorer: public abortable
           process_transition(e.empty() ? nullptr : &e);
         }
       }
-#else
-      if (summand.cache_strategy == caching::none)
-      {
-        rewr(condition, summand.condition, sigma);
-        if (!data::is_false(condition))
-        {
-          if (summand.variables.size()==0)
-          {
-            // There is only one solution that is generated as there are no variables. 
-            check_enumerator_solution(condition, summand,sigma,rewr);
-            if constexpr (Stochastic)
-            {
-              compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
-            }
-            else
-            {
-              compute_state(s1,summand.next_state,sigma,rewr);
-              if (!confluent_summands.empty())
-              {
-                s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator); 
-              }
-            }
-            if constexpr (ReportActions)
-            {
-              if (m_options.rewrite_actions)
-              {
-                lps::multi_action a=rewrite_action(summand.multi_action,sigma,rewr);
-                report_transition(a,s1);
-              }
-              else
-              {
-                report_transition(summand.multi_action,s1);
-              }
-            }
-            else
-            {
-              report_transition(s1);
-            }
-          }
-          else // There are variables to be enumerated.
-          {
-            enumerator.enumerate<enumerator_element>(
-                        summand.variables, 
-                        condition,
-                        sigma,
-                        [&](const enumerator_element& p) {
-                          check_enumerator_solution(p.expression(), summand, sigma, rewr);
-                          p.add_assignments(summand.variables, sigma, rewr);
-                          variables_are_assigned_to_sigma=true;
-                          state_type s1; // TODO: wasn't the redundant parameter s1 added to the interface to avoid this declaration?
-                          if constexpr (Stochastic)
-                          {
-                            compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
-                          }
-                          else
-                          {
-                            compute_state(s1,summand.next_state,sigma,rewr);
-                            if (!confluent_summands.empty())
-                            {
-                              s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
-                            }
-                          }
-                          if (m_recursive && variables_are_assigned_to_sigma)
-                          {
-                            data::remove_assignments(sigma, summand.variables);
-                            variables_are_assigned_to_sigma=false;
-                          }
-                          if constexpr (ReportActions)
-                          {
-                            if (m_options.rewrite_actions)
-                            {
-                              lps::multi_action a=rewrite_action(summand.multi_action,sigma,rewr);
-                              report_transition(a,s1);
-                            }
-                            else
-                            {
-                              report_transition(summand.multi_action,s1);
-                            }
-                          }
-                          else
-                          {
-                            report_transition(s1);
-                          }
-                          return false;
-                        },
-                        data::is_false
-            );
-          }
-        }
-      }
-      else
-      {
-        summand_cache_map& cache = summand.cache_strategy == caching::global ? global_cache : summand.local_cache;
-        // The result of find is sometimes compared with the "end()" below, where the end() belongs to
-        // the cache which is resized in the meantime. The lock is needed to avoid this premature resizing.
-        utilities::shared_guard g=atermpp::detail::g_thread_term_pool().lock_shared();
-        summand_cache_map::iterator q = cache.find(detail::cheap_cache_key(sigma, summand.gamma));
-        if (q == cache.end())
-        {
-          g.unlock_shared();
-          rewr(condition, summand.condition, sigma);
-          atermpp::term_list<data::data_expression_list> solutions;
-          if (!data::is_false(condition))
-          {
-            enumerator.enumerate<enumerator_element>(
-                        summand.variables,
-                        condition,
-                        sigma,
-                        [&](const enumerator_element& p) {
-                          check_enumerator_solution(p.expression(), summand, sigma, rewr);
-                          solutions.push_front(p.assign_expressions(summand.variables, rewr));
-                          return false;
-                        },
-                        data::is_false
-                      );
-          }
-          summand.compute_key(key, sigma);
-          q = cache.insert({key, solutions}).first;
-        }
-        else
-        {
-          g.unlock_shared();
-        }
 
-        for (const data::data_expression_list& e: static_cast<atermpp::term_list<data::data_expression_list>&>(q->second))
-        {
-          data::add_assignments(sigma, summand.variables, e);
-          variables_are_assigned_to_sigma=true;
-          if constexpr (Stochastic)
-          {
-            compute_stochastic_state(s1, summand.distribution, summand.next_state, sigma, rewr, enumerator);
-          }
-          else
-          {
-            compute_state(s1,summand.next_state,sigma,rewr);
-            if (!confluent_summands.empty())
-            {
-              s1 = find_representative(s1, confluent_summands, sigma, rewr, enumerator, id_generator);
-            }
-          }
-          if (m_recursive && variables_are_assigned_to_sigma)
-          {
-            data::remove_assignments(sigma, summand.variables);
-            variables_are_assigned_to_sigma=false;
-          }
-          if constexpr (ReportActions)
-          {
-            if (m_options.rewrite_actions)
-            {
-              lps::multi_action a=rewrite_action(summand.multi_action,sigma,rewr);
-              report_transition(a,s1);
-            }
-            else
-            {
-              report_transition(summand.multi_action,s1);
-            }
-          }
-          else
-          {
-            report_transition(s1);
-          }
-        }
-      }
-#endif // !MCRL2_USE_PROJECTIONS
       if (!m_recursive && variables_are_assigned_to_sigma)
       {
         data::remove_assignments(sigma, summand.variables);
@@ -991,7 +818,6 @@ class explorer: public abortable
         }
       }
 
-#ifdef MCRL2_USE_PROJECTIONS
       // Initialize the read/write projections
       if (m_options.use_projections)
       {
@@ -1001,7 +827,6 @@ class explorer: public abortable
           m_regular_summands[i].set_projection_attributes(R[i], W[i]);
         }
       }
-#endif
     }
 
     ~explorer() override = default;

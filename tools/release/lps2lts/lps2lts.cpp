@@ -64,9 +64,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       desc.add_option("no-probability-checking", "do not check if probabilities in stochastic specifications have sensible values");
       desc.add_hidden_option("dfs-recursive", "use recursive depth first search for divergence detection");
       desc.add_option("cached", "use enumeration caching techniques to speed up state space generation. ");
-#ifdef MCRL2_USE_PROJECTIONS
       desc.add_option("project", "use read/write projections ");
-#endif
 #ifdef MCRL2_USE_CONTROL_FLOW
       desc.add_option("control-flow", "use control flow based summand pruning");
 #endif
@@ -235,9 +233,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       options.cached                                = parser.has_option("cached");
       options.global_cache                          = parser.has_option("global-cache");
       options.confluence                            = parser.has_option("confluence");
-#ifdef MCRL2_USE_PROJECTIONS
       options.use_projections                       = parser.has_option("project");
-#endif
 #ifdef MCRL2_USE_CONTROL_FLOW
       options.use_control_flow                      = parser.has_option("control-flow");
 #endif
@@ -375,12 +371,10 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
                                 options.save_error_trace ||
                                 options.generate_traces;
 
-#ifdef MCRL2_USE_PROJECTIONS
       if (parser.has_option("project") && (parser.has_option("cached") || parser.has_option("global-cache")))
       {
         parser.error("Option --project cannot be combined with --cached or --global-cache.");
       }
-#endif
 
 #ifdef MCRL2_USE_CONTROL_FLOW
       stategraph_options.rewrite_strategy = rewrite_strategy();
@@ -442,13 +436,12 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 
       if (lps::is_stochastic(stochastic_lpsspec))
       {
-#ifdef MCRL2_USE_PROJECTIONS
         if (options.use_projections) {
             options.use_projections = false;
             mCRL2log(log::warning) << "Projections are currently not supported for stochastic specifications. "
                                    << "Projections have been disabled.\n";
         }
-#endif
+
         auto builder = create_stochastic_lts_builder(stochastic_lpsspec, options, output_format);
         if (is_timed)
         {

@@ -17,10 +17,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/atermpp/standard_containers/vector.h"
-
-#ifdef MCRL2_USE_PROJECTIONS
 #include "mcrl2/lps/explorer_projections.h"
-#endif
 
 namespace mcrl2::lps
 {
@@ -172,14 +169,12 @@ using summand_cache_map = atermpp::utilities::unordered_map<atermpp::aterm,
     std::allocator<std::pair<atermpp::aterm, atermpp::term_list<data::data_expression_list>>>,
     true>;
 
-#ifdef MCRL2_USE_PROJECTIONS
 using projection_cache_map = atermpp::utilities::unordered_map<lps::state,
     std::vector<projected_transition>,
     projection_cache_hash,
     projection_cache_equality,
     std::allocator<std::pair<lps::state, std::vector<projected_transition>>>,
     true>;
-#endif
 
 struct explorer_summand
 {
@@ -196,7 +191,6 @@ struct explorer_summand
   atermpp::function_symbol f_gamma;
   mutable summand_cache_map local_cache;
 
-#ifdef MCRL2_USE_PROJECTIONS
   // attributes for projections (these are not initialized during construction!)
   std::vector<std::size_t> I_r;  // indices of read parameters
   std::vector<std::size_t> I_w;  // indices of write parameters
@@ -211,7 +205,6 @@ struct explorer_summand
       I_w = Iw;
     }
   }
-#endif
 
   template <typename ActionSummand>
   explorer_summand(const ActionSummand& summand, std::size_t summand_index, const data::variable_list& process_parameters, caching cache_strategy_)
