@@ -413,9 +413,12 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       mCRL2log(log::debug) << "Updating summands" << std::endl;
 
       // Use auto& so that for a stochastic_specification the concrete
-      // stochastic_action_summand type is deduced and the overload that also
-      // rewrites the distribution is selected (rather than slicing to the base).
-      for (auto& a: m_spec.process().action_summands())
+      // stochastic_action_summand type is deduced and the right overload is
+      // selected.
+      //
+      // TODO: The stochastic_action_summand path was never tested and does not
+      // work.
+      for (action_summand& a: m_spec.process().action_summands())
       {
         update_action_summand(a);
       }
