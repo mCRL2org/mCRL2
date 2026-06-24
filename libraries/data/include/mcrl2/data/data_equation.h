@@ -48,8 +48,8 @@ class data_equation: public atermpp::aterm
     {}
 
     /// \\brief Constructor Z1.
-    template <typename Container>
-    data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = nullptr)
+    template <typename Container> requires(atermpp::is_container<Container, variable>::value)
+    data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs)
       : atermpp::aterm(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
     {}
 

@@ -44,8 +44,8 @@ class structured_sort_constructor: public atermpp::aterm
     {}
 
     /// \\brief Constructor Z1.
-    template <typename Container>
-    structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = nullptr)
+    template <typename Container> requires(atermpp::is_container<Container, structured_sort_constructor_argument>::value)
+    structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser)
       : atermpp::aterm(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
     {}
 

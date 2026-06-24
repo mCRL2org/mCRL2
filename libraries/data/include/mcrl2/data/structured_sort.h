@@ -72,8 +72,8 @@ class structured_sort: public sort_expression
     {}
 
     /// \\brief Constructor Z2.
-    template <typename Container>
-    structured_sort(const Container& constructors, typename atermpp::enable_if_container<Container, structured_sort_constructor>::type* = nullptr)
+    template <typename Container> requires(atermpp::is_container<Container, structured_sort_constructor>::value)
+    structured_sort(const Container& constructors)
       : sort_expression(atermpp::aterm(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
     {}
 

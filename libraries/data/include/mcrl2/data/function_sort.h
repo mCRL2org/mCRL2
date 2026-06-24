@@ -43,8 +43,8 @@ class function_sort: public sort_expression
     {}
 
     /// \\brief Constructor Z2.
-    template <typename Container>
-    function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
+    template <typename Container> requires(atermpp::is_container<Container, sort_expression>::value)
+    function_sort(const Container& domain, const sort_expression& codomain)
       : sort_expression(atermpp::aterm(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))
     {}
 

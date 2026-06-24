@@ -41,8 +41,8 @@ class where_clause: public data_expression
     {}
 
     /// \\brief Constructor Z2.
-    template <typename Container>
-    where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = nullptr)
+    template <typename Container> requires(atermpp::is_container<Container, assignment_expression>::value)
+    where_clause(const data_expression& body, const Container& declarations)
       : data_expression(atermpp::aterm(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
     {}
 

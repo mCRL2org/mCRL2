@@ -42,8 +42,8 @@ class untyped_possible_sorts: public sort_expression
     {}
 
     /// \\brief Constructor Z2.
-    template <typename Container>
-    untyped_possible_sorts(const Container& sorts, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
+    template <typename Container> requires(atermpp::is_container<Container, sort_expression>::value)
+    untyped_possible_sorts(const Container& sorts)
       : sort_expression(atermpp::aterm(core::detail::function_symbol_UntypedSortsPossible(), sort_expression_list(sorts.begin(), sorts.end())))
     {}
 
