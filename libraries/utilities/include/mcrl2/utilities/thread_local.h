@@ -17,6 +17,7 @@
 #include <array>
 #include <atomic>
 #include <bit>
+#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <new>
@@ -244,21 +245,48 @@ public:
   }
 
   /// \brief Iterator over thread-local values.
+  /// \details This is a standard forward iterator: dereferencing is idempotent and
+  ///          only operator++ advances the cursor. The currently pointed-to value is
+  ///          located (and cached) when the iterator is constructed or incremented.
   class Iter
   {
   private:
-    const ThreadLocal* m_thread_local;
-    mutable std::size_t bucket = 0;
-    mutable std::size_t bucket_size = 1;
-    mutable std::size_t index = 0;
-    mutable std::size_t yielded = 0;
+    const ThreadLocal* m_thread_local = nullptr;
+    std::size_t bucket = 0;
+    std::size_t bucket_size = 1;
+    std::size_t index = 0;
+    const T* m_current = nullptr;
 
-    /// \brief Advance to the next bucket.
-    void next_bucket() const
+    /// \brief Scan forward from the current (bucket, index) position to the next
+    ///        present entry, caching it in m_current. When no further entry exists
+    ///        the iterator is moved to the end position (bucket == BUCKETS).
+    void advance_to_next_present()
     {
-      bucket_size <<= 1;
-      bucket += 1;
-      index = 0;
+      while (bucket < BUCKETS)
+      {
+        Entry* bucket_ptr = m_thread_local->buckets[bucket].load(std::memory_order_acquire);
+        if (bucket_ptr != nullptr)
+        {
+          while (index < bucket_size)
+          {
+            Entry& entry = bucket_ptr[index];
+            if (entry.present.load(std::memory_order_acquire))
+            {
+              m_current = reinterpret_cast<const T*>(&entry.value);
+              return;
+            }
+            ++index;
+          }
+        }
+
+        // Move to the next bucket, which contains twice as many entries.
+        bucket_size <<= 1;
+        ++bucket;
+        index = 0;
+      }
+
+      // Reached the end of all buckets.
+      m_current = nullptr;
     }
 
   public:
@@ -268,10 +296,16 @@ public:
     using reference = const T&;
     using iterator_category = std::forward_iterator_tag;
 
+    Iter() = default;
+
     Iter(const ThreadLocal* tl, bool begin)
       : m_thread_local(tl)
     {
-      if (!begin)
+      if (begin)
+      {
+        advance_to_next_present();
+      }
+      else
       {
         bucket = BUCKETS;
       }
@@ -279,61 +313,20 @@ public:
 
     const T& operator*() const
     {
-      while (bucket < BUCKETS)
-      {
-        Entry* bucket_ptr = m_thread_local->buckets[bucket].load(std::memory_order_acquire);
-        if (!bucket_ptr)
-        {
-          next_bucket();
-          continue;
-        }
-
-        while (index < bucket_size)
-        {
-          Entry& entry = bucket_ptr[index];
-          ++index;
-          if (entry.present.load(std::memory_order_acquire))
-          {
-            return *reinterpret_cast<const T*>(&entry.value);
-          }
-        }
-
-        next_bucket();
-      }
-
-      throw std::out_of_range("ThreadLocal iterator out of bounds");
+      assert(m_current != nullptr);
+      return *m_current;
     }
 
     const T* operator->() const
     {
-      return &**this;
+      return m_current;
     }
 
     Iter& operator++()
     {
-      while (bucket < BUCKETS)
-      {
-        Entry* bucket_ptr = m_thread_local->buckets[bucket].load(std::memory_order_acquire);
-        if (!bucket_ptr)
-        {
-          next_bucket();
-          continue;
-        }
-
-        while (index < bucket_size)
-        {
-          Entry& entry = bucket_ptr[index];
-          ++index;
-          if (entry.present.load(std::memory_order_acquire))
-          {
-            ++yielded;
-            return *this;
-          }
-        }
-
-        next_bucket();
-      }
-
+      // Step past the current entry, then locate the next present one.
+      ++index;
+      advance_to_next_present();
       return *this;
     }
 

@@ -16,6 +16,7 @@
 #include <vector>
 #include <memory>
 #include <atomic>
+#include <set>
 
 using mcrl2::utilities::ThreadLocal;
 
@@ -140,4 +141,84 @@ BOOST_AUTO_TEST_CASE(test_size)
   
   tls.get_or([] { return 42; });
   BOOST_CHECK_EQUAL(tls.size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_iteration_multiple_values)
+{
+  // Regression test for the forward iterator. Iterating over two or more present
+  // values must visit each value exactly once. operator* must be idempotent and
+  // only operator++ may advance the cursor. The previous implementation advanced
+  // inside operator*, so range-for skipped every other element and then threw
+  // std::out_of_range when operator* walked past the end.
+  constexpr int num_threads = 8;
+  ThreadLocal<int> tls;
+
+  // Each value can only be created from its owning thread, so populate the
+  // container from several worker threads (one entry per thread).
+  std::vector<std::thread> threads;
+  for (int i = 0; i < num_threads; ++i)
+  {
+    threads.emplace_back([&tls, i]() { tls.get_or([i] { return 1000 + i; }); });
+  }
+  for (auto& t : threads)
+  {
+    t.join();
+  }
+
+  BOOST_REQUIRE_EQUAL(tls.size(), static_cast<std::size_t>(num_threads));
+
+  std::set<int> seen;
+  int count = 0;
+  for (const auto& val : tls)
+  {
+    seen.insert(val);
+    ++count;
+  }
+
+  BOOST_CHECK_EQUAL(count, num_threads);
+  BOOST_CHECK_EQUAL(seen.size(), static_cast<std::size_t>(num_threads));
+  for (int i = 0; i < num_threads; ++i)
+  {
+    BOOST_CHECK(seen.count(1000 + i) == 1);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_iteration_empty)
+{
+  // An empty container must yield begin() == end() and an empty range, rather
+  // than throwing when dereferenced.
+  ThreadLocal<int> tls;
+  BOOST_CHECK(tls.begin() == tls.end());
+
+  int count = 0;
+  for (const auto& val : tls)
+  {
+    (void)val;
+    ++count;
+  }
+  BOOST_CHECK_EQUAL(count, 0);
+}
+
+BOOST_AUTO_TEST_CASE(test_iteration_postincrement)
+{
+  // Exercise the post-increment operator over multiple values.
+  constexpr int num_threads = 4;
+  ThreadLocal<int> tls;
+  std::vector<std::thread> threads;
+  for (int i = 0; i < num_threads; ++i)
+  {
+    threads.emplace_back([&tls, i]() { tls.get_or([i] { return i; }); });
+  }
+  for (auto& t : threads)
+  {
+    t.join();
+  }
+
+  int count = 0;
+  for (auto it = tls.begin(); it != tls.end(); it++)
+  {
+    (void)*it;
+    ++count;
+  }
+  BOOST_CHECK_EQUAL(count, num_threads);
 }
