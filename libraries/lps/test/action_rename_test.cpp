@@ -191,7 +191,7 @@ static void test_regex1()
   BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().tail().tail().front().name()) == "out_ac");
 
   BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "out_a|ab_out"; }));
+                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "ab_out|out_a"; }));
   BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
                               [](const action_summand& as){ return lps::pp(as.multi_action()) == "b_out"; }));
   BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
