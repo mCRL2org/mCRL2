@@ -72,13 +72,12 @@ static const std::array<std::string, 5> type_strings = { "unknown", "lts", "aut"
 
 static const std::array<std::string, 5> extension_strings = { "", "lts", "aut", "fsm", "dot" };
 
-static const std::array<std::string, 6> type_desc_strings = {
+static const std::array<std::string, 5> type_desc_strings = {
     "unknown LTS format",
     "mCRL2 LTS format",
     "Aldebaran format (CADP)",
     "Finite State Machine format",
-    "GraphViz format (no longer supported as input format)",
-    "SVC format"
+    "GraphViz format (no longer supported as input format)"
                                          };
 
 
@@ -112,17 +111,17 @@ lts_type parse_format(std::string const& s)
 
 std::string string_for_type(const lts_type type)
 {
-  return (type_strings[type]);
+  return (type_strings.at(type));
 }
 
 std::string extension_for_type(const lts_type type)
 {
-  return (extension_strings[type]);
+  return (extension_strings.at(type));
 }
 
 std::string mime_type_for_type(const lts_type type)
 {
-  return (mime_type_strings[type]);
+  return (mime_type_strings.at(type));
 }
 
 static const std::set<lts_type>& initialise_supported_lts_formats()
@@ -160,20 +159,21 @@ std::string supported_lts_formats_text(lts_type default_format, const std::set<l
   std::string r;
   for (std::vector<lts_type>::iterator i=types.begin(); i!=types.end(); ++i)
   {
-    r += "  '" + type_strings[*i] + "' for the " + type_desc_strings[*i];
+    r += "  '" + type_strings.at(*i) + "' for the " + type_desc_strings.at(*i);
 
     if (*i == default_format)
     {
       r += " (default)";
     }
 
-    // Still unsafe if types.size() < 2
-    assert(types.size() >= 2);
-    if (i == types.end() - 2)
+    // Append the separator that fits the position of this entry. The last entry
+    // gets none, the penultimate one gets ", or", the rest get a comma.
+    const std::size_t remaining = static_cast<std::size_t>(std::distance(i, types.end()));
+    if (remaining == 2)
     {
       r += ", or\n";
     }
-    else if (i != types.end() - 1)
+    else if (remaining > 2)
     {
       r += ",\n";
     }
