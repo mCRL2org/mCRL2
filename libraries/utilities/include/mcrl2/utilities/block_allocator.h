@@ -272,6 +272,20 @@ private:
         e->next = block_allocator::sentinel_ptr();
         e = next;
       }
+
+      // Mark the entries of the current block that were never bump-allocated
+      // (the range [bump_offset, N)) as free too. These slots are not on any
+      // freelist and would otherwise neither be reclaimed nor returned to the
+      // shared free chunks, leaking them (and pinning their block) until the
+      // allocator is destroyed.
+      if (state.current_block != nullptr)
+      {
+        for (std::size_t i = state.bump_offset; i < N; ++i)
+        {
+          state.current_block->data[i].next = block_allocator::sentinel_ptr();
+        }
+      }
+
       state.free_head = nullptr;
       state.current_block = nullptr;
       state.bump_offset = N;
