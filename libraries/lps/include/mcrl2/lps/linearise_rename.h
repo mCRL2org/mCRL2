@@ -56,6 +56,9 @@ namespace mcrl2::lps
     return action;
   }
 
+  /// Apply renamings to a list of actions.
+  ///
+  /// Note that the result is not sorted.
   inline
   process::action_list rename(const process::rename_expression_list& renamings,
                               const process::action_list& actions)
@@ -94,7 +97,7 @@ namespace mcrl2::lps
     const process::rename_expression_list& renamings,
     lps::stochastic_action_summand_vector& action_summands)
   {
-    [[maybe_unused]]    
+    [[maybe_unused]]
     lps_statistics_t lps_statistics_before = get_statistics(action_summands);
 
     for (stochastic_action_summand& action_summand: action_summands)
