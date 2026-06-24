@@ -19,7 +19,7 @@
 
 #include "mcrl2/utilities/noncopyable.h"
 #include "mcrl2/utilities/configuration.h"
-
+#include "mcrl2/utilities/hardware_interference_size.h"
 
 namespace mcrl2::utilities
 {
@@ -114,7 +114,7 @@ struct shared_mutex_data
 
 /// An implementation of a shared mutex (also called readers-write lock in the literature) based on
 /// the notion of busy and forbidden flags.
-class shared_mutex
+class alignas(hardware_destructive_interference_size) shared_mutex
 {
 public:
   shared_mutex()
