@@ -70,11 +70,7 @@ inline hashtable<Key,Hash,Equals,Allocator>::hashtable(std::size_t initial_size,
 template <class Key, typename Hash, typename Equals, typename Allocator>
 inline void hashtable<Key,Hash,Equals,Allocator>::clear()
 {
-  // Reset every slot to the empty value (nullptr) and the element count to zero,
-  // while keeping the current capacity (and therefore m_buckets_mask) valid.
-  // Note that m_hashtable.clear() must not be used here: it would shrink the
-  // vector to size zero, leaving m_buckets_mask and m_number_of_elements stale
-  // and every subsequent get_index() out of bounds.
+  // Reset every slot to the empty value.
   m_hashtable.assign(m_hashtable.size(), nullptr);
   m_number_of_elements = 0;
 }

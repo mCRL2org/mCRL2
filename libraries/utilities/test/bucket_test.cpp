@@ -63,3 +63,34 @@ BOOST_AUTO_TEST_CASE(test_list)
 
   BOOST_CHECK_EQUAL(length(list), 0);
 }
+
+BOOST_AUTO_TEST_CASE(test_emplace_front_unique_duplicate)
+{
+  // Regression test: emplace_front_unique constructs the node first (moving its
+  // rvalue arguments into the node) and then checks for a duplicate. The check
+  // must compare against the already-constructed key, not re-forward the
+  // (possibly moved-from) arguments. With a movable key such as std::string,
+  // re-forwarding compared against an empty moved-from string, so a duplicate was
+  // not detected.
+  using Bucket = bucket_list<std::string, std::allocator<std::string>>;
+  Bucket::NodeAllocator allocator;
+  Bucket list;
+
+  std::equal_to<std::string> equals;
+
+  auto [it1, added1] = list.emplace_front_unique(allocator, equals, std::string("hello"));
+  (void)it1;
+  BOOST_CHECK(added1);
+
+  // Inserting the same value (as an rvalue) again must be detected as a duplicate.
+  auto [it2, added2] = list.emplace_front_unique(allocator, equals, std::string("hello"));
+  (void)it2;
+  BOOST_CHECK(!added2);
+
+  // A different value is still inserted.
+  auto [it3, added3] = list.emplace_front_unique(allocator, equals, std::string("world"));
+  (void)it3;
+  BOOST_CHECK(added3);
+
+  list.clear(allocator);
+}
