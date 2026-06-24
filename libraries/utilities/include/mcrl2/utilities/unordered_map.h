@@ -155,16 +155,28 @@ public:
   std::pair<iterator, bool> emplace(Args&&... args) { auto[x, y] = m_set.emplace(std::forward<Args>(args)...); return std::make_pair(iterator(x), y); }
 
   template<typename ...Args>
-  iterator emplace_hint(const_iterator /*hint*/, Args&&... args) { return emplace(std::forward<Args>(args)...); }
+  iterator emplace_hint(const_iterator /*hint*/, Args&&... args) { return emplace(std::forward<Args>(args)...).first; }
 
   template<typename ...Args>
   std::pair<iterator, bool> try_emplace(const key_type& key, Args&&... args);
 
   template< class... Args >
-  iterator try_emplace(const_iterator /*hint*/, const Key& k, Args&&... args) { return try_emplace(k, std::forward<Args>(args)...); }
+  iterator try_emplace(const_iterator /*hint*/, const Key& k, Args&&... args) { return try_emplace(k, std::forward<Args>(args)...).first; }
 
   template< class... Args >
-  iterator try_emplace(const_iterator /*hint*/, Key&& k, Args&&... args) { return try_emplace(std::move<Key>(k), std::forward<Args>(args)...); }
+  iterator try_emplace(const_iterator /*hint*/, Key&& k, Args&&... args) { return try_emplace(std::move(k), std::forward<Args>(args)...).first; }
+
+  template <typename M>
+  std::pair<iterator, bool> insert_or_assign(const Key& k, M&& obj)
+  {
+    auto it = find(k);
+    if (it != end())
+    {
+      (*it).second = std::forward<M>(obj);
+      return std::make_pair(it, false);
+    }
+    return emplace(k, std::forward<M>(obj));
+  }
 
   template <typename M>
   std::pair<iterator, bool> insert_or_assign(Key&& k, M&& obj)
@@ -172,23 +184,17 @@ public:
     auto it = find(k);
     if (it != end())
     {
-      *it = obj;
-      return std::make_pair(it, true);
+      (*it).second = std::forward<M>(obj);
+      return std::make_pair(it, false);
     }
-    else
-    {
-      return emplace(std::move(k), std::forward(obj));
-    }
+    return emplace(std::move(k), std::forward<M>(obj));
   }
 
   template <typename M>
-  std::pair<iterator, bool> insert_or_assign(const Key& k, M&& obj) { return insert_or_emplace(k, std::forward<M>(obj)); }
+  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, const Key& k, M&& obj) { return insert_or_assign(k, std::forward<M>(obj)); }
 
   template <typename M>
-  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, const Key& k, M&& obj) { return insert_or_emplace(k, std::forward<M>(obj)); }
-
-  template <typename M>
-  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, Key&& k, M&& obj) { return insert_or_emplace(std::move<Key>(k), std::forward<M>(obj)); }
+  std::pair<iterator, bool> insert_or_assign(const_iterator /* hint */, Key&& k, M&& obj) { return insert_or_assign(std::move(k), std::forward<M>(obj)); }
 
   /// \brief Erases elements.
   void erase(const key_type& key) { const_iterator it = m_set.find(key); m_set.erase(it); }
