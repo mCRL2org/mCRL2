@@ -161,7 +161,7 @@ public:
   /// \brief Removes the element after the given iterator from the list. The returned iterator
   iterator erase_after(iterator it)
   {
-    slot* current_node = it.get_node();
+    slot* current_node = it.get_slot();
     assert(current_node->next() != nullptr); // Cannot erase after the last node.
 
     // Keep track of the node that we should remove.
@@ -182,7 +182,7 @@ public:
     union slot* slot = reinterpret_cast<union slot*>(pointer);
     for (auto it = begin(); it != end(); ++it)
     {
-      if (slot == *it)
+      if (slot == it.get_slot())
       {
         return true;
       }
