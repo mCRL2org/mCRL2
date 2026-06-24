@@ -10,16 +10,64 @@
 #ifndef MCRL_LPS_LPS_SUMMAND_GROUP_H
 #define MCRL_LPS_LPS_SUMMAND_GROUP_H
 
-#ifdef MCRL2_ENABLE_SYLVAN
-
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/action_summand.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/symbolic/summand_group.h"
-#include "mcrl2/symbolic/utility.h"
+#include "mcrl2/symbolic/ordering.h"
 
 #include <functional>
 #include <set>
+
+namespace mcrl2::lps
+{
+
+namespace
+{
+
+/// \brief Computes the read and written process parameters for the given summand
+inline
+std::pair<std::set<data::variable>, std::set<data::variable>> read_write_parameters(const lps::action_summand& summand, const std::set<data::variable>& process_parameters)
+{
+  using utilities::detail::set_union;
+  using utilities::detail::set_intersection;
+
+  // TODO: multi-action free variables are only necessary when actions are rewritten.
+  std::set<data::variable> read_parameters = set_union(data::find_free_variables(summand.condition()), lps::find_free_variables(summand.multi_action()));
+  std::set<data::variable> write_parameters;
+
+  for (const auto& assignment: summand.assignments())
+  {
+    if (assignment.lhs() != assignment.rhs())
+    {
+      write_parameters.insert(assignment.lhs());
+      data::find_free_variables(assignment.rhs(), std::inserter(read_parameters, read_parameters.end()));
+    }
+  }
+
+  return { set_intersection(read_parameters, process_parameters), set_intersection(write_parameters, process_parameters) };
+}
+
+/// \brief Assigns a unique index to every parameter of the process.
+template <typename Specification>
+std::map<data::variable, std::size_t> process_parameter_index(const Specification& lpsspec)
+{
+  std::map<data::variable, std::size_t> result;
+  std::size_t i = 0;
+  for (const data::variable& v: lpsspec.process().process_parameters())
+  {
+    result[v] = i++;
+  }
+  return result;
+}
+
+} // internal
+
+} // namespace mcrl2::lps
+
+#ifdef MCRL2_ENABLE_SYLVAN
+
+#include "mcrl2/symbolic/summand_group.h"
+#include "mcrl2/symbolic/utility.h"
 
 namespace mcrl2::lps
 {
@@ -78,47 +126,6 @@ struct lps_summand_group: public symbolic::summand_group
   
   std::vector<lps::multi_action> actions;
 };
-
-namespace 
-{
-
-/// \brief Computes the read and written process parameters for the given summand
-inline
-std::pair<std::set<data::variable>, std::set<data::variable>> read_write_parameters(const lps::action_summand& summand, const std::set<data::variable>& process_parameters)
-{
-  using utilities::detail::set_union;
-  using utilities::detail::set_intersection;
-
-  // TODO: multi-action free variables are only necessary when actions are rewritten.
-  std::set<data::variable> read_parameters = set_union(data::find_free_variables(summand.condition()), lps::find_free_variables(summand.multi_action()));
-  std::set<data::variable> write_parameters;
-
-  for (const auto& assignment: summand.assignments())
-  {
-    if (assignment.lhs() != assignment.rhs())
-    {
-      write_parameters.insert(assignment.lhs());
-      data::find_free_variables(assignment.rhs(), std::inserter(read_parameters, read_parameters.end()));
-    }
-  }
-
-  return { set_intersection(read_parameters, process_parameters), set_intersection(write_parameters, process_parameters) };
-}
-
-/// \brief Assigns a unique index to every parameter of the process.
-template <typename Specification>
-std::map<data::variable, std::size_t> process_parameter_index(const Specification& lpsspec)
-{
-  std::map<data::variable, std::size_t> result;
-  std::size_t i = 0;
-  for (const data::variable& v: lpsspec.process().process_parameters())
-  {
-    result[v] = i++;
-  }
-  return result;
-}
-
-} // internal
 
 std::vector<boost::dynamic_bitset<>> compute_read_write_patterns(const lps::specification& lpsspec)
 {
