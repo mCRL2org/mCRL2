@@ -366,6 +366,11 @@ BOOST_AUTO_TEST_CASE(preprocess_nested_modal_operators_test)
   test_preprocess_nested_modal_operators("[a]<b>true", lpsspec, "[a]mu X. <b>true");
   test_preprocess_nested_modal_operators("true && <a><a>true", lpsspec, "true && <a>mu X. <a>true");
   test_preprocess_nested_modal_operators("true => mu X. [a]<b>true", lpsspec, "true => mu X. [a]mu X1. <b>true");
+
+  // Regression test: the 'may' (diamond) handler must keep the recursively
+  // processed operand, just like the 'must' (box) handler does.
+  test_preprocess_nested_modal_operators("[c](nu Z. <a><b>true)", lpsspec, "[c](nu Z. <a>(nu X. <b>true))");
+  test_preprocess_nested_modal_operators("<c>(nu Z. <a><b>true)", lpsspec, "<c>(nu Z. <a>(nu X. <b>true))");
 }
 
 BOOST_AUTO_TEST_CASE(parse_modal_formula_test)

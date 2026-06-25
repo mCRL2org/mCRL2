@@ -134,6 +134,7 @@ std::size_t count_modal_operator_nesting(const state_formula& x)
   return f.result;
 }
 
+/// \brief Traverser that detects unscoped modal operators.
 struct has_unscoped_modal_formula_traverser: public state_formula_traverser<has_unscoped_modal_formula_traverser>
 {
   using super = state_formula_traverser<has_unscoped_modal_formula_traverser>;
@@ -142,6 +143,9 @@ struct has_unscoped_modal_formula_traverser: public state_formula_traverser<has_
   using super::apply;
 
   bool result = false;
+
+  /// \brief Stack of the fixpoint operators (mu/nu) that enclose the current node.
+  /// When it is empty, any modal operator that is visited is unscoped.
   std::vector<state_formula> fixpoints;
 
   void push(const state_formula& x)
@@ -191,6 +195,12 @@ struct has_unscoped_modal_formula_traverser: public state_formula_traverser<has_
   }
 };
 
+/// \brief Checks whether a state formula contains an unscoped modal operator.
+/// A modal operator (must '[a]' or may '<a>') is <em>unscoped</em> when, on the path from the root of
+/// the formula to that operator, it is not preceded by a fixpoint operator (mu or nu). In other words,
+/// the modal operator is not contained in the scope of any fixpoint. For example '[a]true' and
+/// 'true => <a>true' contain an unscoped modal operator, whereas in 'mu X. [a]<b>true' both modal
+/// operators are scoped by the surrounding 'mu X'.
 inline
 bool has_unscoped_modal_formulas(const state_formula& x)
 {
@@ -289,7 +299,7 @@ struct state_formula_preprocess_nested_modal_operators_builder: public state_for
     apply(operand, x.operand());
     if (!has_unscoped_modal_formulas(operand))
     {
-      result = x;
+      make_may(result, x.formula(), operand);
       return;
     }
     core::identifier_string X = generator("X");
