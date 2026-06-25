@@ -62,7 +62,6 @@ struct rewrite_star_substitution
 {
   const fixpoint_symbol& symbol;
   const propositional_variable_instantiation& X;
-  const pbes_expression& psi;
   const structure_graph& G;
   bool alpha;
   const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping;
@@ -70,14 +69,12 @@ struct rewrite_star_substitution
 
   rewrite_star_substitution(const fixpoint_symbol& symbol,
       const propositional_variable_instantiation& X,
-      const pbes_expression& psi,
       const structure_graph& G,
       bool alpha,
       const std::unordered_map<pbes_expression, structure_graph::index_type>& mapping,
       const std::unordered_map<std::string, std::set<int>>& R)
       : symbol(symbol),
       X(X),
-      psi(psi),
       G(G),
       alpha(alpha),
       mapping(mapping),
@@ -95,7 +92,7 @@ struct rewrite_star_substitution
     std::smatch match;
 
     // Now we need to find all reachable X --> Y, following vertices that are not ranked.
-    mCRL2log(log::debug) << "X = " << X << ", psi = " << psi << std::endl;
+    mCRL2log(log::debug) << "X = " << X << std::endl;
 
     std::unordered_set<pbes_expression> Ys;
 
@@ -247,7 +244,7 @@ public:
     const pbes_expression& phi) override
   {
     return compose_substitutions(pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi), 
-      detail::rewrite_star_substitution(symbol, X, phi, G, alpha, mapping, R));
+      detail::rewrite_star_substitution(symbol, X, G, alpha, mapping, R));
   }
 
 private:
@@ -282,7 +279,7 @@ public:
     const pbes_expression& phi) override
   {
     return compose_substitutions(pbesinst_structure_graph_algorithm::phi_substitution(thread_index, symbol, X, phi),
-      detail::rewrite_star_substitution(symbol, X, phi, G, alpha, mapping, R));
+      detail::rewrite_star_substitution(symbol, X, G, alpha, mapping, R));
   }
 
 private:
