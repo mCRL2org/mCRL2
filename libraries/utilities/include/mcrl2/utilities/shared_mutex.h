@@ -267,9 +267,6 @@ public:
     return true;
   }
 
-// REMOVE
-inline std::size_t get_lock_depth() { return m_lock_depth; }
-      
   inline
   void lock_shared_impl()
   {
