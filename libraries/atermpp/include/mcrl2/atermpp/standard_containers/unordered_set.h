@@ -303,6 +303,8 @@ protected:
   void rehash(std::size_t new_size);
 
   void rehash_if_needed();
+
+  bool rehash_is_needed() const;
 };
 
 } // namespace utilities

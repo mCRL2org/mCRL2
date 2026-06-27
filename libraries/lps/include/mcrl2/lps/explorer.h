@@ -1,10 +1,10 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink. 
 // Copyright: see the accompanying file COPYING or copy at
-// https://github.com/mCRL2org/mCRL2/blob/master/COPYING
+// https://github.com/mCRL2org./mCRL2/blob/master/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
+// http://www.boost.org/LICENSE _1_0.txt)
 //
 /// \file mcrl2/lps/explorer.h
 /// \brief Generic state space explorer for (stochastic) linear process specifications.
@@ -78,6 +78,9 @@ class explorer: public abortable
     Specification m_global_lpsspec;
     // Mutexes
     std::mutex m_exclusive_state_access;
+    // Mutex locked if a process finds the global buffer empty, and unlocked if it is (attempted to be) refilled
+    std::mutex m_global_todo_buffer_mutex;
+    std::condition_variable m_signal_global_todo_buffer_filled;
 
     std::vector<data::variable> m_process_parameters;
     std::size_t m_n; // m_n = m_process_parameters.size()
@@ -912,7 +915,6 @@ class explorer: public abortable
     void generate_state_space_thread(std::unique_ptr<todo_set>& todo,
       std::size_t thread_index,
       std::atomic<std::size_t>& number_of_active_processes,
-      std::atomic<std::size_t>& number_of_idle_processes,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
       indexed_set_for_states_type& discovered,

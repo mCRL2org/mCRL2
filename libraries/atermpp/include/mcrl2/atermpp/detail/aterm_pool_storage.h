@@ -145,6 +145,9 @@ public:
   ///        mark() was called first.
   void sweep();
 
+  /// \brief Check whether resizing the hash table is needed. 
+  bool resize_is_needed() const;
+
   /// \brief Resizes the hash table if necessary.
   void resize_if_needed();
 

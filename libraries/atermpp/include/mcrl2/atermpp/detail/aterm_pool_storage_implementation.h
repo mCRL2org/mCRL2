@@ -334,6 +334,12 @@ void ATERM_POOL_STORAGE::sweep()
 }
 
 ATERM_POOL_STORAGE_TEMPLATES
+bool ATERM_POOL_STORAGE::resize_is_needed() const
+{
+  return m_term_set.rehash_is_needed();
+}
+
+ATERM_POOL_STORAGE_TEMPLATES
 void ATERM_POOL_STORAGE::resize_if_needed()
 {
   m_term_set.rehash_if_needed();

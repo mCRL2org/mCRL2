@@ -340,6 +340,10 @@ public:
   /// \details Not standard.
   size_type capacity() const noexcept { return m_buckets.size(); }
 
+  /// \brief Checks whether a rehash is required. 
+  /// \details Not standard.
+  bool rehash_is_needed() const;
+
   /// \brief Resizes the hash table if necessary.
   /// \details Not standard.
   void rehash_if_needed();

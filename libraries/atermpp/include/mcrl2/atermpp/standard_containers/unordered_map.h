@@ -446,6 +446,8 @@ class unordered_map : public mcrl2::utilities::unordered_map< detail::markable_a
     void rehash(std::size_t /* new_size */);
   
     void rehash_if_needed();
+
+    bool rehash_is_needed() const;
 };
 }
 

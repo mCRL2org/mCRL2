@@ -324,13 +324,19 @@ namespace atermpp::utilities {
 
   
   template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
+  inline bool unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::rehash_is_needed() const
+  {
+    return super::load_factor() >= super::max_load_factor();
+  }
+
+  template< class Key, class T, class Hash, class Pred, class Alloc, bool ThreadSafe >
   inline void unordered_map<Key,T,Hash,Pred,Alloc,ThreadSafe>::rehash_if_needed()
   {
     // These functions are not thread safe.
     mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
-    std::size_t count = super::bucket_count();
-    if (super::load_factor() >= super::max_load_factor())
+    if (rehash_is_needed())
     {
+      std::size_t count = super::bucket_count();
       guard.unlock_shared();
       rehash(count* 2);
     }

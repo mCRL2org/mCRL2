@@ -378,9 +378,15 @@ auto MCRL2_UNORDERED_SET_CLASS::find_impl(size_type bucket_index, const Args&...
 }
 
 MCRL2_UNORDERED_SET_TEMPLATES
+bool MCRL2_UNORDERED_SET_CLASS::rehash_is_needed() const
+{
+  return load_factor() >= max_load_factor();
+}
+
+MCRL2_UNORDERED_SET_TEMPLATES
 void MCRL2_UNORDERED_SET_CLASS::rehash_if_needed()
 {
-  if (load_factor() >= max_load_factor())
+  if (rehash_is_needed())
   {
     rehash(m_buckets.size() * 2);
   }

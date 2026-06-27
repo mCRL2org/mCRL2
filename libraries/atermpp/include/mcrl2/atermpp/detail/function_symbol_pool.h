@@ -45,6 +45,9 @@ public:
   /// \threadsafe
   std::shared_ptr<std::size_t> register_prefix(const std::string& prefix);
 
+  /// \brief Check whether a resize is needed. 
+  bool resize_is_needed() const;
+
   /// \brief Resize the function symbol pool if necessary.
   void resize_if_needed();
 

@@ -183,6 +183,10 @@ private:
       InputIterator end);
 
   /// \brief Resizes all storages if necessary.
+  /// \details This locks the shared mutex in shared mode for thread safety. 
+  inline bool resize_is_needed(mcrl2::utilities::shared_mutex& shared) const;
+
+  /// \brief Resizes all storages if necessary.
   /// \details threadsafe
   inline void resize_if_needed(mcrl2::utilities::shared_mutex& shared);
 
@@ -217,7 +221,7 @@ private:
 
   /// Track the number of terms destroyed and reduce the freelist.
   std::atomic<long> m_count_until_collection = 0;
-  std::atomic<long> m_count_until_resize = 0;
+  std::atomic<long> m_count_until_resize = 0; 
 
   std::atomic<bool> m_enable_garbage_collection = EnableGarbageCollection; /// Garbage collection is enabled.
 

@@ -42,7 +42,7 @@ public:
 
   ~shared_guard()
   {
-    if (is_locked)
+    if (m_is_locked)
     {
       unlock_shared();
     }
@@ -56,7 +56,7 @@ private:
   {}
 
   shared_mutex& m_mutex;
-  bool is_locked = true;
+  bool m_is_locked = true;
 };
 
 /// An exclusive lock guard for the shared_mutex.
@@ -66,23 +66,30 @@ public:
   /// Unlocks the acquired shared guard explicitly. Otherwise, performed in destructor.
   void unlock();
 
+  bool try_lock();
+
   ~lock_guard()
   {
-    if (is_locked)
+    if (m_is_locked)
     {
       unlock();
     }
   }
 
+  bool owns_lock() const
+  {
+    return m_is_locked;
+  }
+
 private:
   friend class shared_mutex;
 
-  lock_guard(shared_mutex& mutex)
-    : m_mutex(mutex)
+  lock_guard(shared_mutex& mutex, bool locked=true)
+    : m_mutex(mutex), m_is_locked(locked)
   {}
 
   shared_mutex& m_mutex;
-  bool is_locked = true;
+  bool m_is_locked;
 };
 
 struct shared_mutex_data 
@@ -175,6 +182,15 @@ public:
     return lock_guard(*this);
   }
 
+  // Try to obtain exclusive access to the busy-forbidden lock without blocking.
+  // Returns a lock_guard with is_locked set to true if successful, false otherwise.
+  inline
+  lock_guard try_lock()
+  {
+    bool acquired = try_lock_impl();
+    return lock_guard(*this, acquired);
+  }
+
   // Release exclusive access to the busy-forbidden lock.
   inline
   void unlock()
@@ -198,37 +214,61 @@ public:
   }
 
   inline
+  void set_forbidden_flags() 
+  {    
+    // Shared and exclusive sections MUST be disjoint.
+    assert(!m_busy_flag);
+
+    assert(std::find(m_shared->other.begin(), m_shared->other.end(), this) != m_shared->other.end());
+
+    // Indicate that threads must wait.
+    for (shared_mutex* mutex : m_shared->other)
+    {
+      if (mutex != this)
+      {
+        mutex->set_forbidden(true);
+      }
+    }
+
+    // Wait for all pools to indicate that they are not busy.
+    for (const shared_mutex* mutex : m_shared->other)
+    {
+      if (mutex != this)
+      {
+        mutex->wait_for_busy();
+      }
+    }
+  }
+
+  inline
   void lock_impl() 
   {    
     if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
     {
-      // Shared and exclusive sections MUST be disjoint.
-      assert(!m_busy_flag);
-      
       // Only one thread can halt everything.
       m_shared->mutex.lock();
-
-      assert(std::find(m_shared->other.begin(), m_shared->other.end(), this) != m_shared->other.end());
-
-      // Indicate that threads must wait.
-      for (auto& mutex : m_shared->other)
-      {
-        if (mutex != this)
-        {
-          mutex->set_forbidden(true);
-        }
-      }
-
-      // Wait for all pools to indicate that they are not busy.
-      for (const auto& mutex : m_shared->other)
-      {
-        if (mutex != this)
-        {
-          mutex->wait_for_busy();
-        }
-      }
+      set_forbidden_flags();
     }
   }
+
+  inline
+  bool try_lock_impl() 
+  {    
+    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
+    {
+      // Try to obtain the lock. If the surrounding mutex cannot be locked, this fails.
+      if (!m_shared->mutex.try_lock())
+      {
+        return false;
+      }
+
+      set_forbidden_flags();
+    }
+    return true;
+  }
+
+// REMOVE
+inline std::size_t get_lock_depth() { return m_lock_depth; }
       
   inline
   void lock_shared_impl()
@@ -277,7 +317,7 @@ private:
   {
     if constexpr (mcrl2::utilities::detail::GlobalThreadSafe)
     {
-      for (auto& mutex : m_shared->other)
+      for (shared_mutex* mutex : m_shared->other)
       {
         mutex->set_forbidden(false);
       }
@@ -322,21 +362,27 @@ void shared_guard::lock_shared()
 {    
   // Uses the internal implementation since we don't need a shared_guard.
   m_mutex.lock_shared_impl();
-  is_locked = true;
+  m_is_locked = true;
 }
 
 inline
 void shared_guard::unlock_shared()
 {    
   m_mutex.unlock_shared();
-  is_locked = false;
+  m_is_locked = false;
+}
+
+inline
+bool lock_guard::try_lock()
+{
+  return m_mutex.try_lock_impl();
 }
 
 inline
 void lock_guard::unlock()
 {
   m_mutex.unlock();
-  is_locked = false;
+  m_is_locked = false;
 }
 
 } // namespace mcrl2::utilities

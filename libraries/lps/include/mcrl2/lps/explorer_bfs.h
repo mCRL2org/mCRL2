@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink. Multi-threading added by Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/explorer_bfs.h
-/// \brief Breadth-first state space exploration on top of the generic explorer.
+/// \brief Breadth/depth-first state space exploration on top of the generic explorer.
 
 #ifndef MCRL2_LPS_EXPLORER_BFS_H
 #define MCRL2_LPS_EXPLORER_BFS_H
@@ -32,7 +32,6 @@ namespace mcrl2::lps
       std::unique_ptr<todo_set>& todo,
       const std::size_t thread_index,
       std::atomic<std::size_t>& number_of_active_processes,
-      std::atomic<std::size_t>& number_of_idle_processes,
       const SummandSequence& regular_summands,
       const SummandSequence& confluent_summands,
       indexed_set_for_states_type& discovered,
@@ -60,7 +59,8 @@ namespace mcrl2::lps
       {
         m_exclusive_state_access.lock();
       }
-      while (number_of_active_processes>0 || !todo->empty())
+      
+      while (!m_must_abort.load(std::memory_order_relaxed)) 
       {
         assert(m_must_abort || thread_todo->empty());
           
@@ -159,31 +159,40 @@ namespace mcrl2::lps
               );
             }
 
-            if (number_of_idle_processes>0 && thread_todo->size()>1)
-            {
-              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-              {
-                m_exclusive_state_access.lock();
-              }
+            finish_state(thread_index, m_options.number_of_threads, current_state, s_index, thread_todo->size());
+            thread_todo->finish_state();
 
-              if (todo->size() < m_options.number_of_threads) 
+            // TODO: The constant 100 below is quite arbitrary, and could be chosen more wisely.
+            // If it is too low, then m_exclusive_state_access.lock(); becomes dominant, whereas 
+            // few states that a local process owns are redistributed, which is not wise. 
+            // It would be nice if we could find an optimal redistribution strategy of the 
+            // states in the todo buffers, minimizing the number of times a mutex has to be 
+            // obtained. 
+            if (number_of_active_processes<m_options.number_of_threads && thread_todo->size()>100)
+            {
+              if (todo->size()==0)
               {
+                if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+                {
+                  m_exclusive_state_access.lock();
+                }
+
                 // move 25% of the states of this thread to the global todo buffer.
-                for(std::size_t i=0; i<std::min(thread_todo->size()-1,1+(thread_todo->size()/4)); ++i)  
+                std::size_t number_of_states_to_move=std::min(thread_todo->size()-1,1+(thread_todo->size()/4));
+                for(std::size_t i=0; i<number_of_states_to_move; ++i)  
                 {
                   thread_todo->choose_element(current_state);
                   todo->insert(current_state);
                 }
+                if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+                {
+                  m_exclusive_state_access.unlock();
+                }
+                std::lock_guard<std::mutex> lock(m_global_todo_buffer_mutex);
+                m_signal_global_todo_buffer_filled.notify_all();
               }
 
-              if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-              {
-                m_exclusive_state_access.unlock();
-              }
             }
-
-            finish_state(thread_index, m_options.number_of_threads, current_state, s_index, thread_todo->size());
-            thread_todo->finish_state();
           }
         }
         else
@@ -196,31 +205,30 @@ namespace mcrl2::lps
         // Check whether all processes are ready. If so the number_of_active_processes becomes 0. 
         // Otherwise, this thread becomes active again, and tries to see whether the todo buffer is
         // not empty, to take up more work. 
-        number_of_active_processes--;
-        number_of_idle_processes++;
-        if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
-        {
-          m_exclusive_state_access.lock();
-        }
 
         assert(thread_todo->empty() || m_must_abort);
         if (todo->empty())
         {
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+          std::unique_lock<std::mutex> lock(m_global_todo_buffer_mutex);  
+          // Atomic decrement and compare is essential) 
+          if (1==number_of_active_processes.fetch_sub(1))
           {
-            m_exclusive_state_access.unlock();
+            m_must_abort=true;
+            m_signal_global_todo_buffer_filled.notify_all(); 
           }
-          std::this_thread::sleep_for(std::chrono::milliseconds(100));
-          if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
+          else
           {
-            m_exclusive_state_access.lock();
+            m_signal_global_todo_buffer_filled.wait(lock); 
+            if (!m_must_abort) 
+            {
+              number_of_active_processes++;   
+            }
           }
         }
-        if (number_of_active_processes>0 || !todo->empty())
+        if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
         {
-          number_of_active_processes++;
+          m_exclusive_state_access.lock();
         }
-        number_of_idle_processes--;
       } 
       mCRL2log(log::debug) << "Stop thread " << thread_index << ".\n";
       if (mcrl2::utilities::detail::GlobalThreadSafe && m_options.number_of_threads > 1)
@@ -289,7 +297,6 @@ namespace mcrl2::lps
       }
 
       std::atomic<std::size_t> number_of_active_processes=number_of_threads;
-      std::atomic<std::size_t> number_of_idle_processes=0;
 
       if (number_of_threads>1)
       {
@@ -304,7 +311,7 @@ namespace mcrl2::lps
                                                          StartState, FinishState,
                                                          DiscoverInitialState >
                                        (todo, 
-                                        i, number_of_active_processes, number_of_idle_processes,
+                                        i, number_of_active_processes, 
                                         regular_summands,confluent_summands,discovered, discover_state,
                                         examine_transition, start_state, finish_state, 
                                         m_global_rewr.clone(), m_global_sigma); } );  // It is essential that the rewriter is cloned as
@@ -325,7 +332,7 @@ namespace mcrl2::lps
                                                 DiscoverState, ExamineTransition,
                                                 StartState, FinishState,
                                                 DiscoverInitialState >
-                                  (todo,single_thread_index,number_of_active_processes, number_of_idle_processes,
+                                  (todo,single_thread_index,number_of_active_processes, 
                                    regular_summands,confluent_summands,discovered, discover_state,
                                    examine_transition, start_state, finish_state, 
                                    m_global_rewr, m_global_sigma);  

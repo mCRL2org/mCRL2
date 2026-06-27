@@ -220,6 +220,11 @@ void function_symbol_pool::sweep()
   }
 }
 
+bool function_symbol_pool::resize_is_needed() const
+{
+  return m_symbol_set.rehash_is_needed();
+}
+
 void function_symbol_pool::resize_if_needed()
 {
   m_mutex.lock();
