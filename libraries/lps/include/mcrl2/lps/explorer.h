@@ -15,7 +15,7 @@
 #include <random>
 #include <thread>
 #include <type_traits>
-#include "mcrl2/data/find_quantifier_variables.h"
+#include <condition_variable>
 #include "mcrl2/utilities/detail/io.h"
 #include "mcrl2/utilities/skip.h"
 #include "mcrl2/atermpp/standard_containers/vector.h"
@@ -23,6 +23,7 @@
 #include "mcrl2/atermpp/standard_containers/detail/unordered_map_implementation.h"
 #include "mcrl2/data/consistency.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/find_quantifier_variables.h"
 #include "mcrl2/data/detail/enumerator_iteration_limit.h"
 #include "mcrl2/data/substitution_utility.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
