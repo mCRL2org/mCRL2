@@ -44,10 +44,12 @@ class multi_action: public atermpp::aterm
       return atermpp::down_cast<data::data_expression>((*this)[1]);
     }
 //--- start user section multi_action ---//
-    /// \brief Constructor
-    explicit multi_action(const process::action_list& actions = process::action_list(), 
+    /// \brief Constructor. Actions are sorted to establish the sorted-storage invariant.
+    explicit multi_action(const process::action_list& actions = process::action_list(),
                           data::data_expression time = data::undefined_real())
-      : atermpp::aterm(core::detail::function_symbol_TimedMultAct(), actions, time)
+      : atermpp::aterm(core::detail::function_symbol_TimedMultAct(),
+                       atermpp::sort_list(actions),
+                       time)
     {
       assert(data::sort_real::is_real(time.sort()));
     }
@@ -80,18 +82,6 @@ class multi_action: public atermpp::aterm
       return multi_action(actions() + other.actions(), time());
     }
 
-    /// \brief Returns the multiaction in which the list of actions is sorted. 
-    /// \return A multi-action with a sorted list.
-    multi_action sort_actions() const
-    {
-      return multi_action(atermpp::sort_list(actions()),time());
-    }
-
-    bool operator==(const multi_action& other) const
-    {
-      return time()==other.time() && atermpp::sort_list(actions())==atermpp::sort_list(other.actions());
-    }
-
    //--- end user section multi_action ---//
 };
 
@@ -101,6 +91,10 @@ template <class... ARGUMENTS>
 inline void make_multi_action(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_TimedMultAct(), args...);
+  // Re-assign through the sorting constructor to maintain the sorted-storage invariant
+  // when the action list is rebuilt by a builder traversal (make_term_appl bypasses it).
+  t = multi_action(atermpp::down_cast<multi_action>(t).actions(),
+                   atermpp::down_cast<multi_action>(t).time());
 }
 
 /// \\brief list of multi_actions
@@ -206,23 +200,6 @@ struct compare_action_labels
   }
 };
 
-/// \brief Compares action labels and arguments
-struct compare_action_label_arguments
-{
-  /// \brief Function call operator
-  /// \param a An action
-  /// \param b An action
-  /// \return The function result
-  bool operator()(const process::action& a, const process::action& b) const
-  {
-    if (a.label() != b.label())
-    {
-      return a.label() < b.label();
-    }
-    return a < b;
-  }
-};
-
 /// \brief Used for building an expression for the comparison of data parameters.
 struct equal_data_parameters_builder
 {
@@ -314,11 +291,10 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
 {
   using namespace data::lazy;
 
-  // make copies of a and b and sort them
-  std::vector<process::action> va(a.actions().begin(), a.actions().end()); // protection not needed
-  std::vector<process::action> vb(b.actions().begin(), b.actions().end()); // protection not needed
-  std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
-  std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
+  assert(std::is_sorted(a.actions().begin(), a.actions().end()));
+  assert(std::is_sorted(b.actions().begin(), b.actions().end()));
+  std::vector<process::action> va(a.actions().begin(), a.actions().end());
+  std::vector<process::action> vb(b.actions().begin(), b.actions().end());
 
   if (!detail::equal_action_signatures(va, vb))
   {
@@ -352,11 +328,10 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
 {
   using namespace data::lazy;
 
-  // make copies of a and b and sort them
+  assert(std::is_sorted(a.actions().begin(), a.actions().end()));
+  assert(std::is_sorted(b.actions().begin(), b.actions().end()));
   std::vector<process::action> va(a.actions().begin(), a.actions().end());
   std::vector<process::action> vb(b.actions().begin(), b.actions().end());
-  std::sort(va.begin(), va.end(), detail::compare_action_label_arguments());
-  std::sort(vb.begin(), vb.end(), detail::compare_action_label_arguments());
 
   if (!detail::equal_action_signatures(va, vb))
   {

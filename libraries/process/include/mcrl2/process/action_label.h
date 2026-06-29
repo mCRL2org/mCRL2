@@ -122,19 +122,13 @@ struct action_name_compare
   }
 };
 
-/// Determine if a1 < a2; the key requirement is that orderings of action labels and the actions in multiactions are
-/// consistent.
-struct action_label_compare
+/// Total ordering on action labels: name first (string order), then sorts.
+inline bool operator<(const action_label& a1, const action_label& a2)
 {
-  bool operator()(const process::action_label& a1, const process::action_label& a2) const
-  {
-    /* first compare the strings in the actions */
-    const core::identifier_string& a1_name = a1.name();
-    const core::identifier_string& a2_name = a2.name();
-
-    return action_name_compare()(a1_name, a2_name) || (a1_name == a2_name && a1.sorts() < a2.sorts());
-  }
-};
+  const std::string& s1 = a1.name();
+  const std::string& s2 = a2.name();
+  return s1 < s2 || (s1 == s2 && a1.sorts() < a2.sorts());
+}
 
 } // namespace mcrl2::process
 

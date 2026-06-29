@@ -15,6 +15,7 @@
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
 #include <boost/test/included/unit_test.hpp>
+#include <set>
 
 using namespace mcrl2;
 using lps::stochastic_specification;
@@ -23,7 +24,35 @@ using lps::action_summand;
 using lps::action_summand_vector;
 using lps::deadlock_summand;
 
-void test1()
+inline
+std::multiset<std::string> multiaction_names(const lps::multi_action& ma)
+{
+  std::multiset<std::string> result;
+  for (const auto& a : ma.actions())
+  {
+    result.insert(std::string(a.label().name()));
+  }
+  return result;
+}
+
+inline
+bool has_action_label(const stochastic_specification& spec, const std::string& name)
+{
+  return std::any_of(spec.action_labels().begin(), spec.action_labels().end(),
+    [&name](const process::action_label& al){ return std::string(al.name()) == name; });
+}
+
+// Check whether a summand with the given names in its multi-action is present in the specification.
+// We use multisets to correctly handle duplicate action names and avoid ordering issues.
+inline
+bool has_summand_with_multiaction(const stochastic_specification& spec, std::initializer_list<std::string> names)
+{
+  const std::multiset<std::string> expected(names);
+  return std::any_of(spec.process().action_summands().begin(), spec.process().action_summands().end(),
+    [&expected](const action_summand& as){ return multiaction_names(as.multi_action()) == expected; });
+}
+
+BOOST_AUTO_TEST_CASE(multiple_rename_rules_per_action)
 {
   // Check a renaming when more than one renaming rule
   // for one action is present.
@@ -44,10 +73,10 @@ void test1()
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   stochastic_specification new_spec = action_rename(ar_spec,spec,data::rewriter(),false);
   BOOST_CHECK(check_well_typedness(new_spec));
-  BOOST_CHECK(new_spec.process().summand_count()==3);
+  BOOST_CHECK_EQUAL(new_spec.process().summand_count(), 3u);
 }
 
-void test2()
+BOOST_AUTO_TEST_CASE(new_declarations_in_rename_spec)
 {
   // Check whether new declarations in the rename file
   // are read properly. Check for renamings of more than one action.
@@ -71,10 +100,10 @@ void test2()
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   stochastic_specification new_spec = action_rename(ar_spec,spec,data::rewriter(),false);
   BOOST_CHECK(check_well_typedness(new_spec));
-  BOOST_CHECK(new_spec.process().summand_count()==2);
+  BOOST_CHECK_EQUAL(new_spec.process().summand_count(), 2u);
 }
 
-void test3()
+BOOST_AUTO_TEST_CASE(rename_constant_to_delta)
 {
   // Check whether constants in an action_rename file are properly translated.
   const std::string SPEC =
@@ -94,10 +123,10 @@ void test3()
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
   BOOST_CHECK(check_well_typedness(new_spec));
-  BOOST_CHECK(new_spec.process().summand_count()==2);
+  BOOST_CHECK_EQUAL(new_spec.process().summand_count(), 2u);
 }
 
-void test4()
+BOOST_AUTO_TEST_CASE(conditional_rename_to_tau)
 {
   const std::string SPEC =
     "sort D = struct d1 | d2;\n"
@@ -122,11 +151,12 @@ void test4()
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
   BOOST_CHECK(check_well_typedness(new_spec));
-  BOOST_CHECK(new_spec.process().summand_count()==2);
+  BOOST_CHECK_EQUAL(new_spec.process().summand_count(), 2u);
 }
 
-void test5() // Test whether partial renaming to delta is going well. See bug report #1009.
+BOOST_AUTO_TEST_CASE(partial_rename_to_delta)
 {
+  // Test whether partial renaming to delta is going well. See bug report #1009.
   const std::string SPEC =
     "sort Command = struct com1 | com2;\n"
     "sort State = struct st1 | st2;\n"
@@ -169,11 +199,11 @@ void test5() // Test whether partial renaming to delta is going well. See bug re
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
   BOOST_CHECK(check_well_typedness(new_spec));
-  BOOST_CHECK(new_spec.process().summand_count()==8);
+  BOOST_CHECK_EQUAL(new_spec.process().summand_count(), 8u);
 }
 
 // Check whether renaming with a regular expression works well
-static void test_regex1()
+BOOST_AUTO_TEST_CASE(regex_rename)
 {
   const std::string SPEC =
   "act a_out, b_out, cout, ab_out, ac_out;\n"
@@ -184,22 +214,22 @@ static void test_regex1()
   stochastic_specification new_spec = action_rename(std::regex("^([^b]*)_out"), "out_$1", spec);
 
   BOOST_CHECK(check_well_typedness(new_spec));
-  BOOST_CHECK(std::string(new_spec.action_labels().front().name()) == "out_a");
-  BOOST_CHECK(std::string(new_spec.action_labels().tail().front().name()) == "b_out");
-  BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().front().name()) == "cout");
-  BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().tail().front().name()) == "ab_out");
-  BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().tail().tail().front().name()) == "out_ac");
+  BOOST_CHECK_EQUAL(new_spec.action_labels().size(), 5u);
+  BOOST_CHECK( has_action_label(new_spec, "out_a"));
+  BOOST_CHECK( has_action_label(new_spec, "b_out"));
+  BOOST_CHECK( has_action_label(new_spec, "cout"));
+  BOOST_CHECK( has_action_label(new_spec, "ab_out"));
+  BOOST_CHECK( has_action_label(new_spec, "out_ac"));
+  BOOST_CHECK(!has_action_label(new_spec, "a_out"));
+  BOOST_CHECK(!has_action_label(new_spec, "ac_out"));
 
-  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "out_a|ab_out"; }));
-  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "b_out"; }));
-  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "cout"; }));
+  BOOST_CHECK(has_summand_with_multiaction(new_spec, {"ab_out", "out_a"}));
+  BOOST_CHECK(has_summand_with_multiaction(new_spec, {"b_out"}));
+  BOOST_CHECK(has_summand_with_multiaction(new_spec, {"cout"}));
 }
 
 // Check whether renaming some actions to delta works
-void test_regex2()
+BOOST_AUTO_TEST_CASE(regex_rename_to_delta)
 {
   const std::string SPEC =
   "act a_out, b_out, cout, ab_out, ac_out;\n"
@@ -209,18 +239,22 @@ void test_regex2()
   // This should rename a_out, leaving the rest
   stochastic_specification new_spec = action_rename(std::regex("^a_out"), "delta", spec);
 
-  BOOST_CHECK(std::string(new_spec.action_labels().front().name()) == "b_out");
-  BOOST_CHECK(std::string(new_spec.action_labels().tail().front().name()) == "cout");
-  BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().front().name()) == "ab_out");
+  BOOST_CHECK_EQUAL(new_spec.action_labels().size(), 4u);
+  BOOST_CHECK( has_action_label(new_spec, "b_out"));
+  BOOST_CHECK( has_action_label(new_spec, "cout"));
+  BOOST_CHECK( has_action_label(new_spec, "ab_out"));
+  BOOST_CHECK( has_action_label(new_spec, "ac_out"));  // declared but unused; kept since it was not renamed
+  BOOST_CHECK(!has_action_label(new_spec, "a_out"));
 
-  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "b_out"; }));
-  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "cout"; }));
+  BOOST_CHECK(has_summand_with_multiaction(new_spec, {"b_out"}));
+  BOOST_CHECK(has_summand_with_multiaction(new_spec, {"cout"}));
 
-  BOOST_CHECK(new_spec.process().deadlock_summands().size() == 2);
+  BOOST_CHECK_EQUAL(new_spec.process().deadlock_summands().size(), 2u);
   auto find_result = std::find_if(spec.process().action_summands().begin(), spec.process().action_summands().end(),
-    [](const action_summand& as){ return lps::pp(as.multi_action()) == "a_out|ab_out"; });
+    [](const action_summand& as)
+    {
+      return multiaction_names(as.multi_action()) == std::multiset<std::string>{"a_out", "ab_out"};
+    });
   BOOST_CHECK(find_result != spec.process().action_summands().end());
   if(find_result != spec.process().action_summands().end())
   {
@@ -230,7 +264,7 @@ void test_regex2()
 }
 
 // Check whether renaming some actions to tau works
-void test_regex3()
+BOOST_AUTO_TEST_CASE(regex_rename_to_tau)
 {
   const std::string SPEC =
   "act a_out, b_out, cout, ab_out, ac_out;\n"
@@ -240,21 +274,22 @@ void test_regex3()
   // This should rename a_out and cout, leaving the rest
   stochastic_specification new_spec = action_rename(std::regex("^(a_out|cout)$"), "tau", spec);
 
-  BOOST_CHECK(std::string(new_spec.action_labels().front().name()) == "b_out");
-  BOOST_CHECK(std::string(new_spec.action_labels().tail().front().name()) == "ab_out");
-  BOOST_CHECK(std::string(new_spec.action_labels().tail().tail().front().name()) == "ac_out");
+  BOOST_CHECK_EQUAL(new_spec.action_labels().size(), 3u);
+  BOOST_CHECK( has_action_label(new_spec, "b_out"));
+  BOOST_CHECK( has_action_label(new_spec, "ab_out"));
+  BOOST_CHECK( has_action_label(new_spec, "ac_out"));
+  BOOST_CHECK(!has_action_label(new_spec, "a_out"));
+  BOOST_CHECK(!has_action_label(new_spec, "cout"));
 
-  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "ab_out"; }));
-  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "b_out"; }));
-  BOOST_CHECK(std::any_of(new_spec.process().action_summands().begin(), new_spec.process().action_summands().end(),
-                              [](const action_summand& as){ return lps::pp(as.multi_action()) == "tau"; }));
+  BOOST_CHECK(has_summand_with_multiaction(new_spec, {"ab_out"}));
+  BOOST_CHECK(has_summand_with_multiaction(new_spec, {"b_out"}));
+  // tau is represented as an empty multi-action (no action names)
+  BOOST_CHECK(has_summand_with_multiaction(new_spec, {}));
 }
 
 // Check whether the list of actions contains no duplicates after renaming multiple actions
 // to one action.
-void test_regex4()
+BOOST_AUTO_TEST_CASE(regex_rename_no_duplicate_labels)
 {
   const std::string SPEC =
   "act a_out, b_out;\n"
@@ -264,8 +299,8 @@ void test_regex4()
   // This should rename both actions to 'out'
   stochastic_specification new_spec = action_rename(std::regex("^(a|b)_out$"), "out", spec);
 
-  BOOST_CHECK(new_spec.action_labels().size() == 1);
-  BOOST_CHECK(std::string(new_spec.action_labels().front().name()) == "out");
+  BOOST_CHECK_EQUAL(new_spec.action_labels().size(), 1u);
+  BOOST_CHECK(has_action_label(new_spec, "out"));
 }
 
 BOOST_AUTO_TEST_CASE(multiple_action_declarations)
@@ -286,19 +321,5 @@ BOOST_AUTO_TEST_CASE(multiple_action_declarations)
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   stochastic_specification new_spec = action_rename(ar_spec,spec,data::rewriter(),false);
 
-  BOOST_CHECK(new_spec.action_labels().size() == 4);
-}
-
-BOOST_AUTO_TEST_CASE(test_main)
-{
-  test1();
-  test2();
-  test3();
-  test4();
-  test5();
-
-  test_regex1();
-  test_regex2();
-  test_regex3();
-  test_regex4();
+  BOOST_CHECK_EQUAL(new_spec.action_labels().size(), 4u);
 }

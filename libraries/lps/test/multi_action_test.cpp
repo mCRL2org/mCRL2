@@ -114,3 +114,69 @@ BOOST_AUTO_TEST_CASE(test_main)
   test_equal_multi_actions();
   test_pp();
 }
+
+// Invariant: multi_action always stores actions in sorted order.
+
+BOOST_AUTO_TEST_CASE(test_actions_sorted_on_construction)
+{
+  data_expression d1 = nat("d1");
+
+  process::action_label a_label(core::identifier_string("a"), sort_expression_list({ sort_nat::nat() }));
+  process::action_label b_label(core::identifier_string("b"), sort_expression_list({ sort_nat::nat() }));
+
+  process::action a_act(a_label, data_expression_list({ d1 }));
+  process::action b_act(b_label, data_expression_list({ d1 }));
+
+  // Construct with unsorted list (b before a).
+  multi_action ma(process::action_list({ b_act, a_act }));
+
+  // After construction the stored order must be sorted (a before b).
+  process::action_list expected({ a_act, b_act });
+  BOOST_CHECK_EQUAL(ma.actions(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(test_hash_consistent_with_equality)
+{
+  data_expression d1 = nat("d1");
+
+  process::action_label a_label(core::identifier_string("a"), sort_expression_list({ sort_nat::nat() }));
+  process::action_label b_label(core::identifier_string("b"), sort_expression_list({ sort_nat::nat() }));
+
+  process::action a_act(a_label, data_expression_list({ d1 }));
+  process::action b_act(b_label, data_expression_list({ d1 }));
+
+  multi_action ma_ab(process::action_list({ a_act, b_act }));
+  multi_action ma_ba(process::action_list({ b_act, a_act }));
+
+  // Both must be equal since they contain the same actions.
+  BOOST_CHECK(ma_ab == ma_ba);
+
+  // Hash must be equal too (required for use in unordered containers).
+  std::hash<multi_action> hasher;
+  BOOST_CHECK_EQUAL(hasher(ma_ab), hasher(ma_ba));
+}
+
+// Regression test: make_multi_action (used by builder.h) calls make_term_appl
+// directly and bypasses the sorting constructor.  Without a fix, the stored
+// action list is unsorted, breaking the class invariant.
+BOOST_AUTO_TEST_CASE(test_make_multi_action_preserves_sorted_invariant)
+{
+  data_expression d1 = nat("d1");
+
+  // b > a, so [b, a] is intentionally unsorted.
+  process::action b_act = act("b", data_expression_list({ d1 }));
+  process::action a_act = act("a", data_expression_list({ d1 }));
+  process::action_list unsorted({ b_act, a_act });
+  BOOST_REQUIRE(!std::is_sorted(unsorted.begin(), unsorted.end()));
+
+  // Replicate what builder.h does: call make_multi_action with the action list
+  // directly (not through the sorting constructor).
+  atermpp::aterm t;
+  make_multi_action(t, unsorted, data::undefined_real());
+
+  const multi_action& ma = atermpp::down_cast<multi_action>(t);
+  BOOST_CHECK_MESSAGE(std::is_sorted(ma.actions().begin(), ma.actions().end()),
+      "make_multi_action must maintain the sorted-storage invariant");
+  process::action_list expected({ a_act, b_act });
+  BOOST_CHECK_EQUAL(ma.actions(), expected);
+}

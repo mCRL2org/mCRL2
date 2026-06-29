@@ -12,7 +12,8 @@
 #ifndef MCRL2_PROCESS_ACTION_NAME_MULTISET_H
 #define MCRL2_PROCESS_ACTION_NAME_MULTISET_H
 
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/process/action_label.h"
 
 namespace mcrl2::process
 {
@@ -22,23 +23,7 @@ namespace mcrl2::process
 class action_name_multiset: public atermpp::aterm
 {
   public:
-    /// \\brief Default constructor X3.
-    action_name_multiset()
-      : atermpp::aterm(core::detail::default_values::MultActName)
-    {}
 
-    /// \\brief Constructor Z9.
-    /// \\param term A term
-    explicit action_name_multiset(const atermpp::aterm& term)
-      : atermpp::aterm(term)
-    {
-      assert(core::detail::check_term_MultActName(*this));
-    }
-
-    /// \\brief Constructor Z12.
-    explicit action_name_multiset(const core::identifier_string_list& names)
-      : atermpp::aterm(core::detail::function_symbol_MultActName(), names)
-    {}
 
     /// Move semantics
     action_name_multiset(const action_name_multiset&) noexcept = default;
@@ -50,6 +35,26 @@ class action_name_multiset: public atermpp::aterm
     {
       return atermpp::down_cast<core::identifier_string_list>((*this)[0]);
     }
+//--- start user section action_name_multiset ---//
+    /// \brief Default constructor.
+    action_name_multiset()
+      : atermpp::aterm(core::detail::default_values::MultActName)
+    {}
+
+    /// \brief Constructor from aterm.
+    /// \param term A term
+    explicit action_name_multiset(const atermpp::aterm& term)
+      : atermpp::aterm(term)
+    {
+      assert(core::detail::check_term_MultActName(*this));
+    }
+
+    /// \brief Constructor. Names are sorted lexicographically to establish the sorted-storage invariant.
+    explicit action_name_multiset(const core::identifier_string_list& names)
+      : atermpp::aterm(core::detail::function_symbol_MultActName(),
+                       atermpp::sort_list(names, action_name_compare()))
+    {}
+//--- end user section action_name_multiset ---//
 };
 
 /// \\brief Make_action_name_multiset constructs a new term into a given address.
@@ -58,6 +63,8 @@ template <class... ARGUMENTS>
 inline void make_action_name_multiset(atermpp::aterm& t, const ARGUMENTS&... args)
 {
   atermpp::make_term_appl(t, core::detail::function_symbol_MultActName(), args...);
+  // Re-assign through the sorting constructor to maintain the sorted-storage invariant.
+  t = action_name_multiset(atermpp::down_cast<action_name_multiset>(t).names());
 }
 
 /// \\brief list of action_name_multisets

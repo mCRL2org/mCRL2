@@ -78,90 +78,11 @@ lps_statistics_t get_statistics(const stochastic_action_summand_vector& action_s
   return statistics;
 }
 
-/// Insert action into an action_list, keeping the action list sorted w.r.t. action_compare.
-/// Complexity: O(n) for an action_list of length n.
-inline
-process::action_list insert(
-  const process::action& act,
-  process::action_list l)
-{
-  if (l.empty())
-  {
-    return process::action_list({ act });
-  }
-  const process::action& head = l.front();
-
-  if (process::action_compare()(act, head))
-  {
-    l.push_front(act);
-    return l;
-  }
-
-  process::action_list result = insert(act, l.tail());
-  result.push_front(head);
-  return result;
-}
-
-/// insert an action name into the list, while preserving the sorting of action names.
-inline
-core::identifier_string_list insert(
-  const core::identifier_string& s,
-  core::identifier_string_list l)
-{
-  if (l.empty())
-  {
-    return core::identifier_string_list({ s });
-  }
-  const core::identifier_string& head = l.front();
-
-  if (process::action_name_compare()(s, head))
-  {
-    l.push_front(s);
-    return l;
-  }
-
-  core::identifier_string_list result = insert(s, l.tail());
-  result.push_front(head);
-  return result;
-}
 
 inline
-process::action_name_multiset sort_action_names(const process::action_name_multiset& action_labels,
-  const std::function<bool(const core::identifier_string&, const core::identifier_string&)>& cmp
-                                    = [](const core::identifier_string& t1, const core::identifier_string& t2){ return process::action_name_compare()(t1, t2);})
+process::action_list sort_actions(const process::action_list& actions)
 {
-  return process::action_name_multiset(atermpp::sort_list(action_labels.names(), cmp));
-}
-
-inline
-process::action_name_multiset_list sort_multi_action_labels(const process::action_name_multiset_list& l)
-{
-  return process::action_name_multiset_list(l.begin(),l.end(),[](const process::action_name_multiset& al){ return sort_action_names(al); });
-}
-
-inline
-process::action_list sort_actions(const process::action_list& actions,
-  const std::function<bool(const process::action&, const process::action&)>& cmp
-                                    = [](const process::action& t1, const process::action& t2){ return process::action_compare()(t1, t2);})
-{
-  return process::action_list(atermpp::sort_list(actions, cmp));
-}
-
-
-/// Sort the left-hand sides of the communication expressions in communications
-///
-/// Sorting is done using sort_action_labels, so by default, the left-hand sides of the communications are sorted by names of the actions.
-inline
-process::communication_expression_list sort_communications(const process::communication_expression_list& communications)
-{
-  process::communication_expression_list result;
-
-  for (const process::communication_expression& comm: communications)
-  {
-    result.push_front(process::communication_expression(sort_action_names(comm.action_name()),comm.name()));
-  }
-
-  return result;
+  return process::action_list(atermpp::sort_list(actions));
 }
 
 inline

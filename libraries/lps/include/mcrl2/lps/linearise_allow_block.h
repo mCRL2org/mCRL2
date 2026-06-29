@@ -106,7 +106,7 @@ inline bool allow_(const detail::allow_list_cache& allow_cache,
     const process::action_list& multi_action,
     const process::action& termination_action)
 {
-  assert(std::is_sorted(multi_action.begin(), multi_action.end(), process::action_compare()));
+  assert(std::is_sorted(multi_action.begin(), multi_action.end()));
 
   // The empty multiaction and the termination action can never be blocked by allows.
   if (multi_action.empty() || multi_action == process::action_list({termination_action}))
@@ -129,7 +129,7 @@ bool encap(const Container& blocked_actions, const process::action_list& multiac
   static_assert(std::is_same_v<typename Container::value_type, core::identifier_string>, "Container must contain core::identifier_string");
 
   assert(std::is_sorted(blocked_actions.begin(), blocked_actions.end(), process::action_name_compare()));
-  assert(std::is_sorted(multiaction.begin(), multiaction.end(), process::action_compare()));
+  assert(std::is_sorted(multiaction.begin(), multiaction.end()));
 
   core::identifier_string_list::const_iterator blocked_actions_it = blocked_actions.begin();
   process::action_list::const_iterator multiaction_it = multiaction.begin();
@@ -165,7 +165,7 @@ bool encap(const Container& blocked_actions, const process::action_list& multiac
 inline bool encap(const process::action_name_multiset_list& encaplist, const process::action_list& multiaction)
 {
   assert(encaplist.size() == 1);
-  assert(std::is_sorted(multiaction.begin(), multiaction.end(), process::action_compare()));
+  assert(std::is_sorted(multiaction.begin(), multiaction.end()));
 
   const core::identifier_string_list& blocked_actions = encaplist.front().names();
   return encap(blocked_actions, multiaction);
@@ -211,7 +211,7 @@ inline void allowblockcomposition(
   deadlock_summand_vector resultsimpledeltasumlist;
   deadlock_summands.swap(resultdeltasumlist);
 
-  process::action_name_multiset_list allowlist((is_allow) ? sort_multi_action_labels(allowlist1) : allowlist1);
+  process::action_name_multiset_list allowlist(allowlist1);
 
   std::size_t sourcesumlist_length = sourcesumlist.size();
   if (sourcesumlist_length > 2 || is_allow) // This condition prevents this message to be printed

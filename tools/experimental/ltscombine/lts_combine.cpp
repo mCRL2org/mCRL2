@@ -56,7 +56,7 @@ bool match_sorted_lhs(const std::vector<process::action>& actions,
                       const data::data_expression_list& arguments,
                       std::vector<std::size_t>& indices)
 {
-  assert(std::is_sorted(actions.begin(), actions.end(), process::action_compare()));
+  assert(std::is_sorted(actions.begin(), actions.end()));
   assert(std::is_sorted(lhs_names.begin(), lhs_names.end(), process::action_name_compare()));
   assert(!lhs_names.empty());
 
@@ -104,7 +104,7 @@ bool find_matching_indices(const std::vector<process::action>& actions,
                            const core::identifier_string_list& lhs_names,
                            std::vector<std::size_t>& indices)
 {
-  assert(std::is_sorted(actions.begin(), actions.end(), process::action_compare()));
+  assert(std::is_sorted(actions.begin(), actions.end()));
   assert(std::is_sorted(lhs_names.begin(), lhs_names.end(), process::action_name_compare()));
   assert(!lhs_names.empty());
 
@@ -165,7 +165,7 @@ void erase_indices(std::vector<process::action>& actions,
 lps::multi_action mcrl2::apply_communication(const lps::multi_action& label,
                                              const process::communication_expression_list& comm_set)
 {
-  assert(std::is_sorted(label.actions().begin(), label.actions().end(), process::action_compare()));
+  assert(std::is_sorted(label.actions().begin(), label.actions().end()));
   assert(std::all_of(comm_set.begin(), comm_set.end(), [](const process::communication_expression& comm_expr)
   {
     return std::is_sorted(comm_expr.action_name().names().begin(), comm_expr.action_name().names().end(),
@@ -195,8 +195,8 @@ lps::multi_action mcrl2::apply_communication(const lps::multi_action& label,
   }
 
   remaining_actions.insert(remaining_actions.end(), communicated_actions.begin(), communicated_actions.end());
-  std::sort(remaining_actions.begin(), remaining_actions.end(), process::action_compare());
 
+  // multi_action constructor sorts the action list, so no explicit sort needed here.
   return lps::multi_action(process::action_list(remaining_actions.begin(), remaining_actions.end()), label.time());
 }
 
@@ -506,8 +506,8 @@ private:
     auto filter_and_report = [this, state_index, &termination_action](const lps::multi_action& candidate_label,
                                                    const std::vector<state_t>& target_state)
     {
-      std::function<bool(const process::action&, const process::action&)> action_compare = process::action_compare();
-      lps::multi_action label(atermpp::sort_list(candidate_label.actions(), action_compare), candidate_label.time());
+      // candidate_label is a multi_action, so its actions are already sorted.
+      lps::multi_action label = candidate_label;
 
       mCRL2log(log::debug) << lps::pp(label) << std::endl;
 
