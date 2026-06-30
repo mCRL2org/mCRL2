@@ -39,7 +39,7 @@ void thread_aterm_pool::create_int(aterm& term, size_t val)
   bool added = m_pool.create_int(term, val);
   guard.unlock_shared();
    
-  if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
+  if (added) { m_pool.created_term(m_shared_mutex, m_count_until_check); }
 }
 
 void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol& sym)
@@ -48,7 +48,7 @@ void thread_aterm_pool::create_term(aterm& term, const atermpp::function_symbol&
   bool added = m_pool.create_term(term, sym);
   guard.unlock_shared();
 
-  if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
+  if (added) { m_pool.created_term(m_shared_mutex, m_count_until_check); }
 }
 
 template<class ...Terms>
@@ -58,7 +58,7 @@ void thread_aterm_pool::create_appl(aterm& term, const function_symbol& sym, con
   bool added = m_pool.create_appl(term, sym, arguments...);
   guard.unlock_shared();
 
-  if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
+  if (added) { m_pool.created_term(m_shared_mutex, m_count_until_check); }
 }
 
 template<class Term, class INDEX_TYPE, class ...Terms>
@@ -94,7 +94,7 @@ void thread_aterm_pool::create_appl_index(aterm& term, const function_symbol& sy
   }
   guard.unlock_shared();
 
-  if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
+  if (added) { m_pool.created_term(m_shared_mutex, m_count_until_check); }
 }
 
 template<typename InputIterator>
@@ -107,7 +107,7 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
   bool added = m_pool.create_appl_dynamic(term, sym, begin, end);
   guard.unlock_shared();
     
-  if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
+  if (added) { m_pool.created_term(m_shared_mutex, m_count_until_check); }
 }
 
 template<typename InputIterator, typename ATermConverter>
@@ -121,7 +121,7 @@ void thread_aterm_pool::create_appl_dynamic(aterm& term,
   bool added = m_pool.create_appl_dynamic(term, sym, convert_to_aterm, begin, end);
   guard.unlock_shared();
 
-  if (added) { m_pool.created_term(!m_shared_mutex.is_shared_locked(), m_shared_mutex); }
+  if (added) { m_pool.created_term(m_shared_mutex, m_count_until_check); }
 }
 
 void thread_aterm_pool::register_variable(aterm_core* variable)

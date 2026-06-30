@@ -129,12 +129,6 @@ public:
   /// \brief Add a callback that is triggered whenever a term with the given function symbol is destroyed.
   inline void add_deletion_hook(function_symbol sym, term_callback callback);
 
-  /// \brief Enable garbage collection when passing true and disable otherwise.
-  inline void enable_garbage_collection(bool enable) { m_enable_garbage_collection = enable; };
-
-  /// \brief Enable automatic hash table resizing when passing true and disable otherwise.
-  inline void enable_resize(bool enable) { m_enable_resize = enable; };
-
   inline function_symbol_pool& get_symbol_pool() { return m_function_symbol_pool; }
 
   // These functions of the aterm pool should be called through a thread_aterm_pool.
@@ -147,7 +141,7 @@ private:
   /// \param allow_collect Actually perform the garbage collection instead of only updating the counters.
   /// \param mutex The shared mutex that should be used for locking if necessary.
   /// \details threadsafe
-  inline void created_term(bool allow_collect, mcrl2::utilities::shared_mutex& mutex);
+  inline void created_term(mcrl2::utilities::shared_mutex& mutex, long& count_until_check);
 
   /// \brief Collect garbage on all storages.
   /// \details threadsafe
@@ -221,11 +215,10 @@ private:
 
   /// Track the number of terms destroyed and reduce the freelist.
   std::atomic<long> m_count_until_collection = 0;
-  std::atomic<long> m_count_until_resize = 0; 
 
-  std::atomic<bool> m_enable_garbage_collection = EnableGarbageCollection; /// Garbage collection is enabled.
+  static constexpr bool m_enable_garbage_collection = EnableGarbageCollection; /// Garbage collection is enabled.
 
-  std::atomic<bool> m_enable_resize = true; /// Automatic hash table resizing is enabled.
+  static constexpr bool m_enable_resize = true; /// Automatic hash table resizing is enabled.
 
   /// All the shared mutexes.
   mcrl2::utilities::shared_mutex m_shared_mutex;

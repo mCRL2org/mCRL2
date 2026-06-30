@@ -178,6 +178,9 @@ private:
   std::size_t m_container_insertions = 0;
   std::stack<std::reference_wrapper<_aterm>> m_todo; ///< A reusable todo stack.
 
+  long m_count_until_check; // Counter used to check whether the data structures need a resize or recollect
+                            // to avoid checking too often, and incrementing global counters too frequently.
+
   bool m_is_main_thread = false;
 
   /// The registered thread aterm pool.
