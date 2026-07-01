@@ -226,6 +226,74 @@ std::vector<propositional_variable_instantiation> get_propositional_variable_ins
   return result;
 }
 
+/// \brief Helper class to track multiple time measurements and call counts
+struct timing_tracker
+{
+  struct measurement
+  {
+    std::chrono::duration<double, std::milli> total_time = std::chrono::duration<double, std::milli>::zero();
+    int call_count = 0;
+
+    void add_measurement(std::chrono::duration<double, std::milli> duration)
+    {
+      total_time += duration;
+      call_count++;
+    }
+
+    double get_total_seconds() const { return std::chrono::duration<double>(total_time).count(); }
+  };
+
+  std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
+  std::map<std::string, measurement> measurements;
+
+  timing_tracker()
+    : start_time(std::chrono::high_resolution_clock::now())
+  {}
+
+  /// \brief Start timing an operation (returns the start time for use with end_measurement)
+  std::chrono::time_point<std::chrono::steady_clock> start_measurement() { return std::chrono::steady_clock::now(); }
+
+  /// \brief End timing an operation and record it
+  void end_measurement(const std::string& label, std::chrono::time_point<std::chrono::steady_clock> measurement_start)
+  {
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+      std::chrono::steady_clock::now() - measurement_start);
+    measurements[label].add_measurement(duration);
+  }
+
+  /// \brief Log all measurements
+  void log_measurements() const
+  {
+    double total_elapsed
+      = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count();
+    mCRL2log(log::verbose) << "Total time: " << total_elapsed << std::endl;
+
+    for (const auto& [label, measurement]: measurements)
+    {
+      mCRL2log(log::verbose) << label << ": " << measurement.get_total_seconds() << "s (" << measurement.call_count
+                             << " calls)" << std::endl;
+    }
+  }
+};
+
+/// \brief Generic decorator to wrap any function call with timing measurements
+template<typename Func>
+inline auto measure_time(timing_tracker& timer, const std::string& name, Func&& func)
+{
+  auto start = timer.start_measurement();
+  if constexpr (std::is_same_v<void, decltype(func())>)
+  {
+    func();
+    timer.end_measurement(name, start);
+  }
+  else
+  {
+    auto result = func();
+    timer.end_measurement(name, start);
+    return result;
+  }
+}
+
 inline pbes_expression simplify_expr(pbes_expression& phi,
   rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
   simplify_data_rewriter<data::rewriter>& pbes_rewriter)
@@ -266,11 +334,7 @@ inline void self_substitute(pbes_equation& equation,
   pbeschain_options options)
 {
   bool stable = false;
-  std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
-  auto total_substitution_time = std::chrono::duration<double, std::milli>::zero();
-  auto total_rewrite_time = std::chrono::duration<double, std::milli>::zero();
-  int count_substitutions = 0;
-  int count_rewrites = 0;
+  timing_tracker timer;
 
   if (options.timeout > 0.0)
   {
@@ -298,7 +362,7 @@ inline void self_substitute(pbes_equation& equation,
       if (options.timeout > 0.0)
       {
         std::chrono::time_point current_time = std::chrono::high_resolution_clock::now();
-        double elapsed = std::chrono::duration<double>(current_time - start_time).count();
+        double elapsed = std::chrono::duration<double>(current_time - timer.start_time).count();
         if (elapsed >= options.timeout)
         {
           stable = true;
@@ -344,12 +408,9 @@ inline void self_substitute(pbes_equation& equation,
           sigma[v] = par;
         }
 
-        auto rewrite_start_time = std::chrono::steady_clock::now();
-        pbes_expression phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
-        total_substitution_time += std::chrono::steady_clock::now() - rewrite_start_time;
-        total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
-        count_substitutions++;
-        count_rewrites++;
+        pbes_expression phi = measure_time(timer,
+          "substitution",
+          [&]() { return pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma); });
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
@@ -371,10 +432,8 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // Simplify
-        rewrite_start_time = std::chrono::steady_clock::now();
-        phi = simplify_expr(phi, if_substituter, pbes_rewriter);
-        total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
-        count_rewrites++;
+        phi = measure_time(timer, "simplify_expr", [&]() { return simplify_expr(phi, if_substituter, pbes_rewriter); });
+
         phi_vector = get_propositional_variable_instantiations(phi);
         std::size_t size = phi_vector.size();
         if (options.count_unique_pvi)
@@ -385,9 +444,28 @@ inline void self_substitute(pbes_equation& equation,
         // TODO: Also queue the other PVI in some way
 
         // (3) check if simpler
-        if ((size >= 1 && size <= options.max_number_pvi)
-            && is_avoiding_alternation(options, *phi_vector.begin(), equation) && is_not_too_big(options, cur_x, phi)
-            && is_quantifier_free(phi, options))
+        bool condition_result = (size >= 1 && size <= options.max_number_pvi);
+
+        if (condition_result)
+        {
+          condition_result = measure_time(timer,
+            "is_avoiding_alternation",
+            [&]() { return is_avoiding_alternation(options, *phi_vector.begin(), equation); });
+        }
+
+        if (condition_result)
+        {
+          condition_result
+            = measure_time(timer, "is_not_too_big", [&]() { return is_not_too_big(options, cur_x, phi); });
+        }
+
+        if (condition_result)
+        {
+          condition_result
+            = measure_time(timer, "is_quantifier_free", [&]() { return is_quantifier_free(phi, options); });
+        }
+
+        if (condition_result)
         {
           std::set<propositional_variable_instantiation> phi_set(phi_vector.begin(), phi_vector.end());
           bool all_in_path = true;
@@ -499,10 +577,9 @@ inline void self_substitute(pbes_equation& equation,
       if (current_size == 0 || (previous_size >= current_size + 10))
       {
         previous_size = current_size;
-        auto rewrite_start_time = std::chrono::steady_clock::now();
-        equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
-        total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
-        count_rewrites++;
+        equation.formula() = measure_time(timer,
+          "simplify_expr",
+          [&]() { return simplify_expr(equation.formula(), if_substituter, pbes_rewriter); });
       }
     }
   }
@@ -511,20 +588,15 @@ inline void self_substitute(pbes_equation& equation,
 
   if (current_size == 0)
   {
-    auto rewrite_start_time = std::chrono::steady_clock::now();
-    equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
-    total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
-    count_rewrites++;
+    equation.formula() = measure_time(timer,
+      "simplify_expr",
+      [&]() { return simplify_expr(equation.formula(), if_substituter, pbes_rewriter); });
   }
 
   if (options.timings)
-    mCRL2log(log::verbose)
-      << "Total time: " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count()
-      << std::endl
-      << "Of which substitution: " << std::chrono::duration<double>(total_substitution_time).count() << std::endl
-      << "Substitution calls: " << count_substitutions << std::endl
-      << "Of which rewriting: " << std::chrono::duration<double>(total_rewrite_time).count() << std::endl
-      << "Rewrite calls: " << count_rewrites << std::endl;
+  {
+    timer.log_measurements();
+  }
 }
 
 inline void substitute(pbes_equation& into,
