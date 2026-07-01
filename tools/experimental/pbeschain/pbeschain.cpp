@@ -47,7 +47,7 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
       m_options.rewrite_only_substitution = parser.has_option("rewrite-only-substitution");
       m_options.srf_factor = parser.option_argument_as<double>("srf-factor");
       m_options.max_number_pvi = parser.option_argument_as<std::size_t>("max-number-pvi");
-
+      m_options.timings = m_timing_enabled;
     }
 
     void add_options(interface_description& desc) override
