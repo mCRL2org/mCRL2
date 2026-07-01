@@ -226,6 +226,8 @@ std::vector<propositional_variable_instantiation> get_propositional_variable_ins
   return result;
 }
 
+
+
 /// \brief Helper class to track multiple time measurements and call counts
 struct timing_tracker
 {
@@ -266,12 +268,25 @@ struct timing_tracker
   {
     double total_elapsed
       = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count();
-    mCRL2log(log::verbose) << "Total time: " << total_elapsed << std::endl;
+    mCRL2log(log::verbose) << "Total time: " << total_elapsed << "s" << std::endl;
 
-    for (const auto& [label, measurement]: measurements)
+    if (!measurements.empty())
     {
-      mCRL2log(log::verbose) << label << ": " << measurement.get_total_seconds() << "s (" << measurement.call_count
-                             << " calls)" << std::endl;
+      // Find the longest label name for alignment
+      std::size_t max_label_length = 0;
+      for (const auto& [label, measurement]: measurements)
+      {
+        max_label_length = std::max(max_label_length, label.length() + 4);
+      }
+
+      // Log measurements with aligned values
+      for (const auto& [label, measurement]: measurements)
+      {
+        mCRL2log(log::verbose) << std::left << std::setw(max_label_length) << (label + " ") << ": "
+                               << std::right << std::setw(2) << std::fixed 
+                               << measurement.get_total_seconds() << "s ("
+                               << measurement.call_count << " calls)" << std::endl;
+      }
     }
   }
 };
