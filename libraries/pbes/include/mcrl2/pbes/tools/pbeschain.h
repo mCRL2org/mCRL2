@@ -53,6 +53,7 @@ struct pbeschain_options
   std::size_t max_number_pvi = 1;
   double srf_factor; // factor of the maximum size the chained equation in SRF should be after chaining compared
                      // to the size of the original equation. Default is 1.0
+  bool timings = false;
 };
 
 // Substitutor to target specific path, replace our specific pvi with true/false
@@ -266,6 +267,10 @@ inline void self_substitute(pbes_equation& equation,
 {
   bool stable = false;
   std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+  auto total_substitution_time = std::chrono::duration<double, std::milli>::zero();
+  auto total_rewrite_time = std::chrono::duration<double, std::milli>::zero();
+  int count_substitutions = 0;
+  int count_rewrites = 0;
 
   if (options.timeout > 0.0)
   {
@@ -339,7 +344,12 @@ inline void self_substitute(pbes_equation& equation,
           sigma[v] = par;
         }
 
+        auto rewrite_start_time = std::chrono::steady_clock::now();
         pbes_expression phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
+        total_substitution_time += std::chrono::steady_clock::now() - rewrite_start_time;
+        total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
+        count_substitutions++;
+        count_rewrites++;
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
@@ -361,7 +371,10 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // Simplify
+        rewrite_start_time = std::chrono::steady_clock::now();
         phi = simplify_expr(phi, if_substituter, pbes_rewriter);
+        total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
+        count_rewrites++;
         phi_vector = get_propositional_variable_instantiations(phi);
         std::size_t size = phi_vector.size();
         if (options.count_unique_pvi)
@@ -433,19 +446,10 @@ inline void self_substitute(pbes_equation& equation,
             }
             else
             {
-                // bool first = true;
                 for (const propositional_variable_instantiation& pvi : phi_set_same_name)
                 {
-                    // if (first)
-                    // {
                         cur_x = pvi;
-                        pvi_done = true;
-                        // first = false;
-                    // }
                     break;
-                    // else {
-                    //     set.insert(pvi);
-                    // }
                 }
             }
           }
@@ -493,7 +497,11 @@ inline void self_substitute(pbes_equation& equation,
       if (current_size == 0 || (previous_size >= current_size + 10))
       {
         previous_size = current_size;
+        auto rewrite_start_time = std::chrono::steady_clock::now();
         equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
+        total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
+        count_rewrites++;
+
       }
     }
   }
@@ -502,8 +510,19 @@ inline void self_substitute(pbes_equation& equation,
 
   if (current_size == 0)
   {
-    equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
+      auto rewrite_start_time = std::chrono::steady_clock::now();
+      equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
+      total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
+      count_rewrites++;
+
   }
+
+  if (options.timings)
+  mCRL2log(log::verbose) << "Total time: " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count()  << std::endl
+      << "Of which substitution: " << std::chrono::duration<double>(total_substitution_time).count() << std::endl
+      << "Substitution calls: " << count_substitutions << std::endl
+      << "Of which rewriting: " << std::chrono::duration<double>(total_rewrite_time).count() << std::endl
+      << "Rewrite calls: " << count_rewrites << std::endl;
 }
 
 inline void substitute(pbes_equation& into,
