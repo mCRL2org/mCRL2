@@ -1,3 +1,4 @@
+
 // Author(s): Jore Booy
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -25,8 +26,8 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/resolve_name_clashes.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/logger.h"
@@ -411,8 +412,10 @@ inline void self_substitute(pbes_equation& equation,
               pvi_substituter.set_pvi(phi_x);
               pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
               pvi_substituter.apply(result, phi);
-            } else {
-                all_in_path = false;
+            }
+            else
+            {
+              all_in_path = false;
             }
           }
 
@@ -430,27 +433,31 @@ inline void self_substitute(pbes_equation& equation,
           {
             // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler.
             mCRL2log(log::debug) << "Replaced in PBES equation for " << cur_x << "\n-->\n"
-                                 << phi << "\n" << core::detail::print_list(phi_set) << "\n";
+                                 << phi << "\n"
+                                 << core::detail::print_list(phi_set) << "\n";
 
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(phi);
             pvi_substituter.apply(equation.formula(), equation.formula());
             // Get the set of elements that have the same name as the equation variable
             std::set<propositional_variable_instantiation> phi_set_same_name;
-            std::copy_if(phi_set.begin(), phi_set.end(), std::inserter(phi_set_same_name, phi_set_same_name.begin()),
-                         [&](const propositional_variable_instantiation& pvi) { return pvi.name() == equation.variable().name(); });
+            std::copy_if(phi_set.begin(),
+              phi_set.end(),
+              std::inserter(phi_set_same_name, phi_set_same_name.begin()),
+              [&](const propositional_variable_instantiation& pvi)
+              { return pvi.name() == equation.variable().name(); });
             stable = false;
             if (phi_set_same_name.size() == 0)
             {
-                pvi_done = true;
+              pvi_done = true;
             }
             else
             {
-                for (const propositional_variable_instantiation& pvi : phi_set_same_name)
-                {
-                        cur_x = pvi;
-                    break;
-                }
+              for (const propositional_variable_instantiation& pvi: phi_set_same_name)
+              {
+                cur_x = pvi;
+                break;
+              }
             }
           }
         }
@@ -501,7 +508,6 @@ inline void self_substitute(pbes_equation& equation,
         equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
         total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
         count_rewrites++;
-
       }
     }
   }
@@ -510,15 +516,16 @@ inline void self_substitute(pbes_equation& equation,
 
   if (current_size == 0)
   {
-      auto rewrite_start_time = std::chrono::steady_clock::now();
-      equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
-      total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
-      count_rewrites++;
-
+    auto rewrite_start_time = std::chrono::steady_clock::now();
+    equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
+    total_rewrite_time += std::chrono::steady_clock::now() - rewrite_start_time;
+    count_rewrites++;
   }
 
   if (options.timings)
-  mCRL2log(log::verbose) << "Total time: " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count()  << std::endl
+    mCRL2log(log::verbose)
+      << "Total time: " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count()
+      << std::endl
       << "Of which substitution: " << std::chrono::duration<double>(total_substitution_time).count() << std::endl
       << "Substitution calls: " << count_substitutions << std::endl
       << "Of which rewriting: " << std::chrono::duration<double>(total_rewrite_time).count() << std::endl
@@ -578,7 +585,8 @@ inline pbes tosrf(pbes_system::pbes pbesspec)
   auto result = pbes2pre_srf(pbesspec, true);
   // Unify the parameters of the original PBES (which has potential counter example information)
   unify_parameters(result, true, false);
-  pbes_system::resolve_summand_variable_name_clashes(result, result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
+  pbes_system::resolve_summand_variable_name_clashes(result,
+    result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
   return pre_srf2srfpbes(result).to_pbes();
 }
 
