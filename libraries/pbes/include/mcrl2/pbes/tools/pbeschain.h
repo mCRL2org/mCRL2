@@ -1,4 +1,3 @@
-
 // Author(s): Jore Booy
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
@@ -453,11 +452,7 @@ inline void self_substitute(pbes_equation& equation,
             }
             else
             {
-              for (const propositional_variable_instantiation& pvi: phi_set_same_name)
-              {
-                cur_x = pvi;
-                break;
-              }
+              cur_x = *phi_set_same_name.begin();
             }
           }
         }
