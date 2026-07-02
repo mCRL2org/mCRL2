@@ -54,6 +54,18 @@ std::size_t power_size_t(const std::size_t n_in, const std::size_t m_in)
   return result;
 }
 
+template <typename T>
+bool is_odd(T t)
+{
+  return t % 2 != 0;
+}
+
+template <typename T>
+bool is_even(T t)
+{
+  return t % 2 == 0;
+}
+
 } // namespace mcrl2::utilities
 
 #endif // MCRL2_UTILITIES_MATH_H
