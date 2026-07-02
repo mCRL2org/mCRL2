@@ -484,6 +484,7 @@ inline void self_substitute(pbes_equation& equation,
         {
           std::set<propositional_variable_instantiation> phi_set(phi_vector.begin(), phi_vector.end());
           bool all_in_path = true;
+          measure_time(timer, "successful_substitutions", [&]() { return true; });
 
           for (const propositional_variable_instantiation& phi_x: phi_set)
           {
@@ -557,6 +558,7 @@ inline void self_substitute(pbes_equation& equation,
           stable = false;
           mCRL2log(log::debug) << "Replaced in PBES equation for " << cur_x << ":\n" << x << " \n-->\n " << phi << "\n";
           pvi_done = true;
+          measure_time(timer, "successful_substitutions", [&]() { return true; });
         }
         else
         {
