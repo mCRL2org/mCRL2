@@ -1,0 +1,754 @@
+// Author(s): Jore Booy
+// Copyright: see the accompanying file COPYING or copy at
+// https://github.com/mCRL2org/mCRL2/blob/master/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/pbes/tools/pbescegps.h
+/// \brief This file provides a tool that can simplify PBESs by
+///        substituting PBES equations for variables in the rhs,
+///        simplifying the result, and keeping it when it can
+///        eliminate PBES variables.
+
+#ifndef MCRL2_PBES_TOOLS_PBESCEGPS_H
+#define MCRL2_PBES_TOOLS_PBESCEGPS_H
+
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/rewrite_strategy.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_pbes.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/parelm.h"
+#include "mcrl2/pbes/pbes_equation.h"
+#include "mcrl2/pbes/pbesinst_structure_graph.h"
+#include "mcrl2/pbes/rewrite.h"
+#ifdef MCRL2_ENABLE_SYLVAN
+#include "mcrl2/pbes/pbesreach.h"
+#include "mcrl2/pbes/tools/pbesstategraph_options.h"
+#endif
+#include "mcrl2/pbes/pbessolve_options.h"
+#include "mcrl2/pbes/rewriters/dataspec_prune_rewriter.h"
+#include "mcrl2/pbes/solve_structure_graph.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/execution_timer.h"
+#include <boost/asio.hpp>
+#include <boost/asio/buffer.hpp>
+#include <boost/asio/read_until.hpp>
+#include <boost/container/flat_map.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/process.hpp>
+#include <boost/process/search_path.hpp>
+#include <cstddef>
+#include <iostream>
+#include <map>
+#include <set>
+#include <vector>
+
+namespace bp = boost::process;
+
+namespace mcrl2::pbes_system
+{
+// Abstraction builder for pbescegps - applies data abstraction to PBES expressions
+template <typename Dummy = void>
+struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewriter<Dummy>>
+{
+  using super = pbes_expression_builder<abstraction_rewriter<Dummy>>;
+  using super::apply;
+
+  const std::set<data::variable>& m_abstraction_vars;
+  bool m_is_overapproximation;
+
+  abstraction_rewriter(const std::set<data::variable>& vars, bool is_over)
+    : m_abstraction_vars(vars), m_is_overapproximation(is_over)
+  {
+  }
+
+  // Handle variables in data expressions by intercepting at the builder level
+  // (Embedded in generic data_expression handler below)
+
+  // Handle function applications by intercepting at the builder level
+  // (Embedded in generic data_expression handler below)
+
+  // Comprehensive data expression handler
+  template <class T>
+  void apply(T& result, const data::data_expression& x)
+  {
+    mCRL2log(log::debug) << "Processing data expression: " << x << std::endl;
+    
+    // Check if it's a variable using built-in function
+    if (data::is_variable(x))
+    {
+      const data::variable& var = atermpp::down_cast<data::variable>(x);
+      mCRL2log(log::debug) << "  -> Handling as data::variable: " << var.name() << std::endl;
+      
+      if (m_abstraction_vars.count(var) > 0)
+      {
+        // Variable is being abstracted
+        mCRL2log(log::debug) << "     Abstracting variable " << var.name() 
+                               << " to " << (m_is_overapproximation ? "true" : "false") << std::endl;
+        data::data_expression abstracted_val = m_is_overapproximation ? data::true_() : data::false_();
+        result = pbes_expression(abstracted_val);
+      }
+      else
+      {
+        // Variable is not abstracted, return as-is
+        mCRL2log(log::debug) << "     Keeping variable " << var.name() << " as-is" << std::endl;
+        result = pbes_expression(var);
+      }
+      return;
+    }
+    
+    // Check if it's an application using built-in function
+    if (data::is_application(x))
+    {
+      const data::application& app = atermpp::down_cast<data::application>(x);
+      mCRL2log(log::debug) << "  -> Handling as data::application" << std::endl;
+      
+      // First check if any free variables depend on abstracted variables
+      std::set<data::variable> free_vars = pbes_system::find_free_variables(app);
+      
+      bool depends_on_abstracted = false;
+      for (const auto& var : free_vars)
+      {
+        if (m_abstraction_vars.count(var) > 0)
+        {
+          depends_on_abstracted = true;
+          break;
+        }
+      }
+      
+      if (!depends_on_abstracted)
+      {
+        // Expression doesn't depend on abstracted variables, return as-is
+        mCRL2log(log::debug) << "     Application does not depend on abstracted variables, keeping as-is" << std::endl;
+        result = pbes_expression(app);
+        return;
+      }
+      
+      mCRL2log(log::debug) << "     Application depends on abstracted variables" << std::endl;
+      
+      // Expression depends on abstracted variables
+      // Check if the function is monotonic or anti-monotonic
+      bool is_monotonic = false;
+      bool is_anti_monotonic = false;
+      
+      // Check for known monotonic functions using predicate functions
+      if (data::sort_bool::is_and_application(app) ||
+          data::sort_bool::is_or_application(app))
+      {
+        is_monotonic = true;
+        mCRL2log(log::debug) << "     Function is monotonic (and/or)" << std::endl;
+      }
+      // Check for known anti-monotonic functions (implication in antecedent)
+      else if (data::sort_bool::is_not_application(app))
+      {
+        // Implication is monotonic in consequent, anti-monotonic in antecedent
+        // For now, treat conservatively
+        is_anti_monotonic = true;
+        mCRL2log(log::debug) << "     Function is anti-monotonic (not)" << std::endl;
+      }
+      // For unknown functions that depend on abstracted variables, use conservative approach
+      else
+      {
+        // Conservative: return true/false
+        mCRL2log(log::debug) << "     Unknown function, using conservative approach, returning " 
+                               << (m_is_overapproximation ? "true" : "false") << std::endl;
+        data::data_expression conservative_val = m_is_overapproximation ? data::true_() : data::false_();
+        result = pbes_expression(conservative_val);
+        return;
+      }
+      
+      // Apply appropriate abstraction to arguments
+      data::data_expression_list abstracted_args;
+      for (const auto& arg : app)
+      {
+        pbes_expression abstracted_arg_expr;
+        
+        if (is_monotonic)
+        {
+          // Apply same abstraction mode to all arguments
+          mCRL2log(log::debug) << "     Abstracting argument with monotonic mode" << std::endl;
+          apply(abstracted_arg_expr, arg);
+        }
+        else if (is_anti_monotonic)
+        {
+          // Flip abstraction mode for arguments
+          mCRL2log(log::debug) << "     Flipping abstraction mode for anti-monotonic argument" << std::endl;
+          m_is_overapproximation = !m_is_overapproximation;
+          apply(abstracted_arg_expr, arg);
+          m_is_overapproximation = !m_is_overapproximation;
+        }
+        
+        // Extract the data expression from the pbes_expression
+        const data::data_expression& data_expr = atermpp::down_cast<data::data_expression>(abstracted_arg_expr);
+        abstracted_args.push_front(data_expr);
+      }
+      
+      // Reverse the arguments back to original order
+      std::vector<data::data_expression> args_vec;
+      for (const auto& arg : abstracted_args)
+      {
+        args_vec.push_back(arg);
+      }
+      abstracted_args = data::data_expression_list();
+      for (auto it = args_vec.rbegin(); it != args_vec.rend(); ++it)
+      {
+        abstracted_args.push_front(*it);
+      }
+      
+      // Reconstruct the application with abstracted arguments
+      data::data_expression reconstructed = data::application(app.head(), abstracted_args);
+      result = pbes_expression(reconstructed);
+      return;
+    }
+    
+    // For any other data expression type (e.g., function symbols), use the default builder behavior
+    mCRL2log(log::debug) << "  -> Using default builder behavior (not a variable or application)" << std::endl;
+    super::apply(result, x);
+  }
+
+  // TODO: Add the following cases:
+  // \begin{array}{lcl}
+  // \dbrack{t}\eta\delta &=& \dbrack{t}\delta\
+  // \dbrack{X(t_1,\ldots,t_n)}\eta\delta &= & \langle\dbrack{t_1}\delta, \ldots, \dbrack{t_n}\delta\rangle \in \eta(X) \\
+  // \dbrack{\phi \land \psi}\eta\delta &= & \dbrack{\phi}\eta\delta \text{ and } \dbrack{\psi}\eta\delta\\
+  // \dbrack{\phi \lor \psi}\eta\delta &= &   \dbrack{\phi}\eta\delta \text{ or } \dbrack{\psi}\eta\delta \\
+  // \dbrack{\forall x {:} T.\phi}\eta\delta &= &\textrm{true iff }\dbrack{\phi}\eta\delta\lbrack v / x \rbrack\textrm{ holds for all }v\in\mathbf{D}_T \\
+  // \dbrack{\exists x {:} T.\phi}\eta\delta &= &\textrm{true iff }\dbrack{\phi}\eta\delta\lbrack v / x \rbrack\textrm{ holds for at least one }v\in\mathbf{D}_T \\
+  // \dbrack{X(t_1,\ldots,t_n)}\eta\delta &= & \langle\dbrack{t_1}\delta, \ldots, \dbrack{t_n}\delta\rangle \in \eta(X) \\
+  
+  // \end{array}
+
+  // Handle conjunction: abstract both operands and combine with 'and'
+  template <class T>
+  void apply(T& result, const and_& x)
+  {
+    mCRL2log(log::debug) << "Processing PBES conjunction" << std::endl;
+    pbes_expression left;
+    pbes_expression right;
+    super::apply(left, x.left());
+    super::apply(right, x.right());
+    make_and_(result, left, right);
+  }
+
+  // Handle disjunction: abstract both operands and combine with 'or'
+  template <class T>
+  void apply(T& result, const or_& x)
+  {
+    mCRL2log(log::debug) << "Processing PBES disjunction" << std::endl;
+    pbes_expression left;
+    pbes_expression right;
+    super::apply(left, x.left());
+    super::apply(right, x.right());
+    make_or_(result, left, right);
+  }
+
+  // Handle universal quantification: abstract the body
+  template <class T>
+  void apply(T& result, const forall& x)
+  {
+    mCRL2log(log::debug) << "Processing PBES forall" << std::endl;
+    pbes_expression body;
+    super::apply(body, x.body());
+    result = make_forall_(x.variables(), body);
+  }
+
+  // Handle existential quantification: abstract the body
+  template <class T>
+  void apply(T& result, const exists& x)
+  {
+    mCRL2log(log::debug) << "Processing PBES exists" << std::endl;
+    pbes_expression body;
+    super::apply(body, x.body());
+    result = make_exists_(x.variables(), body);
+  }
+
+  // Handle propositional variable instantiation: abstract all arguments
+  template <class T>
+  void apply(T& result, const propositional_variable_instantiation& x)
+  {
+    mCRL2log(log::debug) << "Processing PBES propositional variable instantiation: " << x.name() << std::endl;
+    // Collect abstracted arguments in a vector, then convert to list
+    std::vector<data::data_expression> abstracted_args_vec;
+    for (const auto& arg : x.parameters())
+    {
+      pbes_expression abstracted_arg;
+      apply(abstracted_arg, arg);
+      abstracted_args_vec.push_back(atermpp::down_cast<data::data_expression>(abstracted_arg));
+    }
+    // Convert vector back to data_expression_list
+    data::data_expression_list abstracted_args;
+    for (auto it = abstracted_args_vec.rbegin(); it != abstracted_args_vec.rend(); ++it)
+    {
+      abstracted_args.push_front(*it);
+    }
+    result = propositional_variable_instantiation(x.name(), abstracted_args);
+  }
+  
+  template <class T>
+  void apply(T& result, const not_& x)
+  {
+      mCRL2log(log::debug) << "Processing PBES not (negation)" << std::endl;
+      throw mcrl2::runtime_error("Not is not supported in this tool");
+    m_is_overapproximation = !m_is_overapproximation;
+    pbes_expression operand;
+    super::apply(operand, x.operand());
+    m_is_overapproximation = !m_is_overapproximation;
+    make_not_(result, operand);
+  }
+
+  // Override imp: not allowed after normalization
+  template <class T>
+  void apply(T& result, const imp& x)
+  {
+    (void)result;
+    (void)x;
+    throw mcrl2::runtime_error("apply_abstraction encountered implication; PBES should be normalized");
+  }
+};
+} // namespace mcrl2::pbes_system
+
+
+namespace mcrl2::pbes_system
+{
+
+struct pbescegps_options
+{
+  data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
+  bool init_control_flow = false;
+  bool solve_symbolic = false;
+  std::string solve_symbolic_args = "";
+};
+
+struct pbescegps_iterator
+{
+private:
+  utilities::indexed_set<data::data_expression> m_values;
+
+  bp::child sym_process;
+
+public:
+  bool solve(const pbes& p, pbescegps_options options)
+  {
+    pbes p_copy(p);
+    utilities::execution_timer timer;
+
+    mCRL2log(log::debug) << "MY APPROX" << pp(p_copy) << "MY END" << std::endl;
+
+    bool result = false;
+    timer.start("solving approximation");
+    if (options.solve_symbolic)
+    {
+      try
+      {
+        bp::ipstream output_sym_stream;
+        bp::opstream input_sym_stream;
+        mCRL2log(log::debug) << "Solving symbolic with args: " << options.solve_symbolic_args << std::endl;
+        sym_process = bp::child(("pbessolvesymbolic - " + options.solve_symbolic_args),
+          bp::std_in<input_sym_stream, bp::std_out> output_sym_stream);
+
+        std::ostringstream buffer(std::ios::binary);
+        atermpp::binary_aterm_ostream(buffer) << p_copy;
+
+        const std::string& data = buffer.str();
+        input_sym_stream.write(data.data(), data.size());
+
+        input_sym_stream.flush();
+
+        std::vector<std::string> outline;
+        std::string line;
+        while (sym_process.running() && std::getline(output_sym_stream, line))
+        {
+          mCRL2log(log::debug) << "[symbolic]: " << line << std::endl;
+          outline.push_back(line);
+        }
+        mCRL2log(log::verbose) << "Result: " << outline.back() << std::endl;
+        sym_process.wait();
+
+        result = outline.back() == "true";
+      }
+      catch (const std::exception& e)
+      {
+        sym_process.wait();
+        mcrl2::runtime_error("symbolic solver failed: " + std::string(e.what()));
+      }
+    }
+    else
+    {
+      pbessolve_options options2;
+      options2.rewrite_strategy = options.rewrite_strategy;
+
+      structure_graph G;
+      pbesinst_structure_graph_algorithm algorithm(options2, p_copy, G);
+      algorithm.run();
+
+      // Solve the structure graph
+      result = solve_structure_graph(G);
+      mCRL2log(log::verbose) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
+    }
+    timer.finish("solving approximation");
+    if (mcrl2::log::mCRL2logEnabled(log::verbose))
+    {
+      timer.report();
+    }
+    return result;
+  }
+
+  // Solves the underapproximated PBES using structure graph solving
+  bool solve_approximation(const pbes& p,
+    pbescegps_options options,
+    const bool& is_overapproximation)
+  {
+    mCRL2log(log::verbose) << "Calculating " << (is_overapproximation ? "over" : "under") << "approximation"
+                           << std::endl;
+
+    data::mutable_map_substitution<> sigma;
+    pbes p_copy(p);
+    sigma = pbes_system::detail::instantiate_global_variables(p_copy);
+    pbes_system::detail::replace_global_variables(p_copy, sigma);
+
+    try
+    {
+      mCRL2log(log::verbose) << "Solving " << (is_overapproximation ? "over" : "under") << "approximated PBES"
+                             << std::endl;
+      return solve(p_copy, options);
+    }
+    catch (const std::exception& e)
+    {
+      throw mcrl2::runtime_error("Exception during structure graph solving: " + std::string(e.what()));
+    }
+  }
+
+  // Collects all parameters W = decl(E) from a PBES
+  // This gathers all data variables that appear in PBES equations
+  std::set<data::variable> collect_parameters(const pbes& p)
+  {
+    std::set<data::variable> parameters;
+    for (const pbes_equation& eq : p.equations())
+    {
+      for (const auto& param : eq.variable().parameters())
+      {
+        parameters.insert(atermpp::down_cast<data::variable>(param));
+      }
+    }
+    return parameters;
+  }
+
+  // // Applies abstraction to a PBES expression
+  // // Replaces data expressions depending on abstracted variables with true/false
+  pbes_expression apply_abstraction(const pbes_expression& expr,
+    const std::set<data::variable>& abstraction_vars,
+    bool is_overapproximation);
+
+  // Applies abstraction to all equations in a PBES
+  pbes apply_abstraction_to_pbes(const pbes& p,
+    const std::map<core::identifier_string, std::set<data::variable>>& abstraction_vars_per_eq,
+    bool is_overapproximation,
+    pbescegps_options options)
+  {
+    pbes result = p;
+    for (pbes_equation& eq : result.equations())
+    {
+      // Find abstraction set for this equation
+      auto it = abstraction_vars_per_eq.find(eq.variable().name());
+      if (it != abstraction_vars_per_eq.end())
+      {
+        eq.formula() = apply_abstraction(eq.formula(), it->second, is_overapproximation);
+      }
+    }
+
+    // Remove unused parameters after abstraction
+    // Temporarily suppress logging during parelm to reduce noise
+    mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
+    mcrl2::log::logger::set_reporting_level(mcrl2::log::error);
+    pbes_system::parelm(result, false);
+    mcrl2::log::logger::set_reporting_level(saved_level);
+
+    // Rewrite expressions for simplification
+    data::rewriter datar(p.data(), options.rewrite_strategy);
+    simplify_data_rewriter<data::rewriter> pbesr(datar);
+    pbes_rewrite(result, pbesr);
+
+    return result;
+  }
+
+  // Helper: Calculate non-Control Flow Parameters (CFP) per equation
+  // Returns a map from equation name to set of non-CFP variables
+  std::map<core::identifier_string, std::set<data::variable>>
+  calculate_non_cfp(pbes& p, pbescegps_options& options, const bool use_init_control_flow)
+  {
+    // Initialize result with ALL parameters for each equation
+    std::map<core::identifier_string, std::set<data::variable>> result;
+    for (const pbes_equation& eq : p.equations())
+    {
+      for (const auto& param : eq.variable().parameters())
+      {
+        result[eq.variable().name()].insert(atermpp::down_cast<data::variable>(param));
+      }
+    }
+    
+    if (!use_init_control_flow)
+    {
+      return result;
+    }
+
+    data::rewriter datar(p.data(), options.rewrite_strategy);
+    detail::stategraph_pbes stategraph(p, datar);
+    pbesstategraph_options opts;
+    detail::stategraph_algorithm algo(p, opts);
+
+    for (detail::stategraph_equation& equation: stategraph.equations())
+    {
+      for (detail::predicate_variable& predvar: equation.predicate_variables())
+      {
+        predvar.simplify_guard();
+      }
+    }
+
+    stategraph.compute_source_target_copy();
+    algo.run();
+
+    // Get the GCFP vector for each equation
+    const auto& gcfp_map = algo.get_GCFP();
+
+    for (const auto& [eq_name, cfp_vector] : gcfp_map)
+    {
+      // Find the corresponding equation to get parameter list
+      for (const pbes_equation& eq : p.equations())
+      {
+        if (eq.variable().name() == eq_name)
+        {
+          const data::variable_list& params = eq.variable().parameters();
+          std::set<data::variable>& non_cfp_set = result[eq_name];
+
+          // cfp_vector[i] == true means parameter i is a CFP
+          // cfp_vector[i] == false means parameter i is NOT a CFP (non-CFP)
+          for (std::size_t i = 0; i < cfp_vector.size() && i < params.size(); ++i)
+          {
+            if (cfp_vector[i])  // If IS a CFP (remove from non-CFP set)
+            {
+              non_cfp_set.erase(atermpp::down_cast<data::variable>(params[i]));
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  // Helper: Collect all PVI calls from a formula recursively
+  void collect_pvis(const pbes_expression& expr, std::vector<propositional_variable_instantiation>& result)
+  {
+    if (is_propositional_variable_instantiation(expr))
+    {
+      result.push_back(atermpp::down_cast<propositional_variable_instantiation>(expr));
+    }
+    else if (is_not(expr))
+    {
+      collect_pvis(atermpp::down_cast<not_>(expr).operand(), result);
+    }
+    else if (is_and(expr))
+    {
+      const auto& and_expr = atermpp::down_cast<and_>(expr);
+      collect_pvis(and_expr.left(), result);
+      collect_pvis(and_expr.right(), result);
+    }
+    else if (is_or(expr))
+    {
+      const auto& or_expr = atermpp::down_cast<or_>(expr);
+      collect_pvis(or_expr.left(), result);
+      collect_pvis(or_expr.right(), result);
+    }
+    else if (is_imp(expr))
+    {
+      const auto& imp_expr = atermpp::down_cast<imp>(expr);
+      collect_pvis(imp_expr.left(), result);
+      collect_pvis(imp_expr.right(), result);
+    }
+    else if (is_forall(expr))
+    {
+      collect_pvis(atermpp::down_cast<forall>(expr).body(), result);
+    }
+    else if (is_exists(expr))
+    {
+      collect_pvis(atermpp::down_cast<exists>(expr).body(), result);
+    }
+  }
+
+  // Makes W data-closed under the PBES (simplified version)
+  // W is now a per-equation map, so we ensure each equation's abstraction set is closed
+  void make_data_closed(const pbes& p, std::map<core::identifier_string, std::set<data::variable>>& W)
+  {
+    // For now, just use the provided W as-is
+    // A full implementation would check all PVI arguments for dependencies
+    // and expand W accordingly, but that requires more complex traversal logic
+    (void)p;
+  }
+
+  void report_abstracted_parameters(const std::map<core::identifier_string, std::set<data::variable>>& W_map)
+  {
+    for (const auto& [eq_name, var_set] : W_map)
+    {
+      std::string param_names;
+      for (const auto& var : var_set)
+      {
+        param_names += var.name();
+        param_names += " ";
+      }
+      mCRL2log(log::verbose) << "Abstracted parameters for " << eq_name << ": " << param_names << std::endl;
+    }
+  }
+
+  // Iterative refinement: progressively un-abstract parameters
+  // Removes one parameter from one equation's abstraction set per call
+  void add_relevant_parameter(const pbes& p, std::map<core::identifier_string, std::set<data::variable>>& W)
+  {
+    mCRL2log(log::verbose) << "Updating parameters for refinement..." << std::endl;
+
+    // Find the first non-empty equation's abstraction set
+    for (auto& [eq_name, var_set] : W)
+    {
+      if (!var_set.empty())
+      {
+        // Remove the first parameter from this equation's set
+        auto it = var_set.begin();
+        data::variable to_remove = *it;
+        var_set.erase(it);
+
+        mCRL2log(log::verbose) << "Un-abstracted parameter " << to_remove.name() 
+                               << " from equation " << eq_name << std::endl;
+
+        // Call make_data_closed immediately to re-establish the invariant
+        make_data_closed(p, W);
+        return;
+      }
+    }
+
+    mCRL2log(log::verbose) << "No more parameters to un-abstract" << std::endl;
+  }
+
+  bool run(pbes& p, pbescegps_options options)
+  {
+    // Calculate non-Control Flow Parameters (parameters to abstract) per equation
+    std::map<core::identifier_string, std::set<data::variable>> W = 
+      calculate_non_cfp(p, options, options.init_control_flow);
+
+    // Ensure W is data-closed
+    make_data_closed(p, W);
+
+    // Collect sorts to abstract (non-CFP parameters)
+    report_abstracted_parameters(W);
+    
+    mCRL2log(log::verbose) << "Regular...\n" << pp(p) << std::endl;
+
+    // Iterative refinement loop
+    do
+    {
+      // Check if all equations have empty abstraction sets
+      bool all_empty = true;
+      for (const auto& [eq_name, var_set] : W)
+      {
+        if (!var_set.empty())
+        {
+          all_empty = false;
+          break;
+        }
+      }
+
+      if (all_empty)
+      {
+        mCRL2log(log::verbose) << "No parameters to abstract, solving normally." << std::endl;
+        return solve(p, options);
+      }
+
+      // Try under-approximation
+      pbes p_under = apply_abstraction_to_pbes(p, W, false, options);
+      mCRL2log(log::verbose) << "Trying under-approximation...\n" << pp(p_under) << std::endl;
+      bool under_result = solve_approximation(p_under, options, false);
+
+      if (under_result)
+      {
+        mCRL2log(log::verbose) << "Under-approximation solved to TRUE" << std::endl;
+        report_abstracted_parameters(W);
+        return true;
+      }
+
+      // Try over-approximation
+      pbes p_over = apply_abstraction_to_pbes(p, W, true, options);
+      bool over_result = solve_approximation(p_over, options, true);
+      mCRL2log(log::verbose) << "Trying over-approximation...\n" << pp(p_over) << std::endl;
+
+      if (!over_result)
+      {
+        mCRL2log(log::verbose) << "Over-approximation solved to FALSE" << std::endl;
+        report_abstracted_parameters(W);
+        return false;
+      }
+
+      // Both approximations are inconclusive, refine by un-abstracting one parameter
+      mCRL2log(log::verbose) << "Both approximations inconclusive, refining..." << std::endl;
+      add_relevant_parameter(p, W);
+    }
+    while (true);
+
+    throw mcrl2::runtime_error("Could not find a solution");
+  }
+};
+
+// Abstraction builder implementation
+// Must be defined outside the struct due to template constraints
+pbes_expression pbescegps_iterator::apply_abstraction(const pbes_expression& expr,
+  const std::set<data::variable>& abstraction_vars,
+  bool is_overapproximation)
+{
+  mCRL2log(log::debug) << "=== Entering apply_abstraction ===" << std::endl;
+  mCRL2log(log::debug) << "Abstraction mode: " << (is_overapproximation ? "OVER-approximation" : "UNDER-approximation") << std::endl;
+  mCRL2log(log::debug) << "Number of variables to abstract: " << abstraction_vars.size() << std::endl;
+  for (const auto& var : abstraction_vars)
+  {
+    mCRL2log(log::debug) << "  - " << var.name() << std::endl;
+  }
+  
+  pbes_expression result;
+  abstraction_rewriter<> rewriter(abstraction_vars, is_overapproximation);
+  mCRL2log(log::debug) << "Created abstraction_rewriter, now applying to expression" << std::endl;
+  rewriter.apply(result, expr);
+  mCRL2log(log::debug) << "=== Exiting apply_abstraction ===" << std::endl;
+  return result;
+}
+
+inline bool pbescegps(const std::string& input_filename,
+  const utilities::file_format& input_format,
+  const pbescegps_options options)
+{
+  pbes p;
+  load_pbes(p, input_filename, input_format);
+  algorithms::normalize(p);
+
+  pbescegps_iterator iterator;
+  bool result = iterator.run(p, options);
+
+  mCRL2log(log::info) << (result ? "true" : "false") << std::endl;
+  return result;
+}
+}; // namespace mcrl2::pbes_system
+
+#endif // MCRL2_PBES_TOOLS_PBESCEGPS_H
