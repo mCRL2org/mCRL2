@@ -303,6 +303,10 @@ class PbesabstractTest(PbesTest):
     def __init__(self, name, settings):
         super().__init__(name, ymlfile('pbesabstract'), settings)
 
+class PbescegpsTest(PbesTest):
+    def __init__(self, name, settings):
+        super().__init__(name, ymlfile('pbescegps'), settings)
+
 class PbesconstelmTest(PbesTest):
     def __init__(self, name, settings):
         super().__init__(name, ymlfile('pbesconstelm'), settings)
@@ -535,7 +539,8 @@ available_tests = {
     'bisimulation-branching-bisim-gjkw'           : lambda name, settings: BisimulationTest(name, 'branching-bisim-gjkw', settings)                    ,
     'bisimulation-branching-bisim-gj'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj', settings)                      ,
     'bisimulation-branching-bisim-gj-lazy-BLC'    : lambda name, settings: BisimulationTest(name, 'branching-bisim-gj-lazy-BLC', settings)             ,
-    'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                              ,
+    'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                                  ,
+    'pbescegps'                                   : lambda name, settings: PbescegpsTest(name, settings)                                                  ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                            ,
     'pbesrewr-simplify'                           : lambda name, settings: PbesrewrTest(name, 'simplify', settings)                                    ,
     'pbesrewr-pfnf'                               : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                                        ,
