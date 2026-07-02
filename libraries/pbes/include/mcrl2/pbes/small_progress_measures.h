@@ -20,21 +20,10 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/normal_forms.h"
 #include "mcrl2/pbes/print.h"
+#include "mcrl2/utilities/math.h"
 
 namespace mcrl2::pbes_system
 {
-
-template <typename T>
-bool is_odd(T t)
-{
-  return t % 2 != 0;
-}
-
-template <typename T>
-bool is_even(T t)
-{
-  return t % 2 == 0;
-}
 
 template <typename InputIterator1, typename InputIterator2>
 int lexicographical_compare_3way(InputIterator1 first1, InputIterator1 last1,
@@ -226,7 +215,7 @@ class small_progress_measures_algorithm
       {
         if (eqn.symbol() != last_symbol)
         {
-          if (is_even(m_beta.size()))
+          if (utilities::is_even(m_beta.size()))
           {
             m_beta.push_back(0);
           }
@@ -241,7 +230,7 @@ class small_progress_measures_algorithm
         block_size++;
         m_vertices[propositional_variable_instantiation(eqn.variable().name())] = vertex(is_disjunctive(eqn.formula()), last_rank, m_d);
       }
-      if (is_even(m_beta.size()))
+      if (utilities::is_even(m_beta.size()))
       {
         m_beta.push_back(0);
       }
@@ -336,7 +325,7 @@ class small_progress_measures_algorithm
           std::vector<int> alpha(m_d, 0);
           const progress_measures_vertex& w = **j;
           std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m + 1, alpha.begin());
-          if (is_odd(m))
+          if (utilities::is_odd(m))
           {
             mCRL2log(log::debug) << "\n    inc(" << core::detail::print_list(alpha) << ", " << std::to_string(m) << ") = ";
             inc(alpha, m, m_beta);
