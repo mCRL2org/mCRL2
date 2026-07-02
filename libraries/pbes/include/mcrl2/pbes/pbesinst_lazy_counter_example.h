@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/structure_graph.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/math.h"
 
 #include <regex>
 
@@ -112,6 +113,15 @@ struct rewrite_star_substitution
 
         if (mapping.count(G.find_vertex(u).formula()) != 0)
         {
+          // If this vertex is won by player even and is decorated with `true`,
+          // then it stems from an equation (\nu X = true), which originally was (\nu X = X) before the default simplification (analogous for player odd).
+          if (G.strategy(u) == undefined_vertex() &&
+              ((!alpha && utilities::is_even(G.rank(u)) && G.decoration(u) == structure_graph::d_true)
+              || (alpha && utilities::is_odd(G.rank(u)) && G.decoration(u) == structure_graph::d_false)))
+          {
+            // We act as if the self-dependency is still there.
+            Ys.insert(G.find_vertex(u).formula());
+          }
           // This vertex is won by alpha
           if (G.strategy(u) != undefined_vertex()
               && ((!alpha && G.decoration(u) == structure_graph::d_disjunction)
