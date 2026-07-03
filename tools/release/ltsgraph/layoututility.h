@@ -94,7 +94,7 @@ const std::size_t max_slice = 50;
 /// This method avoids precision loss due to adding up too much before division
 ///  Downside: more divisions. Upside: more accuracy.
 template < typename ReturnType >
-ReturnType _slicedAverage(std::size_t i, std::size_t j,
+ReturnType _slicedAverage(const std::size_t i, const std::size_t j,
                           std::function<ReturnType(std::size_t)> f, ReturnType zero)
 {
   std::size_t n = j - i;

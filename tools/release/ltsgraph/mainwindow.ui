@@ -87,7 +87,8 @@
     <addaction name="actOutput"/>
     <addaction name="separator"/>
     <addaction name="actFullscreen"/>
-    <addaction name="actReset"/>
+    <addaction name="actResetViewpoint"/>
+    <addaction name="actResetLayout"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
@@ -169,12 +170,17 @@
     <string>Ctrl+T</string>
    </property>
   </action>
-  <action name="actReset">
+  <action name="actResetViewpoint">
    <property name="text">
     <string>Reset viewpoint</string>
    </property>
    <property name="shortcut">
     <string>Esc</string>
+   </property>
+  </action>
+  <action name="actResetLayout">
+   <property name="text">
+    <string>Reset layout</string>
    </property>
   </action>
   <action name="actExportImage">

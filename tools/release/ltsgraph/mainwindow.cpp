@@ -69,7 +69,8 @@ MainWindow::MainWindow(QWidget* parent) :
   connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(updateStatusBar()));
   connect(m_ui.actExplorationMode, SIGNAL(toggled(bool)), this, SLOT(onExplore(bool)));
   connect(m_ui.actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
-  connect(m_ui.actReset, SIGNAL(triggered()), m_glwidget, SLOT(resetViewpoint()));
+  connect(m_ui.actResetViewpoint, SIGNAL(triggered()), m_glwidget, SLOT(resetViewpoint()));
+  connect(m_ui.actResetLayout, SIGNAL(triggered()),  springlayoutui, SLOT(onResetPositionsPressed()));
   connect(m_ui.actOpenFile, SIGNAL(triggered()), this, SLOT(onOpenFile()));
   connect(m_ui.actExportImage, SIGNAL(triggered()), this, SLOT(onExportImage()));
   connect(m_ui.actImport_XML, SIGNAL(triggered()), this, SLOT(onImportXML()));

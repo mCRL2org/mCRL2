@@ -7,14 +7,17 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "springlayout.h"
-#include "settingsmanager.h"
-#include "utility.h"
 
 #include <QThread>
 #include <QWidget>
 #include <cmath>
 #include <cstdlib>
+
+#include "springlayout.h"
+#include "settingsmanager.h"
+#include "utility.h"
+
+#include "mcrl2/utilities/exception.h"
 
 namespace Graph
 {
@@ -235,8 +238,8 @@ QVector3D SpringLayout::approxRepulsionForce<Quadtree>(const QVector3D& a, Quadt
 
 template <>
 void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(bool sel,
-    std::size_t nodeCount,
-    std::size_t edgeCount)
+                                                                               std::size_t nodeCount,
+                                                                               std::size_t edgeCount)
 {
   std::vector<std::size_t> nodeLocations(m_graph.nodeCount());
   for (std::size_t i = 0; i < nodeCount; ++i)
@@ -265,7 +268,8 @@ void SpringLayout::attractionAccumulation<SpringLayout::ThreadingMode::normal>(b
       m_hforces[i] += (*m_repFunc)(m_graph.handle(n).pos(), m_graph.node(from).pos(), 10*m_handleDeviation) * m_repulsion;
     }
 
-    f = (*m_attrFunc)(m_graph.node(to).pos(), m_graph.node(from).pos(), m_natLength) * m_attraction;
+    f = (*m_attrFunc)(m_graph.node(to).pos(), m_graph.node(from).pos(), m_natLength) * m_attraction/4; // The constant 4 is added as otherwise
+                                                                                                       // the layout can become unstable.
     m_nforces[nodeLocations[from]] += f;
     m_nforces[nodeLocations[to]] -= f;
 
@@ -585,7 +589,6 @@ void SpringLayout::apply()
       }
       randomizeZ(0.1f * std::sqrt((max_x - min_x) * (max_x - min_x) + (max_y - min_y) * (max_y - min_y)));
     }
-
     if (m_graph.resetPositions())
     {
       m_graph.resetPositions() = false;
@@ -821,8 +824,7 @@ void SpringLayout::setAttraction(int v)
   {
     m_ui->m_ui.lbl_attractRepulse->setText(QString::number(1 - m_attraction, 'g', 2));
   }
-  mCRL2log(mcrl2::log::verbose) << "Set attraction scale to: " << v << " corresponding to: " << m_attraction
-                                << std::endl;
+  mCRL2log(mcrl2::log::verbose) << "Set attraction scale to: " << v << " corresponding to: " << m_attraction << std::endl;
 }
 
 void SpringLayout::setRepulsion(int v)
