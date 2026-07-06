@@ -20,11 +20,11 @@ namespace mcrl2::data
 
 namespace detail
 {
-/// \return The value <tt>!arg</tt>
+/// \post result is the optimized version of <tt>!arg</tt>
 template <typename TermTraits>
 inline
-void optimized_not(typename TermTraits::term_type& result, 
-                   const typename TermTraits::term_type& arg, 
+void optimized_not(typename TermTraits::term_type& result,
+                   const typename TermTraits::term_type& arg,
                    TermTraits)
 {
   using tr = TermTraits;
@@ -50,12 +50,12 @@ void optimized_not(typename TermTraits::term_type& result,
 /// \brief Make a conjunction and optimize it if possible.
 /// \param left A term
 /// \param right A term
-/// \return The value <tt>left && right</tt>
+/// \post result is the optimized version of <tt>left && right</tt>
 template <typename TermTraits>
 inline
-void optimized_and(typename TermTraits::term_type& result, 
-                   const typename TermTraits::term_type& left, 
-                   const typename TermTraits::term_type& right, 
+void optimized_and(typename TermTraits::term_type& result,
+                   const typename TermTraits::term_type& left,
+                   const typename TermTraits::term_type& right,
                    TermTraits)
 {
   using tr = TermTraits;
@@ -89,11 +89,11 @@ void optimized_and(typename TermTraits::term_type& result,
 /// \brief Make a disjunction
 /// \param left A term
 /// \param right A term
-/// \return The value <tt>left || right</tt>
+/// \post result is the optimized version of <tt>left || right</tt>
 template <typename TermTraits>
 inline
-void optimized_or(typename TermTraits::term_type& result, 
-                  const typename TermTraits::term_type& left, 
+void optimized_or(typename TermTraits::term_type& result,
+                  const typename TermTraits::term_type& left,
                   const typename TermTraits::term_type& right, TermTraits)
 {
   using tr = TermTraits;
@@ -127,11 +127,11 @@ void optimized_or(typename TermTraits::term_type& result,
 /// \brief Make an implication
 /// \param left A term
 /// \param right A term
-/// \return The value <tt>left => right</tt>
+/// \post result is the optimized version of <tt>left => right</tt>
 template <typename TermTraits>
 inline
-void optimized_imp(typename TermTraits::term_type& result, 
-                   const typename TermTraits::term_type& left, 
+void optimized_imp(typename TermTraits::term_type& result,
+                   const typename TermTraits::term_type& left,
                    const typename TermTraits::term_type& right, TermTraits t)
 {
   using tr = TermTraits;
@@ -169,13 +169,13 @@ void optimized_imp(typename TermTraits::term_type& result,
 /// \param empty_domain_allowed If true, and there are no variables in \a v, treat
 ///        as empty domain, hence yielding <tt>true</tt>, otherwise <tt>arg</tt> arg
 ///        is returned in this case.
-/// \return The universal quantification <tt>forall v.arg</tt>
+/// \post result is the optimized version of <tt>forall v.arg</tt>
 template <typename TermTraits>
 inline
-void optimized_forall(typename TermTraits::term_type& result, 
-                      const typename TermTraits::variable_sequence_type& v, 
-                      const typename TermTraits::term_type& arg, 
-                      bool remove_variables, 
+void optimized_forall(typename TermTraits::term_type& result,
+                      const typename TermTraits::variable_sequence_type& v,
+                      const typename TermTraits::term_type& arg,
+                      bool remove_variables,
                       bool empty_domain_allowed, TermTraits)
 {
   using tr = TermTraits;
@@ -227,14 +227,14 @@ void optimized_forall(typename TermTraits::term_type& result,
 /// \param empty_domain_allowed If true, and there are no variables in \a v, treat
 ///        as empty domain, hence yielding <tt>false</tt>, otherwise <tt>arg</tt> arg
 ///        is returned in this case.
-/// \return The existential quantification <tt>exists v.arg</tt>
+/// \post result is the optimized version of <tt>exists v.arg</tt>
 template <typename TermTraits>
 inline
 void optimized_exists(typename TermTraits::term_type& result,
-                      const typename TermTraits::variable_sequence_type& v, 
-                      const typename TermTraits::term_type& arg, 
-                      bool remove_variables, 
-                      bool empty_domain_allowed, 
+                      const typename TermTraits::variable_sequence_type& v,
+                      const typename TermTraits::term_type& arg,
+                      bool remove_variables,
+                      bool empty_domain_allowed,
                       TermTraits)
 {
   using tr = TermTraits;
@@ -343,7 +343,7 @@ void optimized_exists(typename TermTraits::term_type& result,
 
 /// \brief Make a negation
 /// \param arg A term
-/// \return The application of not to the argument.
+/// \post result is the optimized version of <tt>!arg</tt>
 template <typename Term>
 inline
 void optimized_not(Term& result, const Term& arg)
@@ -355,6 +355,7 @@ void optimized_not(Term& result, const Term& arg)
 /// \param result Contains the optimized and.
 /// \param p A term
 /// \param q A term
+/// \post result is the optimized version of <tt>p && q</tt>
 template <typename Term>
 inline
 void optimized_and(Term& result, const Term& p, const Term& q)
@@ -362,11 +363,11 @@ void optimized_and(Term& result, const Term& p, const Term& q)
   return detail::optimized_and(result, p, q, core::term_traits<Term>());
 }
 
-/// \brief Make a conjunction, and optimize if possible.
+/* /// \brief Make a conjunction, and optimize if possible.
 /// \param p A term
 /// \param q A term
 /// \return The application of and to the arguments.
-/* template <typename Term>
+template <typename Term>
 inline
 Term optimized_and(const Term& p, const Term& q)
 {
@@ -376,7 +377,7 @@ Term optimized_and(const Term& p, const Term& q)
 /// \brief Make a disjunction
 /// \param p A term
 /// \param q A term
-/// \return The application of or to the arguments.
+/// \post result is the optimized version of <tt>p || q</tt>
 template <typename Term>
 inline
 void optimized_or(Term& result, const Term& p, const Term& q)
@@ -387,7 +388,7 @@ void optimized_or(Term& result, const Term& p, const Term& q)
 /// \brief Make an implication
 /// \param p A term
 /// \param q A term
-/// \return The application of implication to the arguments.
+/// \post result is the optimized version of <tt>p => q</tt>
 template <typename Term>
 inline
 void optimized_imp(Term& result, const Term& p, const Term& q)
@@ -399,7 +400,7 @@ void optimized_imp(Term& result, const Term& p, const Term& q)
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of universal quantification to the arguments.
+/// \post result is the optimized version of <tt>forall l.p</tt>
 template <typename Term, typename VariableSequence>
 inline
 void optimized_forall(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
@@ -412,7 +413,7 @@ void optimized_forall(Term& result, const VariableSequence& l, const Term& p, bo
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of universal quantification to the arguments.
+/// \post result is the optimized version of <tt>forall l.p</tt>
 /// The optimization forall x:empty_set. phi = true is not applied.
 template <typename Term, typename VariableSequence>
 inline
@@ -426,7 +427,7 @@ void optimized_forall_no_empty_domain(Term& result, const VariableSequence& l, c
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of existential quantification to the arguments.
+/// \post result is the optimized version of <tt>exists l.p</tt>
 template <typename Term, typename VariableSequence>
 inline
 void optimized_exists(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
@@ -439,7 +440,7 @@ void optimized_exists(Term& result, const VariableSequence& l, const Term& p, bo
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of existential quantification to the arguments.
+/// \post result is the optimized version of <tt>exists l.p</tt>
 /// The optimization exists x:empty_set. phi = false is not applied.
 template <typename Term, typename VariableSequence>
 inline

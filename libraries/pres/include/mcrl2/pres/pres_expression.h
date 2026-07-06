@@ -178,7 +178,7 @@ class propositional_variable_instantiation: public pres_expression
 };
 
 /// \\brief Make_propositional_variable_instantiation constructs a new term into a given address.
-/// \\ \param t The reference into which the new propositional_variable_instantiation is constructed. 
+/// \\ \param t The reference into which the new propositional_variable_instantiation is constructed.
 template <class... ARGUMENTS>
 inline void make_propositional_variable_instantiation(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -255,7 +255,7 @@ class minus: public pres_expression
 };
 
 /// \\brief Make_minus constructs a new term into a given address.
-/// \\ \param t The reference into which the new minus is constructed. 
+/// \\ \param t The reference into which the new minus is constructed.
 template <class... ARGUMENTS>
 inline void make_minus(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -331,7 +331,7 @@ class and_: public pres_expression
 };
 
 /// \\brief Make_and_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new and_ is constructed. 
+/// \\ \param t The reference into which the new and_ is constructed.
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -407,7 +407,7 @@ class or_: public pres_expression
 };
 
 /// \\brief Make_or_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new or_ is constructed. 
+/// \\ \param t The reference into which the new or_ is constructed.
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -483,7 +483,7 @@ class imp: public pres_expression
 };
 
 /// \\brief Make_imp constructs a new term into a given address.
-/// \\ \param t The reference into which the new imp is constructed. 
+/// \\ \param t The reference into which the new imp is constructed.
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -559,7 +559,7 @@ class plus: public pres_expression
 };
 
 /// \\brief Make_plus constructs a new term into a given address.
-/// \\ \param t The reference into which the new plus is constructed. 
+/// \\ \param t The reference into which the new plus is constructed.
 template <class... ARGUMENTS>
 inline void make_plus(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -635,7 +635,7 @@ class const_multiply: public pres_expression
 };
 
 /// \\brief Make_const_multiply constructs a new term into a given address.
-/// \\ \param t The reference into which the new const_multiply is constructed. 
+/// \\ \param t The reference into which the new const_multiply is constructed.
 template <class... ARGUMENTS>
 inline void make_const_multiply(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -711,7 +711,7 @@ class const_multiply_alt: public pres_expression
 };
 
 /// \\brief Make_const_multiply_alt constructs a new term into a given address.
-/// \\ \param t The reference into which the new const_multiply_alt is constructed. 
+/// \\ \param t The reference into which the new const_multiply_alt is constructed.
 template <class... ARGUMENTS>
 inline void make_const_multiply_alt(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -787,7 +787,7 @@ class infimum: public pres_expression
 };
 
 /// \\brief Make_infimum constructs a new term into a given address.
-/// \\ \param t The reference into which the new infimum is constructed. 
+/// \\ \param t The reference into which the new infimum is constructed.
 template <class... ARGUMENTS>
 inline void make_infimum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -863,7 +863,7 @@ class supremum: public pres_expression
 };
 
 /// \\brief Make_supremum constructs a new term into a given address.
-/// \\ \param t The reference into which the new supremum is constructed. 
+/// \\ \param t The reference into which the new supremum is constructed.
 template <class... ARGUMENTS>
 inline void make_supremum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -939,7 +939,7 @@ class sum: public pres_expression
 };
 
 /// \\brief Make_sum constructs a new term into a given address.
-/// \\ \param t The reference into which the new sum is constructed. 
+/// \\ \param t The reference into which the new sum is constructed.
 template <class... ARGUMENTS>
 inline void make_sum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1010,7 +1010,7 @@ class eqinf: public pres_expression
 };
 
 /// \\brief Make_eqinf constructs a new term into a given address.
-/// \\ \param t The reference into which the new eqinf is constructed. 
+/// \\ \param t The reference into which the new eqinf is constructed.
 template <class... ARGUMENTS>
 inline void make_eqinf(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1081,7 +1081,7 @@ class eqninf: public pres_expression
 };
 
 /// \\brief Make_eqninf constructs a new term into a given address.
-/// \\ \param t The reference into which the new eqninf is constructed. 
+/// \\ \param t The reference into which the new eqninf is constructed.
 template <class... ARGUMENTS>
 inline void make_eqninf(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1162,7 +1162,7 @@ class condsm: public pres_expression
 };
 
 /// \\brief Make_condsm constructs a new term into a given address.
-/// \\ \param t The reference into which the new condsm is constructed. 
+/// \\ \param t The reference into which the new condsm is constructed.
 template <class... ARGUMENTS>
 inline void make_condsm(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1243,7 +1243,7 @@ class condeq: public pres_expression
 };
 
 /// \\brief Make_condeq constructs a new term into a given address.
-/// \\ \param t The reference into which the new condeq is constructed. 
+/// \\ \param t The reference into which the new condeq is constructed.
 template <class... ARGUMENTS>
 inline void make_condeq(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1554,11 +1554,11 @@ pres_expression make_supremum(const data::variable_list& l, const pres_expressio
 
 /// \brief Make a negation
 /// \param p A PRES expression
-/// \return The value <tt>!p</tt>
+/// \post result is the optimized version of <tt>!p</tt>
 inline
 void optimized_minus(pres_expression& result, const pres_expression& p)
 {
-  // Should be optimized. 
+  // Should be optimized.
   // true false special cases.
   // data::sort_real::is_zero(p)
   make_minus(result, p);
@@ -1567,7 +1567,7 @@ void optimized_minus(pres_expression& result, const pres_expression& p)
 /// \brief Make a conjunction
 /// \param p A PRES expression
 /// \param q A PRES expression
-/// \return The value <tt>p && q</tt>
+/// \post result is the optimized version of <tt>p && q</tt>
 inline
 void optimized_and(pres_expression& result, const pres_expression& p, const pres_expression& q)
 {
@@ -1577,17 +1577,17 @@ void optimized_and(pres_expression& result, const pres_expression& p, const pres
 /// \brief Make a disjunction
 /// \param p A PRES expression
 /// \param q A PRES expression
-/// \return The value <tt>p || q</tt>
+/// \post result is the optimized version of <tt>p || q</tt>
 inline
 void optimized_or(pres_expression& result, const pres_expression& p, const pres_expression& q)
 {
   data::optimized_or(result, p, q);
 }
 
-/// \brief Make a disjunction
+/// \brief Make a sum
 /// \param p A PRES expression
 /// \param q A PRES expression
-/// \return The value <tt>p || q</tt>
+/// \post result is the optimized version of <tt>p + q</tt>
 inline
 void optimized_plus(pres_expression& result, const pres_expression& p, const pres_expression& q)
 {
@@ -1610,7 +1610,7 @@ void optimized_plus(pres_expression& result, const pres_expression& p, const pre
         return;
       }
     }
-    make_plus(result, p, q);  
+    make_plus(result, p, q);
   }
   else if (is_false(q))
   {
@@ -1623,7 +1623,7 @@ void optimized_plus(pres_expression& result, const pres_expression& p, const pre
         return;
       }
     }
-    make_plus(result, p, q);  
+    make_plus(result, p, q);
   }
   else if (data::sort_real::is_zero(p))
   {
@@ -1642,7 +1642,7 @@ void optimized_plus(pres_expression& result, const pres_expression& p, const pre
 /// \brief Make an implication
 /// \param p A PRES expression
 /// \param q A PRES expression
-/// \return The value <tt>p => q</tt>
+/// \post result is the optimized version of <tt>p => q</tt>
 /* inline
 void optimized_imp(pres_expression& result, const pres_expression& p, const pres_expression& q)
 {
@@ -1653,21 +1653,21 @@ void optimized_imp(pres_expression& result, const pres_expression& p, const pres
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
 /// \param p A PRES expression
-/// \return The value <tt>inf l.p</tt>
+/// \post result is the optimized version of <tt>inf l.p</tt>
 inline
 void optimized_infimum(pres_expression& result, const data::variable_list& l, const pres_expression& p)
 {
   std::set<data::variable> free_variables = find_free_variables(p);
-  data::variable_list new_l(l.begin(), 
-                           l.end(), 
-                           [](const data::variable& v){ return v; }, 
+  data::variable_list new_l(l.begin(),
+                           l.end(),
+                           [](const data::variable& v){ return v; },
                            [&free_variables](const data::variable& v){ return free_variables.find(v)!=free_variables.end(); });
   if (new_l.empty())
   {
     result=p;
   }
   else
-  { 
+  {
     make_infimum(result, new_l, p);
   }
 }
@@ -1676,21 +1676,21 @@ void optimized_infimum(pres_expression& result, const data::variable_list& l, co
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
 /// \param p A PRES expression
-/// \return The value <tt>sup l.p</tt>
+/// \post result is the optimized version of <tt>sup l.p</tt>
 inline
 void optimized_supremum(pres_expression& result, const data::variable_list& l, const pres_expression& p)
 {
   std::set<data::variable> free_variables = find_free_variables(p);
-  data::variable_list new_l(l.begin(), 
-                           l.end(), 
-                           [](const data::variable& v){ return v; }, 
+  data::variable_list new_l(l.begin(),
+                           l.end(),
+                           [](const data::variable& v){ return v; },
                            [&free_variables](const data::variable& v){ return free_variables.find(v)!=free_variables.end(); });
   if (new_l.empty())
   {
     result=p;
   }
   else
-  { 
+  {
     make_supremum(result, new_l, p);
   }
 }
@@ -1701,12 +1701,12 @@ void optimized_supremum(pres_expression& result, const data::variable_list& l, c
 /// \param p A PRES expression.
 /// \param data_specification A data specification to determine the cardinality of sorts.
 /// \param rewr A rewriter to determine the cardinality of sorts.
-/// \return The value <tt>sum l.p</tt>
+/// \post result is the optimized version of <tt>sum l.p</tt>
 inline
-void optimized_sum(pres_expression& result, 
-                   const data::variable_list& l, 
-                   const pres_expression& p, 
-                   const data::data_specification& data_specification, 
+void optimized_sum(pres_expression& result,
+                   const data::variable_list& l,
+                   const pres_expression& p,
+                   const data::data_specification& data_specification,
                    const data::rewriter& rewr)
 {
   if (l.size()==0)
@@ -1724,7 +1724,7 @@ void optimized_sum(pres_expression& result,
     {
       if (!is_true(p) && !is_false(p) && !data::sort_real::is_zero(p))
       {
-        // Determine the cardinality. 
+        // Determine the cardinality.
         std::size_t c = cardinality(v.sort());
         if (c==0) // This means the cardinality is infinite or cannot be determined.
         {
@@ -1757,7 +1757,7 @@ void optimized_sum(pres_expression& result,
       const data::data_expression& d = atermpp::down_cast<data::data_expression>(p);
       if (d.sort()==data::sort_bool::bool_())
       {
-        result = atermpp::down_cast<pres_expression>(d);  
+        result = atermpp::down_cast<pres_expression>(d);
       }
       else
       {
@@ -1770,7 +1770,7 @@ void optimized_sum(pres_expression& result,
       make_const_multiply(result, data::sort_real::real_(factor),p);
     }
   }
-  else 
+  else
   {
     result=p;
   }
@@ -1779,13 +1779,13 @@ void optimized_sum(pres_expression& result,
     make_sum(result, new_l, result);
   }
   return;
-} 
+}
 
 /// \brief Make an optimized condsm expression
 /// \param p1 A pres expression
 /// \param p2 A pres expression
 /// \param p3 A pres expression
-/// \return An optimized representation of condsm(p1, p2, p3)
+/// \post result is an optimized representation of condsm(p1, p2, p3)
 inline
 void optimized_condsm(pres_expression& result, const pres_expression& p1, const pres_expression& p2, const pres_expression& p3)
 {
@@ -1803,11 +1803,11 @@ void optimized_condsm(pres_expression& result, const pres_expression& p1, const 
   return;
 }
 
-/// \brief Make an optimized condsm expression
+/// \brief Make an optimized condeq expression
 /// \param p1 A pres expression
 /// \param p2 A pres expression
 /// \param p3 A pres expression
-/// \return An optimized representation of condsm(p1, p2, p3)
+/// \post result is an optimized representation of condeq(p1, p2, p3)
 inline
 void optimized_condeq(pres_expression& result, const pres_expression& p1, const pres_expression& p2, const pres_expression& p3)
 {
@@ -1828,7 +1828,7 @@ void optimized_condeq(pres_expression& result, const pres_expression& p1, const 
 
 /// \brief Make an optimized eqinf expression
 /// \param p A pres expression
-/// \return An optimized representation of eqinf(p)
+/// \post result is an optimized representation of eqinf(\a p)
 inline
 void optimized_eqinf(pres_expression& result, const pres_expression& p)
 {
@@ -1852,9 +1852,9 @@ void optimized_eqinf(pres_expression& result, const pres_expression& p)
   make_eqinf(result, p);
 }
 
-/// \brief Make an optimized eqinf expression
+/// \brief Make an optimized eqninf expression
 /// \param p A pres expression
-/// \return An optimized representation of eqinf(p)
+/// \post result is an optimized representation of eqninf(\a p)
 inline
 void optimized_eqninf(pres_expression& result, const pres_expression& p)
 {
@@ -1879,9 +1879,9 @@ void optimized_eqninf(pres_expression& result, const pres_expression& p)
 }
 
 /// \brief Make an optimized const_multiply expression
-/// \param d A real data expression, which should be positive. 
+/// \param d A real data expression, which should be positive.
 /// \param p A pres expression
-/// \return An optimized representation of eqinf(p)
+/// \post result is an optimized representation of const_multiply(\a d, \a p)
 inline
 void optimized_const_multiply(pres_expression& result, const data::data_expression& d, const pres_expression& p)
 {
@@ -1890,7 +1890,7 @@ void optimized_const_multiply(pres_expression& result, const data::data_expressi
     result = atermpp::down_cast<pres_expression>(d);
     return;
   }
-  if (data::sort_real::is_larger_zero(d) && 
+  if (data::sort_real::is_larger_zero(d) &&
       (p==false_() || p==true_() || is_eqinf(p) || is_eqninf(d)))
   {
     result = p;
@@ -1900,20 +1900,20 @@ void optimized_const_multiply(pres_expression& result, const data::data_expressi
 }
 
 /// \brief Make an optimized const_multiply_alt expression
-/// \param d A real data expression, which should be positive. 
+/// \param d A real data expression, which should be positive.
 /// \param p A pres expression
-/// \return An optimized representation of eqinf(p)
+/// \post result is an optimized representation of const_multiply_alt(\a d, \a p)
 inline
 void optimized_const_multiply_alt(pres_expression& result, const data::data_expression& d, const pres_expression& p)
 {
   if (data::sort_real::is_zero(d))
-  { 
+  {
     result = atermpp::down_cast<pres_expression>(d);
     return;
   }
-  if (data::sort_real::is_larger_zero(d) && 
+  if (data::sort_real::is_larger_zero(d) &&
       (p==false_() || p==true_() || is_eqinf(p) || is_eqninf(d)))
-  { 
+  {
     result = p;
     return;
   }
@@ -1934,7 +1934,7 @@ data::variable_list free_variables(const pres_expression& x)
 }
 
 /// \\brief Make_propositional_variable constructs a new term into a given address.
-/// \\ \param t The reference into which the new propositional_variable is constructed. 
+/// \\ \param t The reference into which the new propositional_variable is constructed.
 template <class... ARGUMENTS>
 inline void make_propositional_variable(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -2361,7 +2361,7 @@ struct term_traits<pres_system::pres_expression>
   {
     // Forall and exists are not fully supported by the data library
     assert(!data::is_data_expression(t) || (!data::is_abstraction(t)
-                                        || (!is_infimum(atermpp::down_cast<pres_system::pres_expression>(data::abstraction(t))) && 
+                                        || (!is_infimum(atermpp::down_cast<pres_system::pres_expression>(data::abstraction(t))) &&
                                             !is_supremum(atermpp::down_cast<pres_system::pres_expression>(data::abstraction(t))))));
     assert(is_supremum(t) || is_infimum(t));
 
