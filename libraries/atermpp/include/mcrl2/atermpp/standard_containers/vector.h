@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 //
-/// \file mcrl2/data/standard_containers/vector.h
+/// \file mcrl2/atermpp/standard_containers/vector.h
 /// \brief This file contains a vector class that behaves 
 ///        exactly as a standard vector. It can only be used
 ///        to store class instances that derive from aterms.
