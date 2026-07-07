@@ -100,3 +100,67 @@ BOOST_AUTO_TEST_CASE(test_worker_thread_aterm_survives_gc)
     delete orphan;
   }
 }
+
+// Regression test for a race condition in the #1934 transfer logic above.
+//
+// That fix transfers a dying worker's surviving entries into
+// g_main_thread_pool via register_variable()/register_container(), which
+// only take a *shared* lock. That excludes a concurrent GC, but not the main
+// thread's own (shared-locked) register/deregister calls on the very same
+// pool, nor another worker doing the same transfer concurrently. The
+// underlying hashtable has no internal synchronisation, so the concurrent
+// writes corrupt it, and a later, unrelated deregister_variable() call fails
+// to find its key: "hashtable::erase called for a key that is not present".
+//
+// This spawns worker threads that leak terms so ~thread_aterm_pool() must
+// transfer them on exit, while the main thread concurrently churns its own
+// terms -- reproducing the race directly.
+BOOST_AUTO_TEST_CASE(test_concurrent_worker_teardown_does_not_corrupt_main_pool)
+{
+  if constexpr (!mcrl2::utilities::detail::GlobalThreadSafe)
+  {
+    return;
+  }
+
+  constexpr std::size_t number_of_repetitions = 10;
+  constexpr std::size_t number_of_workers = 16;
+  constexpr std::size_t terms_per_worker = 128;
+
+  const atermpp::function_symbol orphan_sym("__test_worker_orphan__", 0);
+  const atermpp::function_symbol churn_sym("__test_main_churn__", 0);
+
+  for (std::size_t repetition = 0; repetition < number_of_repetitions; ++repetition)
+  {
+    std::atomic<std::size_t> workers_finished{ 0 };
+
+    std::vector<std::thread> workers;
+    workers.reserve(number_of_workers);
+    for (std::size_t i = 0; i < number_of_workers; ++i)
+    {
+      workers.emplace_back([&workers_finished, &orphan_sym]
+      {
+        // Leaked deliberately, so these are still registered when the
+        // thread exits below, forcing the transfer to g_main_thread_pool.
+        for (std::size_t j = 0; j < terms_per_worker; ++j)
+        {
+          new atermpp::aterm(orphan_sym);
+        }
+        ++workers_finished;
+      });
+    }
+
+    // Churn this (== main) thread's own pool while workers are exiting and
+    // transferring into it.
+    while (workers_finished.load() < number_of_workers)
+    {
+      atermpp::aterm term(churn_sym);
+    }
+
+    for (auto& worker : workers)
+    {
+      worker.join();
+    }
+  }
+
+  BOOST_CHECK(true);
+}
