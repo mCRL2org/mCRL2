@@ -138,6 +138,10 @@ public:
     return *this;
   }
 
+  markable_aterm& operator=(const unprotected_aterm_core& other) noexcept;
+
+  markable_aterm& operator=(unprotected_aterm_core&& other) noexcept;
+
   operator T&() noexcept { return m_t; }
   operator const T&() const noexcept { return m_t; }
 
