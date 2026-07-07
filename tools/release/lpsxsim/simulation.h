@@ -9,6 +9,8 @@
 #ifndef LPSXSIM_SIMULATION_H
 #define LPSXSIM_SIMULATION_H
 
+#include <memory>
+
 #include <QList>
 #include <QMutex>
 #include <QObject>
@@ -79,7 +81,13 @@ class Simulation : public QObject
   private:
     mcrl2::data::rewrite_strategy m_strategy;
     bool m_initialized;
-    mcrl2::lps::stochastic_specification m_stochastic_spec;
+
+    // Constructed in init(), which runs on this object's own (worker) thread
+    // after moveToThread(): a value member here would instead be
+    // default-constructed on the main thread by Simulation's constructor,
+    // and later destroyed on the worker thread, violating atermpp's
+    // assumption that a term is destroyed on the thread that created it.
+    std::unique_ptr<mcrl2::lps::stochastic_specification> m_stochastic_spec;
 
     mcrl2::lps::simulation *m_simulation;
     QStringList m_parameters;

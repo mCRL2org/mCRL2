@@ -13,9 +13,13 @@
 
 void Simulation::init(const QString& filename, bool do_not_use_dummies)
 {
+  // Constructed here (on this object's own worker thread), not as a
+  // Simulation member: see the comment at its declaration in simulation.h.
+  m_stochastic_spec = std::make_unique<mcrl2::lps::stochastic_specification>();
+
   try
   {
-    load_lps(m_stochastic_spec, filename.toStdString());
+    load_lps(*m_stochastic_spec, filename.toStdString());
   }
   catch (mcrl2::runtime_error& e)
   {
@@ -30,12 +34,12 @@ void Simulation::init(const QString& filename, bool do_not_use_dummies)
 
   if (!do_not_use_dummies)
   {
-    mcrl2::lps::detail::instantiate_global_variables(m_stochastic_spec);
+    mcrl2::lps::detail::instantiate_global_variables(*m_stochastic_spec);
   }
-    
-  m_simulation = new mcrl2::lps::simulation(m_stochastic_spec, m_strategy);
 
-  for (const mcrl2::data::variable& v: m_stochastic_spec.process().process_parameters())
+  m_simulation = new mcrl2::lps::simulation(*m_stochastic_spec, m_strategy);
+
+  for (const mcrl2::data::variable& v: m_stochastic_spec->process().process_parameters())
   {
     m_parameters += QString::fromStdString(mcrl2::data::pp(v));
   }
