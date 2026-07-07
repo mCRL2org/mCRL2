@@ -172,6 +172,36 @@ void thread_aterm_pool::deregister_container(aterm_container* container)
   m_containers->erase(container);
 }
 
+void thread_aterm_pool::absorb(mcrl2::utilities::hashtable<aterm_core*>& variables,
+    mcrl2::utilities::hashtable<aterm_container*>& containers)
+{
+  // No locking here: the caller already holds the exclusive lock (see
+  // ~thread_aterm_pool()), which excludes all other pools including this one.
+  for (aterm_core* v : variables)
+  {
+    if (v != nullptr)
+    {
+      if (m_variables->must_resize())
+      {
+        m_variables->resize();
+      }
+      m_variables->insert(v);
+    }
+  }
+
+  for (aterm_container* c : containers)
+  {
+    if (c != nullptr)
+    {
+      if (m_containers->must_resize())
+      {
+        m_containers->resize();
+      }
+      m_containers->insert(c);
+    }
+  }
+}
+
 void thread_aterm_pool::mark()
 {
   for (const aterm_core* variable : *m_variables) 
