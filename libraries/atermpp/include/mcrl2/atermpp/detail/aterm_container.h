@@ -171,8 +171,19 @@ struct markable_aterm<T> : unprotected_aterm_core
     : unprotected_aterm_core(detail::address(other))
   {}
 
-  markable_aterm& operator=(const unprotected_aterm_core& other) noexcept;
-  markable_aterm& operator=(unprotected_aterm_core&& other) noexcept;
+  markable_aterm& operator=(const unprotected_aterm_core& other) noexcept
+  {
+    mcrl2::utilities::shared_guard guard = lock_shared_aterm_pool();
+    m_term = detail::address(other);
+    return *this;
+  }
+
+  markable_aterm& operator=(unprotected_aterm_core&& other) noexcept
+  {
+    mcrl2::utilities::shared_guard guard = lock_shared_aterm_pool();
+    m_term = detail::address(other);
+    return *this;
+  }
 
   operator T&() noexcept
   {
