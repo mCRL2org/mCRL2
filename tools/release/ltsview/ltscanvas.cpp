@@ -537,7 +537,7 @@ QImage LtsCanvas::renderImage(int width, int height)
   {
     imageData = new unsigned char[width * height * 4];
   }
-  catch (const std::bad_alloc& exception)
+  catch (const std::bad_alloc&)
   {
     trDelete(context);
     return QImage();

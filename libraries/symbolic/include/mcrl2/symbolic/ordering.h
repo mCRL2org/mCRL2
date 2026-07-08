@@ -202,7 +202,7 @@ std::vector<std::size_t> distances(const std::vector<boost::dynamic_bitset<>>& a
       if (S[i]) {      
         for (std::size_t j = 0; j < n; ++j) {
           if (S[j] && i != j) {
-            if (adjacency[i][j] > 0 && dist[i] !=  std::numeric_limits<size_t>::max())  {
+            if (adjacency[i][j] && dist[i] !=  std::numeric_limits<size_t>::max())  {
               dist[j] = std::min(dist[j], dist[i] + 1);
             }
           }
