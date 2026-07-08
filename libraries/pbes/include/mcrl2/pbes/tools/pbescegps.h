@@ -15,6 +15,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESCEGPS_H
 #define MCRL2_PBES_TOOLS_PBESCEGPS_H
 
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/container_sort.h"
@@ -36,7 +37,9 @@
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
+#include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/rewrite.h"
+#include <ostream>
 #ifdef MCRL2_ENABLE_SYLVAN
 #include "mcrl2/pbes/pbesreach.h"
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
@@ -57,6 +60,7 @@
 #include <cstddef>
 #include <iostream>
 #include <map>
+#include <ranges>
 #include <set>
 #include <vector>
 
@@ -71,21 +75,15 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
   using super = pbes_expression_builder<abstraction_rewriter<Dummy>>;
   using super::apply;
 
+  std::map<core::identifier_string, std::set<int>> m_pbes_parameters_abstraction_indices;
   const std::set<data::variable>& m_abstraction_vars;
   bool m_is_overapproximation;
 
-  abstraction_rewriter(const std::set<data::variable>& vars, bool is_over)
-    : m_abstraction_vars(vars), m_is_overapproximation(is_over)
+  abstraction_rewriter( const std::set<data::variable>& vars, const std::map<core::identifier_string, std::set<int>>& pbes_parameters_abstraction_indices, bool is_over)
+    : m_pbes_parameters_abstraction_indices(pbes_parameters_abstraction_indices), m_abstraction_vars(vars), m_is_overapproximation(is_over)
   {
   }
 
-  // Handle variables in data expressions by intercepting at the builder level
-  // (Embedded in generic data_expression handler below)
-
-  // Handle function applications by intercepting at the builder level
-  // (Embedded in generic data_expression handler below)
-
-  // Comprehensive data expression handler
   template <class T>
   void apply(T& result, const data::data_expression& x)
   {
@@ -99,7 +97,6 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
       
       if (m_abstraction_vars.count(var) > 0)
       {
-        // Variable is being abstracted
         mCRL2log(log::debug) << "     Abstracting variable " << var.name() 
                                << " to " << (m_is_overapproximation ? "true" : "false") << std::endl;
         data::data_expression abstracted_val = m_is_overapproximation ? data::true_() : data::false_();
@@ -109,7 +106,6 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
       {
         // Variable is not abstracted, return as-is
         mCRL2log(log::debug) << "     Keeping variable " << var.name() << " as-is" << std::endl;
-        result = pbes_expression(var);
       }
       return;
     }
@@ -135,9 +131,8 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
       
       if (!depends_on_abstracted)
       {
-        // Expression doesn't depend on abstracted variables, return as-is
         mCRL2log(log::debug) << "     Application does not depend on abstracted variables, keeping as-is" << std::endl;
-        result = pbes_expression(app);
+        // result = data::data_expression(app);
         return;
       }
       
@@ -223,19 +218,6 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     super::apply(result, x);
   }
 
-  // TODO: Add the following cases:
-  // \begin{array}{lcl}
-  // \dbrack{t}\eta\delta &=& \dbrack{t}\delta\
-  // \dbrack{X(t_1,\ldots,t_n)}\eta\delta &= & \langle\dbrack{t_1}\delta, \ldots, \dbrack{t_n}\delta\rangle \in \eta(X) \\
-  // \dbrack{\phi \land \psi}\eta\delta &= & \dbrack{\phi}\eta\delta \text{ and } \dbrack{\psi}\eta\delta\\
-  // \dbrack{\phi \lor \psi}\eta\delta &= &   \dbrack{\phi}\eta\delta \text{ or } \dbrack{\psi}\eta\delta \\
-  // \dbrack{\forall x {:} T.\phi}\eta\delta &= &\textrm{true iff }\dbrack{\phi}\eta\delta\lbrack v / x \rbrack\textrm{ holds for all }v\in\mathbf{D}_T \\
-  // \dbrack{\exists x {:} T.\phi}\eta\delta &= &\textrm{true iff }\dbrack{\phi}\eta\delta\lbrack v / x \rbrack\textrm{ holds for at least one }v\in\mathbf{D}_T \\
-  // \dbrack{X(t_1,\ldots,t_n)}\eta\delta &= & \langle\dbrack{t_1}\delta, \ldots, \dbrack{t_n}\delta\rangle \in \eta(X) \\
-  
-  // \end{array}
-
-  // Handle conjunction: abstract both operands and combine with 'and'
   template <class T>
   void apply(T& result, const and_& x)
   {
@@ -247,7 +229,6 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     make_and_(result, left, right);
   }
 
-  // Handle disjunction: abstract both operands and combine with 'or'
   template <class T>
   void apply(T& result, const or_& x)
   {
@@ -259,7 +240,6 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     make_or_(result, left, right);
   }
 
-  // Handle universal quantification: abstract the body
   template <class T>
   void apply(T& result, const forall& x)
   {
@@ -269,7 +249,6 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     result = make_forall_(x.variables(), body);
   }
 
-  // Handle existential quantification: abstract the body
   template <class T>
   void apply(T& result, const exists& x)
   {
@@ -279,26 +258,26 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     result = make_exists_(x.variables(), body);
   }
 
-  // Handle propositional variable instantiation: abstract all arguments
   template <class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
     mCRL2log(log::debug) << "Processing PBES propositional variable instantiation: " << x.name() << std::endl;
-    // Collect abstracted arguments in a vector, then convert to list
-    std::vector<data::data_expression> abstracted_args_vec;
-    for (const auto& arg : x.parameters())
-    {
-      pbes_expression abstracted_arg;
-      apply(abstracted_arg, arg);
-      abstracted_args_vec.push_back(atermpp::down_cast<data::data_expression>(abstracted_arg));
+    std::vector<data::data_expression> filtered_args_vec;
+    
+    std::size_t i = 0;
+    for (auto it = x.parameters().begin(); it != x.parameters().end(); ++it, ++i)   {
+      if (!m_pbes_parameters_abstraction_indices[x.name()].contains(i))
+      {
+          filtered_args_vec.push_back(atermpp::down_cast<data::data_expression>(*it));
+      }
     }
     // Convert vector back to data_expression_list
-    data::data_expression_list abstracted_args;
-    for (auto it = abstracted_args_vec.rbegin(); it != abstracted_args_vec.rend(); ++it)
+    data::data_expression_list args;
+    for (auto & it : std::ranges::reverse_view(filtered_args_vec))
     {
-      abstracted_args.push_front(*it);
+      args.push_front(it);
     }
-    result = propositional_variable_instantiation(x.name(), abstracted_args);
+    result = propositional_variable_instantiation(x.name(), args);
   }
   
   template <class T>
@@ -454,31 +433,69 @@ public:
   // // Replaces data expressions depending on abstracted variables with true/false
   pbes_expression apply_abstraction(const pbes_expression& expr,
     const std::set<data::variable>& abstraction_vars,
+    const std::map<core::identifier_string, std::set<int>>& pbes_parameters_abstraction_indices,
     bool is_overapproximation);
 
   // Applies abstraction to all equations in a PBES
   pbes apply_abstraction_to_pbes(const pbes& p,
-    const std::map<core::identifier_string, std::set<data::variable>>& abstraction_vars_per_eq,
+    std::map<core::identifier_string, std::set<data::variable>>& abstraction_vars_per_eq,
     bool is_overapproximation,
     pbescegps_options options)
   {
     pbes result = p;
+    // TODO: Put this in separate function
+    // Calculate the indices of the parameters to abstract
+    std::map<core::identifier_string, std::set<int>> pbes_parameters_abstraction_indices;
+    for (const auto& eq : p.binding_variables())
+    {
+      pbes_parameters_abstraction_indices[eq.name()] = std::set<int>();
+      int i = 0;
+      for (auto it = eq.parameters().begin(); it != eq.parameters().end(); ++it, ++i)
+      {
+        if (abstraction_vars_per_eq[eq.name()].contains(*it))
+        {
+          pbes_parameters_abstraction_indices[eq.name()].insert(i);
+        }
+      }
+    }
+    
+    // TODO: Filter the parameters of the original PBES
+    std::vector<pbes_equation> new_equations;
+    for (const pbes_equation& eq : result.equations())
+    {
+      propositional_variable bnd_var = eq.variable();
+      data::variable_list filtered_params;
+      std::size_t i = 0;
+      for (auto it = bnd_var.parameters().begin(); it != bnd_var.parameters().end(); ++it, ++i)   {
+        if (!abstraction_vars_per_eq[bnd_var.name()].contains(*it))
+        {
+        mCRL2log(log::debug) << pp(*it) << std::endl;
+          filtered_params.push_front(atermpp::down_cast<data::variable>(*it));
+        }
+      }
+      propositional_variable new_bnd_var(bnd_var.name(), filtered_params);
+      pbes_equation new_eq(eq.symbol(), new_bnd_var, eq.formula());
+      new_equations.push_back(new_eq);
+    }
+    result.equations() = new_equations;
+    
     for (pbes_equation& eq : result.equations())
     {
       // Find abstraction set for this equation
       auto it = abstraction_vars_per_eq.find(eq.variable().name());
       if (it != abstraction_vars_per_eq.end())
       {
-        eq.formula() = apply_abstraction(eq.formula(), it->second, is_overapproximation);
+        eq.formula() = apply_abstraction(eq.formula(), it->second, pbes_parameters_abstraction_indices, is_overapproximation);
       }
     }
 
-    // Remove unused parameters after abstraction
-    // Temporarily suppress logging during parelm to reduce noise
-    mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
-    mcrl2::log::logger::set_reporting_level(mcrl2::log::error);
-    pbes_system::parelm(result, false);
-    mcrl2::log::logger::set_reporting_level(saved_level);
+    mCRL2log(log::debug) << pp(result) << std::endl;
+    // // Remove unused parameters after abstraction
+    // // Temporarily suppress logging during parelm to reduce noise
+    // mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
+    // mcrl2::log::logger::set_reporting_level(mcrl2::log::error);
+    // pbes_system::parelm(result, false);
+    // mcrl2::log::logger::set_reporting_level(saved_level);
 
     // Rewrite expressions for simplification
     data::rewriter datar(p.data(), options.rewrite_strategy);
@@ -554,46 +571,7 @@ public:
     return result;
   }
 
-  // Helper: Collect all PVI calls from a formula recursively
-  void collect_pvis(const pbes_expression& expr, std::vector<propositional_variable_instantiation>& result)
-  {
-    if (is_propositional_variable_instantiation(expr))
-    {
-      result.push_back(atermpp::down_cast<propositional_variable_instantiation>(expr));
-    }
-    else if (is_not(expr))
-    {
-      collect_pvis(atermpp::down_cast<not_>(expr).operand(), result);
-    }
-    else if (is_and(expr))
-    {
-      const auto& and_expr = atermpp::down_cast<and_>(expr);
-      collect_pvis(and_expr.left(), result);
-      collect_pvis(and_expr.right(), result);
-    }
-    else if (is_or(expr))
-    {
-      const auto& or_expr = atermpp::down_cast<or_>(expr);
-      collect_pvis(or_expr.left(), result);
-      collect_pvis(or_expr.right(), result);
-    }
-    else if (is_imp(expr))
-    {
-      const auto& imp_expr = atermpp::down_cast<imp>(expr);
-      collect_pvis(imp_expr.left(), result);
-      collect_pvis(imp_expr.right(), result);
-    }
-    else if (is_forall(expr))
-    {
-      collect_pvis(atermpp::down_cast<forall>(expr).body(), result);
-    }
-    else if (is_exists(expr))
-    {
-      collect_pvis(atermpp::down_cast<exists>(expr).body(), result);
-    }
-  }
-
-  // Makes W data-closed under the PBES (simplified version)
+  // TODO: Makes W data-closed under the PBES 
   // W is now a per-equation map, so we ensure each equation's abstraction set is closed
   void make_data_closed(const pbes& p, std::map<core::identifier_string, std::set<data::variable>>& W)
   {
@@ -656,7 +634,7 @@ public:
 
     // Collect sorts to abstract (non-CFP parameters)
     report_abstracted_parameters(W);
-    
+
     mCRL2log(log::verbose) << "Regular...\n" << pp(p) << std::endl;
 
     // Iterative refinement loop
@@ -703,6 +681,8 @@ public:
         return false;
       }
 
+      // TODO: Implement essential variables calculation
+      
       // Both approximations are inconclusive, refine by un-abstracting one parameter
       mCRL2log(log::verbose) << "Both approximations inconclusive, refining..." << std::endl;
       add_relevant_parameter(p, W);
@@ -713,10 +693,13 @@ public:
   }
 };
 
+// TODO: fix pbescegps -v scratch/tempredgreen_septypes.pbes
+
 // Abstraction builder implementation
 // Must be defined outside the struct due to template constraints
 pbes_expression pbescegps_iterator::apply_abstraction(const pbes_expression& expr,
   const std::set<data::variable>& abstraction_vars,
+  const std::map<core::identifier_string, std::set<int>>& pbes_parameters_abstraction_indices,
   bool is_overapproximation)
 {
   mCRL2log(log::debug) << "=== Entering apply_abstraction ===" << std::endl;
@@ -728,7 +711,7 @@ pbes_expression pbescegps_iterator::apply_abstraction(const pbes_expression& exp
   }
   
   pbes_expression result;
-  abstraction_rewriter<> rewriter(abstraction_vars, is_overapproximation);
+  abstraction_rewriter<> rewriter(abstraction_vars, pbes_parameters_abstraction_indices, is_overapproximation);
   mCRL2log(log::debug) << "Created abstraction_rewriter, now applying to expression" << std::endl;
   rewriter.apply(result, expr);
   mCRL2log(log::debug) << "=== Exiting apply_abstraction ===" << std::endl;
