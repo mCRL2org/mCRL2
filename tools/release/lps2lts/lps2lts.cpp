@@ -377,7 +377,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       }
 
 #ifdef MCRL2_USE_CONTROL_FLOW
-      stategraph_options.rewrite_strategy = rewrite_strategy();
+      stategraph_options.rewrite_strategy = mcrl2::data::rewrite_strategy::jitty; // The stategraph algorithm constructs its own rewriter.
       stategraph_options.simplify = !parser.has_option("no-simplify");
       stategraph_options.use_global_variant = false;
       stategraph_options.print_influence_graph = false;
