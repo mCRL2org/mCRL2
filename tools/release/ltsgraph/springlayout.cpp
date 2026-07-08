@@ -819,7 +819,7 @@ void SpringLayout::setAccuracy(int v)
 
 void SpringLayout::setAttraction(int v)
 {
-  m_attraction = lerp(v, 0.99, 0.01);
+  m_attraction = lerp(v, 0.99f, 0.01f);
   if (this->m_ui)
   {
     m_ui->m_ui.lbl_attractRepulse->setText(QString::number(1 - m_attraction, 'g', 2));
@@ -829,7 +829,7 @@ void SpringLayout::setAttraction(int v)
 
 void SpringLayout::setRepulsion(int v)
 {
-  m_repulsion = lerp(v, 0.01, 0.99);
+  m_repulsion = lerp(v, 0.01f, 0.99f);
   mCRL2log(mcrl2::log::verbose) << "Set repulsion scale to: " << v << " corresponding to: " << m_repulsion << std::endl;
 }
 

@@ -50,11 +50,11 @@ QColor VisUtils::BlueYellow::operator()(double fraction) const
 {
   if (fraction < 0.5)
   {
-    return QColor::fromHsvF(4.0 / 6.0, static_cast<float>(1.0 - fraction * 2.0), 1.0F);
+    return QColor::fromHsvF(4.0f / 6.0f, static_cast<float>(1.0 - fraction * 2.0), 1.0F);
   }
   else
   {
-    return QColor::fromHsvF(1.0 / 6.0, static_cast<float>(fraction * 2.0 - 1.0), 1.0F);
+    return QColor::fromHsvF(1.0f / 6.0f, static_cast<float>(fraction * 2.0 - 1.0), 1.0F);
   }
 }
 

@@ -26,8 +26,8 @@ constexpr int TOP_BIT = 2;
 ConeDB::ConeDB()
 {
   int hashclass = 6;
-  ohashtable.assign((1 << hashclass),-1);
-  thashtable.assign((1 << hashclass),-1);
+  ohashtable.assign((static_cast<std::size_t>(1) << hashclass),-1);
+  thashtable.assign((static_cast<std::size_t>(1) << hashclass),-1);
 }
 
 ConeDB::~ConeDB()

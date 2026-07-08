@@ -103,10 +103,10 @@ class SpringLayout
   float m_accuracy; ///< Controls the Barnes-Hut criterion in the approximation
                     ///< of repulsive forces
   bool m_tree_enable_for_large_graphs = true;
-  float m_stabilityThreshold = 1e-4;
+  float m_stabilityThreshold = 1e-4f;
   int m_stabilityMaxCount = 500; // Number of iterations in which change has to be within threshold before 'stable'
   int m_stabilityCounter = 0;
-  float m_previous_energy = 1e25;
+  float m_previous_energy = 1e25f;
   std::vector<QVector3D> m_nforces, m_hforces, m_lforces,
       m_sforces; ///< Vector of the calculated forces..
 

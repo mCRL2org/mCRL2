@@ -321,8 +321,8 @@ inline std::string print_equivalence(const lts_equivalence eq)
       return "determinisation";
     case lts_red_tau_scc:
       return "tau-scc";
-    // default:
-    //  throw mcrl2::runtime_error("Unknown equivalence.");
+     default:
+      throw mcrl2::runtime_error("Unknown equivalence.");
   }
 }
 
@@ -406,8 +406,8 @@ inline std::string description(const lts_equivalence eq)
       return "determinisation";
     case lts_red_tau_scc:
       return "contraction of tau-loops";
-    // default:
-    //  throw mcrl2::runtime_error("Unknown equivalence.");
+     default:
+      throw mcrl2::runtime_error("Unknown equivalence.");
   }
 }
 
