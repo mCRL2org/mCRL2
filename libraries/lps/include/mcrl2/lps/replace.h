@@ -21,7 +21,6 @@ namespace mcrl2::lps
 
 namespace detail {
 
-/// \cond INTERNAL_DOCS
 } // namespace detail
 
 //--- start generated lps replace code ---//
@@ -221,7 +220,7 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
   {
     data::variable lhs;
     apply(lhs, x.lhs());
-    data::data_expression rhs; 
+    data::data_expression rhs;
     apply(rhs, x.rhs());
     data::make_assignment(result, lhs, rhs);
   }

@@ -152,7 +152,7 @@ class propositional_variable_instantiation: public pbes_expression
       : propositional_variable_instantiation(core::identifier_string(name), parameters)
     {
     }
-    
+
     /// \brief Constructor.
     explicit propositional_variable_instantiation(const core::identifier_string& name)
       : propositional_variable_instantiation(name, data::data_expression_list())
@@ -169,7 +169,7 @@ class propositional_variable_instantiation: public pbes_expression
 };
 
 /// \\brief Make_propositional_variable_instantiation constructs a new term into a given address.
-/// \\ \param t The reference into which the new propositional_variable_instantiation is constructed. 
+/// \param[out] t The reference into which the new propositional_variable_instantiation is constructed.
 template <class... ARGUMENTS>
 inline void make_propositional_variable_instantiation(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -246,7 +246,7 @@ class not_: public pbes_expression
 };
 
 /// \\brief Make_not_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new not_ is constructed. 
+/// \param[out] t The reference into which the new not_ is constructed.
 template <class... ARGUMENTS>
 inline void make_not_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -322,7 +322,7 @@ class and_: public pbes_expression
 };
 
 /// \\brief Make_and_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new and_ is constructed. 
+/// \param[out] t The reference into which the new and_ is constructed.
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -398,7 +398,7 @@ class or_: public pbes_expression
 };
 
 /// \\brief Make_or_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new or_ is constructed. 
+/// \param[out] t The reference into which the new or_ is constructed.
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -474,7 +474,7 @@ class imp: public pbes_expression
 };
 
 /// \\brief Make_imp constructs a new term into a given address.
-/// \\ \param t The reference into which the new imp is constructed. 
+/// \param[out] t The reference into which the new imp is constructed.
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -550,7 +550,7 @@ class forall: public pbes_expression
 };
 
 /// \\brief Make_forall constructs a new term into a given address.
-/// \\ \param t The reference into which the new forall is constructed. 
+/// \param[out] t The reference into which the new forall is constructed.
 template <class... ARGUMENTS>
 inline void make_forall(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -626,7 +626,7 @@ class exists: public pbes_expression
 };
 
 /// \\brief Make_exists constructs a new term into a given address.
-/// \\ \param t The reference into which the new exists is constructed. 
+/// \param[out] t The reference into which the new exists is constructed.
 template <class... ARGUMENTS>
 inline void make_exists(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -941,7 +941,7 @@ pbes_expression make_exists_(const data::variable_list& l, const pbes_expression
 
 /// \brief Make a negation
 /// \param p A PBES expression
-/// \return The value <tt>!p</tt>
+/// \post result is the optimized negation of <tt>!p</tt>
 inline
 void optimized_not(pbes_expression& result, const pbes_expression& p)
 {
@@ -951,7 +951,7 @@ void optimized_not(pbes_expression& result, const pbes_expression& p)
 /// \brief Make a conjunction
 /// \param p A PBES expression
 /// \param q A PBES expression
-/// \return The value <tt>p && q</tt>
+/// \post result is the optimized conjunction of <tt>p && q</tt>
 inline
 void optimized_and(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
 {
@@ -961,7 +961,7 @@ void optimized_and(pbes_expression& result, const pbes_expression& p, const pbes
 /// \brief Make a disjunction
 /// \param p A PBES expression
 /// \param q A PBES expression
-/// \return The value <tt>p || q</tt>
+/// \post result is the optimized disjunction of <tt>p || q</tt>
 inline
 void optimized_or(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
 {
@@ -971,7 +971,7 @@ void optimized_or(pbes_expression& result, const pbes_expression& p, const pbes_
 /// \brief Make an implication
 /// \param p A PBES expression
 /// \param q A PBES expression
-/// \return The value <tt>p => q</tt>
+/// \post result is the optimized implication <tt>p => q</tt>
 inline
 void optimized_imp(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
 {
@@ -982,7 +982,7 @@ void optimized_imp(pbes_expression& result, const pbes_expression& p, const pbes
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
 /// \param p A PBES expression
-/// \return The value <tt>forall l.p</tt>
+/// \post result is the optimized universal quantification <tt>forall l.p</tt>
 inline
 void optimized_forall(pbes_expression& result, const data::variable_list& l, const pbes_expression& p)
 {
@@ -1010,7 +1010,7 @@ void optimized_forall(pbes_expression& result, const data::variable_list& l, con
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
 /// \param p A PBES expression
-/// \return The value <tt>exists l.p</tt>
+/// \post result is the optimized existential quantification <tt>exists l.p</tt>
 inline
 void optimized_exists(pbes_expression& result, const data::variable_list& l, const pbes_expression& p)
 {

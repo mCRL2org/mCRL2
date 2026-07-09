@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 //
-/// \file mcrl2/data/standard_containers/deque.h
-/// \brief This file contains a deque class that behaves 
+/// \file mcrl2/atermpp/standard_containers/deque.h
+/// \brief This file contains a deque class that behaves
 ///        exactly as a standard deque. It can only be used
 ///        to store class instances that derive from aterms.
 ///        The stored aterms are protected as a whole, i.e.,

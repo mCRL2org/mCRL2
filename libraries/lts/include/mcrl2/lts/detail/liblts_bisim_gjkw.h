@@ -39,6 +39,7 @@ namespace mcrl2::lts::detail
 // whole file.
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
                                                                                 #ifndef NDEBUG
+                                                                                    /// \cond INTERNAL_DOCS
                                                                                     /// \brief include something in Debug mode
                                                                                     /// \details In a few places, we have to include an additional parameter to
                                                                                     /// a function in Debug mode.  While it is in principle possible to use
@@ -46,6 +47,7 @@ namespace mcrl2::lts::detail
                                                                                     /// over many code lines.  This macro expands to its arguments in Debug
                                                                                     /// mode and to nothing otherwise.
                                                                                     #define ONLY_IF_DEBUG(...) __VA_ARGS__
+                                                                                    /// \endcond
                                                                                 #else
                                                                                     #define ONLY_IF_DEBUG(...)
                                                                                 #endif
@@ -64,8 +66,7 @@ using label_type = std::size_t;
 
 
 
-/// \defgroup part_state
-/// \brief data structures for a refinable partition
+/// \defgroup part_state Data structures for states
 /// \details The following definitions provide a _refinable partition_ data
 /// structure.  The basic idea is that we store a permutation of the states (in
 /// a permutation_t array), so that states belonging to the same block are
@@ -99,8 +100,8 @@ using label_type = std::size_t;
 ///   state_info_ptr actually contains a pointer to a state_info_entry with
 ///   the additional guarantee that this is not the last entry in state_info_t.
 ///   (To make this a small bit more type safe, we could change the type
-///   state_info_ptr to something like ``pointer to an array with two
-///   state_info_entries'', typedef state_info_entry (*state_info_ptr)[2];.
+///   state_info_ptr to something like "pointer to an array with two
+///   state_info_entries", typedef state_info_entry (*state_info_ptr)[2];.
 ///   Still, that would allow unsafe pointer juggling.)
 /// - A block_t also contains information about its outgoing inert transitions.
 /// - A state_info_entry also contains information used during `refine()` or
@@ -156,7 +157,7 @@ using B_to_C_desc_const_iter_t = B_to_C_desc_list::const_iterator;
 /// there is one more `state_info_entry`.  The reason is that iterators past
 /// the last transition are not actually stored here, as they are equal to the
 /// iterator to the first transition of the next state.  The array will contain
-/// one additional ``state'' that is only used for these pointers.
+/// one additional "state" that is only used for these pointers.
 class state_info_entry
 {
   private:
@@ -431,7 +432,7 @@ class block_t
     /// \details This list serves two purposes: it contains all
     /// B_to_C_descriptors, so that the constellations reachable from this
     /// block can be found; and if this block has transitions to the current
-    /// splitter SpC\SpB, then the first element of the list points to these
+    /// splitter SpC\\SpB, then the first element of the list points to these
     /// transitions.
     B_to_C_desc_list to_constln;
   private:
@@ -780,6 +781,13 @@ class block_t
     /// \details This function is called after a refinement function has found
     /// that the red subblock is the smaller one.  It creates a new block for
     /// the red states.
+    ///
+    /// Both `split_off_blue()` and `split_off_red()` unmark all states in the blue
+    /// subblock and mark all bottom states in the red subblock.  (This will help
+    /// the caller to distinguish old bottom states from new bottom states found
+    /// after `split_off_blue()` or `split_off_red()`, respectively.)  The two
+    /// functions use the same complexity counters because their operations belong
+    /// together.
     /// \param red_nonbottom_begin iterator to the first red non-bottom state
     /// \returns pointer to the new (red) block
     block_t* split_off_red(permutation_iter_t red_nonbottom_begin);
@@ -1029,7 +1037,7 @@ class part_state_t
 
   private:
     /// \brief array with all other information about states
-    /// \details We allocate 1 additional ``state'' to allow for the iterators
+    /// \details We allocate 1 additional "state" to allow for the iterators
     /// past the last transition, as described in the documentation of
     /// `state_info_entry`.
     fixed_vector<state_info_entry> state_info;
@@ -1045,7 +1053,7 @@ class part_state_t
     /// \param n number of states in the Kripke structure
     part_state_t(state_type n)
       : permutation(n),
-        state_info(n+1) //< an additional ``state'' is needed to store pointers
+        state_info(n+1) //< an additional "state" is needed to store pointers
             // to the end of the slices of transitions of the last state
     {                                                                           assert(0 == block_t::nr_of_blocks);
                                                                                 #ifndef NDEBUG
@@ -1160,8 +1168,7 @@ class part_state_t
 
 
 
-/// \defgroup part_trans
-/// \brief data structures for transitions used during partition refinement
+/// \defgroup part_trans Data structures for transitions used during partition refinement
 /// \details These definitions provide a partition for transition data
 /// structure that can be used for the partition refinement algorithm.
 ///
@@ -1583,7 +1590,7 @@ class part_trans_t
     reflect that noninert and inert transitions from block b would go to
     different constellations.
     Its time complexity is O(1+min {|out_noninert(b-->C)|, |out_inert(b)|}). */
-    void split_inert_to_C(block_t* B);
+    void split_inert_to_C(block_t* SpB);
 
     /* part_trans_t::change_to_C has to be called after a transition target has
     changed its constellation.  The member function will adapt the transition
@@ -1639,8 +1646,8 @@ class part_trans_t
     at least while postprocessing.
 
     Its time complexity is O(1 + |out(NewB)|). */
-    void new_blue_block_created(block_t* OldB, block_t* NewB);
-    void new_red_block_created(block_t*OldB,block_t*NewB, bool postprocessing);
+    void new_blue_block_created(block_t* RfnB, block_t* NewB);
+    void new_red_block_created(block_t* RfnB, block_t* NewB, bool postprocessing);
 
     B_to_C_const_iter_t B_to_C_begin() const  {  return B_to_C.begin();  }
     B_to_C_iter_t       B_to_C_end  ()        {  return B_to_C.end  ();  }
@@ -1669,8 +1676,7 @@ class part_trans_t
 
 
 
-/// \defgroup part_refine
-/// \brief classes to calculate the stutter equivalence quotient of a LTS
+/// \defgroup part_refine Classes to calculate the stutter equivalence quotient of a LTS
 ///@{
 
 
@@ -1868,8 +1874,7 @@ class bisim_partitioner_gjkw
 
 
 
-/// \defgroup part_interface
-/// \brief nonmember functions serving as interface with the rest of mCRL2
+/// \defgroup part_interface Nonmember functions serving as interface with the rest of mCRL2
 /// \details These functions are copied, almost without changes, from
 /// liblts_bisim_gw.h, which was written by Anton Wijs.
 ///@{

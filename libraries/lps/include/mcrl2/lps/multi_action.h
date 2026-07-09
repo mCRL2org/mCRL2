@@ -86,7 +86,7 @@ class multi_action: public atermpp::aterm
 };
 
 /// \\brief Make_multi_action constructs a new term into a given address.
-/// \\ \param t The reference into which the new multi_action is constructed. 
+/// \param[out] t The reference into which the new multi_action is constructed.
 template <class... ARGUMENTS>
 inline void make_multi_action(atermpp::aterm& t, const ARGUMENTS&... args)
 {

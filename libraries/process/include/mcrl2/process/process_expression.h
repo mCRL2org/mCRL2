@@ -174,7 +174,7 @@ class action: public process_expression
 };
 
 /// \\brief Make_action constructs a new term into a given address.
-/// \\ \param t The reference into which the new action is constructed.
+/// \param[out] t The reference into which the new action is constructed.
 template <class... ARGUMENTS>
 inline void make_action(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -256,7 +256,7 @@ class process_instance: public process_expression
 };
 
 /// \\brief Make_process_instance constructs a new term into a given address.
-/// \\ \param t The reference into which the new process_instance is constructed.
+/// \param[out] t The reference into which the new process_instance is constructed.
 template <class... ARGUMENTS>
 inline void make_process_instance(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -332,7 +332,7 @@ class process_instance_assignment: public process_expression
 };
 
 /// \\brief Make_process_instance_assignment constructs a new term into a given address.
-/// \\ \param t The reference into which the new process_instance_assignment is constructed.
+/// \param[out] t The reference into which the new process_instance_assignment is constructed.
 template <class... ARGUMENTS>
 inline void make_process_instance_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -514,7 +514,7 @@ class sum: public process_expression
 };
 
 /// \\brief Make_sum constructs a new term into a given address.
-/// \\ \param t The reference into which the new sum is constructed.
+/// \param[out] t The reference into which the new sum is constructed.
 template <class... ARGUMENTS>
 inline void make_sum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -592,7 +592,7 @@ class block: public process_expression
 };
 
 /// \\brief Make_block constructs a new term into a given address.
-/// \\ \param t The reference into which the new block is constructed.
+/// \param[out] t The reference into which the new block is constructed.
 template <class... ARGUMENTS>
 inline void make_block(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -671,7 +671,7 @@ class hide: public process_expression
 };
 
 /// \\brief Make_hide constructs a new term into a given address.
-/// \\ \param t The reference into which the new hide is constructed.
+/// \param[out] t The reference into which the new hide is constructed.
 template <class... ARGUMENTS>
 inline void make_hide(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -747,7 +747,7 @@ class rename: public process_expression
 };
 
 /// \\brief Make_rename constructs a new term into a given address.
-/// \\ \param t The reference into which the new rename is constructed.
+/// \param[out] t The reference into which the new rename is constructed.
 template <class... ARGUMENTS>
 inline void make_rename(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -823,7 +823,7 @@ class comm: public process_expression
 };
 
 /// \\brief Make_comm constructs a new term into a given address.
-/// \\ \param t The reference into which the new comm is constructed.
+/// \param[out] t The reference into which the new comm is constructed.
 template <class... ARGUMENTS>
 inline void make_comm(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -899,7 +899,7 @@ class allow: public process_expression
 };
 
 /// \\brief Make_allow constructs a new term into a given address.
-/// \\ \param t The reference into which the new allow is constructed.
+/// \param[out] t The reference into which the new allow is constructed.
 template <class... ARGUMENTS>
 inline void make_allow(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -975,7 +975,7 @@ class sync: public process_expression
 };
 
 /// \\brief Make_sync constructs a new term into a given address.
-/// \\ \param t The reference into which the new sync is constructed.
+/// \param[out] t The reference into which the new sync is constructed.
 template <class... ARGUMENTS>
 inline void make_sync(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1051,7 +1051,7 @@ class at: public process_expression
 };
 
 /// \\brief Make_at constructs a new term into a given address.
-/// \\ \param t The reference into which the new at is constructed.
+/// \param[out] t The reference into which the new at is constructed.
 template <class... ARGUMENTS>
 inline void make_at(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1127,7 +1127,7 @@ class seq: public process_expression
 };
 
 /// \\brief Make_seq constructs a new term into a given address.
-/// \\ \param t The reference into which the new seq is constructed.
+/// \param[out] t The reference into which the new seq is constructed.
 template <class... ARGUMENTS>
 inline void make_seq(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1203,7 +1203,7 @@ class if_then: public process_expression
 };
 
 /// \\brief Make_if_then constructs a new term into a given address.
-/// \\ \param t The reference into which the new if_then is constructed.
+/// \param[out] t The reference into which the new if_then is constructed.
 template <class... ARGUMENTS>
 inline void make_if_then(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1284,7 +1284,7 @@ class if_then_else: public process_expression
 };
 
 /// \\brief Make_if_then_else constructs a new term into a given address.
-/// \\ \param t The reference into which the new if_then_else is constructed.
+/// \param[out] t The reference into which the new if_then_else is constructed.
 template <class... ARGUMENTS>
 inline void make_if_then_else(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1360,7 +1360,7 @@ class bounded_init: public process_expression
 };
 
 /// \\brief Make_bounded_init constructs a new term into a given address.
-/// \\ \param t The reference into which the new bounded_init is constructed.
+/// \param[out] t The reference into which the new bounded_init is constructed.
 template <class... ARGUMENTS>
 inline void make_bounded_init(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1436,7 +1436,7 @@ class merge: public process_expression
 };
 
 /// \\brief Make_merge constructs a new term into a given address.
-/// \\ \param t The reference into which the new merge is constructed.
+/// \param[out] t The reference into which the new merge is constructed.
 template <class... ARGUMENTS>
 inline void make_merge(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1512,7 +1512,7 @@ class left_merge: public process_expression
 };
 
 /// \\brief Make_left_merge constructs a new term into a given address.
-/// \\ \param t The reference into which the new left_merge is constructed.
+/// \param[out] t The reference into which the new left_merge is constructed.
 template <class... ARGUMENTS>
 inline void make_left_merge(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1588,7 +1588,7 @@ class choice: public process_expression
 };
 
 /// \\brief Make_choice constructs a new term into a given address.
-/// \\ \param t The reference into which the new choice is constructed.
+/// \param[out] t The reference into which the new choice is constructed.
 template <class... ARGUMENTS>
 inline void make_choice(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1669,7 +1669,7 @@ class stochastic_operator: public process_expression
 };
 
 /// \\brief Make_stochastic_operator constructs a new term into a given address.
-/// \\ \param t The reference into which the new stochastic_operator is constructed.
+/// \param[out] t The reference into which the new stochastic_operator is constructed.
 template <class... ARGUMENTS>
 inline void make_stochastic_operator(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1750,7 +1750,7 @@ class untyped_process_assignment: public process_expression
 };
 
 /// \\brief Make_untyped_process_assignment constructs a new term into a given address.
-/// \\ \param t The reference into which the new untyped_process_assignment is constructed.
+/// \param[out] t The reference into which the new untyped_process_assignment is constructed.
 template <class... ARGUMENTS>
 inline void make_untyped_process_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 {

@@ -24,7 +24,7 @@ import string
 # U = generate user section
 # X = it is an expression super class
 # W = do not generate swap overload
-# N = term has an additional index as last argument  TODO: Constructors must still be adapted. 
+# N = term has an additional index as last argument  TODO: Constructors must still be adapted.
 # i = this class can be cast to an aterm_int.
 
 CORE_CLASSES = r'''
@@ -490,7 +490,7 @@ class Constructor:
         text = re.sub('<ATERM>'              , self.aterm              , text)
         text = re.sub('<PARAMETERS>'         , self.parameters         , text)
         text = re.sub('<TEMPLATE_PARAMETERS>', self.template_parameters, text)
-        if len(self.parameters)>0 and self.parameters.find(',')<0:     # There is only one parameter. Add explicit. 
+        if len(self.parameters)>0 and self.parameters.find(',')<0:     # There is only one parameter. Add explicit.
             text = re.sub('<EXPLICIT>','explicit ',text)
         else:
            text = re.sub('<EXPLICIT>','',text)
@@ -962,11 +962,11 @@ inline void swap(<CLASSNAME>& t1, <CLASSNAME>& t2) noexcept
         text = re.sub('<MOVE_SEMANTICS>'  , move_semantics, text)
         return text
 
-    # Generate the make_...  functions that allow the construction of a class member in situ. 
+    # Generate the make_...  functions that allow the construction of a class member in situ.
     def make_function(self):
         if 'i' in self.modifiers():
           text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
-/// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
+/// \param[out] t The reference into which the new <CLASSNAME> is constructed.
 template <class... ARGUMENTS>
 inline void make_<CLASSNAME>(atermpp::aterm& t, size_t n)
 {
@@ -974,7 +974,7 @@ inline void make_<CLASSNAME>(atermpp::aterm& t, size_t n)
 }'''
         else:
           text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
-/// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
+/// \param[out] t The reference into which the new <CLASSNAME> is constructed.
 template <class... ARGUMENTS>
 inline void make_<CLASSNAME>(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1205,7 +1205,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
     def builder_function(self, all_classes, dependencies, modifiability_map):
         text = r'''<TEMPLATE>void <METHOD>(<RESULT><CONST><CLASS_NAME>& x)
-{ 
+{
   <ASSERT>static_cast<Derived&>(*this).enter(x);<VISIT_TEXT>
   static_cast<Derived&>(*this).leave(x);<RETURN_STATEMENT>
 }
@@ -1257,7 +1257,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     else:
                         local_type = re.sub('const ','',re.sub('&','',p.type()))
                         if classname == 'lps::stochastic_specification' and local_type == 'process_initializer':
-                            local_type = 'stochastic_process_initializer'   # Unclear why this needs to be done. Appears to be a bug. 
+                            local_type = 'stochastic_process_initializer'   # Unclear why this needs to be done. Appears to be a bug.
                         local_variable = 'result_%s' % p.name()
                         updates.append('%s %s;\nstatic_cast<Derived&>(*this).apply(%s, x.%s());\nx.%s() = %s;' \
                                          % (local_type, local_variable, local_variable, p.name(), p.name(), local_variable))
@@ -1309,7 +1309,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
    x.head(),
    x.begin(),
    x.end(),
-   [&](data_expression& result, const data::data_expression& t){ static_cast<Derived&>(*this).apply(result,t);} );''' 
+   [&](data_expression& result, const data::data_expression& t){ static_cast<Derived&>(*this).apply(result,t);} );'''
                     # special case for stochastic distribution
                     elif return_type == 'lps::stochastic_distribution':
                         visit_text = 'result = x; if (x.is_defined()) { %s(result, %s); }' % (make_class_function, ', '.join(updates))

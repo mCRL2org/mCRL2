@@ -132,7 +132,7 @@ class assignment: public assignment_expression
 };
 
 /// \\brief Make_assignment constructs a new term into a given address.
-/// \\ \param t The reference into which the new assignment is constructed. 
+/// \param[out] t The reference into which the new assignment is constructed.
 template <class... ARGUMENTS>
 inline void make_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -228,7 +228,7 @@ class untyped_identifier_assignment: public assignment_expression
 };
 
 /// \\brief Make_untyped_identifier_assignment constructs a new term into a given address.
-/// \\ \param t The reference into which the new untyped_identifier_assignment is constructed. 
+/// \param[out] t The reference into which the new untyped_identifier_assignment is constructed.
 template <class... ARGUMENTS>
 inline void make_untyped_identifier_assignment(atermpp::aterm& t, const ARGUMENTS&... args)
 {
