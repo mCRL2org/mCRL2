@@ -77,7 +77,7 @@ public:
       // its pool.
       if (g_main_thread_pool != nullptr)
       {
-        mcrl2::utilities::lock_guard guard = m_shared_mutex.lock();
+        mcrl2::utilities::lock_guard guard(m_shared_mutex);
         g_main_thread_pool->absorb(*m_variables, *m_containers);
       }
       // We need to prematurely unregister this thread pool since we are going
