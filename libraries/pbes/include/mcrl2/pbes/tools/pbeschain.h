@@ -25,8 +25,8 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/resolve_name_clashes.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/logger.h"
@@ -50,8 +50,10 @@ struct pbeschain_options
   bool quantifier_free = false;
   bool avoid_alternating = false;
   bool rewrite_only_substitution = false;
+  std::size_t max_number_pvi = 1;
   double srf_factor; // factor of the maximum size the chained equation in SRF should be after chaining compared
                      // to the size of the original equation. Default is 1.0
+  bool timings = false;
 };
 
 // Substitutor to target specific path, replace our specific pvi with true/false
@@ -224,6 +226,89 @@ std::vector<propositional_variable_instantiation> get_propositional_variable_ins
   return result;
 }
 
+
+
+/// \brief Helper class to track multiple time measurements and call counts
+struct timing_tracker
+{
+  struct measurement
+  {
+    std::chrono::duration<double, std::milli> total_time = std::chrono::duration<double, std::milli>::zero();
+    int call_count = 0;
+
+    void add_measurement(std::chrono::duration<double, std::milli> duration)
+    {
+      total_time += duration;
+      call_count++;
+    }
+
+    double get_total_seconds() const { return std::chrono::duration<double>(total_time).count(); }
+  };
+
+  std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
+  std::map<std::string, measurement> measurements;
+
+  timing_tracker()
+    : start_time(std::chrono::high_resolution_clock::now())
+  {}
+
+  /// \brief Start timing an operation (returns the start time for use with end_measurement)
+  std::chrono::time_point<std::chrono::steady_clock> start_measurement() { return std::chrono::steady_clock::now(); }
+
+  /// \brief End timing an operation and record it
+  void end_measurement(const std::string& label, std::chrono::time_point<std::chrono::steady_clock> measurement_start)
+  {
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+      std::chrono::steady_clock::now() - measurement_start);
+    measurements[label].add_measurement(duration);
+  }
+
+  /// \brief Log all measurements
+  void log_measurements() const
+  {
+    double total_elapsed
+      = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count();
+    mCRL2log(log::verbose) << "Total time: " << total_elapsed << "s" << std::endl;
+
+    if (!measurements.empty())
+    {
+      // Find the longest label name for alignment
+      std::size_t max_label_length = 0;
+      for (const auto& [label, measurement]: measurements)
+      {
+        max_label_length = std::max(max_label_length, label.length() + 4);
+      }
+
+      // Log measurements with aligned values
+      for (const auto& [label, measurement]: measurements)
+      {
+        mCRL2log(log::verbose) << std::left << std::setw(max_label_length) << (label + " ") << ": "
+                               << std::right << std::setw(2) << std::fixed 
+                               << measurement.get_total_seconds() << "s ("
+                               << measurement.call_count << " calls)" << std::endl;
+      }
+    }
+  }
+};
+
+/// \brief Generic decorator to wrap any function call with timing measurements
+template<typename Func>
+inline auto measure_time(timing_tracker& timer, const std::string& name, Func&& func)
+{
+  auto start = timer.start_measurement();
+  if constexpr (std::is_same_v<void, decltype(func())>)
+  {
+    func();
+    timer.end_measurement(name, start);
+  }
+  else
+  {
+    auto result = func();
+    timer.end_measurement(name, start);
+    return result;
+  }
+}
+
 inline pbes_expression simplify_expr(pbes_expression& phi,
   rewrite_if_builder<pbes_system::pbes_expression_builder>& if_substituter,
   simplify_data_rewriter<data::rewriter>& pbes_rewriter)
@@ -264,7 +349,7 @@ inline void self_substitute(pbes_equation& equation,
   pbeschain_options options)
 {
   bool stable = false;
-  std::chrono::time_point start_time = std::chrono::high_resolution_clock::now();
+  timing_tracker timer;
 
   if (options.timeout > 0.0)
   {
@@ -292,7 +377,7 @@ inline void self_substitute(pbes_equation& equation,
       if (options.timeout > 0.0)
       {
         std::chrono::time_point current_time = std::chrono::high_resolution_clock::now();
-        double elapsed = std::chrono::duration<double>(current_time - start_time).count();
+        double elapsed = std::chrono::duration<double>(current_time - timer.start_time).count();
         if (elapsed >= options.timeout)
         {
           stable = true;
@@ -338,7 +423,9 @@ inline void self_substitute(pbes_equation& equation,
           sigma[v] = par;
         }
 
-        pbes_expression phi = pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma);
+        pbes_expression phi = measure_time(timer,
+          "substitution",
+          [&]() { return pbes_rewrite(equation.formula(), pbes_default_rewriter, sigma); });
 
         std::vector<propositional_variable_instantiation> phi_vector = get_propositional_variable_instantiations(phi);
 
@@ -360,7 +447,8 @@ inline void self_substitute(pbes_equation& equation,
         }
 
         // Simplify
-        phi = simplify_expr(phi, if_substituter, pbes_rewriter);
+        phi = measure_time(timer, "simplify_expr", [&]() { return simplify_expr(phi, if_substituter, pbes_rewriter); });
+
         phi_vector = get_propositional_variable_instantiations(phi);
         std::size_t size = phi_vector.size();
         if (options.count_unique_pvi)
@@ -368,29 +456,64 @@ inline void self_substitute(pbes_equation& equation,
           size = std::set(phi_vector.begin(), phi_vector.end()).size();
         }
 
+        // TODO: Also queue the other PVI in some way
+
         // (3) check if simpler
-        if (size == 1 && is_avoiding_alternation(options, *phi_vector.begin(), equation)
-            && is_not_too_big(options, cur_x, phi) && is_quantifier_free(phi, options))
+        bool condition_result = (size >= 1 && size <= options.max_number_pvi);
+
+        if (condition_result)
         {
-          propositional_variable_instantiation new_x = *phi_vector.begin();
+          condition_result = measure_time(timer,
+            "is_avoiding_alternation",
+            [&]() { return is_avoiding_alternation(options, *phi_vector.begin(), equation); });
+        }
 
-          mCRL2log(log::debug) << "Trying loop " << new_x << " in path with \n";
-          for (const propositional_variable_instantiation& itr: path)
-          {
-            mCRL2log(log::debug) << itr << "\n";
-          }
+        if (condition_result)
+        {
+          condition_result
+            = measure_time(timer, "is_not_too_big", [&]() { return is_not_too_big(options, cur_x, phi); });
+        }
 
-          if (path.contains(new_x))
+        if (condition_result)
+        {
+          condition_result
+            = measure_time(timer, "is_quantifier_free", [&]() { return is_quantifier_free(phi, options); });
+        }
+
+        if (condition_result)
+        {
+          std::set<propositional_variable_instantiation> phi_set(phi_vector.begin(), phi_vector.end());
+          bool all_in_path = true;
+          measure_time(timer, "successful_substitutions", [&]() { return true; });
+
+          for (const propositional_variable_instantiation& phi_x: phi_set)
           {
-            // We have already seen this, so we are in a loop.
-            mCRL2log(log::debug) << "Loop, seen " << new_x << " in path after " << cur_x << "    " << phi << "\n";
+            mCRL2log(log::debug) << "Trying loop " << phi_x << " in path with \n";
             for (const propositional_variable_instantiation& itr: path)
             {
               mCRL2log(log::debug) << itr << "\n";
             }
-            pvi_substituter.set_pvi(new_x);
-            pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
-            pvi_substituter.apply(result, phi);
+
+            if (path.contains(phi_x))
+            {
+              // We have already seen this, so we are in a loop.
+              mCRL2log(log::debug) << "Loop, seen " << phi_x << " in path after " << cur_x << "    " << phi << "\n";
+              for (const propositional_variable_instantiation& itr: path)
+              {
+                mCRL2log(log::debug) << itr << "\n";
+              }
+              pvi_substituter.set_pvi(phi_x);
+              pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
+              pvi_substituter.apply(result, phi);
+            }
+            else
+            {
+              all_in_path = false;
+            }
+          }
+
+          if (all_in_path)
+          {
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(result);
             pvi_substituter.apply(equation.formula(), equation.formula());
@@ -403,19 +526,27 @@ inline void self_substitute(pbes_equation& equation,
           {
             // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler.
             mCRL2log(log::debug) << "Replaced in PBES equation for " << cur_x << "\n-->\n"
-                                 << phi << "\n[" << new_x << "]\n";
+                                 << phi << "\n"
+                                 << core::detail::print_list(phi_set) << "\n";
+
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(phi);
             pvi_substituter.apply(equation.formula(), equation.formula());
-            if (new_x.name() == equation.variable().name())
+            // Get the set of elements that have the same name as the equation variable
+            std::set<propositional_variable_instantiation> phi_set_same_name;
+            std::copy_if(phi_set.begin(),
+              phi_set.end(),
+              std::inserter(phi_set_same_name, phi_set_same_name.begin()),
+              [&](const propositional_variable_instantiation& pvi)
+              { return pvi.name() == equation.variable().name(); });
+            stable = false;
+            if (phi_set_same_name.size() == 0)
             {
-              cur_x = new_x;
-              path.insert(new_x);
+              pvi_done = true;
             }
             else
             {
-              stable = false;
-              pvi_done = true;
+              cur_x = *phi_set_same_name.begin();
             }
           }
         }
@@ -427,6 +558,7 @@ inline void self_substitute(pbes_equation& equation,
           stable = false;
           mCRL2log(log::debug) << "Replaced in PBES equation for " << cur_x << ":\n" << x << " \n-->\n " << phi << "\n";
           pvi_done = true;
+          measure_time(timer, "successful_substitutions", [&]() { return true; });
         }
         else
         {
@@ -462,7 +594,9 @@ inline void self_substitute(pbes_equation& equation,
       if (current_size == 0 || (previous_size >= current_size + 10))
       {
         previous_size = current_size;
-        equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
+        equation.formula() = measure_time(timer,
+          "simplify_expr",
+          [&]() { return simplify_expr(equation.formula(), if_substituter, pbes_rewriter); });
       }
     }
   }
@@ -471,7 +605,14 @@ inline void self_substitute(pbes_equation& equation,
 
   if (current_size == 0)
   {
-    equation.formula() = simplify_expr(equation.formula(), if_substituter, pbes_rewriter);
+    equation.formula() = measure_time(timer,
+      "simplify_expr",
+      [&]() { return simplify_expr(equation.formula(), if_substituter, pbes_rewriter); });
+  }
+
+  if (options.timings)
+  {
+    timer.log_measurements();
   }
 }
 
@@ -528,7 +669,8 @@ inline pbes tosrf(pbes_system::pbes pbesspec)
   auto result = pbes2pre_srf(pbesspec, true);
   // Unify the parameters of the original PBES (which has potential counter example information)
   unify_parameters(result, true, false);
-  pbes_system::resolve_summand_variable_name_clashes(result, result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
+  pbes_system::resolve_summand_variable_name_clashes(result,
+    result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
   return pre_srf2srfpbes(result).to_pbes();
 }
 

@@ -46,6 +46,8 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
       m_options.avoid_alternating = parser.has_option("avoid-alternating");
       m_options.rewrite_only_substitution = parser.has_option("rewrite-only-substitution");
       m_options.srf_factor = parser.option_argument_as<double>("srf-factor");
+      m_options.max_number_pvi = parser.option_argument_as<std::size_t>("max-number-pvi");
+      m_options.timings = m_timing_enabled;
     }
 
     void add_options(interface_description& desc) override
@@ -81,6 +83,8 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
       desc.add_option("srf-factor", utilities::make_optional_argument("FACTOR", "1.0"),
                   "Set a factor of the maximum size the chained equation in SRF should be after chaining compared to the size of the original equation. "
                   "0 means no limit. Default is 1.0.");
+      desc.add_hidden_option("max-number-pvi", utilities::make_optional_argument("NUMBER", "1"),
+                  "Set the maximum number of PVI instances to chain. Default is 1.");
     }
 
   public:
