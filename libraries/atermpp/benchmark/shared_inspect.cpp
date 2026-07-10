@@ -9,8 +9,6 @@
 
 #include "benchmark_shared.h"
 
-#include "mcrl2/atermpp/algorithm.h"
-
 #include <queue>
 
 using namespace atermpp;
@@ -52,7 +50,7 @@ int main(int argc, char* argv[])
 
           for (const aterm& u : t)
           {
-            Q.push(reinterpret_cast<const aterm*>(&u));
+            Q.push(&u);
             n++;
           }
         }

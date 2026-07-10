@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
           for (const aterm& u : t)
           {
-            Q.push(reinterpret_cast<const aterm*>(&u));
+            Q.push(&u);
             n++;
           }
         }
