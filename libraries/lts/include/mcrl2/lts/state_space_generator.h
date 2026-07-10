@@ -440,7 +440,7 @@ class divergence_detector
       using utilities::detail::contains;
 
       bool result = false;
-      divergence_detector_mutex.lock();
+      std::lock_guard guard(divergence_detector_mutex);
       m_local_trace_constructor.clear();
 
       auto q = m_divergent_states.find(s);
@@ -450,7 +450,6 @@ class divergence_detector
                               "), reachable from divergent state with index " + std::to_string(q->second);
         mCRL2log(log::info) << message << ".\n";
         m_divergent_states.erase(q);
-        divergence_detector_mutex.unlock();
         return false;
       }
 
@@ -536,7 +535,6 @@ class divergence_detector
       {
         explorer.abort();
       }
-      divergence_detector_mutex.unlock();
       return result;
     }
 };
@@ -575,18 +573,17 @@ class progress_monitor
         ++count;
         if (number_of_threads == 1 && count == level_up) 
         {
-          exclusive_print_mutex.lock();
+          std::lock_guard guard(exclusive_print_mutex);
           mCRL2log(log::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
           level++;
           level_up = count + todo_list_size;
           last_state_count = state_count;
           last_transition_count = transition_count;
-          exclusive_print_mutex.unlock();
         }
 
         if (time(&new_log_time) > last_log_time.load(std::memory_order_relaxed))
         {
-          exclusive_print_mutex.lock();
+          std::lock_guard guard(exclusive_print_mutex);
 
           last_log_time = new_log_time;
           std::size_t lvl_states = state_count - last_state_count;
@@ -606,7 +603,6 @@ class progress_monitor
                                   << "%. Last level: " << level << ", " << lvl_states << "st, " 
                                   << lvl_transitions << "tr.\n";
           }
-          exclusive_print_mutex.unlock();
         }
       }
       else
@@ -614,13 +610,12 @@ class progress_monitor
         count++;
         if (time(&new_log_time) > last_log_time.load(std::memory_order_relaxed))
         {
-          exclusive_print_mutex.lock();
+          std::lock_guard guard(exclusive_print_mutex);
           last_log_time = new_log_time;
           mCRL2log(log::status) << "monitor: currently explored "
                             << count << " state" << ((count==1)?"":"s")
                             << " and " << transition_count << " transition" << ((transition_count==1)?".":"s.")
                             << std::endl;
-          exclusive_print_mutex.unlock();
         }
       }
     }

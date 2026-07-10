@@ -136,18 +136,15 @@ class stochastic_lts_aut_builder: public stochastic_lts_builder
     // Add a transition to the LTS
     void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities, const std::size_t number_of_threads) override
     {
+      std::unique_lock<std::mutex> guard(m_exclusive_transition_access, std::defer_lock);
       if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads > 1)
       {
-        m_exclusive_transition_access.lock();
+        guard.lock();
       }
       std::size_t to = m_stochastic_states.size();
       std::size_t label = add_action(a);
       m_stochastic_states.emplace_back(targets, probabilities);
       m_transitions.emplace_back(from, label, to);
-      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads > 1)
-      {
-        m_exclusive_transition_access.unlock();
-      }
     }
 
     // Add actions and states to the LTS
@@ -248,18 +245,15 @@ class stochastic_lts_lts_builder: public stochastic_lts_builder
     // Add a transition to the LTS
     void add_transition(std::size_t from, const lps::multi_action& a, const std::list<std::size_t>& targets, const std::vector<data::data_expression>& probabilities, const std::size_t number_of_threads) override
     {
+      std::unique_lock<std::mutex> guard(m_exclusive_transition_access, std::defer_lock);
       if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads > 1)
       {
-        m_exclusive_transition_access.lock();
+        guard.lock();
       }
       auto s1 = make_probabilistic_state(targets, probabilities);
       std::size_t label = add_action(a);
       std::size_t to = m_lts.add_probabilistic_state(s1);
       m_lts.add_transition(transition(from, label, to));
-      if (mcrl2::utilities::detail::GlobalThreadSafe && number_of_threads > 1)
-      {
-        m_exclusive_transition_access.unlock();
-      }
     }
 
     // Add actions and states to the LTS

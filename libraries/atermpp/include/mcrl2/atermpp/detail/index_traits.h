@@ -16,6 +16,7 @@
 
 #include "mcrl2/atermpp/detail/aterm_configuration.h"
 #include "mcrl2/atermpp/standard_containers/unordered_map.h"
+#include "mcrl2/utilities/mutex.h"
 
 
 
@@ -36,9 +37,9 @@ std::stack<std::size_t>& variable_map_free_numbers()
 }
 
 template <typename Variable, typename KeyType>
-std::mutex& variable_mutex()
+mcrl2::utilities::mutex& variable_mutex()
 {
-  static std::mutex m;
+  static mcrl2::utilities::mutex m;
   return m;
 }
 
@@ -85,7 +86,7 @@ public:
   static inline
   std::size_t insert(const KeyType& x)
   {
-    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().lock(); }
+    std::lock_guard guard(variable_mutex<Variable, KeyType>());
 
     auto& m = variable_index_map<Variable, KeyType>();
     auto i = m.find(x);
@@ -109,7 +110,6 @@ public:
     {
       value = i->second;
     }
-    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().unlock(); }
     return value;
   }
 
@@ -118,7 +118,7 @@ public:
   static inline
   void erase(const KeyType& x)
   {
-    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().lock(); }
+    std::lock_guard guard(variable_mutex<Variable, KeyType>());
 
     auto& m = variable_index_map<Variable, KeyType>();
     auto& s = variable_map_free_numbers<Variable, KeyType>();
@@ -126,8 +126,6 @@ public:
     assert(i != m.end());
     s.push(i->second);
     m.erase(i);
-
-    if constexpr (mcrl2::utilities::detail::GlobalThreadSafe) { variable_mutex<Variable, KeyType>().unlock(); }
   }
 
   /// \brief Note: intended for internal use only!

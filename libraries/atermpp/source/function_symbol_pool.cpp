@@ -31,7 +31,7 @@ function_symbol_pool::function_symbol_pool()
 
 void function_symbol_pool::create_helper(const std::string& name)
 {
-  if constexpr (GlobalThreadSafe) { m_mutex.lock(); }
+  std::lock_guard guard(m_mutex);
 
   // Check whether there is a registered prefix p such that name equal pn where n is a number.
   // In that case prevent that pn will be generated as a fresh function name.
@@ -56,8 +56,6 @@ void function_symbol_pool::create_helper(const std::string& name)
       }
     }
   }
-
-  if  constexpr (GlobalThreadSafe) { m_mutex.unlock(); }
 }
 
 function_symbol function_symbol_pool::create(std::string&& name, const std::size_t arity, const bool check_for_registered_functions)
