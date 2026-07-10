@@ -262,10 +262,10 @@ function(mcrl2_add_header_tests TARGET_NAME INCLUDE_DIR EXCLUDE_FILES)
       set(testname headertest_${testname})
 
       if(NOT TARGET ${testname})
-        # In test.cpp we define BOOST_UNITS_HEADER_NAME to be the current header
+        # In headertest.cpp we define MCRL2_HEADERTEST_HEADER_NAME to be the current header
         add_executable(${testname} "${CMAKE_SOURCE_DIR}/cmake/headertest.cpp")
         target_link_libraries(${testname} ${TARGET_NAME})
-        set_target_properties(${testname} PROPERTIES COMPILE_DEFINITIONS "BOOST_UNITS_HEADER_NAME=${cppname}")
+        target_compile_definitions(${testname} PRIVATE "MCRL2_HEADERTEST_HEADER_NAME=${cppname}")
       endif()
 
     endif()

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifdef MCRL2_ATERMPP_BENCHMARK_BENCHMARK_SHARED_H
+#ifndef MCRL2_ATERMPP_BENCHMARK_BENCHMARK_SHARED_H
 #define MCRL2_ATERMPP_BENCHMARK_BENCHMARK_SHARED_H
 
 #include "mcrl2/atermpp/aterm.h"
