@@ -1,17 +1,16 @@
 /*
- * This file is part of the Mingw32 package.
+ * MSVC workaround header for mCRL2.
  *
- * unistd.h maps (roughly) to io.h
+ * Windows/MSVC does not provide a POSIX <unistd.h>. This shim forwards the
+ * subset of declarations that mCRL2 actually uses (e.g. getpid()) to the
+ * corresponding MSVC headers <io.h> and <process.h>. It is only on the include
+ * path for MSVC builds via cmake/ConfigureMSVC.cmake, but the guard below makes
+ * it a no-op should the path ever leak into a non-Windows toolchain.
  */
 
-#ifndef __STRICT_ANSI__
+#if defined(_MSC_VER) || defined(_WIN32)
 
 #include <io.h>
 #include <process.h>
 
-#define __UNISTD_GETOPT__
-// #include <getopt.h>
-#undef __UNISTD_GETOPT__
-
 #endif
-
