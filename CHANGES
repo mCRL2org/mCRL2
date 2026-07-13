@@ -1,4 +1,30 @@
 ===============================================================================
+Changes between toolset releases 202607.0 and 202507.0:
+===============================================================================
+
+This release focuses on the performance and correctness of the equivalence
+checking and PBES solving tools, and on modernising the code base. The
+bisimulation algorithm of Groote and Jansen, which runs in O(m log n), is now
+the default for strong, branching and divergence-preserving branching
+bisimulation in ltsconvert and ltscompare.
+
+The generation of counter examples has been extended. ltscompare can now
+produce counter examples for weak trace and impossible futures comparisons,
+and the counter examples of the symbolic solver pbessolvesymbolic now also
+work for the optimised (partial) solvers.
+
+<N> issues were resolved and <M> external pull requests have been accepted
+since the last release.
+
+List of other changes:
+  - A new experimental tool lpsparvalues has been added, which enumerates the
+    values that the parameters of a linear process can take during state space
+    exploration.
+  - The computation of communication for multi-actions, used in linearisation
+    and ltscombine, has been reimplemented, fixing several correctness issues.
+  - Sylvan and Lace have been updated to versions 1.10.0 and 1.6.3.
+
+===============================================================================
 Changes between toolset releases 202507.0 and 202407.1:
 ===============================================================================
 
