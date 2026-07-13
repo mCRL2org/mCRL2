@@ -13,8 +13,7 @@ produce counter examples for weak trace and impossible futures comparisons,
 and the counter examples of the symbolic solver pbessolvesymbolic now also
 work for the optimised (partial) solvers.
 
-<N> issues were resolved and <M> external pull requests have been accepted
-since the last release.
+27 issues were resolved since the last release.
 
 List of other changes:
   - A new experimental tool lpsparvalues has been added, which enumerates the
