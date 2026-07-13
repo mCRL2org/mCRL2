@@ -678,6 +678,17 @@ public:
     }
   }
 
+  // TODO: Exception during structure graph solving: structure_graph_builder: encountered unsupported pbes_expression 1 && !(true < 3)
+  
+  // Contents of file l1.pbesspec:
+  // pbes
+  // nu X0(c:Bool) = ((X0(true)) && ((val(false)) => (((val(c)) || (X1)) && (val(c))))) && ((!X3) => (val(false)));
+  // nu X1 = (!(forall u:Nat.((val(u < 3)) && (exists t:Nat.((val(t < 3)) || (val(t == u))))))) || (!(((forall w:Nat.((val(w < 3)) && (!X0(true)))) || (val(false))) && ((val(true)) && ((exists v:Nat.((val(v < 3)) || (val(v < 2)))) => ((!X3) || (!X1))))));
+  // nu X2(b:Bool, m:Nat) = ((val(m < 3)) => ((!X3) => ((exists w:Nat.((val(w < 3)) || (!(!X2(w < 2, m + 1))))) && (X0(false))))) && ((val(false)) || ((val(b)) && (!(val(m < 3)))));
+  // mu X3 = (((val(true)) && (val(false))) && ((exists w:Nat.((val(w < 3)) || (((val(w < 2)) => (X0(w > 0))) => (forall t:Nat.((val(t < 3)) && (val(t > 1))))))) => (X3))) || (X2(true, 1));
+  
+  // init X0(true);
+  
   // Removes one parameter from one equation's abstraction set
   void add_relevant_parameter(const pbes& p, std::map<core::identifier_string, std::set<data::variable>>& W)
   {
