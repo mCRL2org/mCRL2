@@ -233,7 +233,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
   {
     (void)result;
     (void)x;
-    throw mcrl2::runtime_error("not_ is not supported in this tool");
+    throw mcrl2::runtime_error("apply_abstraction: not_ is not supported in this tool");
   }
 
   // Override imp: not allowed after normalization
