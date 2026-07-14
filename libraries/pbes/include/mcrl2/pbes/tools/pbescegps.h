@@ -48,7 +48,7 @@
 #endif
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/rewriters/abstraction_rewriter.h"
-#include "mcrl2/pbes/rewriters/dataspec_prune_rewriter.h"
+#include "mcrl2/pbes/rewriters/essential_variable_extractor.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/execution_timer.h"
@@ -488,26 +488,47 @@ public:
   {
     mCRL2log(log::debug) << "Updating parameters for refinement..." << std::endl;
 
+    std::set<data::variable> essential_vars = find_essential_variables(p.equations().rbegin()->formula(), state.W[p.equations().rbegin()->variable().name()], state.I);
+    mCRL2log(log::verbose) << "Essential variables: " << p.equations().rbegin()->variable().name() << ": " << essential_vars.size() << " (" << core::detail::print_list(essential_vars) << ")" << std::endl;
+    
     // Find the first non-empty equation's abstraction set
+    bool found = false;
     for (auto it = state.W.rbegin(); it != state.W.rend(); it++)
     {
       if (!it->second.empty())
       {
-        // Remove the first parameter from this equation's set
-        auto first = it->second.rbegin();
-        data::variable to_remove = *first;
-        core::identifier_string eq_name = it->first;
+          core::identifier_string eq_name = it->first;
+          pbes_expression eq_formula;
+          for (const pbes_equation& eq : p.equations())
+          {
+            if (eq.variable().name() == eq_name)
+            {
+              eq_formula = eq.formula();
+              break;
+            }
+          }
+          std::set<data::variable> essential_vars = find_essential_variables(eq_formula, state.W[eq_name], state.I);
+          
+          // TODO: Find a better heuristic
+          // Choose the first essential variable to un-abstract
+          for (const data::variable& var : essential_vars)
+          {
+            if (it->second.find(var) != it->second.end())
+            {
+              found = true;
+              
+              mCRL2log(log::debug) << "Un-abstracted parameter " << var.name() << " from equation " << eq_name
+                                   << std::endl;
 
-        mCRL2log(log::debug) << "Un-abstracted parameter " << to_remove.name() << " from equation " << eq_name
-                             << std::endl;
-
-        // Use the struct method to keep indices in sync
-        state.remove_abstracted_variable(p, eq_name, to_remove);
-        return;
+              state.remove_abstracted_variable(p, eq_name, var);
+              break;
+            }
+          }
+          if (found)
+          break;
       }
     }
 
-    mCRL2log(log::debug) << "No more parameters to un-abstract" << std::endl;
   }
 
   bool run_cegps_algorithm(pbes& p, pbescegps_options options)
