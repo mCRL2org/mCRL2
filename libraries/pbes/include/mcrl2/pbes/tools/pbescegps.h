@@ -411,7 +411,7 @@ public:
 
   // Collects all parameters W = decl(E) from a PBES
   // This gathers all data variables that appear in PBES equations
-  std::set<data::variable> collect_parameters(const pbes& p)
+  std::set<data::variable> extract_equation_parameters(const pbes& p)
   {
     std::set<data::variable> parameters;
     for (const pbes_equation& eq: p.equations())
@@ -426,7 +426,7 @@ public:
 
   // Calculate the indices of the parameters to abstract
   // Maps equation names to sets of parameter indices that should be abstracted
-  std::map<core::identifier_string, std::set<std::size_t>> calculate_parameter_abstraction_indices(const pbes& p,
+  std::map<core::identifier_string, std::set<std::size_t>> map_parameters_to_abstraction_indices(const pbes& p,
     const std::map<core::identifier_string, std::set<data::variable>>& abstraction_vars_per_eq)
   {
     std::map<core::identifier_string, std::set<std::size_t>> pbes_parameters_abstraction_indices;
@@ -506,13 +506,7 @@ public:
       }
     }
 
-    mCRL2log(log::debug) << pp(result) << std::endl;
-    // // Remove unused parameters after abstraction
-    // // Temporarily suppress logging during parelm to reduce noise
-    // mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
-    // mcrl2::log::logger::set_reporting_level(mcrl2::log::error);
-    // pbes_system::parelm(result, false);
-    // mcrl2::log::logger::set_reporting_level(saved_level);
+    mCRL2log(log::trace) << pp(result) << std::endl;
 
     // Rewrite expressions for simplification
     data::rewriter datar(p.data(), options.rewrite_strategy);
@@ -525,12 +519,13 @@ public:
   // Helper: Calculate non-Control Flow Parameters (CFP) per equation
   // Returns a map from equation name to set of non-CFP variables
   std::map<core::identifier_string, std::set<data::variable>>
-  calculate_non_cfp(pbes& p, pbescegps_options& options, const bool use_init_control_flow)
+  compute_initial_abstraction_set(pbes& p, pbescegps_options& options, const bool use_init_control_flow)
   {
     // Initialize result with ALL parameters for each equation
     std::map<core::identifier_string, std::set<data::variable>> result;
     for (const pbes_equation& eq: p.equations())
     {
+      result[eq.variable().name()] = std::set<data::variable>();
       for (const auto& param: eq.variable().parameters())
       {
         result[eq.variable().name()].insert(atermpp::down_cast<data::variable>(param));
@@ -664,7 +659,7 @@ public:
     }
   }
 
-  void report_abstracted_parameters(const std::map<core::identifier_string, std::set<data::variable>>& W_map)
+  void print_abstraction_summary(const std::map<core::identifier_string, std::set<data::variable>>& W_map)
   {
     for (const auto& [eq_name, var_set]: W_map)
     {
@@ -678,19 +673,8 @@ public:
     }
   }
 
-  // TODO: Exception during structure graph solving: structure_graph_builder: encountered unsupported pbes_expression 1 && !(true < 3)
-  
-  // Contents of file l1.pbesspec:
-  // pbes
-  // nu X0(c:Bool) = ((X0(true)) && ((val(false)) => (((val(c)) || (X1)) && (val(c))))) && ((!X3) => (val(false)));
-  // nu X1 = (!(forall u:Nat.((val(u < 3)) && (exists t:Nat.((val(t < 3)) || (val(t == u))))))) || (!(((forall w:Nat.((val(w < 3)) && (!X0(true)))) || (val(false))) && ((val(true)) && ((exists v:Nat.((val(v < 3)) || (val(v < 2)))) => ((!X3) || (!X1))))));
-  // nu X2(b:Bool, m:Nat) = ((val(m < 3)) => ((!X3) => ((exists w:Nat.((val(w < 3)) || (!(!X2(w < 2, m + 1))))) && (X0(false))))) && ((val(false)) || ((val(b)) && (!(val(m < 3)))));
-  // mu X3 = (((val(true)) && (val(false))) && ((exists w:Nat.((val(w < 3)) || (((val(w < 2)) => (X0(w > 0))) => (forall t:Nat.((val(t < 3)) && (val(t > 1))))))) => (X3))) || (X2(true, 1));
-  
-  // init X0(true);
-  
   // Removes one parameter from one equation's abstraction set
-  void add_relevant_parameter(const pbes& p, std::map<core::identifier_string, std::set<data::variable>>& W)
+  void unabstract_one_parameter(const pbes& p, std::map<core::identifier_string, std::set<data::variable>>& W)
   {
     mCRL2log(log::debug) << "Updating parameters for refinement..." << std::endl;
 
@@ -715,23 +699,23 @@ public:
     mCRL2log(log::debug) << "No more parameters to un-abstract" << std::endl;
   }
 
-  bool run(pbes& p, pbescegps_options options)
+  bool run_cegps_algorithm(pbes& p, pbescegps_options options)
   {
     // Calculate non-Control Flow Parameters (parameters to abstract) per equation
     std::map<core::identifier_string, std::set<data::variable>> W
-      = calculate_non_cfp(p, options, options.init_control_flow);
+      = compute_initial_abstraction_set(p, options, options.init_control_flow);
 
     pbes original_p = p;
 
     // Calculate the indices of the parameters to abstract
     std::map<core::identifier_string, std::set<std::size_t>> pbes_parameters_abstraction_indices
-      = calculate_parameter_abstraction_indices(p, W);
+      = map_parameters_to_abstraction_indices(p, W);
 
     // Ensure W is data-closed
     make_data_closed(p, W, pbes_parameters_abstraction_indices);
 
     // Collect sorts to abstract (non-CFP parameters)
-    report_abstracted_parameters(W);
+    print_abstraction_summary(W);
 
     // Iterative refinement loop
     do
@@ -761,7 +745,7 @@ public:
       if (under_result)
       {
         mCRL2log(log::verbose) << "Under-approximation solved to TRUE" << std::endl;
-        report_abstracted_parameters(W);
+        print_abstraction_summary(W);
         return true;
       }
 
@@ -773,7 +757,7 @@ public:
       if (!over_result)
       {
         mCRL2log(log::verbose) << "Over-approximation solved to FALSE" << std::endl;
-        report_abstracted_parameters(W);
+        print_abstraction_summary(W);
         return false;
       }
 
@@ -782,10 +766,10 @@ public:
       // Both approximations are inconclusive, refine by un-abstracting one parameter
       mCRL2log(log::verbose) << "Both approximations inconclusive, refining..." << std::endl;
       p = original_p;
-      add_relevant_parameter(p, W);
-      pbes_parameters_abstraction_indices = calculate_parameter_abstraction_indices(p, W);
+      unabstract_one_parameter(p, W);
+      pbes_parameters_abstraction_indices = map_parameters_to_abstraction_indices(p, W);
       make_data_closed(p, W, pbes_parameters_abstraction_indices);
-      report_abstracted_parameters(W);
+      print_abstraction_summary(W);
     }
     while (true);
 
@@ -828,7 +812,7 @@ inline bool pbescegps(const std::string& input_filename,
   algorithms::normalize(p);
 
   pbescegps_iterator iterator;
-  bool result = iterator.run(p, options);
+  bool result = iterator.run_cegps_algorithm(p, options);
 
   mCRL2log(log::info) << (result ? "true" : "false") << std::endl;
   return result;
