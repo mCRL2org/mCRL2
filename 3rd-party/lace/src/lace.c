@@ -1221,11 +1221,9 @@ lace_start(unsigned int _n_workers, size_t dequesize)
 #ifndef _WIN32
         struct rlimit lim;
         if (getrlimit(RLIMIT_STACK, &lim) == 0) stacksize = (size_t)lim.rlim_cur;
-        if (stacksize > 67108864) stacksize = 67108864;
 #endif
     }
     if (stacksize < 16777216) stacksize = 16777216;
-    if (stacksize > 67108864) stacksize = 67108864;
 
 #if LACE_USE_HWLOC
     // Use hwloc to allocate stacks bound to the correct NUMA node
