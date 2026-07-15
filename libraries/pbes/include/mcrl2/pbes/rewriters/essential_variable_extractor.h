@@ -43,24 +43,24 @@ struct essential_variable_extractor : public pbes_expression_traverser<essential
 
   void apply(const data::untyped_data_parameter& x)
   {
-    mCRL2log(log::debug) << "Processing data param: " << x << std::endl;
+    mCRL2log(log::trace) << "Processing data param: " << x << std::endl;
   }
 
   void apply(const data::data_expression& x)
   {
-    mCRL2log(log::debug) << "Processing: " << x << std::endl;
+    mCRL2log(log::trace) << "Processing: " << x << std::endl;
     // Case 1: x is a variable in W
     if (data::is_variable(x))
     {
       const data::variable& var = atermpp::down_cast<data::variable>(x);
-      mCRL2log(log::debug) << "Is a variable." << std::endl;
+      mCRL2log(log::trace) << "Is a variable." << std::endl;
       if (W.find(var) != W.end())
       {
-        mCRL2log(log::debug) << "Added it." << std::endl;
+        mCRL2log(log::trace) << "Added it." << std::endl;
         result.insert(var);
       }
 
-      mCRL2log(log::debug) << "----------------------" << std::endl << std::endl;
+      mCRL2log(log::trace) << "----------------------" << std::endl << std::endl;
       return;
     }
 
@@ -68,7 +68,7 @@ struct essential_variable_extractor : public pbes_expression_traverser<essential
     else if (data::is_application(x))
     {
       const data::application& app = atermpp::down_cast<data::application>(x);
-      mCRL2log(log::debug) << "Is an application." << std::endl;
+      mCRL2log(log::trace) << "Is an application." << std::endl;
 
       abstraction_rewriter<> rewriter_under(W, I, false);
       pbes_expression under;
@@ -79,10 +79,11 @@ struct essential_variable_extractor : public pbes_expression_traverser<essential
       rewriter_over.apply(over, x);
 
       // Down-abstraction equals up-abstraction
+      // TODO: Will this ever happen theoretically?
       if (under == over)
       {
-        mCRL2log(log::debug) << "Under is over." << std::endl;
-        mCRL2log(log::debug) << "----------------------" << std::endl << std::endl;
+        mCRL2log(log::trace) << "Under is over." << std::endl;
+        mCRL2log(log::trace) << "----------------------" << std::endl << std::endl;
         return;
       }
 
@@ -92,15 +93,15 @@ struct essential_variable_extractor : public pbes_expression_traverser<essential
       {
         if (W.find(var) != W.end())
         {
-          mCRL2log(log::debug) << "Found: " << var << std::endl;
+          mCRL2log(log::trace) << "Found: " << var << std::endl;
           result.insert(var);
         }
       }
-      mCRL2log(log::debug) << "----------------------" << std::endl << std::endl;
+      mCRL2log(log::trace) << "----------------------" << std::endl << std::endl;
       return;
     }
 
-    mCRL2log(log::debug) << "----------------------" << std::endl << std::endl;
+    mCRL2log(log::trace) << "----------------------" << std::endl << std::endl;
     // For any other data expression type, no essential variables
   }
 

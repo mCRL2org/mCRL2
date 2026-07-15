@@ -51,17 +51,17 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
   template<class T>
   void apply(T& result, const data::data_expression& x)
   {
-    mCRL2log(log::debug) << "Processing data expression: " << x << std::endl;
+    mCRL2log(log::trace) << "Processing data expression: " << x << std::endl;
 
     // Check if it's a variable using built-in function
     if (data::is_variable(x))
     {
       const data::variable& var = atermpp::down_cast<data::variable>(x);
-      mCRL2log(log::debug) << "  -> Handling as data::variable: " << var.name() << std::endl;
+      mCRL2log(log::trace) << "  -> Handling as data::variable: " << var.name() << std::endl;
 
       if (contains(m_abstraction_vars, var))
       {
-        mCRL2log(log::debug) << "     Abstracting variable " << var.name() << " to "
+        mCRL2log(log::trace) << "     Abstracting variable " << var.name() << " to "
                              << (m_is_overapproximation ? "true" : "false") << std::endl;
         data::data_expression abstracted_val = m_is_overapproximation ? data::true_() : data::false_();
         result = pbes_expression(abstracted_val);
@@ -69,7 +69,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
       else
       {
         // Variable is not abstracted, return as-is
-        mCRL2log(log::debug) << "     Keeping variable " << var.name() << " as-is" << std::endl;
+        mCRL2log(log::trace) << "     Keeping variable " << var.name() << " as-is" << std::endl;
         result = pbes_expression(var);
       }
       return;
@@ -79,7 +79,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     if (data::is_application(x))
     {
       const data::application& app = atermpp::down_cast<data::application>(x);
-      mCRL2log(log::debug) << "  -> Handling as data::application" << std::endl;
+      mCRL2log(log::trace) << "  -> Handling as data::application" << std::endl;
 
       // First check if any free variables depend on abstracted variables
       std::set<data::variable> free_vars = pbes_system::find_free_variables(app);
@@ -96,12 +96,12 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
 
       if (!depends_on_abstracted)
       {
-        mCRL2log(log::debug) << "     Application does not depend on abstracted variables, keeping as-is" << std::endl;
+        mCRL2log(log::trace) << "     Application does not depend on abstracted variables, keeping as-is" << std::endl;
         result = pbes_expression(app);
         return;
       }
 
-      mCRL2log(log::debug) << "     Application depends on abstracted variables" << std::endl;
+      mCRL2log(log::trace) << "     Application depends on abstracted variables" << std::endl;
 
       // Expression depends on abstracted variables
       // Check if the function is monotonic or anti-monotonic
@@ -112,7 +112,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
       if (data::sort_bool::is_and_application(app) || data::sort_bool::is_or_application(app))
       {
         is_monotonic = true;
-        mCRL2log(log::debug) << "     Function is monotonic (and/or)" << std::endl;
+        mCRL2log(log::trace) << "     Function is monotonic (and/or)" << std::endl;
       }
       // Check for known anti-monotonic functions (implication in antecedent)
       else if (data::sort_bool::is_not_application(app))
@@ -120,13 +120,13 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
         // Implication is monotonic in consequent, anti-monotonic in antecedent
         // For now, treat conservatively
         is_anti_monotonic = true;
-        mCRL2log(log::debug) << "     Function is anti-monotonic (not)" << std::endl;
+        mCRL2log(log::trace) << "     Function is anti-monotonic (not)" << std::endl;
       }
       // For unknown functions that depend on abstracted variables, use conservative approach
       else
       {
         // Conservative: return true/false
-        mCRL2log(log::debug) << "     Unknown function, using conservative approach, returning "
+        mCRL2log(log::trace) << "     Unknown function, using conservative approach, returning "
                              << (m_is_overapproximation ? "true" : "false") << std::endl;
         data::data_expression conservative_val = m_is_overapproximation ? data::true_() : data::false_();
         result = pbes_expression(conservative_val);
@@ -142,13 +142,13 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
         if (is_monotonic)
         {
           // Apply same abstraction mode to all arguments
-          mCRL2log(log::debug) << "     Abstracting argument with monotonic mode" << std::endl;
+          mCRL2log(log::trace) << "     Abstracting argument with monotonic mode" << std::endl;
           apply(abstracted_arg_expr, arg);
         }
         else if (is_anti_monotonic)
         {
           // Flip abstraction mode for arguments
-          mCRL2log(log::debug) << "     Flipping abstraction mode for anti-monotonic argument" << std::endl;
+          mCRL2log(log::trace) << "     Flipping abstraction mode for anti-monotonic argument" << std::endl;
           m_is_overapproximation = !m_is_overapproximation;
           apply(abstracted_arg_expr, arg);
           m_is_overapproximation = !m_is_overapproximation;
@@ -166,14 +166,14 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     }
 
     // For any other data expression type (e.g., function symbols), use the default builder behavior
-    mCRL2log(log::debug) << "  -> Using default builder behavior (not a variable or application)" << std::endl;
+    mCRL2log(log::trace) << "  -> Using default builder behavior (not a variable or application)" << std::endl;
     super::apply(result, x);
   }
 
   template<class T>
   void apply(T& result, const and_& x)
   {
-    mCRL2log(log::debug) << "Processing PBES conjunction" << std::endl;
+    mCRL2log(log::trace) << "Processing PBES conjunction" << std::endl;
     pbes_expression left;
     pbes_expression right;
     super::apply(left, x.left());
@@ -184,7 +184,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
   template<class T>
   void apply(T& result, const or_& x)
   {
-    mCRL2log(log::debug) << "Processing PBES disjunction" << std::endl;
+    mCRL2log(log::trace) << "Processing PBES disjunction" << std::endl;
     pbes_expression left;
     pbes_expression right;
     super::apply(left, x.left());
@@ -195,7 +195,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
   template<class T>
   void apply(T& result, const forall& x)
   {
-    mCRL2log(log::debug) << "Processing PBES forall" << std::endl;
+    mCRL2log(log::trace) << "Processing PBES forall" << std::endl;
     pbes_expression body;
     super::apply(body, x.body());
     result = make_forall_(x.variables(), body);
@@ -204,7 +204,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
   template<class T>
   void apply(T& result, const exists& x)
   {
-    mCRL2log(log::debug) << "Processing PBES exists" << std::endl;
+    mCRL2log(log::trace) << "Processing PBES exists" << std::endl;
     pbes_expression body;
     super::apply(body, x.body());
     result = make_exists_(x.variables(), body);
@@ -213,7 +213,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
   template<class T>
   void apply(T& result, const propositional_variable_instantiation& x)
   {
-    mCRL2log(log::debug) << "Processing PBES propositional variable instantiation: " << x.name() << std::endl;
+    mCRL2log(log::trace) << "Processing PBES propositional variable instantiation: " << x.name() << std::endl;
     data::data_expression_list filtered_args_vec;
 
     std::size_t i = 0;
