@@ -37,7 +37,25 @@ protected:
       m_options.init_control_flow = parser.has_option("init-cfp");
       m_options.solve_symbolic = parser.has_option("solve-symbolic-args");
       m_options.solve_symbolic_args = parser.option_argument_as<std::string>("solve-symbolic-args");
-      m_options.var_choice = parser.option_argument_as<std::string>("var-choice");
+      
+      std::string var_choice_str = parser.option_argument_as<std::string>("var-choice");
+      if (var_choice_str == "lhs")
+      {
+        m_options.var_choice = var_choice_strategy::lhs;
+      }
+      else if (var_choice_str == "rhs")
+      {
+        m_options.var_choice = var_choice_strategy::rhs;
+      }
+      else if (var_choice_str == "count")
+      {
+        m_options.var_choice = var_choice_strategy::count;
+      }
+      else
+      {
+        throw mcrl2::runtime_error("Invalid var-choice option '" + var_choice_str + "'. "
+          "Valid options are: 'first', 'rhs', 'count'.");
+      }
   }
 
   void add_options(interface_description& desc) override { 
@@ -50,6 +68,7 @@ protected:
       desc.add_option("var-choice",
           utilities::make_optional_argument("STR", "first"),
           "'first' (default) the variable order of the left-hand side of the equation\n"
+          "'rhs' the variable order of the right-hand side of the equation\n"
           "'count' the free variable that occurs most often (excluding data expressions in PVI)\n"
           "Choose the method of chosing a variable on iteration.");
   }
