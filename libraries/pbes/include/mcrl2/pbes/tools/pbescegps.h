@@ -20,7 +20,6 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/sort_expression.h"
@@ -28,19 +27,20 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/detail/count_free_variables.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/rewrite.h"
 #include <algorithm>
+#include <iterator>
 #include <ostream>
 #ifdef MCRL2_ENABLE_SYLVAN
 #include "mcrl2/pbes/pbesreach.h"
@@ -77,6 +77,7 @@ struct pbescegps_options
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   bool init_control_flow = false;
   bool solve_symbolic = false;
+  std::string var_choice = "first";
   std::string solve_symbolic_args = "";
 };
 
@@ -138,6 +139,10 @@ private:
   utilities::indexed_set<data::data_expression> m_values;
 
   bp::child sym_process;
+
+  // Cache for variable occurrence counts to avoid recomputing
+  // Keyed by equation name instead of formula pointer for stability
+  std::map<core::identifier_string, std::map<data::variable, std::size_t>> m_var_count_cache;
 
 public:
   bool solve(const pbes& p, pbescegps_options options)
@@ -483,52 +488,113 @@ public:
     }
   }
 
+  std::optional<data::variable> choose_variable_by_count(const core::identifier_string& eq_name,
+    const pbes_expression& eq_formula,
+    const std::set<data::variable>& essential_vars)
+  {
+    // Check if we have a cached result for this equation
+    auto cache_it = m_var_count_cache.find(eq_name);
+    if (cache_it == m_var_count_cache.end())
+    {
+      // Compute and cache the results
+      mCRL2log(log::verbose) << "ache miss for " << eq_name << std::endl;
+      auto var_counts = detail::count_free_variable_occurrences(eq_formula, false);
+      m_var_count_cache[eq_name] = var_counts;
+      cache_it = m_var_count_cache.find(eq_name);
+    }
+
+    const auto& var_counts = cache_it->second;
+    std::size_t best_count = 0;
+    std::optional<data::variable> best_var;
+    for (const data::variable& var: essential_vars)
+    {
+      mCRL2log(log::debug) << "  - " << var.name() << " -> " << var_counts.at(var) << std::endl;
+      if (var_counts.find(var) != var_counts.end())
+      {
+        std::size_t count = var_counts.at(var);
+        if (count > best_count)
+        {
+          best_count = count;
+          best_var = var;
+        }
+      }
+    }
+    return best_var;
+  }
+
+  std::optional<data::variable> choose_variable_by_first_occurrence(const propositional_variable& bnd_var,
+    const std::set<data::variable>& essential_vars)
+  {
+    for (const auto& param: bnd_var.parameters())
+    {
+      data::variable var = atermpp::down_cast<data::variable>(param);
+      if (essential_vars.contains(var))
+      {
+        return var;
+      }
+    }
+    return std::nullopt;
+  }
+
   // Removes one parameter from one equation's abstraction set
-  void unabstract_one_parameter(const pbes& p, abstract_param_state& state)
+  void unabstract_one_parameter(const pbes& p, abstract_param_state& state, const pbescegps_options& options)
   {
     mCRL2log(log::debug) << "Updating parameters for refinement..." << std::endl;
 
-    std::set<data::variable> essential_vars = find_essential_variables(p.equations().rbegin()->formula(), state.W[p.equations().rbegin()->variable().name()], state.I);
-    mCRL2log(log::verbose) << "Essential variables: " << p.equations().rbegin()->variable().name() << ": " << essential_vars.size() << " (" << core::detail::print_list(essential_vars) << ")" << std::endl;
-    
     // Find the first non-empty equation's abstraction set
     bool found = false;
     for (auto it = state.W.rbegin(); it != state.W.rend(); it++)
     {
       if (!it->second.empty())
       {
-          core::identifier_string eq_name = it->first;
-          pbes_expression eq_formula;
-          for (const pbes_equation& eq : p.equations())
+        core::identifier_string eq_name = it->first;
+        pbes_expression eq_formula;
+        propositional_variable bnd_var;
+        for (const pbes_equation& eq: p.equations())
+        {
+          if (eq.variable().name() == eq_name)
           {
-            if (eq.variable().name() == eq_name)
-            {
-              eq_formula = eq.formula();
-              break;
-            }
+            eq_formula = eq.formula();
+            bnd_var = eq.variable();
+            break;
           }
-          std::set<data::variable> essential_vars = find_essential_variables(eq_formula, state.W[eq_name], state.I);
-          
-          // TODO: Find a better heuristic
-          // Choose the first essential variable to un-abstract
-          for (const data::variable& var : essential_vars)
-          {
-            if (it->second.find(var) != it->second.end())
-            {
-              found = true;
-              
-              mCRL2log(log::debug) << "Un-abstracted parameter " << var.name() << " from equation " << eq_name
-                                   << std::endl;
+        }
+        // TODO: I am not convinced the current calculation makes sense at all.
+        // std::set<data::variable> essential_vars = find_essential_variables(eq_formula, state.W[eq_name], state.I);
+        std::set<data::variable> essential_vars = state.W[eq_name];
+        mCRL2log(log::debug) << "Essential variables: " << eq_name << ": " << essential_vars.size() << " ("
+                             << core::detail::print_list(essential_vars) << ")" << std::endl;
 
-              state.remove_abstracted_variable(p, eq_name, var);
-              break;
-            }
-          }
-          if (found)
-          break;
+        std::optional<data::variable> selected_var;
+
+        if (options.var_choice == "count")
+        {
+          selected_var = choose_variable_by_count(eq_name, eq_formula, essential_vars);
+        }
+        else if (options.var_choice == "first")
+        {
+          selected_var = choose_variable_by_first_occurrence(bnd_var, essential_vars);
+        }
+        else
+        {
+          mCRL2log(log::warning) << "Unknown var-choice option '" << options.var_choice << "'; using 'first'."
+                                 << std::endl;
+          selected_var = choose_variable_by_first_occurrence(bnd_var, essential_vars);
+        }
+
+        if (selected_var)
+        {
+          mCRL2log(log::debug) << "Un-abstracted parameter " << selected_var->name() << " from equation " << eq_name
+                               << std::endl;
+          state.remove_abstracted_variable(p, eq_name, *selected_var);
+          found = true;
+          return;
+        }
       }
     }
 
+    if (!found)
+      throw mcrl2::runtime_error("No essential variable found for un-abstracting parameter.");
   }
 
   bool run_cegps_algorithm(pbes& p, pbescegps_options options)
@@ -589,12 +655,10 @@ public:
         return false;
       }
 
-      // TODO: Implement essential variables calculation
-
       // Both approximations are inconclusive, refine by un-abstracting one parameter
       mCRL2log(log::verbose) << "Both approximations inconclusive, refining..." << std::endl;
       p = original_p;
-      unabstract_one_parameter(p, state);
+      unabstract_one_parameter(p, state, options);
       make_data_closed(p, state);
       print_abstraction_summary(state.W);
     }
@@ -604,8 +668,6 @@ public:
   }
 };
 
-// TODO: fix pbescegps -v scratch/tempredgreen_septypes.pbes
-
 // Abstraction builder implementation
 // Must be defined outside the struct due to template constraints
 pbes_expression pbescegps_iterator::apply_abstraction(const pbes_expression& expr,
@@ -613,20 +675,20 @@ pbes_expression pbescegps_iterator::apply_abstraction(const pbes_expression& exp
   const std::map<core::identifier_string, std::set<std::size_t>>& pbes_parameters_abstraction_indices,
   bool is_overapproximation)
 {
-  mCRL2log(log::debug) << "=== Entering apply_abstraction ===" << std::endl;
-  mCRL2log(log::debug) << "Abstraction mode: " << (is_overapproximation ? "OVER-approximation" : "UNDER-approximation")
+  mCRL2log(log::trace) << "=== Entering apply_abstraction ===" << std::endl;
+  mCRL2log(log::trace) << "Abstraction mode: " << (is_overapproximation ? "OVER-approximation" : "UNDER-approximation")
                        << std::endl;
-  mCRL2log(log::debug) << "Number of variables to abstract: " << abstraction_vars.size() << std::endl;
+  mCRL2log(log::trace) << "Number of variables to abstract: " << abstraction_vars.size() << std::endl;
   for (const auto& var: abstraction_vars)
   {
-    mCRL2log(log::debug) << "  - " << var.name() << std::endl;
+    mCRL2log(log::trace) << "  - " << var.name() << std::endl;
   }
 
   pbes_expression result;
   abstraction_rewriter<> rewriter(abstraction_vars, pbes_parameters_abstraction_indices, is_overapproximation);
-  mCRL2log(log::debug) << "Created abstraction_rewriter, now applying to expression" << std::endl;
+  mCRL2log(log::trace) << "Created abstraction_rewriter, now applying to expression" << std::endl;
   rewriter.apply(result, expr);
-  mCRL2log(log::debug) << "=== Exiting apply_abstraction ===" << std::endl;
+  mCRL2log(log::trace) << "=== Exiting apply_abstraction ===" << std::endl;
   return result;
 }
 
