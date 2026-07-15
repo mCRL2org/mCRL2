@@ -1,0 +1,21 @@
+nodes:
+  l1:
+    type: pbesspec
+  l2:
+    type: pbes
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2]
+    output: []
+    args: []
+    name: pbescegps
+    
+result: |
+  # Just verify pbescegps runs without crashing
+  result = True
