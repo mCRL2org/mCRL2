@@ -17,22 +17,16 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/detail/count_free_variables.h"
+#include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -72,12 +66,19 @@ namespace bp = boost::process;
 namespace mcrl2::pbes_system
 {
 
+enum class var_choice_strategy
+{
+  lhs,   // variable order of the left-hand side of the equation
+  rhs,     // variable order of the right-hand side of the equation
+  count    // free variable that occurs most often (excluding data expressions in PVI)
+};
+
 struct pbescegps_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   bool init_control_flow = false;
   bool solve_symbolic = false;
-  std::string var_choice = "first";
+  var_choice_strategy var_choice = var_choice_strategy::lhs;
   std::string solve_symbolic_args = "";
 };
 
@@ -522,15 +523,30 @@ public:
     return best_var;
   }
 
-  std::optional<data::variable> choose_variable_by_first_occurrence(const propositional_variable& bnd_var,
+  std::optional<data::variable> choose_variable_by_lhs_order(const propositional_variable& bnd_var,
     const std::set<data::variable>& essential_vars)
   {
-    for (const auto& param: bnd_var.parameters())
+    for (const data::variable& param: bnd_var.parameters())
     {
-      data::variable var = atermpp::down_cast<data::variable>(param);
-      if (essential_vars.contains(var))
+      if (essential_vars.contains(param))
       {
-        return var;
+        return param;
+      }
+    }
+    return std::nullopt;
+  }
+
+  std::optional<data::variable> choose_variable_by_rhs_order(const pbes_expression& formula,
+    const std::set<data::variable>& essential_vars)
+  {
+    detail::find_free_variables_traverser f(data::variable_list(), false);
+    f.apply(formula);
+      std::set<data::variable> vars = f.result;
+    for (auto it = vars.rbegin(); it != vars.rend(); it++)
+    {
+      if (essential_vars.contains(*it))
+      {
+        return *it;
       }
     }
     return std::nullopt;
@@ -565,22 +581,24 @@ public:
         mCRL2log(log::debug) << "Essential variables: " << eq_name << ": " << essential_vars.size() << " ("
                              << core::detail::print_list(essential_vars) << ")" << std::endl;
 
-        std::optional<data::variable> selected_var;
+         std::optional<data::variable> selected_var;
 
-        if (options.var_choice == "count")
-        {
-          selected_var = choose_variable_by_count(eq_name, eq_formula, essential_vars);
-        }
-        else if (options.var_choice == "first")
-        {
-          selected_var = choose_variable_by_first_occurrence(bnd_var, essential_vars);
-        }
-        else
-        {
-          mCRL2log(log::warning) << "Unknown var-choice option '" << options.var_choice << "'; using 'first'."
-                                 << std::endl;
-          selected_var = choose_variable_by_first_occurrence(bnd_var, essential_vars);
-        }
+         if (options.var_choice == var_choice_strategy::count)
+         {
+           selected_var = choose_variable_by_count(eq_name, eq_formula, essential_vars);
+         }
+         else if (options.var_choice == var_choice_strategy::rhs)
+         {
+           selected_var = choose_variable_by_rhs_order(eq_formula, essential_vars);
+         }
+         else if (options.var_choice == var_choice_strategy::lhs)
+         {
+           selected_var = choose_variable_by_lhs_order(bnd_var, essential_vars);
+         }
+         else
+         {
+           throw mcrl2::runtime_error("Unknown var-choice option; this should not happen.");
+         }
 
         if (selected_var)
         {
