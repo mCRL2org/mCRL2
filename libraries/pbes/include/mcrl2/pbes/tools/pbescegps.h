@@ -15,6 +15,7 @@
 #ifndef MCRL2_PBES_TOOLS_PBESCEGPS_H
 #define MCRL2_PBES_TOOLS_PBESCEGPS_H
 
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
@@ -68,9 +69,9 @@ namespace mcrl2::pbes_system
 
 enum class var_choice_strategy
 {
-  lhs,   // variable order of the left-hand side of the equation
-  rhs,     // variable order of the right-hand side of the equation
-  count    // free variable that occurs most often (excluding data expressions in PVI)
+  lhs, // variable order of the left-hand side of the equation
+  rhs, // variable order of the right-hand side of the equation
+  count // free variable that occurs most often (excluding data expressions in PVI)
 };
 
 struct pbescegps_options
@@ -86,6 +87,20 @@ struct abstract_param_state
 {
   std::map<core::identifier_string, std::set<data::variable>> W;
   std::map<core::identifier_string, std::set<std::size_t>> I;
+
+  // Remove a variable from W for a specific equation and update indices
+  void remove_abstracted_variable(const pbes& p, const core::identifier_string& eq_name, const std::size_t& i)
+  {
+    I[eq_name].erase(i);
+    for (const auto& eq: p.equations())
+    {
+      if (eq.variable().name() == eq_name)
+      {
+        W[eq_name].erase(atermpp::down_cast<data::variable>(eq.variable().parameters()[i]));
+        break;
+      }
+    }
+  }
 
   // Remove a variable from W for a specific equation and update indices
   void remove_abstracted_variable(const pbes& p, const core::identifier_string& eq_name, const data::variable& var)
@@ -361,6 +376,9 @@ public:
       return;
     }
 
+    mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
+    mcrl2::log::logger::set_reporting_level(mcrl2::log::info);
+
     data::rewriter datar(p.data(), options.rewrite_strategy);
     detail::stategraph_pbes stategraph(p, datar);
     pbesstategraph_options opts;
@@ -379,6 +397,7 @@ public:
 
     // Get the GCFP vector for each equation
     const auto& gcfp_map = algo.get_GCFP();
+    mcrl2::log::logger::set_reporting_level(saved_level);
 
     for (const auto& [eq_name, cfp_vector]: gcfp_map)
     {
@@ -395,7 +414,7 @@ public:
           {
             if (cfp_vector[i]) // If IS a CFP (remove from non-CFP set)
             {
-              state.remove_abstracted_variable(p, eq_name, atermpp::down_cast<data::variable>(params[i]));
+              state.remove_abstracted_variable(p, eq_name, i);
             }
           }
           break;
@@ -498,7 +517,7 @@ public:
     if (cache_it == m_var_count_cache.end())
     {
       // Compute and cache the results
-      mCRL2log(log::verbose) << "ache miss for " << eq_name << std::endl;
+      mCRL2log(log::debug) << "Cache miss for " << eq_name << std::endl;
       auto var_counts = detail::count_free_variable_occurrences(eq_formula, false);
       m_var_count_cache[eq_name] = var_counts;
       cache_it = m_var_count_cache.find(eq_name);
@@ -509,9 +528,9 @@ public:
     std::optional<data::variable> best_var;
     for (const data::variable& var: essential_vars)
     {
-      mCRL2log(log::debug) << "  - " << var.name() << " -> " << var_counts.at(var) << std::endl;
       if (var_counts.find(var) != var_counts.end())
       {
+        mCRL2log(log::debug) << "  - " << var.name() << " -> " << var_counts.at(var) << std::endl;
         std::size_t count = var_counts.at(var);
         if (count > best_count)
         {
@@ -541,7 +560,7 @@ public:
   {
     detail::find_free_variables_traverser f(data::variable_list(), false);
     f.apply(formula);
-      std::set<data::variable> vars = f.result;
+    std::set<data::variable> vars = f.result;
     for (auto it = vars.rbegin(); it != vars.rend(); it++)
     {
       if (essential_vars.contains(*it))
@@ -581,24 +600,24 @@ public:
         mCRL2log(log::debug) << "Essential variables: " << eq_name << ": " << essential_vars.size() << " ("
                              << core::detail::print_list(essential_vars) << ")" << std::endl;
 
-         std::optional<data::variable> selected_var;
+        std::optional<data::variable> selected_var;
 
-         if (options.var_choice == var_choice_strategy::count)
-         {
-           selected_var = choose_variable_by_count(eq_name, eq_formula, essential_vars);
-         }
-         else if (options.var_choice == var_choice_strategy::rhs)
-         {
-           selected_var = choose_variable_by_rhs_order(eq_formula, essential_vars);
-         }
-         else if (options.var_choice == var_choice_strategy::lhs)
-         {
-           selected_var = choose_variable_by_lhs_order(bnd_var, essential_vars);
-         }
-         else
-         {
-           throw mcrl2::runtime_error("Unknown var-choice option; this should not happen.");
-         }
+        if (options.var_choice == var_choice_strategy::count)
+        {
+          selected_var = choose_variable_by_count(eq_name, eq_formula, essential_vars);
+        }
+        else if (options.var_choice == var_choice_strategy::rhs)
+        {
+          selected_var = choose_variable_by_rhs_order(eq_formula, essential_vars);
+        }
+        else if (options.var_choice == var_choice_strategy::lhs)
+        {
+          selected_var = choose_variable_by_lhs_order(bnd_var, essential_vars);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("Unknown var-choice option; this should not happen.");
+        }
 
         if (selected_var)
         {
