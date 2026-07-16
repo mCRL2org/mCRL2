@@ -47,8 +47,8 @@ struct symbolic_reachability_options
   bool no_relprod = false;
   bool info = false;
   bool replace_dont_care = false;
-  std::string summand_groups;
-  std::string variable_order;
+  std::string summand_groups = "none";
+  std::string variable_order = "none";
   std::string dot_file;
 };
 

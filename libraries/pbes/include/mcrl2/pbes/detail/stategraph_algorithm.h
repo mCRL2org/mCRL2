@@ -49,6 +49,9 @@ class stategraph_algorithm
       }
     }
 
+    // Getter for GCFP
+    const std::map<core::identifier_string, std::vector<bool>>& get_GCFP() const { return m_is_GCFP; }
+
   protected:
     // the pbes that is considered
     stategraph_pbes m_pbes;

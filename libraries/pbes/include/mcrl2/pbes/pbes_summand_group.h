@@ -16,6 +16,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/symbolic/summand_group.h"
+#include "mcrl2/utilities/logger.h"
 
 #include <functional>
 #include <set>
@@ -130,6 +131,13 @@ struct pbes_summand_group: public symbolic::summand_group
   )
     : symbolic::summand_group(process_parameters, read_write_pattern, false)
   {
+    mCRL2log(log::debug) << "pbes_summand_group constructor called" << std::endl;
+    mCRL2log(log::debug) << "Number of equations: " << pbesspec.equations().size() << std::endl;
+    mCRL2log(log::debug) << "Process parameters size: " << process_parameters.size() << std::endl;
+    mCRL2log(log::debug) << "Summand group indices size: " << summand_group_indices.size() << std::endl;
+    mCRL2log(log::debug) << "Read write patterns size: " << read_write_patterns.size() << std::endl;
+    mCRL2log(log::debug) << "Variable order size: " << variable_order.size() << std::endl;
+
     using symbolic::project;
     using utilities::detail::as_vector;
     using utilities::detail::as_set;
@@ -145,30 +153,52 @@ struct pbes_summand_group: public symbolic::summand_group
     {
       used.insert(2*j + 1);
     }
+    mCRL2log(log::debug) << "Used size (read/write indices): " << used.size() << std::endl;
 
     const auto& equations = pbesspec.equations();
+    mCRL2log(log::debug) << "Starting equation iteration, total equations: " << equations.size() << std::endl;
     std::size_t k = 0;
     for (const auto& equation : equations)
     {
+      mCRL2log(log::debug) << "Processing equation " << k << " with " << equation.summands().size() << " summands" << std::endl;
       const core::identifier_string& X_i = equation.variable().name();
       const auto& equation_summands = equation.summands();
       for (std::size_t j = 0; j < equation_summands.size(); j++, k++)
       {
         if (contains(summand_group_indices, k))
         {
+          mCRL2log(log::debug) << "Found summand " << k << " in group" << std::endl;
           std::vector<int> copy;
           for (std::size_t q: used)
           {
+            if (q >= read_write_patterns[k].size())
+            {
+              mCRL2log(log::error) << "Index out of bounds: q=" << q << " >= size=" << read_write_patterns[k].size() << std::endl;
+              continue;
+            }
             bool b = read_write_patterns[k][q];
             copy.push_back(b ? 0 : 1);
           }
+          mCRL2log(log::debug) << "Copy vector created, size: " << copy.size() << std::endl;
+          
           const pbes_system::srf_summand& smd = equation_summands[j];
+          mCRL2log(log::debug) << "Retrieved summand from equation" << std::endl;
+          
           auto next_state = make_state(smd.variable(), propvar_map);
+          mCRL2log(log::debug) << "Created next_state, size: " << next_state.size() << std::endl;
+          
           next_state = symbolic::permute_copy(next_state, variable_order);
-          summands.emplace_back(data::and_(data::equal_to(process_parameters.front(), propvar_map.at(X_i)), smd.condition()), smd.parameters(), project(as_vector(next_state), write), copy);
+          mCRL2log(log::debug) << "Permuted next_state, size: " << next_state.size() << std::endl;
+          
+          auto projected = project(as_vector(next_state), write);
+          mCRL2log(log::debug) << "Projected state, size: " << as_vector(next_state).size() << std::endl;
+          
+          summands.emplace_back(data::and_(data::equal_to(process_parameters.front(), propvar_map.at(X_i)), smd.condition()), smd.parameters(), projected, copy);
+          mCRL2log(log::debug) << "Emplace_back completed for summand " << k << std::endl;
         }
       }
     }
+    mCRL2log(log::debug) << "pbes_summand_group constructor completed successfully, total summands: " << summands.size() << std::endl;
   }
 };
 

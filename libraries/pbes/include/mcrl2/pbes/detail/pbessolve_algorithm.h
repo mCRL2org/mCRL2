@@ -154,6 +154,7 @@ class pbessolve_tool
           's');
       desc.add_hidden_option("long-strategy",
           utilities::make_enum_argument<partial_solve_strategy>("STRATEGY")
+              .add_value_desc(partial_solve_strategy::none, "Really do not apply any optimizations.")
               .add_value_desc(partial_solve_strategy::no_optimisation, "Do not apply any optimizations.")
               .add_value_desc(partial_solve_strategy::remove_self_loops, "Remove self loops.")
               .add_value_desc(partial_solve_strategy::propagate_solved_equations_using_substitution,

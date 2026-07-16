@@ -120,7 +120,7 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
 };
 
 inline
-std::set<data::variable> find_free_variables(const pbes_expression& x, const data::variable_list& bound_variables = data::variable_list(), bool search_propositional_variables = true)
+std::set<data::variable> find_free_variables(const pbes_expression& x, const data::variable_list& bound_variables, bool search_propositional_variables = true)
 {
   find_free_variables_traverser f(bound_variables, search_propositional_variables);
   f.apply(x);
