@@ -85,6 +85,7 @@ class probabilistic_arbitrary_precision_fraction
        m_denominator(denominator)
     {
       assert(enumerator<= denominator);
+      remove_common_factors(m_enumerator, m_denominator);
     }
 
     /* \brief A constructor, where the enumerator and denominator are constructed
@@ -95,6 +96,7 @@ class probabilistic_arbitrary_precision_fraction
        m_denominator(utilities::big_natural_number(denominator))
     {
       assert(m_enumerator<= m_denominator);
+      remove_common_factors(m_enumerator, m_denominator);
     }
 
     /* \brief Return the enumerator of the fraction.
@@ -115,11 +117,7 @@ class probabilistic_arbitrary_precision_fraction
     */
     bool operator==(const probabilistic_arbitrary_precision_fraction& other) const
     {
-      buffer1().clear();
-      this->m_enumerator.multiply(other.m_denominator, buffer1(), buffer3());
-      buffer2().clear();
-      other.m_enumerator.multiply(this->m_denominator, buffer2(), buffer3());
-      return buffer1()==buffer2();
+      return m_enumerator==other.m_enumerator && m_denominator==other.m_denominator;
     }
 
     /* \brief Standard comparison operator.
@@ -173,7 +171,6 @@ class probabilistic_arbitrary_precision_fraction
       buffer1().add(buffer2());
       buffer2().clear();
       m_denominator.multiply(other.m_denominator,buffer2(),buffer3());
-      remove_common_factors(buffer1(),buffer2());
       return probabilistic_arbitrary_precision_fraction(buffer1(),buffer2()); 
     }
 
@@ -189,7 +186,6 @@ class probabilistic_arbitrary_precision_fraction
       buffer1().subtract(buffer2());
       buffer2().clear();
       m_denominator.multiply(other.m_denominator,buffer2(),buffer3());
-      remove_common_factors(buffer1(),buffer2());
       return probabilistic_arbitrary_precision_fraction(buffer1(),buffer2()); 
     }
 
@@ -202,7 +198,6 @@ class probabilistic_arbitrary_precision_fraction
       m_enumerator.multiply(other.m_enumerator, buffer1(), buffer3());
       buffer2().clear();
       m_denominator.multiply(other.m_denominator,buffer2(),buffer3());
-      remove_common_factors(buffer1(),buffer2());
       return probabilistic_arbitrary_precision_fraction(buffer1(),buffer2()); 
     }
 
@@ -215,7 +210,6 @@ class probabilistic_arbitrary_precision_fraction
       m_enumerator.multiply(other.m_denominator, buffer1(), buffer3());
       buffer2().clear();
       m_denominator.multiply(other.m_enumerator,buffer2(),buffer3());
-      remove_common_factors(buffer1(),buffer2());
       return probabilistic_arbitrary_precision_fraction(buffer1(),buffer2()); 
     }
 
