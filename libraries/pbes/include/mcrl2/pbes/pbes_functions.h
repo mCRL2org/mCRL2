@@ -91,6 +91,16 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
       : allow_counter_example_variables(allow_counter_example_variables)
   {}
 
+  void apply(const pbes_expression& x)
+  {
+    // Abort traversal if result is already false;
+    if (!result)
+    {
+      return;
+    }
+    super::apply(x);
+  }
+
   void enter(const propositional_variable_instantiation& x)
   {
     if (!allow_counter_example_variables || !detail::is_counter_example_instantiation(x))
@@ -113,6 +123,95 @@ bool is_simple_expression(const T& x, bool allow_counter_example_propvar)
   f.apply(x);
   return f.result;
 }
+
+/// \cond INTERNAL_DOCS
+/// \brief Visitor for checking if a pbes object is a simple pbes expression with a cache.
+struct is_simple_expression_traverser_with_cache:
+            public pbes_expression_traverser<is_simple_expression_traverser_with_cache>
+{
+  using super = pbes_expression_traverser<is_simple_expression_traverser_with_cache>;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  bool result = true;
+  bool m_allow_counter_example_variables;
+
+  std::map<pbes_expression, bool>& m_cache_true;
+  std::map<pbes_expression, bool>& m_cache_false;
+
+  is_simple_expression_traverser_with_cache(
+               bool allow_counter_example_variables,
+               std::map<pbes_expression, bool>& cache_true,
+               std::map<pbes_expression, bool>& cache_false)
+      : m_allow_counter_example_variables(allow_counter_example_variables),
+        m_cache_true(cache_true),
+        m_cache_false(cache_false)
+  {}
+
+  void apply(const pbes_expression& x)
+  {
+    // Abort traversal if result is already false;
+    if (!result)
+    {
+      return;
+    }
+
+    if (m_allow_counter_example_variables)
+    {
+      const std::map<pbes_expression, bool>::const_iterator i=m_cache_true.find(x);
+      if (i!=m_cache_true.end())
+      {
+        result=i->second;
+        return;
+      }
+      super::apply(x);
+      m_cache_true[x]=result;
+      return;
+    }
+    else
+    {
+      const std::map<pbes_expression, bool>::const_iterator i=m_cache_false.find(x);
+      if (i!=m_cache_false.end())
+      {
+        result=i->second;
+        return;
+      }
+      super::apply(x);
+      m_cache_false[x]=result;
+      return;
+    }
+  }
+
+  void enter(const propositional_variable_instantiation& x)
+  {
+    if (!m_allow_counter_example_variables || !detail::is_counter_example_instantiation(x))
+    {
+      result = false;
+    }
+  }
+};
+/// \endcond
+
+/// \brief Determines if an expression is a simple expression using a cache.
+/// An expression is simple if it is free of propositional variables.
+/// \param x a PBES object
+/// \param allow_counter_example_propvar If true, counter example propositional variables are seen as simple expressions.
+/// \param cache_true A cache in which it is stored that expressions are simple when allow_counter_example is true.
+/// \param cache_false A cache in which it is stored that expressions are simple when allow_counter_example is false.
+/// \return true if x is a simple expression.
+template <typename T>
+bool is_simple_expression_with_cache(
+             const T& x,
+             bool allow_counter_example_propvar,
+             std::map<pbes_expression, bool>& cache_true,
+             std::map<pbes_expression, bool>& cache_false)
+{
+  is_simple_expression_traverser_with_cache f(allow_counter_example_propvar,cache_true,cache_false);
+  f.apply(x);
+  return f.result;
+}
+
 
 /// \brief Test for a disjunction
 /// \param t A PBES expression
