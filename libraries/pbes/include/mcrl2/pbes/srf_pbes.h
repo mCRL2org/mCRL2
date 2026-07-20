@@ -640,12 +640,15 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
       }
     }
 
-    if (simple_clauses.empty())
+    /* if (simple_clauses.empty())
     {
-      // No simple clauses, so we can just apply the or_ operator.
+      // No simple clauses, so we can just apply the or_ operator.  
+      // WRONG. This can still be a conjunction, and now the split_and above 
+      // is applied again to the subterms, leading to a dramatic drop in performance.
+      // Was this Claude generated code?
       super::apply(x);
       return;
-    }
+    } */
 
     // condition used for strengthening guards of dependencies.
     pbes_expression condition = make_conjunction(simple_clauses.begin(), simple_clauses.end());
