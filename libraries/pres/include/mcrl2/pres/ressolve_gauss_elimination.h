@@ -1200,14 +1200,9 @@ class ressolve_by_gauss_elimination_algorithm
          m_input_pres.initial_state() = propositional_variable_instantiation(new_name, data::data_expression_list());
       }
 
-      atermpp::indexed_set<core::identifier_string> variable_names;
       pres_expression result;
       res_conjunctive_disjunctive_normal_form_builder conjunctive_normal_form_builder(true);
       res_conjunctive_disjunctive_normal_form_builder disjunctive_normal_form_builder(false);
-      for(pres_equation& e: res_equations)
-      {
-        variable_names.insert(e.variable().name());
-      }
 
       for(std::vector<pres_equation>::reverse_iterator equation_it=res_equations.rbegin(); equation_it!=res_equations.rend(); equation_it++)
       {

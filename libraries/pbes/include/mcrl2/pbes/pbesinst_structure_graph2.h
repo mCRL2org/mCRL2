@@ -419,8 +419,10 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       simple_structure_graph G(m_graph_builder.vertices());
 
       atermpp::deque<pbes_expression> todo1{init};
+      // The index of the indexed_set below does not appear to be used. 
+      // Maybe the use of an atermpp::unordered_set is a better choice.
       atermpp::indexed_set<pbes_expression> done1;
-      done1.insert(init);
+      std::ignore = done1.insert(init);
       
       atermpp::unordered_set<propositional_variable_instantiation> new_todo;
       pbes_expression X;
@@ -451,7 +453,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
               if (!contains(done1, Y))
               {
                 todo1.emplace_back(Y);
-                done1.insert(Y);
+                std::ignore = done1.insert(Y);
               }
             }
           }

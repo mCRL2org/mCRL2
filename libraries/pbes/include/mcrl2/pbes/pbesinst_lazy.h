@@ -147,6 +147,8 @@ class pbesinst_lazy_algorithm
     pbesinst_lazy_todo todo;
 
     /// \brief The propositional variable instantiations that have been discovered (not necessarily handled).
+    /// \detail It appears that the index is not used. The indexed set can probably be replaced with an
+    ///         atermpp::unordered_set.
     atermpp::indexed_set<propositional_variable_instantiation, true> discovered;
 
     /// \brief The initial value (after rewriting).
@@ -391,7 +393,7 @@ class pbesinst_lazy_algorithm
             todo.insert(occ.begin(), occ.end(), discovered, thread_index);
             for (const propositional_variable_instantiation& i : occ)
             {
-              discovered.insert(i, thread_index);
+              std::ignore = discovered.insert(i, thread_index);
             }
             on_discovered_elements(occ);
 
@@ -439,7 +441,7 @@ class pbesinst_lazy_algorithm
 
       init = atermpp::down_cast<propositional_variable_instantiation>(m_global_R(m_pbes.initial_state(), sigma));
       todo.insert(init);
-      discovered.insert(init, initialisation_thread_index);
+      std::ignore = discovered.insert(init, initialisation_thread_index);
 
       if (number_of_threads>1)
       {
