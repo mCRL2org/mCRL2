@@ -940,12 +940,33 @@ pbes_expression make_exists_(const data::variable_list& l, const pbes_expression
 }
 
 /// \brief Make a negation
+/// \param result Placeholder for the resulting PBES expression <tt>!p</tt>. This is more efficient than delivering it as the result of a function. 
 /// \param p A PBES expression
-/// \return The value <tt>!p</tt>
 inline
 void optimized_not(pbes_expression& result, const pbes_expression& p)
 {
   data::optimized_not(result, p);
+}
+
+/// \brief Make a negation
+/// \param p A PBES expression
+/// \return The value <tt>!p</tt>
+inline
+pbes_expression optimized_not(const pbes_expression& p)
+{
+  pbes_expression result;
+  data::optimized_not(result, p);
+  return result;
+}
+
+/// \brief Make a conjunction
+/// \param result Placeholder for the resulting PBES expression <tt>p && q</tt>. This is more efficient than delivering it as the result of a function. 
+/// \param p A PBES expression
+/// \param q A PBES expression
+inline
+void optimized_and(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
+{
+  data::optimized_and(result, p, q);
 }
 
 /// \brief Make a conjunction
@@ -953,9 +974,21 @@ void optimized_not(pbes_expression& result, const pbes_expression& p)
 /// \param q A PBES expression
 /// \return The value <tt>p && q</tt>
 inline
-void optimized_and(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
+pbes_expression optimized_and(const pbes_expression& p, const pbes_expression& q)
 {
+  pbes_expression result;
   data::optimized_and(result, p, q);
+  return result;
+}
+
+/// \brief Make a disjunction
+/// \param result Placeholder for the resulting PBES expression <tt>p || q</tt>. This is more efficient than delivering it as the result of a function. 
+/// \param p A PBES expression
+/// \param q A PBES expression
+inline
+void optimized_or(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
+{
+  data::optimized_or(result, p, q);
 }
 
 /// \brief Make a disjunction
@@ -963,9 +996,21 @@ void optimized_and(pbes_expression& result, const pbes_expression& p, const pbes
 /// \param q A PBES expression
 /// \return The value <tt>p || q</tt>
 inline
-void optimized_or(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
+pbes_expression optimized_or(const pbes_expression& p, const pbes_expression& q)
 {
+  pbes_expression result;
   data::optimized_or(result, p, q);
+  return result;
+}
+
+/// \brief Make an implication
+/// \param result Placeholder for the resulting PBES expression <tt>p => q</tt>. This is more efficient than delivering it as the result of a function. 
+/// \param p A PBES expression
+/// \param q A PBES expression
+inline
+void optimized_imp(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
+{
+  data::optimized_imp(result, p, q);
 }
 
 /// \brief Make an implication
@@ -973,9 +1018,11 @@ void optimized_or(pbes_expression& result, const pbes_expression& p, const pbes_
 /// \param q A PBES expression
 /// \return The value <tt>p => q</tt>
 inline
-void optimized_imp(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
+pbes_expression optimized_imp(const pbes_expression& p, const pbes_expression& q)
 {
+  pbes_expression result;
   data::optimized_imp(result, p, q);
+  return result;
 }
 
 /// \brief Make a universal quantification

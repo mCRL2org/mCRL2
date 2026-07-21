@@ -272,10 +272,11 @@ protected:
     super::add_options(desc);
     desc.add_option("lace-dqsize",
       utilities::make_optional_argument("NUM", "4194304"),
-      "set length of Lace task queue (default 1024*1024*4)");
+      "set the length of Lace task queue (default 1024*1024*4)");
     desc.add_option("lace-stacksize",
       utilities::make_optional_argument("NUM", "0"),
-      "set size of program stack in kilobytes (0=default stack size)");
+      "set the size of Sylvan program stack in gigabytes (0=default stack size). "
+      "This is the main stack for all calculations. If it is too small a bus error occurs. ");
     desc.add_option("memory-limit",
       utilities::make_optional_argument("NUM", "3"),
       "Sylvan memory limit in gigabytes (default 3)",
@@ -499,7 +500,7 @@ public:
 
   bool run() override
   {
-    lace_set_stacksize(lace_stacksize);
+    lace_set_stacksize(lace_stacksize*1024*1024*1024);
     lace_start(number_of_threads(), lace_dqsize);
     sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, static_cast<int>(std::log2(table_ratio)), static_cast<int>(std::log2(initial_ratio)));
     sylvan::sylvan_init_package();

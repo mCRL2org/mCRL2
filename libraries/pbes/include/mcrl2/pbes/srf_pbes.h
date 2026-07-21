@@ -152,7 +152,7 @@ public:
   {
     if constexpr (allow_ce)
     {
-      m_condition = pbes_system::and_(f, m_condition);
+      m_condition=pbes_system::optimized_and(f, m_condition);
     }
     else
     {
@@ -389,7 +389,7 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
     std::set<pbes_expression> clauses = split_or(x, false);
 
     std::vector<pbes_expression> simple_clauses;
-    for (const auto& clause : clauses)
+    for (const pbes_expression& clause: clauses)
     {
       if (m_merge_simple_expressions && is_simple_expression_cached(clause, false))
       {
@@ -400,15 +400,19 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
 
     if (simple_clauses.empty())
     {
-      // No simple clauses, so we can just apply the or_ operator.
-      super::apply(x);
+      // No simple clauses, so we have a disjunction of non-simple ors.
+      for (const pbes_expression& clause : clauses)
+      {
+        mCRL2log(log::trace) << "Clause " << clause << "\n";
+        apply(clause);
+      }
       return;
     }
 
     pbes_expression condition = make_disjunction(simple_clauses.begin(), simple_clauses.end());
     mCRL2log(log::trace) << "Simple condition " << condition << "\n";
 
-    for (const auto& clause : clauses)
+    for (const pbes_expression& clause: clauses)
     {
       if (!m_merge_simple_expressions || !is_simple_expression_cached(clause, false))
       {
@@ -640,15 +644,16 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
       }
     }
 
-    /* if (simple_clauses.empty())
+    if (simple_clauses.empty())
     {
-      // No simple clauses, so we can just apply the or_ operator.  
-      // WRONG. This can still be a conjunction, and now the split_and above 
-      // is applied again to the subterms, leading to a dramatic drop in performance.
-      // Was this Claude generated code?
-      super::apply(x);
+      // No simple clauses, so we have a conjunction of non-simple ands.
+      for (const pbes_expression& clause : clauses)
+      {
+        mCRL2log(log::trace) << "Clause " << clause << "\n";
+        apply(clause);
+      }
       return;
-    } */
+    }
 
     // condition used for strengthening guards of dependencies.
     pbes_expression condition = make_conjunction(simple_clauses.begin(), simple_clauses.end());
