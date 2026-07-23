@@ -68,7 +68,7 @@ class process_identifier: public atermpp::aterm
 };
 
 /// \\brief Make_process_identifier constructs a new term into a given address.
-/// \\ \param t The reference into which the new process_identifier is constructed. 
+/// \\ \param t The reference into which the new process_identifier is constructed.
 template <class... ARGUMENTS>
 inline void make_process_identifier(atermpp::aterm& t, const ARGUMENTS&... args)
 {

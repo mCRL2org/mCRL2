@@ -65,7 +65,7 @@ class stochastic_distribution: public atermpp::aterm
 };
 
 /// \\brief Make_stochastic_distribution constructs a new term into a given address.
-/// \\ \param t The reference into which the new stochastic_distribution is constructed. 
+/// \\ \param t The reference into which the new stochastic_distribution is constructed.
 template <class... ARGUMENTS>
 inline void make_stochastic_distribution(atermpp::aterm& t, const ARGUMENTS&... args)
 {

@@ -85,18 +85,6 @@ class multi_action: public atermpp::aterm
    //--- end user section multi_action ---//
 };
 
-/// \\brief Make_multi_action constructs a new term into a given address.
-/// \\ \param t The reference into which the new multi_action is constructed. 
-template <class... ARGUMENTS>
-inline void make_multi_action(atermpp::aterm& t, const ARGUMENTS&... args)
-{
-  atermpp::make_term_appl(t, core::detail::function_symbol_TimedMultAct(), args...);
-  // Re-assign through the sorting constructor to maintain the sorted-storage invariant
-  // when the action list is rebuilt by a builder traversal (make_term_appl bypasses it).
-  t = multi_action(atermpp::down_cast<multi_action>(t).actions(),
-                   atermpp::down_cast<multi_action>(t).time());
-}
-
 /// \\brief list of multi_actions
 using multi_action_list = atermpp::term_list<multi_action>;
 
@@ -132,6 +120,18 @@ inline void swap(multi_action& t1, multi_action& t2) noexcept
 }
 //--- end generated class multi_action ---//
 
+
+/// \\brief Make_multi_action constructs a new term into a given address.
+/// \\ \param t The reference into which the new multi_action is constructed. 
+template <class... ARGUMENTS>
+inline void make_multi_action(atermpp::aterm& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_TimedMultAct(), args...);
+  // Re-assign through the sorting constructor to maintain the sorted-storage invariant
+  // when the action list is rebuilt by a builder traversal (make_term_appl bypasses it).
+  t = multi_action(atermpp::down_cast<multi_action>(t).actions(),
+                   atermpp::down_cast<multi_action>(t).time());
+}
 
 // template function overloads
 lps::multi_action normalize_sorts(const multi_action& x, const data::sort_specification& sortspec);

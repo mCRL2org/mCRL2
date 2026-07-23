@@ -57,16 +57,6 @@ class action_name_multiset: public atermpp::aterm
 //--- end user section action_name_multiset ---//
 };
 
-/// \\brief Make_action_name_multiset constructs a new term into a given address.
-/// \\ \param t The reference into which the new action_name_multiset is constructed. 
-template <class... ARGUMENTS>
-inline void make_action_name_multiset(atermpp::aterm& t, const ARGUMENTS&... args)
-{
-  atermpp::make_term_appl(t, core::detail::function_symbol_MultActName(), args...);
-  // Re-assign through the sorting constructor to maintain the sorted-storage invariant.
-  t = action_name_multiset(atermpp::down_cast<action_name_multiset>(t).names());
-}
-
 /// \\brief list of action_name_multisets
 using action_name_multiset_list = atermpp::term_list<action_name_multiset>;
 
@@ -101,6 +91,16 @@ inline void swap(action_name_multiset& t1, action_name_multiset& t2) noexcept
   t1.swap(t2);
 }
 //--- end generated class action_name_multiset ---//
+
+/// \\brief Make_action_name_multiset constructs a new term into a given address.
+/// \\ \param t The reference into which the new action_name_multiset is constructed. 
+template <class... ARGUMENTS>
+inline void make_action_name_multiset(atermpp::aterm& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_MultActName(), args...);
+  // Re-assign through the sorting constructor to maintain the sorted-storage invariant.
+  t = action_name_multiset(atermpp::down_cast<action_name_multiset>(t).names());
+}
 
 } // namespace mcrl2::process
 

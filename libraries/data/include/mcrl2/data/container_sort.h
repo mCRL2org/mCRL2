@@ -59,7 +59,7 @@ class container_sort: public sort_expression
 };
 
 /// \\brief Make_container_sort constructs a new term into a given address.
-/// \\ \param t The reference into which the new container_sort is constructed. 
+/// \\ \param t The reference into which the new container_sort is constructed.
 template <class... ARGUMENTS>
 inline void make_container_sort(atermpp::aterm& t, const ARGUMENTS&... args)
 {

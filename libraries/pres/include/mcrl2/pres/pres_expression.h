@@ -178,7 +178,7 @@ class propositional_variable_instantiation: public pres_expression
 };
 
 /// \\brief Make_propositional_variable_instantiation constructs a new term into a given address.
-/// \\ \param t The reference into which the new propositional_variable_instantiation is constructed. 
+/// \\ \param t The reference into which the new propositional_variable_instantiation is constructed.
 template <class... ARGUMENTS>
 inline void make_propositional_variable_instantiation(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -255,7 +255,7 @@ class minus: public pres_expression
 };
 
 /// \\brief Make_minus constructs a new term into a given address.
-/// \\ \param t The reference into which the new minus is constructed. 
+/// \\ \param t The reference into which the new minus is constructed.
 template <class... ARGUMENTS>
 inline void make_minus(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -331,7 +331,7 @@ class and_: public pres_expression
 };
 
 /// \\brief Make_and_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new and_ is constructed. 
+/// \\ \param t The reference into which the new and_ is constructed.
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -407,7 +407,7 @@ class or_: public pres_expression
 };
 
 /// \\brief Make_or_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new or_ is constructed. 
+/// \\ \param t The reference into which the new or_ is constructed.
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -483,7 +483,7 @@ class imp: public pres_expression
 };
 
 /// \\brief Make_imp constructs a new term into a given address.
-/// \\ \param t The reference into which the new imp is constructed. 
+/// \\ \param t The reference into which the new imp is constructed.
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -559,7 +559,7 @@ class plus: public pres_expression
 };
 
 /// \\brief Make_plus constructs a new term into a given address.
-/// \\ \param t The reference into which the new plus is constructed. 
+/// \\ \param t The reference into which the new plus is constructed.
 template <class... ARGUMENTS>
 inline void make_plus(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -635,7 +635,7 @@ class const_multiply: public pres_expression
 };
 
 /// \\brief Make_const_multiply constructs a new term into a given address.
-/// \\ \param t The reference into which the new const_multiply is constructed. 
+/// \\ \param t The reference into which the new const_multiply is constructed.
 template <class... ARGUMENTS>
 inline void make_const_multiply(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -711,7 +711,7 @@ class const_multiply_alt: public pres_expression
 };
 
 /// \\brief Make_const_multiply_alt constructs a new term into a given address.
-/// \\ \param t The reference into which the new const_multiply_alt is constructed. 
+/// \\ \param t The reference into which the new const_multiply_alt is constructed.
 template <class... ARGUMENTS>
 inline void make_const_multiply_alt(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -787,7 +787,7 @@ class infimum: public pres_expression
 };
 
 /// \\brief Make_infimum constructs a new term into a given address.
-/// \\ \param t The reference into which the new infimum is constructed. 
+/// \\ \param t The reference into which the new infimum is constructed.
 template <class... ARGUMENTS>
 inline void make_infimum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -863,7 +863,7 @@ class supremum: public pres_expression
 };
 
 /// \\brief Make_supremum constructs a new term into a given address.
-/// \\ \param t The reference into which the new supremum is constructed. 
+/// \\ \param t The reference into which the new supremum is constructed.
 template <class... ARGUMENTS>
 inline void make_supremum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -939,7 +939,7 @@ class sum: public pres_expression
 };
 
 /// \\brief Make_sum constructs a new term into a given address.
-/// \\ \param t The reference into which the new sum is constructed. 
+/// \\ \param t The reference into which the new sum is constructed.
 template <class... ARGUMENTS>
 inline void make_sum(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1010,7 +1010,7 @@ class eqinf: public pres_expression
 };
 
 /// \\brief Make_eqinf constructs a new term into a given address.
-/// \\ \param t The reference into which the new eqinf is constructed. 
+/// \\ \param t The reference into which the new eqinf is constructed.
 template <class... ARGUMENTS>
 inline void make_eqinf(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1081,7 +1081,7 @@ class eqninf: public pres_expression
 };
 
 /// \\brief Make_eqninf constructs a new term into a given address.
-/// \\ \param t The reference into which the new eqninf is constructed. 
+/// \\ \param t The reference into which the new eqninf is constructed.
 template <class... ARGUMENTS>
 inline void make_eqninf(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1162,7 +1162,7 @@ class condsm: public pres_expression
 };
 
 /// \\brief Make_condsm constructs a new term into a given address.
-/// \\ \param t The reference into which the new condsm is constructed. 
+/// \\ \param t The reference into which the new condsm is constructed.
 template <class... ARGUMENTS>
 inline void make_condsm(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -1243,7 +1243,7 @@ class condeq: public pres_expression
 };
 
 /// \\brief Make_condeq constructs a new term into a given address.
-/// \\ \param t The reference into which the new condeq is constructed. 
+/// \\ \param t The reference into which the new condeq is constructed.
 template <class... ARGUMENTS>
 inline void make_condeq(atermpp::aterm& t, const ARGUMENTS&... args)
 {

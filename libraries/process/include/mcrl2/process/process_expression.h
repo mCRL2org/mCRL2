@@ -591,17 +591,6 @@ class block: public process_expression
 //--- end user section block ---//
 };
 
-/// \\brief Make_block constructs a new term into a given address.
-/// \\ \param t The reference into which the new block is constructed.
-template <class... ARGUMENTS>
-inline void make_block(atermpp::aterm& t, const ARGUMENTS&... args)
-{
-  atermpp::make_term_appl(t, core::detail::function_symbol_Block(), args...);
-  // Re-assign through the sorting constructor to maintain the sorted-storage invariant.
-  t = block(atermpp::down_cast<block>(t).block_set(),
-             atermpp::down_cast<block>(t).operand());
-}
-
 /// \\brief Test for a block expression
 /// \\param x A term
 /// \\return True if \\a x is a block expression
@@ -1785,6 +1774,17 @@ inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
   t1.swap(t2);
 }
 //--- end generated classes ---//
+
+/// \\brief Make_block constructs a new term into a given address.
+/// \\ \param t The reference into which the new block is constructed.
+template <class... ARGUMENTS>
+inline void make_block(atermpp::aterm& t, const ARGUMENTS&... args)
+{
+  atermpp::make_term_appl(t, core::detail::function_symbol_Block(), args...);
+  // Re-assign through the sorting constructor to maintain the sorted-storage invariant.
+  t = block(atermpp::down_cast<block>(t).block_set(),
+             atermpp::down_cast<block>(t).operand());
+}
 
 // template function overloads
 std::string pp(const process_expression_list& x, bool precedence_aware = true);

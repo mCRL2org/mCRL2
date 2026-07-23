@@ -60,7 +60,7 @@ class untyped_possible_sorts: public sort_expression
 };
 
 /// \\brief Make_untyped_possible_sorts constructs a new term into a given address.
-/// \\ \param t The reference into which the new untyped_possible_sorts is constructed. 
+/// \\ \param t The reference into which the new untyped_possible_sorts is constructed.
 template <class... ARGUMENTS>
 inline void make_untyped_possible_sorts(atermpp::aterm& t, const ARGUMENTS&... args)
 {

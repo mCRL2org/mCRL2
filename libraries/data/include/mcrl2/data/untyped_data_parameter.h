@@ -64,7 +64,7 @@ class untyped_data_parameter: public atermpp::aterm
 };
 
 /// \\brief Make_untyped_data_parameter constructs a new term into a given address.
-/// \\ \param t The reference into which the new untyped_data_parameter is constructed. 
+/// \\ \param t The reference into which the new untyped_data_parameter is constructed.
 template <class... ARGUMENTS>
 inline void make_untyped_data_parameter(atermpp::aterm& t, const ARGUMENTS&... args)
 {

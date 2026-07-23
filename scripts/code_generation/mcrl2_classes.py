@@ -17,6 +17,7 @@ import string
 # C = generate container typedefs (vector + list)
 # E = it is an expression derived class
 # I = generate is-function
+# K = manually generate make functions
 # M = the class is modifiable
 # O = generate constructor overloads
 # s = skip constructor generation
@@ -24,7 +25,7 @@ import string
 # U = generate user section
 # X = it is an expression super class
 # W = do not generate swap overload
-# N = term has an additional index as last argument  TODO: Constructors must still be adapted. 
+# N = term has an additional index as last argument  TODO: Constructors must still be adapted.
 # i = this class can be cast to an aterm_int.
 
 CORE_CLASSES = r'''
@@ -157,29 +158,29 @@ state_formula_specification(const data::data_specification& data, const process:
 
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
-deadlock(const data::data_expression& time)                                                                                                                                                                                                                   | CMS  | None              | A deadlock
-multi_action(const process::action_list& actions, const data::data_expression& time)                                                                                                                                             : public atermpp::aterm      | CIUs | TimedMultAct      | A timed multi-action
-deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                       | CMS  | None              | A deadlock summand
-action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                       | CMS  | None              | An action summand
-process_initializer(const data::data_expression_list& expressions)                                                                                                                                                               : public atermpp::aterm      | CIUS | LinearProcessInit | A process initializer
-linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                                 | MSW  | LinearProcess     | A linear process
-specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | MSW  | LinProcSpec       | A linear process specification
-stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)                                                                                                                         : public atermpp::aterm      | CIU  | Distribution | A stochastic distribution
+deadlock(const data::data_expression& time)                                                                                                                                                                                                                   | CMS   | None              | A deadlock
+multi_action(const process::action_list& actions, const data::data_expression& time)                                                                                                                                             : public atermpp::aterm      | CIUsK | TimedMultAct      | A timed multi-action
+deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& deadlock)                                                                                                                       | CMS   | None              | A deadlock summand
+action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments)                                                                       | CMS   | None              | An action summand
+process_initializer(const data::data_expression_list& expressions)                                                                                                                                                               : public atermpp::aterm      | CIUS  | LinearProcessInit | A process initializer
+linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const action_summand_vector& action_summands)                                                                                                 | MSW   | LinearProcess     | A linear process
+specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables,const linear_process& process, const process_initializer& initial_process)                              | MSW   | LinProcSpec       | A linear process specification
+stochastic_distribution(const data::variable_list& variables, const data::data_expression& distribution)                                                                                                                         : public atermpp::aterm      | CIU   | Distribution | A stochastic distribution
 stochastic_action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& multi_action, const data::assignment_list& assignments, const stochastic_distribution& distribution) : public lps::action_summand | CMS  | None              | A stochastic action summand
 stochastic_linear_process(const data::variable_list& process_parameters, const deadlock_summand_vector& deadlock_summands, const stochastic_action_summand_vector& action_summands) : public linear_process      | MSW  | LinearProcess     | A stochastic linear process
 stochastic_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const stochastic_linear_process& process, const process_initializer& initial_process) : public lps::specification       | MSW  | LinProcSpec       | A stochastic linear process specification
-stochastic_process_initializer(const data::data_expression_list& expressions, const stochastic_distribution& distribution)                                                                                                  : public lps::process_initializer | CIS  | LinearProcessInit | A stochastic process initializer
+stochastic_process_initializer(const data::data_expression_list& expressions, const stochastic_distribution& distribution)                                                                                                  : public lps::process_initializer | CIS   | LinearProcessInit | A stochastic process initializer
 '''
 
 PROCESS_CLASSES = r'''
-action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                       : public atermpp::aterm | CI   | ActId              | An action label
+action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                       : public atermpp::aterm | CI    | ActId              | An action label
 process_specification(const data::data_specification& data, const process::action_label_list& action_labels, const std::set<data::variable>& global_variables, const std::vector<process::process_equation>& equations, const process_expression& init)           | SMW | ProcSpec    | A process specification
-process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm | CIUs | ProcVarId          | A process identifier
-process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm | CI   | ProcEqn            | A process equation
-rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm | CI   | RenameExpr         | A rename expression
-communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm | CI   | CommExpr           | A communication expression
-action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm | CIUs | MultActName        | A multiset of action names
-untyped_multi_action(const data::untyped_data_parameter_list& actions)                                                                                                           : public atermpp::aterm | CI   | UntypedMultiAction | An untyped multi action or data application
+process_identifier(const core::identifier_string& name, const data::variable_list& variables)                                                                                    : public atermpp::aterm | CIUs  | ProcVarId          | A process identifier
+process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : public atermpp::aterm | CI    | ProcEqn            | A process equation
+rename_expression(core::identifier_string& source, core::identifier_string& target)                                                                                              : public atermpp::aterm | CI    | RenameExpr         | A rename expression
+communication_expression(const action_name_multiset& action_name, const core::identifier_string& name)                                                                           : public atermpp::aterm | CI    | CommExpr           | A communication expression
+action_name_multiset(const core::identifier_string_list& names)                                                                                                                  : public atermpp::aterm | CIUsK | MultActName        | A multiset of action names
+untyped_multi_action(const data::untyped_data_parameter_list& actions)                                                                                                           : public atermpp::aterm | CI    | UntypedMultiAction | An untyped multi action or data application
 '''
 
 PROCESS_EXPRESSION_CLASSES = r'''
@@ -190,7 +191,7 @@ process_instance_assignment(const process_identifier& identifier, const data::as
 delta()                                                                                                                                 : public process::process_expression | EI  | Delta                    | The value delta
 tau()                                                                                                                                   : public process::process_expression | EI  | Tau                      | The value tau
 sum(const data::variable_list& variables, const process_expression& operand)                                                            : public process::process_expression | EI  | Sum                      | The sum operator
-block(const core::identifier_string_list& block_set, const process_expression& operand)                                                 : public process::process_expression | EIUs | Block                    | The block operator
+block(const core::identifier_string_list& block_set, const process_expression& operand)                                                 : public process::process_expression | EIUsK| Block                    | The block operator
 hide(const core::identifier_string_list& hide_set, const process_expression& operand)                                                   : public process::process_expression | EI  | Hide                     | The hide operator
 rename(const rename_expression_list& rename_set, const process_expression& operand)                                                     : public process::process_expression | EI  | Rename                   | The rename operator
 comm(const communication_expression_list& comm_set, const process_expression& operand)                                                  : public process::process_expression | EI  | Comm                     | The communication operator
@@ -490,7 +491,7 @@ class Constructor:
         text = re.sub('<ATERM>'              , self.aterm              , text)
         text = re.sub('<PARAMETERS>'         , self.parameters         , text)
         text = re.sub('<TEMPLATE_PARAMETERS>', self.template_parameters, text)
-        if len(self.parameters)>0 and self.parameters.find(',')<0:     # There is only one parameter. Add explicit. 
+        if len(self.parameters)>0 and self.parameters.find(',')<0:     # There is only one parameter. Add explicit.
             text = re.sub('<EXPLICIT>','explicit ',text)
         else:
            text = re.sub('<EXPLICIT>','',text)
@@ -962,11 +963,11 @@ inline void swap(<CLASSNAME>& t1, <CLASSNAME>& t2) noexcept
         text = re.sub('<MOVE_SEMANTICS>'  , move_semantics, text)
         return text
 
-    # Generate the make_...  functions that allow the construction of a class member in situ. 
+    # Generate the make_...  functions that allow the construction of a class member in situ.
     def make_function(self):
         if 'i' in self.modifiers():
           text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
-/// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
+/// \\ \param t The reference into which the new <CLASSNAME> is constructed.
 template <class... ARGUMENTS>
 inline void make_<CLASSNAME>(atermpp::aterm& t, size_t n)
 {
@@ -974,7 +975,7 @@ inline void make_<CLASSNAME>(atermpp::aterm& t, size_t n)
 }'''
         else:
           text = r'''/// \\brief Make_<CLASSNAME> constructs a new term into a given address.
-/// \\ \param t The reference into which the new <CLASSNAME> is constructed. 
+/// \\ \param t The reference into which the new <CLASSNAME> is constructed.
 template <class... ARGUMENTS>
 inline void make_<CLASSNAME>(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -990,6 +991,7 @@ inline void make_<CLASSNAME>(atermpp::aterm& t, const ARGUMENTS&... args)
               text = re.sub('<HASINDEX>', '_with_index<<CLASSNAME>,std::pair<<PARAMETER_SORTS>>>', text)
         else:
           text = re.sub('<HASINDEX>', '', text)
+        # text = re.sub('<CLASSNAME>', self.classname().rstrip('_'), text)
         text = re.sub('<CLASSNAME>', self.classname(), text)
         text = re.sub('<PARAMETER_SORTS>',', '.join([re.sub('const ','',re.sub('&','',p.type())) for p in self.constructor.parameters()]), text)
         return text
@@ -1067,7 +1069,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
         # generate additional functions
         # if not ('s' in self.modifiers() or 'S' in self.modifiers()):
-        if not 'S' in self.modifiers() and self.constructor.parameters():
+        print('HIERO', self.modifiers(),'  ',self.classname())
+        if (not 'S' in self.modifiers() and self.constructor.parameters()) and not 'K' in self.modifiers():
             text = text + '\n\n' + self.make_function()
         if 'C' in self.modifiers():
             text = text + '\n\n' + self.container_typedefs()
@@ -1205,7 +1208,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
     def builder_function(self, all_classes, dependencies, modifiability_map):
         text = r'''<TEMPLATE>void <METHOD>(<RESULT><CONST><CLASS_NAME>& x)
-{ 
+{
   <ASSERT>static_cast<Derived&>(*this).enter(x);<VISIT_TEXT>
   static_cast<Derived&>(*this).leave(x);<RETURN_STATEMENT>
 }
@@ -1257,7 +1260,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     else:
                         local_type = re.sub('const ','',re.sub('&','',p.type()))
                         if classname == 'lps::stochastic_specification' and local_type == 'process_initializer':
-                            local_type = 'stochastic_process_initializer'   # Unclear why this needs to be done. Appears to be a bug. 
+                            local_type = 'stochastic_process_initializer'   # Unclear why this needs to be done. Appears to be a bug.
                         local_variable = 'result_%s' % p.name()
                         updates.append('%s %s;\nstatic_cast<Derived&>(*this).apply(%s, x.%s());\nx.%s() = %s;' \
                                          % (local_type, local_variable, local_variable, p.name(), p.name(), local_variable))
@@ -1309,7 +1312,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
    x.head(),
    x.begin(),
    x.end(),
-   [&](data_expression& result, const data::data_expression& t){ static_cast<Derived&>(*this).apply(result,t);} );''' 
+   [&](data_expression& result, const data::data_expression& t){ static_cast<Derived&>(*this).apply(result,t);} );'''
                     # special case for stochastic distribution
                     elif return_type == 'lps::stochastic_distribution':
                         visit_text = 'result = x; if (x.is_defined()) { %s(result, %s); }' % (make_class_function, ', '.join(updates))

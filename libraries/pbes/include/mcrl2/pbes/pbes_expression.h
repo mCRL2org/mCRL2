@@ -169,7 +169,7 @@ class propositional_variable_instantiation: public pbes_expression
 };
 
 /// \\brief Make_propositional_variable_instantiation constructs a new term into a given address.
-/// \\ \param t The reference into which the new propositional_variable_instantiation is constructed. 
+/// \\ \param t The reference into which the new propositional_variable_instantiation is constructed.
 template <class... ARGUMENTS>
 inline void make_propositional_variable_instantiation(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -246,7 +246,7 @@ class not_: public pbes_expression
 };
 
 /// \\brief Make_not_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new not_ is constructed. 
+/// \\ \param t The reference into which the new not_ is constructed.
 template <class... ARGUMENTS>
 inline void make_not_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -322,7 +322,7 @@ class and_: public pbes_expression
 };
 
 /// \\brief Make_and_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new and_ is constructed. 
+/// \\ \param t The reference into which the new and_ is constructed.
 template <class... ARGUMENTS>
 inline void make_and_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -398,7 +398,7 @@ class or_: public pbes_expression
 };
 
 /// \\brief Make_or_ constructs a new term into a given address.
-/// \\ \param t The reference into which the new or_ is constructed. 
+/// \\ \param t The reference into which the new or_ is constructed.
 template <class... ARGUMENTS>
 inline void make_or_(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -474,7 +474,7 @@ class imp: public pbes_expression
 };
 
 /// \\brief Make_imp constructs a new term into a given address.
-/// \\ \param t The reference into which the new imp is constructed. 
+/// \\ \param t The reference into which the new imp is constructed.
 template <class... ARGUMENTS>
 inline void make_imp(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -550,7 +550,7 @@ class forall: public pbes_expression
 };
 
 /// \\brief Make_forall constructs a new term into a given address.
-/// \\ \param t The reference into which the new forall is constructed. 
+/// \\ \param t The reference into which the new forall is constructed.
 template <class... ARGUMENTS>
 inline void make_forall(atermpp::aterm& t, const ARGUMENTS&... args)
 {
@@ -626,7 +626,7 @@ class exists: public pbes_expression
 };
 
 /// \\brief Make_exists constructs a new term into a given address.
-/// \\ \param t The reference into which the new exists is constructed. 
+/// \\ \param t The reference into which the new exists is constructed.
 template <class... ARGUMENTS>
 inline void make_exists(atermpp::aterm& t, const ARGUMENTS&... args)
 {
