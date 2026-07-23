@@ -120,31 +120,6 @@ data_expression optimized_forall(const variable_list& l, const data_expression& 
   return mcrl2::core::optimized_forall(l, p, remove_variables);
 }
 
-/// \brief Make a universal quantification and apply optimisations.
-/// \param result Will contains the optimized universal implication
-/// \param l A sequence of variables
-/// \param p A term
-/// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of universal quantification to the arguments.
-/// The optimization forall x:empty_set. phi = true is not applied.
-inline
-void make_optimized_forall_no_empty_domain(data_expression& result, const variable_list& l, const data_expression& p, bool remove_variables = false)
-{
-  mcrl2::core::make_optimized_forall_no_empty_domain(result, l, p, remove_variables);
-}
-
-/// \brief Make a universal quantification and apply optimisations.
-/// \param l A sequence of variables
-/// \param p A term
-/// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of universal quantification to the arguments.
-/// The optimization forall x:empty_set. phi = true is not applied.
-inline
-data_expression optimized_forall_no_empty_domain(data_expression& result, const variable_list& l, const data_expression& p, bool remove_variables = false)
-{
-  return mcrl2::core::optimized_forall_no_empty_domain(l, p, remove_variables);
-}
-
 /// \brief Make an existential quantification and apply optimisations.
 /// \param result Will contains the optimized existential implication.
 /// \param l A sequence of variables
@@ -166,30 +141,6 @@ inline
 data_expression optimized_exists(const variable_list& l, const data_expression& p, bool remove_variables = false)
 {
   return mcrl2::core::optimized_exists(l, p, remove_variables);
-}
-
-/// \brief Make an existential quantification and apply optimisations.
-/// \param result Will contains the optimized existential implication.
-/// \param l A sequence of variables
-/// \param p A term
-/// \param remove_variables If true, unused quantifier variables are removed
-/// The optimization exists x:empty_set. phi = false is not applied.
-inline
-void make_optimized_exists_no_empty_domain(data_expression& result, const variable_list& l, const data_expression& p, bool remove_variables = false)
-{
-  mcrl2::core::make_optimized_exists_no_empty_domain(result, l, p, remove_variables);
-}
-
-/// \brief Make an existential quantification and apply optimisations.
-/// \param l A sequence of variables
-/// \param p A term
-/// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of existential quantification to the arguments.
-/// The optimization exists x:empty_set. phi = false is not applied.
-inline
-data_expression optimized_exists_no_empty_domain(const variable_list& l, const data_expression& p, bool remove_variables = false)
-{
-  return mcrl2::core::optimized_exists_no_empty_domain(l, p, remove_variables);
 }
 
 } // namespace mcrl2::data

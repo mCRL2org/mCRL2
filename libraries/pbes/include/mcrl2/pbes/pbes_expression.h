@@ -1027,25 +1027,7 @@ pbes_expression optimized_imp(const pbes_expression& p, const pbes_expression& q
 inline
 void make_optimized_forall(pbes_expression& result, const data::variable_list& l, const pbes_expression& p, bool remove_variables = false)
 {
-  core::make_optimized_forall_no_empty_domain(result, l, p, remove_variables);
-  /* if (l.empty())
-  {
-    result = p;
-    return;
-  }
-  if (is_false(p))
-  {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = atermpp::down_cast<pbes_expression>(data::sort_bool::false_());
-    return;
-  }
-  if (is_true(p))
-  {
-    result = true_();
-    return;
-  }
-  pbes_system::make_forall(result, l, p);
-  return; */
+  core::make_optimized_forall(result, l, p, remove_variables);
 }
 
 /// \brief Make a universal quantification
@@ -1057,7 +1039,7 @@ void make_optimized_forall(pbes_expression& result, const data::variable_list& l
 inline
 pbes_expression optimized_forall(const data::variable_list& l, const pbes_expression& p, bool remove_variables = false)
 {
-  return core::optimized_forall_no_empty_domain(l, p, remove_variables);
+  return core::optimized_forall(l, p, remove_variables);
 }
 
 /// \brief Make an optimized existential quantification. If l is empty, p is returned.
@@ -1068,25 +1050,7 @@ pbes_expression optimized_forall(const data::variable_list& l, const pbes_expres
 inline
 void make_optimized_exists(pbes_expression& result, const data::variable_list& l, const pbes_expression& p, bool remove_variables = false)
 {
-  core::make_optimized_exists_no_empty_domain(result, l, p, remove_variables);
-  /* if (l.empty())
-  {
-    result = p;
-    return;
-  }
-  if (is_false(p))
-  {
-    result = atermpp::down_cast<pbes_expression>(data::sort_bool::false_());
-    return;
-  }
-  if (is_true(p))
-  {
-    // N.B. Here we use the fact that mCRL2 data types are never empty.
-    result = atermpp::down_cast<pbes_expression>(data::sort_bool::true_());
-    return;
-  }
-  pbes_system::make_exists(result, l, p);
-  return; */
+  core::make_optimized_exists(result, l, p, remove_variables);
 }
 
 /// \brief Make an existential quantification
@@ -1098,7 +1062,7 @@ void make_optimized_exists(pbes_expression& result, const data::variable_list& l
 inline
 pbes_expression optimized_exists(const data::variable_list& l, const pbes_expression& p, bool remove_variables = false)
 {
-  return core::optimized_exists_no_empty_domain(l, p, remove_variables);
+  return core::optimized_exists(l, p, remove_variables);
 }
 
 inline

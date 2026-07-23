@@ -167,9 +167,7 @@ void make_optimized_imp(typename TermTraits::term_type& result,
 /// \param v A sequence of variables
 /// \param arg A term
 ////// \param remove_variables If true, remove bound variables that do not occur in \a arg.
-/// \param empty_domain_allowed If true, and there are no variables in \a v, treat
-///        as empty domain, hence yielding <tt>true</tt>, otherwise <tt>arg</tt> arg
-///        is returned in this case.
+/// \details If the variable sequence v is empty, the result is arg. 
 /// \return The universal quantification <tt>forall v.arg</tt>
 template <typename TermTraits>
 inline
@@ -177,22 +175,13 @@ void make_optimized_forall(typename TermTraits::term_type& result,
                            const typename TermTraits::variable_sequence_type& v, 
                            const typename TermTraits::term_type& arg, 
                            bool remove_variables, 
-                           bool empty_domain_allowed, 
                            TermTraits)
 {
   using tr = TermTraits;
 
   if (v.empty())
   {
-    if (empty_domain_allowed)
-    {
-      throw mcrl2::runtime_error("EMPTY DOMAINS SHOULD NOT BE ALLOWED forall " + pp(arg) + "\n");
-      result = tr::true_();
-    }
-    else
-    {
-      result = arg;
-    }
+    result = arg;
   }
   else if (tr::is_true(arg))
   {
@@ -227,9 +216,7 @@ void make_optimized_forall(typename TermTraits::term_type& result,
 /// \param v A sequence of variables
 /// \param arg A term
 /// \param remove_variables If true, remove bound variables that do not occur in \a arg.
-/// \param empty_domain_allowed If true, and there are no variables in \a v, treat
-///        as empty domain, hence yielding <tt>false</tt>, otherwise <tt>arg</tt> arg
-///        is returned in this case.
+/// \details If the sequence of variable v is empty, the result is arg. 
 /// \return The existential quantification <tt>exists v.arg</tt>
 template <typename TermTraits>
 inline
@@ -237,22 +224,13 @@ void make_optimized_exists(typename TermTraits::term_type& result,
                            const typename TermTraits::variable_sequence_type& v, 
                            const typename TermTraits::term_type& arg, 
                            bool remove_variables, 
-                           bool empty_domain_allowed, 
                            TermTraits)
 {
   using tr = TermTraits;
 
   if (v.empty())
   {
-    if (empty_domain_allowed)
-    {
-      throw mcrl2::runtime_error("EMPTY DOMAINS SHOULD NOT BE ALLOWED exists " + pp(arg) + "\n");
-      result = tr::false_();
-    }
-    else
-    {
-      result = arg;
-    }
+    result = arg;
   }
   else if (tr::is_true(arg))
   {
@@ -379,66 +357,34 @@ Term optimized_imp(const Term& p, const Term& q)
   return result;
 } 
 
-/// \brief Make a universal quantification, applying optimisations when possible.
-/// \param result Place where the quantified expressions is placed.
-/// \param l A sequence of variables
-/// \param p A term
-/// \param remove_variables If true, unused quantifier variables are removed
+/// \brief Make an optimized universal quantification, applying optimisations when possible.
+/// \param result Place where the quantified expressions is placed. If the variable list l is empty, result becomes p.
+/// \param l A sequence of variables.
+/// \param p A term.
+/// \param remove_variables If true, unused quantifier variables are removed.
 template <typename Term, typename VariableSequence>
 inline
 void make_optimized_forall(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
 {
-  bool empty_domain_allowed = true;
-  detail::make_optimized_forall(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+  detail::make_optimized_forall(result, l, p, remove_variables, core::term_traits<Term>());
 }
 
-/// \brief Make a universal quantification, applying optimisations.
+/// \brief Make an optimized universal quantification, applying optimisations.
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of universal quantification to the arguments.
+/// \return The application of universal quantification to the arguments. If the l is empty, p is returned. 
 template <typename Term, typename VariableSequence>
 inline
 Term optimized_forall(const VariableSequence& l, const Term& p, bool remove_variables = false)
 {
-  bool empty_domain_allowed = true;
   Term result;
-  detail::make_optimized_forall(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+  detail::make_optimized_forall(result, l, p, remove_variables, core::term_traits<Term>());
   return result;
 }
 
-/// \brief Make a universal quantification, optimizing the result.
-/// \param result Place where the quantified expressions is placed.
-/// \param l A sequence of variables.
-/// \param p A term.
-/// \param remove_variables If true, unused quantifier variables are removed.
-/// The optimization forall x:empty_set. phi = true is not applied.
-template <typename Term, typename VariableSequence>
-inline
-void make_optimized_forall_no_empty_domain(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
-{
-  bool empty_domain_allowed = false;
-  detail::make_optimized_forall(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
-}
-
-/// \brief Make a universal quantification, optimizing the result.
-/// \param l A sequence of variables.
-/// \param p A term.
-/// \param remove_variables If true, unused quantifier variables are removed.
-/// \return The application of universal quantification to the arguments.
-/// The optimization forall x:empty_set. phi = true is not applied.
-template <typename Term, typename VariableSequence>
-inline
-Term optimized_forall_no_empty_domain(const VariableSequence& l, const Term& p, bool remove_variables = false)
-{
-  bool empty_domain_allowed = false;
-  Term result;
-  detail::make_optimized_forall(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
-  return result;
-}
-
-/// \brief Make an existential quantification, optimizing the result.
-/// \param result Place where the quantified expressions is placed.
+/// \brief Make an optimized existential quantification, optimizing the result.
+/// \param result Place where the quantified expressions is placed. If l is empty, result becomes p. 
 /// \param l A sequence of variables.
 /// \param p A term.
 /// \param remove_variables If true, unused quantifier variables are removed
@@ -446,52 +392,20 @@ template <typename Term, typename VariableSequence>
 inline
 void make_optimized_exists(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
 {
-  bool empty_domain_allowed = true;
-  detail::make_optimized_exists(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+  detail::make_optimized_exists(result, l, p, remove_variables, core::term_traits<Term>());
 }
 
-/// \brief Make an existential quantification
+/// \brief Make an optimized existential quantification.
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of existential quantification to the arguments.
+/// \return The application of existential quantification to the arguments. If l is empty, p is returned. 
 template <typename Term, typename VariableSequence>
 inline
 Term optimized_exists(const VariableSequence& l, const Term& p, bool remove_variables = false)
 {
-  bool empty_domain_allowed = true;
   Term result;
-  detail::make_optimized_exists(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
-  return result;
-}
-
-/// \brief Make an existential quantification
-/// \param result Place where the quantified expressions is placed.
-/// \param l A sequence of variables
-/// \param p A term
-/// \param remove_variables If true, unused quantifier variables are removed
-/// The optimization exists x:empty_set. phi = false is not applied.
-template <typename Term, typename VariableSequence>
-inline
-void make_optimized_exists_no_empty_domain(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
-{
-  bool empty_domain_allowed = false;
-  detail::make_optimized_exists(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
-}
-
-/// \brief Make an existential quantification
-/// \param l A sequence of variables
-/// \param p A term
-/// \param remove_variables If true, unused quantifier variables are removed
-/// \return The application of existential quantification to the arguments.
-/// The optimization exists x:empty_set. phi = false is not applied.
-template <typename Term, typename VariableSequence>
-inline
-Term optimized_exists_no_empty_domain(const VariableSequence& l, const Term& p, bool remove_variables = false)
-{
-  bool empty_domain_allowed = false;
-  Term result;
-  detail::make_optimized_exists(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+  detail::make_optimized_exists(result, l, p, remove_variables, core::term_traits<Term>());
   return result;
 }
 

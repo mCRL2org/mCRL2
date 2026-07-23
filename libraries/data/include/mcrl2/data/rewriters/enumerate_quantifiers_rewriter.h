@@ -155,14 +155,14 @@ struct enumerate_quantifiers_builder: public data_expression_builder<enumerate_q
     }
     if (enumerable.empty())
     {
-      data::make_optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+      data::make_optimized_forall(result, non_enumerable, result, remove_unused_variables);
     }
     else
     {
       data_expression d;
       enumerate_forall(d, enumerable, result);
       result = d;
-      data::make_optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+      data::make_optimized_forall(result, non_enumerable, result, remove_unused_variables);
     }
     redo_substitution(x.variables(), undo);
   }
@@ -192,7 +192,7 @@ struct enumerate_quantifiers_builder: public data_expression_builder<enumerate_q
     }
     if (enumerable.empty())
     {
-      data::make_optimized_exists_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+      data::make_optimized_exists(result, non_enumerable, result, remove_unused_variables);
     }
     else
     {
@@ -200,7 +200,7 @@ struct enumerate_quantifiers_builder: public data_expression_builder<enumerate_q
       enumerate_exists(d, enumerable, result);
       result = d;
 
-      data::make_optimized_exists_no_empty_domain(result, non_enumerable, d, remove_unused_variables);
+      data::make_optimized_exists(result, non_enumerable, d, remove_unused_variables);
     }
     redo_substitution(x.variables(), undo);
   }
