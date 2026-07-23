@@ -99,9 +99,7 @@ inline pbes_expression optimized_join_or(FwdIt first, FwdIt last)
                                  last, 
                                  [](const pbes_expression& arg0, const pbes_expression& arg1) -> pbes_expression
                                  { 
-                                   pbes_expression result;
-                                   data::optimized_or(result, arg0, arg1);
-                                   return result;
+                                   return pbes_system::optimized_or(arg0, arg1);
                                  }, 
                                  false_());
 }
@@ -117,9 +115,7 @@ inline pbes_expression optimized_join_and(FwdIt first, FwdIt last)
                                  last, 
                                  [](const pbes_expression& arg0, const pbes_expression& arg1) -> pbes_expression
                                  { 
-                                   pbes_expression result;
-                                   data::optimized_and(result, arg0, arg1);
-                                   return result;
+                                   return pbes_system::optimized_and(arg0, arg1);
                                  }, 
                                  true_());
 }

@@ -316,7 +316,7 @@ protected:
       const variable_list qvars_not_in_update    {qvars | std::views::filter(is_not_in_update)};
       
       data_expression quantified_condition;
-      optimized_exists_no_empty_domain(quantified_condition, qvars_not_in_update, rewritten_condition);
+      make_optimized_exists_no_empty_domain(quantified_condition, qvars_not_in_update, rewritten_condition);
   
       mCRL2log(log::debug) << "Enumerate " << detail::ppsort(qvars_in_update) << " in " << quantified_condition << "\n"; 
 

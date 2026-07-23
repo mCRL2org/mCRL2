@@ -118,7 +118,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                 sigma,
                 [&](const enumerator_element& p)
                 {
-                  data::optimized_and(result, result, p.expression());
+                  pbes_system::make_optimized_and(result, result, p.expression());
                   return is_false(result);
                 },
                 is_true,
@@ -138,7 +138,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                 sigma,
                 [&](const enumerator_element& p)
                 {
-                  data::optimized_or(result, result, p.expression());
+                  pbes_system::make_optimized_or(result, result, p.expression());
                   return is_false(result);
                 },
                 is_false,
@@ -173,7 +173,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     }
     if (enumerable.empty())
     {
-      data::optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+      pbes_system::make_optimized_forall(result, non_enumerable, result, remove_unused_variables);
     }
     else
     {
@@ -189,7 +189,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         result = phi_;
       }
-      data::optimized_forall_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+      pbes_system::make_optimized_forall(result, non_enumerable, result, remove_unused_variables);
     }
     redo_substitution(x.variables(), undo);
   }
@@ -219,7 +219,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     }
     if (enumerable.empty())
     {
-      data::optimized_exists_no_empty_domain(result, non_enumerable, result, remove_unused_variables);
+      pbes_system::make_optimized_exists(result, non_enumerable, result, remove_unused_variables);
     }
     else
     {
@@ -235,7 +235,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
       {
         result = phi_;
       }
-      data::optimized_exists_no_empty_domain(result, non_enumerable, phi_, remove_unused_variables);
+      pbes_system::make_optimized_exists(result, non_enumerable, phi_, remove_unused_variables);
     }
     redo_substitution(x.variables(), undo);
   }

@@ -28,74 +28,79 @@ struct term_traits_optimized
 template <>
 struct term_traits_optimized<pbes_system::pbes_expression>: public core::term_traits<pbes_system::pbes_expression>
 {
+
   using super = core::term_traits<pbes_system::pbes_expression>;
 
   static inline
   term_type not_(const term_type& x)
   {
-    term_type result;
-    data::optimized_not(result, x);
-    return result;
+    return pbes_system::optimized_not(x);
   } 
 
   static inline
   void make_not_(term_type& result, const term_type& x)
   {
-    data::optimized_not(result, x);
+    pbes_system::make_optimized_not(result, x);
   }
 
   static inline
   term_type and_(const term_type& x, const term_type& y)
   {
-    term_type result;
-    data::optimized_and(result, x, y);
-    return result;
+    return pbes_system::optimized_and(x, y);
   }
 
   static inline
   void make_and_(term_type& result, const term_type& x, const term_type& y)
   {
-    data::optimized_and(result, x, y);
+    pbes_system::make_optimized_and(result, x, y);
   }
 
   static inline
   term_type or_(const term_type& x, const term_type& y)
   {
-    term_type result;
-    data::optimized_or(result, x, y);
-    return result;
+    return pbes_system::optimized_or(x, y);
   } 
 
   static inline
   void make_or_(term_type& result, const term_type& x, const term_type& y)
   {
-    data::optimized_or(result, x, y);
+    pbes_system::make_optimized_or(result, x, y);
   }
 
   static inline
   term_type imp(const term_type& x, const term_type& y)
   {
-    term_type result;
-    data::optimized_imp(result, x, y);
-    return result;
+    return pbes_system::optimized_imp(x, y);
   } 
 
   static inline
   void make_imp(term_type& result, const term_type& x, const term_type& y)
   {
-    data::optimized_imp(result, x, y);
+    pbes_system::make_optimized_imp(result, x, y);
+  }
+
+  static inline
+  term_type forall(const variable_sequence_type& d, const term_type& x)
+  {
+    return pbes_system::optimized_forall(d, x);
   }
 
   static inline
   void make_forall(term_type& result, const variable_sequence_type& d, const term_type& x)
   {
-    data::optimized_forall_no_empty_domain(result, d, x);
+    pbes_system::make_optimized_forall(result, d, x);
+  }
+
+  static inline
+  term_type exists(const variable_sequence_type& d, const term_type& x)
+  {
+    return pbes_system::optimized_exists(d, x);
   }
 
   static inline
   void make_exists(term_type& result, const variable_sequence_type& d, const term_type& x)
   {
-    data::optimized_exists_no_empty_domain(result, d, x);
+    pbes_system::make_optimized_exists(result, d, x);
   }
 
   template <typename FwdIt>

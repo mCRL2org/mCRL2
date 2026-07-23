@@ -496,7 +496,7 @@ class pbessolve_tool
       throw mcrl2::runtime_error("Optimisation detect_winning_loops_original (8) does not work correctly with multiple threads.");
     }
 
-    mCRL2log(log::log_level_t::verbose) << "Using optimisation " << options.optimization << "\n";
+    mCRL2log(log::log_level_t::verbose) << "Using optimisation " << m_short_strategy << "\n";
 
     if (options.optimization <= partial_solve_strategy::remove_self_loops)
     {

@@ -13,7 +13,7 @@
 #define MCRL2_PRES_PRES_EXPRESSION_H
 
 #include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/data/cardinality.h"
 #include "mcrl2/pbes/propositional_variable.h"
@@ -1564,14 +1564,34 @@ void optimized_minus(pres_expression& result, const pres_expression& p)
   make_minus(result, p);
 }
 
+/// \brief Make a conjunction.
+/// \param result Term to which the value <tt>p && q</tt> is assigned.
+/// \param p A PRES expression.
+/// \param q A PRES expression.
+inline
+void make_optimized_and(pres_expression& result, const pres_expression& p, const pres_expression& q)
+{
+  core::make_optimized_and(result, p, q);
+}
+
 /// \brief Make a conjunction
 /// \param p A PRES expression
 /// \param q A PRES expression
 /// \return The value <tt>p && q</tt>
 inline
-void optimized_and(pres_expression& result, const pres_expression& p, const pres_expression& q)
+pres_expression optimized_and(const pres_expression& p, const pres_expression& q)
 {
-  data::optimized_and(result, p, q);
+  return core::optimized_and(p, q);
+}
+
+/// \brief Make a disjunction
+/// \param result Term to which the value <tt>p && q</tt> is assigned.
+/// \param p A PRES expression
+/// \param q A PRES expression
+inline
+void make_optimized_or(pres_expression& result, const pres_expression& p, const pres_expression& q)
+{
+  core::make_optimized_or(result, p, q);
 }
 
 /// \brief Make a disjunction
@@ -1579,9 +1599,9 @@ void optimized_and(pres_expression& result, const pres_expression& p, const pres
 /// \param q A PRES expression
 /// \return The value <tt>p || q</tt>
 inline
-void optimized_or(pres_expression& result, const pres_expression& p, const pres_expression& q)
+pres_expression optimized_or(const pres_expression& p, const pres_expression& q)
 {
-  data::optimized_or(result, p, q);
+  return core::optimized_or(p, q);
 }
 
 /// \brief Make a disjunction
@@ -1796,7 +1816,7 @@ void optimized_condsm(pres_expression& result, const pres_expression& p1, const 
   }
   else if (p1==true_())
   {
-    optimized_or(result, p2, p3);
+    make_optimized_or(result, p2, p3);
     return;
   }
   make_condsm(result, p1, p2, p3);
@@ -1814,7 +1834,7 @@ void optimized_condeq(pres_expression& result, const pres_expression& p1, const 
   if (p1==false_())
   {
     // N.B. Here we use the fact that mCRL2 data types are never empty.
-    optimized_and(result, p2, p3);
+    make_optimized_and(result, p2, p3);
     return;
   }
   else if (p1==true_())

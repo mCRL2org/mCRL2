@@ -275,7 +275,6 @@ bool is_constant(const data_expression& x)
 }
 
 using variable_list = atermpp::term_list<variable>;
-variable_list free_variables(const data_expression& x);
 
 } // namespace mcrl2::data
 

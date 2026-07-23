@@ -49,23 +49,23 @@ struct add_simplify_quantifiers: public Builder<Derived>
       optimized_infimum(result, variables, left); 
       pres_expression result_right;
       optimized_infimum(result_right, variables, right);
-      data::optimized_and(result, result, result_right);
+      make_optimized_and(result, result, result_right);
     }
     else if (is_or(body))
     {
       auto const& left = atermpp::down_cast<or_>(body).left();
       auto const& right = atermpp::down_cast<or_>(body).right();
-      data::variable_list lv = data::detail::set_intersection(variables, free_variables(left));
-      data::variable_list rv = data::detail::set_intersection(variables, free_variables(right));
+      data::variable_list lv = data::detail::set_intersection(variables, find_free_variables(left));
+      data::variable_list rv = data::detail::set_intersection(variables, find_free_variables(right));
       if (lv.empty())
       {
         optimized_infimum(result, rv, right);
-        data::optimized_or(result, left, result);
+        make_optimized_or(result, left, result);
       }
       else if (rv.empty())
       {
         optimized_infimum(result, lv, left);
-        data::optimized_or(result, result, right);
+        make_optimized_or(result, result, right);
       }
       else
       {
@@ -101,23 +101,23 @@ struct add_simplify_quantifiers: public Builder<Derived>
       optimized_supremum(result, variables, left);
       pres_expression result_right;
       optimized_supremum(result_right, variables, right);
-      data::optimized_or(result, result, result_right);
+      make_optimized_or(result, result, result_right);
     }
     else if (is_and(body))
     {
       auto const& left = atermpp::down_cast<and_>(body).left();
       auto const& right = atermpp::down_cast<and_>(body).right();
-      data::variable_list lv = data::detail::set_intersection(variables, free_variables(left));
-      data::variable_list rv = data::detail::set_intersection(variables, free_variables(right));
+      data::variable_list lv = data::detail::set_intersection(variables, find_free_variables(left));
+      data::variable_list rv = data::detail::set_intersection(variables, find_free_variables(right));
       if (lv.empty())
       {
         optimized_supremum(result, rv, right);
-        data::optimized_and(result, left, result);
+        make_optimized_and(result, left, result);
       }
       else if (rv.empty())
       {
         optimized_supremum(result, lv, left);
-        data::optimized_and(result, right, result);
+        make_optimized_and(result, right, result);
       }
       else
       {

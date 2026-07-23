@@ -400,7 +400,7 @@ public:
        apply(t2, t1);
        make_eqinf(t1, resulta.right());
        apply(result, t1);
-       optimized_and(t1, t2, result);
+       make_optimized_and(t1, t2, result);
        result = t1;
        return;
     }
@@ -413,7 +413,7 @@ public:
        apply(t2, t1);
        make_eqinf(t1, resulta.right());
        apply(result, t1);
-       optimized_or(t1, t2, result);
+       make_optimized_or(t1, t2, result);
        result = t1;
        return;
     }
@@ -485,7 +485,7 @@ public:
        apply(t2, t1);
        make_eqninf(t1, resulta.right());
        apply(result, t1);
-       optimized_and(t1, t2, result);
+       make_optimized_and(t1, t2, result);
        result = t1;
        return;
     }
@@ -498,7 +498,7 @@ public:
        apply(t2, t1);
        make_eqninf(t1, resulta.right());
        apply(result, t1);
-       optimized_or(t1, t2, result);
+       make_optimized_or(t1, t2, result);
        result = t1;
        return;
     }
@@ -518,9 +518,9 @@ public:
        apply(t3, t);
        make_eqninf(t, resulta.right());
        apply(t4, t);
-       optimized_or(t, t1, t2);
-       optimized_or(t1, t3, t4);
-       optimized_and(result, t, t1);
+       make_optimized_or(t, t1, t2);
+       make_optimized_or(t1, t3, t4);
+       make_optimized_and(result, t, t1);
        return;
     }
     if (is_const_multiply(result))

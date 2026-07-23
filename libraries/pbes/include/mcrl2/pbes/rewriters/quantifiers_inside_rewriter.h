@@ -168,9 +168,9 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
     std::set<data::variable> vars_Psi = find_free_variables(Psi);
-    optimized_or(result,
-                 quantifiers_inside_forall(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
-                 quantifiers_inside_forall(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
+    make_optimized_or(result,
+                      quantifiers_inside_forall(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
+                      quantifiers_inside_forall(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
     make_forall_(result, 
                  data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
                  result);
@@ -274,9 +274,9 @@ struct quantifiers_inside_exists_builder: public pbes_expression_builder<quantif
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
     std::set<data::variable> vars_Psi = find_free_variables(Psi);
-    optimized_and(result,
-                  quantifiers_inside_exists(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
-                  quantifiers_inside_exists(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
+    make_optimized_and(result,
+                       quantifiers_inside_exists(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
+                       quantifiers_inside_exists(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
     make_exists_(result, data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
                           result);
   }

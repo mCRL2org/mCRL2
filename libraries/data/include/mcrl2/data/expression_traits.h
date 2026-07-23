@@ -16,6 +16,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
+#include "mcrl2/data/detail/data_sequence_algorithm.h"
 
 namespace mcrl2
 {
@@ -325,88 +326,28 @@ struct term_traits<data::data_expression>
   {
     return data::pp(t);
   }
+
+  // \brief A function that calculates the intersection of two variable lists.
+  // \param x A list.
+  // \param y Another list.
+  // \return The intersection of the two lists.
+  static inline
+  data::variable_list set_intersection(const data::variable_list& x, const std::set<data::variable>& y)
+  {
+    return data::detail::set_intersection(x, y);
+  }
+
+  // \brief Find the free variables in a term.
+  // \param x The input term.
+  // \return The set of free variables in a term.
+  static inline
+  std::set<data::variable> find_free_variables(const data::data_expression& x)
+  {
+    return data::find_free_variables(x);
+  }
 };
 
 } // namespace core
-
-namespace data
-{
-/// \brief expression traits (currently nothing more than core::term_traits)
-template < typename Expression >
-struct expression_traits : public core::term_traits< Expression >
-{
-  // Type of expression that represents variables
-  using variable_type = mcrl2::data::variable;
-
-  static bool is_true(const data_expression& e)
-  {
-    return sort_bool::is_true_function_symbol(e);
-  }
-
-  static bool is_false(const data_expression& e)
-  {
-    return sort_bool::is_false_function_symbol(e);
-  }
-
-  static bool is_application(const data_expression& e)
-  {
-    return data::is_application(e);
-  }
-
-  static bool is_abstraction(const data_expression& e)
-  {
-    return data::is_abstraction(e);
-  }
-
-  static const data_expression& head(const data_expression& e)
-  {
-    return atermpp::down_cast<mcrl2::data::application>(e).head();
-  }
-
-  static const variable_list& variables(const data_expression& a)
-  {
-    return atermpp::down_cast<abstraction>(a).variables();
-  }
-
-  static const data_expression& body(const data_expression& a)
-  {
-    return atermpp::down_cast<const abstraction>(a).body();
-  }
-
-  static data_expression replace_body(const data_expression& variable_binder, const data_expression& new_body)
-  {
-    const abstraction& a=atermpp::down_cast<const abstraction>(variable_binder);
-    return abstraction(a.binding_operator(), a.variables(), new_body);
-  }
-
-  template < typename Container >
-  static application application(const data_expression& e, const Container& arguments)
-  {
-    return application(e, arguments);
-  }
-
-  static const data_expression& false_()
-  {
-    return sort_bool::false_();
-  }
-
-  static const data_expression& true_()
-  {
-    return sort_bool::true_();
-  }
-
-  static data_expression and_(const data_expression& e1, const data_expression& e2)
-  {
-    return sort_bool::and_(e1, e2);
-  }
-
-  static data_expression or_(const data_expression& e1, const data_expression& e2)
-  {
-    return sort_bool::or_(e1, e2);
-  }
-};
-
-} // namespace data
 
 } // namespace mcrl2
 

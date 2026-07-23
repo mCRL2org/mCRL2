@@ -67,7 +67,7 @@ public:
       {
         if(is_simple_expression(disj, false))
         {
-          optimized_or(cond, cond, disj);
+          make_optimized_or(cond, cond, disj);
         }
         else
         {
@@ -84,7 +84,7 @@ public:
       {
         if(is_simple_expression(conj, false))
         {
-          optimized_and(cond, cond, conj);
+          make_optimized_and(cond, cond, conj);
         }
         else
         {
@@ -197,7 +197,7 @@ public:
         if(is_simple_expression(expr, false))
         {
           data::data_expression data_expr = pbes2data(expr);
-          optimized_and(simple_formula, simple_formula, data_expr);
+          make_optimized_and(simple_formula, simple_formula, data_expr);
         }
         else
         {
@@ -221,7 +221,7 @@ public:
         if(is_simple_expression(expr, false))
         {
           data::data_expression data_expr = pbes2data(expr);
-          optimized_or(simple_formula, simple_formula, data_expr);
+          make_optimized_or(simple_formula, simple_formula, data_expr);
         }
         else
         {

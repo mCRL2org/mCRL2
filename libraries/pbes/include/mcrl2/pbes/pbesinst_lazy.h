@@ -192,7 +192,11 @@ class pbesinst_lazy_algorithm
       pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
       for (pbes_equation& eqn: p.equations())
       {
-        eqn.formula() = order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eqn.formula())), p.data());
+        // eqn.formula() = order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eqn.formula())), p.data());
+        pbes_expression aux = simplify_rewriter(eqn.formula());
+        pbes_expression aux1 = one_point_rule_rewriter(aux);
+        pbes_expression aux2 = order_quantified_variables(aux1,p.data());
+        eqn.formula() = aux2;
       }
       return p;
     }
@@ -257,7 +261,7 @@ class pbesinst_lazy_algorithm
        m_equation_index(p),
        discovered(m_options.number_of_threads),
        m_global_R(datar, p.data())
-    { }
+    {}
 
     virtual ~pbesinst_lazy_algorithm() = default;
 

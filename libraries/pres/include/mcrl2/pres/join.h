@@ -101,9 +101,7 @@ inline pres_expression optimized_join_or(FwdIt first, FwdIt last)
                                  last, 
                                  [](const pres_expression& arg0, const pres_expression& arg1) -> pres_expression
                                  { 
-                                   pres_expression result;
-                                   data::optimized_or(result, arg0, arg1);
-                                   return result;
+                                   return pres_system::optimized_or(arg0, arg1);
                                  }, 
                                  false_());
 }
@@ -119,9 +117,7 @@ inline pres_expression optimized_join_and(FwdIt first, FwdIt last)
                                  last, 
                                  [](const pres_expression& arg0, const pres_expression& arg1) -> pres_expression
                                  { 
-                                   pres_expression result;
-                                   data::optimized_and(result, arg0, arg1);
-                                   return result;
+                                   return pres_system::optimized_and(arg0, arg1);
                                  }, 
                                  true_());
 }

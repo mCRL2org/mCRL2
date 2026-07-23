@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
-#include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/data/detail/data_sequence_algorithm.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace mcrl2::pbes_system
@@ -943,9 +943,9 @@ pbes_expression make_exists_(const data::variable_list& l, const pbes_expression
 /// \param result Placeholder for the resulting PBES expression <tt>!p</tt>. This is more efficient than delivering it as the result of a function. 
 /// \param p A PBES expression
 inline
-void optimized_not(pbes_expression& result, const pbes_expression& p)
+void make_optimized_not(pbes_expression& result, const pbes_expression& p)
 {
-  data::optimized_not(result, p);
+  core::make_optimized_not(result, p);
 }
 
 /// \brief Make a negation
@@ -954,9 +954,7 @@ void optimized_not(pbes_expression& result, const pbes_expression& p)
 inline
 pbes_expression optimized_not(const pbes_expression& p)
 {
-  pbes_expression result;
-  data::optimized_not(result, p);
-  return result;
+  return core::optimized_not(p);
 }
 
 /// \brief Make a conjunction
@@ -964,9 +962,9 @@ pbes_expression optimized_not(const pbes_expression& p)
 /// \param p A PBES expression
 /// \param q A PBES expression
 inline
-void optimized_and(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
+void make_optimized_and(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
 {
-  data::optimized_and(result, p, q);
+  core::make_optimized_and(result, p, q);
 }
 
 /// \brief Make a conjunction
@@ -976,9 +974,7 @@ void optimized_and(pbes_expression& result, const pbes_expression& p, const pbes
 inline
 pbes_expression optimized_and(const pbes_expression& p, const pbes_expression& q)
 {
-  pbes_expression result;
-  data::optimized_and(result, p, q);
-  return result;
+  return core::optimized_and(p, q);
 }
 
 /// \brief Make a disjunction
@@ -986,9 +982,9 @@ pbes_expression optimized_and(const pbes_expression& p, const pbes_expression& q
 /// \param p A PBES expression
 /// \param q A PBES expression
 inline
-void optimized_or(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
+void make_optimized_or(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
 {
-  data::optimized_or(result, p, q);
+  core::make_optimized_or(result, p, q);
 }
 
 /// \brief Make a disjunction
@@ -998,9 +994,7 @@ void optimized_or(pbes_expression& result, const pbes_expression& p, const pbes_
 inline
 pbes_expression optimized_or(const pbes_expression& p, const pbes_expression& q)
 {
-  pbes_expression result;
-  data::optimized_or(result, p, q);
-  return result;
+  return core::optimized_or(p, q);
 }
 
 /// \brief Make an implication
@@ -1008,9 +1002,9 @@ pbes_expression optimized_or(const pbes_expression& p, const pbes_expression& q)
 /// \param p A PBES expression
 /// \param q A PBES expression
 inline
-void optimized_imp(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
+void make_optimized_imp(pbes_expression& result, const pbes_expression& p, const pbes_expression& q)
 {
-  data::optimized_imp(result, p, q);
+  core::make_optimized_imp(result, p, q);
 }
 
 /// \brief Make an implication
@@ -1020,20 +1014,21 @@ void optimized_imp(pbes_expression& result, const pbes_expression& p, const pbes
 inline
 pbes_expression optimized_imp(const pbes_expression& p, const pbes_expression& q)
 {
-  pbes_expression result;
-  data::optimized_imp(result, p, q);
-  return result;
+  return core::optimized_imp(p, q);
 }
 
 /// \brief Make a universal quantification
 /// If l is empty, p is returned.
+/// \param result The placeholder to which the optimised existential quantification is assigned. 
 /// \param l A sequence of data variables
 /// \param p A PBES expression
+/// \param remove_variables If true variables not occurring in p will be removed. This requires complexity in the size of p. 
 /// \return The value <tt>forall l.p</tt>
 inline
-void optimized_forall(pbes_expression& result, const data::variable_list& l, const pbes_expression& p)
+void make_optimized_forall(pbes_expression& result, const data::variable_list& l, const pbes_expression& p, bool remove_variables = false)
 {
-  if (l.empty())
+  core::make_optimized_forall_no_empty_domain(result, l, p, remove_variables);
+  /* if (l.empty())
   {
     result = p;
     return;
@@ -1050,18 +1045,31 @@ void optimized_forall(pbes_expression& result, const data::variable_list& l, con
     return;
   }
   pbes_system::make_forall(result, l, p);
-  return;
+  return; */
 }
 
-/// \brief Make an existential quantification
+/// \brief Make a universal quantification
 /// If l is empty, p is returned.
 /// \param l A sequence of data variables
 /// \param p A PBES expression
-/// \return The value <tt>exists l.p</tt>
+/// \param remove_variables If true variables not occurring in p will be removed. This requires complexity in the size of p. 
+/// \return The value <tt>forall l.p</tt>
 inline
-void optimized_exists(pbes_expression& result, const data::variable_list& l, const pbes_expression& p)
+pbes_expression optimized_forall(const data::variable_list& l, const pbes_expression& p, bool remove_variables = false)
 {
-  if (l.empty())
+  return core::optimized_forall_no_empty_domain(l, p, remove_variables);
+}
+
+/// \brief Make an optimized existential quantification. If l is empty, p is returned.
+/// \param result The placeholder to which the optimised existential quantification is assigned. 
+/// \param l A sequence of data variables
+/// \param p A PBES expression
+/// \param remove_variables If true variables not occurring in p will be removed. This requires complexity in the size of p. 
+inline
+void make_optimized_exists(pbes_expression& result, const data::variable_list& l, const pbes_expression& p, bool remove_variables = false)
+{
+  core::make_optimized_exists_no_empty_domain(result, l, p, remove_variables);
+  /* if (l.empty())
   {
     result = p;
     return;
@@ -1078,7 +1086,19 @@ void optimized_exists(pbes_expression& result, const data::variable_list& l, con
     return;
   }
   pbes_system::make_exists(result, l, p);
-  return;
+  return; */
+}
+
+/// \brief Make an existential quantification
+/// If l is empty, p is returned.
+/// \param l A sequence of data variables
+/// \param p A PBES expression
+/// \param remove_variables If true variables not occurring in p will be removed. This requires complexity in the size of p. 
+/// \return The value <tt>exists l.p</tt>
+inline
+pbes_expression optimized_exists(const data::variable_list& l, const pbes_expression& p, bool remove_variables = false)
+{
+  return core::optimized_exists_no_empty_domain(l, p, remove_variables);
 }
 
 inline
@@ -1484,6 +1504,26 @@ struct term_traits<pbes_system::pbes_expression>
   {
     return pbes_system::pp(t);
   }
+
+  // \brief A function that calculates the intersection of two variable lists.
+  // \param x A list.
+  // \param y Another list.
+  // \return The intersection of the two lists.
+  static inline
+  data::variable_list set_intersection(const data::variable_list& x, const std::set<data::variable>& y)
+  {
+    return data::detail::set_intersection(x, y);
+  }
+
+  // \brief Find the free variables in a term.
+  // \param x The input term.
+  // \return The set of free variables in a term.
+  static inline
+  std::set<data::variable> find_free_variables(const term_type& x)
+  {
+    return pbes_system::find_free_variables(x);
+  }
+
 };
 
 } // namespace mcrl2::core

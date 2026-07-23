@@ -223,21 +223,21 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
   pbes_expression make_and(const pfnf_traverser_expression& left, const pfnf_traverser_expression& right) const
   {
     pbes_expression result;
-    data::optimized_and(result, left.expr, right.expr);
+    pbes_system::make_optimized_and(result, left.expr, right.expr);
     return result;
   }
 
   pbes_expression make_or(const pfnf_traverser_expression& left, const pfnf_traverser_expression& right) const
   {
     pbes_expression result;
-    data::optimized_or(result, left.expr, right.expr);
+    pbes_system::make_optimized_or(result, left.expr, right.expr);
     return result;
   }
 
   pbes_expression make_not(const pfnf_traverser_expression& x) const
   {
     pbes_expression result;
-    data::optimized_not(result, x.expr);
+    pbes_system::make_optimized_not(result, x.expr);
     return result;
   }
 
@@ -262,11 +262,11 @@ struct pfnf_traverser: public pbes_expression_traverser<pfnf_traverser>
       pbes_expression x = std::accumulate(impl.rhs.begin(), impl.rhs.end(), F, 
                                           [&p](const pbes_expression& arg1, const pbes_expression& arg2) -> pbes_expression
                                               {
-                                                data::optimized_or(p, arg1, arg2);
+                                                pbes_system::make_optimized_or(p, arg1, arg2);
                                                 return p;
                                               });
-      data::optimized_imp(p, impl.g, x);
-      data::optimized_and(result, result, p);
+      pbes_system::make_optimized_imp(p, impl.g, x);
+      pbes_system::make_optimized_and(result, result, p);
     }
     for (const pfnf_traverser_quantifier& q: expr.quantifiers)
     {

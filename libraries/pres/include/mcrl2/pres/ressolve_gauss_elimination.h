@@ -217,7 +217,7 @@ inline pres_expression group_sums_conjuncts_disjuncts(const pres_expression& con
     pres_expression result = true_();
     for(const pres_expression& t: and_terms)
     {
-      optimized_and(result, result, t);
+      make_optimized_and(result, result, t);
     }
     return result;
   }
@@ -228,7 +228,7 @@ inline pres_expression group_sums_conjuncts_disjuncts(const pres_expression& con
     pres_expression result = false_();
     for(const pres_expression& t: or_terms)
     {
-      optimized_or(result, result, t);
+      make_optimized_or(result, result, t);
     }
     return result;
   }
@@ -292,17 +292,17 @@ inline void push_and_inside(pres_expression& result,
   {
     push_and_inside(aux, atermpp::down_cast<or_>(t1).left(), t2, conjunctive_normal_form);
     push_and_inside(result, atermpp::down_cast<or_>(t1).right(), t2, conjunctive_normal_form);
-    optimized_or(result, aux, result);
+    make_optimized_or(result, aux, result);
   }
   else if (!conjunctive_normal_form && is_or(t2))
   {
     push_and_inside(aux, t1, atermpp::down_cast<or_>(t2).left(), conjunctive_normal_form);
     push_and_inside(result, t1, atermpp::down_cast<or_>(t2).right(), conjunctive_normal_form);
-    optimized_or(result, aux, result);
+    make_optimized_or(result, aux, result);
   }
   else
   {
-    optimized_and(result, t1, t2);
+    make_optimized_and(result, t1, t2);
   }
 }
 
@@ -340,17 +340,17 @@ inline void push_or_inside(pres_expression& result,
   { 
     push_or_inside(aux, atermpp::down_cast<and_>(t1).left(), t2, conjunctive_normal_form);
     push_or_inside(result, atermpp::down_cast<and_>(t1).right(), t2, conjunctive_normal_form);
-    optimized_and(result, aux, result);
+    make_optimized_and(result, aux, result);
   }
   else if (conjunctive_normal_form && is_and(t2))
   { 
     push_or_inside(aux, t1, atermpp::down_cast<and_>(t2).left(), conjunctive_normal_form);
     push_or_inside(result, t1, atermpp::down_cast<and_>(t2).right(), conjunctive_normal_form);
-    optimized_and(result, aux, result);
+    make_optimized_and(result, aux, result);
   }
   else
   {
-    optimized_or(result, t1, t2);
+    make_optimized_or(result, t1, t2);
   }
 }
 
@@ -388,37 +388,37 @@ inline void push_plus_inside(pres_expression& result,
   {
     push_plus_inside(aux, atermpp::down_cast<and_>(t1).left(), t2, conjunctive_normal_form);
     push_plus_inside(result, atermpp::down_cast<and_>(t1).right(), t2, conjunctive_normal_form);
-    optimized_and(result, aux, result);
+    make_optimized_and(result, aux, result);
   }
   else if (conjunctive_normal_form && is_and(t2))
   {
     push_plus_inside(aux, t1, atermpp::down_cast<and_>(t2).left(), conjunctive_normal_form);
     push_plus_inside(result, t1, atermpp::down_cast<and_>(t2).right(), conjunctive_normal_form);
-    optimized_and(result, aux, result);
+    make_optimized_and(result, aux, result);
   }
   else if (is_or(t1))
   {
     push_plus_inside(aux, atermpp::down_cast<or_>(t1).left(), t2, conjunctive_normal_form);
     push_plus_inside(result, atermpp::down_cast<or_>(t1).right(), t2, conjunctive_normal_form);
-    optimized_or(result, aux, result);
+    make_optimized_or(result, aux, result);
   }
   else if (is_or(t2))
   {
     push_plus_inside(aux, t1, atermpp::down_cast<or_>(t2).left(), conjunctive_normal_form);
     push_plus_inside(result, t1, atermpp::down_cast<or_>(t2).right(), conjunctive_normal_form);
-    optimized_or(result, aux, result);
+    make_optimized_or(result, aux, result);
   }
   else if (!conjunctive_normal_form && is_and(t1))  // DNF: first more || upwards. 
   {
     push_plus_inside(aux, atermpp::down_cast<and_>(t1).left(), t2, conjunctive_normal_form);
     push_plus_inside(result, atermpp::down_cast<and_>(t1).right(), t2, conjunctive_normal_form);
-    optimized_and(result, aux, result);
+    make_optimized_and(result, aux, result);
   }
   else if (!conjunctive_normal_form && is_and(t2))
   {
     push_plus_inside(aux, t1, atermpp::down_cast<and_>(t2).left(), conjunctive_normal_form);
     push_plus_inside(result, t1, atermpp::down_cast<and_>(t2).right(), conjunctive_normal_form);
-    optimized_and(result, aux, result);
+    make_optimized_and(result, aux, result);
   }
   else
   {
@@ -462,14 +462,14 @@ push_constant_inside(pres_expression& result, const data::data_expression& const
   {
     push_constant_inside(aux, constant, atermpp::down_cast<and_>(t).left());
     push_constant_inside(result, constant, atermpp::down_cast<and_>(t).right());
-    optimized_and(result, aux, result);
+    make_optimized_and(result, aux, result);
   }
   else if (is_or(t))
   {
     pres_expression aux;
     push_constant_inside(aux, constant, atermpp::down_cast<or_>(t).left());
     push_constant_inside(result, constant, atermpp::down_cast<or_>(t).right());
-    optimized_or(result, aux, result);
+    make_optimized_or(result, aux, result);
   }
   else if (is_plus(t))
   {
@@ -893,7 +893,7 @@ inline pres_expression solve_fixed_point_inner(const propositional_variable& v,
   if (minimal_fixed_point)
   {
     pres_expression U;
-    optimized_or(U, m, disjunction_cj_fj(shallow_lines));
+    make_optimized_or(U, m, disjunction_cj_fj(shallow_lines));
     pres_expression cond1 = disjunction_fj_cj(steep_lines, U, rewriter);
     pres_expression cond2 = disjunction_infinity_cj_prime(shallow_lines, steep_lines, flat_lines);
 
@@ -902,7 +902,7 @@ inline pres_expression solve_fixed_point_inner(const propositional_variable& v,
     pres_expression eqninf_m;
     optimized_eqninf(eqninf_m, m);
     pres_expression cond4;
-    optimized_or(cond4, cond1, cond2);
+    make_optimized_or(cond4, cond1, cond2);
     pres_expression exp1;
     optimized_condeq(exp1, cond4, U, true_());
     pres_expression exp2;
@@ -915,7 +915,7 @@ inline pres_expression solve_fixed_point_inner(const propositional_variable& v,
   else // Maximal fixed point
   {
     pres_expression U; 
-    optimized_and(U, m, conjunction_cj_fj(shallow_lines));
+    make_optimized_and(U, m, conjunction_cj_fj(shallow_lines));
 
     pres_expression cond1 = conjunction_fj_cj(steep_lines, U, rewriter);
 
@@ -1082,7 +1082,7 @@ public:
   {
     pres_expression aux;
     optimized_minus(aux, x.left());
-    optimized_or(aux, aux, x.right());
+    make_optimized_or(aux, aux, x.right());
     apply(result,aux);
   }
 

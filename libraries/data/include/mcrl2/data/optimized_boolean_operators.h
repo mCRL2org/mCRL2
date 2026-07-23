@@ -13,440 +13,183 @@
 #define MCRL2_DATA_OPTIMIZED_BOOLEAN_OPERATORS_H
 
 #include "mcrl2/core/term_traits.h"
-#include "mcrl2/data/detail/data_sequence_algorithm.h"
+#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/data/expression_traits.h"
 
 namespace mcrl2::data
 {
 
-namespace detail
-{
-/// \return The value <tt>!arg</tt>
-template <typename TermTraits>
-inline
-void optimized_not(typename TermTraits::term_type& result, 
-                   const typename TermTraits::term_type& arg, 
-                   TermTraits)
-{
-  using tr = TermTraits;
-
-  if (tr::is_true(arg))
-  {
-    result=tr::false_();
-  }
-  else if (tr::is_false(arg))
-  {
-    result=tr::true_();
-  }
-  else if (tr::is_not(arg))
-  {
-    result=tr::not_arg(arg);
-  }
-  else
-  {
-    tr::make_not_(result, arg);
-  }
-}
-
-/// \brief Make a conjunction and optimize it if possible.
-/// \param left A term
-/// \param right A term
-/// \return The value <tt>left && right</tt>
-template <typename TermTraits>
-inline
-void optimized_and(typename TermTraits::term_type& result, 
-                   const typename TermTraits::term_type& left, 
-                   const typename TermTraits::term_type& right, 
-                   TermTraits)
-{
-  using tr = TermTraits;
-
-  if (tr::is_true(left))
-  {
-    result=right;
-  }
-  else if (tr::is_false(left))
-  {
-    result=tr::false_();
-  }
-  else if (tr::is_true(right))
-  {
-    result=left;
-  }
-  else if (tr::is_false(right))
-  {
-    result=tr::false_();
-  }
-  else if (left == right)
-  {
-    result=left;
-  }
-  else
-  {
-    tr::make_and_(result, left, right);
-  }
-}
-
-/// \brief Make a disjunction
-/// \param left A term
-/// \param right A term
-/// \return The value <tt>left || right</tt>
-template <typename TermTraits>
-inline
-void optimized_or(typename TermTraits::term_type& result, 
-                  const typename TermTraits::term_type& left, 
-                  const typename TermTraits::term_type& right, TermTraits)
-{
-  using tr = TermTraits;
-
-  if (tr::is_true(left))
-  {
-    result=tr::true_();
-  }
-  else if (tr::is_false(left))
-  {
-    result=right;
-  }
-  else if (tr::is_true(right))
-  {
-    result=tr::true_();
-  }
-  else if (tr::is_false(right))
-  {
-    result=left;
-  }
-  else if (left == right)
-  {
-    result=left;
-  }
-  else
-  {
-    tr::make_or_(result, left, right);
-  }
-}
-
-/// \brief Make an implication
-/// \param left A term
-/// \param right A term
-/// \return The value <tt>left => right</tt>
-template <typename TermTraits>
-inline
-void optimized_imp(typename TermTraits::term_type& result, 
-                   const typename TermTraits::term_type& left, 
-                   const typename TermTraits::term_type& right, TermTraits t)
-{
-  using tr = TermTraits;
-
-  if (tr::is_true(left))
-  {
-    result=right;
-  }
-  else if (tr::is_false(left))
-  {
-    result=tr::true_();
-  }
-  else if (tr::is_true(right))
-  {
-    result=tr::true_();
-  }
-  else if (tr::is_false(right))
-  {
-    optimized_not(result,left, t);
-  }
-  else if (left == right)
-  {
-    result=tr::true_();
-  }
-  else
-  {
-    tr::make_imp(result, left, right);
-  }
-}
-
-/// \brief Make a universal quantification
-/// \param v A sequence of variables
-/// \param arg A term
-////// \param remove_variables If true, remove bound variables that do not occur in \a arg.
-/// \param empty_domain_allowed If true, and there are no variables in \a v, treat
-///        as empty domain, hence yielding <tt>true</tt>, otherwise <tt>arg</tt> arg
-///        is returned in this case.
-/// \return The universal quantification <tt>forall v.arg</tt>
-template <typename TermTraits>
-inline
-void optimized_forall(typename TermTraits::term_type& result, 
-                      const typename TermTraits::variable_sequence_type& v, 
-                      const typename TermTraits::term_type& arg, 
-                      bool remove_variables, 
-                      bool empty_domain_allowed, TermTraits)
-{
-  using tr = TermTraits;
-
-  if (v.empty())
-  {
-    if (empty_domain_allowed)
-    {
-      result = tr::true_();
-    }
-    else
-    {
-      result = arg;
-    }
-  }
-  else if (tr::is_true(arg))
-  {
-    result = tr::true_();
-  }
-  else if (tr::is_false(arg))
-  {
-    result = tr::false_();
-  }
-  else
-  {
-    if (remove_variables)
-    {
-      data::variable_list variables = data::detail::set_intersection(v, free_variables(arg));
-      if (variables.empty())
-      {
-        result = arg;
-      }
-      else
-      {
-        tr::make_forall(result, variables, arg);
-      }
-    }
-    else
-    {
-      tr::make_forall(result, v, arg);
-    }
-  }
-}
-
-/// \brief Make an existential quantification
-/// \param v A sequence of variables
-/// \param arg A term
-/// \param remove_variables If true, remove bound variables that do not occur in \a arg.
-/// \param empty_domain_allowed If true, and there are no variables in \a v, treat
-///        as empty domain, hence yielding <tt>false</tt>, otherwise <tt>arg</tt> arg
-///        is returned in this case.
-/// \return The existential quantification <tt>exists v.arg</tt>
-template <typename TermTraits>
-inline
-void optimized_exists(typename TermTraits::term_type& result,
-                      const typename TermTraits::variable_sequence_type& v, 
-                      const typename TermTraits::term_type& arg, 
-                      bool remove_variables, 
-                      bool empty_domain_allowed, 
-                      TermTraits)
-{
-  using tr = TermTraits;
-
-  if (v.empty())
-  {
-    if (empty_domain_allowed)
-    {
-      result = tr::false_();
-    }
-    else
-    {
-      result = arg;
-    }
-  }
-  else if (tr::is_true(arg))
-  {
-    result = tr::true_();
-  }
-  else if (tr::is_false(arg))
-  {
-    result = tr::false_();
-  }
-  else
-  {
-    if (remove_variables)
-    {
-      data::variable_list variables = data::detail::set_intersection(v, free_variables(arg));
-      if (variables.empty())
-      {
-        result = arg;
-      }
-      else
-      {
-        result = tr::exists(variables, arg);
-      }
-    }
-    else
-    {
-      result = tr::exists(v, arg);
-    }
-  }
-}
-
 /// \brief Make a negation
+/// \param result Variable to which the resulting term is assigned.
 /// \param arg A term
-/// \param not_ The operation not
-/// \param true_ The value true
-/// \param is_true Function that tests for the value true
-/// \param false_ The value false
-/// \param is_false Function that tests for the value false
-/// \return The value <tt>!arg</tt>
-
-/// \brief Make a conjunction
-/// \param left A term
-/// \param right A term
-/// \param and_ The operation and
-/// \param true_ The value true
-/// \param is_true Function that tests for the value true
-/// \param false_ The value false
-/// \param is_false Function that tests for the value false
-/// \return The value <tt>left && right</tt>
-
-/// \brief Make a disjunction
-/// \param left A term
-/// \param right A term
-/// \param or_ The operation or
-/// \param true_ The value true
-/// \param is_true Function that tests for the value true
-/// \param false_ The value false
-/// \param is_false Function that tests for the value false
-/// \return The value <tt>left || right</tt>
-
-/// \brief Make an implication
-/// \param left A term
-/// \param right A term
-/// \param imp The implication operator
-/// \param not_ The operation not
-/// \param true_ The value true
-/// \param is_true Function that tests for the value true
-/// \param false_ The value false
-/// \param is_false Function that tests for the value false
-/// \return The value <tt>left => right</tt>
-
-/// \brief Make a universal quantification
-/// \param v A sequence of variables
-/// \param arg A term
-/// \param forall The universal quantification operator
-/// \param true_ The value true
-/// \param is_true Function that tests for the value true
-/// \param false_ The value false
-/// \param is_false Function that tests for the value false
-/// \return The universal quantification <tt>forall v.arg</tt>
-
-/// \brief Make an existential quantification
-/// \param v A sequence of variables
-/// \param arg A term
-/// \param exists The existential quantification operator
-/// \param true_ The value true
-/// \param is_true Function that tests for the value true
-/// \param false_ The value false
-/// \param is_false Function that tests for the value false
-/// \return The existential quantification <tt>exists v.arg</tt>
-
-} // namespace detail
+inline
+void make_optimized_not(data_expression& result, const data_expression& arg)
+{
+  mcrl2::core::make_optimized_not(result, arg);
+}
 
 /// \brief Make a negation
 /// \param arg A term
 /// \return The application of not to the argument.
-template <typename Term>
 inline
-void optimized_not(Term& result, const Term& arg)
+data_expression optimized_not(const data_expression& arg)
 {
-  detail::optimized_not(result, arg, core::term_traits<Term>());
+  return mcrl2::core::optimized_not(arg);
 }
 
 /// \brief Make a conjunction, and optimize if possible.
 /// \param result Contains the optimized and.
 /// \param p A term
 /// \param q A term
-template <typename Term>
 inline
-void optimized_and(Term& result, const Term& p, const Term& q)
+void make_optimized_and(data_expression& result, const data_expression& p, const data_expression& q)
 {
-  return detail::optimized_and(result, p, q, core::term_traits<Term>());
+  mcrl2::core::make_optimized_and(result, p, q);
 }
 
 /// \brief Make a conjunction, and optimize if possible.
 /// \param p A term
 /// \param q A term
 /// \return The application of and to the arguments.
-/* template <typename Term>
 inline
-Term optimized_and(const Term& p, const Term& q)
+data_expression optimized_and(const data_expression& p, const data_expression& q)
 {
-  return detail::optimized_and(p, q, core::term_traits<Term>());
-} */
+  return mcrl2::core::optimized_and(p, q);
+}
+
+/// \brief Make a disjunction
+/// \param result Will contains the optimized or.
+/// \param p A term
+/// \param q A term
+inline
+void make_optimized_or(data_expression& result, const data_expression& p, const data_expression& q)
+{
+  mcrl2::core::make_optimized_or(result, p, q);
+}
 
 /// \brief Make a disjunction
 /// \param p A term
 /// \param q A term
 /// \return The application of or to the arguments.
-template <typename Term>
 inline
-void optimized_or(Term& result, const Term& p, const Term& q)
+data_expression optimized_or(const data_expression& p, const data_expression& q)
 {
-  detail::optimized_or(result, p, q, core::term_traits<Term>());
+  return mcrl2::core::optimized_or(p, q);
 }
 
-/// \brief Make an implication
+/// \brief Make an implication and apply optimisations.
+/// \param result Will contains the optimized implication.
 /// \param p A term
 /// \param q A term
 /// \return The application of implication to the arguments.
-template <typename Term>
 inline
-void optimized_imp(Term& result, const Term& p, const Term& q)
+void make_optimized_imp(data_expression& result, const data_expression& p, const data_expression& q)
 {
-  detail::optimized_imp(result, p, q, core::term_traits<Term>());
+  mcrl2::core::make_optimized_imp(result, p, q);
 }
 
-/// \brief Make a universal quantification
+/// \brief Make an implication and apply optimisations.
+/// \param p A term
+/// \param q A term
+/// \return The application of implication to the arguments.
+inline
+data_expression optimized_imp(const data_expression& p, const data_expression& q)
+{
+  return mcrl2::core::optimized_imp(p, q);
+}
+
+/// \brief Make a universal quantification and apply optimisations.
+/// \param result Will contains the optimized universal implication
+/// \param l A sequence of variables
+/// \param p A term
+/// \param remove_variables If true, unused quantifier variables are removed
+inline
+void make_optimized_forall(data_expression& result, const variable_list& l, const data_expression& p, bool remove_variables = false)
+{
+  mcrl2::core::make_optimized_forall(result, l, p, remove_variables);
+}
+
+/// \brief Make a universal quantification and apply optimisations.
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
 /// \return The application of universal quantification to the arguments.
-template <typename Term, typename VariableSequence>
 inline
-void optimized_forall(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
+data_expression optimized_forall(const variable_list& l, const data_expression& p, bool remove_variables = false)
 {
-  bool empty_domain_allowed = true;
-  detail::optimized_forall(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+  return mcrl2::core::optimized_forall(l, p, remove_variables);
 }
 
-/// \brief Make a universal quantification
+/// \brief Make a universal quantification and apply optimisations.
+/// \param result Will contains the optimized universal implication
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
 /// \return The application of universal quantification to the arguments.
 /// The optimization forall x:empty_set. phi = true is not applied.
-template <typename Term, typename VariableSequence>
 inline
-void optimized_forall_no_empty_domain(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
+void make_optimized_forall_no_empty_domain(data_expression& result, const variable_list& l, const data_expression& p, bool remove_variables = false)
 {
-  bool empty_domain_allowed = false;
-  detail::optimized_forall(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+  mcrl2::core::make_optimized_forall_no_empty_domain(result, l, p, remove_variables);
 }
 
-/// \brief Make an existential quantification
+/// \brief Make a universal quantification and apply optimisations.
+/// \param l A sequence of variables
+/// \param p A term
+/// \param remove_variables If true, unused quantifier variables are removed
+/// \return The application of universal quantification to the arguments.
+/// The optimization forall x:empty_set. phi = true is not applied.
+inline
+data_expression optimized_forall_no_empty_domain(data_expression& result, const variable_list& l, const data_expression& p, bool remove_variables = false)
+{
+  return mcrl2::core::optimized_forall_no_empty_domain(l, p, remove_variables);
+}
+
+/// \brief Make an existential quantification and apply optimisations.
+/// \param result Will contains the optimized existential implication.
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
 /// \return The application of existential quantification to the arguments.
-template <typename Term, typename VariableSequence>
 inline
-void optimized_exists(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
+void make_optimized_exists(data_expression& result, const variable_list& l, const data_expression& p, bool remove_variables = false)
 {
-  bool empty_domain_allowed = true;
-  detail::optimized_exists(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+  mcrl2::core::make_optimized_exists(result, l, p, remove_variables);
 }
 
-/// \brief Make an existential quantification
+/// \brief Make an existential quantification and apply optimisations.
+/// \param l A sequence of variables
+/// \param p A term
+/// \param remove_variables If true, unused quantifier variables are removed
+/// \return The application of existential quantification to the arguments.
+inline
+data_expression optimized_exists(const variable_list& l, const data_expression& p, bool remove_variables = false)
+{
+  return mcrl2::core::optimized_exists(l, p, remove_variables);
+}
+
+/// \brief Make an existential quantification and apply optimisations.
+/// \param result Will contains the optimized existential implication.
+/// \param l A sequence of variables
+/// \param p A term
+/// \param remove_variables If true, unused quantifier variables are removed
+/// The optimization exists x:empty_set. phi = false is not applied.
+inline
+void make_optimized_exists_no_empty_domain(data_expression& result, const variable_list& l, const data_expression& p, bool remove_variables = false)
+{
+  mcrl2::core::make_optimized_exists_no_empty_domain(result, l, p, remove_variables);
+}
+
+/// \brief Make an existential quantification and apply optimisations.
 /// \param l A sequence of variables
 /// \param p A term
 /// \param remove_variables If true, unused quantifier variables are removed
 /// \return The application of existential quantification to the arguments.
 /// The optimization exists x:empty_set. phi = false is not applied.
-template <typename Term, typename VariableSequence>
 inline
-void optimized_exists_no_empty_domain(Term& result, const VariableSequence& l, const Term& p, bool remove_variables = false)
+data_expression optimized_exists_no_empty_domain(const variable_list& l, const data_expression& p, bool remove_variables = false)
 {
-  bool empty_domain_allowed = false;
-  detail::optimized_exists(result, l, p, remove_variables, empty_domain_allowed, core::term_traits<Term>());
+  return mcrl2::core::optimized_exists_no_empty_domain(l, p, remove_variables);
 }
 
 } // namespace mcrl2::data

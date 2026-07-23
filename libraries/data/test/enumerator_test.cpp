@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
                 sigma,
                 [&](const enumerator_element& p)
                 {
-                  data::optimized_and(result, result, p.expression());
+                  data::make_optimized_and(result, result, p.expression());
                   return result == data::sort_bool::false_();
                 },
                 is_true,
@@ -472,7 +472,7 @@ BOOST_AUTO_TEST_CASE(enumerate_callback)
                   sigma,
                   [&](const enumerator_element& p)
                   {
-                    data::optimized_and(result, result, p.expression());
+                    data::make_optimized_and(result, result, p.expression());
                     return is_false(result);
                   },
                   is_true,
@@ -487,7 +487,7 @@ BOOST_AUTO_TEST_CASE(enumerate_callback)
                   sigma,
                   [&](const enumerator_element& p)
                   {
-                    data::optimized_or(result, result, p.expression());
+                    data::make_optimized_or(result, result, p.expression());
                     return is_true(result);
                   },
                   is_false,

@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/detail/enumerator_identifier_generator.h"
 #include "mcrl2/data/replace_capture_avoiding_with_an_identifier_generator.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
@@ -178,14 +179,14 @@ struct add_simplify: public Builder<Derived>
   void apply(T& result, const forall& x)
   {
     apply(result, x.body());
-    data::optimized_forall(result, x.variables(), result, true);
+    pbes_system::make_optimized_forall(result, x.variables(), result, true);
   }
 
   template <class T>
   void apply(T& result, const exists& x)
   {
     apply(result, x.body());
-    data::optimized_exists(result, x.variables(), result, true);
+    pbes_system::make_optimized_exists(result, x.variables(), result, true);
   }
 };
 
@@ -248,7 +249,7 @@ struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::de
   {
     const data::variable_list vl = substitution_administration.push(x.variables());
     super::apply(result, x.body());
-    data::optimized_forall(result, vl, result, true);
+    pbes_system::make_optimized_forall(result, vl, result, true);
     substitution_administration.pop(vl);
   }
 
@@ -257,7 +258,7 @@ struct simplify_data_rewriter_builder : public add_data_rewriter<pbes_system::de
   {
     const data::variable_list vl = substitution_administration.push(x.variables());
     super::apply(result, x.body());
-    data::optimized_exists(result, vl, result, true);
+    pbes_system::make_optimized_exists(result, vl, result, true);
     substitution_administration.pop(vl);
   }
 

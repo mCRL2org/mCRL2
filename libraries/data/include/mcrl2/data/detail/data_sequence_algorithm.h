@@ -17,50 +17,30 @@
 namespace mcrl2::data::detail
 {
 
-/// \brief Returns the intersection of two unordered sets, that are stored in ATerm lists.
-/// \param x A sequence of data variables
-/// \param y A sequence of data variables
+/// \brief Returns the intersection of a list and a set of variables.
+/// \param x A sequence of data variables.
+/// \param y A set of data variables.
 /// \return The intersection of two sets.
 inline
-variable_list set_intersection(const variable_list& x, const variable_list& y)
+variable_list set_intersection(const variable_list& x, const std::set<variable>& y)
 {
-  if (x == y)
-  {
-    return x;
-  }
-
-  std::vector<variable> result;
-  for (const variable& v: x)
-  {
-    if (std::find(y.begin(), y.end(), v) != y.end())
-    {
-      result.push_back(v);
-    }
-  }
-  return variable_list(result.begin(), result.end());
+  return variable_list(x.begin(), 
+                       x.end(), 
+                       [](const variable& v){ return v; }, // Identity transformer.
+                       [&y](const variable& v){ return y.contains(v); });
 }
 
-/// \brief Returns the difference of two unordered sets, that are stored in aterm lists.
-/// \param x A sequence of data variables
-/// \param y A sequence of data variables
+/// \brief Returns a list of variables equal to the first list, not containing the elements in the second.
+/// \param x A list of data variables.
+/// \param y A set of data variables.
 /// \return The difference of two sets.
 inline
-variable_list set_difference(const variable_list& x, const variable_list& y)
+variable_list set_difference(const variable_list& x, const std::set<variable>& y)
 {
-  if (x == y)
-  {
-    return variable_list();
-  }
-
-  std::vector<variable> result;
-  for (const variable& v: x)
-  {
-    if (std::find(y.begin(), y.end(), v) == y.end())
-    {
-      result.push_back(v);
-    }
-  }
-  return variable_list(result.begin(), result.end());
+  return variable_list(x.begin(), 
+                       x.end(), 
+                       [](const variable& v){ return v; }, // Identity transformer.
+                       [&y](const variable& v){ return !y.contains(v); });
 }
 
 } // namespace mcrl2::data::detail

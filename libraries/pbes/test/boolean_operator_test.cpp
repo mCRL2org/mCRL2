@@ -48,9 +48,9 @@ pbes_system::pbes_expression expr(const std::string& text)
 BOOST_AUTO_TEST_CASE(test_boolean_operators)
 {
   mcrl2::pbes_system::pbes_expression result;
-  data::optimized_or(result, expr("false"), expr("X"));
+  pbes_system::make_optimized_or(result, expr("false"), expr("X"));
   BOOST_CHECK(result == expr("X"));
-  data::optimized_and(result, expr("false"), expr("X"));
+  pbes_system::make_optimized_and(result, expr("false"), expr("X"));
   BOOST_CHECK(result == expr("false"));
 }
 

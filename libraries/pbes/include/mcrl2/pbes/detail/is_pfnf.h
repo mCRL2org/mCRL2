@@ -236,7 +236,7 @@ void split_pfnf_expression(const pbes_expression& phi, pbes_expression& h, std::
   {
     if (is_pfnf_simple_expression(expr))
     {
-      data::optimized_and(h, h, expr);
+      pbes_system::make_optimized_and(h, h, expr);
     }
     else
     {

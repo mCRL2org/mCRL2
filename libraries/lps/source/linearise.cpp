@@ -7518,7 +7518,7 @@ class specification_basic_type
       // Additionally map the time variable of the second ultimate delay to that of the first.
       sigma[delay2.time_var()]=delay1.time_var();
       data_expression new_constraint;
-      optimized_and(new_constraint, delay1.constraint(), replace_variables_capture_avoiding_alt(delay2.constraint(),sigma));
+      make_optimized_and(new_constraint, delay1.constraint(), replace_variables_capture_avoiding_alt(delay2.constraint(),sigma));
       variable_list new_existential_variables = delay1.variables()+renameable_variables;
 
       // TODO: The new constraint can be simplified, as two conditions sharing the timed variable have been merged.
@@ -7588,7 +7588,7 @@ class specification_basic_type
               sigma[ultimate_delay_condition.time_var()]=actiontime1;
               const data_expression intermediateultimatedelaycondition=
                          replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma);
-              optimized_and(condition1, condition1, intermediateultimatedelaycondition);
+              make_optimized_and(condition1, condition1, intermediateultimatedelaycondition);
             }
 
             condition1=RewriteTerm(condition1);
@@ -7637,7 +7637,7 @@ class specification_basic_type
               {
                 actiontime1=ultimate_delay_condition.time_var();
                 sumvars1.push_front(ultimate_delay_condition.time_var());
-                optimized_and(condition1, condition1,
+                make_optimized_and(condition1, condition1,
                                          replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),
                                                                                   sigma));
                 has_time=true;
@@ -7651,7 +7651,7 @@ class specification_basic_type
               sigma[ultimate_delay_condition.time_var()]=actiontime1;
               const data_expression intermediateultimatedelaycondition=
                          replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma);
-              optimized_and(condition1, condition1, intermediateultimatedelaycondition);
+              make_optimized_and(condition1, condition1, intermediateultimatedelaycondition);
             }
 
             condition1=RewriteTerm(condition1);

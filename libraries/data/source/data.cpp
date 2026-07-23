@@ -191,12 +191,6 @@ std::set<data::variable> substitution_variables(const mutable_map_substitution<>
   return result;
 }
 
-variable_list free_variables(const data_expression& x)
-{
-  std::set<variable> v = find_free_variables(x);
-  return variable_list(v.begin(), v.end());
-}
-
 namespace detail {
 
 sort_expression parse_sort_expression(const std::string& text)

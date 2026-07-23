@@ -164,9 +164,9 @@ struct quantifiers_inside_infimum_builder: public data_expression_builder<quanti
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
     std::set<data::variable> vars_Psi = find_free_variables(Psi);
-    optimized_or(result,
-                 quantifiers_inside_infimum(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
-                 quantifiers_inside_infimum(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
+    make_optimized_or(result,
+                      quantifiers_inside_infimum(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
+                      quantifiers_inside_infimum(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
     make_infimum_(result, data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
                           result);
   }
@@ -268,9 +268,9 @@ struct quantifiers_inside_supremum_builder: public pres_expression_builder<quant
     }
     std::set<data::variable> vars_Phi = find_free_variables(Phi);
     std::set<data::variable> vars_Psi = find_free_variables(Psi);
-    optimized_and(result,
-                  quantifiers_inside_supremum(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
-                  quantifiers_inside_supremum(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
+    make_optimized_and(result,
+                       quantifiers_inside_supremum(set_difference(set_intersection(V, vars_Phi), vars_Psi), Phi),
+                       quantifiers_inside_supremum(set_difference(set_intersection(V, vars_Psi), vars_Phi), Psi));
      make_supremum_(result, data::detail::make_variable_list(set_intersection(V, set_intersection(vars_Phi, vars_Psi))),
                           result);
   }

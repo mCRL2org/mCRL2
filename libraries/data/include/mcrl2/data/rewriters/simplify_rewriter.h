@@ -72,7 +72,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       {
         data_expression y;
         derived().apply(y, *x.begin());
-        data::optimized_not(result, y);
+        data::make_optimized_not(result, y);
       }
       else if (is_and(x)) // x = y && z
       {
@@ -80,7 +80,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
         derived().apply(y, binary_left(x));
         data_expression z;
         derived().apply(z, binary_right(x));
-        data::optimized_and(result, y, z);
+        data::make_optimized_and(result, y, z);
       }
       else if (is_or(x)) // x = y || z
       {
@@ -88,7 +88,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
         derived().apply(y, binary_left(x));
         data_expression z;
         derived().apply(z, binary_right(x));
-        data::optimized_or(result, y, z);
+        data::make_optimized_or(result, y, z);
       }
       else if (is_imp(x)) // x = y => z
       {
@@ -96,7 +96,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
         derived().apply(y, binary_left(x));
         data_expression z;
         derived().apply(z, binary_right(x));
-        data::optimized_imp(result, y, z);
+        data::make_optimized_imp(result, y, z);
       }
       else
       {
@@ -111,7 +111,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       variable_list d = forall(x).variables();
       data_expression y;
       derived().apply(y, forall(x).body());
-      data::optimized_forall(result, d, y, true);
+      data::make_optimized_forall(result, d, y, true);
     }
 
     template <class T>
@@ -120,7 +120,7 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       variable_list d = exists(x).variables();
       data_expression y;
       derived().apply(y, exists(x).body());
-      data::optimized_exists(result, d, y, true);
+      data::make_optimized_exists(result, d, y, true);
     }
 };
 

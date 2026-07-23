@@ -225,7 +225,7 @@ struct edge_condition_traverser: public pres_expression_traverser<edge_condition
   void leave(const data::data_expression& x)
   {
     data::data_expression cond_not;
-    data::optimized_not(cond_not, x);
+    data::make_optimized_not(cond_not, x);
 
     push(stack_elem(x, cond_not, data::find_free_variables(x)));
   }
@@ -241,8 +241,8 @@ struct edge_condition_traverser: public pres_expression_traverser<edge_condition
     stack_elem ec_left = pop();
     data::data_expression cond_and;
     data::data_expression cond_or;
-    data::optimized_and(cond_and, ec_left.Cpos, ec_right.Cpos);
-    data::optimized_or(cond_or, ec_left.Cneg, ec_right.Cneg);
+    data::make_optimized_and(cond_and, ec_left.Cpos, ec_right.Cpos);
+    data::make_optimized_or(cond_or, ec_left.Cneg, ec_right.Cneg);
 
     stack_elem ec(cond_and, cond_or,
       utilities::detail::set_union(ec_left.FV, ec_right.FV));
@@ -257,8 +257,8 @@ struct edge_condition_traverser: public pres_expression_traverser<edge_condition
     data::data_expression cond_and;
     data::data_expression cond_or;
 
-    data::optimized_and(cond_and, ec_left.Cneg, ec_right.Cneg);
-    data::optimized_or(cond_or, ec_left.Cpos, ec_right.Cpos);
+    data::make_optimized_and(cond_and, ec_left.Cneg, ec_right.Cneg);
+    data::make_optimized_or(cond_or, ec_left.Cpos, ec_right.Cpos);
 
     stack_elem ec(cond_or, cond_and,
       utilities::detail::set_union(ec_left.FV, ec_right.FV));
@@ -273,8 +273,8 @@ struct edge_condition_traverser: public pres_expression_traverser<edge_condition
     data::data_expression cond_or;
     data::data_expression cond_and;
 
-    data::optimized_or(cond_or, ec_left.Cneg, ec_right.Cpos);
-    data::optimized_and(cond_and, ec_left.Cpos, ec_right.Cneg);
+    data::make_optimized_or(cond_or, ec_left.Cneg, ec_right.Cpos);
+    data::make_optimized_and(cond_and, ec_left.Cpos, ec_right.Cneg);
 
     stack_elem ec(cond_or, cond_and,
       utilities::detail::set_union(ec_left.FV, ec_right.FV));;
@@ -295,20 +295,20 @@ struct edge_condition_traverser: public pres_expression_traverser<edge_condition
       for(const data::data_expression& e: cond_set)
       {        
         data::data_expression t;
-        data::optimized_exists(t, x.variables(), e, true);
+        data::make_optimized_exists(t, x.variables(), e, true);
         new_conditions.insert(t);
       }
       cond_set = std::move(new_conditions);
       data::data_expression forall;
-      data::optimized_forall(forall, x.variables(), ec.Cpos, true);
+      data::make_optimized_forall(forall, x.variables(), ec.Cpos, true);
 
       cond_set.insert(forall);
 
       // Update FV
       conj_FV = ec.FV;
     }
-    data::optimized_forall(ec.Cpos, x.variables(), ec.Cpos, true);
-    data::optimized_exists(ec.Cneg, x.variables(), ec.Cneg, true);
+    data::make_optimized_forall(ec.Cpos, x.variables(), ec.Cpos, true);
+    data::make_optimized_exists(ec.Cneg, x.variables(), ec.Cneg, true);
 
     std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
     ec.FV = utilities::detail::set_difference(ec.FV, bound_vars);
@@ -334,20 +334,20 @@ struct edge_condition_traverser: public pres_expression_traverser<edge_condition
       for(const data::data_expression& e: cond_set)
       {
         data::data_expression t;
-        data::optimized_exists(t, x.variables(), e, true);
+        data::make_optimized_exists(t, x.variables(), e, true);
         new_conditions.insert(t);
       }
       cond_set = std::move(new_conditions);
 
       data::data_expression forall;
-      data::optimized_forall(forall, x.variables(), ec.Cneg, true);
+      data::make_optimized_forall(forall, x.variables(), ec.Cneg, true);
       cond_set.insert(forall);
 
       // Update FV
       disj_FV = ec.FV;
     }
-    data::optimized_exists(ec.Cpos, x.variables(), ec.Cpos, true);
-    data::optimized_forall(ec.Cneg, x.variables(), ec.Cneg, true);
+    data::make_optimized_exists(ec.Cpos, x.variables(), ec.Cpos, true);
+    data::make_optimized_forall(ec.Cneg, x.variables(), ec.Cneg, true);
     std::set<data::variable> bound_vars{x.variables().begin(), x.variables().end()};
     ec.FV = utilities::detail::set_difference(ec.FV, bound_vars);
     push(ec);
