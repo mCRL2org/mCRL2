@@ -21,6 +21,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/count_free_variables.h"
@@ -160,13 +161,15 @@ private:
   // Keyed by equation name instead of formula pointer for stability
   std::map<core::identifier_string, std::map<data::variable, std::size_t>> m_var_count_cache;
 
+
 public:
-  bool solve(const pbes& p, pbescegps_options options)
+  std::pair<bool, structure_graph> solve(const pbes& p, pbescegps_options options)
   {
     pbes p_copy(p);
     utilities::execution_timer timer;
     mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
-    mcrl2::log::logger::set_reporting_level(mcrl2::log::error);
+    // mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
+    structure_graph m_solved_graph;
 
     bool result = false;
     timer.start("solving approximation");
@@ -211,12 +214,12 @@ public:
       pbessolve_options options2;
       options2.rewrite_strategy = options.rewrite_strategy;
 
-      structure_graph G;
-      pbesinst_structure_graph_algorithm algorithm(options2, p_copy, G);
+      m_solved_graph = structure_graph();
+      pbesinst_structure_graph_algorithm algorithm(options2, p_copy, m_solved_graph);
       algorithm.run();
 
       // Solve the structure graph
-      result = solve_structure_graph(G);
+      result = solve_structure_graph(m_solved_graph);
       mCRL2log(log::verbose) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
     }
     timer.finish("solving approximation");
@@ -225,11 +228,12 @@ public:
       timer.report();
     }
     mcrl2::log::logger::set_reporting_level(saved_level);
-    return result;
+    return {result, m_solved_graph};
   }
 
   // Solves the underapproximated PBES using structure graph solving
-  bool solve_approximation(const pbes& p, pbescegps_options options, const bool& is_overapproximation)
+  std::pair<bool, structure_graph>
+  solve_approximation(const pbes& p, pbescegps_options options, const bool& is_overapproximation)
   {
     data::mutable_map_substitution<> sigma;
     pbes p_copy(p);
@@ -313,6 +317,7 @@ public:
           filtered_params.push_front(atermpp::down_cast<data::variable>(param));
         }
       }
+      filtered_params = reverse(filtered_params);
       propositional_variable new_bnd_var(bnd_var.name(), filtered_params);
       pbes_equation new_eq(eq.symbol(), new_bnd_var, eq.formula());
       new_equations.push_back(new_eq);
@@ -330,6 +335,7 @@ public:
       }
       ++i;
     }
+    filtered_args_vec = reverse(filtered_args_vec);
     result.initial_state() = propositional_variable_instantiation(result.initial_state().name(), filtered_args_vec);
 
     // Apply abstraction to the formulae
@@ -561,14 +567,342 @@ public:
     detail::find_free_variables_traverser f(data::variable_list(), false);
     f.apply(formula);
     std::set<data::variable> vars = f.result;
-    for (auto it = vars.rbegin(); it != vars.rend(); it++)
+    for (const auto& var: vars)
     {
-      if (essential_vars.contains(*it))
+      if (essential_vars.contains(var))
       {
-        return *it;
+        return var;
       }
     }
     return std::nullopt;
+  }
+
+  // Refine by analyzing strategy paths in the counterexample and witness structure graphs
+  // Follows the CEGPS parameter selection algorithm:
+  //   1. Walk counterexample strategy, compare decorations with witness
+  //   2. Walk witness strategy, compare decorations with counterexample
+  //   3. Walk counterexample strategy path, check edges exist in witness
+  //   4. Walk witness strategy path, check edges exist in counterexample
+  // Returns true if a variable was successfully selected for un-abstraction.
+  bool refine_using_strategies(const pbes& p,
+    abstract_param_state& state,
+    const pbescegps_options& options,
+    const structure_graph& under_graph,
+    const structure_graph& over_graph)
+  {
+    auto find_vertex_index_by_formula
+      = [](const structure_graph& g, const pbes_expression& formula) -> structure_graph::index_type
+    {
+      for (structure_graph::index_type i = 0; i < g.extent(); ++i)
+      {
+        if (g.find_vertex(i).formula() == formula)
+        {
+          return i;
+        }
+      }
+      return undefined_vertex();
+    };
+
+    auto has_edge
+      = [](const structure_graph& g, structure_graph::index_type from, structure_graph::index_type to) -> bool
+    {
+      if (from >= g.extent() || to >= g.extent())
+      {
+        return false;
+      }
+      const auto& succs = g.all_successors(from);
+      return std::find(succs.begin(), succs.end(), to) != succs.end();
+    };
+
+    auto select_variable = [&](const structure_graph& g,
+                             structure_graph::index_type v,
+                             const structure_graph& g_prime,
+                             structure_graph::vertex v_other,
+                             const std::string& phase) -> bool
+    {
+      const auto& vertex_data = g.find_vertex(v);
+      const auto& pvi = atermpp::down_cast<propositional_variable_instantiation>(vertex_data.formula());
+      core::identifier_string eq_name = pvi.name();
+
+      auto wit = state.W.find(eq_name);
+      if (wit == state.W.end() || wit->second.empty())
+      {
+        throw mcrl2::runtime_error("No abstracted variables for equation " + pp(eq_name) + " at phase " + phase);
+      }
+
+      // Find the equation in the original PBES
+      pbes_expression eq_formula;
+      propositional_variable bnd_var;
+      for (const pbes_equation& eq: p.equations())
+      {
+        if (eq.variable().name() == eq_name)
+        {
+          eq_formula = eq.formula();
+          bnd_var = eq.variable();
+          break;
+        }
+      }
+
+      // Partially instantiate the original formula with concrete values from the vertex PVI.
+      // Only non-abstracted explicit parameters are substituted; abstracted ones remain free.
+      data::mutable_indexed_substitution sigma;
+      data::data_expression_list current_pvi_args = pvi.parameters();
+      for (const data::variable& explicit_: bnd_var.parameters())
+      {
+        if (!state.W[eq_name].contains(explicit_))
+        {
+          if (current_pvi_args.empty())
+            break;
+          sigma[explicit_] = current_pvi_args.front();
+          current_pvi_args.pop_front();
+        }
+      }
+
+      data::rewriter datar(p.data(), options.rewrite_strategy);
+      simplify_data_rewriter<data::rewriter> pbesr(datar);
+      pbes_expression instantiated = pbes_rewrite(eq_formula, pbesr, sigma);
+      mCRL2log(log::verbose) << "Phase " << phase << ": Instantiated " << vertex_data << std::endl
+                             << "to " << instantiated << std::endl;
+
+      std::set<data::variable> essential_vars = wit->second;
+      pbes_expression guard_formula = instantiated;
+
+      // If we have some next vertex, we can filter based on the guard of those PVI
+      if (vertex_data.strategy != undefined_vertex() || v_other.strategy != undefined_vertex())
+      {
+        auto all_pvis = find_propositional_variable_instantiations(instantiated);
+        const propositional_variable_instantiation succ_pvi
+          = vertex_data.strategy != undefined_vertex()
+              ? atermpp::down_cast<propositional_variable_instantiation>(g.find_vertex(vertex_data.strategy).formula())
+              : atermpp::down_cast<propositional_variable_instantiation>(
+                  g_prime.find_vertex(v_other.strategy).formula());
+
+        std::set<propositional_variable_instantiation> candidate_pvis;
+        for (const auto& candidate: all_pvis)
+        {
+          if (candidate.name() != succ_pvi.name())
+          {
+            continue;
+          }
+
+          bool matches = true;
+          auto cand_it = candidate.parameters().begin();
+          auto succ_it = succ_pvi.parameters().begin();
+          auto cand_end = candidate.parameters().end();
+          auto succ_end = succ_pvi.parameters().end();
+
+          for (const pbes_equation& eq: p.equations())
+          {
+            if (eq.variable().name() == candidate.name())
+            {
+              for (const auto& param: eq.variable().parameters())
+              {
+                if (cand_it == cand_end || succ_it == succ_end)
+                {
+                  matches = true;
+                  break;
+                }
+                data::variable var = atermpp::down_cast<data::variable>(param);
+                if (!state.W[candidate.name()].contains(var) && find_free_variables(*cand_it).empty())
+                {
+                  data::data_expression eq_expr = data::lazy::equal_to(*cand_it, *succ_it);
+                  data::data_expression rewritten = datar(eq_expr);
+                  if (rewritten != data::sort_bool::true_())
+                  {
+                    matches = false;
+                    break;
+                  }
+                }
+                ++cand_it;
+                ++succ_it;
+              }
+              break;
+            }
+          }
+
+          if (matches)
+          {
+            candidate_pvis.insert(candidate);
+          }
+        }
+
+        mCRL2log(log::verbose) << "Candidate PVIs: " << core::detail::print_list(candidate_pvis) << std::endl;
+        if (!candidate_pvis.empty())
+        {
+          detail::guard_traverser gt(datar);
+          gt.apply(instantiated);
+          const std::vector<std::pair<propositional_variable_instantiation, pbes_expression>>& guards
+            = gt.expression_stack.back().guards;
+
+          for (const auto& [pvi, guard_result]: guards)
+          {
+            std::set<data::variable> guard_vars = find_free_variables(guard_result);
+            std::set<data::variable> v_intersection;
+            std::set_intersection(state.W[bnd_var.name()].begin(),
+              state.W[bnd_var.name()].end(),
+              guard_vars.begin(),
+              guard_vars.end(),
+              std::inserter(v_intersection, v_intersection.begin()));
+            if (!v_intersection.empty())
+            {
+              essential_vars = std::move(v_intersection);
+              guard_formula = guard_result;
+              mCRL2log(log::verbose) << "Guard vars: " << core::detail::print_list(guard_vars) << std::endl;
+              break;
+            }
+          }
+        }
+      }
+
+      std::optional<data::variable> selected_var;
+      if (options.var_choice == var_choice_strategy::count)
+      {
+        selected_var = choose_variable_by_count(eq_name, guard_formula, essential_vars);
+      }
+      else if (options.var_choice == var_choice_strategy::rhs)
+      {
+        selected_var = choose_variable_by_rhs_order(guard_formula, essential_vars);
+      }
+      else
+      {
+        selected_var = choose_variable_by_lhs_order(bnd_var, essential_vars);
+      }
+
+      if (selected_var)
+      {
+        mCRL2log(log::verbose) << "Phase " << phase << ": Un-abstracting " << selected_var->name() << " from "
+                               << eq_name << std::endl;
+        state.remove_abstracted_variable(p, eq_name, *selected_var);
+        return true;
+      }
+      throw mcrl2::runtime_error(
+        "No abstracted variable selected in instantiated formula for equation " + pp(eq_name) + " at phase " + phase);
+    };
+
+    // Part 1: Walk counterexample strategy path, check decorations against witness
+    {
+      structure_graph::index_type v = under_graph.initial_vertex();
+      std::set<structure_graph::index_type> visited;
+      while (v != undefined_vertex())
+      {
+        structure_graph::index_type v_other
+          = find_vertex_index_by_formula(over_graph, under_graph.find_vertex(v).formula());
+        if (v_other == undefined_vertex()
+            || under_graph.find_vertex(v).decoration != over_graph.find_vertex(v_other).decoration)
+        {
+          mCRL2log(log::verbose) << "Phase dec-cex: vertex " << under_graph.find_vertex(v)
+                                 << " has different decoration than vertex " << over_graph.find_vertex(v_other)
+                                 << std::endl;
+          if (select_variable(under_graph, v, over_graph, over_graph.find_vertex(v_other), "dec-cex"))
+            return true;
+        }
+
+        visited.insert(v);
+        structure_graph::index_type strat = under_graph.find_vertex(v).strategy;
+        if (strat != undefined_vertex() && visited.find(strat) == visited.end())
+        {
+          v = strat;
+        }
+        else
+        {
+          break;
+        }
+      }
+    }
+
+    // Part 2: Walk witness strategy path, check decorations against counterexample
+    {
+      structure_graph::index_type v = over_graph.initial_vertex();
+      std::set<structure_graph::index_type> visited;
+      while (v != undefined_vertex())
+      {
+        structure_graph::index_type v_other
+          = find_vertex_index_by_formula(under_graph, over_graph.find_vertex(v).formula());
+        if (v_other == undefined_vertex()
+            || over_graph.find_vertex(v).decoration != under_graph.find_vertex(v_other).decoration)
+        {
+          if (select_variable(over_graph, v, under_graph, under_graph.find_vertex(v_other), "dec-wit"))
+            return true;
+        }
+
+        visited.insert(v);
+        structure_graph::index_type strat = over_graph.find_vertex(v).strategy;
+        if (strat != undefined_vertex() && visited.find(strat) == visited.end())
+        {
+          v = strat;
+        }
+        else
+        {
+          break;
+        }
+      }
+    }
+
+    // Part 3: Walk counterexample strategy path, check edges exist in witness
+    {
+      structure_graph::index_type v = under_graph.initial_vertex();
+      if (v != undefined_vertex())
+      {
+        std::set<structure_graph::index_type> visited;
+        while (true)
+        {
+          structure_graph::index_type strat = under_graph.find_vertex(v).strategy;
+          if (strat == undefined_vertex() || visited.find(strat) != visited.end())
+          {
+            break;
+          }
+
+          structure_graph::index_type v_other
+            = find_vertex_index_by_formula(over_graph, under_graph.find_vertex(v).formula());
+          structure_graph::index_type strat_other
+            = find_vertex_index_by_formula(over_graph, under_graph.find_vertex(strat).formula());
+          if (v_other == undefined_vertex() || strat_other == undefined_vertex()
+              || !has_edge(over_graph, v_other, strat_other))
+          {
+            if (select_variable(under_graph, v, over_graph, over_graph.find_vertex(v_other), "edge-cex"))
+              return true;
+            break;
+          }
+
+          visited.insert(v);
+          v = strat;
+        }
+      }
+    }
+
+    // Part 4: Walk witness strategy path, check edges exist in counterexample
+    {
+      structure_graph::index_type v = over_graph.initial_vertex();
+      if (v != undefined_vertex())
+      {
+        std::set<structure_graph::index_type> visited;
+        while (true)
+        {
+          structure_graph::index_type strat = over_graph.find_vertex(v).strategy;
+          if (strat == undefined_vertex() || visited.find(strat) != visited.end())
+          {
+            break;
+          }
+
+          structure_graph::index_type v_other
+            = find_vertex_index_by_formula(under_graph, over_graph.find_vertex(v).formula());
+          structure_graph::index_type strat_other
+            = find_vertex_index_by_formula(under_graph, over_graph.find_vertex(strat).formula());
+          if (v_other == undefined_vertex() || strat_other == undefined_vertex()
+              || !has_edge(under_graph, v_other, strat_other))
+          {
+            if (select_variable(over_graph, v, under_graph, under_graph.find_vertex(v_other), "edge-wit"))
+              return true;
+            break;
+          }
+
+          visited.insert(v);
+          v = strat;
+        }
+      }
+    }
+
+    return false;
   }
 
   // Removes one parameter from one equation's abstraction set
@@ -665,13 +999,14 @@ public:
       if (all_empty)
       {
         mCRL2log(log::debug) << "No parameters to abstract, solving normally." << std::endl;
-        return solve(p, options);
+        auto [result, graph] = solve(p, options);
+        return result;
       }
 
       // Try under-approximation
       pbes p_under = apply_abstraction_to_pbes(p, state, false, options);
       mCRL2log(log::verbose) << "Trying under-approximation..." << std::endl;
-      bool under_result = solve_approximation(p_under, options, false);
+      auto [under_result, under_graph] = solve_approximation(p_under, options, false);
 
       if (under_result)
       {
@@ -682,7 +1017,7 @@ public:
 
       // Try over-approximation
       pbes p_over = apply_abstraction_to_pbes(p, state, true, options);
-      bool over_result = solve_approximation(p_over, options, true);
+      auto [over_result, over_graph] = solve_approximation(p_over, options, true);
       mCRL2log(log::verbose) << "Trying over-approximation..." << std::endl;
 
       if (!over_result)
@@ -695,7 +1030,10 @@ public:
       // Both approximations are inconclusive, refine by un-abstracting one parameter
       mCRL2log(log::verbose) << "Both approximations inconclusive, refining..." << std::endl;
       p = original_p;
-      unabstract_one_parameter(p, state, options);
+      if (!refine_using_strategies(p, state, options, under_graph, over_graph))
+      {
+        unabstract_one_parameter(p, state, options);
+      }
       make_data_closed(p, state);
       print_abstraction_summary(state.W);
     }
