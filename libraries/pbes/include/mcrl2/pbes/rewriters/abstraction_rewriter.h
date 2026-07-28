@@ -159,6 +159,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
         abstracted_args.push_front(data_expr);
       }
 
+      abstracted_args = reverse(abstracted_args);
       // Reconstruct the application with abstracted arguments
       data::data_expression reconstructed = data::application(app.head(), abstracted_args);
       result = pbes_expression(reconstructed);
@@ -225,6 +226,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
       }
       ++i;
     }
+    filtered_args_vec = reverse(filtered_args_vec);
     result = propositional_variable_instantiation(x.name(), filtered_args_vec);
   }
 
