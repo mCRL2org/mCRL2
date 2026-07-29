@@ -19,6 +19,12 @@
 #include "mcrl2/utilities/logger.h"
 #include <set>
 
+/****
+ * I am not convinced the current calculation makes sense at all. Now, the f(t1,...,tn) = f(t1',...,tn') check is
+ * syntactic. This means now that the calculation is equivalent to checking for all free variables, intersected with W.
+ * This is left here for now unused.
+ */ 
+
 namespace mcrl2::pbes_system
 {
 

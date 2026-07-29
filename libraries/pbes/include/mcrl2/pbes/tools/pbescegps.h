@@ -28,7 +28,7 @@
 #include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/pbescegps_refine_strategies.h"
-#include "mcrl2/pbes/detail/pbescegps_types.h"
+#include "mcrl2/pbes/detail/pbescegps_utilities.h"
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/io.h"
@@ -434,69 +434,6 @@ public:
     }
   }
 
-  std::optional<data::variable> choose_variable_by_count(const core::identifier_string& eq_name,
-    const pbes_expression& eq_formula,
-    const std::set<data::variable>& essential_vars)
-  {
-    // Check if we have a cached result for this equation
-    auto cache_it = m_var_count_cache.find(eq_name);
-    if (cache_it == m_var_count_cache.end())
-    {
-      // Compute and cache the results
-      mCRL2log(log::debug) << "Cache miss for " << eq_name << std::endl;
-      auto var_counts = detail::count_free_variable_occurrences(eq_formula, false);
-      m_var_count_cache[eq_name] = var_counts;
-      cache_it = m_var_count_cache.find(eq_name);
-    }
-
-    const auto& var_counts = cache_it->second;
-    std::size_t best_count = 0;
-    std::optional<data::variable> best_var;
-    for (const data::variable& var: essential_vars)
-    {
-      if (var_counts.find(var) != var_counts.end())
-      {
-        mCRL2log(log::debug) << "  - " << var.name() << " -> " << var_counts.at(var) << std::endl;
-        std::size_t count = var_counts.at(var);
-        if (count > best_count)
-        {
-          best_count = count;
-          best_var = var;
-        }
-      }
-    }
-    return best_var;
-  }
-
-  std::optional<data::variable> choose_variable_by_lhs_order(const propositional_variable& bnd_var,
-    const std::set<data::variable>& essential_vars)
-  {
-    for (const data::variable& param: bnd_var.parameters())
-    {
-      if (essential_vars.contains(param))
-      {
-        return param;
-      }
-    }
-    return std::nullopt;
-  }
-
-  std::optional<data::variable> choose_variable_by_rhs_order(const pbes_expression& formula,
-    const std::set<data::variable>& essential_vars)
-  {
-    detail::find_free_variables_traverser f(data::variable_list(), false);
-    f.apply(formula);
-    std::set<data::variable> vars = f.result;
-    for (const auto& var: vars)
-    {
-      if (essential_vars.contains(var))
-      {
-        return var;
-      }
-    }
-    return std::nullopt;
-  }
-
   // Removes one parameter from one equation's abstraction set
   void unabstract_one_parameter(const pbes& p, abstract_param_state& state, const pbescegps_options& options)
   {
@@ -510,13 +447,13 @@ public:
       {
         core::identifier_string eq_name = it->first;
         pbes_expression eq_formula;
-        propositional_variable bnd_var;
+        propositional_variable bound_variable;
         for (const pbes_equation& eq: p.equations())
         {
           if (eq.variable().name() == eq_name)
           {
             eq_formula = eq.formula();
-            bnd_var = eq.variable();
+            bound_variable = eq.variable();
             break;
           }
         }
@@ -530,15 +467,15 @@ public:
 
         if (options.var_choice == var_choice_strategy::count)
         {
-          selected_var = choose_variable_by_count(eq_name, eq_formula, essential_vars);
+          selected_var = detail::choose_variable_by_count(eq_name, eq_formula, essential_vars, m_var_count_cache);
         }
         else if (options.var_choice == var_choice_strategy::rhs)
         {
-          selected_var = choose_variable_by_rhs_order(eq_formula, essential_vars);
+          selected_var = detail::choose_variable_by_rhs_order(eq_formula, essential_vars);
         }
         else if (options.var_choice == var_choice_strategy::lhs)
         {
-          selected_var = choose_variable_by_lhs_order(bnd_var, essential_vars);
+          selected_var = detail::choose_variable_by_lhs_order(bound_variable, essential_vars);
         }
         else
         {
