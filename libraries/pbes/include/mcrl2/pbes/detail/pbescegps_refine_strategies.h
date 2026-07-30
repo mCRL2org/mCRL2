@@ -279,21 +279,20 @@ private:
 
       visited.insert(current_idx);
       index_type strategy_idx = current_vertex.strategy;
+      index_type other_strategy_idx
+        = matching_idx != undefined_vertex() ? other.find_vertex(matching_idx).strategy : undefined_vertex();
+
       if (strategy_idx != undefined_vertex() && visited.find(strategy_idx) == visited.end())
       {
         current_idx = strategy_idx;
       }
+      else if (other_strategy_idx != undefined_vertex() && visited.find(other_strategy_idx) == visited.end())
+      {
+        current_idx = find_vertex_index_by_formula(primary, other.find_vertex(other_strategy_idx).formula());
+      }
       else
       {
-        if (matching_idx != undefined_vertex() && other.find_vertex(matching_idx).strategy != undefined_vertex())
-        {
-          current_idx = find_vertex_index_by_formula(primary,
-            other.find_vertex(other.find_vertex(matching_idx).strategy).formula());
-        }
-        else
-        {
-          break;
-        }
+        break;
       }
     }
     return false;
