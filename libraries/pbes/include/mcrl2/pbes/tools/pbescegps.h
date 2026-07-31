@@ -86,6 +86,14 @@ private:
   // Shared data rewriter, created once from the data specification and reused throughout the tool
   std::optional<data::rewriter> m_datar;
 
+  // Cache of approximation results, keyed by the parameters remaining in each equation
+  // after simplification (constelm/parelm) together with the approximation type.
+  // If the same set of parameters remains again, the result and structure graph are
+  // reused without solving.
+  std::map<std::pair<std::map<core::identifier_string, std::set<data::variable>>, bool>,
+    std::pair<bool, structure_graph>>
+    m_solution_cache;
+
 
 public:
   std::pair<bool, structure_graph> solve(const pbes& p, pbescegps_options options)
@@ -177,6 +185,54 @@ public:
     }
   }
 
+  // Computes, for each equation of the simplified PBES, the parameters that remain
+  // after simplification (constelm/parelm). These determine the effective abstraction
+  // state, so they are used as the cache key.
+  std::map<core::identifier_string, std::set<data::variable>> compute_remaining_parameters(const pbes& simplified)
+  {
+    std::map<core::identifier_string, std::set<data::variable>> remaining_parameters;
+    for (const pbes_equation& eq: simplified.equations())
+    {
+      remaining_parameters[eq.variable().name()] = as_set(eq.variable().parameters());
+    }
+    return remaining_parameters;
+  }
+
+  // Solves an under- or over-approximation of the PBES, reusing a previously cached
+  // result and structure graph when the same set of equation parameters remains
+  // after simplification.
+  bool solve_approximation_cached(const pbes& p,
+    abstract_param_state& state,
+    bool is_overapproximation,
+    const pbescegps_options& options,
+    structure_graph& graph)
+  {
+    pbes p_approx = apply_abstraction_to_pbes(p, state, is_overapproximation);
+    std::map<core::identifier_string, std::set<data::variable>> remaining_parameters
+      = compute_remaining_parameters(p_approx);
+
+    auto key = std::make_pair(remaining_parameters, is_overapproximation);
+    auto cached = m_solution_cache.find(key);
+    if (cached != m_solution_cache.end())
+    {
+      mCRL2log(log::verbose) << "Using cached " << (is_overapproximation ? "over" : "under")
+                             << "-approximation with result: " << (cached->second.first ? "TRUE" : "FALSE")
+                             << std::endl;
+      mCRL2log(log::verbose) << "Remaining parameters:" << std::endl;
+      for (const auto& [eq_name, variables]: remaining_parameters)
+      {
+        mCRL2log(log::verbose) << "  " << eq_name << ": " << core::detail::print_list(variables) << std::endl;
+      }
+      graph = cached->second.second;
+      return cached->second.first;
+    }
+
+    auto [result, solved_graph] = solve_approximation(p_approx, options, is_overapproximation);
+    graph = solved_graph;
+    m_solution_cache[key] = {result, solved_graph};
+    return result;
+  }
+
   // Collects all parameters W = decl(E) from a PBES
   // This gathers all data variables that appear in PBES equations
   std::set<data::variable> extract_equation_parameters(const pbes& p)
@@ -222,10 +278,7 @@ public:
     bool is_overapproximation);
 
   // Applies abstraction to all equations in a PBES
-  pbes apply_abstraction_to_pbes(const pbes& p,
-    const abstract_param_state& state,
-    bool is_overapproximation,
-    pbescegps_options options)
+  pbes apply_abstraction_to_pbes(const pbes& p, const abstract_param_state& state, bool is_overapproximation)
   {
     pbes result = p;
 
@@ -279,20 +332,24 @@ public:
     // Rewrite expressions for simplification
     simplify_data_rewriter<data::rewriter> pbesr(*m_datar);
     pbes_rewrite(result, pbesr);
+    mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
+    if (saved_level == mcrl2::log::trace || saved_level == mcrl2::log::debug)
+    {
+      mcrl2::log::logger::set_reporting_level(mcrl2::log::verbose);
+    }
+    pbes_system::parelm(result, false);
     pbes_system::parelm(result, false);
     pbes_constelm_algorithm<data::rewriter, simplify_data_rewriter<data::rewriter>> algorithm(*m_datar, pbesr);
     algorithm.run(result);
     pbes_system::parelm(result, false);
+    mcrl2::log::logger::set_reporting_level(saved_level);
 
     return result;
   }
 
   // Helper: Calculate non-Control Flow Parameters (CFP) per equation
   // Populates the abstraction_state directly with W and indices
-  void compute_initial_abstraction_set(pbes& p,
-    pbescegps_options& options,
-    const bool use_init_control_flow,
-    abstract_param_state& state)
+  void compute_initial_abstraction_set(pbes& p, const bool use_init_control_flow, abstract_param_state& state)
   {
     // Initialize W with ALL parameters for each equation using add_abstracted_variable
     for (const pbes_equation& eq: p.equations())
@@ -522,7 +579,7 @@ public:
 
     // Calculate non-Control Flow Parameters (parameters to abstract) per equation
     abstract_param_state state;
-    compute_initial_abstraction_set(p, options, options.init_control_flow, state);
+    compute_initial_abstraction_set(p, options.init_control_flow, state);
 
     pbes original_p = p;
 
@@ -554,9 +611,9 @@ public:
       }
 
       // Try under-approximation
-      pbes p_under = apply_abstraction_to_pbes(p, state, false, options);
       mCRL2log(log::verbose) << "Trying under-approximation..." << std::endl;
-      auto [under_result, under_graph] = solve_approximation(p_under, options, false);
+      structure_graph under_graph;
+      bool under_result = solve_approximation_cached(p, state, false, options, under_graph);
 
       if (under_result)
       {
@@ -566,9 +623,9 @@ public:
       }
 
       // Try over-approximation
-      pbes p_over = apply_abstraction_to_pbes(p, state, true, options);
-      auto [over_result, over_graph] = solve_approximation(p_over, options, true);
       mCRL2log(log::verbose) << "Trying over-approximation..." << std::endl;
+      structure_graph over_graph;
+      bool over_result = solve_approximation_cached(p, state, true, options, over_graph);
 
       if (!over_result)
       {
