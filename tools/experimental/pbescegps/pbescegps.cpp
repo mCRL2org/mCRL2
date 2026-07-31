@@ -51,10 +51,14 @@ protected:
       {
         m_options.var_choice = var_choice_strategy::count;
       }
+      else if (var_choice_str == "all")
+      {
+        m_options.var_choice = var_choice_strategy::all;
+      }
       else
       {
         throw mcrl2::runtime_error("Invalid var-choice option '" + var_choice_str + "'. "
-          "Valid options are: 'lhs', 'rhs', 'count'.");
+          "Valid options are: 'lhs', 'rhs', 'count', 'all'.");
       }
   }
 
@@ -70,6 +74,7 @@ protected:
           "'lhs' (default) the variable order of the left-hand side of the equation\n"
           "'rhs' the variable order of the right-hand side of the equation\n"
           "'count' the free variable that occurs most often (excluding data expressions in PVI)\n"
+          "'all' un-abstract all variables that occur on iteration\n"
           "Choose the method of chosing a variable on iteration.");
   }
 

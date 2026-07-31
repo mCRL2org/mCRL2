@@ -36,7 +36,8 @@ enum class var_choice_strategy
 {
   lhs, // variable order of the left-hand side of the equation
   rhs, // variable order of the right-hand side of the equation
-  count // free variable that occurs most often (excluding data expressions in PVI)
+  count, // free variable that occurs most often (excluding data expressions in PVI)
+  all // un-abstract all variables that occur
 };
 
 struct pbescegps_options
@@ -148,11 +149,13 @@ inline std::optional<data::variable> choose_variable_by_count(const core::identi
 }
 
 inline std::optional<data::variable> choose_variable_by_lhs_order(const propositional_variable& bound_variable,
-  const std::set<data::variable>& essential_vars)
+  const std::set<data::variable>& essential_vars,
+  const pbes_expression& formula = pbes_expression())
 {
   for (const data::variable& param: bound_variable.parameters())
   {
-    if (essential_vars.contains(param))
+    if (essential_vars.contains(param)
+        && (formula == pbes_expression() || search_variable(formula, param)))
     {
       return param;
     }
