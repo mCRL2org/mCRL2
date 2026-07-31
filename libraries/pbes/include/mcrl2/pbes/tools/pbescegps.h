@@ -81,6 +81,9 @@ private:
   // Keyed by equation name instead of formula pointer for stability
   std::map<core::identifier_string, std::map<data::variable, std::size_t>> m_var_count_cache;
 
+  // Shared data rewriter, created once from the data specification and reused throughout the tool
+  std::optional<data::rewriter> m_datar;
+
 
 public:
   std::pair<bool, structure_graph> solve(const pbes& p, pbescegps_options options)
@@ -135,7 +138,7 @@ public:
       options2.rewrite_strategy = options.rewrite_strategy;
 
       m_solved_graph = structure_graph();
-      pbesinst_structure_graph_algorithm algorithm(options2, p_copy, m_solved_graph);
+      pbesinst_structure_graph_algorithm algorithm(options2, p_copy, m_solved_graph, m_datar);
       algorithm.run();
 
       // Solve the structure graph
@@ -272,8 +275,7 @@ public:
     mCRL2log(log::trace) << pp(result) << std::endl;
 
     // Rewrite expressions for simplification
-    data::rewriter datar(p.data(), options.rewrite_strategy);
-    simplify_data_rewriter<data::rewriter> pbesr(datar);
+    simplify_data_rewriter<data::rewriter> pbesr(*m_datar);
     pbes_rewrite(result, pbesr);
 
     return result;
@@ -305,8 +307,7 @@ public:
     mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
     mcrl2::log::logger::set_reporting_level(mcrl2::log::info);
 
-    data::rewriter datar(p.data(), options.rewrite_strategy);
-    detail::stategraph_pbes stategraph(p, datar);
+    detail::stategraph_pbes stategraph(p, *m_datar);
     pbesstategraph_options opts;
     detail::stategraph_algorithm algo(p, opts);
 
@@ -353,7 +354,7 @@ public:
   void make_data_closed(const pbes& p, abstract_param_state& state)
   {
     bool done = false;
-    mCRL2log(log::debug) << "======== Closing the data ======" << std::endl;
+    mCRL2log(log::trace) << "======== Closing the data ======" << std::endl;
     auto global_variables = p.global_variables();
     do
     {
@@ -364,7 +365,7 @@ public:
         for (const propositional_variable_instantiation& pvi: pvis)
         {
           std::size_t i = 0;
-          mCRL2log(log::debug) << "Data-closed: eq " << eq.variable().name() << " pvi " << pvi
+          mCRL2log(log::trace) << "Data-closed: eq " << eq.variable().name() << " pvi " << pvi
                                << " has abstracted parameters at indices "
                                << core::detail::print_list(state.I.at(pvi.name())) << " with "
                                << core::detail::print_list(state.W.at(pvi.name())) << std::endl;
@@ -374,14 +375,14 @@ public:
             if (!contains(state.I.at(pvi.name()), i))
             {
               std::set<data::variable> free_vars = find_free_variables(pvi_param);
-              mCRL2log(log::debug) << "Data-closed: free_vars " << core::detail::print_list(free_vars) << " in \""
+              mCRL2log(log::trace) << "Data-closed: free_vars " << core::detail::print_list(free_vars) << " in \""
                                    << pp(pvi_param) << "\" due to " << pp(pvi) << std::endl;
               for (const data::variable& v: free_vars)
               {
                 if (contains(state.W[eq.variable().name()], v)
                     && std::find(global_variables.begin(), global_variables.end(), v) == global_variables.end())
                 {
-                  mCRL2log(log::debug) << "Data-closed: concrete param " << pp(v)
+                  mCRL2log(log::trace) << "Data-closed: concrete param " << pp(v)
                                        << " in W=" << core::detail::print_list(state.W[eq.variable().name()])
                                        << " of equation " << pvi.name() << " due to " << pp(pvi) << std::endl;
                   // Find the parameter with the same index
@@ -401,7 +402,7 @@ public:
                     throw mcrl2::runtime_error("Data-closed: Could not find parameter " + pp(v.name()) + " in equation "
                                                + pp(eq.variable().name()));
                   }
-                  mCRL2log(log::debug) << "Data-closed: Updated W="
+                  mCRL2log(log::trace) << "Data-closed: Updated W="
                                        << core::detail::print_list(state.W[eq.variable().name()]) << std::endl;
                 }
               }
@@ -412,11 +413,11 @@ public:
       }
     }
     while (!done);
-    mCRL2log(log::debug) << "======== Data closed ======" << std::endl;
-    mCRL2log(log::debug) << "Data closed: W = " << std::endl;
+    mCRL2log(log::trace) << "======== Data closed ======" << std::endl;
+    mCRL2log(log::trace) << "Data closed: W = " << std::endl;
     for (const auto& [eq_name, var_set]: state.W)
     {
-      mCRL2log(log::debug) << "" << eq_name << ": " << core::detail::print_list(var_set) << std::endl;
+      mCRL2log(log::trace) << "" << eq_name << ": " << core::detail::print_list(var_set) << std::endl;
     }
   }
 
@@ -499,6 +500,9 @@ public:
 
   bool run_cegps_algorithm(pbes& p, pbescegps_options options)
   {
+    // Create the data rewriter once and reuse it throughout the tool
+    m_datar.emplace(p.data(), options.rewrite_strategy);
+
     // Calculate non-Control Flow Parameters (parameters to abstract) per equation
     abstract_param_state state;
     compute_initial_abstraction_set(p, options, options.init_control_flow, state);
@@ -560,7 +564,7 @@ public:
       mCRL2log(log::verbose) << "Both approximations inconclusive, refining..." << std::endl;
       p = original_p;
       pbescegps_refine_strategies refine;
-      if (!refine.refine_using_strategies(p, state, options, under_graph, over_graph))
+      if (!refine.refine_using_strategies(p, state, options, under_graph, over_graph, *m_datar))
       {
         unabstract_one_parameter(p, state, options);
       }

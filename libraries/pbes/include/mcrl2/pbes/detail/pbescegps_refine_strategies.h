@@ -51,6 +51,7 @@ private:
   const pbes* m_p = nullptr;
   abstract_param_state* m_state = nullptr;
   const pbescegps_options* m_options = nullptr;
+  const data::rewriter* m_datar = nullptr;
 
   std::map<core::identifier_string, std::map<data::variable, std::size_t>> m_var_count_cache;
 
@@ -124,8 +125,7 @@ private:
       }
     }
 
-    data::rewriter data_rewriter(p.data(), options.rewrite_strategy);
-    simplify_data_rewriter<data::rewriter> pbes_rewriter(data_rewriter);
+    simplify_data_rewriter<data::rewriter> pbes_rewriter(*m_datar);
     pbes_expression instantiated_formula = pbes_rewrite(equation_formula, pbes_rewriter, sigma);
     mCRL2log(log::debug) << "Phase " << phase << ": Instantiated " << current_vertex << std::endl
                          << "to " << instantiated_formula << std::endl;
@@ -179,7 +179,7 @@ private:
               if (!state.W[candidate.name()].contains(var) && find_free_variables(*cand_it).empty())
               {
                 data::data_expression eq_expr = data::lazy::equal_to(*cand_it, *succ_it);
-                data::data_expression rewritten = data_rewriter(eq_expr);
+                data::data_expression rewritten = (*m_datar)(eq_expr);
                 if (rewritten != data::sort_bool::true_())
                 {
                   matches = false;
@@ -202,7 +202,7 @@ private:
       mCRL2log(log::debug) << "Candidate PVIs: " << core::detail::print_list(candidate_pvis) << std::endl;
       if (!candidate_pvis.empty())
       {
-        detail::guard_traverser guard_trav(data_rewriter);
+        detail::guard_traverser guard_trav(*m_datar);
         guard_trav.apply(instantiated_formula);
         const std::vector<std::pair<propositional_variable_instantiation, pbes_expression>>& guards
           = guard_trav.expression_stack.back().guards;
@@ -324,8 +324,8 @@ private:
       }
       mCRL2log(log::debug) << std::endl;
 
-      if (matching_idx != undefined_vertex() && strategy_match_idx != undefined_vertex()
-          && !has_edge(other, matching_idx, strategy_match_idx))
+      if (matching_idx != undefined_vertex()
+          && (strategy_match_idx == undefined_vertex() || !has_edge(other, matching_idx, strategy_match_idx)))
       {
         mCRL2log(log::debug) << " found other edge for vertex " << current_vertex;
         if (select_variable(primary, current_idx, other, matching_idx, phase))
@@ -344,7 +344,8 @@ public:
     abstract_param_state& state,
     const pbescegps_options& options,
     const structure_graph& under_graph,
-    const structure_graph& over_graph)
+    const structure_graph& over_graph,
+    const data::rewriter& data_rewriter)
   {
     if (under_graph.is_empty() || over_graph.is_empty())
     {
@@ -356,6 +357,7 @@ public:
     m_p = &p;
     m_state = &state;
     m_options = &options;
+    m_datar = &data_rewriter;
 
     mCRL2log(log::debug) << "Refining using strategies" << std::endl;
     mCRL2log(log::debug) << "Under: " << under_graph << std::endl;
