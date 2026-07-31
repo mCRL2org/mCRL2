@@ -24,6 +24,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/detail/count_free_variables.h"
 #include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
@@ -32,6 +33,7 @@
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
@@ -277,6 +279,10 @@ public:
     // Rewrite expressions for simplification
     simplify_data_rewriter<data::rewriter> pbesr(*m_datar);
     pbes_rewrite(result, pbesr);
+    pbes_system::parelm(result, false);
+    pbes_constelm_algorithm<data::rewriter, simplify_data_rewriter<data::rewriter>> algorithm(*m_datar, pbesr);
+    algorithm.run(result);
+    pbes_system::parelm(result, false);
 
     return result;
   }
@@ -466,7 +472,18 @@ public:
 
         std::optional<data::variable> selected_var;
 
-        if (options.var_choice == var_choice_strategy::count)
+        if (options.var_choice == var_choice_strategy::all)
+        {
+          mCRL2log(log::debug) << "Un-abstracted all parameters " << core::detail::print_list(essential_vars)
+                               << " from equation " << eq_name << std::endl;
+          for (const data::variable& var: essential_vars)
+          {
+            state.remove_abstracted_variable(p, eq_name, var);
+          }
+          found = true;
+          return;
+        }
+        else if (options.var_choice == var_choice_strategy::count)
         {
           selected_var = detail::choose_variable_by_count(eq_name, eq_formula, essential_vars, m_var_count_cache);
         }

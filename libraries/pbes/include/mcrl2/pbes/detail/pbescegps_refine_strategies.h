@@ -227,6 +227,17 @@ private:
       }
     }
 
+    if (options.var_choice == var_choice_strategy::all && guard_formula != instantiated_formula)
+    {
+      mCRL2log(log::debug) << "Phase " << phase << ": Un-abstracting " << core::detail::print_list(essential_vars)
+                           << " from " << var_name << std::endl;
+      for (const data::variable& var: essential_vars)
+      {
+        state.remove_abstracted_variable(p, var_name, var);
+      }
+      return !essential_vars.empty();
+    }
+
     std::optional<data::variable> selected_var;
     if (options.var_choice == var_choice_strategy::count)
     {
@@ -302,41 +313,61 @@ private:
   {
     mCRL2log(log::debug) << "Phase " << phase << std::endl;
 
-    index_type current_idx = primary.initial_vertex();
-    std::set<index_type> visited;
-    while (true)
+    // Walk the strategy path and try to refine on edges that miss a counterpart
+    // in the other structure graph. Edges that go from one equation to a
+    // different equation (i.e. the formula names differ) are checked first.
+    auto check_edges = [this, &primary, &other, &phase](bool cross_equation_only)
     {
-      const vertex& current_vertex = primary.find_vertex(current_idx);
-      index_type strategy_idx = current_vertex.strategy;
-      if (strategy_idx == undefined_vertex() || visited.find(strategy_idx) != visited.end())
+      index_type current_idx = primary.initial_vertex();
+      std::set<index_type> visited;
+      while (true)
       {
-        break;
-      }
+        const vertex& current_vertex = primary.find_vertex(current_idx);
+        index_type strategy_idx = current_vertex.strategy;
+        if (strategy_idx == undefined_vertex() || visited.find(strategy_idx) != visited.end())
+        {
+          break;
+        }
 
-      const vertex& strategy_vertex = primary.find_vertex(strategy_idx);
-      index_type matching_idx = find_vertex_index_by_formula(other, current_vertex.formula());
-      index_type strategy_match_idx = find_vertex_index_by_formula(other, strategy_vertex.formula());
-      mCRL2log(log::debug) << "Phase " << phase << " vertex " << current_vertex;
-      if (matching_idx != undefined_vertex())
-      {
-        mCRL2log(log::debug) << " trying other edge if " << strategy_match_idx << " is in "
-                             << core::detail::print_list(other.find_vertex(matching_idx).successors);
-      }
-      mCRL2log(log::debug) << std::endl;
+        const vertex& strategy_vertex = primary.find_vertex(strategy_idx);
+        const propositional_variable_instantiation& current_pvi
+          = atermpp::down_cast<propositional_variable_instantiation>(current_vertex.formula());
+        const propositional_variable_instantiation& strategy_pvi
+          = atermpp::down_cast<propositional_variable_instantiation>(strategy_vertex.formula());
+        const bool cross_equation = current_pvi.name() != strategy_pvi.name();
 
-      if (matching_idx != undefined_vertex()
-          && (strategy_match_idx == undefined_vertex() || !has_edge(other, matching_idx, strategy_match_idx)))
-      {
-        mCRL2log(log::debug) << " found other edge for vertex " << current_vertex;
-        if (select_variable(primary, current_idx, other, matching_idx, phase))
-          return true;
-        break;
-      }
+        if (!cross_equation_only || cross_equation)
+        {
+          index_type matching_idx = find_vertex_index_by_formula(other, current_vertex.formula());
+          index_type strategy_match_idx = find_vertex_index_by_formula(other, strategy_vertex.formula());
+          mCRL2log(log::debug) << "Phase " << phase << " vertex " << current_vertex;
+          if (matching_idx != undefined_vertex())
+          {
+            mCRL2log(log::debug) << " trying other edge if " << strategy_match_idx << " is in "
+                                 << core::detail::print_list(other.find_vertex(matching_idx).successors);
+          }
+          mCRL2log(log::debug) << std::endl;
 
-      visited.insert(current_idx);
-      current_idx = strategy_idx;
-    }
-    return false;
+          if (matching_idx != undefined_vertex()
+              && (strategy_match_idx == undefined_vertex() || !has_edge(other, matching_idx, strategy_match_idx)))
+          {
+            mCRL2log(log::debug) << " found other edge for vertex " << current_vertex << std::endl;
+            if (select_variable(primary, current_idx, other, matching_idx, phase))
+              return true;
+            break;
+          }
+        }
+
+        visited.insert(current_idx);
+        current_idx = strategy_idx;
+      }
+      return false;
+    };
+
+    if (check_edges(true))
+      return true;
+
+    return check_edges(false);
   }
 
 public:
@@ -366,10 +397,10 @@ public:
     if (step_decorations(under_graph, over_graph, "dec-cex"))
       return true;
 
-    if (step_decorations(over_graph, under_graph, "dec-wit"))
-      return true;
-
     if (step_edges(under_graph, over_graph, "edge-cex"))
+      return true;
+    
+    if (step_decorations(over_graph, under_graph, "dec-wit"))
       return true;
 
     if (step_edges(over_graph, under_graph, "edge-wit"))
