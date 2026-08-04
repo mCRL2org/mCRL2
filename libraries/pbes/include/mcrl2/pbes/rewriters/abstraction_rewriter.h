@@ -179,7 +179,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     pbes_expression right;
     super::apply(left, x.left());
     super::apply(right, x.right());
-    make_and_(result, left, right);
+    make_optimized_and(result, left, right);
   }
 
   template<class T>
@@ -190,7 +190,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     pbes_expression right;
     super::apply(left, x.left());
     super::apply(right, x.right());
-    make_or_(result, left, right);
+    make_optimized_or(result, left, right);
   }
 
   template<class T>
@@ -199,7 +199,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     mCRL2log(log::trace) << "Processing PBES forall" << std::endl;
     pbes_expression body;
     super::apply(body, x.body());
-    result = make_forall_(x.variables(), body);
+    result = optimized_forall(x.variables(), body);
   }
 
   template<class T>
@@ -208,7 +208,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
     mCRL2log(log::trace) << "Processing PBES exists" << std::endl;
     pbes_expression body;
     super::apply(body, x.body());
-    result = make_exists_(x.variables(), body);
+    result = optimized_exists(x.variables(), body);
   }
 
   template<class T>
