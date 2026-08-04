@@ -47,6 +47,7 @@ struct pbescegps_options
   bool solve_symbolic = false;
   var_choice_strategy var_choice = var_choice_strategy::lhs;
   std::string solve_symbolic_args = "";
+  std::size_t number_of_threads = 1;
 };
 
 struct abstract_param_state
@@ -154,8 +155,7 @@ inline std::optional<data::variable> choose_variable_by_lhs_order(const proposit
 {
   for (const data::variable& param: bound_variable.parameters())
   {
-    if (essential_vars.contains(param)
-        && (formula == pbes_expression() || search_variable(formula, param)))
+    if (essential_vars.contains(param) && (formula == pbes_expression() || search_variable(formula, param)))
     {
       return param;
     }
