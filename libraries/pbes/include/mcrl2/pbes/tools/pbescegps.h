@@ -101,7 +101,10 @@ public:
     pbes p_copy(p);
     utilities::execution_timer timer;
     mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
-    // mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
+    if (saved_level == mcrl2::log::trace || saved_level == mcrl2::log::debug)
+    {
+      mcrl2::log::logger::set_reporting_level(mcrl2::log::verbose);
+    }
     structure_graph m_solved_graph;
 
     bool result = false;

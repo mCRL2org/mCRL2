@@ -249,7 +249,7 @@ private:
     }
     else
     {
-      selected_var = detail::choose_variable_by_lhs_order(bound_variable, essential_vars);
+      selected_var = detail::choose_variable_by_lhs_order(bound_variable, essential_vars, guard_formula);
     }
 
     if (selected_var)
