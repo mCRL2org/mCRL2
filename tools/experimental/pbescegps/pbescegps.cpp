@@ -14,6 +14,7 @@
 #include "mcrl2/pbes/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/parallel_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -25,57 +26,61 @@ using data::tools::rewriter_tool;
 using pbes_system::tools::pbes_input_tool;
 using pbes_system::tools::pbes_rewriter_tool;
 
-class pbescegps_tool : public pbes_input_tool<pbes_rewriter_tool<rewriter_tool<input_tool>>>
+class pbescegps_tool : public parallel_tool<pbes_input_tool<pbes_rewriter_tool<rewriter_tool<input_tool>>>>
 {
 protected:
-  using super = pbes_input_tool<pbes_rewriter_tool<rewriter_tool<input_tool>>>;
+  using super = parallel_tool<pbes_input_tool<pbes_rewriter_tool<rewriter_tool<input_tool>>>>;
 
   pbescegps_options m_options;
 
-  void parse_options(const command_line_parser& parser) override { 
-      super::parse_options(parser);
-      m_options.init_control_flow = parser.has_option("init-cfp");
-      m_options.solve_symbolic = parser.has_option("solve-symbolic-args");
-      m_options.solve_symbolic_args = parser.option_argument_as<std::string>("solve-symbolic-args");
-      
-      std::string var_choice_str = parser.option_argument_as<std::string>("var-choice");
-      if (var_choice_str == "lhs")
-      {
-        m_options.var_choice = var_choice_strategy::lhs;
-      }
-      else if (var_choice_str == "rhs")
-      {
-        m_options.var_choice = var_choice_strategy::rhs;
-      }
-      else if (var_choice_str == "count")
-      {
-        m_options.var_choice = var_choice_strategy::count;
-      }
-      else if (var_choice_str == "all")
-      {
-        m_options.var_choice = var_choice_strategy::all;
-      }
-      else
-      {
-        throw mcrl2::runtime_error("Invalid var-choice option '" + var_choice_str + "'. "
-          "Valid options are: 'lhs', 'rhs', 'count', 'all'.");
-      }
+  void parse_options(const command_line_parser& parser) override
+  {
+    super::parse_options(parser);
+    m_options.init_control_flow = parser.has_option("init-cfp");
+    m_options.solve_symbolic = parser.has_option("solve-symbolic-args");
+    m_options.solve_symbolic_args = parser.option_argument_as<std::string>("solve-symbolic-args");
+    m_options.number_of_threads = number_of_threads();
+
+    std::string var_choice_str = parser.option_argument_as<std::string>("var-choice");
+    if (var_choice_str == "lhs")
+    {
+      m_options.var_choice = var_choice_strategy::lhs;
+    }
+    else if (var_choice_str == "rhs")
+    {
+      m_options.var_choice = var_choice_strategy::rhs;
+    }
+    else if (var_choice_str == "count")
+    {
+      m_options.var_choice = var_choice_strategy::count;
+    }
+    else if (var_choice_str == "all")
+    {
+      m_options.var_choice = var_choice_strategy::all;
+    }
+    else
+    {
+      throw mcrl2::runtime_error("Invalid var-choice option '" + var_choice_str
+                                 + "'. "
+                                   "Valid options are: 'lhs', 'rhs', 'count', 'all'.");
+    }
   }
 
-  void add_options(interface_description& desc) override { 
-      super::add_options(desc);
-      desc.add_option("init-cfp",
-                  "Use the (global) control flow parameters as initial parameters.", 'c');
-      desc.add_option("solve-symbolic-args",
-          utilities::make_optional_argument("STR", ""),
-                  "Solve the PBES symbolically using the following arguments.", 's');
-      desc.add_option("var-choice",
-          utilities::make_optional_argument("STR", "lhs"),
-          "'lhs' (default) the variable order of the left-hand side of the equation\n"
-          "'rhs' the variable order of the right-hand side of the equation\n"
-          "'count' the free variable that occurs most often (excluding data expressions in PVI)\n"
-          "'all' un-abstract all variables that occur on iteration\n"
-          "Choose the method of chosing a variable on iteration.");
+  void add_options(interface_description& desc) override
+  {
+    super::add_options(desc);
+    desc.add_option("init-cfp", "Use the (global) control flow parameters as initial parameters.", 'c');
+    desc.add_option("solve-symbolic-args",
+      utilities::make_optional_argument("STR", ""),
+      "Solve the PBES symbolically using the following arguments.",
+      's');
+    desc.add_option("var-choice",
+      utilities::make_optional_argument("STR", "lhs"),
+      "'lhs' (default) the variable order of the left-hand side of the equation\n"
+      "'rhs' the variable order of the right-hand side of the equation\n"
+      "'count' the free variable that occurs most often (excluding data expressions in PVI)\n"
+      "'all' un-abstract all variables that occur on iteration\n"
+      "Choose the method of chosing a variable on iteration.");
   }
 
 public:

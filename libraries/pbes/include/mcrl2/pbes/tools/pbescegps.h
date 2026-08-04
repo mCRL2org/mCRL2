@@ -146,6 +146,7 @@ public:
     {
       pbessolve_options options2;
       options2.rewrite_strategy = options.rewrite_strategy;
+      options2.number_of_threads = options.number_of_threads;
 
       m_solved_graph = structure_graph();
       pbesinst_structure_graph_algorithm algorithm(options2, p_copy, m_solved_graph, m_datar);
