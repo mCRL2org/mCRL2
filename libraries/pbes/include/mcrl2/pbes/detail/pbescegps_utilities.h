@@ -166,9 +166,7 @@ inline std::optional<data::variable> choose_variable_by_lhs_order(const proposit
 inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_expression& formula,
   const std::set<data::variable>& essential_vars)
 {
-  find_free_variables_traverser f(data::variable_list(), false);
-  f.apply(formula);
-  std::set<data::variable> vars = f.result;
+  std::set<data::variable> vars = find_free_variables(formula, data::variable_list(), false);
   for (const auto& var: vars)
   {
     if (essential_vars.contains(var))
@@ -182,9 +180,7 @@ inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_exp
 inline std::optional<data::variable> choose_variable_by_rhs_order_reverse(const pbes_expression& formula,
   const std::set<data::variable>& essential_vars)
 {
-  find_free_variables_traverser f(data::variable_list(), false);
-  f.apply(formula);
-  std::set<data::variable> vars = f.result;
+  std::set<data::variable> vars = find_free_variables(formula, data::variable_list(), false);
   for (const auto& var: std::ranges::reverse_view(vars))
   {
     if (essential_vars.contains(var))
