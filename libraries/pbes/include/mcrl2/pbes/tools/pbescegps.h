@@ -554,7 +554,7 @@ public:
         }
         else if (options.var_choice == var_choice_strategy::lhs)
         {
-          selected_var = detail::choose_variable_by_lhs_order(bound_variable, essential_vars);
+          selected_var = detail::choose_variable_by_lhs_order(bound_variable, essential_vars, std::nullopt);
         }
         else
         {
