@@ -221,6 +221,7 @@ private:
             essential_vars = std::move(common_vars);
             guard_formula = guard_expr;
             mCRL2log(log::debug) << "Guard vars: " << core::detail::print_list(guard_vars) << std::endl;
+            mCRL2log(log::debug) << "Guard formula: " << guard_formula << std::endl;
             break;
           }
         }
@@ -391,8 +392,8 @@ public:
     m_datar = &data_rewriter;
 
     mCRL2log(log::debug) << "Refining using strategies" << std::endl;
-    mCRL2log(log::debug) << "Under: " << under_graph << std::endl;
-    mCRL2log(log::debug) << "Over: " << over_graph << std::endl;
+    mCRL2log(log::trace) << "Under: " << under_graph << std::endl;
+    mCRL2log(log::trace) << "Over: " << over_graph << std::endl;
 
     if (step_decorations(under_graph, over_graph, "dec-cex"))
       return true;
