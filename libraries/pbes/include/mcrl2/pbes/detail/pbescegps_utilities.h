@@ -151,11 +151,12 @@ inline std::optional<data::variable> choose_variable_by_count(const core::identi
 
 inline std::optional<data::variable> choose_variable_by_lhs_order(const propositional_variable& bound_variable,
   const std::set<data::variable>& essential_vars,
-  const pbes_expression& formula = pbes_expression())
+  const pbes_expression& formula = true_())
 {
+  std::set<data::variable> free_vars = find_free_variables(formula, data::variable_list(), false);
   for (const data::variable& param: bound_variable.parameters())
   {
-    if (essential_vars.contains(param) && (formula == pbes_expression() || search_variable(formula, param)))
+    if (essential_vars.contains(param) && free_vars.contains(param))
     {
       return param;
     }
