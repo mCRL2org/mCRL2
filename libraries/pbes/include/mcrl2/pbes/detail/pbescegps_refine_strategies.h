@@ -255,8 +255,8 @@ private:
 
     if (selected_var)
     {
-      mCRL2log(log::debug) << "Phase " << phase << ": Un-abstracting " << selected_var->name() << " from " << var_name
-                           << std::endl;
+      mCRL2log(log::debug) << "Phase " << phase << ": " << std::endl;
+      mCRL2log(log::verbose) << "Un-abstracting " << selected_var->name() << " from " << var_name << std::endl;
       state.remove_abstracted_variable(p, var_name, *selected_var);
       return true;
     }
@@ -400,7 +400,7 @@ public:
 
     if (step_edges(under_graph, over_graph, "edge-cex"))
       return true;
-    
+
     if (step_decorations(over_graph, under_graph, "dec-wit"))
       return true;
 
