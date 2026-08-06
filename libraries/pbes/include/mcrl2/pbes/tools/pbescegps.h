@@ -30,7 +30,7 @@
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/pbescegps_refine_strategies.h"
 #include "mcrl2/pbes/detail/pbescegps_utilities.h"
-#include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/parelm.h"
@@ -348,6 +348,8 @@ public:
     pbes_system::parelm(result, false);
     mcrl2::log::logger::set_reporting_level(saved_level);
 
+    mCRL2log(log::trace) << pp(result) << std::endl;
+
     return result;
   }
 
@@ -372,11 +374,14 @@ public:
     }
 
     mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
-    mcrl2::log::logger::set_reporting_level(mcrl2::log::info);
+    if (saved_level == mcrl2::log::trace || saved_level == mcrl2::log::debug)
+    {
+      mcrl2::log::logger::set_reporting_level(mcrl2::log::verbose);
+    }
 
     detail::stategraph_pbes stategraph(p, *m_datar);
     pbesstategraph_options opts;
-    detail::stategraph_algorithm algo(p, opts);
+    detail::stategraph_local_algorithm algo(p, opts);
 
     for (detail::stategraph_equation& equation: stategraph.equations())
     {
@@ -386,11 +391,10 @@ public:
       }
     }
 
-    stategraph.compute_source_target_copy();
     algo.run();
 
     // Get the GCFP vector for each equation
-    const auto& gcfp_map = algo.get_GCFP();
+    const std::map<core::identifier_string, std::vector<bool>>& gcfp_map = algo.get_GCFP();
     mcrl2::log::logger::set_reporting_level(saved_level);
 
     for (const auto& [eq_name, cfp_vector]: gcfp_map)

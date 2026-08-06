@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_PBESCEGPS_UTILITIES_H
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/rewrite_strategy.h"
@@ -80,7 +81,7 @@ struct abstract_param_state
     auto eq_opt = detail::find_equation_by_name(p, eq_name);
     if (eq_opt)
     {
-      W[eq_name].erase(atermpp::down_cast<data::variable>(eq_opt->get().variable().parameters()[i]));
+      W[eq_name].erase(atermpp::down_cast<data::variable>(as_vector(eq_opt->get().variable().parameters())[i]));
     }
   }
 
