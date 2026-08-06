@@ -480,7 +480,7 @@ private:
           {
             mCRL2log(log::trace) << "Special case: strategy undefined for vertex " << current_vertex << std::endl;
             const index_type matching_idx
-              = find_vertex_index_by_formula(other, current_vertex.formula(), !primary_is_under);
+              = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
             mCRL2log(log::trace) << "Some index found " << matching_idx << std::endl;
             if (matching_idx == undefined_vertex())
             {
@@ -504,7 +504,7 @@ private:
             {
               mCRL2log(log::trace) << " Finding the strat location in primary " << std::endl;
               const index_type& other_strategy_in_primary
-                = find_vertex_index_by_formula(primary, other_strategy_vertex.formula(), primary_is_under);
+                = find_vertex_index_by_formula(primary, other_strategy_vertex.formula(), !primary_is_under);
               mCRL2log(log::trace) << " Index for other strat " << other_strategy_in_primary << std::endl;
               if (other_strategy_in_primary == undefined_vertex()
                   || !has_edge(primary, current_idx, other_strategy_in_primary))
