@@ -50,6 +50,25 @@ struct pbescegps_options
   std::size_t number_of_threads = 1;
 };
 
+namespace detail
+{
+
+// Helper to find an equation by name in a PBES
+inline std::optional<std::reference_wrapper<const pbes_equation>> find_equation_by_name(const pbes& p,
+  const core::identifier_string& eq_name)
+{
+  for (const pbes_equation& eq: p.equations())
+  {
+    if (eq.variable().name() == eq_name)
+    {
+      return std::ref(eq);
+    }
+  }
+  return std::nullopt;
+}
+
+} // namespace detail
+
 struct abstract_param_state
 {
   std::map<core::identifier_string, std::set<data::variable>> W;
@@ -58,34 +77,28 @@ struct abstract_param_state
   void remove_abstracted_variable(const pbes& p, const core::identifier_string& eq_name, const std::size_t& i)
   {
     I[eq_name].erase(i);
-    for (const auto& eq: p.equations())
+    auto eq_opt = detail::find_equation_by_name(p, eq_name);
+    if (eq_opt)
     {
-      if (eq.variable().name() == eq_name)
-      {
-        W[eq_name].erase(atermpp::down_cast<data::variable>(eq.variable().parameters()[i]));
-        break;
-      }
+      W[eq_name].erase(atermpp::down_cast<data::variable>(eq_opt->get().variable().parameters()[i]));
     }
   }
 
   void remove_abstracted_variable(const pbes& p, const core::identifier_string& eq_name, const data::variable& var)
   {
     W[eq_name].erase(var);
-    for (const auto& eq: p.equations())
+    auto eq_opt = detail::find_equation_by_name(p, eq_name);
+    if (eq_opt)
     {
-      if (eq.variable().name() == eq_name)
+      std::size_t i = 0;
+      for (const auto& param: eq_opt->get().variable().parameters())
       {
-        std::size_t i = 0;
-        for (const auto& param: eq.variable().parameters())
+        if (param.name() == var.name())
         {
-          if (param.name() == var.name())
-          {
-            I[eq_name].erase(i);
-            break;
-          }
-          ++i;
+          I[eq_name].erase(i);
+          break;
         }
-        break;
+        ++i;
       }
     }
   }
@@ -93,21 +106,18 @@ struct abstract_param_state
   void add_abstracted_variable(const pbes& p, const core::identifier_string& eq_name, const data::variable& var)
   {
     W[eq_name].insert(var);
-    for (const auto& eq: p.equations())
+    auto eq_opt = detail::find_equation_by_name(p, eq_name);
+    if (eq_opt)
     {
-      if (eq.variable().name() == eq_name)
+      std::size_t i = 0;
+      for (const auto& param: eq_opt->get().variable().parameters())
       {
-        std::size_t i = 0;
-        for (const auto& param: eq.variable().parameters())
+        if (param.name() == var.name())
         {
-          if (param.name() == var.name())
-          {
-            I[eq_name].insert(i);
-            break;
-          }
-          ++i;
+          I[eq_name].insert(i);
+          break;
         }
-        break;
+        ++i;
       }
     }
   }
