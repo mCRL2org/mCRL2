@@ -339,6 +339,11 @@ private:
 
         for (const auto& [pvi, guard_expr]: guards)
         {
+          if (!candidate_pvis.contains(pvi))
+          {
+            continue;
+          }
+          mCRL2log(log::trace) << "Guard for " << pvi << ": " << guard_expr << std::endl;
           std::set<data::variable> guard_vars = find_free_variables(guard_expr);
           std::set<data::variable> common_vars;
           std::set_intersection(state.W[bound_variable.name()].begin(),
