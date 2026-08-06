@@ -396,22 +396,19 @@ public:
     for (const auto& [eq_name, cfp_vector]: gcfp_map)
     {
       // Find the corresponding equation to get parameter list
-      for (const pbes_equation& eq: p.equations())
+      auto eq_opt = detail::find_equation_by_name(p, eq_name);
+      if (eq_opt)
       {
-        if (eq.variable().name() == eq_name)
-        {
-          const data::variable_list& params = eq.variable().parameters();
+        const data::variable_list& params = eq_opt->get().variable().parameters();
 
-          // cfp_vector[i] == true means parameter i is a CFP
-          // cfp_vector[i] == false means parameter i is NOT a CFP (non-CFP)
-          for (std::size_t i = 0; i < cfp_vector.size() && i < params.size(); ++i)
+        // cfp_vector[i] == true means parameter i is a CFP
+        // cfp_vector[i] == false means parameter i is NOT a CFP (non-CFP)
+        for (std::size_t i = 0; i < cfp_vector.size() && i < params.size(); ++i)
+        {
+          if (cfp_vector[i]) // If IS a CFP (remove from non-CFP set)
           {
-            if (cfp_vector[i]) // If IS a CFP (remove from non-CFP set)
-            {
-              state.remove_abstracted_variable(p, eq_name, i);
-            }
+            state.remove_abstracted_variable(p, eq_name, i);
           }
-          break;
         }
       }
     }
@@ -506,6 +503,7 @@ public:
   void unabstract_one_parameter(const pbes& p, abstract_param_state& state, const pbescegps_options& options)
   {
     mCRL2log(log::debug) << "Updating parameters for refinement..." << std::endl;
+    throw mcrl2::runtime_error("should never be needed");
 
     // Find the first non-empty equation's abstraction set
     bool found = false;
@@ -514,60 +512,55 @@ public:
       if (!it->second.empty())
       {
         core::identifier_string eq_name = it->first;
-        pbes_expression eq_formula;
-        propositional_variable bound_variable;
-        for (const pbes_equation& eq: p.equations())
+        auto eq_opt = detail::find_equation_by_name(p, eq_name);
+        if (eq_opt)
         {
-          if (eq.variable().name() == eq_name)
+          pbes_expression eq_formula = eq_opt->get().formula();
+          propositional_variable bound_variable = eq_opt->get().variable();
+          // TODO: I am not convinced the current calculation makes sense at all.
+          // std::set<data::variable> essential_vars = find_essential_variables(eq_formula, state.W[eq_name], state.I);
+          std::set<data::variable> essential_vars = state.W[eq_name];
+          mCRL2log(log::debug) << "Essential variables: " << eq_name << ": " << essential_vars.size() << " ("
+                               << core::detail::print_list(essential_vars) << ")" << std::endl;
+
+          std::optional<data::variable> selected_var;
+
+          if (options.var_choice == var_choice_strategy::all)
           {
-            eq_formula = eq.formula();
-            bound_variable = eq.variable();
-            break;
+            mCRL2log(log::debug) << "Un-abstracted all parameters " << core::detail::print_list(essential_vars)
+                                 << " from equation " << eq_name << std::endl;
+            for (const data::variable& var: essential_vars)
+            {
+              state.remove_abstracted_variable(p, eq_name, var);
+            }
+            found = true;
+            return;
           }
-        }
-        // TODO: I am not convinced the current calculation makes sense at all.
-        // std::set<data::variable> essential_vars = find_essential_variables(eq_formula, state.W[eq_name], state.I);
-        std::set<data::variable> essential_vars = state.W[eq_name];
-        mCRL2log(log::debug) << "Essential variables: " << eq_name << ": " << essential_vars.size() << " ("
-                             << core::detail::print_list(essential_vars) << ")" << std::endl;
-
-        std::optional<data::variable> selected_var;
-
-        if (options.var_choice == var_choice_strategy::all)
-        {
-          mCRL2log(log::debug) << "Un-abstracted all parameters " << core::detail::print_list(essential_vars)
-                               << " from equation " << eq_name << std::endl;
-          for (const data::variable& var: essential_vars)
+          else if (options.var_choice == var_choice_strategy::count)
           {
-            state.remove_abstracted_variable(p, eq_name, var);
+            selected_var = detail::choose_variable_by_count(eq_name, eq_formula, essential_vars, m_var_count_cache);
           }
-          found = true;
-          return;
-        }
-        else if (options.var_choice == var_choice_strategy::count)
-        {
-          selected_var = detail::choose_variable_by_count(eq_name, eq_formula, essential_vars, m_var_count_cache);
-        }
-        else if (options.var_choice == var_choice_strategy::rhs)
-        {
-          selected_var = detail::choose_variable_by_rhs_order(eq_formula, essential_vars);
-        }
-        else if (options.var_choice == var_choice_strategy::lhs)
-        {
-          selected_var = detail::choose_variable_by_lhs_order(bound_variable, essential_vars, std::nullopt);
-        }
-        else
-        {
-          throw mcrl2::runtime_error("Unknown var-choice option; this should not happen.");
-        }
+          else if (options.var_choice == var_choice_strategy::rhs)
+          {
+            selected_var = detail::choose_variable_by_rhs_order(eq_formula, essential_vars);
+          }
+          else if (options.var_choice == var_choice_strategy::lhs)
+          {
+            selected_var = detail::choose_variable_by_lhs_order(bound_variable, essential_vars, std::nullopt);
+          }
+          else
+          {
+            throw mcrl2::runtime_error("Unknown var-choice option; this should not happen.");
+          }
 
-        if (selected_var)
-        {
-          mCRL2log(log::debug) << "Un-abstracted parameter " << selected_var->name() << " from equation " << eq_name
-                               << std::endl;
-          state.remove_abstracted_variable(p, eq_name, *selected_var);
-          found = true;
-          return;
+          if (selected_var)
+          {
+            mCRL2log(log::debug) << "Un-abstracted parameter " << selected_var->name() << " from equation " << eq_name
+                                 << std::endl;
+            state.remove_abstracted_variable(p, eq_name, *selected_var);
+            found = true;
+            return;
+          }
         }
       }
     }
@@ -641,8 +634,13 @@ public:
       // Both approximations are inconclusive, refine by un-abstracting one parameter
       mCRL2log(log::verbose) << "Both approximations inconclusive, refining..." << std::endl;
       p = original_p;
+
+      // Create the approximated PBES instances for matching
+      pbes under_pbes = apply_abstraction_to_pbes(p, state, false);
+      pbes over_pbes = apply_abstraction_to_pbes(p, state, true);
+
       pbescegps_refine_strategies refine;
-      if (!refine.refine_using_strategies(p, state, options, under_graph, over_graph, *m_datar))
+      if (!refine.refine_using_strategies(p, under_pbes, over_pbes, state, options, under_graph, over_graph, *m_datar))
       {
         unabstract_one_parameter(p, state, options);
       }
