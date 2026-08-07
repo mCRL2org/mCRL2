@@ -38,6 +38,7 @@ protected:
     super::parse_options(parser);
     m_options.init_control_flow = parser.has_option("init-cfp");
     m_options.solve_symbolic = parser.has_option("solve-symbolic-args");
+    m_options.stategraph = parser.has_option("stategraph");
     m_options.solve_symbolic_args = parser.option_argument_as<std::string>("solve-symbolic-args");
     m_options.number_of_threads = number_of_threads();
 
@@ -70,6 +71,7 @@ protected:
   {
     super::add_options(desc);
     desc.add_option("init-cfp", "Use the (global) control flow parameters as initial parameters.", 'c');
+    desc.add_option("stategraph", "Use stategraph for each under and overapproximation.");
     desc.add_option("solve-symbolic-args",
       utilities::make_optional_argument("STR", ""),
       "Solve the PBES symbolically using the following arguments.",

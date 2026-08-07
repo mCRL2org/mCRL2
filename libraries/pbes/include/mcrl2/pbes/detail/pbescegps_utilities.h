@@ -46,6 +46,7 @@ struct pbescegps_options
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   bool init_control_flow = false;
   bool solve_symbolic = false;
+  bool stategraph = false;
   var_choice_strategy var_choice = var_choice_strategy::lhs;
   std::string solve_symbolic_args = "";
   std::size_t number_of_threads = 1;
@@ -81,7 +82,10 @@ struct abstract_param_state
     auto eq_opt = detail::find_equation_by_name(p, eq_name);
     if (eq_opt)
     {
-      W[eq_name].erase(atermpp::down_cast<data::variable>(as_vector(eq_opt->get().variable().parameters())[i]));
+      auto asdf = atermpp::down_cast<data::variable>(as_vector(eq_opt->get().variable().parameters())[i]);
+      W[eq_name].erase(asdf);
+      mCRL2log(log::debug) << "removed " << std::to_string(i) << " (parameter " << pp(asdf) << ") from " << pp(eq_name)
+                           << std::endl;
     }
   }
 
@@ -89,18 +93,26 @@ struct abstract_param_state
   {
     W[eq_name].erase(var);
     auto eq_opt = detail::find_equation_by_name(p, eq_name);
+    bool found = false;
     if (eq_opt)
     {
       std::size_t i = 0;
-      for (const auto& param: eq_opt->get().variable().parameters())
+      for (const auto& param: as_vector(eq_opt->get().variable().parameters()))
       {
         if (param.name() == var.name())
         {
           I[eq_name].erase(i);
+          mCRL2log(log::debug) << "removed " << std::to_string(i) << " (parameter " << pp(var) << ") from "
+                               << pp(eq_name) << std::endl;
+          found = true;
           break;
         }
         ++i;
       }
+    }
+    if (!found)
+    {
+      throw mcrl2::runtime_error("parameter " + pp(var) + " not found in equation");
     }
   }
 
@@ -108,18 +120,24 @@ struct abstract_param_state
   {
     W[eq_name].insert(var);
     auto eq_opt = detail::find_equation_by_name(p, eq_name);
+    bool found = false;
     if (eq_opt)
     {
       std::size_t i = 0;
-      for (const auto& param: eq_opt->get().variable().parameters())
+      for (const auto& param: as_vector(eq_opt->get().variable().parameters()))
       {
         if (param.name() == var.name())
         {
           I[eq_name].insert(i);
+          found = true;
           break;
         }
         ++i;
       }
+    }
+    if (!found)
+    {
+      throw mcrl2::runtime_error("parameter " + pp(var) + " not found in equation");
     }
   }
 };
@@ -129,7 +147,7 @@ namespace detail
 
 inline std::optional<data::variable> choose_variable_by_count(const core::identifier_string& var_name,
   const pbes_expression& equation_formula,
-  const std::set<data::variable>& essential_vars,
+  const std::set<data::variable>& abstracted_vars,
   std::map<core::identifier_string, std::map<data::variable, std::size_t>>& cache)
 {
   auto var_count_it = cache.find(var_name);
@@ -144,7 +162,7 @@ inline std::optional<data::variable> choose_variable_by_count(const core::identi
   const std::map<data::variable, std::size_t>& var_counts = var_count_it->second;
   std::size_t best_count = 0;
   std::optional<data::variable> best_var;
-  for (const data::variable& var: essential_vars)
+  for (const data::variable& var: abstracted_vars)
   {
     if (var_counts.find(var) != var_counts.end())
     {
@@ -160,20 +178,27 @@ inline std::optional<data::variable> choose_variable_by_count(const core::identi
   return best_var;
 }
 
-inline std::optional<data::variable> choose_variable_by_lhs_order(const propositional_variable& bound_variable,
-  const std::set<data::variable>& essential_vars,
+inline std::optional<data::variable> choose_variable_by_lhs_order(const data::variable_list& all_parameters,
+  const std::set<data::variable>& abstracted_vars,
   const std::optional<pbes_expression>& formula)
 {
   std::set<data::variable> free_vars
-    = formula ? find_free_variables(*formula, data::variable_list(), false) : essential_vars;
-  for (const data::variable& param: bound_variable.parameters())
+    = formula ? find_free_variables(*formula, data::variable_list(), false) : abstracted_vars;
+  for (const data::variable& param: all_parameters)
   {
-    if (essential_vars.contains(param) && free_vars.contains(param))
+    if (abstracted_vars.contains(param) && free_vars.contains(param))
     {
       return param;
     }
   }
   return std::nullopt;
+}
+
+inline std::optional<data::variable> choose_variable_by_lhs_order(const propositional_variable& bound_variable,
+  const std::set<data::variable>& abstracted_vars,
+  const std::optional<pbes_expression>& formula)
+{
+  return choose_variable_by_lhs_order(bound_variable.parameters(), abstracted_vars, formula);
 }
 
 inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_expression& formula,
@@ -191,12 +216,12 @@ inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_exp
 }
 
 inline std::optional<data::variable> choose_variable_by_rhs_order_reverse(const pbes_expression& formula,
-  const std::set<data::variable>& essential_vars)
+  const std::set<data::variable>& abstracted_vars)
 {
   std::set<data::variable> vars = find_free_variables(formula, data::variable_list(), false);
   for (const auto& var: std::ranges::reverse_view(vars))
   {
-    if (essential_vars.contains(var))
+    if (abstracted_vars.contains(var))
     {
       return var;
     }

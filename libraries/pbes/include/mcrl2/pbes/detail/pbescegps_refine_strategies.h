@@ -15,6 +15,7 @@
 #define MCRL2_PBES_DETAIL_PBESCEGPS_REFINE_STRATEGIES_H
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
@@ -212,12 +213,20 @@ private:
     index_type current_idx,
     const structure_graph& g_prime,
     index_type matching_idx,
-    const std::string& phase)
+    const std::string& phase,
+    bool g_is_under)
   {
     const vertex& current_vertex = g.find_vertex(current_idx);
     const propositional_variable_instantiation& pvi
       = atermpp::down_cast<propositional_variable_instantiation>(current_vertex.formula());
     core::identifier_string var_name = pvi.name();
+    const std::optional<vertex> matching_vertex
+      = (matching_idx == undefined_vertex()) ? std::nullopt : std::optional<vertex>(g_prime.find_vertex(matching_idx));
+    const std::optional<propositional_variable_instantiation>& matching_pvi
+      = (matching_vertex.has_value())
+          ? std::optional<propositional_variable_instantiation>(
+              atermpp::down_cast<propositional_variable_instantiation>(matching_vertex->formula()))
+          : std::nullopt;
 
     abstract_param_state& state = *m_state;
     const pbescegps_options& options = *m_options;
@@ -229,30 +238,39 @@ private:
       return false;
     }
 
-    pbes_expression equation_formula;
-    propositional_variable bound_variable;
-    for (const pbes_equation& equation: p.equations())
-    {
-      if (equation.variable().name() == var_name)
-      {
-        equation_formula = equation.formula();
-        bound_variable = equation.variable();
-        break;
-      }
-    }
+    pbes_expression equation_formula = detail::find_equation_by_name(p, var_name)->get().formula();
 
     data::mutable_indexed_substitution sigma;
-    data::data_expression_list current_pvi_args = pvi.parameters();
-    for (const data::variable& abstracted_param: bound_variable.parameters())
+    std::vector<data::variable> g_params(g_is_under ? m_under_params[var_name] : m_over_params[var_name]);
+    std::vector<data::variable> g_prime_params = matching_pvi.has_value()
+                                                   ? (!g_is_under ? m_under_params[var_name] : m_over_params[var_name])
+                                                   : std::vector<data::variable>();
+    std::vector<data::data_expression> pvi_values = atermpp::as_vector(pvi.parameters());
+    std::vector<data::data_expression> matching_pvi_values = matching_pvi.has_value()
+                                                               ? atermpp::as_vector(matching_pvi->parameters())
+                                                               : std::vector<data::data_expression>();
+    // Combine the under and over approximation parameters
+    std::size_t ig = 0, ig_prima = 0;
+    for (const data::variable& param: m_original_params[var_name])
     {
-      if (!state.W[var_name].contains(abstracted_param))
+      if (!state.W[var_name].contains(param))
       {
-        if (current_pvi_args.empty())
-          break;
-        sigma[abstracted_param] = current_pvi_args.front();
-        current_pvi_args.pop_front();
+        if (ig < g_params.size() && g_params[ig] == param)
+        {
+          sigma[param] = pvi_values[ig];
+          mCRL2log(log::debug) << "sigma[" << param << "] = " << pvi_values[ig] << " (regular)" << std::endl;
+          ++ig;
+        }
+        if (ig_prima < g_prime_params.size() && g_prime_params[ig_prima] == param)
+        {
+          sigma[param] = matching_pvi_values[ig_prima];
+          mCRL2log(log::trace) << "sigma[" << param << "] = " << matching_pvi_values[ig_prima] << " (matching)"
+                               << std::endl;
+          ++ig_prima;
+        }
       }
     }
+    assert(ig == g_params.size() && ig_prima == g_prime_params.size());
 
     simplify_data_rewriter<data::rewriter> pbes_rewriter(*m_datar);
     pbes_expression instantiated_formula = pbes_rewrite(equation_formula, pbes_rewriter, sigma);
@@ -261,13 +279,6 @@ private:
 
     std::set<data::variable> essential_vars = wit->second;
     pbes_expression guard_formula = instantiated_formula;
-
-    std::optional<vertex> matching_vertex;
-
-    if (matching_idx != undefined_vertex())
-    {
-      matching_vertex = g_prime.find_vertex(matching_idx);
-    }
 
     if (current_vertex.strategy != undefined_vertex()
         || (matching_vertex.has_value() && matching_vertex->strategy != undefined_vertex()))
@@ -345,8 +356,8 @@ private:
           mCRL2log(log::trace) << "Guard for " << pvi << ": " << guard_expr << std::endl;
           std::set<data::variable> guard_vars = find_free_variables(guard_expr);
           std::set<data::variable> common_vars;
-          std::set_intersection(state.W[bound_variable.name()].begin(),
-            state.W[bound_variable.name()].end(),
+          std::set_intersection(state.W[var_name].begin(),
+            state.W[var_name].end(),
             guard_vars.begin(),
             guard_vars.end(),
             std::inserter(common_vars, common_vars.begin()));
@@ -384,7 +395,8 @@ private:
     }
     else
     {
-      selected_var = detail::choose_variable_by_lhs_order(bound_variable, essential_vars, guard_formula);
+      data::variable_list args(m_original_params[var_name]);
+      selected_var = detail::choose_variable_by_lhs_order(args, essential_vars, guard_formula);
     }
 
     if (selected_var)
@@ -423,7 +435,7 @@ private:
           && (current_vertex.rank % 2 == 0 || current_vertex.decoration == decoration_type::d_true))
       {
         mCRL2log(log::debug) << "Phase " << phase << " choose vertex " << std::endl;
-        if (select_variable(primary, current_idx, other, matching_idx, phase))
+        if (select_variable(primary, current_idx, other, matching_idx, phase, primary_is_under))
           return true;
       }
 
@@ -475,8 +487,9 @@ private:
         {
           // If a strategy is undefined, it could be a conjunction and overapproximation or disjunction and
           // underapproximation.
-          if (primary_is_under ? current_vertex.decoration == structure_graph::d_disjunction
-                               : current_vertex.decoration == structure_graph::d_conjunction)
+          if (current_vertex.decoration == structure_graph::d_none
+              || (primary_is_under ? current_vertex.decoration == structure_graph::d_disjunction
+                                   : current_vertex.decoration == structure_graph::d_conjunction))
           {
             mCRL2log(log::trace) << "Special case: strategy undefined for vertex " << current_vertex << std::endl;
             const index_type matching_idx
@@ -486,12 +499,14 @@ private:
             {
               mcrl2::runtime_error("matching_idx == undefined_vertex() for " + pp(current_vertex.formula()));
             }
+            
             const index_type other_strategy_idx = other.find_vertex(matching_idx).strategy;
             mCRL2log(log::trace) << "Strategy index found " << other_strategy_idx << std::endl;
             if (other_strategy_idx == undefined_vertex())
             {
               mcrl2::runtime_error("The other strategy index is also undefined! " + pp(current_vertex.formula()));
             }
+            
             const vertex& other_strategy_vertex = other.find_vertex(other_strategy_idx);
             mCRL2log(log::trace) << "Other strategy vertex found " << other_strategy_vertex << std::endl;
             const propositional_variable_instantiation& current_pvi
@@ -500,64 +515,70 @@ private:
               = atermpp::down_cast<propositional_variable_instantiation>(other_strategy_vertex.formula());
             const bool cross_equation = current_pvi.name() != other_strategy_pvi.name();
             mCRL2log(log::trace) << "Cross equation " << cross_equation << std::endl;
+            mCRL2log(log::trace) << " Finding the strat location in primary " << std::endl;
+            const index_type& other_strategy_in_primary_idx
+              = find_vertex_index_by_formula(primary, other_strategy_vertex.formula(), !primary_is_under);
             if (cross_equation_only ? cross_equation : !cross_equation)
             {
-              mCRL2log(log::trace) << " Finding the strat location in primary " << std::endl;
-              const index_type& other_strategy_in_primary
-                = find_vertex_index_by_formula(primary, other_strategy_vertex.formula(), !primary_is_under);
-              mCRL2log(log::trace) << " Index for other strat " << other_strategy_in_primary << std::endl;
-              if (other_strategy_in_primary == undefined_vertex()
-                  || !has_edge(primary, current_idx, other_strategy_in_primary))
+              mCRL2log(log::trace) << " Index for other strat " << other_strategy_in_primary_idx << std::endl;
+              if (other_strategy_in_primary_idx == undefined_vertex()
+                  || !has_edge(primary, current_idx, other_strategy_in_primary_idx))
               {
                 mCRL2log(log::debug) << " found other edge for vertex " << current_vertex << std::endl;
-                if (select_variable(primary, current_idx, other, matching_idx, phase))
+                if (select_variable(primary, current_idx, other, matching_idx, phase, primary_is_under))
                   return true;
-                continue;
               }
             }
-            mCRL2log(log::debug) << "Dead end " << current_vertex << std::endl;
-            continue;
+            
+            visited.insert(current_idx);
+            if (other_strategy_in_primary_idx != undefined_vertex()
+                && visited.find(other_strategy_in_primary_idx) == visited.end())
+            {
+              todo.insert(other_strategy_in_primary_idx);
+            }
           }
           else
           {
+            mCRL2log(log::debug) << "No special case: strategy undefined for vertex " << current_vertex << std::endl;
             break;
           }
         }
-
-        const vertex& strategy_vertex = primary.find_vertex(strategy_idx);
-        const propositional_variable_instantiation& current_pvi
-          = atermpp::down_cast<propositional_variable_instantiation>(current_vertex.formula());
-        const propositional_variable_instantiation& strategy_pvi
-          = atermpp::down_cast<propositional_variable_instantiation>(strategy_vertex.formula());
-        const bool cross_equation = current_pvi.name() != strategy_pvi.name();
-
-        if (!cross_equation_only || cross_equation)
+        else
         {
-          index_type matching_idx = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
-          index_type strategy_match_idx
-            = find_vertex_index_by_formula(other, strategy_vertex.formula(), primary_is_under);
-          mCRL2log(log::debug) << "Phase " << phase << " vertex " << current_vertex;
-          if (matching_idx != undefined_vertex())
-          {
-            mCRL2log(log::debug) << " trying other edge if " << strategy_match_idx << " is in "
-                                 << core::detail::print_list(other.find_vertex(matching_idx).successors);
-          }
-          mCRL2log(log::debug) << std::endl;
+          const vertex& strategy_vertex = primary.find_vertex(strategy_idx);
+          const propositional_variable_instantiation& current_pvi
+            = atermpp::down_cast<propositional_variable_instantiation>(current_vertex.formula());
+          const propositional_variable_instantiation& strategy_pvi
+            = atermpp::down_cast<propositional_variable_instantiation>(strategy_vertex.formula());
+          const bool cross_equation = current_pvi.name() != strategy_pvi.name();
 
-          if (matching_idx != undefined_vertex()
-              && (strategy_match_idx == undefined_vertex() || !has_edge(other, matching_idx, strategy_match_idx)))
+          if (!cross_equation_only || cross_equation)
           {
-            mCRL2log(log::debug) << " found other edge for vertex " << current_vertex << std::endl;
-            if (select_variable(primary, current_idx, other, matching_idx, phase))
-              return true;
-            // break;
-          }
-        }
+            index_type matching_idx = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
+            index_type strategy_match_idx
+              = find_vertex_index_by_formula(other, strategy_vertex.formula(), primary_is_under);
+            mCRL2log(log::debug) << "Phase " << phase << " vertex " << current_vertex;
+            if (matching_idx != undefined_vertex())
+            {
+              mCRL2log(log::debug) << " trying other edge if " << strategy_match_idx << " is in "
+                                   << core::detail::print_list(other.find_vertex(matching_idx).successors);
+            }
+            mCRL2log(log::debug) << std::endl;
 
-        visited.insert(current_idx);
-        if (visited.find(strategy_idx) == visited.end())
-        {
-          todo.insert(strategy_idx);
+            if (matching_idx != undefined_vertex()
+                && (strategy_match_idx == undefined_vertex() || !has_edge(other, matching_idx, strategy_match_idx)))
+            {
+              mCRL2log(log::debug) << " found other edge for vertex " << current_vertex << std::endl;
+              if (select_variable(primary, current_idx, other, matching_idx, phase, primary_is_under))
+                return true;
+            }
+          }
+
+          visited.insert(current_idx);
+          if (visited.find(strategy_idx) == visited.end())
+          {
+            todo.insert(strategy_idx);
+          }
         }
       }
       return false;
