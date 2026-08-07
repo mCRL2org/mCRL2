@@ -31,6 +31,7 @@
 #include "mcrl2/pbes/detail/pbescegps_refine_strategies.h"
 #include "mcrl2/pbes/detail/pbescegps_utilities.h"
 #include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/parelm.h"
@@ -211,7 +212,7 @@ public:
     const pbescegps_options& options,
     structure_graph& graph)
   {
-    pbes p_approx = apply_abstraction_to_pbes(p, state, is_overapproximation);
+    pbes p_approx = apply_abstraction_to_pbes(p, state, is_overapproximation, options);
     std::map<core::identifier_string, std::set<data::variable>> remaining_parameters
       = compute_remaining_parameters(p_approx);
 
@@ -282,7 +283,10 @@ public:
     bool is_overapproximation);
 
   // Applies abstraction to all equations in a PBES
-  pbes apply_abstraction_to_pbes(const pbes& p, const abstract_param_state& state, bool is_overapproximation)
+  pbes apply_abstraction_to_pbes(const pbes& p,
+    const abstract_param_state& state,
+    bool is_overapproximation,
+    const pbescegps_options& options)
   {
     pbes result = p;
 
@@ -342,10 +346,18 @@ public:
       mcrl2::log::logger::set_reporting_level(mcrl2::log::verbose);
     }
     pbes_system::parelm(result, false);
+    pbes_constelm_algorithm<data::rewriter, simplify_data_rewriter<data::rewriter>> constelm_algo(*m_datar, pbesr);
+    constelm_algo.run(result);
     pbes_system::parelm(result, false);
-    pbes_constelm_algorithm<data::rewriter, simplify_data_rewriter<data::rewriter>> algorithm(*m_datar, pbesr);
-    algorithm.run(result);
-    pbes_system::parelm(result, false);
+    if (options.stategraph)
+    {
+      pbesstategraph_options opts;
+      detail::local_reset_variables_algorithm algo(result, opts);
+      algo.run();
+      result = algo.result();
+      
+      constelm_algo.run(result);
+    }
     mcrl2::log::logger::set_reporting_level(saved_level);
 
     mCRL2log(log::trace) << pp(result) << std::endl;
@@ -403,7 +415,7 @@ public:
       auto eq_opt = detail::find_equation_by_name(p, eq_name);
       if (eq_opt)
       {
-        const data::variable_list& params = eq_opt->get().variable().parameters();
+        const auto& params = as_vector(eq_opt->get().variable().parameters());
 
         // cfp_vector[i] == true means parameter i is a CFP
         // cfp_vector[i] == false means parameter i is NOT a CFP (non-CFP)
@@ -422,7 +434,7 @@ public:
   void make_data_closed(const pbes& p, abstract_param_state& state)
   {
     bool done = false;
-    mCRL2log(log::trace) << "======== Closing the data ======" << std::endl;
+    mCRL2log(log::debug) << "======== Closing the data ======" << std::endl;
     auto global_variables = p.global_variables();
     do
     {
@@ -450,7 +462,7 @@ public:
                 if (contains(state.W[eq.variable().name()], v)
                     && std::find(global_variables.begin(), global_variables.end(), v) == global_variables.end())
                 {
-                  mCRL2log(log::trace) << "Data-closed: concrete param " << pp(v)
+                  mCRL2log(log::debug) << "Data-closed: concrete param " << pp(v)
                                        << " in W=" << core::detail::print_list(state.W[eq.variable().name()])
                                        << " of equation " << pvi.name() << " due to " << pp(pvi) << std::endl;
                   // Find the parameter with the same index
@@ -470,7 +482,7 @@ public:
                     throw mcrl2::runtime_error("Data-closed: Could not find parameter " + pp(v.name()) + " in equation "
                                                + pp(eq.variable().name()));
                   }
-                  mCRL2log(log::trace) << "Data-closed: Updated W="
+                  mCRL2log(log::debug) << "Data-closed: Updated W="
                                        << core::detail::print_list(state.W[eq.variable().name()]) << std::endl;
                 }
               }
@@ -489,17 +501,25 @@ public:
     }
   }
 
-  void print_abstraction_summary(const std::map<core::identifier_string, std::set<data::variable>>& W_map)
+  void print_abstraction_summary(const abstract_param_state& state)
   {
-    for (const auto& [eq_name, var_set]: W_map)
+    for (const auto& [eq_name, var_set]: state.W)
     {
       std::string param_names;
-      for (const auto& var: var_set)
+      for (const data::variable& var: var_set)
       {
         param_names += var.name();
         param_names += " ";
       }
-      mCRL2log(log::verbose) << "Abstracted parameters for " << eq_name << ": " << param_names << std::endl;
+      std::string indices;
+      for (const std::size_t& i: state.I.at(eq_name))
+      {
+        indices += std::to_string(i);
+        indices += " ";
+      }
+      mCRL2log(log::verbose) << "Abstracted parameters for " << eq_name << ": " << param_names;
+      mCRL2log(log::debug) << " (indices: " << indices << ")" << std::endl;
+      mCRL2log(log::verbose) << std::endl;
     }
   }
 
@@ -507,7 +527,6 @@ public:
   void unabstract_one_parameter(const pbes& p, abstract_param_state& state, const pbescegps_options& options)
   {
     mCRL2log(log::debug) << "Updating parameters for refinement..." << std::endl;
-    throw mcrl2::runtime_error("should never be needed");
 
     // Find the first non-empty equation's abstraction set
     bool found = false;
@@ -588,7 +607,7 @@ public:
     make_data_closed(p, state);
 
     // Collect sorts to abstract (non-CFP parameters)
-    print_abstraction_summary(state.W);
+    print_abstraction_summary(state);
 
     // Iterative refinement loop
     do
@@ -619,7 +638,7 @@ public:
       if (under_result)
       {
         mCRL2log(log::verbose) << "Under-approximation solved to TRUE" << std::endl;
-        print_abstraction_summary(state.W);
+        print_abstraction_summary(state);
         return true;
       }
 
@@ -631,7 +650,7 @@ public:
       if (!over_result)
       {
         mCRL2log(log::verbose) << "Over-approximation solved to FALSE" << std::endl;
-        print_abstraction_summary(state.W);
+        print_abstraction_summary(state);
         return false;
       }
 
@@ -640,8 +659,8 @@ public:
       p = original_p;
 
       // Create the approximated PBES instances for matching
-      pbes under_pbes = apply_abstraction_to_pbes(p, state, false);
-      pbes over_pbes = apply_abstraction_to_pbes(p, state, true);
+      pbes under_pbes = apply_abstraction_to_pbes(p, state, false, options);
+      pbes over_pbes = apply_abstraction_to_pbes(p, state, true, options);
 
       pbescegps_refine_strategies refine;
       if (!refine.refine_using_strategies(p, under_pbes, over_pbes, state, options, under_graph, over_graph, *m_datar))
@@ -649,7 +668,7 @@ public:
         unabstract_one_parameter(p, state, options);
       }
       make_data_closed(p, state);
-      print_abstraction_summary(state.W);
+      print_abstraction_summary(state);
     }
     while (true);
 
