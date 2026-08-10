@@ -64,13 +64,13 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
         mCRL2log(log::trace) << "     Abstracting variable " << var.name() << " to "
                              << (m_is_overapproximation ? "true" : "false") << std::endl;
         data::data_expression abstracted_val = m_is_overapproximation ? data::true_() : data::false_();
-        result = pbes_expression(abstracted_val);
+        result = T(abstracted_val);
       }
       else
       {
         // Variable is not abstracted, return as-is
         mCRL2log(log::trace) << "     Keeping variable " << var.name() << " as-is" << std::endl;
-        result = pbes_expression(var);
+        result = T(var);
       }
       return;
     }
@@ -97,7 +97,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
       if (!depends_on_abstracted)
       {
         mCRL2log(log::trace) << "     Application does not depend on abstracted variables, keeping as-is" << std::endl;
-        result = pbes_expression(app);
+        result = T(app);
         return;
       }
 
@@ -129,7 +129,7 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
         mCRL2log(log::trace) << "     Unknown function, using conservative approach, returning "
                              << (m_is_overapproximation ? "true" : "false") << std::endl;
         data::data_expression conservative_val = m_is_overapproximation ? data::true_() : data::false_();
-        result = pbes_expression(conservative_val);
+        result = T(conservative_val);
         return;
       }
 
@@ -162,10 +162,28 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
       abstracted_args = reverse(abstracted_args);
       // Reconstruct the application with abstracted arguments
       data::data_expression reconstructed = data::application(app.head(), abstracted_args);
-      result = pbes_expression(reconstructed);
+      result = T(reconstructed);
       return;
     }
 
+    // Forall, exists
+    if (data::is_forall(x) || data::is_exists(x))
+    {
+      mCRL2log(log::trace) << "  -> Rewriting abstraction (forall/exists)" << std::endl;
+      const data::abstraction& binder = atermpp::down_cast<data::abstraction>(x);
+      data::data_expression body;
+      apply(body, binder.body());
+      if (data::is_forall(x))
+      {
+          result = T(data::forall(binder.variables(), body));
+      }
+      else
+      {
+          result = T(data::exists(binder.variables(), body));
+      }
+      return;
+    }
+    
     // For any other data expression type (e.g., function symbols), use the default builder behavior
     mCRL2log(log::trace) << "  -> Using default builder behavior (not a variable or application)" << std::endl;
     super::apply(result, x);
