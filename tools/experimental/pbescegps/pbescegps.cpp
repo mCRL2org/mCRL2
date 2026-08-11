@@ -41,6 +41,7 @@ protected:
     m_options.stategraph = parser.has_option("stategraph");
     m_options.solve_symbolic_args = parser.option_argument_as<std::string>("solve-symbolic-args");
     m_options.number_of_threads = number_of_threads();
+    m_options.initial_state_file = parser.option_argument_as<std::string>("initial-state");
 
     std::string var_choice_str = parser.option_argument_as<std::string>("var-choice");
     if (var_choice_str == "lhs")
@@ -83,6 +84,14 @@ protected:
       "'count' the free variable that occurs most often (excluding data expressions in PVI)\n"
       "'all' un-abstract all variables that occur on iteration\n"
       "Choose the method of chosing a variable on iteration.");
+    desc.add_option("initial-state",
+      utilities::make_mandatory_argument("FILE"),
+      "Read the initial set of abstracted parameters from FILE instead of abstracting all parameters.\n"
+      "FILE contains one line per equation as printed by the tool:\n"
+      "  Abstracted parameters for X0: value_ValueBool57 value_ValueReal5\n"
+      "Lines can also use parameter indices instead of names, and equations that are not mentioned\n"
+      "in FILE are not abstracted.",
+      'a');
   }
 
 public:
