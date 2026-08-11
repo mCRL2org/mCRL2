@@ -762,14 +762,27 @@ void solve(pbes_system::pbes pbesspec,
   // This has to be done consistently with the LPS for the counter examples.
   data::mutable_map_substitution<> sigma = pbes_system::detail::instantiate_global_variables(pbesspec);
   pbes_system::detail::replace_global_variables(pbesspec, sigma);
-  pbes_system::srf_pbes_with_ce pre_srf_pbes = preprocess(pbesspec, options_);
+  pbes_system::srf_pbes srf_pbes;
+  if (has_counter_example)
+  {
+    pbes_system::srf_pbes_with_ce pre_srf_pbes = preprocess<true>(pbesspec, options_);
 
-  mCRL2log(log::trace) << "============== Pre-SRF PBES ==============" << std::endl;
-  mCRL2log(log::trace) << pre_srf_pbes.to_pbes() << std::endl;
+    mCRL2log(log::trace) << "============== Pre-SRF PBES ==============" << std::endl;
+    mCRL2log(log::trace) << pre_srf_pbes.to_pbes() << std::endl;
 
-  pbes_system::srf_pbes srf_pbes = pre_srf2srfpbes(pre_srf_pbes);
+    srf_pbes = pre_srf2srfpbes(pre_srf_pbes);
+    pbesspec = pre_srf_pbes.to_pbes();
+  }
+  else
+  {
+    srf_pbes = preprocess<false>(pbesspec, options_);
 
-  pbesspec = pre_srf_pbes.to_pbes();
+    mCRL2log(log::trace) << "============== SRF PBES ==============" << std::endl;
+    mCRL2log(log::trace) << srf_pbes.to_pbes() << std::endl;
+
+    pbesspec = srf_pbes.to_pbes();
+  }
+
   if (options_.info)
   {
     PbesReachAlgorithm reach(srf_pbes, options_);

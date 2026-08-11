@@ -188,8 +188,9 @@ pbes_system::srf_pbes split_conditions(const pbes_system::srf_pbes& pbes, std::s
 
 
 /// Applies necessary preprocessing steps to allow the PBES to be solved symbolically.
+template <bool use_pre_srf>
 inline
-pbes_system::srf_pbes_with_ce preprocess(pbes_system::pbes pbesspec, const symbolic_reachability_options& options)
+detail::pre_srf_pbes<use_pre_srf> preprocess(pbes_system::pbes pbesspec, const symbolic_reachability_options& options)
 {
   pbes_system::detail::instantiate_global_variables(pbesspec);
   normalize(pbesspec);
@@ -207,7 +208,12 @@ pbes_system::srf_pbes_with_ce preprocess(pbes_system::pbes pbesspec, const symbo
     pbes_system::replace_constants_by_variables(pbesspec, rewr, sigma);
   }
 
-  auto result = pbes2pre_srf(pbesspec, true);
+  detail::pre_srf_pbes<use_pre_srf> result;
+  if constexpr (use_pre_srf) {
+      result = pbes2pre_srf(pbesspec, true);
+  } else {
+      result = pbes2srf(pbesspec, true);
+  }
 
   // Unify the parameters of the original PBES (which has potential counter example information)
   unify_parameters(result, true, options.reset_parameters);
