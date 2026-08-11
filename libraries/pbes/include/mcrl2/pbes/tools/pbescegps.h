@@ -355,7 +355,7 @@ public:
       detail::local_reset_variables_algorithm algo(result, opts);
       algo.run();
       result = algo.result();
-      
+
       constelm_algo.run(result);
     }
     mcrl2::log::logger::set_reporting_level(saved_level);
@@ -599,7 +599,14 @@ public:
 
     // Calculate non-Control Flow Parameters (parameters to abstract) per equation
     abstract_param_state state;
-    compute_initial_abstraction_set(p, options.init_control_flow, state);
+    if (options.initial_state_file.empty())
+    {
+      compute_initial_abstraction_set(p, options.init_control_flow, state);
+    }
+    else
+    {
+      detail::initialize_initial_abstraction_state(p, state, options.initial_state_file);
+    }
 
     pbes original_p = p;
 

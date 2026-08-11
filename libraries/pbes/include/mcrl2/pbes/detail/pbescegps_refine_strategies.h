@@ -499,14 +499,14 @@ private:
             {
               mcrl2::runtime_error("matching_idx == undefined_vertex() for " + pp(current_vertex.formula()));
             }
-            
+
             const index_type other_strategy_idx = other.find_vertex(matching_idx).strategy;
             mCRL2log(log::trace) << "Strategy index found " << other_strategy_idx << std::endl;
             if (other_strategy_idx == undefined_vertex())
             {
               mcrl2::runtime_error("The other strategy index is also undefined! " + pp(current_vertex.formula()));
             }
-            
+
             const vertex& other_strategy_vertex = other.find_vertex(other_strategy_idx);
             mCRL2log(log::trace) << "Other strategy vertex found " << other_strategy_vertex << std::endl;
             const propositional_variable_instantiation& current_pvi
@@ -529,7 +529,7 @@ private:
                   return true;
               }
             }
-            
+
             visited.insert(current_idx);
             if (other_strategy_in_primary_idx != undefined_vertex()
                 && visited.find(other_strategy_in_primary_idx) == visited.end())

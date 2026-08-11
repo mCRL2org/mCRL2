@@ -23,12 +23,16 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
+#include <cctype>
 #include <cstddef>
+#include <fstream>
 #include <map>
 #include <optional>
 #include <ranges>
 #include <set>
+#include <sstream>
 
 namespace mcrl2::pbes_system
 {
@@ -50,6 +54,7 @@ struct pbescegps_options
   var_choice_strategy var_choice = var_choice_strategy::lhs;
   std::string solve_symbolic_args = "";
   std::size_t number_of_threads = 1;
+  std::string initial_state_file = ""; // if non-empty, read the initial abstraction state from this file
 };
 
 namespace detail
@@ -227,6 +232,153 @@ inline std::optional<data::variable> choose_variable_by_rhs_order_reverse(const 
     }
   }
   return std::nullopt;
+}
+
+// Helper to extract equation name from "Abstracted parameters for X0:" format
+inline std::string parse_verbose_equation_name(std::istringstream& iss, const std::string& line)
+{
+  std::string word, eq_name;
+  if (!(iss >> word) || word != "parameters")
+  {
+    throw mcrl2::runtime_error("initial-state: expected 'parameters' in line \"" + line + "\"");
+  }
+  if (!(iss >> word) || word != "for")
+  {
+    throw mcrl2::runtime_error("initial-state: expected 'for' in line \"" + line + "\"");
+  }
+  if (!(iss >> eq_name))
+  {
+    throw mcrl2::runtime_error("initial-state: missing equation name in line \"" + line + "\"");
+  }
+  if (eq_name.size() > 1 && eq_name.back() == ':')
+  {
+    eq_name.pop_back();
+  }
+  else
+  {
+    char colon = '\0';
+    if (!(iss >> colon) || colon != ':')
+    {
+      throw mcrl2::runtime_error("initial-state: expected ':' after the equation name in line \"" + line + "\"");
+    }
+  }
+  return eq_name;
+}
+
+// Helper to extract equation name from "X0:" or "X0 :" format
+inline std::string parse_bare_equation_name(std::istringstream& iss, const std::string& token, const std::string& line)
+{
+  std::string eq_name = token;
+  if (eq_name.size() > 1 && eq_name.back() == ':')
+  {
+    eq_name.pop_back();
+  }
+  else
+  {
+    std::string colon;
+    if (!(iss >> colon) || colon != ":")
+    {
+      throw mcrl2::runtime_error("initial-state: expected ':' after the equation name in line \"" + line + "\"");
+    }
+  }
+  return eq_name;
+}
+
+// Helper to process a parameter token (index or name) and add it to state
+inline void add_parameter_by_token(const pbes& p, abstract_param_state& state, 
+  const core::identifier_string& eq_name, const std::string& token, 
+  const std::vector<data::variable>& params)
+{
+  if (!token.empty() && std::isdigit(static_cast<unsigned char>(token[0])))
+  {
+    // Token is a parameter index.
+    const std::size_t idx = std::stoul(token);
+    if (idx >= params.size())
+    {
+      throw mcrl2::runtime_error("initial-state: parameter index " + token + " out of bounds in equation " + core::pp(eq_name));
+    }
+    state.add_abstracted_variable(p, eq_name, params[idx]);
+  }
+  else
+  {
+    // Token is a parameter name.
+    for (const auto& param: params)
+    {
+      if (param.name() == core::identifier_string(token))
+      {
+        state.add_abstracted_variable(p, eq_name, param);
+        return;
+      }
+    }
+    throw mcrl2::runtime_error("initial-state: parameter " + token + " not found in equation " + core::pp(eq_name));
+  }
+}
+
+// Parses one line describing the abstracted parameters of a single equation and
+// adds them to the initial abstraction state. The accepted formats are:
+//   Abstracted parameters for X0: value_ValueBool57 value_ValueReal5
+//   X0: value_ValueBool57 value_ValueReal5
+//   X0: 0 3 7     (parameter indices)
+inline void parse_initial_state_line(const pbes& p, abstract_param_state& state, const std::string& line)
+{
+  std::istringstream iss(line);
+  std::string token;
+
+  if (!(iss >> token))
+  {
+    return; // empty line
+  }
+
+  // Parse equation name
+  std::string eq_name = (token == "Abstracted") 
+    ? parse_verbose_equation_name(iss, line)
+    : parse_bare_equation_name(iss, token, line);
+
+  auto eq_opt = find_equation_by_name(p, eq_name);
+  if (!eq_opt)
+  {
+    throw mcrl2::runtime_error("initial-state: equation " + core::pp(eq_name) + " not found in the PBES");
+  }
+  const std::vector<data::variable> params = as_vector(eq_opt->get().variable().parameters());
+
+  // Parse and add parameters
+  while (iss >> token)
+  {
+    if (token[0] == '(')
+    {
+      break; // ignore trailing parenthetical remarks, e.g. "(indices: 0 1 2)"
+    }
+    add_parameter_by_token(p, state, eq_name, token, params);
+  }
+}
+
+// Initializes the abstraction state from a file containing lines as printed by
+// print_abstraction_summary. Equations not mentioned in the file get an empty
+// abstraction set, i.e. they are solved fully concretely.
+inline void
+initialize_initial_abstraction_state(const pbes& p, abstract_param_state& state, const std::string& filename)
+{
+  for (const pbes_equation& eq: p.equations())
+  {
+    state.I[eq.variable().name()] = std::set<std::size_t>();
+    state.W[eq.variable().name()] = std::set<data::variable>();
+  }
+
+  std::ifstream file(filename);
+  if (!file.is_open())
+  {
+    throw mcrl2::runtime_error("initial-state: cannot open file " + filename);
+  }
+
+  std::string line;
+  while (std::getline(file, line))
+  {
+    if (line.empty() || line[0] == '#')
+    {
+      continue;
+    }
+    parse_initial_state_line(p, state, line);
+  }
 }
 
 } // namespace detail
