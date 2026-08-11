@@ -285,8 +285,10 @@ inline std::string parse_bare_equation_name(std::istringstream& iss, const std::
 }
 
 // Helper to process a parameter token (index or name) and add it to state
-inline void add_parameter_by_token(const pbes& p, abstract_param_state& state, 
-  const core::identifier_string& eq_name, const std::string& token, 
+inline void add_parameter_by_token(const pbes& p,
+  abstract_param_state& state,
+  const core::identifier_string& eq_name,
+  const std::string& token,
   const std::vector<data::variable>& params)
 {
   if (!token.empty() && std::isdigit(static_cast<unsigned char>(token[0])))
@@ -295,7 +297,8 @@ inline void add_parameter_by_token(const pbes& p, abstract_param_state& state,
     const std::size_t idx = std::stoul(token);
     if (idx >= params.size())
     {
-      throw mcrl2::runtime_error("initial-state: parameter index " + token + " out of bounds in equation " + core::pp(eq_name));
+      throw mcrl2::runtime_error(
+        "initial-state: parameter index " + token + " out of bounds in equation " + core::pp(eq_name));
     }
     state.add_abstracted_variable(p, eq_name, params[idx]);
   }
@@ -330,9 +333,8 @@ inline void parse_initial_state_line(const pbes& p, abstract_param_state& state,
   }
 
   // Parse equation name
-  std::string eq_name = (token == "Abstracted") 
-    ? parse_verbose_equation_name(iss, line)
-    : parse_bare_equation_name(iss, token, line);
+  std::string eq_name
+    = (token == "Abstracted") ? parse_verbose_equation_name(iss, line) : parse_bare_equation_name(iss, token, line);
 
   auto eq_opt = find_equation_by_name(p, eq_name);
   if (!eq_opt)

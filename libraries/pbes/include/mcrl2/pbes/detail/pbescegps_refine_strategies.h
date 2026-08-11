@@ -66,6 +66,55 @@ private:
 
   std::map<core::identifier_string, std::map<data::variable, std::size_t>> m_var_count_cache;
 
+  // Multi-level index key for formula indexing. Currently keyed by equation name only,
+  // but extensible for additional filtering criteria (e.g., first argument, arity).
+  struct formula_key
+  {
+    core::identifier_string eq_name;
+
+    bool operator<(const formula_key& other) const
+    {
+      return eq_name < other.eq_name;
+    }
+
+    bool operator==(const formula_key& other) const
+    {
+      return eq_name == other.eq_name;
+    }
+  };
+
+  // Index structure: maps (eq_name) → sorted vector of (formula_pp_string, vertex_index) pairs
+  // The pairs are sorted by formula string to enable binary search
+  struct indexed_vertices
+  {
+    std::vector<std::pair<std::string, index_type>> sorted_by_formula;
+  };
+
+  std::map<formula_key, indexed_vertices> m_under_index;
+  std::map<formula_key, indexed_vertices> m_over_index;
+
+  // Helper to build the sorted index for a graph
+  void build_formula_index(const structure_graph& g, std::map<formula_key, indexed_vertices>& index)
+  {
+    for (index_type idx = 0; idx < g.extent(); ++idx)
+    {
+      const pbes_expression& formula = g.find_vertex(idx).formula();
+      const auto& pvi = atermpp::down_cast<propositional_variable_instantiation>(formula);
+      formula_key key{pvi.name()};
+
+      std::string formula_str = core::pp(formula);
+      index[key].sorted_by_formula.emplace_back(formula_str, idx);
+    }
+
+    // Sort each bucket by formula string for binary search
+    for (auto& [key, vertices]: index)
+    {
+      std::sort(vertices.sorted_by_formula.begin(),
+        vertices.sorted_by_formula.end(),
+        [](const auto& a, const auto& b) { return a.first < b.first; });
+    }
+  }
+
   // Maps each parameter in a PVI to its original parameter name and compares
   // by finding common parameters in both under and over approximations.
   bool pvis_match_by_common_parameters(const propositional_variable_instantiation& a,
@@ -182,20 +231,63 @@ private:
   // concrete in both PVIs.
   bool formulae_match(const pbes_expression& a, const pbes_expression& b, bool find_in_over) const
   {
-    return pvis_match_by_common_parameters(atermpp::down_cast<propositional_variable_instantiation>(a),
-      atermpp::down_cast<propositional_variable_instantiation>(b),
-      find_in_over);
+    return a == b
+           || pvis_match_by_common_parameters(atermpp::down_cast<propositional_variable_instantiation>(a),
+             atermpp::down_cast<propositional_variable_instantiation>(b),
+             find_in_over);
   }
 
   index_type find_vertex_index_by_formula(const structure_graph& g, const pbes_expression& formula, bool find_in_over)
   {
-    for (index_type idx = 0; idx < g.extent(); ++idx)
+    const auto& pvi = atermpp::down_cast<propositional_variable_instantiation>(formula);
+    formula_key key{pvi.name()};
+
+    // Select the appropriate index based on which graph we're searching
+    const auto& index = find_in_over ? m_over_index : m_under_index;
+
+    auto key_it = index.find(key);
+    if (key_it == index.end())
+    {
+      return undefined_vertex();
+    }
+
+    const indexed_vertices& candidates = key_it->second;
+    const std::string formula_str = core::pp(formula);
+
+    // Binary search for vertices with matching formula string.
+    // Note: This should typically find at least one match, since we built the index
+    // by converting formulas to strings. However, if no exact match is found,
+    // the formula may have been rewritten or normalized differently.
+    auto range = std::equal_range(candidates.sorted_by_formula.begin(),
+      candidates.sorted_by_formula.end(),
+      std::make_pair(formula_str, index_type(0)),
+      [](const auto& a, const auto& b) { return a.first < b.first; });
+
+    assert(range.first != range.second);
+
+    // Among exact string matches, find the first one that passes formulae_match
+    // (in case pp() produces identical strings for semantically different formulas)
+    for (auto it = range.first; it != range.second; ++it)
+    {
+      if (formulae_match(formula, g.find_vertex(it->second).formula(), find_in_over))
+      {
+        return it->second;
+      }
+    }
+
+#ifndef NDEBUG
+    // If no exact string match was found via binary search, fall back to sequential
+    // search through all candidates for this equation.
+    for (const auto& [candidate_str, idx]: candidates.sorted_by_formula)
     {
       if (formulae_match(formula, g.find_vertex(idx).formula(), find_in_over))
       {
+        mcrl2::runtime_error("Our indexing did not find the right formula");
         return idx;
       }
     }
+#endif
+
     return undefined_vertex();
   }
 
@@ -627,6 +719,10 @@ public:
     {
       m_over_params[eq.variable().name()] = as_vector(eq.variable().parameters());
     }
+
+    // Build formula indices for faster lookup
+    build_formula_index(under_graph, m_under_index);
+    build_formula_index(over_graph, m_over_index);
 
     mCRL2log(log::debug) << "Refining using strategies" << std::endl;
     mCRL2log(log::trace) << "Under: " << under_graph << std::endl;

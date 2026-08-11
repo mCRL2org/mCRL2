@@ -348,6 +348,7 @@ public:
     pbes_system::parelm(result, false);
     pbes_constelm_algorithm<data::rewriter, simplify_data_rewriter<data::rewriter>> constelm_algo(*m_datar, pbesr);
     constelm_algo.run(result);
+    pbes_rewrite(result, pbesr);
     pbes_system::parelm(result, false);
     if (options.stategraph)
     {
