@@ -143,7 +143,7 @@ public:
       catch (const std::exception& e)
       {
         sym_process.wait();
-        mcrl2::runtime_error("symbolic solver failed: " + std::string(e.what()));
+        throw mcrl2::runtime_error("symbolic solver failed: " + std::string(e.what()));
       }
     }
     else
