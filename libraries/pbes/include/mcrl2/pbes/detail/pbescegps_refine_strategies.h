@@ -83,36 +83,125 @@ private:
     }
   };
 
-  // Index structure: maps (eq_name) → sorted vector of (formula_pp_string, vertex_index) pairs
-  // The pairs are sorted by formula string to enable binary search
-  struct indexed_vertices
+  // The key is the common-parameter version of a PVI pretty-printed.
+  struct common_parameter_key_type
   {
-    std::vector<std::pair<std::string, index_type>> sorted_by_formula;
+    std::string value;
+
+    bool operator<(const common_parameter_key_type& other) const
+    {
+      return value < other.value;
+    }
   };
 
+  struct indexed_vertices
+  {
+    std::vector<std::pair<common_parameter_key_type, index_type>> sorted_by_formula;
+  };
+
+  // Index structure: maps (eq_name) → sorted vector of (common-parameter key, vertex index) pairs.
+  // The pairs are sorted by their key to enable binary search.
   std::map<formula_key, indexed_vertices> m_under_index;
   std::map<formula_key, indexed_vertices> m_over_index;
 
-  // Helper to build the sorted index for a graph
-  void build_formula_index(const structure_graph& g, std::map<formula_key, indexed_vertices>& index)
+  // For each equation, records the positions of parameters retained in both
+  // approximations. Pairs are ordered by their original parameter position.
+  std::map<core::identifier_string, std::vector<std::pair<std::size_t, std::size_t>>> m_common_parameter_indices;
+
+  void reset()
+  {
+    m_under_params.clear();
+    m_over_params.clear();
+    m_original_params.clear();
+    m_var_count_cache.clear();
+    m_common_parameter_indices.clear();
+    m_under_index.clear();
+    m_over_index.clear();
+  }
+
+  void initialize_parameters(const pbes& p, const pbes& under_pbes, const pbes& over_pbes)
+  {
+    for (const pbes_equation& eq: p.equations())
+    {
+      m_original_params[eq.variable().name()] = as_vector(eq.variable().parameters());
+    }
+
+    for (const pbes_equation& eq: under_pbes.equations())
+    {
+      m_under_params[eq.variable().name()] = as_vector(eq.variable().parameters());
+    }
+
+    for (const pbes_equation& eq: over_pbes.equations())
+    {
+      m_over_params[eq.variable().name()] = as_vector(eq.variable().parameters());
+    }
+  }
+
+  void build_common_parameter_indices()
+  {
+    for (const auto& [name, original_params]: m_original_params)
+    {
+      const auto& under_params = m_under_params.at(name);
+      const auto& over_params = m_over_params.at(name);
+      auto& indices = m_common_parameter_indices[name];
+      for (const data::variable& param: original_params)
+      {
+        const auto under_it = std::find(under_params.begin(), under_params.end(), param);
+        const auto over_it = std::find(over_params.begin(), over_params.end(), param);
+        if (under_it != under_params.end() && over_it != over_params.end())
+        {
+          indices.emplace_back(static_cast<std::size_t>(std::distance(under_params.begin(), under_it)),
+            static_cast<std::size_t>(std::distance(over_params.begin(), over_it)));
+        }
+      }
+    }
+  }
+
+  common_parameter_key_type common_parameter_key(const propositional_variable_instantiation& pvi, bool is_under) const
+  {
+    const auto indices_it = m_common_parameter_indices.find(pvi.name());
+    if (indices_it == m_common_parameter_indices.end())
+    {
+      throw mcrl2::runtime_error("Could not find common parameter indices for equation " + pp(pvi));
+    }
+
+    const std::vector<data::data_expression> args = as_vector(pvi.parameters());
+    std::vector<data::data_expression> common_parameters;
+    common_parameters.reserve(indices_it->second.size());
+    for (const auto& [under_index, over_index]: indices_it->second)
+    {
+      const std::size_t index = is_under ? under_index : over_index;
+      common_parameters.push_back(args[index]);
+    }
+    return {pp(propositional_variable_instantiation(pvi.name(),
+      data::data_expression_list(common_parameters.begin(), common_parameters.end())))};
+  }
+
+  // Helper to build the sorted index for a graph.
+  void build_formula_index(const structure_graph& g, std::map<formula_key, indexed_vertices>& index, bool is_under)
   {
     for (index_type idx = 0; idx < g.extent(); ++idx)
     {
       const pbes_expression& formula = g.find_vertex(idx).formula();
       const auto& pvi = atermpp::down_cast<propositional_variable_instantiation>(formula);
-      formula_key key{pvi.name()};
+      formula_key equation_key{pvi.name()};
 
-      std::string formula_str = core::pp(formula);
-      index[key].sorted_by_formula.emplace_back(formula_str, idx);
+      index[equation_key].sorted_by_formula.emplace_back(common_parameter_key(pvi, is_under), idx);
     }
 
-    // Sort each bucket by formula string for binary search
+    // Sort each bucket by common-parameter key for binary search.
     for (auto& [key, vertices]: index)
     {
       std::sort(vertices.sorted_by_formula.begin(),
         vertices.sorted_by_formula.end(),
         [](const auto& a, const auto& b) { return a.first < b.first; });
     }
+  }
+
+  void build_formula_indices(const structure_graph& under_graph, const structure_graph& over_graph)
+  {
+    build_formula_index(under_graph, m_under_index, true);
+    build_formula_index(over_graph, m_over_index, false);
   }
 
   // Maps each parameter in a PVI to its original parameter name and compares
@@ -156,15 +245,19 @@ private:
       throw mcrl2::runtime_error("Could not find remaining params for equation " + pp(a));
     }
 
-    const std::vector<data::variable>& under_params = it_under->second;
-    const std::vector<data::variable>& over_params = it_over->second;
+    const auto& indices = m_common_parameter_indices.at(a.name());
+    for (const auto& [under_index, over_index]: indices)
+    {
+      const std::size_t a_index = find_in_over ? under_index : over_index;
+      const std::size_t b_index = find_in_over ? over_index : under_index;
+      if (a_args[a_index] != b_args[b_index])
+      {
+        return false;
+      }
+    }
 
-    // Try matching with a as under, b as over
-    bool match = find_in_over ? try_match(a_args, b_args, under_params, over_params)
-                              : try_match(a_args, b_args, over_params, under_params);
-
-    mCRL2log(log::trace) << (match ? "  MATCH" : "  NO MATCH") << std::endl;
-    return match;
+    mCRL2log(log::trace) << "  MATCH" << std::endl;
+    return true;
   }
 
   // Helper function to try matching PVI arguments against parameter sets
@@ -231,42 +324,36 @@ private:
   // concrete in both PVIs.
   bool formulae_match(const pbes_expression& a, const pbes_expression& b, bool find_in_over) const
   {
-    return a == b
-           || pvis_match_by_common_parameters(atermpp::down_cast<propositional_variable_instantiation>(a),
-             atermpp::down_cast<propositional_variable_instantiation>(b),
-             find_in_over);
+    return pvis_match_by_common_parameters(atermpp::down_cast<propositional_variable_instantiation>(a),
+      atermpp::down_cast<propositional_variable_instantiation>(b),
+      find_in_over);
   }
 
   index_type find_vertex_index_by_formula(const structure_graph& g, const pbes_expression& formula, bool find_in_over)
   {
     const auto& pvi = atermpp::down_cast<propositional_variable_instantiation>(formula);
-    formula_key key{pvi.name()};
+    formula_key equation_key{pvi.name()};
 
     // Select the appropriate index based on which graph we're searching
-    const auto& index = find_in_over ? m_over_index : m_under_index;
+    const std::map<formula_key, indexed_vertices>& index = find_in_over ? m_over_index : m_under_index;
 
-    auto key_it = index.find(key);
+    auto key_it = index.find(equation_key);
     if (key_it == index.end())
     {
       return undefined_vertex();
     }
 
     const indexed_vertices& candidates = key_it->second;
-    const std::string formula_str = core::pp(formula);
+    const common_parameter_key_type common_key = common_parameter_key(pvi, find_in_over);
 
-    // Binary search for vertices with matching formula string.
-    // Note: This should typically find at least one match, since we built the index
-    // by converting formulas to strings. However, if no exact match is found,
-    // the formula may have been rewritten or normalized differently.
+    // Binary search for vertices with identical common-parameter values.
     auto range = std::equal_range(candidates.sorted_by_formula.begin(),
       candidates.sorted_by_formula.end(),
-      std::make_pair(formula_str, index_type(0)),
+      std::make_pair(common_key, index_type(0)),
       [](const auto& a, const auto& b) { return a.first < b.first; });
 
-    assert(range.first != range.second);
-
-    // Among exact string matches, find the first one that passes formulae_match
-    // (in case pp() produces identical strings for semantically different formulas)
+    // Among candidates with matching common-parameter values, find the first
+    // one that passes the full semantic comparison.
     for (auto it = range.first; it != range.second; ++it)
     {
       if (formulae_match(formula, g.find_vertex(it->second).formula(), find_in_over))
@@ -276,14 +363,18 @@ private:
     }
 
 #ifndef NDEBUG
-    // If no exact string match was found via binary search, fall back to sequential
+    // If no common-parameter key match was found via binary search, fall back to sequential
     // search through all candidates for this equation.
-    for (const auto& [candidate_str, idx]: candidates.sorted_by_formula)
+    for (const auto& [candidate_key, idx]: candidates.sorted_by_formula)
     {
       if (formulae_match(formula, g.find_vertex(idx).formula(), find_in_over))
       {
-        mcrl2::runtime_error("Our indexing did not find the right formula");
-        return idx;
+        std::string err = "Our indexing did not find the right formula in this range:";
+        for (auto it = range.first; it != range.second; ++it)
+        {
+          err += "\n  " + pp(g.find_vertex(it->second).formula());
+        }
+        throw mcrl2::runtime_error(err);
       }
     }
 #endif
@@ -567,12 +658,15 @@ private:
     {
       std::set<index_type> todo;
       todo.insert(primary.initial_vertex());
+      assert(
+        primary.initial_vertex() != undefined_vertex() && "Initial vertex of the primary structure graph is undefined");
       std::set<index_type> visited;
       while (!todo.empty())
       {
         const index_type current_idx = *todo.begin();
         todo.erase(todo.begin());
         const vertex& current_vertex = primary.find_vertex(current_idx);
+        assert(current_vertex != undefined_vertex() && "Vertex from the todo stack is undefined");
         const index_type strategy_idx = current_vertex.strategy;
 
         if (strategy_idx == undefined_vertex())
@@ -589,14 +683,14 @@ private:
             mCRL2log(log::trace) << "Some index found " << matching_idx << std::endl;
             if (matching_idx == undefined_vertex())
             {
-              mcrl2::runtime_error("matching_idx == undefined_vertex() for " + pp(current_vertex.formula()));
+              throw mcrl2::runtime_error("matching_idx == undefined_vertex() for " + pp(current_vertex.formula()));
             }
 
             const index_type other_strategy_idx = other.find_vertex(matching_idx).strategy;
             mCRL2log(log::trace) << "Strategy index found " << other_strategy_idx << std::endl;
             if (other_strategy_idx == undefined_vertex())
             {
-              mcrl2::runtime_error("The other strategy index is also undefined! " + pp(current_vertex.formula()));
+              throw mcrl2::runtime_error("The other strategy index is also undefined! " + pp(current_vertex.formula()));
             }
 
             const vertex& other_strategy_vertex = other.find_vertex(other_strategy_idx);
@@ -704,25 +798,10 @@ public:
     m_options = &options;
     m_datar = &data_rewriter;
 
-    // Store original parameters
-    for (const pbes_equation& eq: p.equations())
-    {
-      m_original_params[eq.variable().name()] = as_vector(eq.variable().parameters());
-    }
-
-    // Store remaining parameters for each approximation
-    for (const pbes_equation& eq: under_pbes.equations())
-    {
-      m_under_params[eq.variable().name()] = as_vector(eq.variable().parameters());
-    }
-    for (const pbes_equation& eq: over_pbes.equations())
-    {
-      m_over_params[eq.variable().name()] = as_vector(eq.variable().parameters());
-    }
-
-    // Build formula indices for faster lookup
-    build_formula_index(under_graph, m_under_index);
-    build_formula_index(over_graph, m_over_index);
+    reset();
+    initialize_parameters(p, under_pbes, over_pbes);
+    build_common_parameter_indices();
+    build_formula_indices(under_graph, over_graph);
 
     mCRL2log(log::debug) << "Refining using strategies" << std::endl;
     mCRL2log(log::trace) << "Under: " << under_graph << std::endl;
