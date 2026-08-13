@@ -793,6 +793,7 @@ class pre_srf_pbes
 {
 protected:
   data::data_specification m_dataspec;
+  std::set<data::variable> m_global_variables;
   std::vector<pre_srf_equation<allow_ce>> m_equations;
   propositional_variable_instantiation m_initial_state;
 
@@ -800,9 +801,11 @@ public:
   pre_srf_pbes() = default;
 
   pre_srf_pbes(const data::data_specification& dataspec,
+      std::set<data::variable> global_variables,
       std::vector<pre_srf_equation<allow_ce>> equations,
       propositional_variable_instantiation initial_state)
       : m_dataspec(dataspec),
+        m_global_variables(std::move(global_variables)),
         m_equations(std::move(equations)),
         m_initial_state(std::move(initial_state))
   {}
@@ -819,6 +822,10 @@ public:
 
   data::data_specification& data() { return m_dataspec; }
 
+  const std::set<data::variable>& global_variables() const { return m_global_variables; }
+
+  std::set<data::variable>& global_variables() { return m_global_variables; }
+
   pbes to_pbes() const
   {
     std::vector<pbes_equation> v;
@@ -826,7 +833,7 @@ public:
     {
       v.push_back(eqn.to_pbes());
     }
-    return pbes(m_dataspec, std::set<data::variable>(), v, m_initial_state);
+    return pbes(m_dataspec, m_global_variables, v, m_initial_state);
   }
 
   // Adds extra clauses to the equations to enforce that the PBES is in total SRF format
@@ -901,6 +908,7 @@ inline detail::pre_srf_pbes<allow_ce> pbes2pre_srf(const pbes& p, bool merge_sim
   }
 
   auto result = detail::pre_srf_pbes<allow_ce>(p.data(),
+      p.global_variables(),
       std::vector<detail::pre_srf_equation<allow_ce>>(srf_equations.begin(), srf_equations.end()),
       p.initial_state());
   return result;
@@ -1010,7 +1018,7 @@ inline srf_pbes simplify_srf_pbes(const srf_pbes& p)
     equations.emplace_back(equation.symbol(), equation.variable(), summands, conjunctive);
   }
 
-  return srf_pbes(p.data(), equations, p.initial_state());
+  return srf_pbes(p.data(), p.global_variables(), equations, p.initial_state());
 }
 
 /// \brief Converts a pre-SRF PBES into standard recursive form. Note that the
@@ -1047,7 +1055,7 @@ inline srf_pbes pre_srf2srfpbes(const srf_pbes_with_ce& p)
     equations.emplace_back(equation.symbol(), equation.variable(), summands, equation.is_conjunctive());
   }
 
-  return simplify_srf_pbes(srf_pbes(p.data(), equations, p.initial_state()));
+  return simplify_srf_pbes(srf_pbes(p.data(), p.global_variables(), equations, p.initial_state()));
 }
 
 
