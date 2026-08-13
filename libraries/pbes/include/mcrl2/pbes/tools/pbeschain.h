@@ -41,6 +41,7 @@ struct pbeschain_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   bool back_substitution = true;
+  bool remove_equation = true;
   int max_depth = 12;
   bool count_unique_pvi = false;
   bool fill_pvi = false;
@@ -226,8 +227,6 @@ std::vector<propositional_variable_instantiation> get_propositional_variable_ins
   return result;
 }
 
-
-
 /// \brief Helper class to track multiple time measurements and call counts
 struct timing_tracker
 {
@@ -282,9 +281,8 @@ struct timing_tracker
       // Log measurements with aligned values
       for (const auto& [label, measurement]: measurements)
       {
-        mCRL2log(log::verbose) << std::left << std::setw(max_label_length) << (label + " ") << ": "
-                               << std::right << std::setw(2) << std::fixed 
-                               << measurement.get_total_seconds() << "s ("
+        mCRL2log(log::verbose) << std::left << std::setw(max_label_length) << (label + " ") << ": " << std::right
+                               << std::setw(2) << std::fixed << measurement.get_total_seconds() << "s ("
                                << measurement.call_count << " calls)" << std::endl;
       }
     }
@@ -365,6 +363,7 @@ inline void self_substitute(pbes_equation& equation,
     stable = true;
     std::vector<propositional_variable_instantiation> set
       = get_propositional_variable_instantiations(equation.formula());
+    current_size = set.size();
 
     std::set<std::string> parameterNames = {};
     for (data::variable a: equation.variable().parameters())
@@ -666,12 +665,12 @@ inline pbes fill_pvi(pbes& p, data::rewriter data_rewriter)
 inline pbes tosrf(pbes_system::pbes pbesspec)
 {
   pbes_system::detail::instantiate_global_variables(pbesspec);
-  auto result = pbes2pre_srf(pbesspec, true);
+  auto result = pbes2srf(pbesspec, true);
   // Unify the parameters of the original PBES (which has potential counter example information)
   unify_parameters(result, true, false);
   pbes_system::resolve_summand_variable_name_clashes(result,
     result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
-  return pre_srf2srfpbes(result).to_pbes();
+  return (result).to_pbes();
 }
 
 struct pbeschain_pbes_backward_substituter
@@ -717,12 +716,15 @@ struct pbeschain_pbes_backward_substituter
       original_pbes = p;
     }
 
-    for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
-    {
-      mCRL2log(log::verbose) << "Investigating the equation for " << i->variable().name() << "\n";
-      std::size_t original_i = (p.equations().rend() - i) - 1;
+    std::set<core::identifier_string> equations_to_remove;
 
-      self_substitute(*i,
+    for (std::size_t equation_index = p.equations().size(); equation_index > 0; --equation_index)
+    {
+      pbes_equation& i = p.equations()[equation_index - 1];
+      mCRL2log(log::verbose) << "Investigating the equation for " << i.variable().name() << "\n";
+      std::size_t original_i = equation_index - 1;
+
+      self_substitute(i,
         initial_sizes[original_i],
         pvi_substituter,
         if_rewriter,
@@ -730,8 +732,7 @@ struct pbeschain_pbes_backward_substituter
         pbes_default_rewriter,
         options);
 
-      std::set<propositional_variable_instantiation> pvi_set
-        = find_propositional_variable_instantiations((*i).formula());
+      std::set<propositional_variable_instantiation> pvi_set = find_propositional_variable_instantiations(i.formula());
 
       // If the SRF form of some equation is too big, replace the formula of that equation with the original formula.
       if (pvi_set.size() > 0 && options.srf_factor > 0)
@@ -741,8 +742,13 @@ struct pbeschain_pbes_backward_substituter
         pbes original_srf_pbes = tosrf(original_pbes);
 
         // Find our equation in both PBESs
-        pbes_equation original_eq = original_pbes.equations()[original_i];
-        core::identifier_string original_variable_name = original_eq.variable().name();
+        core::identifier_string original_variable_name = i.variable().name();
+        auto original_eq_it = std::find_if(original_pbes.equations().begin(),
+          original_pbes.equations().end(),
+          [&](const pbes_equation& eq) { return eq.variable().name() == original_variable_name; });
+        if (original_eq_it == original_pbes.equations().end())
+          continue;
+        const pbes_equation& original_eq = *original_eq_it;
 
         auto result_srf_eq = std::find_if(result_srf_pbes.equations().rbegin(),
           result_srf_pbes.equations().rend(),
@@ -762,8 +768,8 @@ struct pbeschain_pbes_backward_substituter
         if (options.srf_factor * (double)original_size <= (double)new_size)
         {
           log_number_pvi(initial_sizes[original_i], initial_sizes[original_i]);
-          (*i).formula() = original_eq.formula();
-          pvi_set = find_propositional_variable_instantiations((*i).formula());
+          i.formula() = original_eq.formula();
+          pvi_set = find_propositional_variable_instantiations(i.formula());
         }
       }
 
@@ -774,13 +780,51 @@ struct pbeschain_pbes_backward_substituter
       {
         if (options.rewrite_only_substitution)
         {
-          (*i).formula() = simplify_expr((*i).formula(), if_rewriter, pbes_rewriter);
+          i.formula() = simplify_expr(i.formula(), if_rewriter, pbes_rewriter);
         }
-        for (std::vector<pbes_equation>::reverse_iterator j = i + 1; j != p.equations().rend(); j++)
+        for (std::size_t j = 0; j < equation_index; ++j)
         {
-          substitute(*j, *i, substituter);
+          substitute(p.equations()[j], i, substituter);
+        }
+        equations_to_remove.insert(i.variable().name());
+      }
+    }
+
+    if (options.remove_equation)
+    {
+      std::set<core::identifier_string> removable_equations;
+      for (std::size_t i = 0; i < p.equations().size(); ++i)
+      {
+        const core::identifier_string& name = p.equations()[i].variable().name();
+        if (!equations_to_remove.contains(name))
+        {
+          continue;
+        }
+
+        bool referenced = false;
+        for (std::size_t j = 0; j < p.equations().size() && !referenced; ++j)
+        {
+          if (i == j)
+          {
+            continue;
+          }
+          const std::set<propositional_variable_instantiation> pvis
+            = find_propositional_variable_instantiations(p.equations()[j].formula());
+          referenced = std::any_of(pvis.begin(),
+            pvis.end(),
+            [&](const propositional_variable_instantiation& pvi) { return pvi.name() == name; });
+        }
+        if (!referenced)
+        {
+          removable_equations.insert(name);
         }
       }
+
+      p.equations().erase(std::remove_if(p.equations().begin(),
+                            p.equations().end(),
+                            [&](const pbes_equation& equation)
+                            { return removable_equations.contains(equation.variable().name()); }),
+        p.equations().end());
     }
   }
 };

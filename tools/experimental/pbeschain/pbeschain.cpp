@@ -37,6 +37,7 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
     {
       super::parse_options(parser);
       m_options.back_substitution = !parser.has_option("no-back-substitution");
+      m_options.remove_equation = !parser.has_option("no-remove-equation");
       m_options.max_depth = parser.option_argument_as<int>("max-depth");
       m_options.count_unique_pvi = parser.has_option("count-unique-pvi");
       m_options.fill_pvi = parser.has_option("fill-pvi");
@@ -58,6 +59,8 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
                   "of predicate variable instances in the equation is zero. "
                   "In some cases, this makes solving the equation faster. However, "
                   "less paths can be reduced.", 's');
+      desc.add_option("no-remove-equation",
+                  "Do not remove an equation after its solution has been substituted backwards.");
       desc.add_option("max-depth", utilities::make_optional_argument("DEPTH", "12"),
                   "The maximum depth a single predicate variable instances "
                   "gets unfolded. Default is 12.", 'm');

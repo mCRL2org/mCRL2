@@ -149,7 +149,6 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
         }
         case pbes_rewriter_type::srf:
         {
-          pbes_system::detail::instantiate_global_variables(p);
           pbes_system::algorithms::normalize(p);
           auto result = pbes2srf(p,true);
           save_pbes(result.to_pbes(), output_filename(), m_pbes_output_format);  
@@ -158,7 +157,6 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
         }
         case pbes_rewriter_type::pre_srf:
         {
-          pbes_system::detail::instantiate_global_variables(p);
           pbes_system::algorithms::normalize(p);
           auto result = pbes2pre_srf(p);
           save_pbes(result.to_pbes(), output_filename(), m_pbes_output_format);  
