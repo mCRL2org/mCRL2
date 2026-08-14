@@ -14,31 +14,38 @@
 
 #include "mcrl2/pbes/traverser.h"
 
-
-
-
+#include <algorithm>
+#include <iterator>
+#include <set>
+#include <vector>
 
 namespace mcrl2::pbes_system::detail
 {
 
-struct find_free_variables_traverser: public pbes_expression_traverser<find_free_variables_traverser>
+template<typename OutputIterator>
+struct find_free_variables_traverser : public pbes_expression_traverser<find_free_variables_traverser<OutputIterator>>
 {
-  using super = pbes_expression_traverser<find_free_variables_traverser>;
+  using super = pbes_expression_traverser<find_free_variables_traverser<OutputIterator>>;
+  using super::apply;
   using super::enter;
   using super::leave;
-  using super::apply;
 
   data::variable_list bound_variables;
   std::vector<data::variable_list> quantifier_stack;
-  std::set<data::variable> result;
+  OutputIterator out;
   bool search_propositional_variables;
 
-  find_free_variables_traverser(bool search_propositional_variables_ = true)
-    : search_propositional_variables(search_propositional_variables_)
+  find_free_variables_traverser(OutputIterator out_, bool search_propositional_variables_ = true)
+    : out(out_),
+      search_propositional_variables(search_propositional_variables_)
   {}
 
-  find_free_variables_traverser(const data::variable_list& bound_variables_, bool search_propositional_variables_ = true)
-    : bound_variables(bound_variables_), search_propositional_variables(search_propositional_variables_)
+  find_free_variables_traverser(OutputIterator out_,
+    const data::variable_list& bound_variables_,
+    bool search_propositional_variables_ = true)
+    : bound_variables(bound_variables_),
+      out(out_),
+      search_propositional_variables(search_propositional_variables_)
   {}
 
   /// \brief Returns true if v is an element of bound_variables or quantifier_stack
@@ -93,15 +100,17 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
     pop();
   }
 
-  void enter(const propositional_variable& x)
+  void enter(const propositional_variable_instantiation& x)
   {
     if (search_propositional_variables)
     {
-      for (const data::variable& v: data::find_free_variables(x.parameters()))
+      std::vector<data::variable> variables;
+      data::find_free_variables(x.parameters(), std::back_inserter(variables));
+      for (const data::variable& v: variables)
       {
         if (!is_bound(v))
         {
-          result.insert(v);
+          *out = v;
         }
       }
     }
@@ -109,28 +118,55 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
 
   void enter(const data::data_expression& x)
   {
-    for (const data::variable& v: data::find_free_variables(x))
+    std::vector<data::variable> variables;
+    data::find_free_variables(x, std::back_inserter(variables));
+    for (const data::variable& v: variables)
     {
       if (!is_bound(v))
       {
-        result.insert(v);
+        *out = v;
       }
     }
   }
 };
 
-inline
-std::set<data::variable> find_free_variables(const pbes_expression& x, const data::variable_list& bound_variables, bool search_propositional_variables = true)
+template<typename OutputIterator>
+void find_free_variables(const pbes_expression& x,
+  OutputIterator out,
+  const data::variable_list& bound_variables,
+  bool search_propositional_variables = true)
 {
-  find_free_variables_traverser f(bound_variables, search_propositional_variables);
+  find_free_variables_traverser<OutputIterator> f(out, bound_variables, search_propositional_variables);
   f.apply(x);
-  return f.result;
+}
+
+inline std::set<data::variable> find_free_variables(const pbes_expression& x,
+  const data::variable_list& bound_variables,
+  bool search_propositional_variables = true)
+{
+  std::set<data::variable> result;
+  find_free_variables(x, std::inserter(result, result.end()), bound_variables, search_propositional_variables);
+  return result;
+}
+
+inline std::vector<data::variable> find_free_variables_in_order(const pbes_expression& x,
+  const data::variable_list& bound_variables,
+  bool search_propositional_variables = true)
+{
+  std::vector<data::variable> occurrences;
+  find_free_variables(x, std::back_inserter(occurrences), bound_variables, search_propositional_variables);
+
+  std::vector<data::variable> result;
+  for (const data::variable& variable: occurrences)
+  {
+    if (std::find(result.begin(), result.end(), variable) == result.end())
+    {
+      result.push_back(variable);
+    }
+  }
+  return result;
 }
 
 } // namespace mcrl2::pbes_system::detail
-
-
-
-
 
 #endif // MCRL2_PBES_DETAIL_FIND_FREE_VARIABLES_H

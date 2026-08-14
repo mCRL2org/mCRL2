@@ -574,7 +574,7 @@ private:
     }
     else if (options.var_choice == var_choice_strategy::rhs)
     {
-      selected_var = detail::choose_variable_by_rhs_order_reverse(guard_formula, essential_vars);
+      selected_var = detail::choose_variable_by_rhs_order(guard_formula, essential_vars);
     }
     else
     {
