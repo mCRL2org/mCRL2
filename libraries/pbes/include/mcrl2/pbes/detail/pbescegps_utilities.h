@@ -209,24 +209,11 @@ inline std::optional<data::variable> choose_variable_by_lhs_order(const proposit
 inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_expression& formula,
   const std::set<data::variable>& essential_vars)
 {
-  std::set<data::variable> vars = find_free_variables(formula, data::variable_list(), false);
-  for (const auto& var: vars)
+  const std::vector<data::variable> vars = find_free_variables_in_order(formula, data::variable_list(), false);
+  mCRL2log(log::debug) << "vars: " << core::detail::print_list(vars);
+  for (const data::variable& var: vars)
   {
     if (essential_vars.contains(var))
-    {
-      return var;
-    }
-  }
-  return std::nullopt;
-}
-
-inline std::optional<data::variable> choose_variable_by_rhs_order_reverse(const pbes_expression& formula,
-  const std::set<data::variable>& abstracted_vars)
-{
-  std::set<data::variable> vars = find_free_variables(formula, data::variable_list(), false);
-  for (const auto& var: std::ranges::reverse_view(vars))
-  {
-    if (abstracted_vars.contains(var))
     {
       return var;
     }
