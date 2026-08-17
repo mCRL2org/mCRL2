@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/iteration_builders.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
+#include "mcrl2/pbes/detail/srf_transformations.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -54,6 +55,7 @@ struct pbeschain_options
   std::size_t max_number_pvi = 1;
   double srf_factor; // factor of the maximum size the chained equation in SRF should be after chaining compared
                      // to the size of the original equation. Default is 1.0
+  bool srf_split_conditions = false;
   bool timings = false;
 };
 
@@ -662,14 +664,13 @@ inline pbes fill_pvi(pbes& p, data::rewriter data_rewriter)
   return res;
 }
 
-inline pbes tosrf(pbes_system::pbes pbesspec)
+inline pbes tosrf(pbes_system::pbes pbesspec, bool split_srf_conditions = false)
 {
-  pbes_system::detail::instantiate_global_variables(pbesspec);
   auto result = pbes2srf(pbesspec, true);
-  // Unify the parameters of the original PBES (which has potential counter example information)
-  unify_parameters(result, true, false);
-  pbes_system::resolve_summand_variable_name_clashes(result,
-    result.equations().front().variable().parameters()); // N.B. This is a required preprocessing step.
+  if (split_srf_conditions)
+  {
+    result = split_conditions(result, 1);
+  }
   return (result).to_pbes();
 }
 
@@ -738,8 +739,8 @@ struct pbeschain_pbes_backward_substituter
       if (pvi_set.size() > 0 && options.srf_factor > 0)
       {
         // Use the same SRF form as pbessolvesymbolic
-        pbes result_srf_pbes = tosrf(p);
-        pbes original_srf_pbes = tosrf(original_pbes);
+        pbes result_srf_pbes = tosrf(p, options.srf_split_conditions);
+        pbes original_srf_pbes = tosrf(original_pbes, options.srf_split_conditions);
 
         // Find our equation in both PBESs
         core::identifier_string original_variable_name = i.variable().name();
@@ -764,7 +765,7 @@ struct pbeschain_pbes_backward_substituter
 
         std::size_t original_size = pp(original_srf_eq->formula()).size();
         std::size_t new_size = pp(result_srf_eq->formula()).size();
-        mCRL2log(log::debug) << "Original size: " << original_size << " New size: " << new_size << "\n";
+        mCRL2log(log::verbose) << "Original size: " << original_size << " New size: " << new_size << "\n";
         if (options.srf_factor * (double)original_size <= (double)new_size)
         {
           log_number_pvi(initial_sizes[original_i], initial_sizes[original_i]);
