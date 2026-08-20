@@ -40,6 +40,7 @@ protected:
     m_options.solve_symbolic = parser.has_option("solve-symbolic-args");
     m_options.stategraph = parser.has_option("stategraph");
     m_options.solve_symbolic_args = parser.option_argument_as<std::string>("solve-symbolic-args");
+    m_options.optimization = parser.option_argument_as<partial_solve_strategy>("optimization");
     m_options.number_of_threads = number_of_threads();
     m_options.initial_state_file = parser.option_argument_as<std::string>("initial-state");
 
@@ -73,10 +74,28 @@ protected:
     super::add_options(desc);
     desc.add_option("init-cfp", "Use the (global) control flow parameters as initial parameters.", 'c');
     desc.add_option("stategraph", "Use stategraph for each under and overapproximation.");
+    desc.add_option("optimization",
+      utilities::make_enum_argument<partial_solve_strategy>("STRATEGY")
+        .add_value_desc(partial_solve_strategy::no_optimisation, "Do not apply any optimizations.", true)
+        .add_value_desc(partial_solve_strategy::remove_self_loops, "Remove self loops.")
+        .add_value_desc(partial_solve_strategy::propagate_solved_equations_using_substitution,
+          "Propagate solved equations using substitution.")
+        .add_value_desc(partial_solve_strategy::propagate_solved_equations_using_attractor,
+          "Propagate solved equations using an attractor.")
+        .add_value_desc(partial_solve_strategy::detect_winning_loops_using_fatal_attractor,
+          "Detect winning loops using a fatal attractor.")
+        .add_value_desc(partial_solve_strategy::solve_subgames_using_fatal_attractor_local,
+          "Solve subgames using a fatal attractor (local version).")
+        .add_value_desc(partial_solve_strategy::solve_subgames_using_fatal_attractor_original,
+          "Solve subgames using a fatal attractor (original version).")
+        .add_value_desc(partial_solve_strategy::solve_subgames_using_solver, "Solve subgames using the solver.")
+        .add_value_desc(partial_solve_strategy::detect_winning_loops_original,
+          "Detect winning loops (original version)."),
+      "Use optimization STRATEGY while solving approximations.",
+      's');
     desc.add_option("solve-symbolic-args",
       utilities::make_optional_argument("STR", ""),
-      "Solve the PBES symbolically using the following arguments.",
-      's');
+      "Solve the PBES symbolically using the following arguments.");
     desc.add_option("var-choice",
       utilities::make_optional_argument("STR", "lhs"),
       "'lhs' (default) the variable order of the left-hand side of the equation\n"

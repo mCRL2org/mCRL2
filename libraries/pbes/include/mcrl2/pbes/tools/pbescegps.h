@@ -38,6 +38,7 @@
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbesinst_structure_graph.h"
+#include "mcrl2/pbes/pbesinst_structure_graph2.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/rewrite.h"
 #include <algorithm>
@@ -150,11 +151,20 @@ public:
     {
       pbessolve_options options2;
       options2.rewrite_strategy = options.rewrite_strategy;
+      options2.optimization = options.optimization;
       options2.number_of_threads = options.number_of_threads;
 
       m_solved_graph = structure_graph();
-      pbesinst_structure_graph_algorithm algorithm(options2, p_copy, m_solved_graph, m_datar);
-      algorithm.run();
+      if (options.optimization <= partial_solve_strategy::remove_self_loops)
+      {
+        pbesinst_structure_graph_algorithm algorithm(options2, p_copy, m_solved_graph, m_datar);
+        algorithm.run();
+      }
+      else
+      {
+        pbesinst_structure_graph_algorithm2 algorithm(options2, p_copy, m_solved_graph, m_datar);
+        algorithm.run();
+      }
 
       // Solve the structure graph
       result = solve_structure_graph(m_solved_graph);

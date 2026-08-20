@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
@@ -48,6 +49,7 @@ enum class var_choice_strategy
 struct pbescegps_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
+  partial_solve_strategy optimization = partial_solve_strategy::no_optimisation;
   bool init_control_flow = false;
   bool solve_symbolic = false;
   bool stategraph = false;

@@ -604,15 +604,23 @@ private:
     {
       mCRL2log(log::debug) << "Find first index " << current_idx << std::endl;
       const vertex& current_vertex = primary.find_vertex(current_idx);
-      index_type matching_idx = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
+      const index_type strategy_idx = current_vertex.strategy;
+      const bool has_terminal_decoration
+        = current_vertex.decoration == decoration_type::d_false || current_vertex.decoration == decoration_type::d_true;
+      const bool can_follow_primary_strategy
+        = strategy_idx != undefined_vertex() && visited.find(strategy_idx) == visited.end();
+      index_type matching_idx = undefined_vertex();
+      if (has_terminal_decoration || can_follow_primary_strategy)
+      {
+        matching_idx = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
+      }
       mCRL2log(log::debug) << "Phase " << phase << " vertex " << current_vertex;
       if (matching_idx != undefined_vertex())
       {
         mCRL2log(log::debug) << " trying other dec " << other.find_vertex(matching_idx);
       }
       mCRL2log(log::debug) << std::endl;
-      if ((current_vertex.decoration == decoration_type::d_false
-            || current_vertex.decoration == decoration_type::d_true)
+      if (has_terminal_decoration
           && (matching_idx == undefined_vertex()
               || current_vertex.decoration != other.find_vertex(matching_idx).decoration)
           && (current_vertex.rank % 2 == 0 || current_vertex.decoration == decoration_type::d_true))
@@ -623,18 +631,25 @@ private:
       }
 
       visited.insert(current_idx);
-      index_type strategy_idx = current_vertex.strategy;
       index_type other_strategy_idx
         = matching_idx != undefined_vertex() ? other.find_vertex(matching_idx).strategy : undefined_vertex();
 
-      if (strategy_idx != undefined_vertex() && visited.find(strategy_idx) == visited.end())
+      if (can_follow_primary_strategy)
       {
         current_idx = strategy_idx;
       }
-      else if (other_strategy_idx != undefined_vertex() && visited.find(other_strategy_idx) == visited.end())
+      else if (other_strategy_idx != undefined_vertex())
       {
-        current_idx
+        index_type match_strategy_idx
           = find_vertex_index_by_formula(primary, other.find_vertex(other_strategy_idx).formula(), !primary_is_under);
+        if (visited.find(match_strategy_idx) == visited.end())
+        {
+          current_idx = match_strategy_idx;
+        }
+        else
+        {
+          break;
+        }
       }
       else
       {
@@ -741,23 +756,22 @@ private:
           if (!cross_equation_only || cross_equation)
           {
             index_type matching_idx = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
-            index_type strategy_match_idx
-              = find_vertex_index_by_formula(other, strategy_vertex.formula(), primary_is_under);
             mCRL2log(log::debug) << "Phase " << phase << " vertex " << current_vertex;
             if (matching_idx != undefined_vertex())
             {
+              const index_type strategy_match_idx
+                = find_vertex_index_by_formula(other, strategy_vertex.formula(), primary_is_under);
               mCRL2log(log::debug) << " trying other edge if " << strategy_match_idx << " is in "
                                    << core::detail::print_list(other.find_vertex(matching_idx).successors);
+
+              if (strategy_match_idx == undefined_vertex() || !has_edge(other, matching_idx, strategy_match_idx))
+              {
+                mCRL2log(log::debug) << " found other edge for vertex " << current_vertex << std::endl;
+                if (select_variable(primary, current_idx, other, matching_idx, phase, primary_is_under))
+                  return true;
+              }
             }
             mCRL2log(log::debug) << std::endl;
-
-            if (matching_idx != undefined_vertex()
-                && (strategy_match_idx == undefined_vertex() || !has_edge(other, matching_idx, strategy_match_idx)))
-            {
-              mCRL2log(log::debug) << " found other edge for vertex " << current_vertex << std::endl;
-              if (select_variable(primary, current_idx, other, matching_idx, phase, primary_is_under))
-                return true;
-            }
           }
 
           visited.insert(current_idx);
