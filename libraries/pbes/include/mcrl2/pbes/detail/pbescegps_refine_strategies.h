@@ -692,20 +692,20 @@ private:
               || (primary_is_under ? current_vertex.decoration == structure_graph::d_disjunction
                                    : current_vertex.decoration == structure_graph::d_conjunction))
           {
-            mCRL2log(log::trace) << "Special case: strategy undefined for vertex " << current_vertex << std::endl;
+            mCRL2log(log::debug) << "Special case: strategy undefined for vertex " << current_vertex << std::endl;
             const index_type matching_idx
               = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
             mCRL2log(log::trace) << "Some index found " << matching_idx << std::endl;
             if (matching_idx == undefined_vertex())
             {
-              throw mcrl2::runtime_error("matching_idx == undefined_vertex() for " + pp(current_vertex.formula()));
+              break;
             }
 
             const index_type other_strategy_idx = other.find_vertex(matching_idx).strategy;
             mCRL2log(log::trace) << "Strategy index found " << other_strategy_idx << std::endl;
             if (other_strategy_idx == undefined_vertex())
             {
-              throw mcrl2::runtime_error("The other strategy index is also undefined! " + pp(current_vertex.formula()));
+              break;
             }
 
             const vertex& other_strategy_vertex = other.find_vertex(other_strategy_idx);

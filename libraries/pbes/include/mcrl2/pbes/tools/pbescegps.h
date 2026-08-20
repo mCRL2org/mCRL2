@@ -360,6 +360,7 @@ public:
     constelm_algo.run(result);
     pbes_rewrite(result, pbesr);
     pbes_system::parelm(result, false);
+    pbes_rewrite(result, pbesr);
     if (options.stategraph)
     {
       pbesstategraph_options opts;
