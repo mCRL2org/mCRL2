@@ -21,8 +21,8 @@
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/iteration_builders.h"
-#include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/detail/srf_transformations.h"
+#include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -57,6 +57,7 @@ struct pbeschain_options
                      // to the size of the original equation. Default is 1.0
   bool srf_split_conditions = false;
   bool timings = false;
+  bool disable_gauss_elimination = false;
 };
 
 // Substitutor to target specific path, replace our specific pvi with true/false
@@ -75,8 +76,14 @@ struct substitute_propositional_variables_for_true_false_builder
     : m_pbes_rewriter(r)
   {}
 
-  void set_pvi(const propositional_variable_instantiation x) { m_pvi = x; }
-  void set_replacement(const pbes_expression x) { m_replacement = x; }
+  void set_pvi(const propositional_variable_instantiation x)
+  {
+    m_pvi = x;
+  }
+  void set_replacement(const pbes_expression x)
+  {
+    m_replacement = x;
+  }
 
   template<class T>
   void apply(T& result, const propositional_variable_instantiation& x)
@@ -146,13 +153,25 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
     : m_pbes_rewriter(r)
   {}
 
-  void set_stable(bool b) { m_stable = b; }
+  void set_stable(bool b)
+  {
+    m_stable = b;
+  }
 
-  bool stable() const { return m_stable; }
+  bool stable() const
+  {
+    return m_stable;
+  }
 
-  void set_equation(const pbes_equation& eq) { m_eq = eq; }
+  void set_equation(const pbes_equation& eq)
+  {
+    m_eq = eq;
+  }
 
-  void set_name(const core::identifier_string& s) { name = s; }
+  void set_name(const core::identifier_string& s)
+  {
+    name = s;
+  }
 
   template<class T>
   void apply(T& result, const propositional_variable_instantiation& x)
@@ -243,18 +262,38 @@ struct timing_tracker
       call_count++;
     }
 
-    double get_total_seconds() const { return std::chrono::duration<double>(total_time).count(); }
+    double get_total_seconds() const
+    {
+      return std::chrono::duration<double>(total_time).count();
+    }
   };
 
   std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
   std::map<std::string, measurement> measurements;
+  std::size_t gauss_elimination_path_count = 0;
+  std::size_t gauss_elimination_direct_count = 0;
 
   timing_tracker()
     : start_time(std::chrono::high_resolution_clock::now())
   {}
 
+  /// \brief Increment the counter of direct Gauss eliminations (replacing a reoccurring pvi with true/false)
+  void increment_gauss_elimination_direct_count()
+  {
+    gauss_elimination_direct_count++;
+  }
+
+  /// \brief Increment the counter of path Gauss eliminations (replacing a pvi in a loop with true/false)
+  void increment_gauss_elimination_path_count()
+  {
+    gauss_elimination_path_count++;
+  }
+
   /// \brief Start timing an operation (returns the start time for use with end_measurement)
-  std::chrono::time_point<std::chrono::steady_clock> start_measurement() { return std::chrono::steady_clock::now(); }
+  std::chrono::time_point<std::chrono::steady_clock> start_measurement()
+  {
+    return std::chrono::steady_clock::now();
+  }
 
   /// \brief End timing an operation and record it
   void end_measurement(const std::string& label, std::chrono::time_point<std::chrono::steady_clock> measurement_start)
@@ -288,6 +327,9 @@ struct timing_tracker
                                << measurement.call_count << " calls)" << std::endl;
       }
     }
+
+    mCRL2log(log::verbose) << "Gauss eliminations (path): " << gauss_elimination_path_count << std::endl;
+    mCRL2log(log::verbose) << "Gauss eliminations (direct): " << gauss_elimination_direct_count << std::endl;
   }
 };
 
@@ -438,9 +480,13 @@ inline void self_substitute(pbes_equation& equation,
           mCRL2log(log::debug) << phi << "\n";
           mCRL2log(log::debug) << equation.formula() << "\n";
 
-          pvi_substituter.set_pvi(cur_x);
-          pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
-          pvi_substituter.apply(phi, phi);
+          if (!options.disable_gauss_elimination)
+          {
+            pvi_substituter.set_pvi(cur_x);
+            pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
+            pvi_substituter.apply(phi, phi);
+            timer.increment_gauss_elimination_direct_count();
+          }
 
           mCRL2log(log::debug) << phi << "\n";
 
@@ -503,9 +549,13 @@ inline void self_substitute(pbes_equation& equation,
               {
                 mCRL2log(log::debug) << itr << "\n";
               }
-              pvi_substituter.set_pvi(phi_x);
-              pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
-              pvi_substituter.apply(result, phi);
+              if (!options.disable_gauss_elimination)
+              {
+                pvi_substituter.set_pvi(phi_x);
+                pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
+                pvi_substituter.apply(result, phi);
+                timer.increment_gauss_elimination_path_count();
+              }
             }
             else
             {

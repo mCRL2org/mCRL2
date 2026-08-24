@@ -50,6 +50,7 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
       m_options.srf_split_conditions = parser.has_option("srf-split-conditions");
       m_options.max_number_pvi = parser.option_argument_as<std::size_t>("max-number-pvi");
       m_options.timings = m_timing_enabled;
+      m_options.disable_gauss_elimination = parser.has_option("no-gauss-elimination");
     }
 
     void add_options(interface_description& desc) override
@@ -88,8 +89,11 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
                    "Set a factor of the maximum size the chained equation in SRF should be after chaining compared to the size of the original equation. "
                    "0 means no limit. Default is 1.0.");
       desc.add_hidden_option("srf-split-conditions", "split disjunctive SRF conditions when checking the SRF factor");
-      desc.add_hidden_option("max-number-pvi", utilities::make_optional_argument("NUMBER", "1"),
-                  "Set the maximum number of PVI instances to chain. Default is 1.");
+       desc.add_hidden_option("max-number-pvi", utilities::make_optional_argument("NUMBER", "1"),
+                   "Set the maximum number of PVI instances to chain. Default is 1.");
+       desc.add_hidden_option("no-gauss-elimination",
+                   "Disable Gauss elimination: do not replace a predicate variable instance with true/false "
+                   "when it is reoccurring or occurs in a loop.");
     }
 
   public:
