@@ -57,6 +57,9 @@ struct pbescegps_options
   std::string solve_symbolic_args = "";
   std::size_t number_of_threads = 1;
   std::string initial_state_file = ""; // if non-empty, read the initial abstraction state from this file
+  bool instantiate_infinite_quantifier_guards = false; // if true, do not abstract parameters that occur in the
+                                                       // guards of predicate variable instances in the scope of an
+                                                       // infinite quantifier
 };
 
 namespace detail
@@ -75,6 +78,76 @@ inline std::optional<std::reference_wrapper<const pbes_equation>> find_equation_
   }
   return std::nullopt;
 }
+
+// Traverser that collects the propositional variable instantiations that occur
+// in the scope of an infinite quantifier, i.e. a forall/exists whose bound
+// variables have a sort that cannot be determined to be finite.
+struct infinite_quantifier_pvi_traverser : public pbes_expression_traverser<infinite_quantifier_pvi_traverser>
+{
+  using super = pbes_expression_traverser<infinite_quantifier_pvi_traverser>;
+  using super::apply;
+  using super::enter;
+  using super::leave;
+
+  const data::data_specification& m_data_spec;
+
+  // The propositional variable instantiations found in the scope of an infinite quantifier.
+  std::set<propositional_variable_instantiation> m_pvis;
+
+  // Stack that tracks whether the current subexpression is in the scope of an infinite quantifier.
+  std::vector<bool> m_scope;
+
+  explicit infinite_quantifier_pvi_traverser(const data::data_specification& data_spec)
+    : m_data_spec(data_spec)
+  {}
+
+  // Returns true if the current subexpression is in the scope of an infinite quantifier.
+  bool in_infinite_scope() const
+  {
+    return !m_scope.empty() && m_scope.back();
+  }
+
+  // Returns true if at least one bound variable has a sort that is not certainly finite.
+  bool is_infinite(const data::variable_list& variables) const
+  {
+    for (const data::variable& v: variables)
+    {
+      if (!m_data_spec.is_certainly_finite(v.sort()))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void enter(const forall& x)
+  {
+    m_scope.push_back(in_infinite_scope() || is_infinite(x.variables()));
+  }
+
+  void leave(const forall&)
+  {
+    m_scope.pop_back();
+  }
+
+  void enter(const exists& x)
+  {
+    m_scope.push_back(in_infinite_scope() || is_infinite(x.variables()));
+  }
+
+  void leave(const exists&)
+  {
+    m_scope.pop_back();
+  }
+
+  void apply(const propositional_variable_instantiation& x)
+  {
+    if (in_infinite_scope())
+    {
+      m_pvis.insert(x);
+    }
+  }
+};
 
 } // namespace detail
 
