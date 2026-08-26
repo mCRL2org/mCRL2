@@ -51,7 +51,8 @@ public:
     //TODO: consider stochastic action summands as well
     for (const action_summand& a: m_spec.process().action_summands())
     {
-      m_graph.add_edge(a.summation_variables(),
+      m_graph.add_edge(core::identifier_string(""),
+                       a.summation_variables(),
                        a.condition(),
                        a.assignments() | std::views::transform([](const data::assignment& as){
                         return std::make_pair(data::detail::parameter(as.lhs()), as.rhs());
