@@ -27,6 +27,7 @@
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/detail/count_free_variables.h"
 #include "mcrl2/pbes/detail/find_free_variables.h"
+#include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/detail/pbescegps_refine_strategies.h"
 #include "mcrl2/pbes/detail/pbescegps_utilities.h"
@@ -442,6 +443,68 @@ public:
     }
   }
 
+  // Computes, per equation, the parameters that occur in the guards of predicate
+  // variable instances that are in the scope of an infinite quantifier. These
+  // parameters must not be abstracted, otherwise the structure graph may contain
+  // infinitely many vertices.
+  std::map<core::identifier_string, std::set<data::variable>> infinite_quantifier_guard_variables(const pbes& p)
+  {
+    std::map<core::identifier_string, std::set<data::variable>> result;
+    for (const pbes_equation& eq: p.equations())
+    {
+      // Find the predicate variable instantiations that occur in the scope of an
+      // infinite quantifier.
+      detail::infinite_quantifier_pvi_traverser scope_traverser(p.data());
+      scope_traverser.apply(eq.formula());
+      if (scope_traverser.m_pvis.empty())
+      {
+        continue;
+      }
+
+      // Compute the guards of all predicate variable instantiations in the equation.
+      detail::guard_traverser guards(*m_datar);
+      guards.apply(eq.formula());
+
+      std::set<data::variable> parameters = as_set(eq.variable().parameters());
+      for (const auto& [pvi, guard]: guards.top().guards)
+      {
+        if (!scope_traverser.m_pvis.contains(pvi))
+        {
+          continue;
+        }
+        for (const data::variable& v: find_free_variables(guard))
+        {
+          if (parameters.contains(v))
+          {
+            result[eq.variable().name()].insert(v);
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  // Ensures that parameters occurring in the guards of predicate variable instances
+  // in the scope of an infinite quantifier are not abstracted, so that the
+  // structure graph does not contain infinitely many vertices.
+  void instantiate_infinite_quantifier_guards(pbes& p, abstract_param_state& state)
+  {
+    for (const auto& [eq_name, variables]: infinite_quantifier_guard_variables(p))
+    {
+      for (const data::variable& v: variables)
+      {
+        if (state.W[eq_name].contains(v))
+        {
+          mCRL2log(log::verbose) << "Not abstracting parameter " << v << " of equation " << eq_name
+                                 << " because it occurs in the guard of a predicate variable instance in the "
+                                    "scope of an infinite quantifier."
+                                 << std::endl;
+          state.remove_abstracted_variable(p, eq_name, v);
+        }
+      }
+    }
+  }
+
   // This can probably be optimized if you create a dependency graph a priori
   void make_data_closed(const pbes& p, abstract_param_state& state)
   {
@@ -618,6 +681,11 @@ public:
     else
     {
       detail::initialize_initial_abstraction_state(p, state, options.initial_state_file);
+    }
+
+    if (options.instantiate_infinite_quantifier_guards)
+    {
+      instantiate_infinite_quantifier_guards(p, state);
     }
 
     pbes original_p = p;
