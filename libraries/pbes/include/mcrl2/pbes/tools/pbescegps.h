@@ -43,6 +43,7 @@
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/rewrite.h"
 #include <algorithm>
+#include <deque>
 #include <iterator>
 #include <ostream>
 #ifdef MCRL2_ENABLE_SYLVAN
@@ -96,6 +97,11 @@ private:
   std::map<std::pair<std::map<core::identifier_string, std::set<data::variable>>, bool>,
     std::pair<bool, structure_graph>>
     m_solution_cache;
+
+  // Ruling relation: m_ruling_relation[X][dₘ] = { dⱼ | dⱼ ≽ dₘ in equation X }.
+  // Computed once from the PBES, reused across all iterations.
+  // dⱼ ≽ dₘ means: dⱼ appears in the guard of a transition that changes dₘ.
+  std::map<core::identifier_string, std::map<data::variable, std::set<data::variable>>> m_ruling_relation;
 
 
 public:
@@ -576,6 +582,171 @@ public:
     }
   }
 
+  // Computes the ruling relation from the PBES structure.
+  // dⱼ ≽ dₘ (dⱼ rules dₘ) iff dⱼ appears in the guard of a self-recursive
+  // transition that changes dₘ. For mutual pairs (A≽B and B≽A), only the
+  // direction with more transition occurrences is kept, making the relation strict.
+  void compute_ruling_relation(const pbes& p)
+  {
+    // Count occurrences: counts[eq][dₘ][dⱼ] = # transitions where dⱼ guards and dₘ changes
+    std::map<core::identifier_string, std::map<data::variable, std::map<data::variable, std::size_t>>> counts;
+
+    for (const pbes_equation& eq: p.equations())
+    {
+      const auto& eq_name = eq.variable().name();
+      const auto& params = as_vector(eq.variable().parameters());
+
+      detail::guard_traverser guard_trav(*m_datar);
+      guard_trav.apply(eq.formula());
+
+      for (const auto& [pvi, guard_expr]: guard_trav.expression_stack.back().guards)
+      {
+        if (pvi.name() != eq_name)
+        {
+          continue;
+        }
+
+        // Guard variables: free variables of guard_expr that are parameters of this equation
+        std::set<data::variable> free_vars = pbes_system::find_free_variables(guard_expr);
+        std::set<data::variable> params_set(params.begin(), params.end());
+        std::set<data::variable> guard_vars;
+        std::set_intersection(free_vars.begin(),
+          free_vars.end(),
+          params_set.begin(),
+          params_set.end(),
+          std::inserter(guard_vars, guard_vars.begin()));
+
+        // Changed parameters: compare PVI args with bound variables
+        auto pvi_args = as_vector(pvi.parameters());
+        for (std::size_t j = 0; j < params.size() && j < pvi_args.size(); ++j)
+        {
+          if (pvi_args[j] != atermpp::down_cast<data::data_expression>(params[j]))
+          {
+            // params[j] changes in this transition — all guard variables rule it
+            for (const auto& gv: guard_vars)
+            {
+              if (params[j] != gv)
+              {
+                counts[eq_name][params[j]][gv]++;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Build the ruling relation, pruning mutual pairs to keep only the stronger direction.
+    m_ruling_relation.clear();
+    for (const auto& [eq_name, ruled_by_counts]: counts)
+    {
+      for (const auto& [d_m, rulers_counts]: ruled_by_counts)
+      {
+        for (const auto& [d_j, count_j]: rulers_counts)
+        {
+          // Check if the reverse direction also exists
+          auto rev_it = counts.find(eq_name);
+          if (rev_it != counts.end())
+          {
+            auto ruled_it = rev_it->second.find(d_j);
+            if (ruled_it != rev_it->second.end())
+            {
+              auto rev_count_it = ruled_it->second.find(d_m);
+              if (rev_count_it != ruled_it->second.end())
+              {
+                // Both d_j ≽ d_m and d_m ≽ d_j exist.
+                // Keep only the stronger direction (higher count).
+                // When counts are equal, keep both directions — the traversal
+                // in choose_variable_by_ruling_order handles cycles via visited set.
+                if (count_j < rev_count_it->second)
+                {
+                  continue; // d_m ≽ d_j is stronger, skip d_j ≽ d_m
+                }
+                else if (count_j == rev_count_it->second && d_j.name() > d_m.name())
+                {
+                  continue;
+                }
+              }
+            }
+          }
+          m_ruling_relation[eq_name][d_m].insert(d_j);
+        }
+      }
+    }
+
+    mCRL2log(log::debug) << "=== Ruling relation ===" << std::endl;
+    for (const auto& [eq_name, ruled_by_map]: m_ruling_relation)
+    {
+      for (const auto& [d_m, parameters]: ruled_by_map)
+      {
+        mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " ruled by " << core::detail::print_list(parameters)
+                             << std::endl;
+      }
+    }
+  }
+
+  // Enforces the order-ideal invariant: abstracted gate → abstracted data.
+  // Contrapositive: if dₘ is concrete and dⱼ ≽ dₘ and dⱼ is abstracted,
+  // then dⱼ must be made concrete too. Uses a TODO set for efficiency:
+  // only parameters affected by newly-concrete parameters are checked.
+  void make_rules_ideal(const pbes& p, abstract_param_state& state)
+  {
+    // Phase 1: find all violations — concrete parameters with abstracted rulers.
+    // Each violation requires un-abstracting the ruler (making it concrete).
+    std::deque<std::pair<core::identifier_string, data::variable>> todo;
+
+    for (const auto& [eq_name, ruled_by_map]: m_ruling_relation)
+    {
+      for (const auto& [d_m, rulers]: ruled_by_map)
+      {
+        if (!state.W[eq_name].contains(d_m)) // dₘ is concrete
+        {
+          for (const auto& d_j: rulers)
+          {
+            if (state.W[eq_name].contains(d_j)) // dⱼ is abstracted → violation
+            {
+              todo.emplace_back(eq_name, d_j);
+            }
+          }
+        }
+      }
+    }
+
+    // Phase 2: cascade. When dⱼ is un-abstracted (made concrete), its own
+    // rulers must also be concrete (by the order ideal applied to dⱼ as data).
+    std::set<std::pair<core::identifier_string, data::variable>> seen;
+    while (!todo.empty())
+    {
+      auto key = todo.front();
+      todo.pop_front();
+      if (!seen.insert(key).second)
+      {
+        continue;
+      }
+
+      auto& [eq_name, d_j] = key;
+      if (!state.W[eq_name].contains(d_j))
+      {
+        continue; // already concrete
+      }
+
+      state.remove_abstracted_variable(p, eq_name, d_j);
+      mCRL2log(log::debug) << "Rules ideal: un-abstracted " << d_j.name() << " from " << eq_name << std::endl;
+
+      // dⱼ is now concrete — its rulers must be concrete too.
+      auto it = m_ruling_relation[eq_name].find(d_j);
+      if (it != m_ruling_relation[eq_name].end())
+      {
+        for (const auto& d_k: it->second) // dₖ ≽ dⱼ
+        {
+          if (state.W[eq_name].contains(d_k)) // dₖ is abstracted
+          {
+            todo.emplace_back(eq_name, d_k);
+          }
+        }
+      }
+    }
+  }
+
   void print_abstraction_summary(const abstract_param_state& state)
   {
     for (const auto& [eq_name, var_set]: state.W)
@@ -642,6 +813,15 @@ public:
           {
             selected_var = detail::choose_variable_by_rhs_order(eq_formula, essential_vars);
           }
+          else if (options.var_choice == var_choice_strategy::ruling)
+          {
+            selected_var
+              = detail::choose_variable_by_ruling_order(eq_name, essential_vars, m_ruling_relation, eq_formula);
+            if (!selected_var)
+            {
+              selected_var = detail::choose_variable_by_rhs_order(eq_formula, essential_vars);
+            }
+          }
           else if (options.var_choice == var_choice_strategy::lhs)
           {
             selected_var = detail::choose_variable_by_lhs_order(bound_variable, essential_vars, std::nullopt);
@@ -672,6 +852,9 @@ public:
     // Create the data rewriter once and reuse it throughout the tool
     m_datar.emplace(p.data(), options.rewrite_strategy);
 
+    // Compute the ruling relation once from the PBES structure
+    compute_ruling_relation(p);
+
     // Calculate non-Control Flow Parameters (parameters to abstract) per equation
     abstract_param_state state;
     if (options.initial_state_file.empty())
@@ -691,6 +874,10 @@ public:
     pbes original_p = p;
 
     // Ensure W is data-closed
+    make_data_closed(p, state);
+
+    // Ensure W is rule-ideal: abstracted gate → abstracted data
+    make_rules_ideal(p, state);
     make_data_closed(p, state);
 
     // Collect sorts to abstract (non-CFP parameters)
@@ -750,10 +937,20 @@ public:
       pbes over_pbes = apply_abstraction_to_pbes(p, state, true, options);
 
       pbescegps_refine_strategies refine;
-      if (!refine.refine_using_strategies(p, under_pbes, over_pbes, state, options, under_graph, over_graph, *m_datar))
+      if (!refine.refine_using_strategies(p,
+            under_pbes,
+            over_pbes,
+            state,
+            options,
+            under_graph,
+            over_graph,
+            *m_datar,
+            m_ruling_relation))
       {
         unabstract_one_parameter(p, state, options);
       }
+      make_data_closed(p, state);
+      make_rules_ideal(p, state);
       make_data_closed(p, state);
       print_abstraction_summary(state);
     }

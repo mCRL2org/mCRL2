@@ -55,6 +55,7 @@ private:
   abstract_param_state* m_state = nullptr;
   const pbescegps_options* m_options = nullptr;
   const data::rewriter* m_datar = nullptr;
+  const ruling_relation_type* m_ruling_relation = nullptr;
 
   // Maps equation names to the vector of remaining parameters in each approximation
   // This is in the order they appear in the approximated equation
@@ -576,6 +577,16 @@ private:
     {
       selected_var = detail::choose_variable_by_rhs_order(guard_formula, essential_vars);
     }
+    else if (options.var_choice == var_choice_strategy::ruling && m_ruling_relation != nullptr)
+    {
+      pbes_expression eq_formula = detail::find_equation_by_name(*m_p, var_name)->get().formula();
+      selected_var = detail::choose_variable_by_ruling_order(var_name, essential_vars, *m_ruling_relation, eq_formula);
+      if (!selected_var)
+      {
+        // Fall back to rhs if no ruling relation for this equation
+        selected_var = detail::choose_variable_by_rhs_order(guard_formula, essential_vars);
+      }
+    }
     else
     {
       data::variable_list args(m_original_params[var_name]);
@@ -798,7 +809,8 @@ public:
     const pbescegps_options& options,
     const structure_graph& under_graph,
     const structure_graph& over_graph,
-    const data::rewriter& data_rewriter)
+    const data::rewriter& data_rewriter,
+    const ruling_relation_type& ruling_relation)
   {
     if (under_graph.is_empty() || over_graph.is_empty())
     {
@@ -811,6 +823,7 @@ public:
     m_state = &state;
     m_options = &options;
     m_datar = &data_rewriter;
+    m_ruling_relation = &ruling_relation;
 
     reset();
     initialize_parameters(p, under_pbes, over_pbes);

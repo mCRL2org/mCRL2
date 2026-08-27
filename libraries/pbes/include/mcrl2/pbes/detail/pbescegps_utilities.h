@@ -43,7 +43,8 @@ enum class var_choice_strategy
   lhs, // variable order of the left-hand side of the equation
   rhs, // variable order of the right-hand side of the equation
   count, // free variable that occurs most often (excluding data expressions in PVI)
-  all // un-abstract all variables that occur
+  all, // un-abstract all variables that occur
+  ruling // prioritize based on the ruled-by ordering: pick the variable that rules the most others
 };
 
 struct pbescegps_options
@@ -61,6 +62,9 @@ struct pbescegps_options
                                                        // guards of predicate variable instances in the scope of an
                                                        // infinite quantifier
 };
+
+// Ruling relation type alias: ruling_relation[eq][dₘ] = { dⱼ | dⱼ ≽ dₘ in equation eq }.
+using ruling_relation_type = std::map<core::identifier_string, std::map<data::variable, std::set<data::variable>>>;
 
 namespace detail
 {
@@ -294,6 +298,98 @@ inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_exp
     }
   }
   return std::nullopt;
+}
+
+// Finds the most dominant parameter reachable by following the ruling relation
+// backwards from `start`. Returns a pair (root, occurrence_count).
+// A "root" is a parameter that rules others but is not ruled by anyone.
+inline std::pair<data::variable, std::size_t> find_dominant_root(const data::variable& start,
+  const ruling_relation_type::mapped_type& ruled_by_map,
+  const std::map<data::variable, std::size_t>& var_counts,
+  std::set<data::variable>& visited)
+{
+  visited.insert(start);
+  auto it = ruled_by_map.find(start);
+  if (it == ruled_by_map.end())
+  {
+    // start is not ruled by anyone — it's a root (most dominant)
+    std::size_t occ = var_counts.contains(start) ? var_counts.at(start) : 0;
+    return {start, occ};
+  }
+
+  // Recurse on each ruler, pick the best root
+  std::size_t best_occ = 0;
+  data::variable best_root = start;
+  for (const data::variable& ruler: it->second)
+  {
+    if (visited.contains(ruler))
+    {
+      continue;
+    }
+    auto [root, occ] = find_dominant_root(ruler, ruled_by_map, var_counts, visited);
+    if (occ > best_occ || (occ == best_occ && root.name() < best_root.name()))
+    {
+      best_occ = occ;
+      best_root = root;
+    }
+  }
+
+  // If no ruler led to a better root, start itself is the best we found
+  if (best_occ == 0 && !var_counts.contains(best_root))
+  {
+    std::size_t occ = var_counts.contains(start) ? var_counts.at(start) : 0;
+    if (occ > 0)
+    {
+      return {start, occ};
+    }
+  }
+  return {best_root, best_occ};
+}
+
+// Chooses the most dominant variable to make concrete.
+// Traverses the ruling relation backwards from each essential variable to find
+// the "root" — a parameter that rules others but is not ruled by anyone.
+// Among all roots, picks the one with the highest occurrence count in the equation formula.
+inline std::optional<data::variable> choose_variable_by_ruling_order(const core::identifier_string& eq_name,
+  const std::set<data::variable>& essential_vars,
+  const ruling_relation_type& ruling_relation,
+  const pbes_expression& eq_formula)
+{
+  auto eq_it = ruling_relation.find(eq_name);
+  if (eq_it == ruling_relation.end())
+  {
+    return std::nullopt;
+  }
+
+  const auto& ruled_by_map = eq_it->second;
+  auto var_counts = count_free_variable_occurrences(eq_formula, false);
+
+  std::size_t best_occurrence_count = 0;
+  std::optional<data::variable> best_var;
+
+  for (const data::variable& var: essential_vars)
+  {
+    std::set<data::variable> visited;
+    auto [root, occ] = find_dominant_root(var, ruled_by_map, var_counts, visited);
+    mCRL2log(log::debug) << "  - " << var.name() << " -> root " << root.name() << " (occurrences: " << occ << ")"
+                         << std::endl;
+
+    // Only accept the root if it's actually in essential_vars (abstracted).
+    // The traversal may reach parameters that are already concrete.
+    if (!essential_vars.contains(root))
+    {
+      root = var;
+      occ = var_counts.contains(var) ? var_counts.at(var) : 0;
+    }
+
+    if (occ > best_occurrence_count || (occ == best_occurrence_count && !best_var.has_value()))
+    {
+      best_occurrence_count = occ;
+      best_var = root;
+    }
+  }
+
+  return best_var;
 }
 
 // Helper to extract equation name from "Abstracted parameters for X0:" format

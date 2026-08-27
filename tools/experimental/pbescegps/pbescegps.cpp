@@ -62,11 +62,15 @@ protected:
     {
       m_options.var_choice = var_choice_strategy::all;
     }
+    else if (var_choice_str == "ruling")
+    {
+      m_options.var_choice = var_choice_strategy::ruling;
+    }
     else
     {
       throw mcrl2::runtime_error("Invalid var-choice option '" + var_choice_str
                                  + "'. "
-                                   "Valid options are: 'lhs', 'rhs', 'count', 'all'.");
+                                   "Valid options are: 'lhs', 'rhs', 'count', 'all', 'ruling'.");
     }
   }
 
@@ -107,6 +111,7 @@ protected:
       "'rhs' the variable order of the right-hand side of the equation\n"
       "'count' the free variable that occurs most often (excluding data expressions in PVI)\n"
       "'all' un-abstract all variables that occur on iteration\n"
+      "'ruling' prioritize based on the ruled-by ordering: pick the variable that rules the most others\n"
       "Choose the method of chosing a variable on iteration.");
     desc.add_option("initial-state",
       utilities::make_mandatory_argument("FILE"),
