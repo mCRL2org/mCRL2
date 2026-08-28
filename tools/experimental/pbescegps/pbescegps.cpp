@@ -38,6 +38,7 @@ protected:
     super::parse_options(parser);
     m_options.init_control_flow = parser.has_option("init-cfp");
     m_options.instantiate_infinite_quantifier_guards = parser.has_option("instantiate-infinite-quantifier-guards");
+    m_options.rules_ideal = parser.has_option("rules-ideal");
     m_options.solve_symbolic = parser.has_option("solve-symbolic-args");
     m_options.stategraph = parser.has_option("stategraph");
     m_options.solve_symbolic_args = parser.option_argument_as<std::string>("solve-symbolic-args");
@@ -78,6 +79,9 @@ protected:
   {
     super::add_options(desc);
     desc.add_option("init-cfp", "Use the (global) control flow parameters as initial parameters.", 'c');
+    desc.add_option("rules-ideal",
+      "Enforce the order-ideal invariant: if a gate parameter is abstracted, "
+      "all data parameters it rules must also be abstracted.");
     desc.add_option("instantiate-infinite-quantifier-guards",
       "Do not abstract parameters that occur in the guards of predicate variable instances in the scope of an "
       "infinite quantifier, to prevent infinitely many vertices in the structure graph.",
