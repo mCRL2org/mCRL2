@@ -184,6 +184,12 @@ private:
     for (index_type idx = 0; idx < g.extent(); ++idx)
     {
       const pbes_expression& formula = g.find_vertex(idx).formula();
+      // Vertices can have a formula that is not a propositional variable
+      // instantiation (e.g. X2 || X3).
+      if (!is_propositional_variable_instantiation(formula))
+      {
+        continue;
+      }
       const auto& pvi = atermpp::down_cast<propositional_variable_instantiation>(formula);
       formula_key equation_key{pvi.name()};
 
