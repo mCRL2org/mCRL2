@@ -26,6 +26,7 @@
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
+#include <algorithm>
 #include <cctype>
 #include <cstddef>
 #include <fstream>
@@ -34,6 +35,7 @@
 #include <ranges>
 #include <set>
 #include <sstream>
+#include <vector>
 
 namespace mcrl2::pbes_system
 {
@@ -61,6 +63,7 @@ struct pbescegps_options
   bool instantiate_infinite_quantifier_guards = false; // if true, do not abstract parameters that occur in the
                                                        // guards of predicate variable instances in the scope of an
                                                        // infinite quantifier
+  bool rules_ideal = false; // if true, enforce the order-ideal invariant after each refinement step
 };
 
 // Ruling relation type alias: ruling_relation[eq][dₘ] = { dⱼ | dⱼ ≽ dₘ in equation eq }.
@@ -300,56 +303,69 @@ inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_exp
   return std::nullopt;
 }
 
-// Finds the most dominant parameter reachable by following the ruling relation
-// backwards from `start`. Returns a pair (root, occurrence_count).
-// A "root" is a parameter that rules others but is not ruled by anyone.
-inline std::pair<data::variable, std::size_t> find_dominant_root(const data::variable& start,
+// Finds all roots reachable by following the ruling relation backwards from
+// `start`, ordered by dominance (highest occurrence count first, ties broken
+// by name). A "root" is a parameter that is not ruled by anyone.
+// `visited` tracks the current traversal path to break cycles.
+inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots(const data::variable& start,
   const ruling_relation_type::mapped_type& ruled_by_map,
   const std::map<data::variable, std::size_t>& var_counts,
   std::set<data::variable>& visited)
 {
+  if (visited.contains(start))
+  {
+    // cycle detected; no new root via this path
+    return {};
+  }
   visited.insert(start);
+
+  std::map<data::variable, std::size_t> root_counts;
   auto it = ruled_by_map.find(start);
   if (it == ruled_by_map.end())
   {
-    // start is not ruled by anyone — it's a root (most dominant)
-    std::size_t occ = var_counts.contains(start) ? var_counts.at(start) : 0;
-    return {start, occ};
+    // it is a root
+    root_counts[start] = var_counts.contains(start) ? var_counts.at(start) : 0;
+  }
+  else
+  {
+    // Collect the roots of each ruler
+    for (const data::variable& ruler: it->second)
+    {
+      for (const auto& [root, occ]: find_dominant_roots(ruler, ruled_by_map, var_counts, visited))
+      {
+        root_counts[root] = std::max(root_counts[root], occ);
+      }
+    }
+
+    // If no ruler led to a root, start itself is the representative root.
+    // This happens when all rulers are part of a cycle through start.
+    if (root_counts.empty())
+    {
+      root_counts[start] = var_counts.contains(start) ? var_counts.at(start) : 0;
+    }
   }
 
-  // Recurse on each ruler, pick the best root
-  std::size_t best_occ = 0;
-  data::variable best_root = start;
-  for (const data::variable& ruler: it->second)
-  {
-    if (visited.contains(ruler))
-    {
-      continue;
-    }
-    auto [root, occ] = find_dominant_root(ruler, ruled_by_map, var_counts, visited);
-    if (occ > best_occ || (occ == best_occ && root.name() < best_root.name()))
-    {
-      best_occ = occ;
-      best_root = root;
-    }
-  }
+  visited.erase(start);
 
-  // If no ruler led to a better root, start itself is the best we found
-  if (best_occ == 0 && !var_counts.contains(best_root))
-  {
-    std::size_t occ = var_counts.contains(start) ? var_counts.at(start) : 0;
-    if (occ > 0)
+  std::vector<std::pair<data::variable, std::size_t>> roots(root_counts.begin(), root_counts.end());
+  std::sort(roots.begin(),
+    roots.end(),
+    [](const auto& lhs, const auto& rhs)
     {
-      return {start, occ};
-    }
-  }
-  return {best_root, best_occ};
+      if (lhs.second != rhs.second)
+      {
+        return lhs.second > rhs.second;
+      }
+      return lhs.first.name() < rhs.first.name();
+    });
+  return roots;
 }
 
 // Chooses the most dominant variable to make concrete.
 // Traverses the ruling relation backwards from each essential variable to find
-// the "root" — a parameter that rules others but is not ruled by anyone.
-// Among all roots, picks the one with the highest occurrence count in the equation formula.
+// the "roots" — parameters that rule others but are not ruled by anyone.
+// Per starting variable, picks the most dominant root that is itself essential;
+// among those, picks the one with the highest occurrence count in the equation formula.
 inline std::optional<data::variable> choose_variable_by_ruling_order(const core::identifier_string& eq_name,
   const std::set<data::variable>& essential_vars,
   const ruling_relation_type& ruling_relation,
@@ -370,17 +386,31 @@ inline std::optional<data::variable> choose_variable_by_ruling_order(const core:
   for (const data::variable& var: essential_vars)
   {
     std::set<data::variable> visited;
-    auto [root, occ] = find_dominant_root(var, ruled_by_map, var_counts, visited);
-    mCRL2log(log::debug) << "  - " << var.name() << " -> root " << root.name() << " (occurrences: " << occ << ")"
-                         << std::endl;
+    auto roots = find_dominant_roots(var, ruled_by_map, var_counts, visited);
 
-    // Only accept the root if it's actually in essential_vars (abstracted).
+    // Pick the most dominant root that is actually in essential_vars (abstracted).
     // The traversal may reach parameters that are already concrete.
-    if (!essential_vars.contains(root))
+    std::optional<data::variable> root;
+    std::size_t occ = 0;
+    for (const auto& [candidate, count]: roots)
+    {
+      if (essential_vars.contains(candidate))
+      {
+        root = candidate;
+        occ = count;
+        break;
+      }
+    }
+
+    // Fallback: no essential root found, use the starting variable itself.
+    if (!root.has_value())
     {
       root = var;
       occ = var_counts.contains(var) ? var_counts.at(var) : 0;
     }
+
+    mCRL2log(log::debug) << "  - " << var.name() << " -> root " << root->name() << " (occurrences: " << occ << ")"
+                         << std::endl;
 
     if (occ > best_occurrence_count || (occ == best_occurrence_count && !best_var.has_value()))
     {

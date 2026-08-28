@@ -849,6 +849,12 @@ public:
 
   bool run_cegps_algorithm(pbes& p, pbescegps_options options)
   {
+    abstract_param_state unused_state;
+    return run_cegps_algorithm(p, options, unused_state);
+  }
+
+  bool run_cegps_algorithm(pbes& p, pbescegps_options options, abstract_param_state& final_state)
+  {
     // Create the data rewriter once and reuse it throughout the tool
     m_datar.emplace(p.data(), options.rewrite_strategy);
 
@@ -877,8 +883,11 @@ public:
     make_data_closed(p, state);
 
     // Ensure W is rule-ideal: abstracted gate → abstracted data
-    make_rules_ideal(p, state);
-    make_data_closed(p, state);
+    if (options.rules_ideal)
+    {
+      make_rules_ideal(p, state);
+      make_data_closed(p, state);
+    }
 
     // Collect sorts to abstract (non-CFP parameters)
     print_abstraction_summary(state);
@@ -901,6 +910,7 @@ public:
       {
         mCRL2log(log::debug) << "No parameters to abstract, solving normally." << std::endl;
         auto [result, graph] = solve(p, options);
+        final_state = state;
         return result;
       }
 
@@ -913,6 +923,7 @@ public:
       {
         mCRL2log(log::verbose) << "Under-approximation solved to TRUE" << std::endl;
         print_abstraction_summary(state);
+        final_state = state;
         return true;
       }
 
@@ -925,6 +936,7 @@ public:
       {
         mCRL2log(log::verbose) << "Over-approximation solved to FALSE" << std::endl;
         print_abstraction_summary(state);
+        final_state = state;
         return false;
       }
 
@@ -950,8 +962,11 @@ public:
         unabstract_one_parameter(p, state, options);
       }
       make_data_closed(p, state);
-      make_rules_ideal(p, state);
-      make_data_closed(p, state);
+      if (options.rules_ideal)
+      {
+        make_rules_ideal(p, state);
+        make_data_closed(p, state);
+      }
       print_abstraction_summary(state);
     }
     while (true);
