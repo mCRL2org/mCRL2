@@ -480,7 +480,7 @@ inline void self_substitute(pbes_equation& equation,
           mCRL2log(log::debug) << phi << "\n";
           mCRL2log(log::debug) << equation.formula() << "\n";
 
-          if (!options.disable_gauss_elimination)
+          if (!options.disable_gauss_elimination || pp(cur_x.name()) == "X_true" || pp(cur_x.name()) == "X_false")
           {
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
@@ -549,7 +549,7 @@ inline void self_substitute(pbes_equation& equation,
               {
                 mCRL2log(log::debug) << itr << "\n";
               }
-              if (!options.disable_gauss_elimination)
+              if (!options.disable_gauss_elimination || pp(cur_x.name()) == "X_true" || pp(cur_x.name()) == "X_false")
               {
                 pvi_substituter.set_pvi(phi_x);
                 pvi_substituter.set_replacement(equation.symbol().is_nu() ? true_() : false_());
