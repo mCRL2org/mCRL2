@@ -303,19 +303,25 @@ inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_exp
   return std::nullopt;
 }
 
-// Finds all roots reachable by following the ruling relation backwards from
-// `start`, ordered by dominance (highest occurrence count first, ties broken
-// by name). A "root" is a parameter that is not ruled by anyone.
-// `visited` tracks the current traversal path to break cycles.
-inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots(const data::variable& start,
+// Roots reachable from `start` via the ruling relation, ordered by dominance.
+// `visited` breaks cycles; `cache` memoizes per-node results so each node is
+// expanded once (avoids exponential re-expansion on shared sub-paths).
+using ruling_roots_cache = std::map<data::variable, std::vector<std::pair<data::variable, std::size_t>>>;
+
+inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots_impl(const data::variable& start,
   const ruling_relation_type::mapped_type& ruled_by_map,
   const std::map<data::variable, std::size_t>& var_counts,
-  std::set<data::variable>& visited)
+  std::set<data::variable>& visited,
+  ruling_roots_cache& cache)
 {
+  auto cached = cache.find(start);
+  if (cached != cache.end())
+  {
+    return cached->second;
+  }
   if (visited.contains(start))
   {
-    // cycle detected; no new root via this path
-    return {};
+    return {}; // cycle: no new root on this path
   }
   visited.insert(start);
 
@@ -323,22 +329,20 @@ inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots(c
   auto it = ruled_by_map.find(start);
   if (it == ruled_by_map.end())
   {
-    // it is a root
-    root_counts[start] = var_counts.contains(start) ? var_counts.at(start) : 0;
+    root_counts[start] = var_counts.contains(start) ? var_counts.at(start) : 0; // start is a root
   }
   else
   {
-    // Collect the roots of each ruler
     for (const data::variable& ruler: it->second)
     {
-      for (const auto& [root, occ]: find_dominant_roots(ruler, ruled_by_map, var_counts, visited))
+      for (const auto& [root, occ]: find_dominant_roots_impl(ruler, ruled_by_map, var_counts, visited, cache))
       {
         root_counts[root] = std::max(root_counts[root], occ);
       }
     }
 
-    // If no ruler led to a root, start itself is the representative root.
-    // This happens when all rulers are part of a cycle through start.
+    // No ruler reached a root: start is its own representative root (all rulers
+    // are part of a cycle through start).
     if (root_counts.empty())
     {
       root_counts[start] = var_counts.contains(start) ? var_counts.at(start) : 0;
@@ -358,7 +362,17 @@ inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots(c
       }
       return lhs.first.name() < rhs.first.name();
     });
-  return roots;
+  return cache[start] = roots;
+}
+
+// Convenience wrapper: fresh cache per call so no caller needs to declare one.
+inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots(const data::variable& start,
+  const ruling_relation_type::mapped_type& ruled_by_map,
+  const std::map<data::variable, std::size_t>& var_counts,
+  std::set<data::variable>& visited)
+{
+  ruling_roots_cache cache;
+  return find_dominant_roots_impl(start, ruled_by_map, var_counts, visited, cache);
 }
 
 // Chooses the most dominant variable to make concrete.
@@ -377,16 +391,19 @@ inline std::optional<data::variable> choose_variable_by_ruling_order(const core:
     return std::nullopt;
   }
 
-  const auto& ruled_by_map = eq_it->second;
+  const std::map<data::variable, std::set<data::variable>>& ruled_by_map = eq_it->second;
   auto var_counts = count_free_variable_occurrences(eq_formula, false);
 
   std::size_t best_occurrence_count = 0;
   std::optional<data::variable> best_var;
 
+  // Roots depend only on the (static) ruling relation, not on the start node,
+  // so reuse one cache across all essential variables of this equation.
+  ruling_roots_cache cache;
   for (const data::variable& var: essential_vars)
   {
     std::set<data::variable> visited;
-    auto roots = find_dominant_roots(var, ruled_by_map, var_counts, visited);
+    auto roots = find_dominant_roots_impl(var, ruled_by_map, var_counts, visited, cache);
 
     // Pick the most dominant root that is actually in essential_vars (abstracted).
     // The traversal may reach parameters that are already concrete.

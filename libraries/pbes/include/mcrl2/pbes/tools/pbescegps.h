@@ -65,6 +65,7 @@
 #include <boost/process.hpp>
 #include <boost/process/search_path.hpp>
 #include <cstddef>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <ranges>
@@ -105,6 +106,13 @@ private:
 
 
 public:
+  // Read-only access to the computed ruling relation (used by tests).
+  const std::map<core::identifier_string, std::map<data::variable, std::set<data::variable>>>&
+  ruling_relation() const
+  {
+    return m_ruling_relation;
+  }
+
   std::pair<bool, structure_graph> solve(const pbes& p, pbescegps_options options)
   {
     pbes p_copy(p);
@@ -585,7 +593,9 @@ public:
   // Computes the ruling relation from the PBES structure.
   // dⱼ ≽ dₘ (dⱼ rules dₘ) iff dⱼ appears in the guard of a self-recursive
   // transition that changes dₘ. For mutual pairs (A≽B and B≽A), only the
-  // direction with more transition occurrences is kept, making the relation strict.
+  // direction with more transition occurrences is kept. Longer cycles are broken
+  // afterwards by removing the edge ruling the most dominant node of the cycle,
+  // so the final relation is a strict order (DAG).
   void compute_ruling_relation(const pbes& p)
   {
     // Count occurrences: counts[eq][dₘ][dⱼ] = # transitions where dⱼ guards and dₘ changes
@@ -655,8 +665,8 @@ public:
               {
                 // Both d_j ≽ d_m and d_m ≽ d_j exist.
                 // Keep only the stronger direction (higher count).
-                // When counts are equal, keep both directions — the traversal
-                // in choose_variable_by_ruling_order handles cycles via visited set.
+                // When counts are equal, break the tie by name.
+                // Longer cycles are removed by the cycle-breaking pass below.
                 if (count_j < rev_count_it->second)
                 {
                   continue; // d_m ≽ d_j is stronger, skip d_j ≽ d_m
@@ -669,6 +679,119 @@ public:
             }
           }
           m_ruling_relation[eq_name][d_m].insert(d_j);
+        }
+      }
+    }
+
+    // Break longer cycles (3 and up) so that the relation is a strict order.
+    // For each cycle, remove the edge that rules the most dominant node, i.e.
+    // drop the cycle-successor from the ruler set of the node with the highest
+    // occurrence count in the equation formula (ties broken by name). This makes
+    // the most dominant node of the cycle a root, which is what
+    // choose_variable_by_ruling_order ranks highest anyway. Each removal
+    // strictly decreases the number of edges, so the loop terminates.
+    for (const pbes_equation& eq: p.equations())
+    {
+      const auto& eq_name = eq.variable().name();
+      auto rel_it = m_ruling_relation.find(eq_name);
+      if (rel_it == m_ruling_relation.end())
+      {
+        continue;
+      }
+      auto& ruled_by_map = rel_it->second;
+
+      // Guard-count weight of a node: total number of self-recursive transitions
+      // in which it is changed while guarded by something (sum of the incoming edge
+      // weights already computed in `counts`). This reuses the same dominance evidence
+      // the 2-cycle pruning relies on, so the more dominant node of a cycle becomes
+      // the root when the cycle is broken.
+      const auto& eq_counts = counts[eq_name];
+      auto node_weight = [&](const data::variable& v) -> std::size_t
+      {
+        auto it = eq_counts.find(v);
+        if (it == eq_counts.end())
+        {
+          return 0;
+        }
+        std::size_t sum = 0;
+        for (const auto& [ruler, c]: it->second)
+        {
+          sum += c;
+        }
+        return sum;
+      };
+
+      while (true)
+      {
+        // Find one simple cycle via DFS along the ruled-by edges.
+        // On success, `path` ends in the cycle: path = [..., c, ..., x, c].
+        std::set<data::variable> done;
+        std::vector<data::variable> path;
+        std::function<bool(const data::variable&)> dfs = [&](const data::variable& current) -> bool
+        {
+          if (done.contains(current))
+          {
+            return false;
+          }
+          if (std::find(path.begin(), path.end(), current) != path.end())
+          {
+            path.push_back(current);
+            return true;
+          }
+          path.push_back(current);
+          auto rit = ruled_by_map.find(current);
+          if (rit != ruled_by_map.end())
+          {
+            for (const data::variable& ruler: rit->second)
+            {
+              if (dfs(ruler))
+              {
+                return true;
+              }
+            }
+          }
+          path.pop_back();
+          done.insert(current);
+          return false;
+        };
+
+        bool cycle_found = false;
+        for (const auto& [d_m, rulers]: ruled_by_map)
+        {
+          if (dfs(d_m))
+          {
+            cycle_found = true;
+            break;
+          }
+        }
+        if (!cycle_found)
+        {
+          break;
+        }
+
+        // Extract the cycle: suffix of path starting at the first occurrence of
+        // the repeated last element. Edge order: cycle[i] is ruled by cycle[i+1].
+        const std::vector<data::variable> cycle(path.begin() + (std::find(path.begin(), path.end(), path.back()) - path.begin()),
+          path.end() - 1);
+
+        // Find the most dominant node on the cycle and its cycle-successor.
+        const data::variable* v_max = &cycle.front();
+        for (const data::variable& v: cycle)
+        {
+          std::size_t w = node_weight(v);
+          std::size_t w_max = node_weight(*v_max);
+          if (w > w_max || (w == w_max && v.name() < v_max->name()))
+          {
+            v_max = &v;
+          }
+        }
+        std::size_t idx = static_cast<std::size_t>(std::find(cycle.begin(), cycle.end(), *v_max) - cycle.begin());
+        const data::variable& succ = cycle[(idx + 1) % cycle.size()];
+
+        ruled_by_map[*v_max].erase(succ);
+        if (ruled_by_map[*v_max].empty())
+        {
+          ruled_by_map.erase(*v_max);
         }
       }
     }
