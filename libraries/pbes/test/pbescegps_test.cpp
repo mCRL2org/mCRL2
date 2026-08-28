@@ -31,7 +31,7 @@ static bool run_cegps(
   return iterator.run_cegps_algorithm(p, options, final_state);
 }
 
-// Returns the set of parameter names still abstracted for the given equation.
+// Return the set of still-abstracted parameter names for equation eq_name.
 static std::set<std::string> abstracted_names(
   const abstract_param_state& state,
   const std::string& eq_name)
@@ -69,7 +69,7 @@ static pbescegps_options default_options()
   return opts;
 }
 
-// nu equation with two parameters, no transitions.
+// nu equation, no transitions: nothing abstracted.
 BOOST_AUTO_TEST_CASE(test_no_transitions)
 {
   std::string text =
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(test_no_transitions)
   BOOST_CHECK((abstracted == std::set<std::string>{}));
 }
 
-// mu equation with two parameters, no transitions.
+// mu equation, no transitions: nothing abstracted.
 BOOST_AUTO_TEST_CASE(test_mu_equation)
 {
   std::string text =
@@ -91,8 +91,7 @@ BOOST_AUTO_TEST_CASE(test_mu_equation)
   BOOST_CHECK((abstracted == std::set<std::string>{}));
 }
 
-// nu X with a self-transition on a only.
-// X(a, b) = (val(a) || X(!a, b))
+// nu X self-transition on a: both params abstracted.
 // X(false, true) = X(true, true) = true.
 BOOST_AUTO_TEST_CASE(test_self_transition)
 {
@@ -104,8 +103,7 @@ BOOST_AUTO_TEST_CASE(test_self_transition)
   BOOST_CHECK((abstracted == std::set<std::string>{"a", "b"}));
 }
 
-// Two-equation system: nu Z calls mu X0.
-// Z(false, true) = X0(false, true) && ... = false.
+// Two equations: nu Z calls mu X0.
 BOOST_AUTO_TEST_CASE(test_two_equations)
 {
   std::string text =
@@ -118,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_two_equations)
   BOOST_CHECK((abstracted_names(final_state, "X0") == std::set<std::string>{"b"}));
 }
 
-// Test with --var-choice=ruling.
+// --var-choice=ruling.
 BOOST_AUTO_TEST_CASE(test_var_choice_ruling)
 {
   std::string text =
@@ -130,7 +128,7 @@ BOOST_AUTO_TEST_CASE(test_var_choice_ruling)
   BOOST_CHECK(run_cegps(text, opts, "X", abstracted));
 }
 
-// Test ruling + rules_ideal flag.
+// ruling + rules_ideal.
 BOOST_AUTO_TEST_CASE(test_ruling_with_rules_ideal)
 {
   std::string text =
@@ -143,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_ruling_with_rules_ideal)
   BOOST_CHECK(run_cegps(text, opts, "X", abstracted));
 }
 
-// Test with --var-choice=count.
+// --var-choice=count.
 BOOST_AUTO_TEST_CASE(test_var_choice_count)
 {
   std::string text =
@@ -155,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_var_choice_count)
   BOOST_CHECK(run_cegps(text, opts, "X", abstracted));
 }
 
-// Test with --var-choice=rhs.
+// --var-choice=rhs: both params abstracted.
 BOOST_AUTO_TEST_CASE(test_var_choice_rhs)
 {
   std::string text =
@@ -168,7 +166,7 @@ BOOST_AUTO_TEST_CASE(test_var_choice_rhs)
   BOOST_CHECK((abstracted == std::set<std::string>{"a", "b"}));
 }
 
-// Test with --var-choice=all.
+// --var-choice=all: both params abstracted.
 BOOST_AUTO_TEST_CASE(test_var_choice_all)
 {
   std::string text =
@@ -197,7 +195,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_guarded_transitions)
   BOOST_CHECK((abstracted == std::set<std::string>{"a", "c"}));
 }
 
-// Test ruling relation: guard(a) changes a and c. a rules c.
+// Ruling relation: guard(a) changes a and c, so a rules c.
 BOOST_AUTO_TEST_CASE(test_ruling_relation_mutual)
 {
   std::string text =
@@ -214,8 +212,6 @@ BOOST_AUTO_TEST_CASE(test_ruling_relation_mutual)
 }
 
 // Two equations with overlapping parameters.
-// Y(a, b) = X(a, b) && (val(a) || Y(!a, b))
-// X(a, b) = val(b)
 // Y(false, false) = false.
 BOOST_AUTO_TEST_CASE(test_two_equations_shared_params)
 {
