@@ -17,9 +17,11 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/rewrite_strategy.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/detail/count_free_variables.h"
 #include "mcrl2/pbes/detail/find_free_variables.h"
+#include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbessolve_options.h"
@@ -30,6 +32,7 @@
 #include <cctype>
 #include <cstddef>
 #include <fstream>
+#include <functional>
 #include <map>
 #include <optional>
 #include <ranges>
@@ -587,8 +590,228 @@ initialize_initial_abstraction_state(const pbes& p, abstract_param_state& state,
     parse_initial_state_line(p, state, line);
   }
 }
+// counts[eq][dₘ][dⱼ] = # recursive transitions in eq where dₘ changes while guarded by dⱼ.
+using ruling_counts_type
+  = std::map<core::identifier_string, std::map<data::variable, std::map<data::variable, std::size_t>>>;
+
+inline ruling_counts_type count_rulings(const pbes& p, const data::rewriter& datar)
+{
+  ruling_counts_type counts;
+
+  for (const pbes_equation& eq: p.equations())
+  {
+    const auto& eq_name = eq.variable().name();
+    const auto params = as_vector(eq.variable().parameters());
+    const auto params_set = std::set<data::variable>(params.begin(), params.end());
+
+    detail::guard_traverser guard_trav(datar);
+    guard_trav.apply(eq.formula());
+
+    for (const auto& [pvi, guard_expr]: guard_trav.expression_stack.back().guards)
+    {
+      if (pvi.name() != eq_name)
+      {
+        continue;
+      }
+
+      std::set<data::variable> free_vars = pbes_system::find_free_variables(guard_expr);
+      std::set<data::variable> guard_vars;
+      std::set_intersection(free_vars.begin(),
+        free_vars.end(),
+        params_set.begin(),
+        params_set.end(),
+        std::inserter(guard_vars, guard_vars.begin()));
+
+      auto pvi_args = as_vector(pvi.parameters());
+      for (std::size_t j = 0; j < params.size() && j < pvi_args.size(); ++j)
+      {
+        if (pvi_args[j] != atermpp::down_cast<data::data_expression>(params[j]))
+        {
+          for (const auto& gv: guard_vars)
+          {
+            if (params[j] != gv)
+            {
+              counts[eq_name][params[j]][gv]++;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return counts;
+}
+
+// Builds the relation from the counts, keeping only the stronger direction of mutual pairs.
+inline ruling_relation_type build_ruling_relation(const ruling_counts_type& counts)
+{
+  ruling_relation_type relation;
+
+  for (const auto& [eq_name, ruled_by_counts]: counts)
+  {
+    for (const auto& [d_m, rulers_counts]: ruled_by_counts)
+    {
+      for (const auto& [d_j, count_j]: rulers_counts)
+      {
+        auto rev_it = counts.find(eq_name);
+        if (rev_it != counts.end())
+        {
+          auto ruled_it = rev_it->second.find(d_j);
+          if (ruled_it != rev_it->second.end())
+          {
+            auto rev_count_it = ruled_it->second.find(d_m);
+            if (rev_count_it != ruled_it->second.end())
+            {
+              if (count_j < rev_count_it->second)
+              {
+                continue;
+              }
+              else if (count_j == rev_count_it->second && d_j.name() > d_m.name())
+              {
+                continue;
+              }
+            }
+          }
+        }
+        relation[eq_name][d_m].insert(d_j);
+      }
+    }
+  }
+
+  return relation;
+}
+
+// Removes cycles of length 3+ from relation, turning it into a strict order.
+// Each cycle is broken by dropping the edge out of its most dominant node
+// (highest summed count, ties broken by name). Dominance is the same evidence
+// used for the 2-cycle pruning, so the dominant node becomes the cycle root.
+inline void break_ruling_cycles(const pbes& p, ruling_counts_type& counts, ruling_relation_type& relation)
+{
+  for (const pbes_equation& eq: p.equations())
+  {
+    const auto& eq_name = eq.variable().name();
+    auto rel_it = relation.find(eq_name);
+    if (rel_it == relation.end())
+    {
+      continue;
+    }
+    auto& ruled_by_map = rel_it->second;
+
+    const auto& eq_counts = counts[eq_name];
+    auto node_weight = [&](const data::variable& v) -> std::size_t
+    {
+      auto it = eq_counts.find(v);
+      if (it == eq_counts.end())
+      {
+        return 0;
+      }
+      std::size_t sum = 0;
+      for (const auto& [ruler, c]: it->second)
+      {
+        sum += c;
+      }
+      return sum;
+    };
+
+    while (true)
+    {
+      std::set<data::variable> done;
+      std::vector<data::variable> path;
+      std::function<bool(const data::variable&)> dfs = [&](const data::variable& current) -> bool
+      {
+        if (done.contains(current))
+        {
+          return false;
+        }
+        if (std::find(path.begin(), path.end(), current) != path.end())
+        {
+          path.push_back(current);
+          return true;
+        }
+        path.push_back(current);
+        auto rit = ruled_by_map.find(current);
+        if (rit != ruled_by_map.end())
+        {
+          for (const data::variable& ruler: rit->second)
+          {
+            if (dfs(ruler))
+            {
+              return true;
+            }
+          }
+        }
+        path.pop_back();
+        done.insert(current);
+        return false;
+      };
+
+      bool cycle_found = false;
+      for (const auto& [d_m, rulers]: ruled_by_map)
+      {
+        if (dfs(d_m))
+        {
+          cycle_found = true;
+          break;
+        }
+      }
+      if (!cycle_found)
+      {
+        break;
+      }
+
+      const std::vector<data::variable> cycle(path.begin()
+                                                + (std::find(path.begin(), path.end(), path.back()) - path.begin()),
+        path.end() - 1);
+
+      const data::variable* v_max = &cycle.front();
+      for (const data::variable& v: cycle)
+      {
+        std::size_t w = node_weight(v);
+        std::size_t w_max = node_weight(*v_max);
+        if (w > w_max || (w == w_max && v.name() < v_max->name()))
+        {
+          v_max = &v;
+        }
+      }
+      std::size_t idx = static_cast<std::size_t>(std::find(cycle.begin(), cycle.end(), *v_max) - cycle.begin());
+      const data::variable& succ = cycle[(idx + 1) % cycle.size()];
+
+      ruled_by_map[*v_max].erase(succ);
+      if (ruled_by_map[*v_max].empty())
+      {
+        ruled_by_map.erase(*v_max);
+      }
+    }
+  }
+}
+
+inline void log_ruling_relation(const ruling_relation_type& relation)
+{
+  mCRL2log(log::debug) << "=== Ruling relation ===" << std::endl;
+  for (const auto& [eq_name, ruled_by_map]: relation)
+  {
+    for (const auto& [d_m, parameters]: ruled_by_map)
+    {
+      mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " ruled by " << core::detail::print_list(parameters)
+                           << std::endl;
+    }
+  }
+}
 
 } // namespace detail
+
+// Computes the ruled-by relation for a PBES: relation[eq][dₘ] = { dⱼ | dⱼ ≽ dₘ in eq }.
+// A variable dⱼ rules dₘ when some recursive transition changes dₘ while guarded by dⱼ.
+// Mutual pairs are pruned to the stronger direction, and longer cycles are broken so
+// the relation is a strict order (the most dominant cycle node becomes a root).
+inline ruling_relation_type compute_ruling_relation(const pbes& p, const data::rewriter& datar)
+{
+  detail::ruling_counts_type counts = detail::count_rulings(p, datar);
+  ruling_relation_type relation = detail::build_ruling_relation(counts);
+  detail::break_ruling_cycles(p, counts, relation);
+  detail::log_ruling_relation(relation);
+  return relation;
+}
 
 } // namespace mcrl2::pbes_system
 
