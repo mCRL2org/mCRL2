@@ -585,8 +585,7 @@ private:
     }
     else if (options.var_choice == var_choice_strategy::ruling && m_ruling_relation != nullptr)
     {
-      pbes_expression eq_formula = detail::find_equation_by_name(*m_p, var_name)->get().formula();
-      selected_var = detail::choose_variable_by_ruling_order(var_name, essential_vars, *m_ruling_relation, eq_formula);
+      selected_var = detail::choose_variable_by_ruling_order(var_name, essential_vars, *m_ruling_relation);
       if (!selected_var)
       {
         // Fall back to rhs if no ruling relation for this equation

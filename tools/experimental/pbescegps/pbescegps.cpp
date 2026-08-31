@@ -45,6 +45,7 @@ protected:
     m_options.optimization = parser.option_argument_as<partial_solve_strategy>("optimization");
     m_options.number_of_threads = number_of_threads();
     m_options.initial_state_file = parser.option_argument_as<std::string>("initial-state");
+    m_options.ruling_file = parser.option_argument("ruling");
 
     std::string var_choice_str = parser.option_argument_as<std::string>("var-choice");
     if (var_choice_str == "lhs")
@@ -125,6 +126,9 @@ protected:
       "Lines can also use parameter indices instead of names, and equations that are not mentioned\n"
       "in FILE are not abstracted.",
       'a');
+    desc.add_hidden_option("ruling",
+      utilities::make_optional_argument("FILE", ""),
+      "save the ruling relation in text format");
   }
 
 public:
