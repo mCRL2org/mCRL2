@@ -67,10 +67,73 @@ struct pbescegps_options
                                                        // guards of predicate variable instances in the scope of an
                                                        // infinite quantifier
   bool rules_ideal = false; // if true, enforce the order-ideal invariant after each refinement step
+  std::string ruling_file = ""; // if non-empty, write the ruling relation to this file as text
 };
 
-// Ruling relation type alias: ruling_relation[eq][dₘ] = { dⱼ | dⱼ ≽ dₘ in equation eq }.
-using ruling_relation_type = std::map<core::identifier_string, std::map<data::variable, std::set<data::variable>>>;
+// The ruled-by relation together with cached dominance information.
+// ruled_by[eq][dₘ] = { dⱼ | dⱼ ≽ dₘ in equation eq }.
+// tree_size[eq][dⱼ] = the number of parameters that dⱼ (transitively) rules in eq,
+// i.e. the size of dⱼ's dominance subtree. Computed once by compute_tree_sizes()
+// and used to rank roots instead of counting formula occurrences.
+struct ruling_relation_type
+{
+  using equation_relation = std::map<data::variable, std::set<data::variable>>;
+  using equation_tree_sizes = std::map<data::variable, std::size_t>;
+
+  std::map<core::identifier_string, equation_relation> ruled_by;
+  std::map<core::identifier_string, equation_tree_sizes> tree_size;
+
+  // (Re)computes tree_size from ruled_by. Must be called after mutating ruled_by.
+  void compute_tree_sizes()
+  {
+    tree_size.clear();
+    for (const auto& [eq_name, ruled_by_map]: ruled_by)
+    {
+      auto& sizes = tree_size[eq_name];
+      for (const auto& [d_m, rulers]: ruled_by_map)
+      {
+        sizes.try_emplace(d_m, 0);
+        for (const data::variable& d_j: rulers)
+        {
+          sizes.try_emplace(d_j, 0);
+        }
+      }
+
+      // For each parameter, walk upward through its rulers; every ancestor is a
+      // dominator and gains exactly one descendant. visited ensures a shared
+      // descendant is counted once even when reached through several children.
+      for (const auto& [d_m, rulers]: ruled_by_map)
+      {
+        std::set<data::variable> visited;
+        std::vector<data::variable> todo;
+        for (const data::variable& d_j: rulers)
+        {
+          if (visited.insert(d_j).second)
+          {
+            todo.push_back(d_j);
+          }
+        }
+        while (!todo.empty())
+        {
+          const data::variable d_j = todo.back();
+          todo.pop_back();
+          ++sizes[d_j];
+          auto it = ruled_by_map.find(d_j);
+          if (it != ruled_by_map.end())
+          {
+            for (const data::variable& ancestor: it->second)
+            {
+              if (visited.insert(ancestor).second)
+              {
+                todo.push_back(ancestor);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+};
 
 namespace detail
 {
@@ -307,13 +370,14 @@ inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_exp
 }
 
 // Roots reachable from `start` via the ruling relation, ordered by dominance.
+// `tree_sizes` supplies the dominance weight per root (number of descendants);
 // `visited` breaks cycles; `cache` memoizes per-node results so each node is
 // expanded once (avoids exponential re-expansion on shared sub-paths).
 using ruling_roots_cache = std::map<data::variable, std::vector<std::pair<data::variable, std::size_t>>>;
 
 inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots_impl(const data::variable& start,
-  const ruling_relation_type::mapped_type& ruled_by_map,
-  const std::map<data::variable, std::size_t>& var_counts,
+  const ruling_relation_type::equation_relation& ruled_by_map,
+  const ruling_relation_type::equation_tree_sizes& tree_sizes,
   std::set<data::variable>& visited,
   ruling_roots_cache& cache)
 {
@@ -328,33 +392,33 @@ inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots_i
   }
   visited.insert(start);
 
-  std::map<data::variable, std::size_t> root_counts;
+  std::map<data::variable, std::size_t> root_weights;
   auto it = ruled_by_map.find(start);
   if (it == ruled_by_map.end())
   {
-    root_counts[start] = var_counts.contains(start) ? var_counts.at(start) : 0; // start is a root
+    root_weights[start] = tree_sizes.contains(start) ? tree_sizes.at(start) : 0; // start is a root
   }
   else
   {
     for (const data::variable& ruler: it->second)
     {
-      for (const auto& [root, occ]: find_dominant_roots_impl(ruler, ruled_by_map, var_counts, visited, cache))
+      for (const auto& [root, weight]: find_dominant_roots_impl(ruler, ruled_by_map, tree_sizes, visited, cache))
       {
-        root_counts[root] = std::max(root_counts[root], occ);
+        root_weights[root] = std::max(root_weights[root], weight);
       }
     }
 
     // No ruler reached a root: start is its own representative root (all rulers
     // are part of a cycle through start).
-    if (root_counts.empty())
+    if (root_weights.empty())
     {
-      root_counts[start] = var_counts.contains(start) ? var_counts.at(start) : 0;
+      root_weights[start] = tree_sizes.contains(start) ? tree_sizes.at(start) : 0;
     }
   }
 
   visited.erase(start);
 
-  std::vector<std::pair<data::variable, std::size_t>> roots(root_counts.begin(), root_counts.end());
+  std::vector<std::pair<data::variable, std::size_t>> roots(root_weights.begin(), root_weights.end());
   std::sort(roots.begin(),
     roots.end(),
     [](const auto& lhs, const auto& rhs)
@@ -368,36 +432,39 @@ inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots_i
   return cache[start] = roots;
 }
 
-// Convenience wrapper: fresh cache per call so no caller needs to declare one.
 inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots(const data::variable& start,
-  const ruling_relation_type::mapped_type& ruled_by_map,
-  const std::map<data::variable, std::size_t>& var_counts,
+  const ruling_relation_type::equation_relation& ruled_by_map,
+  const ruling_relation_type::equation_tree_sizes& tree_sizes,
   std::set<data::variable>& visited)
 {
   ruling_roots_cache cache;
-  return find_dominant_roots_impl(start, ruled_by_map, var_counts, visited, cache);
+  return find_dominant_roots_impl(start, ruled_by_map, tree_sizes, visited, cache);
 }
 
 // Chooses the most dominant variable to make concrete.
 // Traverses the ruling relation backwards from each essential variable to find
 // the "roots" — parameters that rule others but are not ruled by anyone.
 // Per starting variable, picks the most dominant root that is itself essential;
-// among those, picks the one with the highest occurrence count in the equation formula.
+// among those, picks the root with the largest tree size, i.e. the one that
+// (transitively) rules the most parameters.
 inline std::optional<data::variable> choose_variable_by_ruling_order(const core::identifier_string& eq_name,
   const std::set<data::variable>& essential_vars,
-  const ruling_relation_type& ruling_relation,
-  const pbes_expression& eq_formula)
+  const ruling_relation_type& ruling_relation)
 {
-  auto eq_it = ruling_relation.find(eq_name);
-  if (eq_it == ruling_relation.end())
+  auto eq_it = ruling_relation.ruled_by.find(eq_name);
+  if (eq_it == ruling_relation.ruled_by.end())
   {
     return std::nullopt;
   }
 
-  const std::map<data::variable, std::set<data::variable>>& ruled_by_map = eq_it->second;
-  auto var_counts = count_free_variable_occurrences(eq_formula, false);
+  auto sizes_it = ruling_relation.tree_size.find(eq_name);
+  if (sizes_it == ruling_relation.tree_size.end())
+  {
+    return std::nullopt; // no cached tree sizes — cannot rank roots
+  }
+  const ruling_relation_type::equation_tree_sizes& tree_sizes = sizes_it->second;
 
-  std::size_t best_occurrence_count = 0;
+  std::size_t best_tree_size = 0;
   std::optional<data::variable> best_var;
 
   // Roots depend only on the (static) ruling relation, not on the start node,
@@ -406,18 +473,18 @@ inline std::optional<data::variable> choose_variable_by_ruling_order(const core:
   for (const data::variable& var: essential_vars)
   {
     std::set<data::variable> visited;
-    auto roots = find_dominant_roots_impl(var, ruled_by_map, var_counts, visited, cache);
+    auto roots = find_dominant_roots_impl(var, eq_it->second, tree_sizes, visited, cache);
 
     // Pick the most dominant root that is actually in essential_vars (abstracted).
     // The traversal may reach parameters that are already concrete.
     std::optional<data::variable> root;
-    std::size_t occ = 0;
-    for (const auto& [candidate, count]: roots)
+    std::size_t size = 0;
+    for (const auto& [candidate, weight]: roots)
     {
       if (essential_vars.contains(candidate))
       {
         root = candidate;
-        occ = count;
+        size = weight;
         break;
       }
     }
@@ -426,15 +493,15 @@ inline std::optional<data::variable> choose_variable_by_ruling_order(const core:
     if (!root.has_value())
     {
       root = var;
-      occ = var_counts.contains(var) ? var_counts.at(var) : 0;
+      size = tree_sizes.contains(var) ? tree_sizes.at(var) : 0;
     }
 
-    mCRL2log(log::debug) << "  - " << var.name() << " -> root " << root->name() << " (occurrences: " << occ << ")"
+    mCRL2log(log::debug) << "  - " << var.name() << " -> root " << root->name() << " (tree size: " << size << ")"
                          << std::endl;
 
-    if (occ > best_occurrence_count || (occ == best_occurrence_count && !best_var.has_value()))
+    if (size > best_tree_size || (size == best_tree_size && !best_var.has_value()))
     {
-      best_occurrence_count = occ;
+      best_tree_size = size;
       best_var = root;
     }
   }
@@ -673,7 +740,7 @@ inline ruling_relation_type build_ruling_relation(const ruling_counts_type& coun
             }
           }
         }
-        relation[eq_name][d_m].insert(d_j);
+        relation.ruled_by[eq_name][d_m].insert(d_j);
       }
     }
   }
@@ -690,8 +757,8 @@ inline void break_ruling_cycles(const pbes& p, ruling_counts_type& counts, rulin
   for (const pbes_equation& eq: p.equations())
   {
     const auto& eq_name = eq.variable().name();
-    auto rel_it = relation.find(eq_name);
-    if (rel_it == relation.end())
+    auto rel_it = relation.ruled_by.find(eq_name);
+    if (rel_it == relation.ruled_by.end())
     {
       continue;
     }
@@ -785,15 +852,112 @@ inline void break_ruling_cycles(const pbes& p, ruling_counts_type& counts, rulin
   }
 }
 
+// Anti-transitivity: drops ruling edges that are already implied by a longer
+// chain. If d_m is ruled by d_k and d_k is (transitively) ruled by d_j, then the
+// direct edge "d_m ruled by d_j" carries no new information and is removed,
+// keeping only the covering pairs of the order. Does not filter branching dependencies,
+// i.e. d_m -> d_k -> d_j and d_m -> d_k' -> d_j edges are not removed.
+inline void remove_transitive_rulings(ruling_relation_type& relation)
+{
+  for (auto& [eq_name, ruled_by_map]: relation.ruled_by)
+  {
+    // Returns true when d_start is (transitively) ruled by d_target.
+    std::function<bool(const data::variable&, const data::variable&, std::set<data::variable>&)> rules_transitively
+      = [&](const data::variable& d_start, const data::variable& d_target, std::set<data::variable>& visited) -> bool
+    {
+      auto it = ruled_by_map.find(d_start);
+      if (it == ruled_by_map.end())
+      {
+        return false;
+      }
+      for (const data::variable& d_ruler: it->second)
+      {
+        if (d_ruler == d_target || (visited.insert(d_ruler).second && rules_transitively(d_ruler, d_target, visited)))
+        {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // Collect removals first so every edge is judged against the original relation.
+    std::vector<std::pair<data::variable, data::variable>> removals;
+    for (const auto& [d_m, rulers]: ruled_by_map)
+    {
+      for (const data::variable& d_j: rulers)
+      {
+        for (const data::variable& d_k: rulers)
+        {
+          if (d_k == d_j)
+          {
+            continue;
+          }
+          std::set<data::variable> visited;
+          if (rules_transitively(d_k, d_j, visited))
+          {
+            removals.emplace_back(d_m, d_j);
+            break;
+          }
+        }
+      }
+    }
+
+    for (const auto& [d_m, d_j]: removals)
+    {
+      ruled_by_map[d_m].erase(d_j);
+    }
+    for (auto it = ruled_by_map.begin(); it != ruled_by_map.end();)
+    {
+      if (it->second.empty())
+      {
+        it = ruled_by_map.erase(it);
+      }
+      else
+      {
+        ++it;
+      }
+    }
+  }
+}
+
 inline void log_ruling_relation(const ruling_relation_type& relation)
 {
   mCRL2log(log::debug) << "=== Ruling relation ===" << std::endl;
-  for (const auto& [eq_name, ruled_by_map]: relation)
+  for (const auto& [eq_name, ruled_by_map]: relation.ruled_by)
   {
     for (const auto& [d_m, parameters]: ruled_by_map)
     {
       mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " ruled by " << core::detail::print_list(parameters)
                            << std::endl;
+    }
+  }
+  for (const auto& [eq_name, sizes]: relation.tree_size)
+  {
+    for (const auto& [d_j, size]: sizes)
+    {
+      if (size > 0)
+      {
+        mCRL2log(log::debug) << eq_name << ": " << pp(d_j) << " rules " << size << " parameters (tree size)"
+                             << std::endl;
+      }
+    }
+  }
+}
+
+// Saves the ruling relation to a file in text format.
+inline void save_ruling_relation(const ruling_relation_type& relation, const std::string& filename)
+{
+  std::ofstream out(filename);
+  if (!out.is_open())
+  {
+    throw mcrl2::runtime_error("Could not open file '" + filename + "' for writing the ruling relation.");
+  }
+  out << "=== Ruling relation ===" << std::endl;
+  for (const auto& [eq_name, ruled_by_map]: relation.ruled_by)
+  {
+    for (const auto& [d_m, parameters]: ruled_by_map)
+    {
+      out << eq_name << ": " << pp(d_m) << " ruled by " << core::detail::print_list(parameters) << std::endl;
     }
   }
 }
@@ -804,11 +968,17 @@ inline void log_ruling_relation(const ruling_relation_type& relation)
 // A variable dⱼ rules dₘ when some recursive transition changes dₘ while guarded by dⱼ.
 // Mutual pairs are pruned to the stronger direction, and longer cycles are broken so
 // the relation is a strict order (the most dominant cycle node becomes a root).
+// Finally, transitively implied edges are removed: if C is ruled by B and B by A, the
+// edge "C ruled by A" is redundant and dropped (anti-transitivity).
+// The tree sizes — per equation the number of parameters each variable (transitively)
+// rules — are computed once from the final relation and cached for the ruling strategy.
 inline ruling_relation_type compute_ruling_relation(const pbes& p, const data::rewriter& datar)
 {
   detail::ruling_counts_type counts = detail::count_rulings(p, datar);
   ruling_relation_type relation = detail::build_ruling_relation(counts);
   detail::break_ruling_cycles(p, counts, relation);
+  detail::remove_transitive_rulings(relation);
+  relation.compute_tree_sizes();
   detail::log_ruling_relation(relation);
   return relation;
 }

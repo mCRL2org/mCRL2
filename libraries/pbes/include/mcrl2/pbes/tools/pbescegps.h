@@ -99,15 +99,16 @@ private:
     std::pair<bool, structure_graph>>
     m_solution_cache;
 
-  // Ruling relation: m_ruling_relation[X][dₘ] = { dⱼ | dⱼ ≽ dₘ in equation X }.
-  // Computed once from the PBES, reused across all iterations.
+  // Ruling relation: m_ruling_relation.ruled_by[X][dₘ] = { dⱼ | dⱼ ≽ dₘ in equation X },
+  // with the tree sizes (number of (transitively) ruled parameters) per equation cached in
+  // m_ruling_relation.tree_size. Computed once from the PBES, reused across all iterations.
   // dⱼ ≽ dₘ means: dⱼ appears in the guard of a transition that changes dₘ.
-  std::map<core::identifier_string, std::map<data::variable, std::set<data::variable>>> m_ruling_relation;
+  ruling_relation_type m_ruling_relation;
 
 
 public:
   // Read-only access to the computed ruling relation (used by tests).
-  const std::map<core::identifier_string, std::map<data::variable, std::set<data::variable>>>& ruling_relation() const
+  const ruling_relation_type& ruling_relation() const
   {
     return m_ruling_relation;
   }
@@ -581,11 +582,11 @@ public:
       }
     }
     while (!done);
-    mCRL2log(log::trace) << "======== Data closed ======" << std::endl;
-    mCRL2log(log::trace) << "Data closed: W = " << std::endl;
+    mCRL2log(log::debug) << "======== Data closed ======" << std::endl;
+    mCRL2log(log::debug) << "Data closed: W = " << std::endl;
     for (const auto& [eq_name, var_set]: state.W)
     {
-      mCRL2log(log::trace) << "" << eq_name << ": " << core::detail::print_list(var_set) << std::endl;
+      mCRL2log(log::debug) << "" << eq_name << ": " << core::detail::print_list(var_set) << std::endl;
     }
   }
 
@@ -610,7 +611,7 @@ public:
     // Each violation requires un-abstracting the ruler (making it concrete).
     std::deque<std::pair<core::identifier_string, data::variable>> todo;
 
-    for (const auto& [eq_name, ruled_by_map]: m_ruling_relation)
+    for (const auto& [eq_name, ruled_by_map]: m_ruling_relation.ruled_by)
     {
       for (const auto& [d_m, rulers]: ruled_by_map)
       {
@@ -649,14 +650,18 @@ public:
       mCRL2log(log::debug) << "Rules ideal: un-abstracted " << d_j.name() << " from " << eq_name << std::endl;
 
       // dⱼ is now concrete — its rulers must be concrete too.
-      auto it = m_ruling_relation[eq_name].find(d_j);
-      if (it != m_ruling_relation[eq_name].end())
+      auto it = m_ruling_relation.ruled_by.find(eq_name);
+      if (it != m_ruling_relation.ruled_by.end())
       {
-        for (const auto& d_k: it->second) // dₖ ≽ dⱼ
+        auto rulers_it = it->second.find(d_j);
+        if (rulers_it != it->second.end())
         {
-          if (state.W[eq_name].contains(d_k)) // dₖ is abstracted
+          for (const auto& d_k: rulers_it->second) // dₖ ≽ dⱼ
           {
-            todo.emplace_back(eq_name, d_k);
+            if (state.W[eq_name].contains(d_k)) // dₖ is abstracted
+            {
+              todo.emplace_back(eq_name, d_k);
+            }
           }
         }
       }
@@ -731,8 +736,7 @@ public:
           }
           else if (options.var_choice == var_choice_strategy::ruling)
           {
-            selected_var
-              = detail::choose_variable_by_ruling_order(eq_name, essential_vars, m_ruling_relation, eq_formula);
+            selected_var = detail::choose_variable_by_ruling_order(eq_name, essential_vars, m_ruling_relation);
             if (!selected_var)
             {
               selected_var = detail::choose_variable_by_rhs_order(eq_formula, essential_vars);
@@ -776,6 +780,12 @@ public:
 
     // Compute the ruling relation once from the PBES structure
     compute_ruling_relation(p);
+
+    // Save the ruling relation to a file when requested
+    if (!options.ruling_file.empty())
+    {
+      detail::save_ruling_relation(m_ruling_relation, options.ruling_file);
+    }
 
     // Calculate non-Control Flow Parameters (parameters to abstract) per equation
     abstract_param_state state;
