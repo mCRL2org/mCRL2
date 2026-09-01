@@ -499,7 +499,7 @@ inline std::optional<data::variable> choose_variable_by_ruling_order(const core:
     mCRL2log(log::debug) << "  - " << var.name() << " -> root " << root->name() << " (tree size: " << size << ")"
                          << std::endl;
 
-    if (size > best_tree_size || (size == best_tree_size && !best_var.has_value()))
+    if (size > best_tree_size)
     {
       best_tree_size = size;
       best_var = root;
@@ -661,9 +661,20 @@ initialize_initial_abstraction_state(const pbes& p, abstract_param_state& state,
 using ruling_counts_type
   = std::map<core::identifier_string, std::map<data::variable, std::map<data::variable, std::size_t>>>;
 
-inline ruling_counts_type count_rulings(const pbes& p, const data::rewriter& datar)
+// changes[eq][dₘ] = # recursive transitions in eq where dₘ changes, regardless of guard.
+using pvi_change_counts_type = std::map<core::identifier_string, std::map<data::variable, std::size_t>>;
+
+// Raw evidence for the ruling relation: how often one parameter change is guarded
+// by another parameter, and how often each parameter changes at all.
+struct ruling_statistics_type
 {
   ruling_counts_type counts;
+  pvi_change_counts_type changes;
+};
+
+inline ruling_statistics_type count_rulings(const pbes& p, const data::rewriter& datar)
+{
+  ruling_statistics_type stats;
 
   for (const pbes_equation& eq: p.equations())
   {
@@ -694,11 +705,12 @@ inline ruling_counts_type count_rulings(const pbes& p, const data::rewriter& dat
       {
         if (pvi_args[j] != atermpp::down_cast<data::data_expression>(params[j]))
         {
+          ++stats.changes[eq_name][params[j]];
           for (const auto& gv: guard_vars)
           {
             if (params[j] != gv)
             {
-              counts[eq_name][params[j]][gv]++;
+              ++stats.counts[eq_name][params[j]][gv];
             }
           }
         }
@@ -706,37 +718,62 @@ inline ruling_counts_type count_rulings(const pbes& p, const data::rewriter& dat
     }
   }
 
-  return counts;
+  return stats;
 }
 
-// Builds the relation from the counts, keeping only the stronger direction of mutual pairs.
-inline ruling_relation_type build_ruling_relation(const ruling_counts_type& counts)
-{
-  ruling_relation_type relation;
+// percentages[eq][dₘ][dⱼ] = # transitions where dⱼ guards a change of dₘ in eq divided
+// by the total # transitions in which dₘ changes — i.e. how large a share of dₘ's
+// changes is ruled by dⱼ. This lets parameters that change rarely and parameters
+// that change often be compared on the same scale.
+using ruling_percentages_type
+  = std::map<core::identifier_string, std::map<data::variable, std::map<data::variable, double>>>;
 
-  for (const auto& [eq_name, ruled_by_counts]: counts)
+inline ruling_percentages_type compute_ruling_percentages(const ruling_statistics_type& stats)
+{
+  ruling_percentages_type percentages;
+  for (const auto& [eq_name, ruled_by_counts]: stats.counts)
   {
     for (const auto& [d_m, rulers_counts]: ruled_by_counts)
     {
+      // Every counts entry was created in the same branch as a changes increment,
+      // so the denominator exists and is positive.
+      const std::size_t total = stats.changes.at(eq_name).at(d_m);
       for (const auto& [d_j, count_j]: rulers_counts)
       {
-        auto rev_it = counts.find(eq_name);
-        if (rev_it != counts.end())
+        percentages[eq_name][d_m][d_j] = static_cast<double>(count_j) / static_cast<double>(total);
+      }
+    }
+  }
+  return percentages;
+}
+
+// Builds the relation from the ruling percentages, keeping only the stronger direction
+// of mutual pairs: dⱼ ≻ dₘ survives when dⱼ's percentage of ruling dₘ's changes is at
+// least dₘ's percentage of ruling dⱼ's changes (ties broken by name).
+inline ruling_relation_type build_ruling_relation(const ruling_percentages_type& percentages)
+{
+  ruling_relation_type relation;
+
+  for (const auto& [eq_name, ruled_by_percentages]: percentages)
+  {
+    const auto& eq_percentages = percentages.at(eq_name);
+    for (const auto& [d_m, rulers_percentages]: ruled_by_percentages)
+    {
+      for (const auto& [d_j, pct_j]: rulers_percentages)
+      {
+        auto ruled_it = eq_percentages.find(d_j);
+        if (ruled_it != eq_percentages.end())
         {
-          auto ruled_it = rev_it->second.find(d_j);
-          if (ruled_it != rev_it->second.end())
+          auto rev_pct_it = ruled_it->second.find(d_m);
+          if (rev_pct_it != ruled_it->second.end())
           {
-            auto rev_count_it = ruled_it->second.find(d_m);
-            if (rev_count_it != ruled_it->second.end())
+            if (pct_j < rev_pct_it->second)
             {
-              if (count_j < rev_count_it->second)
-              {
-                continue;
-              }
-              else if (count_j == rev_count_it->second && d_j.name() > d_m.name())
-              {
-                continue;
-              }
+              continue;
+            }
+            else if (pct_j == rev_pct_it->second && d_j.name() > d_m.name())
+            {
+              continue;
             }
           }
         }
@@ -750,9 +787,9 @@ inline ruling_relation_type build_ruling_relation(const ruling_counts_type& coun
 
 // Removes cycles of length 3+ from relation, turning it into a strict order.
 // Each cycle is broken by dropping the edge out of its most dominant node
-// (highest summed count, ties broken by name). Dominance is the same evidence
-// used for the 2-cycle pruning, so the dominant node becomes the cycle root.
-inline void break_ruling_cycles(const pbes& p, ruling_counts_type& counts, ruling_relation_type& relation)
+// (highest summed ruling percentage, ties broken by name). Dominance is the same
+// evidence used for the 2-cycle pruning, so the dominant node becomes the cycle root.
+inline void break_ruling_cycles(const pbes& p, const ruling_percentages_type& percentages, ruling_relation_type& relation)
 {
   for (const pbes_equation& eq: p.equations())
   {
@@ -764,18 +801,22 @@ inline void break_ruling_cycles(const pbes& p, ruling_counts_type& counts, rulin
     }
     auto& ruled_by_map = rel_it->second;
 
-    const auto& eq_counts = counts[eq_name];
-    auto node_weight = [&](const data::variable& v) -> std::size_t
+    auto pct_it = percentages.find(eq_name);
+    auto node_weight = [&](const data::variable& v) -> double
     {
-      auto it = eq_counts.find(v);
-      if (it == eq_counts.end())
+      if (pct_it == percentages.end())
       {
-        return 0;
+        return 0.0;
       }
-      std::size_t sum = 0;
-      for (const auto& [ruler, c]: it->second)
+      auto it = pct_it->second.find(v);
+      if (it == pct_it->second.end())
       {
-        sum += c;
+        return 0.0;
+      }
+      double sum = 0.0;
+      for (const auto& [ruler, pct]: it->second)
+      {
+        sum += pct;
       }
       return sum;
     };
@@ -833,8 +874,8 @@ inline void break_ruling_cycles(const pbes& p, ruling_counts_type& counts, rulin
       const data::variable* v_max = &cycle.front();
       for (const data::variable& v: cycle)
       {
-        std::size_t w = node_weight(v);
-        std::size_t w_max = node_weight(*v_max);
+        double w = node_weight(v);
+        double w_max = node_weight(*v_max);
         if (w > w_max || (w == w_max && v.name() < v_max->name()))
         {
           v_max = &v;
@@ -966,17 +1007,20 @@ inline void save_ruling_relation(const ruling_relation_type& relation, const std
 
 // Computes the ruled-by relation for a PBES: relation[eq][dₘ] = { dⱼ | dⱼ ≽ dₘ in eq }.
 // A variable dⱼ rules dₘ when some recursive transition changes dₘ while guarded by dⱼ.
-// Mutual pairs are pruned to the stronger direction, and longer cycles are broken so
-// the relation is a strict order (the most dominant cycle node becomes a root).
+// Ruling strength is measured as a percentage: # transitions where dⱼ guards a change of
+// dₘ divided by # transitions in which dₘ changes. Mutual pairs are pruned to the
+// stronger direction, and longer cycles are broken so the relation is a strict order
+// (the most dominant cycle node becomes a root).
 // Finally, transitively implied edges are removed: if C is ruled by B and B by A, the
 // edge "C ruled by A" is redundant and dropped (anti-transitivity).
 // The tree sizes — per equation the number of parameters each variable (transitively)
 // rules — are computed once from the final relation and cached for the ruling strategy.
 inline ruling_relation_type compute_ruling_relation(const pbes& p, const data::rewriter& datar)
 {
-  detail::ruling_counts_type counts = detail::count_rulings(p, datar);
-  ruling_relation_type relation = detail::build_ruling_relation(counts);
-  detail::break_ruling_cycles(p, counts, relation);
+  detail::ruling_statistics_type stats = detail::count_rulings(p, datar);
+  detail::ruling_percentages_type percentages = detail::compute_ruling_percentages(stats);
+  ruling_relation_type relation = detail::build_ruling_relation(percentages);
+  detail::break_ruling_cycles(p, percentages, relation);
   detail::remove_transitive_rulings(relation);
   relation.compute_tree_sizes();
   detail::log_ruling_relation(relation);

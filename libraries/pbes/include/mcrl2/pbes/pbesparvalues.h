@@ -57,40 +57,6 @@ protected:
   pbes m_pbes;
   bool m_expand_finite_sorts;
 
-  /// \brief Compute the names of the equations reachable from the initial state.
-  std::set<core::identifier_string> reachable_equations(
-    const std::map<core::identifier_string, const pbes_equation*>& declared) const
-  {
-    std::set<core::identifier_string> visited;
-    std::vector<const pbes_equation*> todo;
-    auto add = [&](const core::identifier_string& name)
-    {
-      if (visited.contains(name))
-      {
-        return;
-      }
-      const auto it = declared.find(name);
-      if (it == declared.end())
-      {
-        throw mcrl2::runtime_error("Predicate variable " + pp(name) + " occurs in the PBES but is not declared.");
-      }
-      visited.insert(name);
-      todo.push_back(it->second);
-    };
-
-    add(m_pbes.initial_state().name());
-    while (!todo.empty())
-    {
-      const pbes_equation* eqn = todo.back();
-      todo.pop_back();
-      for (const propositional_variable_instantiation& pvi: find_propositional_variable_instantiations(eqn->formula()))
-      {
-        add(pvi.name());
-      }
-    }
-    return visited;
-  }
-
 public:
 
   /// \brief Constructor for the pbes_parvalues algorithm
@@ -113,7 +79,7 @@ public:
   {
     algorithms::instantiate_global_variables(m_pbes);
 
-    // Index the declared equations by predicate variable name.
+    // Index declared equations by predicate variable name.
     std::map<core::identifier_string, const pbes_equation*> declared;
     for (const pbes_equation& eqn: m_pbes.equations())
     {
@@ -124,22 +90,10 @@ public:
       }
     }
 
-    // Only equations that are reachable from the initial state are considered.
-    const std::set<core::identifier_string> reachable = reachable_equations(declared);
-    if (reachable.size() < declared.size())
+    // Check that parameters are distinct and that the RHS uses no other free variables.
+    for (const auto& [name, eqn_ptr]: declared)
     {
-      mCRL2log(log::verbose) << "Skipping " << declared.size() - reachable.size()
-                             << " equation(s) that are not reachable from the initial state.\n";
-    }
-
-    // The influence graph identifies parameters by (equation name, parameter).
-    // This is unambiguous under the following assumptions, which are checked
-    // here: the parameters of each equation have distinct names, and the only
-    // data variables occurring freely in the right hand side of an equation
-    // are its own parameters.
-    for (const core::identifier_string& name: reachable)
-    {
-      const pbes_equation& eqn = *declared.at(name);
+      const pbes_equation& eqn = *eqn_ptr;
       std::set<core::identifier_string> parameter_names;
       for (const data::variable& d: eqn.variable().parameters())
       {
@@ -163,11 +117,11 @@ public:
       }
     }
 
-    // Optionally instantiate quantifiers over finite sorts.
+    // Optionally expand quantifiers over finite sorts.
     std::map<core::identifier_string, pbes_expression> formulas;
-    for (const core::identifier_string& name: reachable)
+    for (const auto& [name, eqn_ptr]: declared)
     {
-      formulas.emplace(name, declared.at(name)->formula());
+      formulas.emplace(name, eqn_ptr->formula());
     }
     if (m_expand_finite_sorts)
     {
@@ -180,11 +134,10 @@ public:
       }
     }
 
-    // Add an influence graph edge for each guarded occurrence of a predicate
-    // variable instantiation in the right hand side of an equation.
-    for (const core::identifier_string& name: reachable)
+    // Add a graph edge per guarded PVI occurrence.
+    for (const auto& [name, source_ptr]: declared)
     {
-      const pbes_equation& source = *declared.at(name);
+      const pbes_equation& source = *source_ptr;
 
       detail::guard_traverser guard_traverser(m_rewriter);
       guard_traverser.apply(formulas.at(name));
@@ -202,9 +155,7 @@ public:
           updates.emplace_back(data::detail::parameter(pvi.name(), var), expr);
         }
 
-        // Variables occurring freely in the guard and the updates either are
-        // parameters of the source equation or were bound by enclosing
-        // quantifiers whose binders the guard traverser discards.
+        // Free vars in guard/updates are source params or discarded binders.
         std::set<data::variable> qvars = find_free_variables(guard);
         for (const auto& [_, expr]: updates)
         {
@@ -215,17 +166,13 @@ public:
           qvars.erase(d);
         }
 
-        // The guard is a simple expression, i.e., it does not contain
-        // propositional variable instantiations, hence it can be converted
-        // to a genuine data expression.
+        // Guard has no PVIs, so it converts to a plain data expression.
         assert(is_simple_expression(guard, false));
         m_graph.add_edge(name, qvars, detail::pbes2data(guard), updates);
       }
     }
 
-    // Register the parameters. Parameters of the initial equation receive
-    // their initial values; all other parameters are declared without values
-    // and obtain them once updates reach them.
+    // Initial params get their initial values; others are declared empty.
     {
       const propositional_variable_instantiation& init = m_pbes.initial_state();
       const pbes_equation& init_eqn = *declared.at(init.name());
@@ -234,13 +181,13 @@ public:
       {
         m_graph.new_parameter(data::detail::parameter(init.name(), var), m_rewriter(expr));
       }
-      for (const core::identifier_string& name: reachable)
+      for (const auto& [name, eqn_ptr]: declared)
       {
         if (name == init.name())
         {
           continue;
         }
-        for (const data::variable& var: declared.at(name)->variable().parameters())
+        for (const data::variable& var: eqn_ptr->variable().parameters())
         {
           m_graph.declare_parameter(data::detail::parameter(name, var));
         }
@@ -250,9 +197,9 @@ public:
     super::run();
 
     std::vector<pbes_parameter_domain> result;
-    for (const core::identifier_string& name: reachable)
+    for (const auto& [name, eqn_ptr]: declared)
     {
-      for (const data::variable& var: declared.at(name)->variable().parameters())
+      for (const data::variable& var: eqn_ptr->variable().parameters())
       {
         const data::detail::parameter par(name, var);
         result.push_back({name, var, m_graph.at(par).stable, m_graph.is_unbounded(par)});

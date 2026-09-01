@@ -19,6 +19,7 @@
 #include <atomic>
 #include <cstdio>
 #include <ctime>
+#include <optional>
 #include <set>
 #include <stdexcept>
 
@@ -211,11 +212,23 @@ class logger: private utilities::noncopyable
       log_level() = level;
     }
 
-    /// \brief Get reporting level
+    /// \brief The reporting level override of the current thread. When it has
+    /// a value, it takes precedence over the global reporting level for
+    /// mCRL2log statements on this thread; see scoped_reporting_level.
+    static std::optional<log_level_t>& thread_reporting_level()
+    {
+      thread_local std::optional<log_level_t> level;
+      return level;
+    }
+
+    /// \brief Get reporting level, i.e. the level that is in effect on the
+    /// current thread: the override of the current thread when one is active,
+    /// and the global level otherwise.
     static
     log_level_t get_reporting_level()
     {
-      return log_level();
+      const std::optional<log_level_t>& thread_level = thread_reporting_level();
+      return thread_level.has_value() ? *thread_level : log_level().load();
     }
 
     /// \brief Indicate that timing information should be printed.
@@ -384,6 +397,36 @@ inline bool mCRL2logEnabled(const log_level_t level)
 {
   return level <= mcrl2::log::logger::get_reporting_level();
 }
+
+/// \brief Helper that temporarily limits the reporting level of the
+/// current thread to the given level.
+///
+/// The level is an override of the global reporting level for this thread
+/// only: mCRL2log statements on other threads keep using the global level.
+/// This allows parallel code to silence the verbose output of an algorithm
+/// without interfering with the log output of code running concurrently on
+/// other threads.
+class scoped_reporting_level: private utilities::noncopyable
+{
+public:
+  /// \brief Report at the given level on the current thread until this object
+  /// is destroyed, regardless of the global reporting level.
+  explicit scoped_reporting_level(const log_level_t level)
+    : m_saved_level(logger::thread_reporting_level())
+  {
+    logger::thread_reporting_level() = level;
+  }
+
+  /// \brief Restores the reporting level that was active on this thread before
+  /// this object was constructed.
+  ~scoped_reporting_level()
+  {
+    logger::thread_reporting_level() = m_saved_level;
+  }
+
+private:
+  std::optional<log_level_t> m_saved_level;
+};
 
 } // namespace mcrl2::log
 
