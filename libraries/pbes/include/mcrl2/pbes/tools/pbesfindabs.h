@@ -365,7 +365,7 @@ private:
         {
           // Not data closed: reported as not valid, but not used for pruning,
           // since a superset may well be data closed.
-          mCRL2log(log::verbose) << "Abstraction set " << writer.describe(universe, set)
+          mCRL2log(log::debug) << "Abstraction set " << writer.describe(universe, set)
                                  << " is not valid: it is not data closed." << std::endl;
           std::lock_guard<std::mutex> guard(frontier_mutex);
           next_frontier.push_back(set);

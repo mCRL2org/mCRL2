@@ -703,8 +703,8 @@ private:
       {
         const index_type current_idx = *todo.begin();
         todo.erase(todo.begin());
+        assert(current_idx != undefined_vertex() && "Vertex from the todo stack is undefined");
         const vertex& current_vertex = primary.find_vertex(current_idx);
-        assert(current_vertex != undefined_vertex() && "Vertex from the todo stack is undefined");
         const index_type strategy_idx = current_vertex.strategy;
 
         if (strategy_idx == undefined_vertex())
