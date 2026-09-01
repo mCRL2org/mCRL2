@@ -174,7 +174,8 @@ BOOST_AUTO_TEST_CASE(test_choose_largest_essential_tree_size_root)
   BOOST_CHECK_EQUAL(pp(*result), "r2");
 }
 
-// Root B not essential; falls back to starting variable A.
+// Root B not essential; the fallback starting variable A has no dominance
+// (tree size 0), so nothing is selected.
 BOOST_AUTO_TEST_CASE(test_choose_fallback_root_not_essential)
 {
   ruling_relation_type ruling = make_ruling("Y", {{"A", {"B"}}});
@@ -182,8 +183,7 @@ BOOST_AUTO_TEST_CASE(test_choose_fallback_root_not_essential)
   std::set<data::variable> essential = {V("A")}; // B not essential
 
   auto result = choose_variable_by_ruling_order(core::identifier_string("Y"), essential, ruling);
-  BOOST_CHECK(result.has_value());
-  BOOST_CHECK_EQUAL(pp(*result), "A");
+  BOOST_CHECK(!result.has_value());
 }
 
 // No ruling relation for the equation — returns nullopt.

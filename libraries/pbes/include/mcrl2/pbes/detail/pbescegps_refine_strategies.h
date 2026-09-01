@@ -585,7 +585,14 @@ private:
     }
     else if (options.var_choice == var_choice_strategy::ruling && m_ruling_relation != nullptr)
     {
-      selected_var = detail::choose_variable_by_ruling_order(var_name, essential_vars, *m_ruling_relation);
+      const std::set<data::variable> guard_free_vars = find_free_variables(guard_formula);
+      std::set<data::variable> guard_essential_vars;
+      std::set_intersection(essential_vars.begin(),
+        essential_vars.end(),
+        guard_free_vars.begin(),
+        guard_free_vars.end(),
+        std::inserter(guard_essential_vars, guard_essential_vars.begin()));
+      selected_var = detail::choose_variable_by_ruling_order(var_name, guard_essential_vars, *m_ruling_relation);
       if (!selected_var)
       {
         // Fall back to rhs if no ruling relation for this equation

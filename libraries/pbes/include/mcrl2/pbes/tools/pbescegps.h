@@ -113,14 +113,26 @@ public:
     return m_ruling_relation;
   }
 
+  // Initializes the shared machinery (data rewriter) so that the abstraction and
+  // solving methods of this class can be used without running the full CEGPS
+  // refinement loop (see run_cegps_algorithm).
+  void initialize(const pbes& p, const pbescegps_options& options)
+  {
+    m_datar.emplace(p.data(), options.rewrite_strategy);
+  }
+
   std::pair<bool, structure_graph> solve(const pbes& p, pbescegps_options options)
   {
     pbes p_copy(p);
     utilities::execution_timer timer;
-    mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
-    if (saved_level == mcrl2::log::trace || saved_level == mcrl2::log::debug)
+    // The solving algorithms print enormous amounts of trace and debug output.
+    // Cap the reporting level of this thread at verbose during the solve; the
+    // scoped level does not affect other threads and is restored (also when an
+    // exception is thrown) when the solver is done.
+    std::optional<mcrl2::log::scoped_reporting_level> reporting_level_scope;
+    if (mcrl2::log::logger::get_reporting_level() > mcrl2::log::verbose)
     {
-      mcrl2::log::logger::set_reporting_level(mcrl2::log::verbose);
+      reporting_level_scope.emplace(mcrl2::log::verbose);
     }
     structure_graph m_solved_graph;
 
@@ -190,7 +202,6 @@ public:
     {
       timer.report();
     }
-    mcrl2::log::logger::set_reporting_level(saved_level);
     return {result, m_solved_graph};
   }
 
@@ -365,10 +376,10 @@ public:
     // Rewrite expressions for simplification
     simplify_data_rewriter<data::rewriter> pbesr(*m_datar);
     pbes_rewrite(result, pbesr);
-    mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
-    if (saved_level == mcrl2::log::trace || saved_level == mcrl2::log::debug)
+    std::optional<mcrl2::log::scoped_reporting_level> reporting_level_scope;
+    if (mcrl2::log::logger::get_reporting_level() > mcrl2::log::verbose)
     {
-      mcrl2::log::logger::set_reporting_level(mcrl2::log::verbose);
+      reporting_level_scope.emplace(mcrl2::log::verbose);
     }
     pbes_system::parelm(result, false);
     pbes_constelm_algorithm<data::rewriter, simplify_data_rewriter<data::rewriter>> constelm_algo(*m_datar, pbesr);
@@ -385,7 +396,7 @@ public:
 
       constelm_algo.run(result);
     }
-    mcrl2::log::logger::set_reporting_level(saved_level);
+    reporting_level_scope.reset();
 
     mCRL2log(log::trace) << pp(result) << std::endl;
 
@@ -394,7 +405,7 @@ public:
 
   // Helper: Calculate non-Control Flow Parameters (CFP) per equation
   // Populates the abstraction_state directly with W and indices
-  void compute_initial_abstraction_set(pbes& p, const bool use_init_control_flow, abstract_param_state& state)
+  void compute_initial_abstraction_set(const pbes& p, const bool use_init_control_flow, abstract_param_state& state)
   {
     // Initialize W with ALL parameters for each equation using add_abstracted_variable
     for (const pbes_equation& eq: p.equations())
@@ -412,10 +423,10 @@ public:
       return;
     }
 
-    mcrl2::log::log_level_t saved_level = mcrl2::log::logger::get_reporting_level();
-    if (saved_level == mcrl2::log::trace || saved_level == mcrl2::log::debug)
+    std::optional<mcrl2::log::scoped_reporting_level> reporting_level_scope;
+    if (mcrl2::log::logger::get_reporting_level() > mcrl2::log::verbose)
     {
-      mcrl2::log::logger::set_reporting_level(mcrl2::log::verbose);
+      reporting_level_scope.emplace(mcrl2::log::verbose);
     }
 
     detail::stategraph_pbes stategraph(p, *m_datar);
@@ -434,7 +445,7 @@ public:
 
     // Get the GCFP vector for each equation
     const std::map<core::identifier_string, std::vector<bool>>& gcfp_map = algo.get_GCFP();
-    mcrl2::log::logger::set_reporting_level(saved_level);
+    reporting_level_scope.reset();
 
     for (const auto& [eq_name, cfp_vector]: gcfp_map)
     {
@@ -501,7 +512,7 @@ public:
   // Ensures that parameters occurring in the guards of predicate variable instances
   // in the scope of an infinite quantifier are not abstracted, so that the
   // structure graph does not contain infinitely many vertices.
-  void instantiate_infinite_quantifier_guards(pbes& p, abstract_param_state& state)
+  void instantiate_infinite_quantifier_guards(const pbes& p, abstract_param_state& state)
   {
     for (const auto& [eq_name, variables]: infinite_quantifier_guard_variables(p))
     {
