@@ -563,7 +563,7 @@ inline void self_substitute(pbes_equation& equation,
             }
           }
 
-          if (all_in_path)
+          if (all_in_path && !options.disable_gauss_elimination)
           {
             pvi_substituter.set_pvi(cur_x);
             pvi_substituter.set_replacement(result);
@@ -571,6 +571,13 @@ inline void self_substitute(pbes_equation& equation,
 
             mCRL2log(log::debug) << "new_phi " << result << "\n";
             stable = false;
+            pvi_done = true;
+          }
+          else if (all_in_path)
+          {
+            mCRL2log(log::debug) << "Loop, but Gauss elimination is disabled; stop expanding " << cur_x << "\n";
+            stable_set.insert(x);
+            stable_set.insert(cur_x);
             pvi_done = true;
           }
           else
