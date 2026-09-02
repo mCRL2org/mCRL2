@@ -143,6 +143,7 @@ public:
   /// \return The number of valid abstraction sets found.
   std::size_t run(const pbes& p, const pbesfindabs_options& options)
   {
+    m_valid_count = 0;
     if (options.number_of_threads == 0)
     {
       throw mcrl2::runtime_error("The number of threads should be at least 1.");
@@ -346,7 +347,8 @@ private:
           // abstraction output that check_set produces (which goes no higher
           // than verbose) is suppressed, so the workers do not interleave
           // solver chatter; this thread's own findings remain visible.
-          const mcrl2::log::scoped_reporting_level solver_logging(mcrl2::log::info);
+          const mcrl2::log::scoped_reporting_level solver_logging(
+            std::min(mcrl2::log::logger::get_reporting_level(), mcrl2::log::info));
           result = check_set(solver, p, options, universe, set, is_overapproximation);
         }
 
