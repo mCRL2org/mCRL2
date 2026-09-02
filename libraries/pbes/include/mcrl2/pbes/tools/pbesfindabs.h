@@ -27,6 +27,7 @@
 #include "mcrl2/utilities/logger.h"
 #include <atomic>
 #include <cstddef>
+#include <exception>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -311,6 +312,7 @@ private:
   // output file from the worker that found them, as soon as they are found.
   // Sets that are not blocked (valid or not-data-closed) are collected in
   // next_frontier, so that supersets of not-data-closed sets are still checked.
+  // An exception in a worker is rethrown after all workers have joined.
   void check_candidates(const pbes& p,
     const pbesfindabs_options& options,
     const std::vector<abstractable_parameter>& universe,
@@ -320,12 +322,16 @@ private:
     std::vector<std::vector<std::size_t>>& next_frontier)
   {
     std::atomic<std::size_t> next_candidate{0};
+    std::atomic<bool> failed{false};
     std::mutex frontier_mutex;
+    std::mutex exception_mutex;
+    std::exception_ptr first_exception = nullptr;
 
     const std::size_t num_workers
       = std::min<std::size_t>(options.number_of_threads, candidates.empty() ? 1 : candidates.size());
 
-    auto worker_procedure = [&]()
+    // The work of one worker; exceptions may not escape a thread entry function.
+    auto worker_loop = [&]()
     {
       // Every worker uses its own iterator with its own data rewriter and its
       // own cache of approximation results.
@@ -334,6 +340,11 @@ private:
 
       for (;;)
       {
+        if (failed)
+        {
+          // Stop claiming work after a failure.
+          return;
+        }
         const std::size_t i = next_candidate.fetch_add(1);
         if (i >= candidates.size())
         {
@@ -368,7 +379,7 @@ private:
           // Not data closed: reported as not valid, but not used for pruning,
           // since a superset may well be data closed.
           mCRL2log(log::debug) << "Abstraction set " << writer.describe(universe, set)
-                                 << " is not valid: it is not data closed." << std::endl;
+                               << " is not valid: it is not data closed." << std::endl;
           std::lock_guard<std::mutex> guard(frontier_mutex);
           next_frontier.push_back(set);
           break;
@@ -383,6 +394,24 @@ private:
           break;
         }
         }
+      }
+    };
+
+    auto worker_procedure = [&]()
+    {
+      try
+      {
+        worker_loop();
+      }
+      catch (...)
+      {
+        // Remember the first exception; the caller rethrows it after joining.
+        std::lock_guard<std::mutex> guard(exception_mutex);
+        if (!first_exception)
+        {
+          first_exception = std::current_exception();
+        }
+        failed = true;
       }
     };
 
@@ -406,6 +435,10 @@ private:
       {
         t.join();
       }
+    }
+    if (first_exception)
+    {
+      std::rethrow_exception(first_exception);
     }
   }
 

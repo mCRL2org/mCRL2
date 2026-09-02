@@ -170,13 +170,19 @@ public:
 
         std::vector<std::string> outline;
         std::string line;
-        while (sym_process.running() && std::getline(output_sym_stream, line))
+        while (std::getline(output_sym_stream, line))
         {
           mCRL2log(log::debug) << "[symbolic]: " << line << std::endl;
           outline.push_back(line);
         }
-        mCRL2log(log::verbose) << "Result: " << outline.back() << std::endl;
         sym_process.wait();
+
+        if (outline.empty() || (outline.back() != "true" && outline.back() != "false"))
+        {
+          throw mcrl2::runtime_error(
+            "symbolic solver produced invalid output: " + (outline.empty() ? std::string("<empty>") : outline.back()));
+        }
+        mCRL2log(log::verbose) << "Result: " << outline.back() << std::endl;
 
         result = outline.back() == "true";
       }

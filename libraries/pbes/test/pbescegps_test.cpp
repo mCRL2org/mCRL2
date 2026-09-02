@@ -224,3 +224,54 @@ BOOST_AUTO_TEST_CASE(test_two_equations_shared_params)
   BOOST_CHECK((abstracted_names(final_state, "Y") == std::set<std::string>{}));
   BOOST_CHECK((abstracted_names(final_state, "X") == std::set<std::string>{"a"}));
 }
+
+// Regression: the candidate PVI comparison in select_variable advanced the
+// successor iterator for abstracted parameters as well, misaligning it with
+// the candidate iterator; the prematurely exhausted successor iterator was
+// then treated as a match, so every candidate matched and the guard of the
+// unrelated first transition (!val(p)) drove the refinement instead of the
+// guard of the transition chosen by the strategy (val(q)).
+//
+// The abstraction state leaves only n concrete, and the over-approximation
+// strategy chooses the transition with n=7, so select_variable must match
+// only the candidate with argument 7 for n and un-abstract q; p (a red
+// herring that never resolves the over-approximation) must stay abstracted.
+BOOST_AUTO_TEST_CASE(test_select_variable_strategy_alignment)
+{
+  std::string text =
+    "pbes nu X(p: Bool, q: Bool, n: Nat) ="
+    "(val(p) || X(true, !q, 5))"
+    " && (val(q) && (X(true, !q, 7) || (X(true, !q, 9) && val(n < 5))));"
+    "init X(false, false, 0);";
+  pbes p = txt2pbes(text);
+  pbescegps_options opts = default_options();
+  pbescegps_iterator iterator;
+  iterator.initialize(p, opts);
+
+  // Abstract p and q; only n stays concrete.
+  abstract_param_state state;
+  const pbes_equation& eq = detail::find_equation_by_name(p, core::identifier_string("X"))->get();
+  const data::variable_list params = eq.variable().parameters();
+  state.add_abstracted_variable(p, core::identifier_string("X"), atermpp::down_cast<data::variable>(*params.begin()));
+  state.add_abstracted_variable(p,
+    core::identifier_string("X"),
+    atermpp::down_cast<data::variable>(*std::next(params.begin())));
+
+  // Solve both approximations: the under-approximation is FALSE, the
+  // over-approximation TRUE, so the refinement machinery is required.
+  structure_graph under_graph;
+  structure_graph over_graph;
+  BOOST_CHECK(!iterator.solve_approximation_cached(p, state, false, opts, under_graph));
+  BOOST_CHECK(iterator.solve_approximation_cached(p, state, true, opts, over_graph));
+
+  // The FALSE vertex in the under-approximation mismatches its counterpart in
+  // the over-approximation, so select_variable is reached immediately.
+  pbes under_pbes = iterator.apply_abstraction_to_pbes(p, state, false, opts);
+  pbes over_pbes = iterator.apply_abstraction_to_pbes(p, state, true, opts);
+  data::rewriter datar(p.data(), opts.rewrite_strategy);
+  ruling_relation_type ruling;
+  pbescegps_refine_strategies refine;
+  BOOST_CHECK(
+    refine.refine_using_strategies(p, under_pbes, over_pbes, state, opts, under_graph, over_graph, datar, ruling));
+  BOOST_CHECK((abstracted_names(state, "X") == std::set<std::string>{"p"}));
+}

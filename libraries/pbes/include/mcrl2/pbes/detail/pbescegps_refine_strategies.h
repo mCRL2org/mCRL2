@@ -502,11 +502,17 @@ private:
             {
               if (cand_it == cand_end || succ_it == succ_end)
               {
-                matches = true;
                 break;
               }
               data::variable var = atermpp::down_cast<data::variable>(param);
-              if (!state.W[candidate.name()].contains(var) && find_free_variables(*cand_it).empty())
+              if (state.W[candidate.name()].contains(var))
+              {
+                // Abstracted parameters have no counterpart in the successor
+                // PVI, so the successor iterator must not be advanced for them.
+                ++cand_it;
+                continue;
+              }
+              if (find_free_variables(*cand_it).empty())
               {
                 data::data_expression eq_expr = data::lazy::equal_to(*cand_it, *succ_it);
                 data::data_expression rewritten = (*m_datar)(eq_expr);
