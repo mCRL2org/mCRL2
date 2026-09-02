@@ -512,8 +512,11 @@ inline void self_substitute(pbes_equation& equation,
         {
           condition_result = measure_time(timer,
             "is_avoiding_alternation",
-            [&]() { return is_avoiding_alternation(options, *phi_vector.begin(), equation); });
-        }
+            [&]() {
+              return std::all_of(phi_vector.begin(), phi_vector.end(), [&](const propositional_variable_instantiation& pvi) {
+                return is_avoiding_alternation(options, pvi, equation);
+              });
+            });
 
         if (condition_result)
         {
@@ -859,7 +862,7 @@ struct pbeschain_pbes_backward_substituter
           continue;
         }
 
-        bool referenced = false;
+        bool referenced = (p.initial_state().name() == name);
         for (std::size_t j = 0; j < p.equations().size() && !referenced; ++j)
         {
           if (i == j)

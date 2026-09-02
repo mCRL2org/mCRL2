@@ -44,9 +44,9 @@ inline detail::pre_srf_pbes<allow_ce> split_conditions(const detail::pre_srf_pbe
       const bool should_split = summand.parameters().empty() && granularity > 1;
       if constexpr (allow_ce)
       {
-        if (is_or(summand.condition()))
+        if (is_universal_or(summand.condition()))
         {
-          for (const pbes_expression& clause : split_or(summand.condition()))
+          for (const pbes_expression& clause : split_or(summand.condition(), true))
           {
             split_summands.emplace_back(summand.parameters(), clause, summand.variable());
           }
