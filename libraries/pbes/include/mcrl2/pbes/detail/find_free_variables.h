@@ -100,7 +100,7 @@ struct find_free_variables_traverser : public pbes_expression_traverser<find_fre
     pop();
   }
 
-  void enter(const propositional_variable_instantiation& x)
+  void apply(const propositional_variable_instantiation& x)
   {
     if (search_propositional_variables)
     {

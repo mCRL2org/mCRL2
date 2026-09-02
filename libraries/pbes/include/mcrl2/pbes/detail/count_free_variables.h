@@ -58,7 +58,7 @@ struct count_free_variable_occurrences_traverser
 
   void leave(const exists&) { pop(); }
 
-  void enter(const propositional_variable& x)
+  void apply(const propositional_variable_instantiation& x)
   {
     if (search_propositional_variables)
     {

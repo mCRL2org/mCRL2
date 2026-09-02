@@ -368,9 +368,9 @@ struct absinthe_algorithm
         std::optional<data::structured_sort> j_sort_structured;
         for (const data::alias& alias: user_defined_aliases)
         {
-          if (alias.name().name() == j_sort_basic.name())
+          if (alias.name().name() == j_sort_basic.name() && data::is_structured_sort(alias.reference()))
           {
-            j_sort_structured.emplace(alias.reference());
+            j_sort_structured.emplace(atermpp::down_cast<data::structured_sort>(alias.reference()));
             break;
           }
         }

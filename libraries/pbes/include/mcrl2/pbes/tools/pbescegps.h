@@ -926,7 +926,7 @@ public:
 
 // Abstraction builder implementation
 // Must be defined outside the struct due to template constraints
-pbes_expression pbescegps_iterator::apply_abstraction(const pbes_expression& expr,
+inline pbes_expression pbescegps_iterator::apply_abstraction(const pbes_expression& expr,
   const std::set<data::variable>& abstraction_vars,
   const std::map<core::identifier_string, std::set<std::size_t>>& pbes_parameters_abstraction_indices,
   bool is_overapproximation)
