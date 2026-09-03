@@ -62,16 +62,7 @@
 #include <boost/asio/read_until.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 108800
-#include <boost/process/v1/child.hpp>
-#include <boost/process/v1/io.hpp>
-#include <boost/process/v1/pipe.hpp>
-#include <boost/process/v1/search_path.hpp>
-#else
-#include <boost/process.hpp>
-#include <boost/process/search_path.hpp>
-#endif
+#include "mcrl2/utilities/boost_process.h"
 #include <cstddef>
 #include <functional>
 #include <iostream>
@@ -79,12 +70,6 @@
 #include <ranges>
 #include <set>
 #include <vector>
-
-#if BOOST_VERSION >= 108800
-namespace bp = boost::process::v1;
-#else
-namespace bp = boost::process;
-#endif
 
 namespace mcrl2::pbes_system
 {
