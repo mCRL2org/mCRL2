@@ -211,7 +211,7 @@ public:
       // Each checked set that is not blocked (i.e. valid or not-data-closed)
       // is kept in the next frontier so that its supersets are still explored.
       frontier.clear();
-      check_candidates(p, options, universe, is_overapproximation, candidates, writer, frontier);
+      check_candidates(p, options, universe, is_overapproximation, candidates, writer, frontier, master.data_rewriter());
       if (frontier.empty())
       {
         break;
@@ -319,7 +319,8 @@ private:
     bool is_overapproximation,
     const std::vector<std::vector<std::size_t>>& candidates,
     abstraction_set_writer& writer,
-    std::vector<std::vector<std::size_t>>& next_frontier)
+    std::vector<std::vector<std::size_t>>& next_frontier,
+    data::rewriter& master_rewriter)
   {
     std::atomic<std::size_t> next_candidate{0};
     std::atomic<bool> failed{false};
@@ -333,10 +334,11 @@ private:
     // The work of one worker; exceptions may not escape a thread entry function.
     auto worker_loop = [&]()
     {
-      // Every worker uses its own iterator with its own data rewriter and its
-      // own cache of approximation results.
+      // The data rewriter is cloned from the master rewriter, so it is
+      // constructed (compiled) only once, and initialised for this thread.
       pbescegps_iterator solver;
-      solver.initialize(p, options.cepgps);
+      solver.initialize(master_rewriter.clone());
+      solver.data_rewriter().thread_initialise();
 
       for (;;)
       {

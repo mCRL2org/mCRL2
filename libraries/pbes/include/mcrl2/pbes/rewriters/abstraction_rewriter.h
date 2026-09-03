@@ -16,8 +16,11 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/utilities/logger.h"
+#include <cstddef>
 #include <map>
 #include <set>
+#include <utility>
+#include <vector>
 
 namespace mcrl2::pbes_system
 {
@@ -175,15 +178,15 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
       apply(body, binder.body());
       if (data::is_forall(x))
       {
-          result = T(data::forall(binder.variables(), body));
+        result = T(data::forall(binder.variables(), body));
       }
       else
       {
-          result = T(data::exists(binder.variables(), body));
+        result = T(data::exists(binder.variables(), body));
       }
       return;
     }
-    
+
     // For any other data expression type (e.g., function symbols), use the default builder behavior
     mCRL2log(log::trace) << "  -> Using default builder behavior (not a variable or application)" << std::endl;
     super::apply(result, x);
@@ -192,24 +195,121 @@ struct abstraction_rewriter : public pbes_expression_builder<abstraction_rewrite
   template<class T>
   void apply(T& result, const and_& x)
   {
-    mCRL2log(log::trace) << "Processing PBES conjunction" << std::endl;
-    pbes_expression left;
-    pbes_expression right;
-    super::apply(left, x.left());
-    super::apply(right, x.right());
-    make_optimized_and(result, left, right);
+    apply_nested_boolean(result, pbes_expression(x));
   }
 
   template<class T>
   void apply(T& result, const or_& x)
   {
-    mCRL2log(log::trace) << "Processing PBES disjunction" << std::endl;
-    pbes_expression left;
-    pbes_expression right;
-    super::apply(left, x.left());
-    super::apply(right, x.right());
-    make_optimized_or(result, left, right);
+    apply_nested_boolean(result, pbes_expression(x));
   }
+
+private:
+  // Rewrites a tree of nested PBES conjunctions and disjunctions. The operands are
+  // visited with an explicit stack instead of recursion: chained PBESs contain
+  // conjunction chains thousands of operands deep, which would overflow the (small)
+  // stack of a worker thread when traversed recursively. Operands that are neither a
+  // conjunction nor a disjunction are rewritten by the ordinary (shallow) traversal.
+  template<class T>
+  void apply_nested_boolean(T& result, const pbes_expression& root)
+  {
+    struct frame
+    {
+      pbes_expression node;
+      // 0 = visit left operand, 1 = visit right operand, 2 = combine,
+      // 3 = left operand rewritten by a child frame, 4 = right operand rewritten by a child frame.
+      std::size_t step = 0;
+      pbes_expression left_result;
+      pbes_expression right_result;
+    };
+
+    std::vector<frame> stack;
+    stack.push_back(frame{root, 0, pbes_expression(), pbes_expression()});
+    pbes_expression completed;
+
+    while (!stack.empty())
+    {
+      frame& f = stack.back();
+      if (f.step == 3)
+      {
+        f.left_result = completed;
+        f.step = 1;
+      }
+      else if (f.step == 4)
+      {
+        f.right_result = completed;
+        f.step = 2;
+      }
+
+      const bool node_is_and = is_and(f.node);
+      const pbes_expression left_operand
+        = node_is_and ? atermpp::down_cast<and_>(f.node).left() : atermpp::down_cast<or_>(f.node).left();
+      const pbes_expression right_operand
+        = node_is_and ? atermpp::down_cast<and_>(f.node).right() : atermpp::down_cast<or_>(f.node).right();
+
+      switch (f.step)
+      {
+      case 0:
+      {
+        mCRL2log(log::trace) << "Processing PBES conjunction/disjunction (left operand)" << std::endl;
+        if (is_and(left_operand) || is_or(left_operand))
+        {
+          f.step = 3;
+          stack.push_back(frame{left_operand, 0, pbes_expression(), pbes_expression()});
+        }
+        else
+        {
+          super::apply(f.left_result, left_operand);
+          f.step = 1;
+        }
+        continue;
+      }
+      case 1:
+      {
+        mCRL2log(log::trace) << "Processing PBES conjunction/disjunction (right operand)" << std::endl;
+        if (is_and(right_operand) || is_or(right_operand))
+        {
+          f.step = 4;
+          stack.push_back(frame{right_operand, 0, pbes_expression(), pbes_expression()});
+        }
+        else
+        {
+          super::apply(f.right_result, right_operand);
+          f.step = 2;
+        }
+        continue;
+      }
+      default:
+      {
+        frame done = std::move(f);
+        stack.pop_back();
+        if (stack.empty())
+        {
+          if (is_and(done.node))
+          {
+            make_optimized_and(result, done.left_result, done.right_result);
+          }
+          else
+          {
+            make_optimized_or(result, done.left_result, done.right_result);
+          }
+          return;
+        }
+        if (is_and(done.node))
+        {
+          make_optimized_and(completed, done.left_result, done.right_result);
+        }
+        else
+        {
+          make_optimized_or(completed, done.left_result, done.right_result);
+        }
+        continue;
+      }
+      }
+    }
+  }
+
+public:
 
   template<class T>
   void apply(T& result, const forall& x)

@@ -133,6 +133,18 @@ public:
     m_datar.emplace(p.data(), options.rewrite_strategy);
   }
 
+  // Initializes with an existing data rewriter, so it need not be rebuilt.
+  void initialize(const data::rewriter& rewriter)
+  {
+    m_datar.emplace(rewriter);
+  }
+
+  // Access to the data rewriter, e.g. to clone it for worker threads.
+  data::rewriter& data_rewriter()
+  {
+    return *m_datar;
+  }
+
   std::pair<bool, structure_graph> solve(const pbes& p, pbescegps_options options)
   {
     pbes p_copy(p);
