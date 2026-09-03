@@ -47,33 +47,7 @@ protected:
     m_options.initial_state_file = parser.option_argument_as<std::string>("initial-state");
     m_options.ruling_file = parser.option_argument("ruling");
 
-    std::string var_choice_str = parser.option_argument_as<std::string>("var-choice");
-    if (var_choice_str == "lhs")
-    {
-      m_options.var_choice = var_choice_strategy::lhs;
-    }
-    else if (var_choice_str == "rhs")
-    {
-      m_options.var_choice = var_choice_strategy::rhs;
-    }
-    else if (var_choice_str == "count")
-    {
-      m_options.var_choice = var_choice_strategy::count;
-    }
-    else if (var_choice_str == "all")
-    {
-      m_options.var_choice = var_choice_strategy::all;
-    }
-    else if (var_choice_str == "ruling")
-    {
-      m_options.var_choice = var_choice_strategy::ruling;
-    }
-    else
-    {
-      throw mcrl2::runtime_error("Invalid var-choice option '" + var_choice_str
-                                 + "'. "
-                                   "Valid options are: 'lhs', 'rhs', 'count', 'all', 'ruling'.");
-    }
+    m_options.var_choice = parser.option_argument_as<var_choice_strategy>("var-choice");
   }
 
   void add_options(interface_description& desc) override
@@ -111,19 +85,21 @@ protected:
       utilities::make_optional_argument("STR", ""),
       "Solve the PBES symbolically using the following arguments.");
     desc.add_option("var-choice",
-      utilities::make_optional_argument("STR", "lhs"),
-      "'lhs' (default) the variable order of the left-hand side of the equation\n"
-      "'rhs' the variable order of the right-hand side of the equation\n"
-      "'count' the free variable that occurs most often (excluding data expressions in PVI)\n"
-      "'all' un-abstract all variables that occur on iteration\n"
-      "'ruling' prioritize based on the ruled-by ordering: pick the variable that rules the most others\n"
+      utilities::make_enum_argument<var_choice_strategy>("STRATEGY")
+        .add_value_desc(var_choice_strategy::lhs, "The variable order of the left-hand side of the equation.", true)
+        .add_value_desc(var_choice_strategy::rhs, "The variable order of the right-hand side of the equation.")
+        .add_value_desc(var_choice_strategy::count,
+          "The free variable that occurs most often (excluding data expressions in predicate variable "
+          "instantiations).")
+        .add_value_desc(var_choice_strategy::all, "Un-abstract all variables that occur on iteration.")
+        .add_value_desc(var_choice_strategy::ruling,
+          "Prioritize based on the ruled-by ordering: pick the variable that rules the most others."),
       "Choose the method of choosing a variable on iteration.");
     desc.add_option("initial-state",
       utilities::make_mandatory_argument("FILE"),
-      "Read the initial set of abstracted parameters from FILE instead of abstracting all parameters.\n"
-      "FILE contains one line per equation as printed by the tool:\n"
-      "  Abstracted parameters for X0: value_ValueBool57 value_ValueReal5\n"
-      "Lines can also use parameter indices instead of names, and equations that are not mentioned\n"
+      "Read the initial set of abstracted parameters from FILE instead of abstracting all parameters. FILE contains "
+      "one line per equation as printed by the tool, e.g. 'Abstracted parameters for X0: value_ValueBool57 "
+      "value_ValueReal5'. Lines can also use parameter indices instead of names, and equations that are not mentioned "
       "in FILE are not abstracted.",
       'a');
     desc.add_hidden_option("ruling",

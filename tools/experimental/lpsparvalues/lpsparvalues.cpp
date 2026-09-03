@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lpsexploredomains.cpp
-/// \brief The explore_domains tool which enumerates the possible parameter values of a linear process
+/// \file lpsparvalues.cpp
+/// \brief The lpsparvalues tool which enumerates the possible parameter values of a linear process
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
@@ -55,7 +55,7 @@ class lps_explore_domains_tool: public rewriter_tool<input_tool>
 
     lps_explore_domains_tool()
       : super(
-        "lpsexploredomains",
+        "lpsparvalues",
         "Jan Friso Groote",
         "enumerate the values that the parameters of an LPS can take during state space exploration",
         "Find the values that the parameters of an LPS n INFILE can take during state space exploration. "
