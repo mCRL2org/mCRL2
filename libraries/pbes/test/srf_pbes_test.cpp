@@ -596,7 +596,7 @@ srf_pbes make_srf_pbes(std::vector<srf_equation> equations)
   srf_summand true_summand(data::variable_list(), true_(), var("X_true"));
   equations.emplace_back(fixpoint_symbol::mu(), propositional_variable("X_false", data::variable_list()), std::vector<srf_summand>{false_summand}, false);
   equations.emplace_back(fixpoint_symbol::nu(), propositional_variable("X_true", data::variable_list()), std::vector<srf_summand>{true_summand}, false);
-  return srf_pbes(data::data_specification(), equations, var("X_true"));
+  return srf_pbes(data::data_specification(), std::set<data::variable>(), equations, var("X_true"));
 }
 
 // Unit tests for simplify_srf_pbes.
