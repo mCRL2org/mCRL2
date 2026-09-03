@@ -372,7 +372,7 @@ is_not_too_big(pbeschain_options& options, propositional_variable_instantiation&
 }
 
 inline bool
-is_avoiding_alternation(pbeschain_options& options, propositional_variable_instantiation& new_x, pbes_equation& eq)
+is_avoiding_alternation(const pbeschain_options& options, const propositional_variable_instantiation& new_x, const pbes_equation& eq)
 {
   return !(options.avoid_alternating) || new_x.name() == eq.variable().name();
 }
@@ -517,6 +517,7 @@ inline void self_substitute(pbes_equation& equation,
                 return is_avoiding_alternation(options, pvi, equation);
               });
             });
+        }
 
         if (condition_result)
         {

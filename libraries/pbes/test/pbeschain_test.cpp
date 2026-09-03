@@ -30,8 +30,9 @@ static pbes run_pbeschain(const std::string& pbes_text, pbeschain_options option
 }
 
 // The chain X(0) -> X(1) -> X(2) -> X(1) enters a loop that does not return to
-// the initial pvi. Chaining with Gauss elimination must collapse the equation,
-// after which back substitution removes it altogether.
+// the initial pvi. Chaining with Gauss elimination must collapse the equation to
+// a formula without pvIs. The equation itself is kept because the initial state
+// still refers to X.
 BOOST_AUTO_TEST_CASE(test_pbeschain_indirect_loop_collapse)
 {
   std::string pbes_text =
@@ -41,11 +42,13 @@ BOOST_AUTO_TEST_CASE(test_pbeschain_indirect_loop_collapse)
   pbeschain_options options;
   options.srf_factor = 0.0; // N.B. pbeschain_options does not initialize srf_factor itself
   pbes p = run_pbeschain(pbes_text, options);
-  BOOST_CHECK(p.equations().empty());
+  BOOST_CHECK_EQUAL(p.equations().size(), 1);
+  BOOST_CHECK(find_propositional_variable_instantiations(p.equations().front().formula()).empty());
 }
 
 // A pvi that reoccurs directly in its own unfolding is replaced by true/false
-// (direct Gauss elimination), after which the equation is removed.
+// (direct Gauss elimination), collapsing the equation to a formula without pvIs.
+// The equation itself is kept because the initial state still refers to X.
 BOOST_AUTO_TEST_CASE(test_pbeschain_direct_loop_collapse)
 {
   std::string pbes_text =
@@ -54,7 +57,8 @@ BOOST_AUTO_TEST_CASE(test_pbeschain_direct_loop_collapse)
   pbeschain_options options;
   options.srf_factor = 0.0;
   pbes p = run_pbeschain(pbes_text, options);
-  BOOST_CHECK(p.equations().empty());
+  BOOST_CHECK_EQUAL(p.equations().size(), 1);
+  BOOST_CHECK(find_propositional_variable_instantiations(p.equations().front().formula()).empty());
 }
 
 // With Gauss elimination disabled no pvi may be replaced by true/false. The
@@ -69,7 +73,6 @@ BOOST_AUTO_TEST_CASE(test_pbeschain_no_gauss_elimination)
   pbeschain_options options;
   options.srf_factor = 0.0;
   options.disable_gauss_elimination = true;
-  mcrl2::log::logger::set_reporting_level(log::debug);
   pbes p = run_pbeschain(pbes_text, options);
   BOOST_CHECK(!p.equations().empty());
   BOOST_CHECK(!find_propositional_variable_instantiations(p.equations().front().formula()).empty());
