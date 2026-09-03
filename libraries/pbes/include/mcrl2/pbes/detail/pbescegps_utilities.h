@@ -52,6 +52,60 @@ enum class var_choice_strategy
   ruling // prioritize based on the ruled-by ordering: pick the variable that rules the most others
 };
 
+inline std::string to_string(const var_choice_strategy& strategy)
+{
+  switch (strategy)
+  {
+    case var_choice_strategy::lhs:
+      return "lhs";
+    case var_choice_strategy::rhs:
+      return "rhs";
+    case var_choice_strategy::count:
+      return "count";
+    case var_choice_strategy::all:
+      return "all";
+    case var_choice_strategy::ruling:
+      return "ruling";
+  }
+  return "lhs";
+}
+
+inline std::ostream& operator<<(std::ostream& os, const var_choice_strategy& strategy)
+{
+  return os << to_string(strategy);
+}
+
+inline std::istream& operator>>(std::istream& is, var_choice_strategy& strategy)
+{
+  std::string s;
+  is >> s;
+  if (s == "lhs")
+  {
+    strategy = var_choice_strategy::lhs;
+  }
+  else if (s == "rhs")
+  {
+    strategy = var_choice_strategy::rhs;
+  }
+  else if (s == "count")
+  {
+    strategy = var_choice_strategy::count;
+  }
+  else if (s == "all")
+  {
+    strategy = var_choice_strategy::all;
+  }
+  else if (s == "ruling")
+  {
+    strategy = var_choice_strategy::ruling;
+  }
+  else
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
 struct pbescegps_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
