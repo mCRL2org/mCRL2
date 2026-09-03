@@ -146,6 +146,7 @@ void test_unreachable_equations()
 
   const std::map<std::string, std::set<std::string>> expected =
     {
+      { "(U, u)", {} },
       { "(X, b)", { "false", "true" } }
     };
   const auto actual = domains(compute_domains(spec));

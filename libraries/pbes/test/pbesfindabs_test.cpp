@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -34,7 +35,11 @@ struct test_result
   std::string contents;
 };
 
-test_result run_findabs(const std::string& text, const std::string& test_name, std::size_t threads = 1)
+test_result run_findabs(const std::string& text,
+  const std::string& test_name,
+  std::size_t threads = 1,
+  double timeout = 0.0,
+  bool always_timeout = false)
 {
   pbes p = txt2pbes(text, false);
   algorithms::normalize(p);
@@ -42,6 +47,30 @@ test_result run_findabs(const std::string& text, const std::string& test_name, s
   pbesfindabs_options options;
   options.output_file = (std::filesystem::temp_directory_path() / ("pbesfindabs_" + test_name + ".txt")).string();
   options.number_of_threads = threads;
+  options.timeout = timeout;
+
+  // The engine delegates the actual checking to a pluggable checker; the tool
+  // installs one backed by worker processes, while the tests check in-process.
+  // always_timeout stands in for a set whose worker never finishes in time.
+  pbesfindabs_options snapshot = options;
+  options.checker
+    = [&p, snapshot, always_timeout](const std::vector<abstractable_parameter>& /*universe*/,
+        const std::vector<std::vector<std::size_t>>& batch,
+        bool is_over)
+  {
+    std::vector<check_outcome> outcomes;
+    outcomes.reserve(batch.size());
+    for (const std::vector<std::size_t>& set: batch)
+    {
+      if (always_timeout)
+      {
+        outcomes.push_back(skipped_t{});
+        continue;
+      }
+      outcomes.push_back(pbesfindabs_engine::check_one_set(p, snapshot, set, is_over));
+    }
+    return outcomes;
+  };
 
   pbesfindabs_engine engine;
   test_result result;
@@ -172,6 +201,33 @@ BOOST_AUTO_TEST_CASE(test_multithreaded)
     = run_findabs("pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b)); init X(false, true);", "mt_parallel", 4);
   BOOST_CHECK_EQUAL(single.valid_count, 4);
   BOOST_CHECK_EQUAL(parallel.valid_count, single.valid_count);
+}
+
+// Running with a generous timeout on several threads must behave exactly like
+// no timeout at all: every isolated check completes and its verdict is used.
+BOOST_AUTO_TEST_CASE(test_timeout_generous)
+{
+  test_result result = run_findabs("pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b)); init X(false, true);",
+    "timeout_generous",
+    4,
+    3600.0);
+  BOOST_CHECK_EQUAL(result.valid_count, 4);
+  BOOST_CHECK_EQUAL(count_sets(result.contents), 4);
+}
+
+// When every isolated check is abandoned (the child would be terminated), the
+// non-empty sets are skipped; only the empty set, written without solving,
+// survives. Since a skipped set prunes nothing, the enumeration still walks all
+// levels and terminates.
+BOOST_AUTO_TEST_CASE(test_timeout_always_abandoned)
+{
+  test_result result = run_findabs("pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b)); init X(false, true);",
+    "timeout_abandoned",
+    1,
+    20.0,
+    true);
+  BOOST_CHECK_EQUAL(count_sets(result.contents), result.valid_count);
+  BOOST_CHECK_EQUAL(result.valid_count, 1u);
 }
 
 // Regression test on the minisluice temperature/red-green PBES (two nu

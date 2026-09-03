@@ -17,7 +17,10 @@
 ///        original PBES are blocked; this failure is upward closed, so a set
 ///        is skipped only when it contains a blocked subset. Every valid set
 ///        is immediately written to an output file, so partial results survive
-///        an interrupted run.
+///        an interrupted run. The engine itself performs no parallel work: it
+///        delegates the checking of each level's candidates to a pluggable
+///        checker (the tool provides one backed by a pool of worker processes,
+///        so a slow set can be killed instead of blocking the run).
 
 #ifndef MCRL2_PBES_TOOLS_PBESFINDABS_H
 #define MCRL2_PBES_TOOLS_PBESFINDABS_H
@@ -25,30 +28,41 @@
 #include "mcrl2/pbes/tools/pbescegps.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/logger.h"
-#include <atomic>
 #include <cstddef>
 #include <exception>
 #include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
 #include <map>
-#include <memory>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <string>
-#include <thread>
-#include <utility>
+#include <variant>
 #include <vector>
 
 namespace mcrl2::pbes_system
 {
 
-/// \brief Options for the all-abstraction-sets tool.
-struct pbesfindabs_options
+/// \brief The verdict of checking a single candidate abstraction set.
+enum class abstraction_set_verdict
 {
-  pbescegps_options cepgps; ///< Options used for constructing and solving approximations.
-  std::string output_file; ///< The file to which valid abstraction sets are written.
-  std::size_t number_of_threads = 1; ///< The number of abstraction sets solved in parallel.
+  valid, // data closed and the approximation proves the answer of the original PBES
+  not_closed, // not data closed; supersets may still be data closed, so they are kept
+  blocked // data closed but the approximation does not prove the answer
 };
+
+/// \brief Marker for a check whose verdict is unknown, e.g. because its time
+///        limit expired. Such a set is neither reported nor used for pruning;
+///        its supersets are still explored.
+struct skipped_t
+{
+};
+
+/// \brief The outcome of checking one candidate set: a verdict, or skipped.
+using check_outcome = std::variant<abstraction_set_verdict, skipped_t>;
 
 /// \brief One entry of the universe of abstractable parameters: the variable
 ///        itself and its index inside the parameters of its equation.
@@ -57,6 +71,28 @@ struct abstractable_parameter
   core::identifier_string equation;
   data::variable variable;
   std::size_t index = 0;
+};
+
+/// \brief Options for the all-abstraction-sets tool.
+struct pbesfindabs_options
+{
+  /// \brief Checks a batch of candidate sets (each given by its indices into
+  ///        universe) and returns one outcome per set, in the same order.
+  ///        Implementations may check the sets concurrently and may abandon a
+  ///        set (returning skipped) when its time limit expires.
+  using batch_checker = std::function<std::vector<check_outcome>(const std::vector<abstractable_parameter>& universe,
+    const std::vector<std::vector<std::size_t>>& sets,
+    bool is_overapproximation)>;
+
+  pbescegps_options cepgps; ///< Options used for constructing and solving approximations.
+  std::string output_file; ///< The file to which valid abstraction sets are written.
+  std::size_t number_of_threads = 1; ///< The number of worker processes used to check sets in parallel.
+  double timeout = 0.0; ///< Time limit in seconds for checking one abstraction set; 0 means no limit.
+
+  /// \brief Checks a batch of candidate sets. Required: the engine performs no
+  ///        checking itself. The tool installs one that runs the checks in a
+  ///        pool of worker processes.
+  batch_checker checker;
 };
 
 // Writes valid abstraction sets to a text file. Each set is one block:
@@ -135,6 +171,86 @@ public:
   }
 };
 
+// Serializes a set of universe indices to "eq:param,eq:param". The worker
+// process decodes this, so the parent and worker need not agree on universe
+// indices, only on parameter names.
+inline std::string encode_abstracted_set(const std::vector<abstractable_parameter>& universe,
+  const std::vector<std::size_t>& set)
+{
+  std::ostringstream stream;
+  bool first = true;
+  for (const std::size_t i: set)
+  {
+    stream << (first ? "" : ",") << universe[i].equation << ":" << universe[i].variable.name();
+    first = false;
+  }
+  return stream.str();
+}
+
+// Decodes "eq:param,eq:param" into the universe indices of the named
+// parameters, matching them by name against universe.
+inline std::vector<std::size_t> decode_abstracted_set(const std::string& text,
+  const std::vector<abstractable_parameter>& universe)
+{
+  std::map<std::pair<core::identifier_string, core::identifier_string>, std::size_t> index_of;
+  for (std::size_t i = 0; i < universe.size(); ++i)
+  {
+    index_of[{universe[i].equation, universe[i].variable.name()}] = i;
+  }
+
+  std::vector<std::size_t> set;
+  std::stringstream stream(text);
+  std::string token;
+  while (std::getline(stream, token, ','))
+  {
+    const std::size_t colon = token.find(':');
+    if (colon == std::string::npos || colon == 0 || colon + 1 == token.size())
+    {
+      throw mcrl2::runtime_error("Malformed abstraction set entry '" + token + "'.");
+    }
+    const core::identifier_string equation(token.substr(0, colon));
+    const core::identifier_string parameter(token.substr(colon + 1));
+    const auto it = index_of.find({equation, parameter});
+    if (it == index_of.end())
+    {
+      throw mcrl2::runtime_error("Unknown parameter '" + token + "' in abstraction set.");
+    }
+    set.push_back(it->second);
+  }
+  return set;
+}
+
+inline std::string to_token(abstraction_set_verdict verdict)
+{
+  switch (verdict)
+  {
+  case abstraction_set_verdict::valid:
+    return "valid";
+  case abstraction_set_verdict::not_closed:
+    return "not_closed";
+  case abstraction_set_verdict::blocked:
+    return "blocked";
+  }
+  return "error";
+}
+
+inline std::optional<abstraction_set_verdict> from_token(const std::string& token)
+{
+  if (token == "valid")
+  {
+    return abstraction_set_verdict::valid;
+  }
+  if (token == "not_closed")
+  {
+    return abstraction_set_verdict::not_closed;
+  }
+  if (token == "blocked")
+  {
+    return abstraction_set_verdict::blocked;
+  }
+  return std::nullopt;
+}
+
 /// \brief The engine that enumerates all valid abstraction sets of a PBES.
 class pbesfindabs_engine
 {
@@ -147,7 +263,11 @@ public:
     m_valid_count = 0;
     if (options.number_of_threads == 0)
     {
-      throw mcrl2::runtime_error("The number of threads should be at least 1.");
+      throw mcrl2::runtime_error("The number of workers should be at least 1.");
+    }
+    if (!options.checker)
+    {
+      throw mcrl2::runtime_error("No checker installed: cannot check abstraction sets.");
     }
 
     // One master iterator provides the read-only analyses (initial abstraction
@@ -205,13 +325,23 @@ public:
       {
         break;
       }
+
+      std::vector<check_outcome> outcomes = options.checker(universe, candidates, is_overapproximation);
+
+      const std::size_t closed_count = static_cast<std::size_t>(std::count_if(outcomes.begin(),
+        outcomes.end(),
+        [](const check_outcome& outcome) { return counts_as_data_closed(outcome); }));
       mCRL2log(log::info) << "Level " << level << ": " << candidates.size() << " candidate abstraction set"
-                          << (candidates.size() == 1 ? "" : "s") << " to check." << std::endl;
+                          << (candidates.size() == 1 ? "" : "s") << " to check (" << closed_count << " data-closed)."
+                          << std::endl;
 
       // Each checked set that is not blocked (i.e. valid or not-data-closed)
       // is kept in the next frontier so that its supersets are still explored.
       frontier.clear();
-      check_candidates(p, options, universe, is_overapproximation, candidates, writer, frontier, master.data_rewriter());
+      for (std::size_t i = 0; i < candidates.size(); ++i)
+      {
+        handle_outcome(outcomes[i], universe, candidates[i], options, writer, frontier);
+      }
       if (frontier.empty())
       {
         break;
@@ -223,15 +353,57 @@ public:
     return m_valid_count;
   }
 
-private:
-  // The outcome of checking a single candidate set.
-  enum class outcome
+public:
+  // Checks the abstraction set given by the indices in set (into the universe
+  // of p) and returns its verdict. Used by in-process callers such as the
+  // tests; p must already be normalized and options must contain the same
+  // settings as the parent run.
+  static abstraction_set_verdict check_one_set(const pbes& p,
+    const pbesfindabs_options& options,
+    const std::vector<std::size_t>& set,
+    bool is_overapproximation)
   {
-    valid, // data closed and the approximation proves the answer of the original PBES
-    not_closed, // not data closed; supersets may still be data closed, so they are kept
-    blocked // data closed but the approximation does not prove the answer
-  };
+    pbescegps_iterator master;
+    master.initialize(p, options.cepgps);
+    std::vector<abstractable_parameter> universe = build_universe(p, options, master);
+    pbescegps_iterator solver;
+    solver.initialize(master.data_rewriter().clone());
+    solver.data_rewriter().thread_initialise();
+    return check_set(solver, p, options, universe, set, is_overapproximation);
+  }
 
+  // Runs the worker loop: reads one set (as "eq:param,eq:param" names) per line
+  // from standard input and writes its verdict token to standard output.
+  static void run_worker(const pbes& p, const pbesfindabs_options& options, bool is_overapproximation)
+  {
+    pbescegps_iterator master;
+    master.initialize(p, options.cepgps);
+    std::vector<abstractable_parameter> universe = build_universe(p, options, master);
+    pbescegps_iterator solver;
+    solver.initialize(master.data_rewriter().clone());
+    solver.data_rewriter().thread_initialise();
+
+    std::string line;
+    while (std::getline(std::cin, line))
+    {
+      if (line.empty())
+      {
+        continue;
+      }
+      try
+      {
+        const std::vector<std::size_t> set = decode_abstracted_set(line, universe);
+        std::cout << to_token(check_set(solver, p, options, universe, set, is_overapproximation)) << std::endl;
+      }
+      catch (const std::exception& e)
+      {
+        std::cerr << "pbesfindabs worker: " << e.what() << std::endl;
+        std::cout << "error" << std::endl;
+      }
+    }
+  }
+
+private:
   // Collects the parameters that may occur in abstraction sets: all equation
   // parameters, minus control flow parameters (when --init-cfp is given) and
   // minus parameters occurring in guards under an infinite quantifier (when
@@ -278,20 +450,18 @@ private:
     {
       for (std::size_t i = s.empty() ? 0 : s.back() + 1; i < universe_size; ++i)
       {
-        std::vector<std::size_t> c = s;
-        c.push_back(i);
+        // c = s + {i}. Dropping the last element of c yields s, which is
+        // already non-blocked, so only the subsets obtained by replacing one
+        // element of s with i still have to be checked.
         bool all_subsets_non_blocked = true;
-        for (std::size_t j = 0; j + 1 < c.size(); ++j)
+        std::vector<std::size_t> subset;
+        subset.reserve(s.size());
+        for (std::size_t j = 0; j < s.size(); ++j)
         {
-          std::vector<std::size_t> subset;
-          subset.reserve(c.size() - 1);
-          for (std::size_t k = 0; k < c.size(); ++k)
-          {
-            if (k != j)
-            {
-              subset.push_back(c[k]);
-            }
-          }
+          subset.clear();
+          subset.insert(subset.end(), s.begin(), s.begin() + j);
+          subset.insert(subset.end(), s.begin() + j + 1, s.end());
+          subset.push_back(i);
           if (!frontier_set.contains(subset))
           {
             all_subsets_non_blocked = false;
@@ -300,6 +470,8 @@ private:
         }
         if (all_subsets_non_blocked)
         {
+          std::vector<std::size_t> c = s;
+          c.push_back(i);
           candidates.insert(std::move(c));
         }
       }
@@ -307,153 +479,67 @@ private:
     return std::vector<std::vector<std::size_t>>(candidates.begin(), candidates.end());
   }
 
-  // Solves all candidates of one level using a pool of worker threads; each
-  // worker takes the next unclaimed candidate. Valid sets are written to the
-  // output file from the worker that found them, as soon as they are found.
-  // Sets that are not blocked (valid or not-data-closed) are collected in
-  // next_frontier, so that supersets of not-data-closed sets are still checked.
-  // An exception in a worker is rethrown after all workers have joined.
-  void check_candidates(const pbes& p,
-    const pbesfindabs_options& options,
+  // Processes the outcome of one candidate set, updating the writer, the
+  // counter of valid sets and the next frontier accordingly.
+  void handle_outcome(const check_outcome& outcome,
     const std::vector<abstractable_parameter>& universe,
-    bool is_overapproximation,
-    const std::vector<std::vector<std::size_t>>& candidates,
+    const std::vector<std::size_t>& set,
+    const pbesfindabs_options& options,
     abstraction_set_writer& writer,
-    std::vector<std::vector<std::size_t>>& next_frontier,
-    data::rewriter& master_rewriter)
+    std::vector<std::vector<std::size_t>>& next_frontier)
   {
-    std::atomic<std::size_t> next_candidate{0};
-    std::atomic<bool> failed{false};
-    std::mutex frontier_mutex;
-    std::mutex exception_mutex;
-    std::exception_ptr first_exception = nullptr;
-
-    const std::size_t num_workers
-      = std::min<std::size_t>(options.number_of_threads, candidates.empty() ? 1 : candidates.size());
-
-    // The work of one worker; exceptions may not escape a thread entry function.
-    auto worker_loop = [&]()
+    if (std::holds_alternative<skipped_t>(outcome))
     {
-      // The data rewriter is cloned from the master rewriter, so it is
-      // constructed (compiled) only once, and initialised for this thread.
-      pbescegps_iterator solver;
-      solver.initialize(master_rewriter.clone());
-      solver.data_rewriter().thread_initialise();
-
-      for (;;)
-      {
-        if (failed)
-        {
-          // Stop claiming work after a failure.
-          return;
-        }
-        const std::size_t i = next_candidate.fetch_add(1);
-        if (i >= candidates.size())
-        {
-          return;
-        }
-        const std::vector<std::size_t>& set = candidates[i];
-
-        outcome result;
-        {
-          // The log level is overridden for this thread only: all solving and
-          // abstraction output that check_set produces (which goes no higher
-          // than verbose) is suppressed, so the workers do not interleave
-          // solver chatter; this thread's own findings remain visible.
-          const mcrl2::log::scoped_reporting_level solver_logging(
-            std::min(mcrl2::log::logger::get_reporting_level(), mcrl2::log::info));
-          result = check_set(solver, p, options, universe, set, is_overapproximation);
-        }
-
-        switch (result)
-        {
-        case outcome::valid:
-        {
-          mCRL2log(log::info) << "Found valid abstraction set " << writer.describe(universe, set) << std::endl;
-          writer.write(universe, set);
-          std::lock_guard<std::mutex> guard(frontier_mutex);
-          next_frontier.push_back(set);
-          ++m_valid_count;
-          break;
-        }
-        case outcome::not_closed:
-        {
-          // Not data closed: reported as not valid, but not used for pruning,
-          // since a superset may well be data closed.
-          mCRL2log(log::debug) << "Abstraction set " << writer.describe(universe, set)
-                               << " is not valid: it is not data closed." << std::endl;
-          std::lock_guard<std::mutex> guard(frontier_mutex);
-          next_frontier.push_back(set);
-          break;
-        }
-        case outcome::blocked:
-        {
-          // The approximation is solvable but does not prove the answer; all
-          // supersets behave the same, so this set prunes its own up-set.
-          mCRL2log(log::verbose) << "Abstraction set " << writer.describe(universe, set)
-                                 << " is not valid: the approximation does not prove the answer of the original PBES."
-                                 << std::endl;
-          break;
-        }
-        }
-      }
-    };
-
-    auto worker_procedure = [&]()
-    {
-      try
-      {
-        worker_loop();
-      }
-      catch (...)
-      {
-        // Remember the first exception; the caller rethrows it after joining.
-        std::lock_guard<std::mutex> guard(exception_mutex);
-        if (!first_exception)
-        {
-          first_exception = std::current_exception();
-        }
-        failed = true;
-      }
-    };
-
-    std::vector<std::thread> threads;
-    threads.reserve(num_workers);
-    try
-    {
-      for (std::size_t t = 0; t < num_workers; ++t)
-      {
-        threads.emplace_back(worker_procedure);
-      }
+      // Verdict unknown: not reported, but also not used for pruning, so its
+      // supersets are still explored.
+      mCRL2log(log::warning) << "Abstraction set " << writer.describe(universe, set)
+                             << " is skipped: checking it exceeded the time limit of " << options.timeout << "s."
+                             << std::endl;
+      next_frontier.push_back(set);
+      return;
     }
-    catch (const std::system_error& e)
+
+    switch (std::get<abstraction_set_verdict>(outcome))
     {
-      mCRL2log(log::warning) << "Could not start all " << num_workers << " worker threads (" << e.what()
-                             << "); continuing with the running ones." << std::endl;
-    }
-    for (std::thread& t: threads)
-    {
-      if (t.joinable())
-      {
-        t.join();
-      }
-    }
-    if (first_exception)
-    {
-      std::rethrow_exception(first_exception);
+    case abstraction_set_verdict::valid:
+      mCRL2log(log::info) << "Found valid abstraction set " << writer.describe(universe, set) << "." << std::endl;
+      writer.write(universe, set);
+      next_frontier.push_back(set);
+      ++m_valid_count;
+      break;
+    case abstraction_set_verdict::not_closed:
+      // Not data closed: reported as not valid, but not used for pruning,
+      // since a superset may well be data closed.
+      mCRL2log(log::debug) << "Abstraction set " << writer.describe(universe, set)
+                           << " is not valid: it is not data closed." << std::endl;
+      next_frontier.push_back(set);
+      break;
+    case abstraction_set_verdict::blocked:
+      // The approximation is solvable but does not prove the answer; all
+      // supersets behave the same, so this set prunes its own up-set.
+      mCRL2log(log::verbose) << "Abstraction set " << writer.describe(universe, set)
+                             << " is not valid: the approximation does not prove the answer of the original PBES."
+                             << std::endl;
+      break;
     }
   }
 
-  // Checks a single candidate set: first whether it is data-closed (if not,
-  // solving is useless and the set is reported as not valid, although its
-  // supersets are still worth checking), then by solving the appropriate
-  // approximation and comparing it with the answer of the original PBES.
-  static outcome check_set(pbescegps_iterator& solver,
+  // Whether a check outcome counts as "data closed" for the per-level log line:
+  // a set is data closed when it was solved (valid or blocked) rather than
+  // reported as not data closed or skipped.
+  static bool counts_as_data_closed(const check_outcome& outcome)
+  {
+    const auto* verdict = std::get_if<abstraction_set_verdict>(&outcome);
+    return verdict && *verdict != abstraction_set_verdict::not_closed;
+  }
+
+  // Returns the data-closure of the abstraction state for a set of universe
+  // indices, setting was_closed to whether it was already closed.
+  static abstract_param_state closed_state(pbescegps_iterator& solver,
     const pbes& p,
-    const pbesfindabs_options& options,
     const std::vector<abstractable_parameter>& universe,
     const std::vector<std::size_t>& set,
-    bool is_overapproximation)
+    bool& was_closed)
   {
     abstract_param_state state;
     for (const pbes_equation& eq: p.equations())
@@ -468,19 +554,37 @@ private:
 
     std::map<core::identifier_string, std::set<data::variable>> original_w = state.W;
     solver.make_data_closed(p, state);
-    if (state.W != original_w)
+    was_closed = (state.W == original_w);
+    return state;
+  }
+
+  // Checks a single candidate set: first whether it is data-closed (if not,
+  // solving is useless and the set is reported as not valid, although its
+  // supersets are still worth checking), then by solving the appropriate
+  // approximation and comparing it with the answer of the original PBES.
+  static abstraction_set_verdict check_set(pbescegps_iterator& solver,
+    const pbes& p,
+    const pbesfindabs_options& options,
+    const std::vector<abstractable_parameter>& universe,
+    const std::vector<std::size_t>& set,
+    bool is_overapproximation)
+  {
+    bool was_closed = false;
+    abstract_param_state state = closed_state(solver, p, universe, set, was_closed);
+    if (!was_closed)
     {
-      return outcome::not_closed;
+      return abstraction_set_verdict::not_closed;
     }
 
     structure_graph graph;
     bool result = solver.solve_approximation_cached(p, state, is_overapproximation, options.cepgps, graph);
-    return (is_overapproximation ? !result : result) ? outcome::valid : outcome::blocked;
+    return (is_overapproximation ? !result : result) ? abstraction_set_verdict::valid
+                                                     : abstraction_set_verdict::blocked;
   }
 
-  // Number of valid sets found so far. Incremented from the worker threads, so
-  // it is atomic; it is only read by the main thread between levels.
-  std::atomic<std::size_t> m_valid_count{0};
+  // Number of valid sets found so far. Only the (single-threaded) engine
+  // touches it.
+  std::size_t m_valid_count = 0;
 };
 
 /// \brief Enumerates all valid abstraction sets of the PBES in the input file.
@@ -498,6 +602,21 @@ inline std::size_t pbesfindabs(const std::string& input_filename,
 
   pbesfindabs_engine engine;
   return engine.run(p, options);
+}
+
+/// \brief Runs the worker loop of the tool: reads abstraction sets (by
+///        parameter name) from standard input and writes one verdict per line.
+///        This is the mode used by the worker processes of the parent run.
+inline void pbesfindabs_worker(const std::string& input_filename,
+  const utilities::file_format& input_format,
+  const pbesfindabs_options& options,
+  bool is_overapproximation)
+{
+  pbes p;
+  load_pbes(p, input_filename, input_format);
+  algorithms::normalize(p);
+
+  pbesfindabs_engine::run_worker(p, options, is_overapproximation);
 }
 
 } // namespace mcrl2::pbes_system

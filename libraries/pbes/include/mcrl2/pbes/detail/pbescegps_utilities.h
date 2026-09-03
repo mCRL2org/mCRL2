@@ -821,11 +821,12 @@ inline ruling_relation_type build_ruling_relation(const ruling_percentages_type&
           auto rev_pct_it = ruled_it->second.find(d_m);
           if (rev_pct_it != ruled_it->second.end())
           {
-            if (pct_j < rev_pct_it->second)
+            const double pct_m = rev_pct_it->second;
+            if (pct_j < pct_m)
             {
               continue;
             }
-            else if (pct_j == rev_pct_it->second && d_j.name() > d_m.name())
+            else if (pct_j == pct_m && d_j.name() > d_m.name())
             {
               continue;
             }
