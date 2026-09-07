@@ -1,5 +1,18 @@
 # Replace variables @@ with the current values
-set(SPHINX_BUILD_CMD "sphinx-build")
+# Prefer the sphinx-build executable belonging to the Python interpreter found
+# by FindPythonRequirements (e.g. inside a virtual environment), with a fallback
+# to whatever sphinx-build is on the PATH.
+get_filename_component(SPHINX_PYTHON_BIN_DIR "${Python_EXECUTABLE}" DIRECTORY)
+if(MSVC)
+  set(SPHINX_BUILD_NAMES sphinx-build.bat sphinx-build)
+else()
+  set(SPHINX_BUILD_NAMES sphinx-build)
+endif()
+find_program(SPHINX_BUILD_CMD NAMES ${SPHINX_BUILD_NAMES} HINTS "${SPHINX_PYTHON_BIN_DIR}")
+if(NOT SPHINX_BUILD_CMD)
+  message(FATAL_ERROR "Could not find sphinx-build next to ${Python_EXECUTABLE} or on the PATH. \
+Install the Python dependencies (see the developer manual), e.g. 'pip install -r <mCRL2>/requirements.txt'.")
+endif()
 set(SPHINX_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(SPHINX_BUILD_ROOT_DIR "${CMAKE_BINARY_DIR}/sphinx")
 set(SPHINX_BUILD_OUT_DIR "${SPHINX_BUILD_ROOT_DIR}/build")

@@ -40,7 +40,7 @@ if (MCRL2_ENABLE_STD_CHECKS)
     add_compile_definitions(_LIBCPP_ABI_BOUNDED_ITERATORS_IN_STRING=1)
     add_compile_definitions(_LIBCPP_ABI_BOUNDED_UNIQUE_PTR=1)
     add_compile_definitions(_LIBCPP_ABI_BOUNDED_ITERATORS_IN_STD_ARRAY=1)
-    add_compile_definitions(_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS=1)    
+    add_compile_definitions(_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS=1) 
   endif()
 endif()
 

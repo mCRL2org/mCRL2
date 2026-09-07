@@ -1,0 +1,21 @@
+nodes:
+  l1:
+    type: pbesspec
+  l2:
+    type: pbes
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2]
+    output: []
+    args: ["-a", "abstraction_sets.txt"]
+    name: pbesfindabs
+
+result: |
+  # Just verify pbesfindabs runs without crashing
+  result = True
