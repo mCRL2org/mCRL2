@@ -29,9 +29,15 @@ add_subdirectory(example)
 # MCRL2_ENABLE_STD_CHECKS, ConfigureUNIX.cmake defines
 # _LIBCPP_ABI_BOUNDED_ITERATORS_IN_STRING, which changes the mangled signature of
 # that function to use __bounded_iter; the system libc++ does not provide that
-# symbol. Undefine the ABI-changing iterator macros for the tests that reach it;
-# only iterator typedefs change, so this stays ABI-compatible with the library.
+# symbol. Undefine the ABI-changing iterator macros for all pbes objects that are
+# linked together to avoid mixing bounded and unbounded iterator ABIs in one binary.
 if(APPLE AND MCRL2_ENABLE_TESTS)
+  target_compile_options(mcrl2_pbes PRIVATE
+    -U_LIBCPP_ABI_BOUNDED_ITERATORS
+    -U_LIBCPP_ABI_BOUNDED_ITERATORS_IN_VECTOR
+    -U_LIBCPP_ABI_BOUNDED_ITERATORS_IN_STRING
+    -U_LIBCPP_ABI_BOUNDED_ITERATORS_IN_STD_ARRAY)
+
   foreach(base pbesfindabs_test pbescegps_test pbescegps_ruling_test)
     set(test_target "librarytest_mcrl2_pbes_${base}")
     if(TARGET ${test_target})
