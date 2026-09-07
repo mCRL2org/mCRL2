@@ -22,7 +22,6 @@
 #include <iterator>
 #include <new>
 #include <stdexcept>
-#include <type_traits>
 
 #include "mcrl2/utilities/noncopyable.h"
 
@@ -78,7 +77,7 @@ template <typename T>
 struct Entry
 {
   std::atomic<bool> present{false};
-  std::aligned_storage_t<sizeof(T), alignof(T)> value;
+  alignas(T) std::array<std::byte, sizeof(T)> value;
 
   ~Entry()
   {
