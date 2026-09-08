@@ -17,6 +17,7 @@
 #include "mcrl2/process/process_expression.h"
 
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -141,4 +142,43 @@ BOOST_AUTO_TEST_CASE(test_three_way_rule)
 BOOST_AUTO_TEST_CASE(test_tau_result_rule_is_rejected)
 {
   BOOST_CHECK_THROW(process::detail::parse_comm_set("{ a|b -> tau }"), mcrl2::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_communication_preserves_surrounding_actions)
+{
+  // Intern fresh names in reverse lexical order so their allocation order does
+  // not accidentally mask a comparison of ATerm addresses.
+  const core::identifier_string_vector retained_names = {
+      core::identifier_string("surround_f"), core::identifier_string("surround_e"),
+      core::identifier_string("surround_d"), core::identifier_string("surround_c"),
+      core::identifier_string("surround_b"), core::identifier_string("surround_a")};
+  const auto act_decls = process::parse_action_declaration(
+      "surround_a,surround_b,surround_c,surround_d,surround_e,surround_f,result: Nat;");
+  const data::data_specification data_spec;
+  const std::vector<std::string> names = {"surround_a", "surround_b", "surround_c", "surround_d", "surround_e", "surround_f"};
+  const lps::multi_action input = parse_label(
+      "surround_a(1)|surround_b(1)|surround_c(1)|surround_d(1)|surround_e(1)|surround_f(1)", act_decls, data_spec);
+
+  // Exercise matching with unrelated actions before, between and after the pair.
+  // Action names must be compared lexically, not using their ATerm addresses.
+  for (std::size_t i = 0; i < names.size(); ++i)
+  {
+    for (std::size_t j = i + 1; j < names.size(); ++j)
+    {
+      const std::string rule = "{ " + names[i] + "|" + names[j] + " -> result }";
+      const auto comm_set = process::detail::parse_comm_set(rule);
+      std::string expected = "result(1)";
+      for (std::size_t k = 0; k < names.size(); ++k)
+      {
+        if (k != i && k != j)
+        {
+          expected += "|" + names[k] + "(1)";
+        }
+      }
+      BOOST_TEST_CONTEXT(rule)
+      {
+        BOOST_CHECK(mcrl2::apply_communication(input, comm_set) == parse_label(expected, act_decls, data_spec));
+      }
+    }
+  }
 }

@@ -67,7 +67,7 @@ bool match_sorted_lhs(const std::vector<process::action>& actions,
   {
     const core::identifier_string& action_name = actions[i].label().name();
 
-    if (*lhs_it < action_name)
+    if (process::action_name_compare()(*lhs_it, action_name))
     {
       return false;
     }
@@ -115,7 +115,7 @@ bool find_matching_indices(const std::vector<process::action>& actions,
   for (std::size_t i = 0; i < actions.size(); ++i)
   {
     const core::identifier_string& action_name = actions[i].label().name();
-    if (first_label < action_name)
+    if (process::action_name_compare()(first_label, action_name))
     {
       /// Since actions and lhs_names are sorted, if the first label is smaller than the current action name, there is no match.
       break;
