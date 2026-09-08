@@ -14,12 +14,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include "mcrl2/data/detail/machine_word.h"
 
-
-
-
-
-
-
 namespace mcrl2::data::sort_machine_word::detail
 {
 
@@ -82,6 +76,11 @@ std::size_t div_triple_doubleword(const std::size_t n1, const std::size_t n2, co
   boost::multiprecision::uint256_t m2=n4;
   m2 = (m2 << std::numeric_limits<std::size_t>::digits)+n5;
   return static_cast<std::size_t>(m1 / m2);
+}
+
+std::size_t sqrt_word(const std::size_t n)
+{ 
+  return boost::multiprecision::sqrt(n);
 }
 
 std::size_t sqrt_doubleword(const std::size_t n1, const std::size_t n2)

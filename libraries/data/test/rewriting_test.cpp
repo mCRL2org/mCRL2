@@ -1218,7 +1218,7 @@ BOOST_AUTO_TEST_CASE(square_root_test)
 {
   std::string s(
   "map f:Nat;\n"
-  "eqn f=sqrt(1);\n"
+  "eqn f=sqrt(max(1-1,0));\n"
   );
 
   data_specification specification(parse_data_specification(s));
@@ -1315,6 +1315,25 @@ BOOST_AUTO_TEST_CASE(square_root_test)
 
     e=parse_data_expression("sqrt(20)", specification);
     f=parse_data_expression("Pos2Nat(4)", specification);
+    data_rewrite_test(R, e, R(f));
+
+    // The tests below showed that calculating the squareroot via a double was incorrect.
+    // The squareroot must be calculated by std::sqrtl. Found by AI, September 7, 2026.
+    // The wrong implementation yields the incorrect 4294967296.
+    e=parse_data_expression("sqrt(18446744073709551615)", specification);
+    f=parse_data_expression("Pos2Nat(4294967295)", specification);
+    data_rewrite_test(R, e, R(f));
+
+    e=parse_data_expression("sqrt(4294967295*4294967295+1)", specification);
+    f=parse_data_expression("Pos2Nat(4294967295)", specification);
+    data_rewrite_test(R, e, R(f));
+
+    e=parse_data_expression("sqrt(4294967295*4294967295)", specification);
+    f=parse_data_expression("Pos2Nat(4294967295)", specification);
+    data_rewrite_test(R, e, R(f));
+
+    e=parse_data_expression("sqrt(Int2Nat(4294967295*4294967295-1))", specification);
+    f=parse_data_expression("Pos2Nat(4294967294)", specification);
     data_rewrite_test(R, e, R(f));
   }
 }
@@ -1657,3 +1676,4 @@ BOOST_AUTO_TEST_CASE(compile_complex_application)   // Compilation of a term: h(
     data_rewrite_test(R, e, f);
   } 
 }
+
