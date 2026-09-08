@@ -9,7 +9,7 @@ set(SPHINX_BUILD_TEMP_DIR "${SPHINX_BUILD_ROOT_DIR}/temp")
 set(DOXYGEN_BASE ${SPHINX_BUILD_ROOT_DIR}/_doxygen/)
 set(DOXYGEN_OUTPUT_PATH ${DOXYGEN_BASE}/output/)
 set(DOXYGEN_TAG_PATH ${DOXYGEN_BASE}/mcrl2.tag)
-set(DOXYGEN_INPUT_PATH ${CMAKE_SOURCE_DIR}/libraries/)
+set(DOXYGEN_INPUT_PATH ${mCRL2_SOURCE_DIR}/libraries/)
 
 set(SPHINX_PARALLEL "-jauto")
 if(CMAKE_BUILD_PARALLEL_LEVEL)
@@ -17,11 +17,11 @@ if(CMAKE_BUILD_PARALLEL_LEVEL)
 endif()
 
 if(MCRL2_ENABLE_DOC_DOXYGEN)
-  configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
+  configure_file(${mCRL2_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
 
   # Configure two doxygen commands (one will have the cleandoc as dependency)
   add_custom_target(doxygen
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/
+    WORKING_DIRECTORY ${mCRL2_SOURCE_DIR}/libraries/
     COMMENT "Extracting source code documentation using Doxygen"
     # ensure the build directory exists, because Doxygen does not create it
     # automatically

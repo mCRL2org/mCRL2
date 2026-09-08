@@ -263,7 +263,7 @@ function(mcrl2_add_header_tests TARGET_NAME INCLUDE_DIR EXCLUDE_FILES)
 
       if(NOT TARGET ${testname})
         # In headertest.cpp we define MCRL2_HEADERTEST_HEADER_NAME to be the current header
-        add_executable(${testname} "${CMAKE_SOURCE_DIR}/cmake/headertest.cpp")
+        add_executable(${testname} "${mCRL2_SOURCE_DIR}/cmake/headertest.cpp")
         target_link_libraries(${testname} ${TARGET_NAME})
         target_compile_definitions(${testname} PRIVATE "MCRL2_HEADERTEST_HEADER_NAME=${cppname}")
       endif()
@@ -296,19 +296,19 @@ function(mcrl2_add_resource_files TARGET_NAME TOOLNAME DESCRIPTION ICON SOURCE_F
       set(FILEFLAGS "VER_DBG")
     endif()
 
-    set(ICOFILE ${CMAKE_SOURCE_DIR}/cmake/packaging/icons/${ICON}.ico)
+    set(ICOFILE ${mCRL2_SOURCE_DIR}/cmake/packaging/icons/${ICON}.ico)
     get_filename_component(ORIGFILENAME ${ORIGFILENAME} NAME)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/icon.rc.in ${RC_FILE} @ONLY)
+    configure_file(${mCRL2_SOURCE_DIR}/cmake/packaging/icon.rc.in ${RC_FILE} @ONLY)
 
     list(APPEND ${SOURCE_FILES} ${RC_FILE})
   elseif(APPLE)
-    set(ICNS_FILE ${CMAKE_SOURCE_DIR}/cmake/packaging/icons/${ICON}.icns)
+    set(ICNS_FILE ${mCRL2_SOURCE_DIR}/cmake/packaging/icons/${ICON}.icns)
     set_source_files_properties(${ICNS_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     list(APPEND ${SOURCE_FILES} ${ICNS_FILE})
   elseif(UNIX)
     # Add the desktop file
     set(DESKTOP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.desktop)
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
+    configure_file(${mCRL2_SOURCE_DIR}/cmake/packaging/desktop.in ${DESKTOP_FILE} @ONLY)
     install(FILES ${DESKTOP_FILE} DESTINATION share/applications)
   endif()
 

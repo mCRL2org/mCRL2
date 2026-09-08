@@ -86,7 +86,7 @@ configure_file(${R_IN_PATH} ${R_PATH}.install @ONLY)
 # Configure one version for use in the build tree
 set(R_INCLUDE_DIRS "-I\"${CMAKE_BINARY_DIR}/libraries/utilities\" ")
 foreach(LIB "atermpp" "utilities" "core" "data")
-  set(R_INCLUDE_DIRS "${R_INCLUDE_DIRS}-I\"${CMAKE_SOURCE_DIR}/libraries/${LIB}/include\" " )
+  set(R_INCLUDE_DIRS "${R_INCLUDE_DIRS}-I\"${mCRL2_SOURCE_DIR}/libraries/${LIB}/include\" " )
 endforeach()
 configure_file(${R_IN_PATH} ${R_PATH} @ONLY)
 

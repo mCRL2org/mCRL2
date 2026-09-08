@@ -32,12 +32,12 @@ mark_as_advanced(MCRL2_PACKAGE_RELEASE)
 # Find Git information: git short-hash and modified/not modified
 set(MCRL2_MINOR_VERSION "Unknown")
 
-if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
   find_package(Git REQUIRED)
   # Prints the commit hash of the last commit and its short version.
   execute_process(
     COMMAND ${GIT_EXECUTABLE} rev-list --max-count=1 --format=%h --abbrev=10 HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_REV_LIST
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
@@ -49,7 +49,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
   # List the changed files compared to the last pushed commit.
   execute_process(
     COMMAND ${GIT_EXECUTABLE} status --porcelain
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_FILES_CHANGED
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
@@ -71,14 +71,14 @@ endif()
 
 # Try to read build/SourceVersion, and set that version
 if("${MCRL2_MINOR_VERSION}" STREQUAL "Unknown")
-  if(EXISTS "${CMAKE_SOURCE_DIR}/SourceVersion")
-    include(${CMAKE_SOURCE_DIR}/SourceVersion)
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/SourceVersion")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/SourceVersion)
     if(MCRL2_SOURCE_PACKAGE_REVISION)
       message(WARNING "You are building from a source package; assuming no local modifications.")
       set(MCRL2_MINOR_VERSION ${MCRL2_SOURCE_PACKAGE_REVISION})
     endif()
   else()
-    message(WARNING "No version information could be included because ${CMAKE_SOURCE_DIR} is unversioned.")
+    message(WARNING "No version information could be included because ${CMAKE_CURRENT_SOURCE_DIR} is unversioned.")
   endif()
 endif()
 

@@ -6,4 +6,4 @@ mcrl2_add_library(mcrl2_process
     mcrl2_data
 )
 
-target_include_directories(mcrl2_process PUBLIC ${CMAKE_SOURCE_DIR}/libraries/lps/include)
+target_include_directories(mcrl2_process PUBLIC ${mCRL2_SOURCE_DIR}/libraries/lps/include)

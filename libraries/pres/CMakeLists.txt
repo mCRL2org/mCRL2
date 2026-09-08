@@ -16,7 +16,7 @@ mcrl2_add_library(mcrl2_pres
 
 # This is a hack to get rid of circular dependencies somehow
 # TODO: Get rid of dependency on RES library
-target_include_directories(mcrl2_pres PUBLIC ${CMAKE_SOURCE_DIR}/libraries/res/include)
+target_include_directories(mcrl2_pres PUBLIC ${mCRL2_SOURCE_DIR}/libraries/res/include)
 
 # Copied the code below from AddMCRL2Binary.cmake so as to also link all tests
 # against the RES library

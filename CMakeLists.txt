@@ -41,7 +41,7 @@ if(POLICY CMP0175)
 endif()
 
 # This path is used for FindXXX modules and common cmake function definitions.
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${mCRL2_SOURCE_DIR}/cmake)
 enable_testing()
 
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
