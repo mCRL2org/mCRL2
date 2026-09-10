@@ -1,3 +1,6 @@
+# Added a target that gathers all the compiler flags
+add_library(mcrl2_compiler_definitions INTERFACE)
+
 # Perform compiler-specific compiler configuration
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19.31)
@@ -43,58 +46,55 @@ endif()
 
 # Add the definition to disable soundness checks when the configuration is set to OFF.
 if(NOT ${MCRL2_ENABLE_SOUNDNESS_CHECKS})
-  add_compile_definitions(MCRL2_NO_SOUNDNESS_CHECKS)
+  target_compile_definitions(mcrl2_compiler_definitions INTERFACE MCRL2_NO_SOUNDNESS_CHECKS)
 endif()
 
 # Add compiler definitions
 if(MCRL2_ENABLE_SYLVAN)
-  add_compile_definitions(MCRL2_ENABLE_SYLVAN)
+  target_compile_definitions(mcrl2_compiler_definitions INTERFACE MCRL2_ENABLE_SYLVAN)
 endif()
 
 if(MCRL2_ENABLE_JITTYC)
-  add_compile_definitions(MCRL2_ENABLE_JITTYC)
+  target_compile_definitions(mcrl2_compiler_definitions INTERFACE MCRL2_ENABLE_JITTYC)
 
   if(MCRL2_TEST_JITTYC)
-    add_compile_definitions(MCRL2_TEST_JITTYC)
+    target_compile_definitions(mcrl2_compiler_definitions INTERFACE MCRL2_TEST_JITTYC)
   endif()
 endif()
 
 if(MCRL2_ENABLE_MACHINENUMBERS)
-  add_compile_definitions(MCRL2_ENABLE_MACHINENUMBERS)
+  target_compile_definitions(mcrl2_compiler_definitions INTERFACE MCRL2_ENABLE_MACHINENUMBERS)
 endif()
 
 if(MCRL2_ENABLE_MULTITHREADING)
-  add_compile_definitions(MCRL2_ENABLE_MULTITHREADING)
+  target_compile_definitions(mcrl2_compiler_definitions INTERFACE MCRL2_ENABLE_MULTITHREADING)
 endif()
 
 if(MCRL2_SKIP_LONG_TESTS)
-  add_compile_definitions(MCRL2_SKIP_LONG_TESTS)
+  target_compile_definitions(mcrl2_compiler_definitions INTERFACE MCRL2_SKIP_LONG_TESTS)
 endif(MCRL2_SKIP_LONG_TESTS)
 
 if(APPLE)
-  # Silence useless OpenGL deprecration warnings on macOS. Some GUI tools use outdated OpenGL and this will 
+  # Silence useless OpenGL deprecration warnings on macOS. Some GUI tools use outdated OpenGL and this will
   # only be replaced when it is removed.
-  add_compile_definitions(GL_SILENCE_DEPRECATION)
+  target_compile_definitions(mcrl2_compiler_definitions INTERFACE GL_SILENCE_DEPRECATION)
 endif()
 
 # Enable the new JFG branching bisimulation algorithm.
-add_compile_definitions(BRANCH_BIS_EXPERIMENT_JFG)
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE BRANCH_BIS_EXPERIMENT_JFG)
 
 # Only show deprecation warnings for our minimal Qt version.
-add_compile_definitions(QT_DEPRECATED_WARNINGS_SINCE=0x060200)
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE QT_DEPRECATED_WARNINGS_SINCE=0x060200)
 
 # Avoid warnings about discarding the output of QFile::open.
-add_compile_definitions(QT_NO_USE_NODISCARD_FILE_OPEN)
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE QT_NO_USE_NODISCARD_FILE_OPEN)
 
 # Enable all macros defined in the code used for debugging purposes.
-add_debug_compile_definitions(MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
-
-# Enable all macros defined in the code used for debugging purposes.
-add_debug_compile_definitions(MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
-add_debug_compile_definitions(MCRL2_LPS_PARELM_DEBUG)
-add_debug_compile_definitions(MCRL2_ABSINTHE_CHECK_EXPRESSIONS)
-add_debug_compile_definitions(PARANOID_CHECK)
-add_compile_definitions(MCRL2_EXTENDED_TESTS)
+add_debug_compile_definitions(mcrl2_compiler_definitions MCRL2_PBES_STATEGRAPH_CHECK_GUARDS)
+add_debug_compile_definitions(mcrl2_compiler_definitions MCRL2_LPS_PARELM_DEBUG)
+add_debug_compile_definitions(mcrl2_compiler_definitions MCRL2_ABSINTHE_CHECK_EXPRESSIONS)
+add_debug_compile_definitions(mcrl2_compiler_definitions PARANOID_CHECK)
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE MCRL2_EXTENDED_TESTS)
 
 # These are defines that can be enabled for additional debug printing
 #add_compile_definitions(MCRL2_DEBUG_EXPRESSION_BUILDER)

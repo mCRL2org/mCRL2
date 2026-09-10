@@ -26,16 +26,16 @@ mcrl2_add_c_flag(/MP)
 mcrl2_add_c_flag(/permissive-)
 mcrl2_add_c_debug_flag(/W3)
   
-add_compile_definitions(NOMINMAX)                 # Don't let <windows.h> (re)define min and max
-add_compile_definitions(WIN32_LEAN_AND_MEAN)      # Cleans up a lot of garbage from the windows.h header, and makes it compatible with other windows headers.
-add_compile_definitions(_USE_MATH_DEFINES)        # Make <cmath> define M_PI, M_PI_2 etc.
-add_compile_definitions(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES) # Enables template overloads of standard CRT functions that call the more secure variants automatically.
-add_compile_definitions(_CRT_SECURE_NO_WARNINGS)                 # Prevents many CRT deprecation warnings, especially in dparser.
-add_compile_definitions(BOOST_ALL_NO_LIB=1) # Tells the config system not to automatically select which libraries to link against. Normally if a compiler supports #pragma lib, 
-                                            # then the correct library build variant will be automatically selected and linked against, simply by the act of including one of 
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE NOMINMAX)                 # Don't let <windows.h> (re)define min and max
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE WIN32_LEAN_AND_MEAN)      # Cleans up a lot of garbage from the windows.h header, and makes it compatible with other windows headers.
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE _USE_MATH_DEFINES)        # Make <cmath> define M_PI, M_PI_2 etc.
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES) # Enables template overloads of standard CRT functions that call the more secure variants automatically.
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE _CRT_SECURE_NO_WARNINGS)                 # Prevents many CRT deprecation warnings, especially in dparser.
+target_compile_definitions(mcrl2_compiler_definitions INTERFACE BOOST_ALL_NO_LIB=1) # Tells the config system not to automatically select which libraries to link against. Normally if a compiler supports #pragma lib,
+                                            # then the correct library build variant will be automatically selected and linked against, simply by the act of including one of
                                             # that library's headers. This macro turns that feature off.
-add_debug_compile_definitions(_MSVC_STL_HARDENING=1) # Checks for some instances of undefined behavior at runtime and reports them to the user.
-add_debug_compile_definitions(_MSVC_STL_DESTRUCTOR_TOMBSTONES=1) # Another new safety feature we have added is destructor tombstones, which help mitigate use-after-free mistakes. 
+add_debug_compile_definitions(mcrl2_compiler_definitions _MSVC_STL_HARDENING=1) # Checks for some instances of undefined behavior at runtime and reports them to the user.
+add_debug_compile_definitions(mcrl2_compiler_definitions _MSVC_STL_DESTRUCTOR_TOMBSTONES=1) # Another new safety feature we have added is destructor tombstones, which help mitigate use-after-free mistakes.
 
 if(MCRL2_ENABLE_ADDRESS_SANITIZER)
   mcrl2_add_c_flag(/fsanitize=address)

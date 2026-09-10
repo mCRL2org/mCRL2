@@ -59,7 +59,8 @@ function(mcrl2_add_debug_link_options FLAGS)
   endif()
 endfunction()
 
-# Adds compile definitions for the Debug configuration.
-function(add_debug_compile_definitions FLAGS)
-  add_compile_definitions($<$<CONFIG:Debug>:${FLAGS}>)
+# Adds compile definitions for the Debug configuration to the given INTERFACE target's usage
+# requirements, so that they propagate to every target linking against it.
+function(add_debug_compile_definitions TARGET_NAME FLAGS)
+  target_compile_definitions(${TARGET_NAME} INTERFACE $<$<CONFIG:Debug>:${FLAGS}>)
 endfunction()

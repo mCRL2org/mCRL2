@@ -45,7 +45,9 @@ function(mcrl2_add_library TARGET_NAME)
 
   add_library(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
 
-  target_link_libraries(${TARGET_NAME} PUBLIC ${ARG_DEPENDS})
+  # Linked PUBLIC so the mCRL2-wide compile definitions (see ConfigureCompiler.cmake) propagate
+  # transitively to anything that links against this library, even from outside the mCRL2 source tree.
+  target_link_libraries(${TARGET_NAME} PUBLIC mcrl2_compiler_definitions ${ARG_DEPENDS})
   target_include_directories(${TARGET_NAME} PUBLIC "include/" ${ARG_INCLUDE_DIRS})
 
   if(MCRL2_ENABLE_TESTS)
@@ -80,7 +82,7 @@ function(mcrl2_add_tool TARGET_NAME)
 
   add_executable(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
 
-  target_link_libraries(${TARGET_NAME} ${ARG_DEPENDS})
+  target_link_libraries(${TARGET_NAME} PUBLIC mcrl2_compiler_definitions ${ARG_DEPENDS})
   target_include_directories(${TARGET_NAME} PUBLIC "." "include/")
 
   if(MCRL2_MAN_PAGES)
@@ -123,7 +125,7 @@ function(mcrl2_add_gui_tool TARGET_NAME)
 
   add_executable(${TARGET_NAME} ${ARG_SOURCES} ${TARGET_INCLUDE_FILES})
 
-  target_link_libraries(${TARGET_NAME} ${ARG_DEPENDS})
+  target_link_libraries(${TARGET_NAME} PUBLIC mcrl2_compiler_definitions ${ARG_DEPENDS})
   target_include_directories(${TARGET_NAME} PUBLIC "." "include/")
 
   if(MCRL2_MAN_PAGES)
