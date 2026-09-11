@@ -40,15 +40,40 @@ if (CXX_ACCEPTS_PIC)
   set(R_CXXFLAGS "${R_CXXFLAGS} -fPIC")
 endif()
 
-# Add the other definitions that were added using add_definitions to build flags
+# Add the definitions and options that were added using add_definitions to the build flags.
 get_directory_property(R_COMPILER_DEFINITIONS COMPILE_DEFINITIONS)
+get_directory_property(R_COMPILER_OPTIONS COMPILE_OPTIONS)
+
+# Also add the definitions and options that are collected on the
+# mcrl2_compiler_definitions INTERFACE target.
+if(TARGET mcrl2_compiler_definitions)
+  get_target_property(R_TARGET_DEFINITIONS mcrl2_compiler_definitions INTERFACE_COMPILE_DEFINITIONS)
+  if(R_TARGET_DEFINITIONS)
+    list(APPEND R_COMPILER_DEFINITIONS ${R_TARGET_DEFINITIONS})
+  endif()
+
+  get_target_property(R_TARGET_OPTIONS mcrl2_compiler_definitions INTERFACE_COMPILE_OPTIONS)
+  if(R_TARGET_OPTIONS)
+    list(APPEND R_COMPILER_OPTIONS ${R_TARGET_OPTIONS})
+  endif()
+endif()
+
 foreach(d ${R_COMPILER_DEFINITIONS})
   # Ignore definitions that contain generator expressions
   if (d MATCHES "\\$")
     continue()
   endif()
-  
+
   set(R_CXXFLAGS "${R_CXXFLAGS} -D${d}")
+endforeach()
+
+foreach(o ${R_COMPILER_OPTIONS})
+  # Ignore options that contain generator expressions
+  if (o MATCHES "\\$")
+    continue()
+  endif()
+
+  set(R_CXXFLAGS "${R_CXXFLAGS} ${o}")
 endforeach()
 
 # Make sure we use shared linking.
