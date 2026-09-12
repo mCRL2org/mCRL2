@@ -26,7 +26,9 @@ const basic_sort& bool_();
 const function_symbol& false_();
 const function_symbol& true_();
 application and_(const data_expression&,const data_expression&);
+application or_(const data_expression&,const data_expression&);
 application not_(const data_expression&);
+application implies(const data_expression&,const data_expression&);
 bool is_bool(const sort_expression&);
 } // namespace sort_bool
 
@@ -111,6 +113,13 @@ struct greater_equal_symbol : public symbol< greater_equal_symbol >
   static char const* initialise()
   {
     return ">=";
+  }
+};
+struct less_total_symbol : public symbol< less_total_symbol >
+{
+  static char const* initialise()
+  {
+    return "less_total";
   }
 };
 } // namespace detail
@@ -378,6 +387,43 @@ inline bool is_greater_equal_application(const DataExpression& e)
   return detail::greater_equal_symbol::is_application(e);
 }
 
+/// \brief Constructor for function symbol less_total
+/// \param[in] s A sort expression
+/// \return function symbol less_total
+inline function_symbol less_total(const sort_expression& s)
+{
+  return function_symbol(detail::less_total_symbol::instance(), make_function_sort_(s, s, sort_bool::bool_()));
+}
+
+/// \brief Recogniser for function less_total
+/// \param[in] e A data expression
+/// \return true iff e is the function symbol matching less_total
+template < typename DataExpression >
+inline bool is_less_total_function_symbol(const DataExpression& e)
+{
+  return detail::less_total_symbol::is_function_symbol(e);
+}
+
+/// \brief Application of function symbol less_total
+/// \param[in] arg0 A data expression
+/// \param[in] arg1 A data expression
+/// \return Application of less_total to a number of arguments
+inline application less_total(const data_expression& arg0, const data_expression& arg1)
+{
+  assert(arg0.sort() == arg1.sort());
+  return less_total(arg0.sort())(arg0, arg1);
+}
+
+/// \brief Recogniser for application of less_total
+/// \param[in] e A data expression
+/// \return true iff e is an application of function symbol less_total to a
+///     number of arguments
+template < typename DataExpression >
+inline bool is_less_total_application(const DataExpression& e)
+{
+  return detail::less_total_symbol::is_application(e);
+}
+
 /// \brief Give all standard system defined functions for sort s
 /// \param[in] s A sort expression
 /// \return All standard system defined functions for sort s
@@ -391,6 +437,7 @@ inline function_symbol_vector standard_generate_functions_code(const sort_expres
   result.push_back(less_equal(s));
   result.push_back(greater_equal(s));
   result.push_back(greater(s));
+  result.push_back(less_total(s));
 
   return result;
 }
@@ -413,6 +460,7 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
   result.emplace_back(variable_list({x}), less_equal(x, x), sort_bool::true_());
   result.emplace_back(variable_list({x, y}), greater_equal(x, y), less_equal(y, x));
   result.emplace_back(variable_list({x, y}), greater(x, y), less(y, x));
+  result.emplace_back(variable_list({x}), less_total(x, x), sort_bool::false_());
 
   // For a function sort, add the equation f==g iff forall x.f(x)==g(x). This equation is not in the Specification and Analysis of Communicating Systems of 2014.
   if (is_function_sort(s))
@@ -425,9 +473,11 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
     {
       std::stringstream xs;
       xs << "x" << index;
+      std::stringstream ys;
+      ys << "y" << index;
       ++index;
-      variable x(xs.str(),sort);
-      xvars.push_back(x);
+      xvars.emplace_back(xs.str(),sort);
+      yvars.emplace_back(ys.str(),sort);
     }
     variable f("f",s);
     variable g("g",s);
@@ -437,6 +487,32 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
         abstraction(forall_binder(),
             xvar_list,
             equal_to(application(f, xvars.begin(), xvars.end()), application(g, xvars.begin(), xvars.end()))));
+
+    // less_total(f,g) holds iff there is a point x=(x0,...,xn-1), lexicographically smaller (w.r.t.
+    // less_total on the domain sorts) than every point where f and g differ, such that f(x) is
+    // less_total than g(x). This defines a total order on functions of arbitrary arity, given a total
+    // order on each domain sort and on the codomain (see the domain/codomain totality proof).
+    if (!xvars.empty())
+    {
+      data_expression tuple_less_total = less_total(yvars.back(), xvars.back());
+      for (std::size_t i = xvars.size() - 1; i > 0; --i)
+      {
+        tuple_less_total = sort_bool::or_(less_total(yvars[i - 1], xvars[i - 1]),
+            sort_bool::and_(equal_to(yvars[i - 1], xvars[i - 1]), tuple_less_total));
+      }
+
+      variable_list yvar_list=variable_list(yvars.begin(),yvars.end());
+      result.emplace_back(variable_list({f, g}),
+          less_total(f, g),
+          abstraction(exists_binder(),
+              xvar_list,
+              sort_bool::and_(
+                  abstraction(forall_binder(),
+                      yvar_list,
+                      sort_bool::implies(tuple_less_total,
+                          equal_to(application(f, yvars.begin(), yvars.end()), application(g, yvars.begin(), yvars.end())))),
+                  less_total(application(f, xvars.begin(), xvars.end()), application(g, xvars.begin(), xvars.end())))));
+    }
   }
 
   return result;
