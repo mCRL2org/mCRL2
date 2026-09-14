@@ -44,7 +44,7 @@ A make_A(data::rewriter& d)
   return result;
 }
 
-void test1()
+BOOST_AUTO_TEST_CASE(test1)
 {
   using namespace mcrl2::data::sort_nat;
 
@@ -79,7 +79,7 @@ void test1()
   data_expression qc = c.r_(t);
 }
 
-void test2()
+BOOST_AUTO_TEST_CASE(test2)
 {
   using namespace mcrl2::data::sort_nat;
 
@@ -116,15 +116,15 @@ void test_expressions(Rewriter R, std::string const& expr1, std::string const& e
   {
     BOOST_CHECK(rd1 == rd2);
     std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
-    std::cout << "d1           " << d1 << std::endl;
-    std::cout << "d2           " << d2 << std::endl;
+    std::cout << "d1           " << atermpp::aterm(d1) << std::endl;
+    std::cout << "d2           " << atermpp::aterm(d2) << std::endl;
     std::cout << "sigma\n      " << sigma << std::endl;
     std::cout << "R(d1, sigma) " << rd1 << std::endl;
     std::cout << "R(d2)        " << rd2 << std::endl;
   }
 }
 
-void test4()
+BOOST_AUTO_TEST_CASE(test4)
 {
   data_specification data_spec;
 
@@ -136,7 +136,7 @@ void test4()
   test_expressions(R, expr1, expr2, "c: Bool;", data_spec, sigma);
 }
 
-void test5() // Test set difference for finite sets.
+BOOST_AUTO_TEST_CASE(test5) // Test set difference for finite sets.
 {
   std::string DATA_SPEC1 =
     "map f,g:FSet(Bool);\n"
@@ -152,7 +152,7 @@ void test5() // Test set difference for finite sets.
   test_expressions(R, expr1, expr2, "c: Bool;", data_spec, sigma);
 }
 
-void allocation_test()
+BOOST_AUTO_TEST_CASE(allocation_test)
 {
   data_specification data_spec;
   std::shared_ptr< data::rewriter > R_heap(new data::rewriter(data_spec));
@@ -165,7 +165,7 @@ void allocation_test()
   (*R_heap)(parse_data_expression("1 == 2"));
 }
 
-void one_point_rule_preprocessor_test()
+BOOST_AUTO_TEST_CASE(one_point_rule_preprocessor_test)
 {
   using namespace data::detail;
 
@@ -181,7 +181,7 @@ void one_point_rule_preprocessor_test()
   test_rewriters(N(one_point_rule_preprocessor()), N(I), "!(n1 != n2 || n1 != n2 + 1)", "n1 == n2 && n1 == n2 + 1");
 }
 
-void simplify_rewriter_test()
+BOOST_AUTO_TEST_CASE(simplify_rewriter_test)
 {
   using data::detail::N;
   using data::detail::I;
@@ -193,7 +193,7 @@ void simplify_rewriter_test()
 }
 
 // The testcase below corresponds to ticket #1426. 
-void test_lambda_expression()
+BOOST_AUTO_TEST_CASE(test_lambda_expression)
 {
   data_specification data_spec;
   data::rewriter R(data_spec);
@@ -207,7 +207,7 @@ void test_lambda_expression()
 // The testcase below corresponds to ticket #1428 which indicated
 // that the generated rules for equality were erroneous. Their bound variables were equal
 // f == g = forall x0,x0: Nat. f(x0, x0) == g(x0, x0)
-void test_equality_on_functions()
+BOOST_AUTO_TEST_CASE(test_equality_on_functions)
 {
   std::string DATA_SPEC1 =
     "map f,g:Nat#Nat->Nat;\n"
@@ -228,7 +228,7 @@ void test_equality_on_functions()
 // The testcase below corresponds to ticket #1461 which indicated
 // that rewriting enumerated functions failed as the if function would be removed
 // from the rewriters if it does not occur explicitly in the specification. 
-void test_enumeration_of_functions()
+BOOST_AUTO_TEST_CASE(test_enumeration_of_functions)
 {
   std::string DATA_SPEC1 =
     "sort Hat = struct black | white;"
@@ -244,15 +244,23 @@ void test_enumeration_of_functions()
   test_expressions(R, expr1, expr2, "", data_spec, sigma);
 }
 
-BOOST_AUTO_TEST_CASE(test_main)
+// The testcase checks whether the function @gtesubtb(b, p, q) is correctly
+// define. In September 2026 Claude found that it was not, as a rule of
+// the shape igtesubtb(b, @c1, @cDub(c, q))=@c0 was missing. 
+BOOST_AUTO_TEST_CASE(test_subtraction_of_bags)
 {
-  test1();
-  test2();
-  test4();
-  test5();
-  one_point_rule_preprocessor_test();
-  simplify_rewriter_test();
-  test_lambda_expression();
-  test_equality_on_functions();
-  test_enumeration_of_functions();
+  std::string DATA_SPEC1 =
+    "sort Hat = Bag(Nat);"
+    ;
+
+  data_specification data_spec = parse_data_specification(DATA_SPEC1);
+  // For this test it is essential that unnecessary equations are removed. 
+  data::rewriter R(data_spec); // Do not remove rewrite rules. 
+
+  std::string expr1 = "count(0, {n: Nat | 1} - {n: Nat | 2})";
+  std::string expr2 = "0";
+  std::string sigma = "[]";
+  test_expressions(R, expr1, expr2, "", data_spec, sigma);
 }
+
+

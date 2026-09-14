@@ -106,6 +106,7 @@ eqn ==(@c0, @cNat(p)) = false;
     +(@cNat(p),@cNat(q)) = @cNat(@addc(false,p,q));
     @gtesubtb(false,p,@c1) = pred(p);
     @gtesubtb(true,p,@c1) = pred(Nat2Pos(pred(p)));
+    @gtesubtb(b,@c1,@cDub(c,p)) = @c0;
     @gtesubtb(b,@cDub(c,p),@cDub(c,q)) = @dub(b, @gtesubtb(b,p,q));
     @gtesubtb(b,@cDub(false,p),@cDub(true,q)) = @dub(!(b),@gtesubtb(true,p,q));
     @gtesubtb(b,@cDub(true,p),@cDub(false,q)) = @dub(!(b),@gtesubtb(false,p,q));
