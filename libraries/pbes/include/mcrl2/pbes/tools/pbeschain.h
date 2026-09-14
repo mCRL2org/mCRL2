@@ -34,6 +34,7 @@
 #include <chrono>
 #include <cstddef>
 #include <iostream>
+#include <iomanip>
 
 namespace mcrl2::pbes_system
 {
