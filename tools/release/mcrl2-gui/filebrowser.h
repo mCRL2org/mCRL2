@@ -73,7 +73,7 @@ class FileBrowser : public QTreeView
 
     QFileSystemModel m_model;
 
-    QMenu* m_menu;
+    QMenu* m_menu = nullptr;
     QAction* m_actOpenFiles;
     QAction* m_sep1;
     QAction* m_actNewFile;
@@ -92,7 +92,7 @@ class FileBrowser : public QTreeView
     ToolCatalog m_catalog;
 
     QStringList m_selectedFiles;
-    CopyMode m_copyMode;
+    CopyMode m_copyMode = cm_none;
 
     CopyThread m_copythread;
     CopyDialog m_copydialog;

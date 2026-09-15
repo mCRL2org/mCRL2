@@ -73,7 +73,7 @@ template <int Order> class Bezier
     VectorArray m_control;
 
   public:
-    constexpr Bezier() {}
+    constexpr Bezier() = default;
     constexpr Bezier(const VectorArray& points) : m_control(points) {}
 
     constexpr Vector& operator[](int index) { return m_control[index]; }

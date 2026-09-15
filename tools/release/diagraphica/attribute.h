@@ -31,7 +31,7 @@ class Attribute : public QObject
       QString type,
       const std::size_t& idx);
     Attribute(const Attribute& attr);
-    virtual ~Attribute();
+    ~Attribute() override;
 
     // -- set functions ---------------------------------------------
     void setIndex(const std::size_t& idx);

@@ -39,14 +39,14 @@ struct shared_mutex_data
   inline
   void register_mutex(shared_mutex* shared_mutex)
   {
-    std::lock_guard guard(mutex);
+    std::scoped_lock guard(mutex);
     other.emplace_back(shared_mutex);
   }
   
   // Removes a shared mutex from the data
   inline void unregister_mutex(shared_mutex* shared_mutex) 
   {
-    std::lock_guard guard(mutex);
+    std::scoped_lock guard(mutex);
     auto it = std::find(other.begin(), other.end(), shared_mutex);
     assert(it != other.end());
 

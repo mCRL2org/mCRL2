@@ -21,7 +21,7 @@ class Graph : public QObject
   public:
     // -- constructors and destructors ------------------------------
     Graph();
-    ~Graph();
+    ~Graph() override;
 
     // -- set functions ---------------------------------------------
     void setFileName(QString filename);

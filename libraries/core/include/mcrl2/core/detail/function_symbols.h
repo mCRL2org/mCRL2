@@ -41,7 +41,7 @@ const atermpp::function_symbol& function_symbol_DataAppl_helper(std::size_t i)
 
   // Since it is larger than DataApplFixed we can ignore the start indices.
   i -= DataApplFixed;
-  std::lock_guard guard(mutex);
+  std::scoped_lock guard(mutex);
   do
   {
     function_symbols_DataAppl.push_back(std::make_unique<atermpp::function_symbol>("DataAppl", function_symbols_DataAppl.size() + DataApplFixed));

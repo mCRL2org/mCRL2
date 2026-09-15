@@ -19,7 +19,7 @@
 class Primitive
 {
   public:
-    virtual ~Primitive() {}
+    virtual ~Primitive() = default;
     virtual void draw() = 0;
 
     /// Reshape the primitive
@@ -36,9 +36,9 @@ class P_Sphere : public Primitive
 {
   public:
     P_Sphere();
-    ~P_Sphere();
-    void draw();
-    void reshape(int N,float* coss,float* sins);
+    ~P_Sphere() override;
+    void draw() override;
+    void reshape(int N,float* coss,float* sins) override;
   private:
     GLuint disp_list;
 };
@@ -47,9 +47,9 @@ class P_SimpleSphere : public Primitive
 {
   public:
     P_SimpleSphere();
-    ~P_SimpleSphere();
-    void draw();
-    void reshape(int N,float* coss,float* sins);
+    ~P_SimpleSphere() override;
+    void draw() override;
+    void reshape(int N,float* coss,float* sins) override;
   private:
     GLuint disp_list;
 };
@@ -58,9 +58,9 @@ class P_Hemisphere : public Primitive
 {
   public:
     P_Hemisphere();
-    ~P_Hemisphere();
-    void draw();
-    void reshape(int N,float* coss,float* sins);
+    ~P_Hemisphere() override;
+    void draw() override;
+    void reshape(int N,float* coss,float* sins) override;
   private:
     GLuint disp_list;
 };
@@ -69,9 +69,9 @@ class P_Disc : public Primitive
 {
   public:
     P_Disc();
-    ~P_Disc();
-    void draw();
-    void reshape(int N,float* coss,float* sins);
+    ~P_Disc() override;
+    void draw() override;
+    void reshape(int N,float* coss,float* sins) override;
   private:
     GLuint disp_list;
 };
@@ -80,9 +80,9 @@ class P_Ring : public Primitive
 {
   public:
     P_Ring(float r);
-    ~P_Ring();
-    void draw();
-    void reshape(int N,float* coss,float* sins);
+    ~P_Ring() override;
+    void draw() override;
+    void reshape(int N,float* coss,float* sins) override;
     float getTopRadius();
   private:
     GLuint disp_list;
@@ -94,9 +94,9 @@ class P_TruncatedCone : public Primitive
 {
   public:
     P_TruncatedCone(P_Ring* a_ring,P_Disc* a_disc,bool t,bool b);
-    ~P_TruncatedCone();
-    void draw();
-    void reshape(int N,float* coss,float* sins);
+    ~P_TruncatedCone() override;
+    void draw() override;
+    void reshape(int N,float* coss,float* sins) override;
   private:
     P_Ring* ring;
     P_Disc* disc;
@@ -116,9 +116,9 @@ class P_ObliqueCone : public Primitive
 {
   public:
     P_ObliqueCone(float a,float r,float s);
-    ~P_ObliqueCone();
-    void draw();
-    void reshape(int N,float* coss,float* sins);
+    ~P_ObliqueCone() override;
+    void draw() override;
+    void reshape(int N,float* coss,float* sins) override;
     void reshape(int N,float* coss,float* sins,float obt);
   private:
     GLuint disp_list;

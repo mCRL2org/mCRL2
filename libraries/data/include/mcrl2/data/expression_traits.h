@@ -18,10 +18,9 @@
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 
-namespace mcrl2
-{
 
-namespace core
+
+namespace mcrl2::core
 {
 
 /// \brief Contains type information for data expressions.
@@ -347,8 +346,8 @@ struct term_traits<data::data_expression>
   }
 };
 
-} // namespace core
+} // namespace mcrl2::core
 
-} // namespace mcrl2
+
 
 #endif // MCRL2_DATA_EXPRESSION_TRAITS_H

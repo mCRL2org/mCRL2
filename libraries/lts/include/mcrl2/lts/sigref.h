@@ -77,7 +77,7 @@ protected:
   using signature<LTS_T>::m_sig;
 
 public:
-  virtual ~signature_bisim() = default;
+  ~signature_bisim() override = default;
   /** \brief Constructor */
   signature_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_)
@@ -141,7 +141,7 @@ protected:
   }
 
 public:
-  virtual ~signature_branching_bisim() = default;
+  ~signature_branching_bisim() override = default;
   /** \brief Constructor  */
   signature_branching_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_),
@@ -288,7 +288,7 @@ protected:
   }
 
 public:
-  virtual ~signature_divergence_preserving_branching_bisim() = default;
+  ~signature_divergence_preserving_branching_bisim() override = default;
   /** \brief Constructor
     *
     * This initialises \a m_divergent to record for each vertex whether it is

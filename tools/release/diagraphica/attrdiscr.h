@@ -23,36 +23,36 @@ class AttrDiscr : public Attribute
       const std::size_t& idx,
       const std::vector< std::string > &vals);
     AttrDiscr(const AttrDiscr& attr);
-    virtual ~AttrDiscr();
+    ~AttrDiscr() override;
 
     // -- set functions ---------------------------------------------
     void clusterValues(
       const std::vector< int > &indices,
-      const std::string& newValue);
+      const std::string& newValue) override;
     void moveValue(
       const std::size_t& idxFr,
-      const std::size_t& idxTo);
+      const std::size_t& idxTo) override;
     void configValues(
       const std::vector< std::string > &curDomain,
-      std::map< std::size_t, std::size_t  > &origToCurDomain);
+      std::map< std::size_t, std::size_t  > &origToCurDomain) override;
 
-    std::size_t getSizeOrigValues();
-    Value* getOrigValue(std::size_t idx);
-    std::size_t getSizeCurValues();
-    Value* getCurValue(std::size_t idx);
+    std::size_t getSizeOrigValues() override;
+    Value* getOrigValue(std::size_t idx) override;
+    std::size_t getSizeCurValues() override;
+    Value* getCurValue(std::size_t idx) override;
     std::size_t getSizeMap();
-    Value* mapToValue(double key);
+    Value* mapToValue(double key) override;
 
     // -- clear functions -------------------------------------------
-    void clearClusters();
+    void clearClusters() override;
 
   protected:
     // -- private utility functions ---------------------------------
     void initValues(const std::vector< std::string > &vals);
     void resetCurValues();
     void deleteOrigValues();
-    void deleteCurValues();
-    void deleteCurMap();
+    void deleteCurValues() override;
+    void deleteCurMap() override;
 
     // -- data members ----------------------------------------------
     std::vector< Value* >  origValues; // original domain

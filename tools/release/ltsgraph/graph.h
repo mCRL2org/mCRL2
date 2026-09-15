@@ -447,11 +447,11 @@ class Graph
     friend class Exploration;
 
   private:
-    Exploration* m_exploration;                 ///< The exploration of the current graph (or null).
-    mcrl2::lts::lts_type m_type;                ///< The type of the current graph.
+    Exploration* m_exploration = nullptr;                 ///< The exploration of the current graph (or null).
+    mcrl2::lts::lts_type m_type = mcrl2::lts::lts_lts;                ///< The type of the current graph.
     QString m_empty;                            ///< Empty string that is returned as label if none present.
     mutable QReadWriteLock m_lock;              ///< Lock protecting the structure from being changed while rendering and simulating
-    bool m_stable;                              ///< When true, the graph is considered stable, spring forces should not be applied.
+    bool m_stable = true;                              ///< When true, the graph is considered stable, spring forces should not be applied.
     bool m_hasNewFrame = false;                 ///< Set to false when frame is rendered. Whenever new layout is applied set to true.
     bool m_forceUpdate = false;                 ///< Some actions require forcing update -> toggleOpen for instance
     bool m_resetPositions = false;              ///< Resets all positions on the next worker iteration

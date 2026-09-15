@@ -30,10 +30,10 @@ class Visualizer : public QOpenGLWidget
     Visualizer(
       QWidget *parent,
       Graph *m_graph);
-    virtual ~Visualizer() {}
+    ~Visualizer() override = default;
 
-    virtual void initializeGL() override;
-    virtual void paintGL() override;
+    void initializeGL() override;
+    void paintGL() override;
 
     QSizeF worldSize();
     double pixelSize();
@@ -61,13 +61,13 @@ class Visualizer : public QOpenGLWidget
     virtual void handleMouseLeaveEvent() { }
     virtual void handleKeyEvent(QKeyEvent* e);
 
-    virtual void leaveEvent(QEvent *event) override { handleMouseLeaveEvent(); QOpenGLWidget::leaveEvent(event); }
-    virtual void keyPressEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyPressEvent(event); }
-    virtual void keyReleaseEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyReleaseEvent(event); }
-    virtual void mouseMoveEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mouseMoveEvent(event); }
-    virtual void mousePressEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mousePressEvent(event); }
-    virtual void mouseReleaseEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mouseReleaseEvent(event); }
-    virtual void resizeEvent(QResizeEvent *event) override { handleSizeEvent(); QOpenGLWidget::resizeEvent(event); }
+    void leaveEvent(QEvent *event) override { handleMouseLeaveEvent(); QOpenGLWidget::leaveEvent(event); }
+    void keyPressEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyPressEvent(event); }
+    void keyReleaseEvent(QKeyEvent *event) override { handleKeyEvent(event); QOpenGLWidget::keyReleaseEvent(event); }
+    void mouseMoveEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mouseMoveEvent(event); }
+    void mousePressEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mousePressEvent(event); }
+    void mouseReleaseEvent(QMouseEvent *event) override { handleMouseEvent(event); QOpenGLWidget::mouseReleaseEvent(event); }
+    void resizeEvent(QResizeEvent *event) override { handleSizeEvent(); QOpenGLWidget::resizeEvent(event); }
 
     QSize sizeHint() const override { return QSize(200,200); } // Reimplement to change preferred size
   public slots:

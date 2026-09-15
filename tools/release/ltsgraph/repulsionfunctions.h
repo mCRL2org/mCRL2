@@ -26,6 +26,8 @@ namespace RepulsionFunctions
 {
   struct LTSGraph : RepulsionFunction
   {
+    ~LTSGraph() override = default;
+
     QVector3D operator()(const QVector3D& a, 
                          const QVector3D& b,
                          const float natlength) override
@@ -43,6 +45,8 @@ namespace RepulsionFunctions
 
   struct ElectricalSpring : RepulsionFunction
   {
+    ~ElectricalSpring() override = default;
+
     QVector3D operator()(const QVector3D& a, 
                          const QVector3D& b,
                          const float K) override
@@ -61,6 +65,8 @@ namespace RepulsionFunctions
 
   struct None : RepulsionFunction
   {
+    ~None() override = default;
+    
     QVector3D operator()(const QVector3D&, const QVector3D&, const float) override
     {
       const QVector3D ZERO = { 0, 0, 0 };

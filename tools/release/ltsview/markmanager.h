@@ -54,7 +54,7 @@ struct MarkRule
   bool operator!=(const MarkRule &other) { return !(*this == other); }
 };
 
-typedef std::list<MarkRule>::iterator MarkRuleIndex;
+using MarkRuleIndex = std::list<MarkRule>::iterator;
 inline bool operator<(const MarkRuleIndex &index1, const MarkRuleIndex &index2) { return &*index1 < &*index2; }
 
 class MarkManager : public QObject
@@ -117,17 +117,17 @@ class MarkManager : public QObject
 
   private:
     LtsManager *m_ltsManager;
-    LTS* m_lts;
-    MarkStyle m_markStyle;
-    MatchStyle m_clusterMatchStyle;
-    MatchStyle m_stateMatchStyle;
+    LTS* m_lts = nullptr;
+    MarkStyle m_markStyle = NO_MARKS;
+    MatchStyle m_clusterMatchStyle = MATCH_ANY;
+    MatchStyle m_stateMatchStyle = MATCH_ANY;
     std::list<MarkRule> m_markRules;
     std::vector<bool> m_markedActions;
 
-    int m_markedStatesAny;
-    int m_markedStatesAll;
-    int m_markedTransitions;
-    int m_activeMarkRules;
+    int m_markedStatesAny = 0;
+    int m_markedStatesAll = 0;
+    int m_markedTransitions = 0;
+    int m_activeMarkRules = 0;
 };
 
 #endif

@@ -15,7 +15,7 @@
 #include <QMessageBox>
 
 FileBrowser::FileBrowser(QWidget *parent) :
-  QTreeView(parent), m_model(this), m_menu(nullptr), m_copyMode(cm_none), m_copydialog(parent)
+  QTreeView(parent), m_model(this), m_copydialog(parent)
 {
   connect(&m_copydialog, SIGNAL(rejected()), &m_copythread, SLOT(cancel()));
   connect(&m_copythread, SIGNAL(started()), &m_copydialog, SLOT(open()));

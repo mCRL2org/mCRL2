@@ -69,16 +69,16 @@ protected:
       res.first->second.push_back(real_conditions[i]);
     }
     data_expression result = sort_bool::false_();
-    for(std::map< data_expression, std::vector< data_expression_list >>::iterator it = discr_to_real.begin(); it != discr_to_real.end(); it++)
+    for (std::pair<const data_expression, std::vector<atermpp::term_list<data_expression>>>& it: discr_to_real)
     {
       // Reduce each of the linear systems individually
       data_expression real_condition = sort_bool::false_();
-      for (const data_expression_list& zone: it->second)
+      for (const data_expression_list& zone: it.second)
       {
         real_condition = lazy::or_(real_condition, reduce_lineq(zone));
       }
 
-      result = lazy::or_(result, lazy::and_(simpl_discr.apply(it->first), real_condition));
+      result = lazy::or_(result, lazy::and_(simpl_discr.apply(it.first), real_condition));
     }
     return rewr(result);
   }

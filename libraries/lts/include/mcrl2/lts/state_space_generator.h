@@ -440,7 +440,7 @@ class divergence_detector
       using utilities::detail::contains;
 
       bool result = false;
-      std::lock_guard guard(divergence_detector_mutex);
+      std::scoped_lock guard(divergence_detector_mutex);
       m_local_trace_constructor.clear();
 
       auto q = m_divergent_states.find(s);
@@ -573,7 +573,7 @@ class progress_monitor
         ++count;
         if (number_of_threads == 1 && count == level_up) 
         {
-          std::lock_guard guard(exclusive_print_mutex);
+          std::scoped_lock guard(exclusive_print_mutex);
           mCRL2log(log::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
           level++;
           level_up = count + todo_list_size;
@@ -583,7 +583,7 @@ class progress_monitor
 
         if (time(&new_log_time) > last_log_time.load(std::memory_order_relaxed))
         {
-          std::lock_guard guard(exclusive_print_mutex);
+          std::scoped_lock guard(exclusive_print_mutex);
 
           last_log_time = new_log_time;
           std::size_t lvl_states = state_count - last_state_count;
@@ -610,7 +610,7 @@ class progress_monitor
         count++;
         if (time(&new_log_time) > last_log_time.load(std::memory_order_relaxed))
         {
-          std::lock_guard guard(exclusive_print_mutex);
+          std::scoped_lock guard(exclusive_print_mutex);
           last_log_time = new_log_time;
           mCRL2log(log::status) << "monitor: currently explored "
                             << count << " state" << ((count==1)?"":"s")

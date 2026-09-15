@@ -25,7 +25,7 @@ class ToolInstance : public QWidget
     Q_OBJECT
 
   public:
-    explicit ToolInstance(QString filename, ToolInformation information, mcrl2::gui::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0);
+    explicit ToolInstance(QString filename, ToolInformation information, mcrl2::gui::qt::PersistentFileDialog* fileDialog, QWidget *parent = nullptr);
 
     ToolInformation information() { return m_info; }
     QString executable();

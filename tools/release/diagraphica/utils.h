@@ -17,14 +17,15 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
+#include <numbers>
 #include <sstream>
 #include <string>
 #include <map>
 #include <set>
 #include <vector>
 
-const double PI = 3.14159265;
-const double E  = 2.71828183;
+const double PI = std::numbers::pi;
+const double E  = std::numbers::e;
 
 class Utils
 {

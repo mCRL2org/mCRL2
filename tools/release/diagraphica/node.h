@@ -25,8 +25,8 @@ class Node
 {
   public:
     // -- constructors and destructors ------------------------------
-    Node(std::size_t idx): index(idx), cluster(0) {}
-    Node(std::size_t idx, const std::vector<double> &tpl): index(idx), tuple(tpl), cluster(0) {}
+    Node(std::size_t idx): index(idx), cluster(nullptr) {}
+    Node(std::size_t idx, const std::vector<double> &tpl): index(idx), tuple(tpl), cluster(nullptr) {}
 
     // -- set functions ---------------------------------------------
     void swapTupleVal(std::size_t idx1, std::size_t idx2);

@@ -115,8 +115,8 @@ class AddEditPropertyDialog : public QDialog
   FindAndReplaceDialog* findAndReplaceDialog;
   QString windowTitle;
   Property oldProperty;
-  int propertyParsingProcessid;
-  bool lastParsingPropertyIsMucalculus;
+  int propertyParsingProcessid = -1;
+  bool lastParsingPropertyIsMucalculus = true;
   QRegularExpressionValidator* propertyNameValidator;
   QByteArray geometry;
 

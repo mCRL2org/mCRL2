@@ -27,7 +27,7 @@ class MainWindow : public QMainWindow
 
   public:
     MainWindow(QThread *aterm_thread, mcrl2::data::rewrite_strategy strategy, bool do_not_use_dummies);
-    ~MainWindow();
+    ~MainWindow() override;
 
   protected slots:
     void openSpecification();
@@ -62,7 +62,7 @@ class MainWindow : public QMainWindow
     /**
      * @brief Saves window information
      */
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     QString renderStateChange(Simulation::State source, Simulation::State destination);
     void auto_select_state_or_probability();
 
@@ -70,7 +70,7 @@ class MainWindow : public QMainWindow
     Ui::MainWindow m_ui;
     QThread *m_atermThread;
     mcrl2::data::rewrite_strategy m_strategy;
-    Simulation *m_simulation;
+    Simulation *m_simulation = nullptr;
     Simulation *m_newSimulation = nullptr;
     Simulation::Trace m_trace;
     unsigned long long m_selected_state;

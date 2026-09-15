@@ -25,7 +25,7 @@ class PrimitiveFactory: public QObject
 
   public:
     PrimitiveFactory(Settings* ss);
-    ~PrimitiveFactory();
+    ~PrimitiveFactory() override;
     void drawPrimitive(int p);
     void drawSimpleSphere();
     int makeHemisphere();

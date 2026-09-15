@@ -23,7 +23,7 @@ class Node;
 class Edge
 {
   public:
-    Edge(std::size_t idx, const std::string& lbl): index(idx), label(lbl), inNode(0), outNode(0), bundle(0) {}
+    Edge(std::size_t idx, const std::string& lbl): index(idx), label(lbl) {}
 
     void setInNode(Node* in) { inNode = in; }
     void setOutNode(Node* out) { outNode = out; }
@@ -38,9 +38,9 @@ class Edge
   protected:
     std::size_t index;   // index in list of graph edges
     std::string label;   // "action label"
-    Node* inNode;
-    Node* outNode;
-    Bundle* bundle;
+    Node* inNode = 0;
+    Node* outNode = 0;
+    Bundle* bundle = 0;
 };
 
 #endif

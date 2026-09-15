@@ -132,7 +132,7 @@ public:
     return m_new_state;
   }
 
-  const ppg_summand simplify(const data::rewriter& rewr) const
+  ppg_summand simplify(const data::rewriter& rewr) const
   {
     ppg_summand result;
     result.m_quantification_domain = m_quantification_domain;
@@ -283,7 +283,7 @@ public:
     return m_is_conjunctive;
   }
 
-  const ppg_equation simplify(const data::rewriter& rewr) const
+  ppg_equation simplify(const data::rewriter& rewr) const
   {
     ppg_equation result;
     result.m_symbol = m_symbol;
@@ -433,7 +433,7 @@ public:
     return m_global_variables;
   }
 
-  const ppg_pbes simplify(const data::rewriter& rewr) const
+  ppg_pbes simplify(const data::rewriter& rewr) const
   {
     ppg_pbes result;
     result.m_initial_state = m_initial_state;

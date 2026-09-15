@@ -17,8 +17,7 @@ AddEditPropertyDialog::AddEditPropertyDialog(
     FindAndReplaceDialog* findAndReplaceDialog, QWidget* parent)
     : QDialog(parent), ui(new Ui::AddEditPropertyDialog),
       processSystem(processSystem), fileSystem(fileSystem),
-      findAndReplaceDialog(findAndReplaceDialog), oldProperty(Property()),
-      propertyParsingProcessid(-1), lastParsingPropertyIsMucalculus(true)
+      findAndReplaceDialog(findAndReplaceDialog), oldProperty(Property()) 
 {
   ui->setupUi(this);
 

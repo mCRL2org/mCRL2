@@ -12,7 +12,7 @@
 #include "findreplacedialog.h"
 
 FindReplaceDialog::FindReplaceDialog(QWidget *parent) :
-  QDialog(parent), m_textEdit(nullptr)
+  QDialog(parent) 
 {
   m_ui.setupUi(this);
 

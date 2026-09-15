@@ -30,6 +30,7 @@ namespace AttractionFunctions
 {
   struct LTSGraph : AttractionFunction
   {
+    ~LTSGraph() override = default;
     QVector3D operator()(const QVector3D& a, 
                          const QVector3D& b,
                          const float ideal) override
@@ -42,6 +43,7 @@ namespace AttractionFunctions
 
   struct LinearSprings : AttractionFunction
   {
+    ~LinearSprings() override = default;
     const float spring_constant = 1e-4f;
     const float scaling = 1.0f / 10000;
     QVector3D diff = { 0, 0, 0 };
@@ -64,6 +66,7 @@ namespace AttractionFunctions
 
   struct ElectricalSprings : AttractionFunction
   {
+    virtual ~ElectricalSprings() = default;
     QVector3D diff = { 0, 0, 0 };
     const float scaling = 1e-2f;
     QVector3D operator()(const QVector3D& a, 
@@ -77,6 +80,7 @@ namespace AttractionFunctions
 
   struct SimpleSpring : AttractionFunction
   {
+    virtual ~SimpleSpring() = default;
     QVector3D diff = { 0, 0, 0 };
     const float spring_constant = 1e-4f;
     QVector3D operator()(const QVector3D& a, 

@@ -71,10 +71,9 @@ LtsManager::LtsManager(QObject *parent, Settings *settings, QThread *atermThread
   QObject(parent),
   m_helper(settings),
   m_settings(settings),
-  m_lts(nullptr),
-  m_simulation(nullptr),
-  m_selectedState(nullptr),
-  m_selectedCluster(nullptr)
+  
+  m_simulation(nullptr)
+  
 {
   m_helper.moveToThread(atermThread);
 

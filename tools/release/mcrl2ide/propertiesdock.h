@@ -35,7 +35,7 @@ class PropertiesDock : public QDockWidget
    */
   PropertiesDock(ProcessSystem* processSystem, FileSystem* fileSystem,
                  FindAndReplaceDialog* findAndReplacDialog, QWidget* parent);
-  ~PropertiesDock();
+  ~PropertiesDock() override;
 
   /**
    * @brief setToNoProperties Empties the dock

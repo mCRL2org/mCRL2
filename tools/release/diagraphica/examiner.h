@@ -24,7 +24,7 @@ class Examiner : public Visualizer
       QWidget *parent,
       Settings* s,
       Graph* g);
-    virtual ~Examiner();
+    ~Examiner() override;
 
     QColor selectionColor() { return VisUtils::coolRed; }
     std::size_t selectedClusterIndex();
@@ -87,7 +87,7 @@ class Examiner : public Visualizer
     void handleIconPlay();
     */
     void handleIconRgt();
-    virtual void handleSelection(const Selection&) override;
+    void handleSelection(const Selection&) override;
 
     // -- utility drawing functions ---------------------------------
     void clear() override; 

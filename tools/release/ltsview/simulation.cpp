@@ -13,10 +13,8 @@
 
 Simulation::Simulation(QObject *parent, LTS& lts):
   QObject(parent),
-  m_ltsRef(lts),
-  m_initialState(nullptr),
-  m_currentState(nullptr),
-  m_currentTransition(nullptr)
+  m_ltsRef(lts)
+  
 {
 }
 

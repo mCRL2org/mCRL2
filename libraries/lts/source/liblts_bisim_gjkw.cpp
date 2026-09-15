@@ -1776,7 +1776,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
         s_iter = B->end() - 1;                                                  assert(B->bottom_end() > s_iter);  assert(B->bottom_begin() <= s_iter);
                                                                                 assert(B->end() == B->constln()->end());
         state_type const s_eq = B->seqnr();
-        if (BLOCK_NO_SEQNR == s_eq)
+        if (block_t::BLOCK_NO_SEQNR == s_eq)
         {
             break;
         }
@@ -1785,7 +1785,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
                                           (*s_iter)->succ_end() != succ_iter; )
         {
             if (state_type t_eq = succ_iter->target->block->seqnr();
-                                                        BLOCK_NO_SEQNR != t_eq)
+                                                block_t::BLOCK_NO_SEQNR != t_eq)
             {                                                                   assert(branching);
                 // We have a transition that originally was inert.
                 if (s_eq == t_eq)
@@ -1817,7 +1817,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
                 // Look up the label and where the transition from the
                 // intermediary state goes.
                 Key const k = to_lts_map.find(tgt_id)->second;
-                t_eq = part_st.state_info[k.second].block->seqnr();             assert(BLOCK_NO_SEQNR != t_eq);
+                t_eq = part_st.state_info[k.second].block->seqnr();             assert(block_t::BLOCK_NO_SEQNR != t_eq);
                 aut.add_transition(transition(s_eq, k.first, t_eq));            // The target state could also be found through the pointer
                                                                                 // structure (but we also need the labels, which are not stored
                                                                                 // in the refinable partition):

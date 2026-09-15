@@ -20,7 +20,7 @@ class QPersistentProcess : public QProcess
   public:
     using QProcess::QProcess;
 
-    ~QPersistentProcess() { setProcessState(QProcess::NotRunning); }
+    ~QPersistentProcess() override { setProcessState(QProcess::NotRunning); }
 };
 
 /// Prototype process that spawns new process instances when started
@@ -31,8 +31,8 @@ class QMultiProcess : public QProcess
     using ProcessPtr = std::unique_ptr<Process>;
     using Processes = std::vector<ProcessPtr>;
 
-    QMultiProcess() {}
-    ~QMultiProcess() {}
+    QMultiProcess() = default;
+    ~QMultiProcess() override = default;
 
     Process* start(QIODevice::OpenMode mode = ReadWrite);
 

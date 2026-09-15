@@ -8,6 +8,7 @@
 
 #include <cstdio>
 
+#include "mcrl2/data/function_symbol.h"
 #include "pbes2cvc4.h"
 
 #include "mcrl2/utilities/exception.h"
@@ -691,35 +692,35 @@ void translate_data_specification(const mcrl2::pbes_system::pbes &pbes, translat
   
   
   
-  for (std::set<function_symbol>::const_iterator i = defined_functions.begin(); i != defined_functions.end(); i++) {
-    if (definitions.count(*i) > 0 && definitions[*i].is_builtin()) {
-      translation.function_names[*i] = definitions[*i].name();
-    } else if (definitions.count(*i) > 0 && definitions[*i].is_identity()) {
-      translation.function_names[*i] = "";
-    } else if (definitions.count(*i) > 0 && definitions[*i].is_unavailable()) {
-      throw mcrl2::runtime_error("Function " + data::pp(*i) + " not available in pbes2cvc4, giving up.");
+  for (const function_symbol& defined_function : defined_functions) {
+    if (definitions.count(defined_function) > 0 && definitions[defined_function].is_builtin()) {
+      translation.function_names[defined_function] = definitions[defined_function].name();
+    } else if (definitions.count(defined_function) > 0 && definitions[defined_function].is_identity()) {
+      translation.function_names[defined_function] = "";
+    } else if (definitions.count(defined_function) > 0 && definitions[defined_function].is_unavailable()) {
+      throw mcrl2::runtime_error("Function " + data::pp(defined_function) + " not available in pbes2cvc4, giving up.");
     } else {
-      std::string name = sanitize_term(i->name());
+      std::string name = sanitize_term(defined_function.name());
       if (function_name_generator.has_identifier(name)) {
-        if (!function_sort(i->sort()).domain().empty()) {
-          name = mangle_sort_name(*function_sort(i->sort()).domain().begin()) + "-" + name;
+        if (!function_sort(defined_function.sort()).domain().empty()) {
+          name = mangle_sort_name(*function_sort(defined_function.sort()).domain().begin()) + "-" + name;
         }
       }
       name = function_name_generator(name);
       
       translation.definition += "(declare-fun " + name + " (";
-      if (is_function_sort(i->sort())) {
-        sort_expression_list domain = function_sort(i->sort()).domain();
+      if (is_function_sort(defined_function.sort())) {
+        sort_expression_list domain = function_sort(defined_function.sort()).domain();
         for (const mcrl2::data::sort_expression& j : domain)
         {
           assert(translation.sort_names.count(j) > 0);
           translation.definition += translation.sort_names[j] + " ";
         }
       }
-      assert(translation.sort_names.count(i->sort().target_sort()));
-      translation.definition += ") " + translation.sort_names[i->sort().target_sort()] + ")\n";
+      assert(translation.sort_names.count(defined_function.sort().target_sort()));
+      translation.definition += ") " + translation.sort_names[defined_function.sort().target_sort()] + ")\n";
       
-      translation.function_names[*i] = name;
+      translation.function_names[defined_function] = name;
     }
   }
   

@@ -92,7 +92,7 @@ class MainWindow : public QMainWindow
     /**
      * @brief Asks the user to save all changed files and saves window information
      */
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
 
   private slots:
     // Slots for all menu items

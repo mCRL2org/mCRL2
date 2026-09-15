@@ -90,8 +90,8 @@ class VisUtils
     static const QRgb orange = 0xff8000;
     static const QRgb coolRed = 0xf54000;
 
-    static const struct BlueYellow: public ColorMap<BlueYellow> { BlueYellow(){} QColor operator()(double fraction) const; } blueYellow;
-    static const struct Spectral: public ColorMap<Spectral> { Spectral(){} QColor operator()(double fraction) const; } spectral;
+    static const struct BlueYellow: public ColorMap<BlueYellow> { BlueYellow()= default; QColor operator()(double fraction) const; } blueYellow;
+    static const struct Spectral: public ColorMap<Spectral> { Spectral()= default; QColor operator()(double fraction) const; } spectral;
 
     static const ListColorMap grayScale;
     static const ListColorMap qualPast1;

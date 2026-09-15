@@ -453,11 +453,13 @@ class block_t
     /// this number is used as a state number in the quotient Kripke structure.
     /// (For blocks that contain extra Kripke states, the number is set to
     /// BLOCK_NO_SEQNR).
-    state_type int_seqnr;
-
-#define BLOCK_NO_SEQNR ((state_type) -1)
+    state_type int_seqnr = BLOCK_NO_SEQNR;
 
   public:
+    /// \brief value of int_seqnr indicating that no sequence number has been
+    /// assigned yet
+    [[maybe_unused]] static constexpr state_type BLOCK_NO_SEQNR = (state_type) -1;
+
     /// \brief total number of blocks with unique sequence number allocated
     /// \details Upon starting the stuttering equivalence algorithm, the number
     /// of blocks must be zero.
@@ -478,9 +480,9 @@ class block_t
           // int_inert_begin -- is initialised by part_trans_t::create_new_block
           // int_inert_end -- is initialised by part_trans_t::create_new_block
           to_constln(), // empty list
-          int_constln(constln_),
+          int_constln(constln_)
 
-          int_seqnr(BLOCK_NO_SEQNR)
+          
     {                                                                           // The following assertions hold trivially.
                                                                                 // assert(int_begin <= int_marked_nonbottom_begin);
                                                                                 // assert(int_marked_nonbottom_begin <= int_bottom_begin);
@@ -1097,7 +1099,7 @@ class part_state_t
             block_t* const B = permutation_iter[-1]->block;                     assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
                                                                                 #ifndef NDEBUG
-            if (BLOCK_NO_SEQNR != B->seqnr())
+            if (block_t::BLOCK_NO_SEQNR != B->seqnr())
             {
               ++deleted_blocks;
             }

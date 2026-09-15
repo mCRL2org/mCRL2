@@ -188,7 +188,7 @@ namespace mcrl2::lps
                 {
                   m_exclusive_state_access.unlock();
                 }
-                std::lock_guard<std::mutex> lock(m_global_todo_buffer_mutex);
+                std::scoped_lock lock(m_global_todo_buffer_mutex);
                 m_signal_global_todo_buffer_filled.notify_all();
               }
 

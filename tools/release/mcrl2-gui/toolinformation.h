@@ -101,7 +101,7 @@ class ToolInformation
 
     QString path, name, input2, output, desc, author;
     std::set<QString> input;
-    bool guiTool, valid;
+    bool guiTool, valid = false;
 
     QList<ToolOption> options;
 

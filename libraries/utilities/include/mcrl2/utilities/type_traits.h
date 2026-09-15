@@ -104,7 +104,7 @@ struct function_traits<ReturnType (ClassType::*)(Args...) const>
   template<size_t i>
   struct arg
   {
-    using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
+    using type = std::tuple_element_t<i, std::tuple<Args...>>;
     // the i-th argument is equivalent to the i-th tuple element of a tuple
     // composed of those arguments.
   };

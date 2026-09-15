@@ -13,7 +13,7 @@
 #include <QMimeData>
 
 MovableTableWidget::MovableTableWidget(QWidget *parent) :
-  QTableWidget(parent), m_lineRow(-1)
+  QTableWidget(parent) 
 {
   setSelectionBehavior(QAbstractItemView::SelectRows);
   setDragDropMode(QAbstractItemView::InternalMove);

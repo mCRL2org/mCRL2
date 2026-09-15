@@ -47,9 +47,9 @@ FileSystem::FileSystem(mcrl2::gui::qt::CodeEditor* specificationEditor, QSetting
   : parent(parent),
     specificationEditor(specificationEditor),
     settings(settings),
-    projectOpen(false),
-    properties({}),
-    specificationOnlyMode(false)
+    
+    properties({})
+    
 {
   for (std::pair<IntermediateFileType, QString> item: INTERMEDIATEFILETYPENAMES)
   {
@@ -806,9 +806,9 @@ void FileSystem::newProperty(const Property& property)
 
   /* make sure that no duplicates can be added to the project file */
   QDomNodeList propertyNodes = propertiesNode.childNodes();
-  for (int i = 0; i < propertyNodes.size(); i++)
+  for (auto && propertyNode : propertyNodes)
   {
-    if (propertyNodes.at(i).toElement().text() == property.name)
+    if (propertyNode.toElement().text() == property.name)
     {
       return;
     }

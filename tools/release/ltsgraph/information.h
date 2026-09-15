@@ -33,7 +33,7 @@ class Information
 {
   private:
     Graph& m_graph;         ///< The graph for the statistics
-    InformationUi* m_ui;    ///< The user interface which displays the information
+    InformationUi* m_ui = nullptr;    ///< The user interface which displays the information
   public:
 
     /**
@@ -61,10 +61,10 @@ class Information
 
     QString m_initial;        ///< The initial node index.
     QString m_initialstring;  ///< The initial node label.
-    std::size_t m_nodes;              ///< The total number of nodes.
-    std::size_t m_edges;              ///< The total number of edges.
-    std::size_t m_slabels;            ///< The total number of state labels.
-    std::size_t m_tlabels;            ///< The total number of transition labels.
+    std::size_t m_nodes = 0;              ///< The total number of nodes.
+    std::size_t m_edges = 0;              ///< The total number of edges.
+    std::size_t m_slabels = 0;            ///< The total number of state labels.
+    std::size_t m_tlabels = 0;            ///< The total number of transition labels.
 };
 
 class InformationUi : public QDockWidget

@@ -18,7 +18,7 @@ class FileInformation : public QWidget
     Q_OBJECT
     
 public:
-    explicit FileInformation(QString filename, QWidget *parent = 0);
+    explicit FileInformation(QString filename, QWidget *parent = nullptr);
     
 private:
     QString sizeString(qint64 size);

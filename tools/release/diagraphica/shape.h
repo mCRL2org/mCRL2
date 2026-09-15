@@ -29,7 +29,7 @@ class Shape : public QObject
         double angle,           int    shapeType,
         double xHinge,          double yHinge);
     Shape(const Shape& shape);
-    virtual ~Shape();
+    ~Shape() override;
 
     // -- set functions ---------------------------------------------
     void setIndex(std::size_t index) { m_index = index; }

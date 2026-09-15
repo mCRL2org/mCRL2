@@ -19,7 +19,7 @@ class Diagram : public QObject
 
   public:
     // -- constructors and destructor -------------------------------
-    Diagram(QObject *parent = 0);
+    Diagram(QObject *parent = nullptr);
     Diagram &operator=(const Diagram &other);
 
     // -- set functions ---------------------------------------------

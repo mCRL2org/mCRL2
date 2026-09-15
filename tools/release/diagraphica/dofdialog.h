@@ -21,7 +21,7 @@ class DofDialog : public QDialog
     Q_OBJECT
     
   public:
-    explicit DofDialog(Graph* graph, Shape* shape, QWidget *parent = 0);
+    explicit DofDialog(Graph* graph, Shape* shape, QWidget *parent = nullptr);
     Graph* graph() { return m_graph; }
     Shape* shape() { return m_shape; }
     
@@ -36,7 +36,7 @@ class DofDialog : public QDialog
     void dofActivated(int dofIndex);
 
   protected:
-    bool eventFilter(QObject *object, QEvent *event);
+    bool eventFilter(QObject *object, QEvent *event) override;
 
   private:
     Ui::DofDialog m_ui;

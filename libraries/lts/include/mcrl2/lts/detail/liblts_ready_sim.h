@@ -33,7 +33,7 @@ template <class LTS_TYPE>
      */
   void partitioning_algorithm() override;
   /** Destroys this partitioner. */
-  ~ready_sim_partitioner();
+  ~ready_sim_partitioner() override;
  private :
   // Non inherited data members...
   hash_table2* exists2;

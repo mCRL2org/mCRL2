@@ -56,8 +56,7 @@ class periodic_guard
     std::size_t m_regeneration_period = 100;
 
   public:
-    periodic_guard()
-    {}
+    periodic_guard() = default;
 
     periodic_guard(std::size_t initial_regeneration_period)
       : m_regeneration_period(initial_regeneration_period)
@@ -625,7 +624,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       mCRL2log(log::verbose) << "Finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s).\n";
     }
 
-    void on_discovered_elements(const std::set<propositional_variable_instantiation>& elements) override
+    void on_discovered_elements(const std::set<propositional_variable_instantiation>&  /*elements*/) override
     {
       using utilities::detail::contains;
       stopwatch timer;

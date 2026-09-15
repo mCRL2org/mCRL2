@@ -18,8 +18,8 @@ ToolInformation::ToolInformation(QString name, QString input1, QString input2, Q
   : name(name),
     input2(input2),
     output(output),
-    guiTool(guiTool),
-    valid(false)
+    guiTool(guiTool)
+    
 {
   QStringList inputs = input1.split(';');
   for (auto& input: inputs)

@@ -35,7 +35,7 @@ class SavePictureDialog : public QDialog
     QString m_filename;
     float m_width;
     float m_height;
-    bool m_inChange;
+    bool m_inChange = false;
 };
 
 #endif

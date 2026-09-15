@@ -16,8 +16,7 @@ ColorChooser::ColorChooser(QWidget *parent, DOF *dof, QList<double> *yCoordinate
   Visualizer(parent, nullptr),
   m_dof(dof),
   m_yCoordinates(yCoordinates),
-  m_type(type),
-  m_dragIdx(NON_EXISTING)
+  m_type(type)
 {
   setMouseTracking(true);
   setMinimumSize(100,50);

@@ -521,11 +521,11 @@ private:
   std::map<IntermediateFileType, bool> saveIntermediateFilesOptions;
 
   QString projectName;
-  bool projectOpen;
+  bool projectOpen = false;
   QDomDocument projectOptions;
   std::list<Property> properties;
   std::map<QString, bool> propertyModified;
-  bool specificationOnlyMode;
+  bool specificationOnlyMode = false;
   QDateTime lastKnownSpecificationModificationTime;
   QDateTime lastKnownProjectFileModificationTime;
   std::map<QString, QDateTime> lastKnownPropertyModificationTime;

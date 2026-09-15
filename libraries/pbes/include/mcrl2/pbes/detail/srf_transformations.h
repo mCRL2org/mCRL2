@@ -31,8 +31,10 @@ inline detail::pre_srf_pbes<allow_ce> split_conditions(const detail::pre_srf_pbe
     id_generator.add_identifier(equation.variable().name());
   }
 
-  const propositional_variable Xtrue = pbes.equations()[pbes.equations().size() - 2].variable();
-  const propositional_variable Xfalse = pbes.equations()[pbes.equations().size() - 1].variable();
+  // By construction (see pbes2pre_srf / simplify_srf_pbes), the last two equations of pbes
+  // are always the equations for X_false and X_true, in that order.
+  const propositional_variable X_false = pbes.equations()[pbes.equations().size() - 2].variable();
+  const propositional_variable X_true = pbes.equations()[pbes.equations().size() - 1].variable();
 
   detail::pre_srf_pbes<allow_ce> result = pbes;
   std::vector<detail::pre_srf_equation<allow_ce>> added_equations;
@@ -53,17 +55,21 @@ inline detail::pre_srf_pbes<allow_ce> split_conditions(const detail::pre_srf_pbe
         }
         else if (should_split && is_and(summand.condition()))
         {
-          const bool simple = granularity == 3 || summand.variable().name() == Xtrue.name()
-                              || summand.variable().name() == Xfalse.name();
+          const bool simple = granularity == 3 || summand.variable().name() == X_true.name()
+                              || summand.variable().name() == X_false.name();
           std::vector<detail::pre_srf_summand<allow_ce>> split_summands_inner;
           for (const pbes_expression& clause : split_and(summand.condition()))
           {
             if (simple)
             {
+              // Splitting flips the equation's conjunctivity (see below), so the escape
+              // target must be the terminal that is a no-op under the *flipped* reading:
+              // a conjunctive equation (forall) escapes to X_true (vacuously true conjunct),
+              // a disjunctive equation (exists) escapes to X_false (vacuously false disjunct).
               split_summands_inner.emplace_back(data::variable_list(),
                 not_(clause),
-                !equation.is_conjunctive() ? propositional_variable_instantiation(Xtrue.name(), {})
-                                           : propositional_variable_instantiation(Xfalse.name(), {}));
+                equation.is_conjunctive() ? propositional_variable_instantiation(X_true.name(), {})
+                                           : propositional_variable_instantiation(X_false.name(), {}));
             }
             else
             {

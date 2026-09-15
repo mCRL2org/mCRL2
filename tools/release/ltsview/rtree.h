@@ -18,7 +18,7 @@ class RTree
 {
   public:
     RTree():
-      root(NULL),
+      root(nullptr),
       neighbour_found(false)
     { }
 
@@ -53,11 +53,11 @@ class PackedRTreeBuilder
 {
   public:
     PackedRTreeBuilder():
-      rtree(NULL)
+      rtree(nullptr)
     { }
 
     ~PackedRTreeBuilder()
-    { }
+    = default;
 
     void addPoint(const QVector2D& point)
     {

@@ -174,12 +174,11 @@ void ParityGame::read_pgsolver( std::istream &is,
         vertices.erase(vertices.begin() + static_cast<std::ptrdiff_t>(used), vertices.end());
 
         // Remap edges to new vertex indices:
-        for ( StaticGraph::edge_list::iterator it = edges.begin();
-              it != edges.end(); ++it )
+        for (auto & edge : edges)
         {
-            it->first  = vertex_map[it->first];
-            it->second = vertex_map[it->second];
-            assert(it->first != NO_VERTEX && it->second != NO_VERTEX);
+            edge.first  = vertex_map[edge.first];
+            edge.second = vertex_map[edge.second];
+            assert(edge.first != NO_VERTEX && edge.second != NO_VERTEX);
         }
     }
 

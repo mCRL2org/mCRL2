@@ -12,8 +12,8 @@
 SavePictureDialog::SavePictureDialog(QWidget *parent, LtsCanvas *canvas, QString filename):
   QDialog(parent),
   m_canvas(canvas),
-  m_filename(filename),
-  m_inChange(false)
+  m_filename(filename)
+  
 {
   m_ui.setupUi(this);
 

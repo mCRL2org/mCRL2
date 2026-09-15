@@ -9,10 +9,12 @@
 #ifndef MATHUTILS_H
 #define MATHUTILS_H
 
+#include <numbers>
+
 namespace MathUtils
 {
 
-const double PI = 3.14159265359;
+const double PI = std::numbers::pi;
 
 static inline int round_to_int(float f)
 {

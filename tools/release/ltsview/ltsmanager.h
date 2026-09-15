@@ -113,10 +113,10 @@ class LtsManager : public QObject
     LtsManagerHelper m_helper;
 
     Settings *m_settings;
-    LTS *m_lts;
+    LTS *m_lts = nullptr;
     std::unique_ptr<Simulation> m_simulation;
-    State *m_selectedState;
-    Cluster *m_selectedCluster;
+    State *m_selectedState = nullptr;
+    Cluster *m_selectedCluster = nullptr;
     QList<State *> m_simulationStateHistory;
     QList<Transition *> m_simulationTransitionHistory;
 };

@@ -9,6 +9,7 @@
 //   a experiences towards b, where ideal is a parameter
 struct AttractionFunction
 {
+  virtual ~AttractionFunction() = default;
   virtual QVector3D operator()(const QVector3D& a, const QVector3D& b, float ideal) = 0;
 };
 
@@ -17,6 +18,7 @@ struct AttractionFunction
 //  a experiences as a result of b, where ideal is a parameter
 struct RepulsionFunction
 {
+  virtual ~RepulsionFunction() = default;
   virtual QVector3D operator()(const QVector3D& a, const QVector3D& b, float ideal) = 0;
 };
 

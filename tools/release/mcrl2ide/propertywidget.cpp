@@ -18,7 +18,7 @@ PropertyWidget::PropertyWidget(Property property, ProcessSystem* processSystem,
                                FindAndReplaceDialog* findAndReplaceDialog,
                                QWidget* parent)
     : QWidget(parent), parent(parent), processSystem(processSystem),
-      fileSystem(fileSystem), property(property), lastRunningProcessId(-1)
+      fileSystem(fileSystem), property(property) 
 {
   editPropertyDialog = new AddEditPropertyDialog(
       false, processSystem, fileSystem, findAndReplaceDialog, this);

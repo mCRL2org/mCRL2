@@ -17,7 +17,7 @@ namespace Graph
 //
 
 Information::Information(Graph& graph)
-  : m_graph(graph), m_ui(nullptr), m_initial(""), m_initialstring(""), m_nodes(0), m_edges(0), m_slabels(0), m_tlabels(0)
+  : m_graph(graph),  m_initial(""), m_initialstring("") 
 {
   update();
 }

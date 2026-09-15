@@ -23,8 +23,8 @@ class Simulator : public Visualizer
     Simulator(
       QWidget *parent,
       Settings* s,
-      Graph* g);
-    virtual ~Simulator();
+        Graph* g);
+      ~Simulator() override;
 
 
     static QColor SelectColor() { return VisUtils::coolGreen; }
@@ -55,7 +55,7 @@ class Simulator : public Visualizer
 
     // -- utility event handlers ------------------------------------
     void onTimer();
-    void reset() { initFrameCurr(0, std::vector< Attribute* >()); }
+    void reset() { initFrameCurr(nullptr, std::vector< Attribute* >()); }
 
   signals:
     void routingCluster(Cluster *cluster, QList<Cluster *> clusterSet, QList<Attribute *> attributes);
@@ -87,7 +87,7 @@ class Simulator : public Visualizer
 
     // -- hit detection ---------------------------------------------
     void handleHits(const std::vector< int > &ids);
-    virtual void handleSelection(const Selection&) override;
+    void handleSelection(const Selection&) override;
 
     // -- utility drawing functions ---------------------------------
     void clear() override;

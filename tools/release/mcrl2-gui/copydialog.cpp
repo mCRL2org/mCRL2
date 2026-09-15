@@ -10,8 +10,8 @@
 #include "copydialog.h"
 
 CopyDialog::CopyDialog(QWidget *parent) :
-  QDialog(parent),
-  m_move(false)
+  QDialog(parent)
+  
 {
   m_ui.setupUi(this);
 }

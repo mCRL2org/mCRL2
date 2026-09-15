@@ -28,7 +28,7 @@ class Simulation : public QObject
   Q_OBJECT
 
   public:
-    typedef QStringList State;
+    using State = QStringList;
     struct Transition
     {
       QString action_or_probability;
@@ -43,12 +43,12 @@ class Simulation : public QObject
       QList<Transition> transitions;
       unsigned long long transitionNumber;
     };
-    typedef QList<TracePosition> Trace;
+    using Trace = QList<TracePosition>;
 
   public:
     Simulation(mcrl2::data::rewrite_strategy strategy)
-        : m_strategy(strategy), m_initialized(false), m_simulation(NULL) {}
-    ~Simulation() 
+        : m_strategy(strategy),  m_simulation(nullptr) {}
+    ~Simulation() override 
     { 
       delete m_simulation; 
     }
@@ -80,7 +80,7 @@ class Simulation : public QObject
 
   private:
     mcrl2::data::rewrite_strategy m_strategy;
-    bool m_initialized;
+    bool m_initialized = false;
 
     // Constructed in init(), which runs on this object's own (worker) thread
     // after moveToThread(): a value member here would instead be

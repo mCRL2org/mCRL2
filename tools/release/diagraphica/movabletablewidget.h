@@ -28,7 +28,7 @@ class MovableTableWidget : public QTableWidget
     int dropRow(QPoint pos);
 
   private:
-    int m_lineRow;
+    int m_lineRow = -1;
 
   signals:
     void itemMoved(int oldIndex, int newIndex);

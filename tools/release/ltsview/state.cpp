@@ -11,13 +11,9 @@
 
 
 State::State(int aid):
-  cluster(nullptr),
-  id(aid),
-  zoomLevel(0),
-  positionAngle(-1.0f),
-  positionRadius(0.0f),
-  rank(0),
-  simulationCount(0)
+  
+  id(aid)
+  
 {}
 
 State::~State()

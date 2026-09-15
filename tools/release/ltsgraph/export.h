@@ -148,7 +148,7 @@ class Exporter
   protected:
     Graph::Graph::Guard m_guard;
     QFile m_file;
-    bool m_valid;
+    bool m_valid = false;
 
     const bool m_exploring;
     const std::size_t m_nodeCount;
@@ -171,7 +171,7 @@ class Exporter
      * During the lifetime of this object the graph remains locked, and the file remains open.
      */
     Exporter(Graph::Graph& graph, const QString& fileName)
-      : m_guard(graph), m_file(fileName), m_valid(false),
+      : m_guard(graph), m_file(fileName), 
       m_exploring(m_guard.graph.hasExploration()),
       m_nodeCount(m_exploring ? m_guard.graph.explorationNodeCount() : m_guard.graph.nodeCount()),
       m_edgeCount(m_exploring ? m_guard.graph.explorationEdgeCount() : m_guard.graph.edgeCount())

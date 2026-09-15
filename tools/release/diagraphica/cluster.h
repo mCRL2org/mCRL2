@@ -64,7 +64,7 @@ class Cluster
     Bundle* getOutBundle(const std::size_t& idx);
 
     // -- clear functions -------------------------------------------
-    void clearParent() { parent = 0; }
+    void clearParent() { parent = nullptr; }
     void clearChildren();
     void clearNodes();
     void clearAttribute();

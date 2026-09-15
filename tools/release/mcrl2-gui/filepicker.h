@@ -20,7 +20,7 @@ class FilePicker : public QWidget
     Q_OBJECT
 
   public:
-    explicit FilePicker(mcrl2::gui::qt::PersistentFileDialog* fileDialog, QWidget *parent = 0, bool save = true);
+    explicit FilePicker(mcrl2::gui::qt::PersistentFileDialog* fileDialog, QWidget *parent = nullptr, bool save = true);
 
     QString text() { return m_ui.value->text(); }
 
@@ -29,8 +29,8 @@ class FilePicker : public QWidget
     void setText(QString value) { m_ui.value->setText(value); }
 
   protected:
-    void dragEnterEvent(QDragEnterEvent *event);
-    void dropEvent(QDropEvent *event);
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
   private:
     Ui::FilePicker m_ui;

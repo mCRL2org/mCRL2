@@ -32,8 +32,8 @@ public:
    * @param inputProjectFilePath The file path to a project file to open
    * @param parent The parent of this widget
    */
-  explicit MainWindow(const QString& inputProjectFilePath, QWidget* parent = 0);
-  ~MainWindow();
+  explicit MainWindow(const QString& inputProjectFilePath, QWidget* parent = nullptr);
+  ~MainWindow() override;
 
   public slots:
   /**

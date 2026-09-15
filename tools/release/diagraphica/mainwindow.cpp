@@ -18,12 +18,7 @@
 
 MainWindow::MainWindow():
   m_settingsDialog(new SettingsDialog(this, &m_settings)),
-  m_graph(nullptr),
-  m_examiner(nullptr),
-  m_arcDiagram(nullptr),
-  m_simulator(nullptr),
-  m_diagramEditor(nullptr),
-  m_routingCluster(nullptr),
+  
   m_fileDialog("", this)
 {
   m_ui.setupUi(this);

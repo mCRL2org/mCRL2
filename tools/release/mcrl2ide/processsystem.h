@@ -114,8 +114,8 @@ public:
   private:
   QQueue<int>* processQueue;
   ProcessType processType;
-  bool running;
-  int currentProcessid;
+  bool running = false;
+  int currentProcessid = -1;
 };
 
 /**
@@ -266,7 +266,7 @@ public:
   private:
   FileSystem* fileSystem;
   ConsoleDock* consoleDock;
-  int pid;
+  int pid = 0;
   std::map<int, std::vector<QProcess*>> processes;
   std::map<int, ProcessType> processTypes;
   std::map<int, QString> results;

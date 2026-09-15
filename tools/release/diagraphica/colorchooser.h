@@ -53,7 +53,7 @@ class ColorChooser : public Visualizer
     DOF *m_dof;
     QList<double> *m_yCoordinates;
     ColorType m_type;
-    std::size_t m_dragIdx;
+    std::size_t m_dragIdx = NON_EXISTING;
 };
 
 #endif

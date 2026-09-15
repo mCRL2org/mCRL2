@@ -16,15 +16,8 @@
 
 MarkManager::MarkManager(QObject *parent, LtsManager *ltsManager):
   QObject(parent),
-  m_ltsManager(ltsManager),
-  m_lts(nullptr),
-  m_markStyle(NO_MARKS),
-  m_clusterMatchStyle(MATCH_ANY),
-  m_stateMatchStyle(MATCH_ANY),
-  m_markedStatesAny(0),
-  m_markedStatesAll(0),
-  m_markedTransitions(0),
-  m_activeMarkRules(0)
+  m_ltsManager(ltsManager)
+  
 {
   connect(ltsManager, SIGNAL(ltsChanged(LTS *)), this, SLOT(setLts(LTS *)));
   connect(ltsManager, SIGNAL(ltsZoomed(LTS *)), this, SLOT(setRelatedLts(LTS *)));

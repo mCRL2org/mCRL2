@@ -557,25 +557,26 @@ static std::string match_pattern(
       
       std::vector<std::vector<rule> > split_rules;
       split_rules.resize(constructors.size());
-      for (std::vector<rule>::iterator j = rules.begin(); j != rules.end(); ++j) {
+      for (rule& j: rules)
+      {
         rule new_rule;
-        new_rule.rhs = j->rhs;
-        new_rule.condition = j->condition;
-        new_rule.bound_variables = j->bound_variables;
+        new_rule.rhs = j.rhs;
+        new_rule.condition = j.condition;
+        new_rule.bound_variables = j.bound_variables;
         for (size_t k = 0; k < i; ++k) {
-          if (j->parameters.count(k)) {
-            new_rule.parameters[k] = j->parameters[k];
+          if (j.parameters.count(k)) {
+            new_rule.parameters[k] = j.parameters[k];
           }
         }
         for (size_t k = i + 1; k < arguments.size(); ++k) {
-          if (j->parameters.count(k)) {
-            new_rule.parameters[k - 1] = j->parameters[k];
+          if (j.parameters.count(k)) {
+            new_rule.parameters[k - 1] = j.parameters[k];
           }
         }
         
-        if (!j->parameters.count(i) || is_variable(j->parameters[i])) {
-          if (j->parameters.count(i)) {
-            new_rule.bound_variables[variable(j->parameters[i])] = arguments[i];
+        if (!j.parameters.count(i) || is_variable(j.parameters[i])) {
+          if (j.parameters.count(i)) {
+            new_rule.bound_variables[variable(j.parameters[i])] = arguments[i];
           }
           
           for (auto & split_rule : split_rules) {
@@ -583,11 +584,11 @@ static std::string match_pattern(
           }
         } else {
           function_symbol constructor;
-          if (is_function_symbol(j->parameters[i])) {
-            constructor = function_symbol(j->parameters[i]);
+          if (is_function_symbol(j.parameters[i])) {
+            constructor = function_symbol(j.parameters[i]);
           } else {
-            assert(is_application(j->parameters[i]));
-            application a(j->parameters[i]);
+            assert(is_application(j.parameters[i]));
+            application a(j.parameters[i]);
             constructor = function_symbol(a.head());
             
             size_t index = arguments.size() - 1;
@@ -600,7 +601,7 @@ static std::string match_pattern(
           split_rules[constructor_indices[constructor]].push_back(new_rule);
         }
       }
-      
+
       std::vector<std::string> base_arguments;
       base_arguments.insert(base_arguments.end(), arguments.begin(), arguments.begin() + static_cast<std::ptrdiff_t>(i));
       base_arguments.insert(base_arguments.end(), arguments.begin() + static_cast<std::ptrdiff_t>(i) + 1, arguments.end());

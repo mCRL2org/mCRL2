@@ -69,22 +69,22 @@ class State
     int getZoomLevel() const;
 
   private:
-    Cluster* cluster;
+    Cluster* cluster = nullptr;
     std::size_t id;
-    int zoomLevel;
+    int zoomLevel = 0;
     std::vector< Transition* > inTransitions;
     std::vector< Transition* > loops;
     std::vector< Transition* > outTransitions;
     std::set< MarkRuleIndex > matchedRules;
-    float positionAngle;
-    float positionRadius;
+    float positionAngle = -1.0f;
+    float positionRadius = 0.0f;
     QVector3D positionAbs;
     QVector3D outgoingControl;
     QVector3D incomingControl;
     QVector3D loopControl1;
     QVector3D loopControl2;
-    int rank;
-    int simulationCount;
+    int rank = 0;
+    int simulationCount = 0;
 };
 
 #endif //STATE_H

@@ -28,7 +28,7 @@ class ArcDiagram : public Visualizer
         QWidget *parent,
         Settings* s,
         Graph* g);
-    virtual ~ArcDiagram();
+    ~ArcDiagram() override;
 
     void getAttrsTree(std::vector< std::size_t > &idcs);
 
@@ -129,7 +129,7 @@ class ArcDiagram : public Visualizer
     void hideDiagram(const std::size_t& dgrmIdx);
 
     // -- hit detection ---------------------------------------------
-    virtual void handleSelection(const Selection&) override;
+    void handleSelection(const Selection&) override;
 
     // -- static variables ------------------------------------------
     // -- data members ----------------------------------------------

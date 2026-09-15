@@ -41,17 +41,17 @@ class LtsCanvas : public QOpenGLWidget
     void clusterPositionsChanged();
 
   protected:
-    void initializeGL();
-    void resizeGL(int width, int height);
-    void paintGL();
+    void initializeGL() override;
+    void resizeGL(int width, int height) override;
+    void paintGL() override;
     void render(bool light);
     void determineActiveTool(QMouseEvent* event, bool useModifiers);
     void setActiveTool(Tool tool);
-    void mousePressEvent(QMouseEvent* event);
-    void mouseReleaseEvent(QMouseEvent* event);
-    void mouseDoubleClickEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
-    void wheelEvent(QWheelEvent* event);
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
     Selection selectObject(QPoint position);
     Selection parseSelection(GLuint* selectionBuffer, GLint items);
     void applyRotation(bool reverse = false);
@@ -77,15 +77,15 @@ class LtsCanvas : public QOpenGLWidget
     QCursor m_zoomCursor;
     QCursor m_rotateCursor;
 
-    int m_width;
-    int m_height;
+    int m_width = 0;
+    int m_height = 0;
     float m_baseDepth;
     float m_nearPlane;
     float m_farPlane;
     QVector3D m_position;
     QQuaternion m_rotation;
     Tool m_activeTool;
-    bool m_dragging;
+    bool m_dragging = false;
     QPoint m_lastMousePosition;
 };
 

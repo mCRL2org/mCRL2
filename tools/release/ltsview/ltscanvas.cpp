@@ -22,10 +22,8 @@ LtsCanvas::LtsCanvas(QWidget* parent, Settings* settings, LtsManager* ltsManager
   QOpenGLWidget(parent),
   m_settings(settings),
   m_ltsManager(ltsManager),
-  m_visualizer(new Visualizer(this, settings, ltsManager, markManager)),
-  m_width(0),
-  m_height(0),
-  m_dragging(false)
+  m_visualizer(new Visualizer(this, settings, ltsManager, markManager))
+  
 {
   m_selectCursor = QCursor(Qt::ArrowCursor);
   m_panCursor = QCursor(QPixmap(&pan_cursor[0]));

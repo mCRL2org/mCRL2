@@ -25,6 +25,7 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <assert.h>
+#include <utility>
 #include <vector>
 #include <mcrl2/utilities/logger.h>
 #include <graph.h>
@@ -94,7 +95,7 @@ const std::size_t max_slice = 50;
 /// This method avoids precision loss due to adding up too much before division
 ///  Downside: more divisions. Upside: more accuracy.
 template < typename ReturnType >
-ReturnType _slicedAverage(const std::size_t i, const std::size_t j,
+ReturnType slicedAverage(const std::size_t i, const std::size_t j,
                           std::function<ReturnType(std::size_t)> f, ReturnType zero)
 {
   std::size_t n = j - i;
@@ -103,8 +104,8 @@ ReturnType _slicedAverage(const std::size_t i, const std::size_t j,
     // split
     std::size_t m = i + n / 2;
     double recip = 1.0 / n;
-    return (m - i) * recip * _slicedAverage(i, m, f, zero) +
-           (j - m) * recip * _slicedAverage(m, j, f, zero);
+    return (m - i) * recip * slicedAverage(i, m, f, zero) +
+           (j - m) * recip * slicedAverage(m, j, f, zero);
   }
   else
   {
@@ -157,13 +158,13 @@ class GeometricTree
 {
   public:
   GeometricTree(float theta, T minbounds, T maxbounds)
-      : m_theta(theta), m_minbounds(minbounds), m_maxbounds(maxbounds),
-        m_nodes(1)
+      : m_theta(theta), m_minbounds(minbounds), m_maxbounds(maxbounds)
+        
   {
     m_data = {emptyTreeNode<T>()};
   };
 
-  typedef T data_t;
+  using data_t = T;
   /**
    * @brief Interface function for inserting position into tree
    *
@@ -264,7 +265,7 @@ class GeometricTree
   float m_theta;       ///< Barnes-Hut opening criterion
   T m_minbounds;       ///< Bounding volume of entire tree base
   T m_maxbounds;       ///< Bounding volume of entire tree other extreme
-  std::size_t m_nodes; ///< Number of leaf nodes currently in tree
+  std::size_t m_nodes = 1; ///< Number of leaf nodes currently in tree
 
   std::vector<TreeNode<T>*>
       m_super_nodes; ///< Used to accumulate all super nodes during query
@@ -367,7 +368,7 @@ class GeometricTree
       {
         // iterate over all children and recurse if necessary
         node_extents *= 0.5f;
-        for (std::size_t j = 0; j < num_children; j++)
+        for (std::size_t j = 0; std::cmp_less(j , num_children); j++)
         {
           std::size_t child_index = i + m_data[i].offset + j;
           if (m_data[child_index].children > 0)
@@ -393,7 +394,7 @@ class GeometricTree
     std::size_t base = i + m_data[i].offset;
     double recip = 1.0 / m_data[i].children;
     m_data[i].pos = T();
-    for (std::size_t child = 0; child < num_children; child++)
+    for (std::size_t child = 0; std::cmp_less(child , num_children); child++)
     {
       calc_subpos(base + child);
       m_data[i].pos +=
@@ -410,12 +411,12 @@ class GeometricTree
   {
     if (m_data.size() < m_nodes + num_children)
     {
-      for (std::size_t i = 0; i < num_children; i++)
+      for (std::size_t i = 0; std::cmp_less(i , num_children); i++)
         m_data.emplace_back(emptyTreeNode<T>());
     }
     else
     {
-      for (std::size_t i = 0; i < num_children; i++)
+      for (std::size_t i = 0; std::cmp_less(i , num_children); i++)
         m_data[m_nodes + i].children = 0;
     }
     m_nodes += num_children;

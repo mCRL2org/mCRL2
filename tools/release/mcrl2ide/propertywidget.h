@@ -39,7 +39,7 @@ class PropertyWidget : public QWidget
   PropertyWidget(Property property, ProcessSystem* processSystem,
                  FileSystem* fileSystem,
                  FindAndReplaceDialog* findAndReplaceDialog, QWidget* parent);
-  ~PropertyWidget();
+  ~PropertyWidget() override;
 
   /**
    * @brief getProperty Gets the property of this widget
@@ -131,7 +131,7 @@ class PropertyWidget : public QWidget
 
   AddEditPropertyDialog* editPropertyDialog;
 
-  int lastRunningProcessId;
+  int lastRunningProcessId = -1;
   bool lastProcessIsVerification;
   bool evidenceIsWitness;
 };

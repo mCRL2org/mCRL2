@@ -23,10 +23,10 @@ class Simulation : public QObject
 
   public:
     Simulation(QObject *parent, LTS& lts);
-    ~Simulation();
+    ~Simulation() override;
     Simulation& operator=(const Simulation &other);
     const LTS& lts() const { return m_ltsRef; }
-    bool isStarted() const { return m_currentState != 0; }
+    bool isStarted() const { return m_currentState != nullptr; }
     State *initialState() const { return m_initialState; }
     State *currentState() const { return m_currentState; }
     Transition *currentTransition() const { return m_currentTransition; }
@@ -52,9 +52,9 @@ class Simulation : public QObject
 
   private:
     LTS& m_ltsRef;
-    State *m_initialState;
-    State *m_currentState;
-    Transition *m_currentTransition;
+    State *m_initialState = nullptr;
+    State *m_currentState = nullptr;
+    Transition *m_currentTransition = nullptr;
     QList<Transition *> m_history;
 };
 

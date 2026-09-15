@@ -86,7 +86,7 @@ class MainWindow : public QMainWindow
     /**
      * @brief Saves window information
      */
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
 
     QList<int> selectedAttributes();
     QList<int> selectedValues();
@@ -101,14 +101,14 @@ class MainWindow : public QMainWindow
     Settings m_settings;
     SettingsDialog *m_settingsDialog;
 
-    Graph *m_graph;
+    Graph *m_graph = nullptr;
 
-    Examiner *m_examiner;
-    ArcDiagram *m_arcDiagram;
-    Simulator *m_simulator;
-    DiagramEditor *m_diagramEditor;
+    Examiner *m_examiner = nullptr;
+    ArcDiagram *m_arcDiagram = nullptr;
+    Simulator *m_simulator = nullptr;
+    DiagramEditor *m_diagramEditor = nullptr;
 
-    Cluster *m_routingCluster;
+    Cluster *m_routingCluster = nullptr;
     QList<Cluster *> m_routingClusterSet;
     QList<Attribute *> m_routingClusterAttributes;
 

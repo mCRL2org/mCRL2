@@ -24,7 +24,7 @@ class Cluster_iterator
 {
   public:
     Cluster_iterator(LTS* l);
-    virtual ~Cluster_iterator() {}
+    virtual ~Cluster_iterator() = default;
     void operator++();
     void operator++(int) { ++*this; }
     Cluster* operator*();
@@ -41,10 +41,10 @@ class Reverse_cluster_iterator: public Cluster_iterator
 {
   public:
     Reverse_cluster_iterator(LTS* l);
-    ~Reverse_cluster_iterator() {}
-    bool is_end();
+    ~Reverse_cluster_iterator() override = default;
+    bool is_end() override;
   protected:
-    void next();
+    void next() override;
 };
 
 class State_iterator

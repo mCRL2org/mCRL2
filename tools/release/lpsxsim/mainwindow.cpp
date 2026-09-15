@@ -20,7 +20,7 @@
 MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strategy, bool do_not_use_dummies)
   : m_atermThread(atermThread),
     m_strategy(strategy),
-    m_simulation(nullptr),
+    
     m_animationTimer(new QTimer(this)),
     m_do_not_use_dummies(do_not_use_dummies),
     m_fileDialog("", this)

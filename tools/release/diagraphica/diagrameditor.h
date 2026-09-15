@@ -94,7 +94,7 @@ class DiagramEditor : public Visualizer
 
   protected:
     // -- private utility functions ---------------------------------
-    virtual void clear() override;
+    void clear() override;
     double snapIfNeeded(double input);
     QPointF snapIfNeeded(QPointF input);
     double snapAngleIfNeeded(double input);
@@ -128,7 +128,7 @@ class DiagramEditor : public Visualizer
     QSize sizeHint() const override { return QSize(600,600); }
 
     // -- hit detection ---------------------------------------------
-    virtual void handleSelection(const Selection&) override;
+    void handleSelection(const Selection&) override;
 
     // -- data members ----------------------------------------------
 

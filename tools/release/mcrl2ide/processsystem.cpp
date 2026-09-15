@@ -14,8 +14,8 @@
 #include <utility>
 
 ProcessThread::ProcessThread(QQueue<int>* processQueue, ProcessType processType)
-    : processQueue(processQueue), processType(processType), running(false),
-      currentProcessid(-1)
+    : processQueue(processQueue), processType(processType)
+      
 {
 }
 
@@ -77,7 +77,7 @@ int ProcessThread::getCurrentProcessId()
 }
 
 ProcessSystem::ProcessSystem(FileSystem* fileSystem)
-    : fileSystem(fileSystem), pid(0)
+    : fileSystem(fileSystem) 
 {
   qRegisterMetaType<ProcessType>("ProcessType");
 

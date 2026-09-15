@@ -61,7 +61,7 @@ QVector3D slicedAverage(Graph::Graph& graph)
     return graph.node(graph.hasExploration() ? graph.explorationNode(i) : i)
         .pos();
   };
-  return _slicedAverage(0, graph.hasExploration() ? graph.explorationNodeCount() : graph.nodeCount(), func, QVector3D(0, 0, 0));
+  return slicedAverage(0, graph.hasExploration() ? graph.explorationNodeCount() : graph.nodeCount(), func, QVector3D(0, 0, 0));
 }
 
 // Returns the average square magnitude of all vector3s in the vector
@@ -69,5 +69,5 @@ float slicedAverageSqrMagnitude(std::vector<QVector3D>& forces)
 {
   std::function<float(std::size_t)> func = [&forces](std::size_t i)
                                               { return forces[i].lengthSquared(); };
-  return _slicedAverage(0, forces.size(), func, 0.0f);
+  return slicedAverage(0, forces.size(), func, 0.0f);
 }

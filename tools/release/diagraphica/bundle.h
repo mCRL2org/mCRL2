@@ -53,10 +53,10 @@ class Bundle
       std::string& lbls);
 
     // -- clear functions -------------------------------------------
-    void clearParent() { parent = 0; }
+    void clearParent() { parent = nullptr; }
     void clearChildren();
-    void clearInCluster() { inCluster = 0; }
-    void clearOutCluster() { outCluster = 0; }
+    void clearInCluster() { inCluster = nullptr; }
+    void clearOutCluster() { outCluster = nullptr; }
     void clearEdges();
 
   protected:

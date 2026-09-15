@@ -68,27 +68,23 @@ SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
       m_node_tree2D(0, {0, 0}, {0, 0}),
       m_handle_tree2D(0, {0, 0}, {0, 0}),
       m_trans_tree2D(0, {0, 0}, {0, 0}),
-      m_speed(0.001f),
-      m_attraction(0.13f),
-      m_repulsion(50.0f),
-      m_natLength(50.0f),
-      m_handleDeviation(10.0f),
+      
       m_graph(graph),
-      m_ui(nullptr),
+      
       attrFuncMap({
           {AttractionFunctionID::ltsgraph_attr, new AttractionFunctions::LTSGraph()},
           {AttractionFunctionID::electricalsprings_attr, new AttractionFunctions::ElectricalSprings()},
           {AttractionFunctionID::linearsprings_attr, new AttractionFunctions::LinearSprings()},
       }),
       m_attrFunc(attrFuncMap[AttractionFunctionID::ltsgraph_attr]),
-      m_option_attractionCalculation(AttractionFunctionID::ltsgraph_attr),
+      
       repFuncMap({
           {RepulsionFunctionID::ltsgraph_rep, new RepulsionFunctions::LTSGraph()},
           {RepulsionFunctionID::electricalsprings_rep, new RepulsionFunctions::ElectricalSpring()},
           {RepulsionFunctionID::none_rep, new RepulsionFunctions::None()},
       }),
       m_repFunc(repFuncMap[RepulsionFunctionID::ltsgraph_rep]),
-      m_option_repulsionCalculation(RepulsionFunctionID::ltsgraph_rep),
+      
       m_glwidget(glwidget)
 {
   m_graph.gv_debug.addVar("Stability");
@@ -901,7 +897,7 @@ void SpringLayout::resetPositions()
 SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, CustomQWidget* advancedDialogWidget, QWidget* parent)
     : QDockWidget(parent),
       m_layout(layout),
-      m_thread(nullptr),
+      
       m_ui_advanced_dialog(advancedDialogWidget)
 {
   m_ui.setupUi(this);

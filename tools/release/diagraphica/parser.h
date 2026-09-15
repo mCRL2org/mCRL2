@@ -23,7 +23,7 @@ class Parser : public QObject
 
   public:
     // -- constructors and destructor -------------------------------
-    Parser(QObject* parent = 0);
+    Parser(QObject* parent = nullptr);
 
     // fsm files
     void parseFile(

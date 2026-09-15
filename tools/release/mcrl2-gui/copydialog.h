@@ -29,7 +29,7 @@ class CopyDialog : public QDialog
   private:
     Ui::CopyDialog m_ui;
     int m_count;
-    bool m_move;
+    bool m_move = false;
 
 };
 

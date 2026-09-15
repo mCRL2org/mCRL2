@@ -55,7 +55,7 @@ class NodeShaderInstanced : public QOpenGLShaderProgram
   int u_scale_loc = -1;
   int u_V_loc = -1;
   public:
-  bool link();
+  bool link() override;
   void setEye(const QVector3D& eye){
     setUniformValue(u_eye_loc, eye);
   }
@@ -75,7 +75,7 @@ class ArrowShaderInstanced : public QOpenGLShaderProgram
   int u_VP_loc = -1;
   int u_scale_loc = -1;
   public:
-  bool link();
+  bool link() override;
   void setVP(const QMatrix4x4& VP){
     setUniformValue(u_VP_loc, VP);
   }

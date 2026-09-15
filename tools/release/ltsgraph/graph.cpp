@@ -76,8 +76,8 @@ void debug_lock(const char *type, const char *func)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 Graph::Graph()
-    : m_exploration(nullptr), m_type(mcrl2::lts::lts_lts), m_empty(""),
-      m_stable(true)
+    :  m_empty("")
+      
 {
 }
 
