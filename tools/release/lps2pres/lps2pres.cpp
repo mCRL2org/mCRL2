@@ -11,6 +11,7 @@
 ///        a parameterised real equation system. 
 
 #include "mcrl2/lps/io.h"
+#include "mcrl2/modal_formula/check_formula_actions.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pres/io.h"
 #include "mcrl2/pres/lps2pres.h"
@@ -23,24 +24,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::log;
 using pres_system::tools::pres_output_tool;
-
-namespace mcrl2::pres_system::detail
-{
-/// \brief Prints a warning if formula contains an action that is not used in lpsspec.
-inline void check_lps2pres_actions(const state_formulas::state_formula& formula, const lps::stochastic_specification& lpsspec)
-{
-  std::set<process::action_label> used_lps_actions = lps::find_action_labels(lpsspec.process());
-  std::set<process::action_label> used_state_formula_actions = state_formulas::find_action_labels(formula);
-  std::set<process::action_label> diff = utilities::detail::set_difference(used_state_formula_actions, used_lps_actions);
-  if (!diff.empty())
-  {
-    mCRL2log(log::warning) << "Warning: the modal formula contains actions "
-                           << core::detail::print_list(diff)
-                           << " that are in the data specification, but do not appear in the LPS!" << std::endl;
-  }
-}
-
-} // namespace mcrl2::pres_system::detail
 
 class lps2pres_tool : public pres_output_tool<input_output_tool>
 {
@@ -116,7 +99,7 @@ protected:
       std::string text = utilities::read_text(from);
       const bool formula_is_quantitative = true;
       state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
-      pres_system::detail::check_lps2pres_actions(formspec.formula(), lpsspec);
+      state_formulas::check_formula_actions(formspec.formula(), lps::find_action_labels(lpsspec.process()), "LPS");
       mCRL2log(log::verbose) << "converting state formula and LPS to a PRES..." << std::endl;
       const bool structured=false;
       pres_system::pres result = pres_system::lps2pres(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, check_only);

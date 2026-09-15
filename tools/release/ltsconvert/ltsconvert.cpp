@@ -390,18 +390,6 @@ class ltsconvert_tool : public input_output_tool
                              "and remove other state labels if they exist");
     }
 
-    void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
-    {
-      std::string::size_type lastpos = 0;
-      std::string::size_type pos;
-      while ((pos = act_names.find(',',lastpos)) != std::string::npos)
-      {
-        tau_actions.push_back(act_names.substr(lastpos,pos-lastpos));
-        lastpos = pos+1;
-      }
-      tau_actions.push_back(act_names.substr(lastpos));
-    }
-
     void parse_options(const command_line_parser& parser) override
     {
       input_output_tool::parse_options(parser);
@@ -450,7 +438,7 @@ class ltsconvert_tool : public input_output_tool
 
       if (parser.options.count("tau"))
       {
-        set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
+        tool_options.tau_actions = split(parser.option_argument("tau"), ",");
       }
 
       if (parser.options.count("add-state-as-state-label"))

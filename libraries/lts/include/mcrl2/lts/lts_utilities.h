@@ -23,6 +23,48 @@
 namespace mcrl2::lts
 {
 
+/** \brief Throws a runtime error if the LTS contains a transition with an invalid action label index.
+ * \param[in] ltsspec An LTS.
+ * \pre All transition labels of ltsspec are below the number of action labels of ltsspec.
+ * \post None.
+ */
+template<class LTS_TYPE>
+void check_lts(const LTS_TYPE& ltsspec)
+{
+  for (const transition& tr: ltsspec.get_transitions())
+  {
+    std::size_t label = tr.label();
+    if (label >= ltsspec.action_labels().size())
+    {
+      throw mcrl2::runtime_error("Invalid LTS detected: there are not enough action labels");
+    }
+  }
+}
+
+/** \brief Returns the action labels that occur in the transitions of the given LTS.
+ * \param[in] ltsspec An LTS.
+ * \return The action labels used in the transitions of ltsspec.
+ */
+template<class LTS_TYPE>
+std::set<process::action_label> find_action_labels(const LTS_TYPE& ltsspec)
+{
+  std::set<std::size_t> used_labels;
+  for (const transition& tr: ltsspec.get_transitions())
+  {
+    used_labels.insert(tr.label());
+  }
+  std::set<process::action_label> result;
+  const auto& action_labels = ltsspec.action_labels();
+  for (std::size_t index: used_labels)
+  {
+    for (const process::action& a: action_labels[index].actions())
+    {
+      result.insert(a.label());
+    }
+  }
+  return result;
+}
+
 /** \brief Sorts the transitions using a sort style.
  * \param[in,out] transitions A vector of transitions to be sorted. 
  * \param[in] hidden_label_set A set that tells which actions are to be interpreted as being hidden.

@@ -16,6 +16,7 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <list>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -48,6 +49,45 @@ std::vector<std::string> split_paragraphs(const std::string& text);
 /// \param separators A string
 /// \return The splitted text
 std::vector<std::string> split(const std::string& line, const std::string& separators);
+
+/// \brief Split a string on commas that occur outside parentheses.
+/// \details This is intended for comma separated lists of actions or parameters,
+///          in which commas inside parentheses must not split the list.
+/// \param s A string
+/// \return The substrings of <tt>s</tt> that are separated by commas occurring
+///         outside parentheses
+inline
+std::list<std::string> split_actions(const std::string& s)
+{
+  std::size_t pcount = 0;
+  std::string a;
+  std::list<std::string> result;
+  for (char i: s)
+  {
+    if (i == ',' && pcount == 0)
+    {
+      result.push_back(a);
+      a.clear();
+    }
+    else
+    {
+      if (i == '(')
+      {
+        ++pcount;
+      }
+      else if (i == ')')
+      {
+        --pcount;
+      }
+      a.push_back(i);
+    }
+  }
+  if (!a.empty())
+  {
+    result.push_back(a);
+  }
+  return result;
+}
 
 /// \brief Read text from a file.
 /// \param filename A string

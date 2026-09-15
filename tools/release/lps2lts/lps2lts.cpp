@@ -13,6 +13,7 @@
 #include <csignal>
 #include <memory>
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/parallel_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/is_stochastic.h"
@@ -142,38 +143,6 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 #endif
     }
 
-    static std::list<std::string> split_actions(const std::string& s)
-    {
-      std::size_t count = 0;
-      std::string a;
-      std::list<std::string> result;
-      for (char ch: s)
-      {
-        if (ch == ',' && count == 0)
-        {
-          result.push_back(a);
-          a.clear();
-        }
-        else
-        {
-          if (ch == '(')
-          {
-            ++count;
-          }
-          else if (ch == ')')
-          {
-            --count;
-          }
-          a.push_back(ch);
-        }
-      }
-      if (!a.empty())
-      {
-        result.push_back(a);
-      }
-      return result;
-    }
-
     void parse_trace_multiactions(const data::data_specification& dataspec, const process::action_label_list& action_labels)
     {
       for (const std::string& s: trace_multiaction_strings)
@@ -287,7 +256,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       if (parser.has_option("action"))
       {
         options.detect_action = true;
-        for (const std::string& s: split_actions(parser.option_argument("action")))
+        for (const std::string& s: utilities::split_actions(parser.option_argument("action")))
         {
           options.trace_actions.insert(core::identifier_string(s));
         }
@@ -295,7 +264,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 
       if (parser.has_option("multiaction"))
       {
-        std::list<std::string> actions = split_actions(parser.option_argument("multiaction"));
+        std::list<std::string> actions = utilities::split_actions(parser.option_argument("multiaction"));
         trace_multiaction_strings.insert(actions.begin(), actions.end());
       }
 
@@ -316,7 +285,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         {
           parser.error("Option --tau requires the option --divergence.");
         }
-        std::list<std::string> actions = split_actions(parser.option_argument("tau"));
+        std::list<std::string> actions = utilities::split_actions(parser.option_argument("tau"));
         for (const std::string& s: actions)
         {
           options.actions_internal_for_divergencies.insert(core::identifier_string(s));

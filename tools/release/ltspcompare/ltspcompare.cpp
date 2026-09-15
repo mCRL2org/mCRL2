@@ -203,18 +203,6 @@ class ltspcompare_tool : public ltscompare_base
       }
     }
 
-    void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
-    {
-      std::string::size_type lastpos = 0;
-      std::string::size_type pos;
-      while ((pos = act_names.find(',',lastpos)) != std::string::npos)
-      {
-        tau_actions.push_back(act_names.substr(lastpos,pos-lastpos));
-        lastpos = pos+1;
-      }
-      tau_actions.push_back(act_names.substr(lastpos));
-    }
-
     void add_options(interface_description& desc) override
     {
       ltscompare_base::add_options(desc);
@@ -247,7 +235,7 @@ class ltspcompare_tool : public ltscompare_base
 
       if (parser.has_option("tau"))
       {
-        set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
+        tool_options.tau_actions = split(parser.option_argument("tau"), ",");
       }
 
       if (parser.arguments.size() == 1)

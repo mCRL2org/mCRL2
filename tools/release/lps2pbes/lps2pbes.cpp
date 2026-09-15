@@ -14,34 +14,8 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_output_tool.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/modal_formula/check_formula_actions.h"
 #include "mcrl2/modal_formula/parse.h"
-
-
-
-
-
-namespace mcrl2::pbes_system::detail
-{
-/// \brief Prints a warning if formula contains an action that is not used in lpsspec.
-inline void check_lps2pbes_actions(const state_formulas::state_formula& formula, const lps::stochastic_specification& lpsspec)
-{
-  std::set<process::action_label> used_lps_actions = lps::find_action_labels(lpsspec.process());
-  std::set<process::action_label> used_state_formula_actions = state_formulas::find_action_labels(formula);
-  std::set<process::action_label> diff = utilities::detail::set_difference(used_state_formula_actions, used_lps_actions);
-  if (!diff.empty())
-  {
-    mCRL2log(log::warning) << "Warning: the modal formula contains actions "
-                           << core::detail::print_list(diff)
-                           << " that are in the data specification, but do not appear in the LPS!" << std::endl;
-  }
-}
-
-} // namespace mcrl2::pbes_system::detail
-
-
-
-
-
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
@@ -162,7 +136,7 @@ protected:
       std::string text = utilities::read_text(from);
       const bool formula_is_quantitative = false;
       state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
-      pbes_system::detail::check_lps2pbes_actions(formspec.formula(), lpsspec);
+      state_formulas::check_formula_actions(formspec.formula(), lps::find_action_labels(lpsspec.process()), "LPS");
       mCRL2log(log::verbose) << "Converting state formula and LPS to a PBES..." << std::endl;
       pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, check_only);
 

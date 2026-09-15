@@ -11,6 +11,8 @@
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/lts/detail/lts_load.h"
+#include "mcrl2/lts/lts_utilities.h"
+#include "mcrl2/modal_formula/check_formula_actions.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pres/lts2pres.h"
 #include "mcrl2/pres/pres_output_tool.h"
@@ -19,53 +21,6 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using pres_system::tools::pres_output_tool;
 using utilities::tools::input_output_tool;
-
-inline
-void check_lts(const lts::probabilistic_lts_lts_t& ltsspec)
-{
-  for (const lts::transition& tr: ltsspec.get_transitions())
-  {
-    std::size_t label = tr.label();
-    if (label >= ltsspec.action_labels().size())
-    {
-      throw mcrl2::runtime_error("Invalid LTS detected: there are not enough action labels");
-    }
-  }
-}
-
-inline
-std::set<process::action_label> find_action_labels(const lts::probabilistic_lts_lts_t& ltsspec)
-{
-  std::set<std::size_t> used_labels;
-  for (const lts::transition& tr: ltsspec.get_transitions())
-  {
-    used_labels.insert(tr.label());
-  }
-  std::set<process::action_label> result;
-  const std::vector<lts::action_label_lts>& action_labels = ltsspec.action_labels();
-  for (std::size_t index: used_labels)
-  {
-    for (const process::action& a: action_labels[index].actions())
-    {
-      result.insert(a.label());
-    }
-  }
-  return result;
-}
-
-/// \brief Prints a warning if formula contains an action that is not used in ltsspec.
-inline void check_lts2pres_actions(const state_formulas::state_formula& formula, const lts::probabilistic_lts_lts_t& ltsspec)
-{
-  std::set<process::action_label> used_lts_actions = find_action_labels(ltsspec);
-  std::set<process::action_label> used_state_formula_actions = state_formulas::find_action_labels(formula);
-  std::set<process::action_label> diff = utilities::detail::set_difference(used_state_formula_actions, used_lts_actions);
-  if (!diff.empty())
-  {
-    mCRL2log(log::warning) << "Warning: the modal formula contains actions "
-                           << core::detail::print_list(diff)
-                           << " that are in the data specification, but do not appear in the LTS!" << std::endl;
-  }
-}
 
 class lts2pres_tool : public pres_output_tool<input_output_tool>
 {
@@ -102,7 +57,7 @@ class lts2pres_tool : public pres_output_tool<input_output_tool>
 
       preprocess_modal_operators = parser.options.count("preprocess-modal-operators") > 0;
       lts::detail::load_lts(parser, input_filename(), ltsspec);
-      check_lts(ltsspec);
+      lts::check_lts(ltsspec);
     }
 
   public:
@@ -127,7 +82,7 @@ class lts2pres_tool : public pres_output_tool<input_output_tool>
       }
       const bool formula_is_quantitative = true;
       state_formulas::state_formula_specification formspec = state_formulas::parse_state_formula_specification(from, lpsspec, formula_is_quantitative);
-      check_lts2pres_actions(formspec.formula(), ltsspec);
+      state_formulas::check_formula_actions(formspec.formula(), lts::find_action_labels(ltsspec), "LTS");
       from.close();
       ltsspec.set_data(data::merge_data_specifications(ltsspec.data(), formspec.data()));
       if (!formspec.action_labels().empty())

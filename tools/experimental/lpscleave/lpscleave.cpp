@@ -164,17 +164,17 @@ protected:
 
     if (parser.options.count("parameters"))
     {
-      m_parameters = split_actions(parser.option_argument("parameters"));
+      m_parameters = utilities::split_actions(parser.option_argument("parameters"));
     }
 
     if (parser.options.count("shared"))
     {
-      m_duplicated = split_actions(parser.option_argument("shared"));
+      m_duplicated = utilities::split_actions(parser.option_argument("shared"));
     }
 
     if (parser.options.count("summands"))
     {
-      std::list<std::string> indices = split_actions(parser.option_argument("summands"));
+      std::list<std::string> indices = utilities::split_actions(parser.option_argument("summands"));
       for (auto& string : indices)
       {
         m_indices.emplace_back(std::stoul(string));
