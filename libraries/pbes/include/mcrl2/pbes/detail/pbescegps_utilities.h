@@ -423,84 +423,52 @@ inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_exp
   return std::nullopt;
 }
 
-// Roots reachable from `start` via the ruling relation, ordered by dominance.
-// `tree_sizes` supplies the dominance weight per root (number of descendants);
-// `visited` breaks cycles; `cache` memoizes per-node results so each node is
-// expanded once (avoids exponential re-expansion on shared sub-paths).
-using ruling_roots_cache = std::map<data::variable, std::vector<std::pair<data::variable, std::size_t>>>;
-
-inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots_impl(const data::variable& start,
-  const ruling_relation_type::equation_relation& ruled_by_map,
-  const ruling_relation_type::equation_tree_sizes& tree_sizes,
-  std::set<data::variable>& visited,
-  ruling_roots_cache& cache)
+// All parameters that (transitively) rule `start` under the (acyclic) ruled-by relation.
+inline std::set<data::variable> dominant_ancestors(const data::variable& start,
+  const ruling_relation_type::equation_relation& ruled_by_map)
 {
-  auto cached = cache.find(start);
-  if (cached != cache.end())
+  std::set<data::variable> ancestors;
+  std::vector<data::variable> todo;
+  if (auto it = ruled_by_map.find(start); it != ruled_by_map.end())
   {
-    return cached->second;
+    todo.assign(it->second.begin(), it->second.end());
   }
-  if (visited.contains(start))
+  while (!todo.empty())
   {
-    return {}; // cycle: no new root on this path
-  }
-  visited.insert(start);
-
-  std::map<data::variable, std::size_t> root_weights;
-  auto it = ruled_by_map.find(start);
-  if (it == ruled_by_map.end())
-  {
-    root_weights[start] = tree_sizes.contains(start) ? tree_sizes.at(start) : 0; // start is a root
-  }
-  else
-  {
-    for (const data::variable& ruler: it->second)
+    const data::variable var = todo.back();
+    todo.pop_back();
+    if (ancestors.insert(var).second)
     {
-      for (const auto& [root, weight]: find_dominant_roots_impl(ruler, ruled_by_map, tree_sizes, visited, cache))
+      auto it = ruled_by_map.find(var);
+      if (it != ruled_by_map.end())
       {
-        root_weights[root] = std::max(root_weights[root], weight);
+        todo.insert(todo.end(), it->second.begin(), it->second.end());
       }
     }
-
-    // No ruler reached a root: start is its own representative root (all rulers
-    // are part of a cycle through start).
-    if (root_weights.empty())
-    {
-      root_weights[start] = tree_sizes.contains(start) ? tree_sizes.at(start) : 0;
-    }
   }
-
-  visited.erase(start);
-
-  std::vector<std::pair<data::variable, std::size_t>> roots(root_weights.begin(), root_weights.end());
-  std::sort(roots.begin(),
-    roots.end(),
-    [](const auto& lhs, const auto& rhs)
-    {
-      if (lhs.second != rhs.second)
-      {
-        return lhs.second > rhs.second;
-      }
-      return lhs.first.name() < rhs.first.name();
-    });
-  return cache[start] = roots;
+  return ancestors;
 }
 
-inline std::vector<std::pair<data::variable, std::size_t>> find_dominant_roots(const data::variable& start,
-  const ruling_relation_type::equation_relation& ruled_by_map,
-  const ruling_relation_type::equation_tree_sizes& tree_sizes,
-  std::set<data::variable>& visited)
+struct dominators_cache_type
 {
-  ruling_roots_cache cache;
-  return find_dominant_roots_impl(start, ruled_by_map, tree_sizes, visited, cache);
-}
+  std::map<data::variable, std::set<data::variable>> closure;
 
-// Chooses the most dominant variable to make concrete.
-// Traverses the ruling relation backwards from each essential variable to find
-// the "roots" — parameters that rule others but are not ruled by anyone.
-// Per starting variable, picks the most dominant root that is itself essential;
-// among those, picks the root with the largest tree size, i.e. the one that
-// (transitively) rules the most parameters.
+  const std::set<data::variable>& operator()(const data::variable& start,
+    const ruling_relation_type::equation_relation& ruled_by_map)
+  {
+    auto it = closure.find(start);
+    if (it == closure.end())
+    {
+      it = closure.emplace(start, dominant_ancestors(start, ruled_by_map)).first;
+    }
+    return it->second;
+  }
+};
+
+// Chooses the most dominant variable to make concrete. For each essential
+// variable, its candidate is the essential ancestor with the largest dominance
+// subtree, or the variable itself when it has no essential ancestor. Among all
+// candidates, the one with the largest tree size wins.
 inline std::optional<data::variable> choose_variable_by_ruling_order(const core::identifier_string& eq_name,
   const std::set<data::variable>& essential_vars,
   const ruling_relation_type& ruling_relation)
@@ -514,49 +482,52 @@ inline std::optional<data::variable> choose_variable_by_ruling_order(const core:
   auto sizes_it = ruling_relation.tree_size.find(eq_name);
   if (sizes_it == ruling_relation.tree_size.end())
   {
-    return std::nullopt; // no cached tree sizes — cannot rank roots
+    return std::nullopt; // no cached tree sizes — cannot rank candidates
   }
   const ruling_relation_type::equation_tree_sizes& tree_sizes = sizes_it->second;
 
   std::size_t best_tree_size = 0;
   std::optional<data::variable> best_var;
 
-  // Roots depend only on the (static) ruling relation, not on the start node,
-  // so reuse one cache across all essential variables of this equation.
-  ruling_roots_cache cache;
+  // Ancestors depend only on the (static) ruling relation, not on the start
+  // node, so reuse one cache across all essential variables of this equation.
+  dominators_cache_type cache;
   for (const data::variable& var: essential_vars)
   {
-    std::set<data::variable> visited;
-    auto roots = find_dominant_roots_impl(var, eq_it->second, tree_sizes, visited, cache);
-
-    // Pick the most dominant root that is actually in essential_vars (abstracted).
-    // The traversal may reach parameters that are already concrete.
-    std::optional<data::variable> root;
+    std::optional<data::variable> candidate;
     std::size_t size = 0;
-    for (const auto& [candidate, weight]: roots)
+    for (const data::variable& ancestor: cache(var, eq_it->second))
     {
-      if (essential_vars.contains(candidate))
+      if (!essential_vars.contains(ancestor))
       {
-        root = candidate;
-        size = weight;
-        break;
+        continue;
+      }
+      const std::size_t ancestor_size = tree_sizes.contains(ancestor) ? tree_sizes.at(ancestor) : 0;
+      // Prefer the largest dominance subtree; ties are broken by name so the
+      // choice is deterministic.
+      if (ancestor_size > size
+          || (ancestor_size == size && (!candidate.has_value() || ancestor.name() < candidate->name())))
+      {
+        candidate = ancestor;
+        size = ancestor_size;
       }
     }
 
-    // Fallback: no essential root found, use the starting variable itself.
-    if (!root.has_value())
+    // Fallback: the ruling chain of var contains no essential node, so var
+    // itself is the candidate.
+    if (!candidate.has_value())
     {
-      root = var;
+      candidate = var;
       size = tree_sizes.contains(var) ? tree_sizes.at(var) : 0;
     }
 
-    mCRL2log(log::debug) << "  - " << var.name() << " -> root " << root->name() << " (tree size: " << size << ")"
-                         << std::endl;
+    mCRL2log(log::debug) << "  - " << var.name() << " -> candidate " << candidate->name() << " (tree size: " << size
+                         << ")" << std::endl;
 
     if (size > best_tree_size)
     {
       best_tree_size = size;
-      best_var = root;
+      best_var = candidate;
     }
   }
 
@@ -775,6 +746,53 @@ inline ruling_statistics_type count_rulings(const pbes& p, const data::rewriter&
   return stats;
 }
 
+// A frozen parameter never changes, so it can only be a ruler, never a ruled
+// parameter. Flip every edge "d_m ruled by a frozen d_f" to "d_f ruled by d_m",
+// pushing frozen parameters to the bottom of the hierarchy.
+inline void flip_frozen_rulers(ruling_statistics_type& stats)
+{
+  for (auto& [eq_name, ruled_by_counts]: stats.counts)
+  {
+    const auto changes_it = stats.changes.find(eq_name);
+    if (changes_it == stats.changes.end())
+    {
+      continue;
+    }
+    const auto& changes_map = changes_it->second;
+
+    // Collect the flipped edges first so the iteration is not disturbed.
+    std::vector<std::pair<data::variable, data::variable>> flips; // (d_m, frozen d_f)
+    for (const auto& [d_m, rulers_counts]: ruled_by_counts)
+    {
+      for (const auto& [d_f, count_f]: rulers_counts)
+      {
+        const auto changes_f_it = changes_map.find(d_f);
+        if (changes_f_it == changes_map.end() || changes_f_it->second == 0)
+        {
+          flips.emplace_back(d_m, d_f);
+        }
+      }
+    }
+    for (const auto& [d_m, d_f]: flips)
+    {
+      const std::size_t count = ruled_by_counts.at(d_m).at(d_f);
+      ruled_by_counts.at(d_m).erase(d_f);
+      stats.counts[eq_name][d_f][d_m] += count;
+    }
+    for (auto it = ruled_by_counts.begin(); it != ruled_by_counts.end();)
+    {
+      if (it->second.empty())
+      {
+        it = ruled_by_counts.erase(it);
+      }
+      else
+      {
+        ++it;
+      }
+    }
+  }
+}
+
 // percentages[eq][dₘ][dⱼ] = # transitions where dⱼ guards a change of dₘ in eq divided
 // by the total # transitions in which dₘ changes — i.e. how large a share of dₘ's
 // changes is ruled by dⱼ. This lets parameters that change rarely and parameters
@@ -789,12 +807,17 @@ inline ruling_percentages_type compute_ruling_percentages(const ruling_statistic
   {
     for (const auto& [d_m, rulers_counts]: ruled_by_counts)
     {
-      // Every counts entry was created in the same branch as a changes increment,
-      // so the denominator exists and is positive.
-      const std::size_t total = stats.changes.at(eq_name).at(d_m);
+      // A frozen d_m has no change count; fall back to 1 and cap the share at 1.
+      const auto& changes_map = stats.changes.at(eq_name);
+      const std::size_t total = changes_map.contains(d_m) ? changes_map.at(d_m) : 1;
       for (const auto& [d_j, count_j]: rulers_counts)
       {
-        percentages[eq_name][d_m][d_j] = static_cast<double>(count_j) / static_cast<double>(total);
+        double pct = static_cast<double>(count_j) / static_cast<double>(total);
+        if (pct > 1.0)
+        {
+          pct = 1.0;
+        }
+        percentages[eq_name][d_m][d_j] = pct;
       }
     }
   }
@@ -1073,6 +1096,7 @@ inline void save_ruling_relation(const ruling_relation_type& relation, const std
 inline ruling_relation_type compute_ruling_relation(const pbes& p, const data::rewriter& datar)
 {
   detail::ruling_statistics_type stats = detail::count_rulings(p, datar);
+  detail::flip_frozen_rulers(stats);
   detail::ruling_percentages_type percentages = detail::compute_ruling_percentages(stats);
   ruling_relation_type relation = detail::build_ruling_relation(percentages);
   detail::break_ruling_cycles(p, percentages, relation);

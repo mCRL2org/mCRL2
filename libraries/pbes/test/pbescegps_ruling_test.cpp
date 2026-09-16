@@ -42,7 +42,7 @@ static ruling_relation_type make_ruling(const std::string& eq_name,
   return result;
 }
 
-// find_dominant_roots tests
+// dominant_ancestors tests
 
 // Extract the ruled_by_map for equation eq_name.
 static const ruling_relation_type::equation_relation& get_ruled_by_map(const ruling_relation_type& ruling,
@@ -51,89 +51,46 @@ static const ruling_relation_type::equation_relation& get_ruled_by_map(const rul
   return ruling.ruled_by.at(core::identifier_string(eq_name));
 }
 
-// A is not ruled by anyone — it is the root.
-BOOST_AUTO_TEST_CASE(test_find_root_unruled)
+// B is ruled by A: its dominator closure is {A}.
+BOOST_AUTO_TEST_CASE(test_dominators_direct)
 {
   auto ruling = make_ruling("Y", {{"B", {"A"}}}); // B ruled by A
   const auto& ruled_by_map = get_ruled_by_map(ruling, "Y");
 
-  std::map<data::variable, std::size_t> weights = {{V("A"), 10}, {V("B"), 3}};
-  std::set<data::variable> visited;
-  auto roots = find_dominant_roots(V("B"), ruled_by_map, weights, visited);
-  BOOST_REQUIRE_EQUAL(roots.size(), 1u);
-  BOOST_CHECK_EQUAL(pp(roots[0].first), "A");
-  BOOST_CHECK_EQUAL(roots[0].second, 10u);
+  auto ancestors = dominant_ancestors(V("B"), ruled_by_map);
+  BOOST_REQUIRE_EQUAL(ancestors.size(), 1u);
+  BOOST_CHECK_EQUAL(pp(*ancestors.begin()), "A");
 }
 
-// Chain C->B->A (root). A has weight 5, B (weight 8) is not a root (ruled by A).
-BOOST_AUTO_TEST_CASE(test_find_root_chain)
+// Chain C ruled by B ruled by A: the closure of C contains both B and A.
+BOOST_AUTO_TEST_CASE(test_dominators_chain)
 {
   auto ruling = make_ruling("Y", {{"C", {"B"}}, {"B", {"A"}}});
   const auto& ruled_by_map = get_ruled_by_map(ruling, "Y");
 
-  std::map<data::variable, std::size_t> weights = {{V("A"), 5}, {V("B"), 8}, {V("C"), 1}};
-  std::set<data::variable> visited;
-  auto roots = find_dominant_roots(V("C"), ruled_by_map, weights, visited);
-  BOOST_REQUIRE_EQUAL(roots.size(), 1u);
-  BOOST_CHECK_EQUAL(pp(roots[0].first), "A");
-  BOOST_CHECK_EQUAL(roots[0].second, 5u);
+  auto ancestors = dominant_ancestors(V("C"), ruled_by_map);
+  BOOST_REQUIRE_EQUAL(ancestors.size(), 2u);
+  BOOST_CHECK(ancestors == std::set<data::variable>({V("A"), V("B")}));
 }
 
-// Mutual cycle A<->B, broken at B. B is returned with weight 7.
-BOOST_AUTO_TEST_CASE(test_find_root_mutual)
+// No rulers — the closure is empty.
+BOOST_AUTO_TEST_CASE(test_dominators_root)
 {
-  auto ruling = make_ruling("Y", {{"A", {"B"}}, {"B", {"A"}}});
+  auto ruling = make_ruling("Y", {{"B", {"A"}}});
   const auto& ruled_by_map = get_ruled_by_map(ruling, "Y");
 
-  std::map<data::variable, std::size_t> weights = {{V("A"), 3}, {V("B"), 7}};
-  std::set<data::variable> visited;
-  auto roots = find_dominant_roots(V("A"), ruled_by_map, weights, visited);
-  BOOST_REQUIRE_EQUAL(roots.size(), 1u);
-  BOOST_CHECK_EQUAL(pp(roots[0].first), "B");
-  BOOST_CHECK_EQUAL(roots[0].second, 7u);
+  BOOST_CHECK_EQUAL(dominant_ancestors(V("A"), ruled_by_map).size(), 0u);
 }
 
-// No rulers — the start variable is itself the root.
-BOOST_AUTO_TEST_CASE(test_find_root_alone)
-{
-  std::map<data::variable, std::set<data::variable>> ruled_by_map;
-
-  std::map<data::variable, std::size_t> weights = {{V("X"), 42}};
-  std::set<data::variable> visited;
-  auto roots = find_dominant_roots(V("X"), ruled_by_map, weights, visited);
-  BOOST_REQUIRE_EQUAL(roots.size(), 1u);
-  BOOST_CHECK_EQUAL(pp(roots[0].first), "X");
-  BOOST_CHECK_EQUAL(roots[0].second, 42u);
-}
-
-// Diamond: both branches lead to root A, reported once.
-BOOST_AUTO_TEST_CASE(test_find_root_diamond)
+// Diamond: both branches collapse into the same ancestor set.
+BOOST_AUTO_TEST_CASE(test_dominators_diamond)
 {
   auto ruling = make_ruling("Y", {{"D", {"B", "C"}}, {"B", {"A"}}, {"C", {"A"}}});
   const auto& ruled_by_map = get_ruled_by_map(ruling, "Y");
 
-  std::map<data::variable, std::size_t> weights = {{V("A"), 20}};
-  std::set<data::variable> visited;
-  auto roots = find_dominant_roots(V("D"), ruled_by_map, weights, visited);
-  BOOST_REQUIRE_EQUAL(roots.size(), 1u);
-  BOOST_CHECK_EQUAL(pp(roots[0].first), "A");
-  BOOST_CHECK_EQUAL(roots[0].second, 20u);
-}
-
-// Two independent roots, returned ordered by dominance (weight).
-BOOST_AUTO_TEST_CASE(test_find_roots_ordered)
-{
-  auto ruling = make_ruling("Y", {{"D", {"B", "C"}}, {"B", {"A1"}}, {"C", {"A2"}}});
-  const auto& ruled_by_map = get_ruled_by_map(ruling, "Y");
-
-  std::map<data::variable, std::size_t> weights = {{V("A1"), 20}, {V("A2"), 30}};
-  std::set<data::variable> visited;
-  auto roots = find_dominant_roots(V("D"), ruled_by_map, weights, visited);
-  BOOST_REQUIRE_EQUAL(roots.size(), 2u);
-  BOOST_CHECK_EQUAL(pp(roots[0].first), "A2");
-  BOOST_CHECK_EQUAL(roots[0].second, 30u);
-  BOOST_CHECK_EQUAL(pp(roots[1].first), "A1");
-  BOOST_CHECK_EQUAL(roots[1].second, 20u);
+  auto ancestors = dominant_ancestors(V("D"), ruled_by_map);
+  BOOST_REQUIRE_EQUAL(ancestors.size(), 3u);
+  BOOST_CHECK(ancestors == std::set<data::variable>({V("A"), V("B"), V("C")}));
 }
 
 // choose_variable_by_ruling_order tests
@@ -174,6 +131,19 @@ BOOST_AUTO_TEST_CASE(test_choose_largest_essential_tree_size_root)
   BOOST_CHECK_EQUAL(pp(*result), "r2");
 }
 
+// Chain A ruled by B ruled by C, with only A and B essential: B is the essential
+// ancestor (tree size 1) and is selected.
+BOOST_AUTO_TEST_CASE(test_choose_extra_essential_ancestor)
+{
+  ruling_relation_type ruling = make_ruling("Y", {{"A", {"B"}}, {"B", {"C"}}});
+
+  std::set<data::variable> essential = {V("A"), V("B")}; // C already concrete
+
+  auto result = choose_variable_by_ruling_order(core::identifier_string("Y"), essential, ruling);
+  BOOST_REQUIRE(result.has_value());
+  BOOST_CHECK_EQUAL(pp(*result), "B");
+}
+
 // Root B not essential; the fallback starting variable A has no dominance
 // (tree size 0), so nothing is selected.
 BOOST_AUTO_TEST_CASE(test_choose_fallback_root_not_essential)
@@ -194,6 +164,39 @@ BOOST_AUTO_TEST_CASE(test_choose_no_ruling)
 
   auto result = choose_variable_by_ruling_order(core::identifier_string("MISSING"), essential, ruling);
   BOOST_CHECK(!result.has_value());
+}
+
+// flip_frozen_rulers tests
+
+// b never changes, so the edge "a ruled by b" is flipped to "b ruled by a".
+BOOST_AUTO_TEST_CASE(test_flip_frozen_rulers)
+{
+  ruling_statistics_type stats;
+  const core::identifier_string eq("Y");
+  stats.changes[eq][V("a")] = 2; // a changes, b is frozen
+  stats.counts[eq][V("a")][V("b")] = 2;
+
+  flip_frozen_rulers(stats);
+
+  BOOST_CHECK(!stats.counts[eq].contains(V("a")));
+  BOOST_REQUIRE(stats.counts[eq].contains(V("b")));
+  BOOST_CHECK_EQUAL(stats.counts[eq].at(V("b")).at(V("a")), 2u);
+}
+
+// A ruler that changes is not frozen, so the edge direction is left untouched.
+BOOST_AUTO_TEST_CASE(test_flip_frozen_rulers_keeps_dynamic_ruler)
+{
+  ruling_statistics_type stats;
+  const core::identifier_string eq("Y");
+  stats.changes[eq][V("a")] = 1;
+  stats.changes[eq][V("c")] = 1; // c changes, so it is not frozen
+  stats.counts[eq][V("a")][V("c")] = 1;
+
+  flip_frozen_rulers(stats);
+
+  BOOST_REQUIRE(stats.counts[eq].contains(V("a")));
+  BOOST_CHECK(stats.counts[eq].at(V("a")).contains(V("c")));
+  BOOST_CHECK(!stats.counts[eq].contains(V("c")));
 }
 
 // compute_tree_sizes tests
@@ -336,7 +339,7 @@ BOOST_AUTO_TEST_CASE(test_mutual_cycle_pruned)
 }
 
 // Three parameters forming a cycle: b guards a, c guards b, a guards c.
-// The pruning only handles mutual pairs, so a longer cycle may survive.
+// break_ruling_cycles must reduce this longer cycle to an acyclic relation.
 BOOST_AUTO_TEST_CASE(test_three_cycle_pruned)
 {
   std::string text = "pbes nu Y(a: Bool, b: Bool, c: Bool) = "
