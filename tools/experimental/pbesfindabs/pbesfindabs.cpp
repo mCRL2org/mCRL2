@@ -87,6 +87,7 @@ protected:
     {
       throw mcrl2::runtime_error("The option -a/--abstraction-file with an output file name is required.");
     }
+    m_options.state_file = parser.option_argument("state-file");
   }
 
   void add_options(interface_description& desc) override
@@ -96,6 +97,14 @@ protected:
       utilities::make_mandatory_argument("FILE"),
       "Write every valid abstraction set to FILE as soon as it is found.",
       'a');
+    desc.add_option("state-file",
+      utilities::make_mandatory_argument("FILE"),
+      "Checkpoint progress to FILE so that an interrupted run can be resumed. Every abstraction "
+      "set whose verdict required solving (valid or blocked) or that was skipped is appended to "
+      "FILE together with its level; sets that are merely not data closed are cheap to recompute "
+      "and are not recorded. If FILE already exists and was created for the same PBES, the run "
+      "resumes from it instead of solving the recorded sets again. Without this option no progress "
+      "is saved.");
     desc.add_option("init-cfp", "Only consider the non-(global) control flow parameters for abstraction.", 'c');
     desc.add_option("instantiate-infinite-quantifier-guards",
       "Do not consider parameters that occur in the guards of predicate variable instances in the scope of an "

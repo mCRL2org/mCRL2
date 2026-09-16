@@ -32,6 +32,7 @@ namespace
 struct test_result
 {
   std::size_t valid_count = 0;
+  std::size_t checker_calls = 0;
   std::string contents;
 };
 
@@ -39,7 +40,8 @@ test_result run_findabs(const std::string& text,
   const std::string& test_name,
   std::size_t threads = 1,
   double timeout = 0.0,
-  bool always_timeout = false)
+  bool always_timeout = false,
+  const std::string& state_file = "")
 {
   pbes p = txt2pbes(text, false);
   algorithms::normalize(p);
@@ -48,16 +50,18 @@ test_result run_findabs(const std::string& text,
   options.output_file = (std::filesystem::temp_directory_path() / ("pbesfindabs_" + test_name + ".txt")).string();
   options.number_of_threads = threads;
   options.timeout = timeout;
+  options.state_file = state_file;
 
   // The engine delegates the actual checking to a pluggable checker; the tool
   // installs one backed by worker processes, while the tests check in-process.
   // always_timeout stands in for a set whose worker never finishes in time.
+  std::size_t call_count = 0;
   pbesfindabs_options snapshot = options;
-  options.checker
-    = [&p, snapshot, always_timeout](const std::vector<abstractable_parameter>& /*universe*/,
-        const std::vector<std::vector<std::size_t>>& batch,
-        bool is_over)
+  options.checker = [&p, snapshot, always_timeout, &call_count](const std::vector<abstractable_parameter>& /*universe*/,
+                      const std::vector<std::vector<std::size_t>>& batch,
+                      bool is_over)
   {
+    ++call_count;
     std::vector<check_outcome> outcomes;
     outcomes.reserve(batch.size());
     for (const std::vector<std::size_t>& set: batch)
@@ -75,6 +79,7 @@ test_result run_findabs(const std::string& text,
   pbesfindabs_engine engine;
   test_result result;
   result.valid_count = engine.run(p, options);
+  result.checker_calls = call_count;
 
   std::ifstream in(options.output_file);
   std::ostringstream stream;
@@ -328,4 +333,113 @@ BOOST_AUTO_TEST_CASE(test_nu_all_valid)
   BOOST_CHECK_EQUAL(result.valid_count, 4);
   BOOST_CHECK_EQUAL(count_sets(result.contents), 4);
   BOOST_CHECK(result.contents.find("X: a b") != std::string::npos);
+}
+
+// A state file records the direction and every checked set, so a second run
+// with the same state file must reproduce the output exactly and must not call
+// the checker at all.
+BOOST_AUTO_TEST_CASE(test_state_file_resume_without_rechecking)
+{
+  const std::string text = "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b)); init X(false, true);";
+  const std::string state = (std::filesystem::temp_directory_path() / "pbesfindabs_state_full.state").string();
+  std::filesystem::remove(state);
+
+  const test_result full = run_findabs(text, "state_full", 1, 0.0, false, state);
+  BOOST_CHECK_EQUAL(full.valid_count, 4);
+  BOOST_CHECK(std::filesystem::exists(state));
+
+  const test_result resumed = run_findabs(text, "state_full", 1, 0.0, false, state);
+  BOOST_CHECK_EQUAL(resumed.valid_count, full.valid_count);
+  BOOST_CHECK_EQUAL(resumed.checker_calls, 0u);
+  BOOST_CHECK_EQUAL(resumed.contents, full.contents);
+
+  std::filesystem::remove(state);
+}
+
+// An interrupted run leaves a partial level in the state file. Resuming must
+// keep the recorded verdicts, check only what is missing, and still produce the
+// complete set of valid abstraction sets.
+BOOST_AUTO_TEST_CASE(test_state_file_resume_partial_level)
+{
+  const std::string text = "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b)); init X(false, true);";
+  const std::string state = (std::filesystem::temp_directory_path() / "pbesfindabs_state_partial.state").string();
+  std::filesystem::remove(state);
+
+  const test_result full = run_findabs(text, "state_partial", 1, 0.0, false, state);
+
+  // Keep the header, the empty set and exactly one set of level 1.
+  std::vector<std::string> lines;
+  {
+    std::ifstream in(state);
+    std::string line;
+    std::size_t set_lines = 0;
+    while (std::getline(in, line))
+    {
+      lines.push_back(line);
+      if (line.rfind("S ", 0) == 0 && ++set_lines == 2)
+      {
+        break;
+      }
+    }
+  }
+  {
+    std::ofstream out(state);
+    for (const std::string& line: lines)
+    {
+      out << line << "\n";
+    }
+  }
+
+  const test_result resumed = run_findabs(text, "state_partial", 1, 0.0, false, state);
+  BOOST_CHECK_EQUAL(resumed.valid_count, full.valid_count);
+  BOOST_CHECK_GT(resumed.checker_calls, 0u);
+  BOOST_CHECK_EQUAL(resumed.contents, full.contents);
+
+  std::filesystem::remove(state);
+}
+
+// Not-data-closed sets are cheap to recompute and must not end up in the state
+// file; on resume they are simply checked again, without changing the output.
+BOOST_AUTO_TEST_CASE(test_state_file_skips_not_data_closed)
+{
+  const std::string text = "pbes nu X(a: Bool, b: Bool) = (val(a) || X(b, b)); init X(false, false);";
+  const std::string state = (std::filesystem::temp_directory_path() / "pbesfindabs_state_not_closed.state").string();
+  std::filesystem::remove(state);
+
+  const test_result full = run_findabs(text, "state_not_closed", 1, 0.0, false, state);
+  BOOST_CHECK_EQUAL(full.valid_count, 3);
+
+  {
+    std::ifstream in(state);
+    std::ostringstream contents;
+    contents << in.rdbuf();
+    BOOST_CHECK(contents.str().find("not_closed") == std::string::npos);
+  }
+
+  const test_result resumed = run_findabs(text, "state_not_closed", 1, 0.0, false, state);
+  BOOST_CHECK_EQUAL(resumed.valid_count, full.valid_count);
+  BOOST_CHECK_GT(resumed.checker_calls, 0u);
+  BOOST_CHECK_EQUAL(resumed.contents, full.contents);
+
+  std::filesystem::remove(state);
+}
+
+// A state file created for one universe must be rejected when the PBES (and
+// hence the abstractable parameters) changed, since its verdicts would not
+// apply to the new parameters.
+BOOST_AUTO_TEST_CASE(test_state_file_universe_mismatch)
+{
+  const std::string state = (std::filesystem::temp_directory_path() / "pbesfindabs_state_mismatch.state").string();
+  std::filesystem::remove(state);
+
+  run_findabs("pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b)); init X(false, true);",
+    "state_mismatch_a",
+    1,
+    0.0,
+    false,
+    state);
+  BOOST_CHECK_THROW(run_findabs("pbes mu X(c: Bool) = val(c); init X(true);", "state_mismatch_b", 1, 0.0, false, state),
+    mcrl2::runtime_error);
+
+  std::filesystem::remove(state);
 }

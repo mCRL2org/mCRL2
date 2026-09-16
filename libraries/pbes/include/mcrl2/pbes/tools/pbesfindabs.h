@@ -28,6 +28,7 @@
 #include "mcrl2/pbes/tools/pbescegps.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/logger.h"
+#include <algorithm>
 #include <cstddef>
 #include <exception>
 #include <fstream>
@@ -58,8 +59,7 @@ enum class abstraction_set_verdict
 ///        limit expired. Such a set is neither reported nor used for pruning;
 ///        its supersets are still explored.
 struct skipped_t
-{
-};
+{};
 
 /// \brief The outcome of checking one candidate set: a verdict, or skipped.
 using check_outcome = std::variant<abstraction_set_verdict, skipped_t>;
@@ -86,6 +86,7 @@ struct pbesfindabs_options
 
   pbescegps_options cepgps; ///< Options used for constructing and solving approximations.
   std::string output_file; ///< The file to which valid abstraction sets are written.
+  std::string state_file; ///< Checkpoint file used to resume an interrupted run; empty means no checkpoint.
   std::size_t number_of_threads = 1; ///< The number of worker processes used to check sets in parallel.
   double timeout = 0.0; ///< Time limit in seconds for checking one abstraction set; 0 means no limit.
 
@@ -251,6 +252,275 @@ inline std::optional<abstraction_set_verdict> from_token(const std::string& toke
   return std::nullopt;
 }
 
+inline std::string outcome_token(const check_outcome& outcome)
+{
+  if (std::holds_alternative<skipped_t>(outcome))
+  {
+    return "skipped";
+  }
+  return to_token(std::get<abstraction_set_verdict>(outcome));
+}
+
+inline check_outcome outcome_from_token(const std::string& token)
+{
+  if (token == "skipped")
+  {
+    return skipped_t{};
+  }
+  const std::optional<abstraction_set_verdict> verdict = from_token(token);
+  if (!verdict)
+  {
+    throw mcrl2::runtime_error("Unknown abstraction set verdict '" + token + "' in the progress file.");
+  }
+  return *verdict;
+}
+
+// Not-data-closedness is decided by a cheap, deterministic data-closure
+// computation (no solving), so it is recomputed on resume instead of being
+// persisted. Only verdicts that required solving or that are unknown are worth
+// recording.
+inline bool is_not_closed(const check_outcome& outcome)
+{
+  const auto* verdict = std::get_if<abstraction_set_verdict>(&outcome);
+  return verdict && *verdict == abstraction_set_verdict::not_closed;
+}
+
+/// \brief An append-only checkpoint of an enumeration, so that an interrupted
+///        run can be resumed without re-checking anything already decided.
+///
+/// The file is line oriented. Its header records the universe of abstractable
+/// parameters and the direction of the approximations once:
+///
+///   # pbesfindabs progress file, format 1
+///   direction over|under
+///   universe <count>
+///   u <equation>:<parameter>
+///   ...
+///
+/// Every checked abstraction set is then recorded as soon as its verdict is
+/// known, preceded by a marker for the level it belongs to:
+///
+///   L <level> candidates <count>
+///   S valid|blocked|skipped <eq:param,eq:param>
+///
+/// Not-data-closed sets are not recorded: their verdict follows from a cheap,
+/// deterministic data-closure computation, so they are simply checked again on
+/// resume. (The parser still accepts a recorded "not_closed" verdict.)
+///
+/// The set is encoded exactly as the worker protocol encodes it, and the empty
+/// set (level 0, always valid) is recorded as an empty encoding. On resume the
+/// universe computed from the PBES must match the recorded one, otherwise the
+/// file is rejected: the recorded verdicts would not apply to other parameters.
+class abstraction_progress_log
+{
+public:
+  abstraction_progress_log() = default;
+
+  /// \brief Opens the progress file. When it already holds a complete header
+  ///        the run resumes from it; otherwise the file is (re)created.
+  void open(const std::string& filename, const std::vector<abstractable_parameter>& universe)
+  {
+    m_filename = filename;
+    if (m_filename.empty())
+    {
+      m_enabled = false;
+      return;
+    }
+    m_enabled = true;
+
+    std::ifstream in(m_filename);
+    if (in.is_open())
+    {
+      std::ostringstream buffer;
+      buffer << in.rdbuf();
+      in.close();
+      if (!buffer.str().empty())
+      {
+        parse(buffer.str());
+      }
+    }
+
+    m_resuming = m_has_universe && m_has_direction;
+    if (m_resuming)
+    {
+      std::vector<std::string> expected;
+      expected.reserve(universe.size());
+      for (const abstractable_parameter& parameter: universe)
+      {
+        expected.push_back(std::string(parameter.equation) + ":" + std::string(parameter.variable.name()));
+      }
+      if (expected != m_universe)
+      {
+        throw mcrl2::runtime_error(
+          "The progress file '" + m_filename
+          + "' was created for a different set of abstractable parameters; refusing to resume.");
+      }
+    }
+
+    m_out.open(m_filename, m_resuming ? std::ios::app : std::ios::trunc);
+    if (!m_out.is_open())
+    {
+      throw mcrl2::runtime_error("Could not open progress file '" + m_filename + "' for writing.");
+    }
+  }
+
+  bool enabled() const
+  {
+    return m_enabled;
+  }
+
+  /// \brief Whether a complete header was found and the run continues from it.
+  bool resuming() const
+  {
+    return m_resuming;
+  }
+
+  bool is_overapproximation() const
+  {
+    return m_is_overapproximation;
+  }
+
+  /// \brief The verdict previously recorded for the given encoded set, if any.
+  std::optional<check_outcome> find(const std::string& encoded_set) const
+  {
+    const auto it = m_records.find(encoded_set);
+    if (it == m_records.end())
+    {
+      return std::nullopt;
+    }
+    return it->second;
+  }
+
+  std::size_t size() const
+  {
+    return m_records.size();
+  }
+
+  /// \brief Writes the header. Only called once, before any set is recorded.
+  void write_header(const std::vector<abstractable_parameter>& universe, bool is_overapproximation)
+  {
+    if (!m_enabled || m_has_direction)
+    {
+      return;
+    }
+    m_is_overapproximation = is_overapproximation;
+    m_has_direction = true;
+    m_has_universe = true;
+    m_out << "# pbesfindabs progress file, format 1" << std::endl;
+    m_out << "direction " << (is_overapproximation ? "over" : "under") << std::endl;
+    m_out << "universe " << universe.size() << std::endl;
+    for (const abstractable_parameter& parameter: universe)
+    {
+      m_out << "u " << parameter.equation << ":" << parameter.variable.name() << std::endl;
+    }
+    m_out.flush();
+  }
+
+  /// \brief Records that a level is about to be checked. Only the first call
+  ///        for a level writes the marker, so replayed levels are not repeated.
+  void begin_level(std::size_t level, std::size_t candidate_count)
+  {
+    if (!m_enabled || m_written_levels.contains(level))
+    {
+      return;
+    }
+    m_written_levels.insert(level);
+    m_out << "L " << level << " candidates " << candidate_count << std::endl;
+    m_out.flush();
+  }
+
+  /// \brief Appends the verdict of one checked set.
+  void record(std::size_t /*level*/, const std::string& encoded_set, const check_outcome& outcome)
+  {
+    if (!m_enabled)
+    {
+      return;
+    }
+    m_out << "S " << outcome_token(outcome) << " " << encoded_set << std::endl;
+    m_out.flush();
+    m_records[encoded_set] = outcome;
+  }
+
+private:
+  void parse(const std::string& contents)
+  {
+    std::istringstream stream(contents);
+    std::string line;
+    while (std::getline(stream, line))
+    {
+      if (!line.empty() && line.back() == '\r')
+      {
+        line.pop_back();
+      }
+      if (line.empty() || line[0] == '#')
+      {
+        continue;
+      }
+      std::istringstream fields(line);
+      std::string tag;
+      fields >> tag;
+      if (tag == "direction")
+      {
+        std::string value;
+        fields >> value;
+        m_is_overapproximation = (value == "over");
+        m_has_direction = true;
+      }
+      else if (tag == "universe")
+      {
+        std::size_t count = 0;
+        fields >> count;
+        m_universe.clear();
+        m_universe.reserve(count);
+        std::string entry;
+        for (std::size_t i = 0; i < count && std::getline(stream, entry); ++i)
+        {
+          if (!entry.empty() && entry.back() == '\r')
+          {
+            entry.pop_back();
+          }
+          std::istringstream entry_fields(entry);
+          std::string entry_tag;
+          entry_fields >> entry_tag >> entry;
+          m_universe.push_back(entry);
+        }
+        m_has_universe = true;
+      }
+      else if (tag == "L")
+      {
+        std::size_t level = 0;
+        std::string word;
+        std::size_t count = 0;
+        fields >> level >> word >> count;
+        m_written_levels.insert(level);
+      }
+      else if (tag == "S")
+      {
+        std::string verdict;
+        std::string encoded_set;
+        fields >> verdict;
+        std::getline(fields, encoded_set);
+        if (!encoded_set.empty() && encoded_set.front() == ' ')
+        {
+          encoded_set.erase(0, 1);
+        }
+        m_records[encoded_set] = outcome_from_token(verdict);
+      }
+    }
+  }
+
+  std::string m_filename;
+  std::ofstream m_out;
+  bool m_enabled = false;
+  bool m_resuming = false;
+  bool m_has_universe = false;
+  bool m_has_direction = false;
+  bool m_is_overapproximation = false;
+  std::vector<std::string> m_universe;
+  std::map<std::string, check_outcome> m_records;
+  std::set<std::size_t> m_written_levels;
+};
+
 /// \brief The engine that enumerates all valid abstraction sets of a PBES.
 class pbesfindabs_engine
 {
@@ -282,26 +552,48 @@ public:
       mCRL2log(log::verbose) << "  " << param.equation << " : " << param.variable << std::endl;
     }
 
-    // Determine the direction of the approximations from the answer of the
-    // original PBES: if the answer is true, only under-approximations can
-    // prove it; dually, if the answer is false, only over-approximations can
-    // refute it.
-    utilities::execution_timer timer;
-    timer.start("solving the original PBES");
-    bool original_answer = master.solve(p, options.cepgps).first;
-    timer.finish("solving the original PBES");
-    const bool is_overapproximation = !original_answer;
-    mCRL2log(log::info) << "The original PBES solves to " << (original_answer ? "true" : "false") << "; "
-                        << (is_overapproximation ? "only over-approximations will be checked."
-                                                 : "only under-approximations will be checked.")
-                        << std::endl;
-    if (mcrl2::log::mCRL2logEnabled(log::verbose))
+    // Open the checkpoint, if any, and validate it against the universe just
+    // computed. When it holds a header the recorded direction is reused and
+    // the original PBES is not solved again.
+    abstraction_progress_log progress;
+    progress.open(options.state_file, universe);
+
+    bool is_overapproximation = false;
+    if (progress.resuming())
     {
-      timer.report();
+      is_overapproximation = progress.is_overapproximation();
+      mCRL2log(log::info) << "Resuming from progress file " << options.state_file << " (" << progress.size()
+                          << " checked sets recorded); the original PBES is not solved again and the stored direction "
+                          << "is " << (is_overapproximation ? "over" : "under") << "." << std::endl;
+    }
+    else
+    {
+      // Determine the direction of the approximations from the answer of the
+      // original PBES: if the answer is true, only under-approximations can
+      // prove it; dually, if the answer is false, only over-approximations can
+      // refute it.
+      utilities::execution_timer timer;
+      timer.start("solving the original PBES");
+      bool original_answer = master.solve(p, options.cepgps).first;
+      timer.finish("solving the original PBES");
+      is_overapproximation = !original_answer;
+      mCRL2log(log::info) << "The original PBES solves to " << (original_answer ? "true" : "false") << "; "
+                          << (is_overapproximation ? "only over-approximations will be checked."
+                                                   : "only under-approximations will be checked.")
+                          << std::endl;
+      if (mcrl2::log::mCRL2logEnabled(log::verbose))
+      {
+        timer.report();
+      }
+      progress.write_header(universe, is_overapproximation);
     }
 
     abstraction_set_writer writer(options.output_file);
 
+    // The output file is regenerated from the checkpoint: every valid set,
+    // whether it comes from the checkpoint or from a fresh check, is written
+    // exactly once, so resuming never produces duplicate blocks.
+    //
     // A family is downward closed by construction: a set is only a candidate
     // when none of its subsets is blocked. "blocked" (data closed yet not
     // proving) is the only failure that is upward closed: extending a blocked
@@ -311,8 +603,19 @@ public:
     // Level 0: the empty set is always valid (it equals the original PBES).
     std::vector<std::vector<std::size_t>> frontier;
     frontier.emplace_back();
+    const std::string empty_set = encode_abstracted_set(universe, frontier.front());
+    if (!progress.find(empty_set))
+    {
+      progress.begin_level(0, 1);
+      progress.record(0, empty_set, abstraction_set_verdict::valid);
+    }
     writer.write(universe, frontier.front());
     ++m_valid_count;
+
+    // Checks are performed in chunks and every verdict is persisted as soon as
+    // the chunk returns, so an interrupted run loses at most one chunk. A chunk
+    // is at least one wave of workers.
+    const std::size_t chunk_size = std::max<std::size_t>(64, options.number_of_threads);
 
     // Levels 1..N: breadth-first enumeration of the downward closed family of
     // non-blocked sets. Level k is generated by joining the non-blocked sets of
@@ -326,7 +629,52 @@ public:
         break;
       }
 
-      std::vector<check_outcome> outcomes = options.checker(universe, candidates, is_overapproximation);
+      progress.begin_level(level, candidates.size());
+
+      // Reuse the verdicts of sets that were already checked in an earlier
+      // run; only the remaining candidates are actually checked.
+      std::vector<check_outcome> outcomes;
+      outcomes.reserve(candidates.size());
+      std::vector<std::size_t> missing;
+      for (std::size_t i = 0; i < candidates.size(); ++i)
+      {
+        const std::optional<check_outcome> recorded = progress.find(encode_abstracted_set(universe, candidates[i]));
+        if (recorded)
+        {
+          outcomes.push_back(*recorded);
+        }
+        else
+        {
+          outcomes.push_back(skipped_t{});
+          missing.push_back(i);
+        }
+      }
+
+      for (std::size_t start = 0; start < missing.size(); start += chunk_size)
+      {
+        const std::size_t end = std::min(start + chunk_size, missing.size());
+        std::vector<std::vector<std::size_t>> batch;
+        batch.reserve(end - start);
+        for (std::size_t k = start; k < end; ++k)
+        {
+          batch.push_back(candidates[missing[k]]);
+        }
+        std::vector<check_outcome> results = options.checker(universe, batch, is_overapproximation);
+        if (results.size() != batch.size())
+        {
+          throw mcrl2::runtime_error("The checker returned the wrong number of outcomes for a batch.");
+        }
+        for (std::size_t k = start; k < end; ++k)
+        {
+          outcomes[missing[k]] = results[k - start];
+          // Not-data-closed sets are cheap to recompute, so they are not
+          // persisted; only valid, blocked and skipped verdicts are.
+          if (!is_not_closed(results[k - start]))
+          {
+            progress.record(level, encode_abstracted_set(universe, candidates[missing[k]]), results[k - start]);
+          }
+        }
+      }
 
       const std::size_t closed_count = static_cast<std::size_t>(std::count_if(outcomes.begin(),
         outcomes.end(),
