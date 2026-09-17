@@ -178,6 +178,13 @@ private:
       data::data_expression_list(common_parameters.begin(), common_parameters.end())))};
   }
 
+  // True if the equation occurs in the PBES. SRF transformations may introduce
+  // auxiliary equations, which are ignored during matching.
+  bool is_known_equation(const core::identifier_string& name) const
+  {
+    return m_common_parameter_indices.find(name) != m_common_parameter_indices.end();
+  }
+
   // Helper to build the sorted index for a graph.
   void build_formula_index(const structure_graph& g, std::map<formula_key, indexed_vertices>& index, bool is_under)
   {
@@ -191,6 +198,11 @@ private:
         continue;
       }
       const auto& pvi = atermpp::down_cast<propositional_variable_instantiation>(formula);
+      if (!is_known_equation(pvi.name()))
+      {
+        mCRL2log(log::debug) << "Ignoring structure graph vertex for auxiliary equation " << pvi.name() << std::endl;
+        continue;
+      }
       formula_key equation_key{pvi.name()};
 
       index[equation_key].sorted_by_formula.emplace_back(common_parameter_key(pvi, is_under), idx);
@@ -598,10 +610,12 @@ private:
         guard_free_vars.begin(),
         guard_free_vars.end(),
         std::inserter(guard_essential_vars, guard_essential_vars.begin()));
-      selected_var = detail::choose_variable_by_ruling_order(var_name, guard_essential_vars, *m_ruling_relation);
+      const auto& var_counts = detail::get_or_compute_variable_counts(var_name, guard_formula, m_var_count_cache);
+      selected_var
+        = detail::choose_variable_by_ruling_order(var_name, guard_essential_vars, *m_ruling_relation, var_counts);
       if (!selected_var)
       {
-        // Fall back to rhs if no ruling relation for this equation
+        // No ruling relation for this equation: fall back to rhs.
         selected_var = detail::choose_variable_by_rhs_order(guard_formula, essential_vars);
       }
     }

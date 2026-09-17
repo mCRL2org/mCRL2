@@ -21,10 +21,7 @@ using namespace mcrl2;
 using namespace pbes_system;
 using namespace pbes_system::detail;
 
-static bool run_cegps(
-  const std::string& text,
-  pbescegps_options options,
-  abstract_param_state& final_state)
+static bool run_cegps(const std::string& text, pbescegps_options options, abstract_param_state& final_state)
 {
   pbes p = txt2pbes(text, false);
   pbescegps_iterator iterator;
@@ -32,9 +29,7 @@ static bool run_cegps(
 }
 
 // Return the set of still-abstracted parameter names for equation eq_name.
-static std::set<std::string> abstracted_names(
-  const abstract_param_state& state,
-  const std::string& eq_name)
+static std::set<std::string> abstracted_names(const abstract_param_state& state, const std::string& eq_name)
 {
   std::set<std::string> names;
   auto it = state.W.find(core::identifier_string(eq_name));
@@ -49,8 +44,7 @@ static std::set<std::string> abstracted_names(
 }
 
 // Convenience overload that drops the final state.
-static bool run_cegps(
-  const std::string& text,
+static bool run_cegps(const std::string& text,
   pbescegps_options options,
   const std::string& eq_name,
   std::set<std::string>& result_names)
@@ -72,9 +66,8 @@ static pbescegps_options default_options()
 // nu equation, no transitions: nothing abstracted.
 BOOST_AUTO_TEST_CASE(test_no_transitions)
 {
-  std::string text =
-    "pbes nu X(a: Bool, b: Bool) = val(a);"
-    "init X(false, true);";
+  std::string text = "pbes nu X(a: Bool, b: Bool) = val(a);"
+                     "init X(false, true);";
   std::set<std::string> abstracted;
   BOOST_CHECK(!run_cegps(text, default_options(), "X", abstracted));
   BOOST_CHECK((abstracted == std::set<std::string>{}));
@@ -83,9 +76,8 @@ BOOST_AUTO_TEST_CASE(test_no_transitions)
 // mu equation, no transitions: nothing abstracted.
 BOOST_AUTO_TEST_CASE(test_mu_equation)
 {
-  std::string text =
-    "pbes mu X(a: Bool, b: Bool) = val(a && b);"
-    "init X(true, true);";
+  std::string text = "pbes mu X(a: Bool, b: Bool) = val(a && b);"
+                     "init X(true, true);";
   std::set<std::string> abstracted;
   BOOST_CHECK(run_cegps(text, default_options(), "X", abstracted));
   BOOST_CHECK((abstracted == std::set<std::string>{}));
@@ -95,9 +87,8 @@ BOOST_AUTO_TEST_CASE(test_mu_equation)
 // X(false, true) = X(true, true) = true.
 BOOST_AUTO_TEST_CASE(test_self_transition)
 {
-  std::string text =
-    "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
-    "init X(false, true);";
+  std::string text = "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
+                     "init X(false, true);";
   std::set<std::string> abstracted;
   BOOST_CHECK(run_cegps(text, default_options(), "X", abstracted));
   BOOST_CHECK((abstracted == std::set<std::string>{"a", "b"}));
@@ -106,10 +97,9 @@ BOOST_AUTO_TEST_CASE(test_self_transition)
 // Two equations: nu Z calls mu X0.
 BOOST_AUTO_TEST_CASE(test_two_equations)
 {
-  std::string text =
-    "pbes nu Z(a: Bool, b: Bool) = X0(a, b) && (val(a) || Z(!a, b));"
-    "mu X0(a: Bool, b: Bool) = val(a && b);"
-    "init Z(false, true);";
+  std::string text = "pbes nu Z(a: Bool, b: Bool) = X0(a, b) && (val(a) || Z(!a, b));"
+                     "mu X0(a: Bool, b: Bool) = val(a && b);"
+                     "init Z(false, true);";
   abstract_param_state final_state;
   BOOST_CHECK(!run_cegps(text, default_options(), final_state));
   BOOST_CHECK((abstracted_names(final_state, "Z") == std::set<std::string>{"b"}));
@@ -119,9 +109,8 @@ BOOST_AUTO_TEST_CASE(test_two_equations)
 // --var-choice=ruling.
 BOOST_AUTO_TEST_CASE(test_var_choice_ruling)
 {
-  std::string text =
-    "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
-    "init X(false, true);";
+  std::string text = "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
+                     "init X(false, true);";
   auto opts = default_options();
   opts.var_choice = var_choice_strategy::ruling;
   std::set<std::string> abstracted;
@@ -131,9 +120,8 @@ BOOST_AUTO_TEST_CASE(test_var_choice_ruling)
 // ruling + rules_ideal.
 BOOST_AUTO_TEST_CASE(test_ruling_with_rules_ideal)
 {
-  std::string text =
-    "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
-    "init X(false, true);";
+  std::string text = "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
+                     "init X(false, true);";
   auto opts = default_options();
   opts.var_choice = var_choice_strategy::ruling;
   opts.rules_ideal = true;
@@ -144,9 +132,8 @@ BOOST_AUTO_TEST_CASE(test_ruling_with_rules_ideal)
 // --var-choice=count.
 BOOST_AUTO_TEST_CASE(test_var_choice_count)
 {
-  std::string text =
-    "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
-    "init X(false, true);";
+  std::string text = "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
+                     "init X(false, true);";
   auto opts = default_options();
   opts.var_choice = var_choice_strategy::count;
   std::set<std::string> abstracted;
@@ -156,9 +143,8 @@ BOOST_AUTO_TEST_CASE(test_var_choice_count)
 // --var-choice=rhs: both params abstracted.
 BOOST_AUTO_TEST_CASE(test_var_choice_rhs)
 {
-  std::string text =
-    "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
-    "init X(false, true);";
+  std::string text = "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
+                     "init X(false, true);";
   auto opts = default_options();
   opts.var_choice = var_choice_strategy::rhs;
   std::set<std::string> abstracted;
@@ -169,9 +155,8 @@ BOOST_AUTO_TEST_CASE(test_var_choice_rhs)
 // --var-choice=all: both params abstracted.
 BOOST_AUTO_TEST_CASE(test_var_choice_all)
 {
-  std::string text =
-    "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
-    "init X(false, true);";
+  std::string text = "pbes nu X(a: Bool, b: Bool) = (val(a) || X(!a, b));"
+                     "init X(false, true);";
   auto opts = default_options();
   opts.var_choice = var_choice_strategy::all;
   std::set<std::string> abstracted;
@@ -183,13 +168,12 @@ BOOST_AUTO_TEST_CASE(test_var_choice_all)
 // Z(false, red) = Z(true, green) = Z(true, red) = true.
 BOOST_AUTO_TEST_CASE(test_multiple_guarded_transitions)
 {
-  std::string text =
-    "sort Colour = struct red | green;"
-    ""
-    "pbes nu Z(a: Bool, c: Colour) ="
-    "(val(a) || Z(!a, if(a, green, c))) &&"
-    "(val(!(c == green)) || Z(a, red));"
-    "init Z(false, red);";
+  std::string text = "sort Colour = struct red | green;"
+                     ""
+                     "pbes nu Z(a: Bool, c: Colour) ="
+                     "(val(a) || Z(!a, if(a, green, c))) &&"
+                     "(val(!(c == green)) || Z(a, red));"
+                     "init Z(false, red);";
   std::set<std::string> abstracted;
   BOOST_CHECK(run_cegps(text, default_options(), "Z", abstracted));
   BOOST_CHECK((abstracted == std::set<std::string>{"a", "c"}));
@@ -198,12 +182,11 @@ BOOST_AUTO_TEST_CASE(test_multiple_guarded_transitions)
 // Ruling relation: guard(a) changes a and c, so a rules c.
 BOOST_AUTO_TEST_CASE(test_ruling_relation_mutual)
 {
-  std::string text =
-    "sort Colour = struct red | green;"
-    ""
-    "pbes nu Z(a: Bool, c: Colour) ="
-    "(val(a) || Z(!a, if(a, green, c)));"
-    "init Z(false, red);";
+  std::string text = "sort Colour = struct red | green;"
+                     ""
+                     "pbes nu Z(a: Bool, c: Colour) ="
+                     "(val(a) || Z(!a, if(a, green, c)));"
+                     "init Z(false, red);";
   auto opts = default_options();
   opts.var_choice = var_choice_strategy::ruling;
   std::set<std::string> abstracted;
@@ -215,10 +198,9 @@ BOOST_AUTO_TEST_CASE(test_ruling_relation_mutual)
 // Y(false, false) = false.
 BOOST_AUTO_TEST_CASE(test_two_equations_shared_params)
 {
-  std::string text =
-    "pbes nu Y(a: Bool, b: Bool) = X(a, b) && (val(a) || Y(!a, b));"
-    "mu X(a: Bool, b: Bool) = val(b);"
-    "init Y(false, false);";
+  std::string text = "pbes nu Y(a: Bool, b: Bool) = X(a, b) && (val(a) || Y(!a, b));"
+                     "mu X(a: Bool, b: Bool) = val(b);"
+                     "init Y(false, false);";
   abstract_param_state final_state;
   BOOST_CHECK(!run_cegps(text, default_options(), final_state));
   BOOST_CHECK((abstracted_names(final_state, "Y") == std::set<std::string>{}));
@@ -238,11 +220,10 @@ BOOST_AUTO_TEST_CASE(test_two_equations_shared_params)
 // herring that never resolves the over-approximation) must stay abstracted.
 BOOST_AUTO_TEST_CASE(test_select_variable_strategy_alignment)
 {
-  std::string text =
-    "pbes nu X(p: Bool, q: Bool, n: Nat) ="
-    "(val(p) || X(true, !q, 5))"
-    " && (val(q) && (X(true, !q, 7) || (X(true, !q, 9) && val(n < 5))));"
-    "init X(false, false, 0);";
+  std::string text = "pbes nu X(p: Bool, q: Bool, n: Nat) ="
+                     "(val(p) || X(true, !q, 5))"
+                     " && (val(q) && (X(true, !q, 7) || (X(true, !q, 9) && val(n < 5))));"
+                     "init X(false, false, 0);";
   pbes p = txt2pbes(text);
   pbescegps_options opts = default_options();
   pbescegps_iterator iterator;
@@ -274,4 +255,66 @@ BOOST_AUTO_TEST_CASE(test_select_variable_strategy_alignment)
   BOOST_CHECK(
     refine.refine_using_strategies(p, under_pbes, over_pbes, state, opts, under_graph, over_graph, datar, ruling));
   BOOST_CHECK((abstracted_names(state, "X") == std::set<std::string>{"p"}));
+}
+
+// Checks that two structure graphs have the same vertices and edges.
+static void check_equal_structure_graph(const structure_graph& a, const structure_graph& b)
+{
+  BOOST_REQUIRE_EQUAL(a.extent(), b.extent());
+  BOOST_CHECK_EQUAL(a.initial_vertex(), b.initial_vertex());
+  BOOST_CHECK_EQUAL(a.exclude(), b.exclude());
+  for (structure_graph::index_type i = 0; i < a.extent(); ++i)
+  {
+    const structure_graph::vertex& va = a.find_vertex(i);
+    const structure_graph::vertex& vb = b.find_vertex(i);
+    BOOST_CHECK(va.formula() == vb.formula());
+    BOOST_CHECK_EQUAL(static_cast<int>(va.decoration), static_cast<int>(vb.decoration));
+    BOOST_CHECK_EQUAL(va.rank, vb.rank);
+    BOOST_CHECK_EQUAL(va.strategy, vb.strategy);
+    BOOST_CHECK(va.successors == vb.successors);
+
+    // The predecessor order is not preserved by the reconstruction, only the set.
+    std::vector<structure_graph::index_type> pred_a = va.predecessors;
+    std::vector<structure_graph::index_type> pred_b = vb.predecessors;
+    std::sort(pred_a.begin(), pred_a.end());
+    std::sort(pred_b.begin(), pred_b.end());
+    BOOST_CHECK(pred_a == pred_b);
+  }
+}
+
+// The binary format must round-trip the approximation structure graphs.
+BOOST_AUTO_TEST_CASE(test_structure_graph_binary_round_trip)
+{
+  std::string text = "pbes nu X(p: Bool, q: Bool, n: Nat) ="
+                     "(val(p) || X(true, !q, 5))"
+                     " && (val(q) && (X(true, !q, 7) || (X(true, !q, 9) && val(n < 5))));"
+                     "init X(false, false, 0);";
+  pbes p = txt2pbes(text);
+  pbescegps_options opts = default_options();
+  pbescegps_iterator iterator;
+  iterator.initialize(p, opts);
+
+  // Abstract p and q so that both approximations contain a strategy.
+  abstract_param_state state;
+  const pbes_equation& eq = detail::find_equation_by_name(p, core::identifier_string("X"))->get();
+  const data::variable_list params = eq.variable().parameters();
+  state.add_abstracted_variable(p, core::identifier_string("X"), atermpp::down_cast<data::variable>(*params.begin()));
+  state.add_abstracted_variable(p,
+    core::identifier_string("X"),
+    atermpp::down_cast<data::variable>(*std::next(params.begin())));
+
+  structure_graph under_graph;
+  structure_graph over_graph;
+  BOOST_CHECK(!iterator.solve_approximation_cached(p, state, false, opts, under_graph));
+  BOOST_CHECK(iterator.solve_approximation_cached(p, state, true, opts, over_graph));
+
+  const std::string filename = (std::filesystem::temp_directory_path() / "pbescegps_sgraph_test.bin").string();
+
+  save_structure_graph(under_graph, filename);
+  check_equal_structure_graph(under_graph, load_structure_graph(filename));
+
+  save_structure_graph(over_graph, filename);
+  check_equal_structure_graph(over_graph, load_structure_graph(filename));
+
+  std::filesystem::remove(filename);
 }
