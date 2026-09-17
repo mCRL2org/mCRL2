@@ -13,9 +13,11 @@
 #define BOOST_TEST_MODULE pbescegps_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/data/pos.h"
 #include "mcrl2/pbes/detail/pbescegps_utilities.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include <sstream>
 
 using namespace mcrl2;
 using namespace pbes_system;
@@ -318,3 +320,32 @@ BOOST_AUTO_TEST_CASE(test_structure_graph_binary_round_trip)
 
   std::filesystem::remove(filename);
 }
+
+// A data function symbol must keep its sort across the round trip, otherwise
+// pp() prints encoded numbers such as Pos values in their internal form.
+#ifdef MCRL2_ENABLE_MACHINENUMBERS
+BOOST_AUTO_TEST_CASE(test_structure_graph_binary_keeps_function_symbol_sort)
+{
+  structure_graph G;
+  detail::manual_structure_graph_builder builder(G);
+  const data::data_expression pos_one = data::sort_pos::most_significant_digit(data::sort_machine_word::one_word());
+  builder.m_vertices.emplace_back(propositional_variable_instantiation("X",
+                                    data::make_data_expression_list(std::vector<data::data_expression>{pos_one})),
+    structure_graph::d_none,
+    0);
+  builder.set_initial_state(0);
+  builder.finalize();
+
+  std::ostringstream before;
+  before << G;
+
+  const std::string filename = (std::filesystem::temp_directory_path() / "pbescegps_sgraph_symbol_test.bin").string();
+  save_structure_graph(G, filename);
+  structure_graph loaded = load_structure_graph(filename);
+  std::filesystem::remove(filename);
+
+  std::ostringstream after;
+  after << loaded;
+  BOOST_CHECK_EQUAL(before.str(), after.str());
+}
+#endif

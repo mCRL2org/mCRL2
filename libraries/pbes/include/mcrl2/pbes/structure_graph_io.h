@@ -15,6 +15,8 @@
 
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_io_binary.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/pbes/structure_graph.h"
 #include "mcrl2/pbes/structure_graph_builder.h"
 #include "mcrl2/utilities/exception.h"
@@ -28,12 +30,40 @@
 namespace mcrl2::pbes_system
 {
 
+namespace detail
+{
+
+// A data::function_symbol stores its name and sort in an index that the binary aterm
+// format cannot represent. Encode them as arguments while streaming, as the data and
+// pbes serialization do, so that loaded function symbols keep their sort.
+inline atermpp::aterm remove_opid_index(const atermpp::aterm& x)
+{
+  if (x.function() == core::detail::function_symbol_OpId())
+  {
+    return atermpp::aterm(core::detail::function_symbol_OpIdNoIndex(), x.begin(), --x.end());
+  }
+  return x;
+}
+
+inline atermpp::aterm add_opid_index(const atermpp::aterm& x)
+{
+  if (x.function() == core::detail::function_symbol_OpIdNoIndex())
+  {
+    const data::function_symbol& y = reinterpret_cast<const data::function_symbol&>(x);
+    return data::function_symbol(y.name(), y.sort());
+  }
+  return x;
+}
+
+} // namespace detail
+
 /// \brief Writes a structure graph to a stream in binary aterm format.
 /// \details A sequence of aterms: extent, initial vertex, excluded vertices, then
 ///          per vertex its formula, decoration, rank, strategy and successors.
 inline void save_structure_graph(const structure_graph& G, std::ostream& out)
 {
   atermpp::binary_aterm_ostream stream(out);
+  stream.set_transformer(detail::remove_opid_index);
 
   stream << atermpp::aterm_int(G.extent());
   stream << atermpp::aterm_int(G.initial_vertex());
@@ -79,6 +109,7 @@ inline void save_structure_graph(const structure_graph& G, const std::string& fi
 inline structure_graph load_structure_graph(std::istream& in)
 {
   atermpp::binary_aterm_istream stream(in);
+  stream.set_transformer(detail::add_opid_index);
 
   auto read_size = [&stream]() -> std::size_t
   {
