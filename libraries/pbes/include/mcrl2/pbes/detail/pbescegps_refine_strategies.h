@@ -555,7 +555,6 @@ private:
         const std::vector<std::pair<propositional_variable_instantiation, pbes_expression>>& guards
           = guard_trav.expression_stack.back().guards;
 
-        bool guard_found = false;
         for (const auto& [pvi, guard_expr]: guards)
         {
           if (!candidate_pvis.contains(pvi))
@@ -574,20 +573,10 @@ private:
           {
             essential_vars = std::move(common_vars);
             guard_formula = guard_expr;
-            guard_found = true;
             mCRL2log(log::debug) << "Guard vars: " << core::detail::print_list(guard_vars) << std::endl;
             mCRL2log(log::debug) << "Guard formula: " << guard_formula << std::endl;
             break;
           }
-        }
-
-        // None of the candidate transitions is guarded by an abstracted parameter:
-        // its parameters are only carried into the successor, so un-abstracting one
-        // does not help to resolve the counterexample.
-        if (!guard_found)
-        {
-          mCRL2log(log::debug) << "No candidate guard contains an abstracted parameter, skipping edge." << std::endl;
-          return false;
         }
       }
     }
@@ -614,7 +603,10 @@ private:
     }
     else if (options.var_choice == var_choice_strategy::ruling && m_ruling_relation != nullptr)
     {
-      const std::set<data::variable> guard_free_vars = find_free_variables(guard_formula);
+      // Exclude parameters that only occur in pvi arguments: those are carried into
+      // the successor rather than guarding the transition.
+      const std::set<data::variable> guard_free_vars
+        = detail::find_free_variables(guard_formula, data::variable_list(), false);
       std::set<data::variable> guard_essential_vars;
       std::set_intersection(essential_vars.begin(),
         essential_vars.end(),
