@@ -54,16 +54,20 @@
 #include "mcrl2/pbes/rewriters/abstraction_rewriter.h"
 #include "mcrl2/pbes/rewriters/essential_variable_extractor.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
+#include "mcrl2/pbes/structure_graph_io.h"
+#include "mcrl2/utilities/boost_process.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/logger.h"
+#include <atomic>
 #include <boost/asio.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/read_until.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/filesystem.hpp>
-#include "mcrl2/utilities/boost_process.h"
+#include <chrono>
 #include <cstddef>
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -73,6 +77,16 @@
 
 namespace mcrl2::pbes_system
 {
+
+// Unique temporary path for the child process to write the structure graph to.
+inline std::string structure_graph_temp_path()
+{
+  static std::atomic<std::size_t> counter{0};
+  const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+  return (std::filesystem::temp_directory_path()
+          / ("pbescegps_" + std::to_string(stamp) + "_" + std::to_string(++counter) + ".sgraph"))
+    .string();
+}
 
 struct pbescegps_iterator
 {
@@ -149,13 +163,16 @@ public:
     timer.start("solving approximation");
     if (options.solve_symbolic)
     {
+      // Ask the symbolic solver for the structure graph used by refinement.
+      const std::string structure_graph_path = structure_graph_temp_path();
       try
       {
         bp::ipstream output_sym_stream;
         bp::opstream input_sym_stream;
-        mCRL2log(log::debug) << "Solving symbolic with args: " << options.solve_symbolic_args << std::endl;
-        sym_process = bp::child(("pbessolvesymbolic - " + options.solve_symbolic_args),
-          bp::std_in<input_sym_stream, bp::std_out> output_sym_stream);
+        const std::string command
+          = "pbessolvesymbolic - " + options.solve_symbolic_args + " --structure-graph-out=" + structure_graph_path;
+        mCRL2log(log::debug) << "Solving symbolic with command: " << command << std::endl;
+        sym_process = bp::child(command, bp::std_in<input_sym_stream, bp::std_out> output_sym_stream);
 
         std::ostringstream buffer(std::ios::binary);
         atermpp::binary_aterm_ostream(buffer) << p_copy;
@@ -182,10 +199,26 @@ public:
         mCRL2log(log::verbose) << "Result: " << outline.back() << std::endl;
 
         result = outline.back() == "true";
+
+        if (std::filesystem::exists(structure_graph_path))
+        {
+          m_solved_graph = load_structure_graph(structure_graph_path);
+          mCRL2log(log::verbose) << "Loaded symbolic structure graph with " << m_solved_graph.extent() << " vertices"
+                                 << std::endl;
+          mCRL2log(log::debug) << "Symbolic structure graph:" << std::endl << m_solved_graph << std::endl;
+        }
+        else
+        {
+          mCRL2log(log::warning) << "The symbolic solver did not produce a structure graph; refinement will fall back "
+                                    "to random selection."
+                                 << std::endl;
+        }
+        std::filesystem::remove(structure_graph_path);
       }
       catch (const std::exception& e)
       {
         sym_process.wait();
+        std::filesystem::remove(structure_graph_path);
         throw mcrl2::runtime_error("symbolic solver failed: " + std::string(e.what()));
       }
     }
@@ -721,7 +754,7 @@ public:
   {
     mCRL2log(log::debug) << "Updating parameters for refinement..." << std::endl;
 
-    // Find the first non-empty equation's abstraction set
+    // First non-empty equation
     bool found = false;
     for (auto it = state.W.rbegin(); it != state.W.rend(); it++)
     {
@@ -733,11 +766,21 @@ public:
         {
           pbes_expression eq_formula = eq_opt->get().formula();
           propositional_variable bound_variable = eq_opt->get().variable();
-          // TODO: I am not convinced the current calculation makes sense at all.
-          // std::set<data::variable> essential_vars = find_essential_variables(eq_formula, state.W[eq_name], state.I);
-          std::set<data::variable> essential_vars = state.W[eq_name];
+          // The abstracted parameters that actually occur in the formula.
+          std::set<data::variable> essential_vars = find_essential_variables(eq_formula, state.W[eq_name], state.I);
           mCRL2log(log::debug) << "Essential variables: " << eq_name << ": " << essential_vars.size() << " ("
                                << core::detail::print_list(essential_vars) << ")" << std::endl;
+
+          if (essential_vars.empty())
+          {
+            const std::set<data::variable> irrelevant = state.W[eq_name];
+            for (const data::variable& var: irrelevant)
+            {
+              state.remove_abstracted_variable(p, eq_name, var);
+            }
+            found = true;
+            continue;
+          }
 
           std::optional<data::variable> selected_var;
 
@@ -762,7 +805,9 @@ public:
           }
           else if (options.var_choice == var_choice_strategy::ruling)
           {
-            selected_var = detail::choose_variable_by_ruling_order(eq_name, essential_vars, m_ruling_relation);
+            const auto& var_counts = detail::get_or_compute_variable_counts(eq_name, eq_formula, m_var_count_cache);
+            selected_var
+              = detail::choose_variable_by_ruling_order(eq_name, essential_vars, m_ruling_relation, var_counts);
             if (!selected_var)
             {
               selected_var = detail::choose_variable_by_rhs_order(eq_formula, essential_vars);
@@ -801,16 +846,24 @@ public:
 
   bool run_cegps_algorithm(pbes& p, pbescegps_options options, abstract_param_state& final_state)
   {
-    // Create the data rewriter once and reuse it throughout the tool
+    // Create the data rewriter once.
     m_datar.emplace(p.data(), options.rewrite_strategy);
 
-    // Compute the ruling relation once from the PBES structure
-    compute_ruling_relation(p);
-
-    // Save the ruling relation to a file when requested
-    if (!options.ruling_file.empty())
+    // Compute the ruling relation on an SRF PBES: its summands match the
+    // transitions and equations of the symbolic structure graphs.
+    if (needs_ruling_relation(options))
     {
-      detail::save_ruling_relation(m_ruling_relation, options.ruling_file);
+      algorithms::normalize(p);
+      p = pbes2srf(p, true).to_pbes();
+      // SRF reintroduces implications, which the abstraction rewriter rejects.
+      algorithms::normalize(p);
+
+      compute_ruling_relation(p);
+
+      if (!options.ruling_file.empty())
+      {
+        detail::save_ruling_relation(m_ruling_relation, options.ruling_file);
+      }
     }
 
     // Calculate non-Control Flow Parameters (parameters to abstract) per equation

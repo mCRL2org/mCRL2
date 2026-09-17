@@ -27,6 +27,7 @@
 #include "mcrl2/pbes/pbesreach_partial.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
+#include "mcrl2/pbes/structure_graph_io.h"
 #include "mcrl2/pbes/symbolic_pbessolve.h"
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/utilities/exception.h"
@@ -51,6 +52,7 @@ struct arguments
   std::string input_filename;
   std::string output_filename;
   std::string evidence_filename;
+  std::string structure_graph_filename;
   std::string lpsfile;
   std::string ltsfile;
   mcrl2::utilities::execution_timer& timer;
@@ -73,7 +75,8 @@ namespace detail
 /// If X is the target of an edge, this is expected as the exploration may have been partial, and it
 /// says that the edge is not in the strategy; we shall prune it.
 /// If X is the source it means the two instantiations have
-/// gone out of step, so we have encountered a vertex that was not visited during symbolic exploration, and we must not prune it.
+/// gone out of step, so we have encountered a vertex that was not visited during symbolic exploration, and we must not
+/// prune it.
 inline bool vertex_cube(const propositional_variable_instantiation& X,
   const std::vector<symbolic::data_expression_index>& data_index,
   const std::unordered_map<core::identifier_string, data::data_expression>& propvar_map,
@@ -336,7 +339,7 @@ private:
     // per equation, but operator() below is called once per successor in the right-hand side).
     std::vector<std::uint32_t> m_X_cube;
     bool m_X_is_counter_example; // X is a counter example equation, i.e. in L
-    bool m_X_known;              // X was resolved to a vertex of the symbolic game
+    bool m_X_known; // X was resolved to a vertex of the symbolic game
     bool m_X_is_alpha;
 
     rewrite_star_substitution(const std::vector<symbolic::data_expression_index>& data_index,
@@ -458,6 +461,9 @@ protected:
   std::string ltsfile;
   std::string evidence_file;
 
+  // If non-empty, the strategy-guided structure graph is written here in binary.
+  std::string structure_graph_file;
+
   void add_options(utilities::interface_description& desc) override
   {
     super::add_options(desc);
@@ -531,6 +537,11 @@ protected:
       utilities::make_file_argument("NAME"),
       "The file to which the evidence is written. If not set, a "
       "default name will be chosen.");
+
+    desc.add_hidden_option("structure-graph-out",
+      utilities::make_file_argument("NAME"),
+      "Write the strategy-guided structure graph to NAME in binary format. Forces the second instantiation "
+      "even when the PBES has no counter example information.");
 
     desc.add_hidden_option("aggressive", "apply on-the-fly solving after every iteration to detect bugs");
     desc.add_hidden_option("check-strategy", "do a sanity check on the computed strategy", 'y');
@@ -675,6 +686,11 @@ protected:
       evidence_file = parser.option_argument("evidence-file");
     }
 
+    if (parser.has_option("structure-graph-out"))
+    {
+      structure_graph_file = parser.option_argument("structure-graph-out");
+    }
+
     if (options.check_strategy)
     {
       if (options.summand_groups.compare("none") != 0)
@@ -698,9 +714,11 @@ public:
 
   bool run() override
   {
-    lace_set_stacksize(lace_stacksize*1024*1024*1024);
+    lace_set_stacksize(lace_stacksize * 1024 * 1024 * 1024);
     lace_start(number_of_threads(), lace_dqsize);
-    sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, static_cast<int>(std::log2(table_ratio)), static_cast<int>(std::log2(initial_ratio)));
+    sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024,
+      static_cast<int>(std::log2(table_ratio)),
+      static_cast<int>(std::log2(initial_ratio)));
     sylvan::sylvan_init_package();
     sylvan::sylvan_init_ldd();
     sylvan::ldds::initialise();
@@ -709,6 +727,7 @@ public:
       .input_filename = input_filename(),
       .output_filename = output_filename(),
       .evidence_filename = evidence_file,
+      .structure_graph_filename = structure_graph_file,
       .lpsfile = lpsfile,
       .ltsfile = ltsfile,
       .timer = timer()};
@@ -725,6 +744,7 @@ void solve(pbes_system::pbes pbesspec,
   symbolic_reachability_options& options_,
   const std::string& input_filename,
   const std::string& evidence_filename,
+  const std::string& structure_graph_filename,
   const std::string& lpsfile,
   const std::string& ltsfile,
   mcrl2::utilities::execution_timer& timer)
@@ -732,12 +752,15 @@ void solve(pbes_system::pbes pbesspec,
   using namespace sylvan::ldds;
 
   bool has_counter_example = mcrl2::pbes_system::detail::has_counter_example_information(pbesspec);
-  if (has_counter_example && (options_.solve_strategy == 5 || options_.solve_strategy == 6))
+
+  // A structure graph requires the strategy and the second instantiation.
+  const bool emit_structure_graph = !structure_graph_filename.empty();
+  if ((has_counter_example || emit_structure_graph) && (options_.solve_strategy == 5 || options_.solve_strategy == 6))
   {
     // TODO: Cannot use the partial solvers.
     mCRL2log(mcrl2::log::warning)
-      << "Warning: Cannot use partial solving using fatal attractor solving (solve strategies 5 and 6) with PBES that "
-         "has counter example information, using solving strategy 0 instead."
+      << "Warning: Cannot use partial solving using fatal attractor solving (solve strategies 5 and 6) when the PBES "
+         "has counter example information or a structure graph is requested, using solving strategy 0 instead."
       << std::endl;
     options_.solve_strategy = 0;
   }
@@ -792,7 +815,8 @@ void solve(pbes_system::pbes pbesspec,
   {
     // If you provide a file, but the PBES has no counter example information, then use the two pass instantiation. This
     // will be useless, but at least the file will be written.
-    if ((!has_counter_example && lpsfile.empty() && ltsfile.empty()) || options_.naive_counter_example_instantiation)
+    if ((!has_counter_example && lpsfile.empty() && ltsfile.empty() && !emit_structure_graph)
+        || options_.naive_counter_example_instantiation)
     {
       PbesReachAlgorithm reach(srf_pbes, options_);
       mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
@@ -953,21 +977,28 @@ void solve(pbes_system::pbes pbesspec,
         mCRL2log(log::verbose) << "Number of vertices in the structure graph: " << SG.all_vertices().size()
                                << std::endl;
         [[maybe_unused]]
-        bool final_result
-          = pbes_system::detail::run_solve(pbesspec,
-            sigma,
-            SG,
-            second_instantiate.equation_index(),
-            pbessolve_options,
-            input_filename,
-            lpsfile,
-            ltsfile,
-            evidence_filename,
-            timer);
+        bool final_result = pbes_system::detail::run_solve(pbesspec,
+          sigma,
+          SG,
+          second_instantiate.equation_index(),
+          pbessolve_options,
+          input_filename,
+          lpsfile,
+          ltsfile,
+          evidence_filename,
+          timer);
         if (result != final_result)
         {
-          throw mcrl2::runtime_error(
-            "The result of the first and second instantiations do not match, this is a bug in the tool! Please report it.");
+          throw mcrl2::runtime_error("The result of the first and second instantiations do not match, this is a bug in "
+                                     "the tool! Please report it.");
+        }
+
+        if (emit_structure_graph)
+        {
+          timer.start("save-structure-graph");
+          pbes_system::save_structure_graph(SG, structure_graph_filename);
+          timer.finish("save-structure-graph");
+          mCRL2log(log::verbose) << "Saved structure graph in " << structure_graph_filename << std::endl;
         }
       }
     }
@@ -992,6 +1023,7 @@ TASK_IMPL_1(bool, pbessolvesymbolic_task, arguments*, args) // NOLINT(cppcoregui
         args->options,
         args->input_filename,
         args->evidence_filename,
+        args->structure_graph_filename,
         args->lpsfile,
         args->ltsfile,
         args->timer);
@@ -1002,6 +1034,7 @@ TASK_IMPL_1(bool, pbessolvesymbolic_task, arguments*, args) // NOLINT(cppcoregui
         args->options,
         args->input_filename,
         args->evidence_filename,
+        args->structure_graph_filename,
         args->lpsfile,
         args->ltsfile,
         args->timer);

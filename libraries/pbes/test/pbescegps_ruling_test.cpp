@@ -144,6 +144,32 @@ BOOST_AUTO_TEST_CASE(test_choose_extra_essential_ancestor)
   BOOST_CHECK_EQUAL(pp(*result), "B");
 }
 
+// Equal tree sizes (r1 rules x, r2 rules y): the higher occurrence count wins.
+BOOST_AUTO_TEST_CASE(test_choose_count_breaks_tree_size_tie)
+{
+  ruling_relation_type ruling = make_ruling("Y", {{"x", {"r1"}}, {"y", {"r2"}}});
+
+  std::set<data::variable> essential = {V("r1"), V("r2")};
+  std::map<data::variable, std::size_t> counts = {{V("r1"), 1}, {V("r2"), 5}};
+
+  auto result = choose_variable_by_ruling_order(core::identifier_string("Y"), essential, ruling, counts);
+  BOOST_REQUIRE(result.has_value());
+  BOOST_CHECK_EQUAL(pp(*result), "r2");
+}
+
+// Equal tree sizes and counts: a deterministic candidate is still returned.
+BOOST_AUTO_TEST_CASE(test_choose_count_tie_falls_back_to_name)
+{
+  ruling_relation_type ruling = make_ruling("Y", {{"x", {"r1"}}, {"y", {"r2"}}});
+
+  std::set<data::variable> essential = {V("r1"), V("r2")};
+  std::map<data::variable, std::size_t> counts = {{V("r1"), 3}, {V("r2"), 3}};
+
+  auto result = choose_variable_by_ruling_order(core::identifier_string("Y"), essential, ruling, counts);
+  BOOST_REQUIRE(result.has_value());
+  BOOST_CHECK(*result == V("r1") || *result == V("r2"));
+}
+
 // Root B not essential; the fallback starting variable A has no dominance
 // (tree size 0), so nothing is selected.
 BOOST_AUTO_TEST_CASE(test_choose_fallback_root_not_essential)
