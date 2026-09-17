@@ -42,8 +42,9 @@ the `University of Twente <http://fmt.cs.utwente.nl>`_.
 
 .. note::
 
-   The Coursera lectures are now freely available on Youtube, divided in four parts. 
-   The lectures are also available on `openlearnity.com <https://www.openlearnity.org/courses/?organization=tue>`_.
+   The Coursera courses are now freely available at `openlearnity.com <https://www.openlearnity.org/courses/?organization=tue>`_. You
+   can either get access via accounts of participating  universities, which includes Eindhoven University of Technology, or by making a new user account. 
+   The lectures -- but not the exercises -- are also available on YouTube. 
 
    - `Automata and behavioural equivalences <https://www.youtube.com/watch?v=1brp80vNSy4&list=PLTlBz41EgXBTRm4jcsRwKWoTazWxiieNi>`__.
    - `Model process behaviour <https://www.youtube.com/watch?v=1yP9kMpkv38&list=PLTlBz41EgXBTmbFWpxMsZRT2vcnxxC6fF>`__.
