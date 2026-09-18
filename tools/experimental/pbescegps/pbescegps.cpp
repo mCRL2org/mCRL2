@@ -83,7 +83,9 @@ protected:
       's');
     desc.add_option("solve-symbolic-args",
       utilities::make_optional_argument("STR", ""),
-      "Solve the PBES symbolically using the following arguments.");
+      "Solve the PBES symbolically using the following arguments, which are passed verbatim to pbessolvesymbolic. "
+      "The outer -r/--rewriter option is not forwarded, so the rewriter for the symbolic solver must be set here "
+      "explicitly (e.g. -rjittyc); it defaults to the rewriter of pbessolvesymbolic itself.");
     desc.add_option("var-choice",
       utilities::make_enum_argument<var_choice_strategy>("STRATEGY")
         .add_value_desc(var_choice_strategy::lhs, "The variable order of the left-hand side of the equation.", true)
