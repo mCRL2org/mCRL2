@@ -14,6 +14,7 @@
 #define MCRL2_UTILITIES_BOOST_PROCESS_H
 
 #include <boost/version.hpp>
+// Boost 1.88
 #if BOOST_VERSION >= 108800
 #include <boost/process/v1/child.hpp>
 #include <boost/process/v1/io.hpp>

@@ -736,7 +736,7 @@ inline ruling_statistics_type count_rulings(const pbes& p, const data::rewriter&
         continue;
       }
 
-      std::set<data::variable> free_vars = pbes_system::find_free_variables(guard_expr);
+      std::set<data::variable> free_vars = find_free_variables(guard_expr, data::variable_list(), false);
       std::set<data::variable> guard_vars;
       std::set_intersection(free_vars.begin(),
         free_vars.end(),

@@ -31,8 +31,6 @@
 #include <map>
 #include <optional>
 
-using namespace mcrl2;
-
 namespace mcrl2::pbes_system
 {
 
