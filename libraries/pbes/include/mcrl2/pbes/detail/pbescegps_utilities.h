@@ -524,7 +524,7 @@ inline std::optional<data::variable> choose_variable_by_ruling_order(const core:
       if (!candidate.has_value() || ancestor_size > size
           || (ancestor_size == size
               && (count(ancestor) > count(*candidate)
-                  || (count(ancestor) == count(*candidate) && ancestor.name() < candidate->name()))))
+                  || (count(ancestor) == count(*candidate) && pp(ancestor.name()) < pp(candidate->name())))))
       {
         candidate = ancestor;
         size = ancestor_size;
@@ -544,7 +544,7 @@ inline std::optional<data::variable> choose_variable_by_ruling_order(const core:
     if (size > best_tree_size
         || (size == best_tree_size && best_var.has_value()
             && (count(*candidate) > count(*best_var)
-                || (count(*candidate) == count(*best_var) && candidate->name() < best_var->name()))))
+                || (count(*candidate) == count(*best_var) && pp(candidate->name()) < pp(best_var->name())))))
     {
       best_tree_size = size;
       best_var = candidate;
@@ -820,8 +820,10 @@ inline void log_ruling_statistics(const ruling_statistics_type& stats)
     for (const auto& [d_m, rulers_counts]: ruled_by_counts)
     {
       // d_m may be a frozen parameter (after flip_frozen_rulers) that never changes.
-      const std::size_t total = stats.changes.at(eq_name).contains(d_m) ? stats.changes.at(eq_name).at(d_m) : 1;
-      if (total == 1)
+      const auto& changes_eq = stats.changes.at(eq_name);
+      const bool is_frozen = !changes_eq.contains(d_m) || changes_eq.at(d_m) == 0;
+      const std::size_t total = is_frozen ? 0 : changes_eq.at(d_m);
+      if (is_frozen)
       {
         mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " never changes (frozen)" << std::endl;
       }
@@ -831,7 +833,7 @@ inline void log_ruling_statistics(const ruling_statistics_type& stats)
       }
       for (const auto& [d_j, count_j]: rulers_counts)
       {
-        if (total == 1)
+        if (is_frozen)
         {
           mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " ruled by " << pp(d_j) << " (" << count_j
                                << " transitions)" << std::endl;
@@ -899,7 +901,7 @@ inline ruling_relation_type build_ruling_relation(const ruling_percentages_type&
             {
               continue;
             }
-            else if (pct_j == pct_m && d_j.name() > d_m.name())
+            else if (pct_j == pct_m && pp(d_m.name()) < pp(d_j.name()))
             {
               continue;
             }
@@ -1003,7 +1005,7 @@ break_ruling_cycles(const pbes& p, const ruling_percentages_type& percentages, r
       {
         double w = node_weight(v);
         double w_max = node_weight(*v_max);
-        if (w > w_max || (w == w_max && v.name() < v_max->name()))
+        if (w > w_max || (w == w_max && pp(v.name()) < pp(v_max->name())))
         {
           v_max = &v;
         }
