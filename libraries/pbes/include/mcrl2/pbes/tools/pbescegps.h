@@ -52,7 +52,6 @@
 #endif
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/rewriters/abstraction_rewriter.h"
-#include "mcrl2/pbes/rewriters/essential_variable_extractor.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
 #include "mcrl2/pbes/structure_graph_io.h"
 #include "mcrl2/utilities/boost_process.h"
@@ -545,7 +544,7 @@ public:
         {
           continue;
         }
-        for (const data::variable& v: find_free_variables(guard))
+        for (const data::variable& v: detail::find_free_variables(guard, data::variable_list(), false))
         {
           if (parameters.contains(v))
           {
@@ -766,8 +765,17 @@ public:
         {
           pbes_expression eq_formula = eq_opt->get().formula();
           propositional_variable bound_variable = eq_opt->get().variable();
-          // The abstracted parameters that actually occur in the formula.
-          std::set<data::variable> essential_vars = find_essential_variables(eq_formula, state.W[eq_name], state.I);
+          // The abstracted parameters that actually occur in the formula. Parameters
+          // that only occur in the arguments of a successor are carried into it rather
+          // than guarding the transition, so they are excluded.
+          const std::set<data::variable> formula_free_vars
+            = detail::find_free_variables(eq_formula, data::variable_list(), false);
+          std::set<data::variable> essential_vars;
+          std::set_intersection(formula_free_vars.begin(),
+            formula_free_vars.end(),
+            state.W[eq_name].begin(),
+            state.W[eq_name].end(),
+            std::inserter(essential_vars, essential_vars.begin()));
           mCRL2log(log::debug) << "Essential variables: " << eq_name << ": " << essential_vars.size() << " ("
                                << core::detail::print_list(essential_vars) << ")" << std::endl;
 

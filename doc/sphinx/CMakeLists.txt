@@ -3,12 +3,7 @@
 # by FindPythonRequirements (e.g. inside a virtual environment), with a fallback
 # to whatever sphinx-build is on the PATH.
 get_filename_component(SPHINX_PYTHON_BIN_DIR "${Python_EXECUTABLE}" DIRECTORY)
-if(MSVC)
-  set(SPHINX_BUILD_NAMES sphinx-build.bat sphinx-build)
-else()
-  set(SPHINX_BUILD_NAMES sphinx-build)
-endif()
-find_program(SPHINX_BUILD_CMD NAMES ${SPHINX_BUILD_NAMES} HINTS "${SPHINX_PYTHON_BIN_DIR}")
+find_program(SPHINX_BUILD_CMD NAMES sphinx-build HINTS "${SPHINX_PYTHON_BIN_DIR}")
 if(NOT SPHINX_BUILD_CMD)
   message(FATAL_ERROR "Could not find sphinx-build next to ${Python_EXECUTABLE} or on the PATH. \
 Install the Python dependencies (see the developer manual), e.g. 'pip install -r <mCRL2>/requirements.txt'.")

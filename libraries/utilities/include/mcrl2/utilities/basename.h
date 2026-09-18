@@ -16,6 +16,7 @@
 
 #include <string>
 #include <vector>
+#include <limits.h>
 #include "mcrl2/utilities/exception.h"
 
 #ifdef MCRL2_PLATFORM_LINUX
@@ -44,7 +45,7 @@ namespace mcrl2::utilities
   {
     std::string path;
 #ifdef MCRL2_PLATFORM_LINUX
-    std::vector<char> buffer(4096);
+    std::vector<char> buffer(PATH_MAX);
     ssize_t length = readlink("/proc/self/exe", buffer.data(), buffer.size() - 1);
     if (length <= 0)
     {
@@ -62,7 +63,7 @@ namespace mcrl2::utilities
     }
     path = buffer.data();
 #elif defined(MCRL2_PLATFORM_WINDOWS)
-    std::vector<char> buffer(4096);
+    std::vector<char> buffer(MAX_PATH);
     DWORD length = GetModuleFileNameA(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
     if (length == 0)
     {
@@ -74,7 +75,7 @@ namespace mcrl2::utilities
 #ifndef MCRL2_PLATFORM_WINDOWS
     // Resolve symbolic links so that the returned path is independent of how
     // the executable was reached (a symlink or a name found on PATH).
-    std::vector<char> resolved(4096);
+    std::vector<char> resolved(PATH_MAX);
     if (realpath(path.c_str(), resolved.data()) != nullptr)
     {
       return std::string(resolved.data());

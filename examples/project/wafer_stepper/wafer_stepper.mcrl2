@@ -5,8 +5,7 @@ eqn  MaximumWafers = 5;
 sort WaferState = struct fresh?is_fresh | measured?is_measured | exposed?is_exposed;
 
 sort Wafer = struct wafer(status : WaferState);
-map  DummyWafer:                   Wafer;
-     IsFresh,IsMeasured,IsExposed: Wafer -> Bool;
+map  IsFresh,IsMeasured,IsExposed: Wafer -> Bool;
      MakeMeasured,MakeExposed:     Wafer -> Wafer;
 var  s : WaferState;
      w : Wafer;
@@ -25,6 +24,8 @@ eqn  InitWaferList(0)     = [];
 sort LockID  = struct L0 | L1 | L2 | L3;
 
 sort RobotID = struct R0 | R1;
+
+glob DummyWafer: Wafer;
 
 act  ALLE_HENS_AAN_BOORD;
      Measure,Expose,Swap;
@@ -121,4 +122,3 @@ hide({Measure,Expose,Swap,Rotate},
     )
   )
 );
-

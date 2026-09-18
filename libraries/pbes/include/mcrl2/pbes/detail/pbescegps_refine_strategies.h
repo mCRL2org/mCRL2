@@ -562,7 +562,7 @@ private:
             continue;
           }
           mCRL2log(log::trace) << "Guard for " << pvi << ": " << guard_expr << std::endl;
-          std::set<data::variable> guard_vars = find_free_variables(guard_expr);
+          std::set<data::variable> guard_vars = detail::find_free_variables(guard_expr, data::variable_list(), false);
           std::set<data::variable> common_vars;
           std::set_intersection(state.W[var_name].begin(),
             state.W[var_name].end(),
