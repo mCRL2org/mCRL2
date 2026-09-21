@@ -18,7 +18,7 @@ namespace mcrl2::data
 {
 
 inline
-void on_delete_function_symbol(const atermpp::aterm&  /*t*/)
+void on_delete_function_symbol(const atermpp::aterm& t)
 {
   const data::function_symbol& v = atermpp::down_cast<const data::function_symbol>(t);
 #ifndef NDEBUG

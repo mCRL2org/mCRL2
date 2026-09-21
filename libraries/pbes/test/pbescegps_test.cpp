@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE(test_structure_graph_binary_keeps_function_symbol_sort)
   const data::data_expression pos_one = data::sort_pos::most_significant_digit(data::sort_machine_word::one_word());
   builder.m_vertices.emplace_back(propositional_variable_instantiation("X",
                                     data::make_data_expression_list(std::vector<data::data_expression>{pos_one})),
-    structure_graph::d_none,
+    structure_graph::decoration_type::d_none,
     0);
   builder.set_initial_state(0);
   builder.finalize();

@@ -734,9 +734,9 @@ private:
         {
           // If a strategy is undefined, it could be a conjunction and overapproximation or disjunction and
           // underapproximation.
-          if (current_vertex.decoration == structure_graph::d_none
-              || (primary_is_under ? current_vertex.decoration == structure_graph::d_disjunction
-                                   : current_vertex.decoration == structure_graph::d_conjunction))
+          if (current_vertex.decoration == structure_graph::decoration_type::d_none
+              || (primary_is_under ? current_vertex.decoration == structure_graph::decoration_type::d_disjunction
+                                   : current_vertex.decoration == structure_graph::decoration_type::d_conjunction))
           {
             mCRL2log(log::log_level_t::debug) << "Special case: strategy undefined for vertex " << current_vertex << std::endl;
             const index_type matching_idx
