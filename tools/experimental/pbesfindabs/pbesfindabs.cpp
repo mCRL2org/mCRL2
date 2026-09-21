@@ -185,16 +185,16 @@ public:
     if (m_worker_mode)
     {
       // Worker process: check sets received on standard input, one per line.
-      mcrl2::log::logger::set_reporting_level(mcrl2::log::quiet);
+      mcrl2::log::logger::set_reporting_level(mcrl2::log::log_level_t::quiet);
       pbesfindabs_worker(input_filename(), pbes_input_format(), m_options, m_check_over);
       return true;
     }
 
-    mCRL2log(verbose) << "pbesfindabs parameters:" << std::endl;
-    mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-    mCRL2log(verbose) << "  abstraction file:   " << m_options.output_file << std::endl;
-    mCRL2log(verbose) << "  number of workers:  " << m_options.number_of_threads << std::endl;
-    mCRL2log(verbose) << "  timeout per set:    " << m_options.timeout << " seconds" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "pbesfindabs parameters:" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "  abstraction file:   " << m_options.output_file << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "  number of workers:  " << m_options.number_of_threads << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "  timeout per set:    " << m_options.timeout << " seconds" << std::endl;
 
     // The workers load the PBES from a file, so standard input has to be
     // materialized to a temporary file first.
@@ -288,7 +288,7 @@ private:
       }
       else
       {
-        mCRL2log(warning) << "A worker failed to check an abstraction set ('" << response << "'); it is skipped."
+        mCRL2log(log::log_level_t::warning) << "A worker failed to check an abstraction set ('" << response << "'); it is skipped."
                           << std::endl;
         outcomes.push_back(skipped_t{});
       }
