@@ -127,7 +127,7 @@ public:
     {
       const enumerate_quantifiers_rewriter enumerator(m_rewriter,
         m_pbes.data(),
-        mcrl2::pbes_system::expand_finite_sorts);
+        enumerate_quantifiers_mode::expand_finite_sorts);
       for (auto& [name, formula]: formulas)
       {
         formula = enumerator(formula);

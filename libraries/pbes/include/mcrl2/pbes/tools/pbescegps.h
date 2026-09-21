@@ -152,9 +152,9 @@ public:
     // scoped level does not affect other threads and is restored (also when an
     // exception is thrown) when the solver is done.
     std::optional<mcrl2::log::scoped_reporting_level> reporting_level_scope;
-    if (mcrl2::log::logger::get_reporting_level() > mcrl2::log::verbose)
+    if (mcrl2::log::logger::get_reporting_level() > mcrl2::log::log_level_t::verbose)
     {
-      reporting_level_scope.emplace(mcrl2::log::verbose);
+      reporting_level_scope.emplace(mcrl2::log::log_level_t::verbose);
     }
     structure_graph m_solved_graph;
 
@@ -424,9 +424,9 @@ public:
     simplify_data_rewriter<data::rewriter> pbesr(*m_datar);
     pbes_rewrite(result, pbesr);
     std::optional<mcrl2::log::scoped_reporting_level> reporting_level_scope;
-    if (mcrl2::log::logger::get_reporting_level() > mcrl2::log::verbose)
+    if (mcrl2::log::logger::get_reporting_level() > mcrl2::log::log_level_t::verbose)
     {
-      reporting_level_scope.emplace(mcrl2::log::verbose);
+      reporting_level_scope.emplace(mcrl2::log::log_level_t::verbose);
     }
     pbes_system::parelm(result, false);
     pbes_constelm_algorithm<data::rewriter, simplify_data_rewriter<data::rewriter>> constelm_algo(*m_datar, pbesr);
@@ -471,9 +471,9 @@ public:
     }
 
     std::optional<mcrl2::log::scoped_reporting_level> reporting_level_scope;
-    if (mcrl2::log::logger::get_reporting_level() > mcrl2::log::verbose)
+    if (mcrl2::log::logger::get_reporting_level() > mcrl2::log::log_level_t::verbose)
     {
-      reporting_level_scope.emplace(mcrl2::log::verbose);
+      reporting_level_scope.emplace(mcrl2::log::log_level_t::verbose);
     }
 
     detail::stategraph_pbes stategraph(p, *m_datar);

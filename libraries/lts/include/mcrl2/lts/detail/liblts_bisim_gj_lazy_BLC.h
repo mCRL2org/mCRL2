@@ -2512,7 +2512,7 @@ class bisim_partitioner_gj_lazy_BLC
     void update_small_subblock_counters(state_in_block_pointer_lb* start_blocks,
       state_in_block_pointer_lb* splitpoint,
       state_in_block_pointer_lb* end_blocks,
-      const int split_type = SPLIT_SMALLER)
+      [[maybe_unused]] const int split_type = SPLIT_SMALLER)
     {                                                                           assert(m_states_in_blocks.data()<=start_blocks);
                                                                                 assert(start_blocks<splitpoint);  assert(splitpoint<end_blocks);
                                                                                 assert(end_blocks<=m_states_in_blocks.data_end());

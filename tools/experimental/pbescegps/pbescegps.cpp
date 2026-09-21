@@ -120,8 +120,8 @@ public:
 
   bool run() override
   {
-    mCRL2log(verbose) << "pbescegps parameters:" << std::endl;
-    mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "pbescegps parameters:" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
 
     m_options.rewrite_strategy = rewrite_strategy();
     pbescegps(input_filename(), pbes_input_format(), m_options);

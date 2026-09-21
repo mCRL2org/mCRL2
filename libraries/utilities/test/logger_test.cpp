@@ -116,12 +116,12 @@ BOOST_AUTO_TEST_CASE(test_parallel_logging)
 BOOST_AUTO_TEST_CASE(test_scoped_reporting_level)
 {
   const log_level_t global_level = logger::get_reporting_level();
-  BOOST_CHECK_EQUAL(logger::get_reporting_level(), info);
+  BOOST_CHECK(logger::get_reporting_level() == log_level_t::info);
 
   {
     // The scope overrides the reporting level on the current thread only.
-    scoped_reporting_level scope(quiet);
-    BOOST_CHECK_EQUAL(logger::get_reporting_level(), quiet);
+    scoped_reporting_level scope(log_level_t::quiet);
+    BOOST_CHECK(logger::get_reporting_level() == log_level_t::quiet);
     BOOST_CHECK(!mCRL2logEnabled(global_level));
 
     // Other threads keep using the global reporting level.
@@ -134,5 +134,5 @@ BOOST_AUTO_TEST_CASE(test_scoped_reporting_level)
   }
 
   // After the scope the global level is in effect again.
-  BOOST_CHECK_EQUAL(logger::get_reporting_level(), global_level);
+  BOOST_CHECK(logger::get_reporting_level() == global_level);
 }
