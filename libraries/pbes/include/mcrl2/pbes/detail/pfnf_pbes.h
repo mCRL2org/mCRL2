@@ -275,7 +275,7 @@ class pfnf_pbes
       pbes q = p;
       if (!pbes_system::detail::is_pfnf(p))
       {
-        mCRL2log(log::verbose) << "converting PBES into PFNF format... " << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "converting PBES into PFNF format... " << std::endl;
         pfnf_rewriter R;
         pbes_system::pbes_rewrite(q, R);
         assert (is_pfnf(q));

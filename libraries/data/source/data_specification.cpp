@@ -293,7 +293,7 @@ void sort_specification::import_system_defined_sort(const sort_expression& sort)
 {
   if (is_untyped_sort(sort) || is_untyped_possible_sorts(sort))
   {
-    mCRL2log(mcrl2::log::debug) << "Erroneous attempt to insert an untyped sort into the a sort specification\n";
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Erroneous attempt to insert an untyped sort into the a sort specification\n";
     return;
   }
   // Add an element, and stop if it was already added.
@@ -410,7 +410,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     }
     catch (mcrl2::runtime_error &)
     {
-      mCRL2log(log::debug) << "Encountered an alias loop in the alias for " << a.name() <<". The normalised aliases are not constructed\n";
+      mCRL2log(log::log_level_t::debug) << "Encountered an alias loop in the alias for " << a.name() <<". The normalised aliases are not constructed\n";
       return;
     }
   }

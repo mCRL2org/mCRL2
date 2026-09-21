@@ -115,7 +115,7 @@ class pres2res_algorithm
         // save the generated equation
         std::size_t k = m_equation_index.rank(X_e.name());
         
-        mCRL2log(log::debug) << "generated equation " << (k%2==0?pres_system::fixpoint_symbol::nu():pres_system::fixpoint_symbol::mu()) << " " 
+        mCRL2log(log::log_level_t::debug) << "generated equation " << (k%2==0?pres_system::fixpoint_symbol::nu():pres_system::fixpoint_symbol::mu()) << " " 
                              << new_pres_variables[m_stored_variables.index(X_e)].name() << " = " << psi_e
                              << " with rank " << k << " for " << X_e << "\n";
 
@@ -126,7 +126,7 @@ class pres2res_algorithm
                                                         psi_e));
         if (generated_equations[k].size() % 1000 == 0)
         {
-          mCRL2log(log::verbose) << "Generated " << (generated_equations[k].size() / 1000)
+          mCRL2log(log::log_level_t::verbose) << "Generated " << (generated_equations[k].size() / 1000)
                                  << "k RES variables with rank " << k << ".\n";
         }
       }
@@ -134,14 +134,14 @@ class pres2res_algorithm
       variable_replace_builder variable_replacer(m_stored_variables, new_pres_variables);
       std::vector<pres_equation> resulting_equations;
       pres_expression result;
-      mCRL2log(log::debug) << "generated equation in final form.\n";
+      mCRL2log(log::log_level_t::debug) << "generated equation in final form.\n";
       for(atermpp::vector<pres_equation>& eqns: generated_equations)
       {
         for(const pres_equation& eqn: eqns)
         {
           variable_replacer.apply(result, eqn.formula());
           resulting_equations.emplace_back(eqn.symbol(), eqn.variable(), result);
-          mCRL2log(log::debug) <<  resulting_equations.back() << "\n";
+          mCRL2log(log::log_level_t::debug) <<  resulting_equations.back() << "\n";
         }
         eqns=atermpp::vector<pres_equation>(); // clear the equations.
       } 

@@ -204,7 +204,7 @@ struct guard_expression
   template <typename PbesRewriter>
   bool check_guards(const pbes_expression& x, PbesRewriter R) const
   {
-    mCRL2log(log::debug) << "check_guards: x = " << pbes_system::pp(x) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_guards: x = " << pbes_system::pp(x) << std::endl;
     bool result = true;
     for (const auto& i: guards)
     {
@@ -216,8 +216,8 @@ struct guard_expression
         if (pbes_rewrite(g1, R) != pbes_rewrite(g2, R))
         {
           result = false;
-          mCRL2log(log::debug) << " g1 = " << g1 << " g2 = " << g2 << std::endl;
-          mCRL2log(log::debug) << "guard error: X = " << X << " g1 = " << pbes_rewrite(g1, R) << " g2 = " << pbes_rewrite(g2, R) << std::endl;
+          mCRL2log(log::log_level_t::debug) << " g1 = " << g1 << " g2 = " << g2 << std::endl;
+          mCRL2log(log::log_level_t::debug) << "guard error: X = " << X << " g1 = " << pbes_rewrite(g1, R) << " g2 = " << pbes_rewrite(g2, R) << std::endl;
         }
       }
       // NOLINTNEXTLINE(bugprone-empty-catch) intentional: do not check multiple instances of predicate variables
@@ -272,7 +272,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
 
   void push(const guard_expression& x)
   {
-    mCRL2log(log::trace) << "<push>" << "\n" << x << std::endl;
+    mCRL2log(log::log_level_t::trace) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 

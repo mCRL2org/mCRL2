@@ -86,7 +86,7 @@ inline InvResult global_invariant_check(pbes_equation& equation,
     simplify_data_rewriter<data::rewriter> pbes_rewriter,
     std::set<data::variable>& global_variables)
 {
-  mCRL2log(log::debug) << "INV: " << equation.symbol() << "\n";
+  mCRL2log(log::log_level_t::debug) << "INV: " << equation.symbol() << "\n";
   if (equation.symbol().is_mu())
   {
     return InvResult::INV_FALSE;
@@ -96,7 +96,7 @@ inline InvResult global_invariant_check(pbes_equation& equation,
   std::set<propositional_variable_instantiation> set = find_propositional_variable_instantiations(equation.formula());
   if (set.size() == 0)
   {
-    mCRL2log(log::debug) << "INV: " << equation.variable().name() << " does not contain any pvi." << "\n";
+    mCRL2log(log::log_level_t::debug) << "INV: " << equation.variable().name() << " does not contain any pvi." << "\n";
     return InvResult::INV_TRUE;
   }
 
@@ -105,7 +105,7 @@ inline InvResult global_invariant_check(pbes_equation& equation,
           [=](const propositional_variable_instantiation& v) { return v.name() != equation.variable().name(); }))
   {
     // The formula contains another pvi than the current equation, so skip
-    mCRL2log(log::debug) << "INV: " << equation.variable().name() << " contains other pvi." << "\n";
+    mCRL2log(log::log_level_t::debug) << "INV: " << equation.variable().name() << " contains other pvi." << "\n";
     return InvResult::INV_FALSE;
   }
 
@@ -126,13 +126,13 @@ inline InvResult global_invariant_check(pbes_equation& equation,
       pbes_rewriter);
 
   mcrl2::data::detail::BDD_Prover f_bdd_prover(data_spec, data::used_data_equation_selector(data_spec));
-  mCRL2log(log::verbose) << "INV: PVI set size " << set.size() << "\n";
+  mCRL2log(log::log_level_t::verbose) << "INV: PVI set size " << set.size() << "\n";
   int i = 0;
   for (const propositional_variable_instantiation& pvi: set)
   {
     if (i % 5 == 0)
     {
-      mCRL2log(log::verbose) << "INV: PVI " << i << "begin added now. \n";
+      mCRL2log(log::log_level_t::verbose) << "INV: PVI " << i << "begin added now. \n";
     }
     i++;
     // Calculate CC_i
@@ -145,7 +145,7 @@ inline InvResult global_invariant_check(pbes_equation& equation,
       if (par.sort() != v.sort())
       {
         // Parameters do not match with variables. Ignore this substitution.
-        mCRL2log(log::verbose) << "INV: No param match for " << v.name() << "\n";
+        mCRL2log(log::log_level_t::verbose) << "INV: No param match for " << v.name() << "\n";
         return InvResult::INV_FALSE;
       }
       sigma[v] = par;
@@ -168,9 +168,9 @@ inline InvResult global_invariant_check(pbes_equation& equation,
 
     f_bdd_prover.set_formula(c_i_data);
     data::detail::Answer c_i_is_contradiction = f_bdd_prover.is_contradiction();
-    if (c_i_is_contradiction == data::detail::answer_yes)
+    if (c_i_is_contradiction == data::detail::Answer::answer_yes)
     {
-      mCRL2log(log::verbose) << "Core constraint is not simple (contains pvi)." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Core constraint is not simple (contains pvi)." << std::endl;
       return InvResult::INV_FALSE;
     }
 
@@ -183,34 +183,34 @@ inline InvResult global_invariant_check(pbes_equation& equation,
     }
 
     f_bdd_prover.set_formula(bdd_expr);
-    mCRL2log(log::verbose) << "INV?: " << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "INV?: " << std::endl;
 
     data::detail::Answer v_is_tautology = f_bdd_prover.is_tautology();
     data::detail::Answer v_is_contradiction = f_bdd_prover.is_contradiction();
-    if (v_is_contradiction == data::detail::answer_yes)
+    if (v_is_contradiction == data::detail::Answer::answer_yes)
     {
-      mCRL2log(log::verbose) << "Contradiction for inv checker." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Contradiction for inv checker." << std::endl;
       equation.formula() = false_();
       return InvResult::EQ_FALSE;
     }
-    else if (v_is_tautology == data::detail::answer_no || v_is_tautology == data::detail::answer_undefined)
+    else if (v_is_tautology == data::detail::Answer::answer_no || v_is_tautology == data::detail::Answer::answer_undefined)
     {
-      mCRL2log(log::verbose) << "Found some transition that is not an invariant" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Found some transition that is not an invariant" << std::endl;
       return InvResult::INV_FALSE;
     }
-    else if (v_is_tautology == data::detail::answer_yes)
+    else if (v_is_tautology == data::detail::Answer::answer_yes)
     {
-      mCRL2log(log::verbose) << "This transition is true" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "This transition is true" << std::endl;
       global_invariant = true;
     }
     else
     {
-      mCRL2log(log::error) << "No contradiction and no tautology" << std::endl;
+      mCRL2log(log::log_level_t::error) << "No contradiction and no tautology" << std::endl;
       throw mcrl2::runtime_error("TODO");
     }
   }
 
-  mCRL2log(log::info) << "Is global invariant? " << global_invariant << std::endl;
+  mCRL2log(log::log_level_t::info) << "Is global invariant? " << global_invariant << std::endl;
   if (global_invariant)
   {
     equation.formula() = cc;
@@ -253,7 +253,7 @@ inline void perform_iteration(pbes_equation& equation,
   int i = 0;
   while (!stable)
   {
-    mCRL2log(log::info) << eq.variable().name() << ":  " << i << std::endl;
+    mCRL2log(log::log_level_t::info) << eq.variable().name() << ":  " << i << std::endl;
 
     // Apply substitution
     substituter.set_equation(eq);
@@ -287,12 +287,12 @@ inline void perform_iteration(pbes_equation& equation,
       {
         var_list.push_front(x);
       }
-      mCRL2log(log::verbose) << eq.variable().name() << ": SMT check for " << i << " started." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << eq.variable().name() << ": SMT check for " << i << " started." << std::endl;
       smt::answer result = solv->solve(var_list, data::not_(formula), std::chrono::seconds(0));
       switch (result)
       {
       case smt::answer::UNSAT:
-        mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
+        mCRL2log(log::log_level_t::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
         stable = true;
         break;
       case smt::answer::SAT:
@@ -304,11 +304,11 @@ inline void perform_iteration(pbes_equation& equation,
     else
     {
       f_bdd_prover->set_formula(formula);
-      mCRL2log(log::verbose) << eq.variable().name() << ": EQ-BDD check for " << i << " started." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << eq.variable().name() << ": EQ-BDD check for " << i << " started." << std::endl;
       data::detail::Answer v_is_tautology = f_bdd_prover->is_tautology();
-      if (v_is_tautology == data::detail::answer_yes)
+      if (v_is_tautology == data::detail::Answer::answer_yes)
       {
-        mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
+        mCRL2log(log::log_level_t::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
         stable = true;
       }
     }
@@ -324,13 +324,13 @@ inline void perform_iteration(pbes_equation& equation,
 
       if (options.smt)
       {
-        mCRL2log(log::verbose) << eq.variable().name() << ": SMT init check for " << i << " started." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << eq.variable().name() << ": SMT init check for " << i << " started." << std::endl;
         data::data_expression smt_data = init_eq.symbol().is_mu() ? data::not_(init_data) : init_data;
         smt::answer result = solv->solve({}, smt_data, std::chrono::seconds(0));
         switch (result)
         {
         case smt::answer::UNSAT:
-          mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
+          mCRL2log(log::log_level_t::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
           stable = true;
           break;
         case smt::answer::SAT:
@@ -342,18 +342,18 @@ inline void perform_iteration(pbes_equation& equation,
       else
       {
         f_bdd_prover->set_formula(init_data);
-        mCRL2log(log::verbose) << eq.variable().name() << ": EQ-BDD init check for " << i << " started." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << eq.variable().name() << ": EQ-BDD init check for " << i << " started." << std::endl;
         data::detail::Answer v_is_tautology = f_bdd_prover->is_tautology();
         data::detail::Answer v_is_contradiction = f_bdd_prover->is_contradiction();
 
-        mCRL2log(log::verbose) << eq.variable().name() << ": EQ-BDD tauto? "
-                               << (v_is_tautology == data::detail::answer_yes) << std::endl;
-        mCRL2log(log::verbose) << eq.variable().name() << ": EQ-BDD contra? "
-                               << (v_is_contradiction == data::detail::answer_yes) << std::endl;
-        if (init_eq.symbol().is_mu() ? v_is_tautology == data::detail::answer_yes
-                                     : v_is_contradiction == data::detail::answer_yes)
+        mCRL2log(log::log_level_t::verbose) << eq.variable().name() << ": EQ-BDD tauto? "
+                               << (v_is_tautology == data::detail::Answer::answer_yes) << std::endl;
+        mCRL2log(log::log_level_t::verbose) << eq.variable().name() << ": EQ-BDD contra? "
+                               << (v_is_contradiction == data::detail::Answer::answer_yes) << std::endl;
+        if (init_eq.symbol().is_mu() ? v_is_tautology == data::detail::Answer::answer_yes
+                                     : v_is_contradiction == data::detail::Answer::answer_yes)
         {
-          mCRL2log(log::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
+          mCRL2log(log::log_level_t::info) << eq.variable().name() << ": iteration " << i << " is equal to " << i + 1 << std::endl;
           stable = true;
         }
       }
@@ -383,7 +383,7 @@ struct pbesfixpointsolve_pbes_fixpoint_iterator
 
     for (std::vector<pbes_equation>::reverse_iterator i = p.equations().rbegin(); i != p.equations().rend(); i++)
     {
-      mCRL2log(log::verbose) << "Investigating the equation for " << i->variable().name() << "\n";
+      mCRL2log(log::log_level_t::verbose) << "Investigating the equation for " << i->variable().name() << "\n";
       if (options.check_global_invariant)
       {
         InvResult global_inv = global_invariant_check(*i,

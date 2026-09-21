@@ -91,10 +91,10 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
       using namespace pbes_system;
       using namespace utilities;
 
-      mCRL2log(verbose) << "pbesrewr parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbesrewr parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
       // load the pbes
       pbes p;
@@ -114,13 +114,13 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
         }
         case pbes_rewriter_type::quantifier_all:
         {
-          enumerate_quantifiers_rewriter pbesr(datar, p.data(), expand_infinite_sorts);
+          enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_quantifiers_mode::expand_infinite_sorts);
           pbes_rewrite(p, pbesr);
           break;
         }
         case pbes_rewriter_type::quantifier_finite:
         {
-          enumerate_quantifiers_rewriter pbesr(datar, p.data(), expand_finite_sorts);
+          enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_quantifiers_mode::expand_finite_sorts);
           pbes_rewrite(p, pbesr);
           break;
         }
@@ -154,13 +154,13 @@ class pbes_rewriter : public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
           bool ppg = pbes_system::detail::is_ppg(p);
           if (ppg)
           {
-            mCRL2log(log::verbose) << "PBES is already a PPG." << std::endl;
+            mCRL2log(log::log_level_t::verbose) << "PBES is already a PPG." << std::endl;
           }
           else
           {
-            mCRL2log(log::verbose) << "Rewriting..." << std::endl;
+            mCRL2log(log::log_level_t::verbose) << "Rewriting..." << std::endl;
             pbes q = pbes_system::detail::to_ppg(p);
-            mCRL2log(log::verbose) << "Rewriting done." << std::endl;
+            mCRL2log(log::log_level_t::verbose) << "Rewriting done." << std::endl;
             ppg = pbes_system::detail::is_ppg(q);
             if (!ppg)
             {

@@ -112,7 +112,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     {
       if (f_deadline != 0 && (f_deadline - time(nullptr)) < 0)
       {
-        mCRL2log(log::debug) << "The time limit has passed." << std::endl;
+        mCRL2log(log::log_level_t::debug) << "The time limit has passed." << std::endl;
         return a_bdd;
       }
 
@@ -179,7 +179,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     BDD_Path_Eliminator(smt_solver_type a_solver_type)
     {
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
-      if (a_solver_type == solver_type_cvc)
+      if (a_solver_type == smt_solver_type::solver_type_cvc)
       {
         if (mcrl2::data::detail::prover::cvc_smt_solver::usable())
         {
@@ -188,7 +188,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
           return;
         }
       }
-      else if (a_solver_type == solver_type_z3)
+      else if (a_solver_type == smt_solver_type::solver_type_z3)
       {
         if (mcrl2::data::detail::prover::z3_smt_solver::usable())
         {

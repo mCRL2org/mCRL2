@@ -38,7 +38,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, stochastic_sp
 template <typename Specification>
 void save_lps(const Specification& spec, std::ostream& stream, const std::string& target = "")
 {
-  mCRL2log(log::debug) << "Saving LPS" << (target.empty() ? "" : " to " + target) << ".\n";
+  mCRL2log(log::log_level_t::debug) << "Saving LPS" << (target.empty() ? "" : " to " + target) << ".\n";
   atermpp::binary_aterm_ostream(stream) << spec;
 }
 
@@ -50,7 +50,7 @@ void save_lps(const Specification& spec, std::ostream& stream, const std::string
 template <typename Specification>
 void load_lps(Specification& spec, std::istream& stream, const std::string& source = "")
 {
-  mCRL2log(log::debug) << "Loading LPS" << (source.empty() ? "" : " from " + source) << ".\n";
+  mCRL2log(log::log_level_t::debug) << "Loading LPS" << (source.empty() ? "" : " from " + source) << ".\n";
 
   if constexpr (std::is_same_v<Specification, specification>)
   {

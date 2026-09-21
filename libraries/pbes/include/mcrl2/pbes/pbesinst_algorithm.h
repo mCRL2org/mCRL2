@@ -152,7 +152,7 @@ class pbesinst_algorithm
     /// \param rewrite_strategy A strategy for the data rewriter.
     /// \param print_equations If true, the generated equations are printed.
     explicit pbesinst_algorithm(data::data_specification const& data_spec,
-        data::rewriter::strategy rewrite_strategy = data::jitty,
+        data::rewriter::strategy rewrite_strategy = data::rewrite_strategy::jitty,
         bool print_equations = false)
         : datar(data_spec, rewrite_strategy),
           R(datar, data_spec),
@@ -214,10 +214,10 @@ class pbesinst_algorithm
         pbes_equation new_eqn(eqn.symbol(), propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list()), rho(psi_e));
         if (m_print_equations)
         {
-          mCRL2log(log::info) << eqn.symbol() << " " << X_e << " = " << psi_e << std::endl;
+          mCRL2log(log::log_level_t::info) << eqn.symbol() << " " << X_e << " = " << psi_e << std::endl;
         }
         E[index].push_back(new_eqn);
-        mCRL2log(log::verbose) << print_equation_count(++m_equation_count);
+        mCRL2log(log::log_level_t::verbose) << print_equation_count(++m_equation_count);
         detail::check_bes_equation_limit(m_equation_count);
       }
     }

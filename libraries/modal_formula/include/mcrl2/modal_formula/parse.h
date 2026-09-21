@@ -113,9 +113,9 @@ state_formula post_process_state_formula(
   state_formula x = formula;
   if (options.translate_regular_formulas)
   {
-    mCRL2log(log::debug) << "formula before translating regular formulas: " << x << std::endl;
+    mCRL2log(log::log_level_t::debug) << "formula before translating regular formulas: " << x << std::endl;
     x = translate_regular_formulas(x);
-    mCRL2log(log::debug) << "formula after translating regular formulas: " << x << std::endl;
+    mCRL2log(log::log_level_t::debug) << "formula after translating regular formulas: " << x << std::endl;
   }
   if (options.translate_user_notation)
   {
@@ -127,9 +127,9 @@ state_formula post_process_state_formula(
   }
   if (options.resolve_name_clashes && has_state_variable_name_clashes(x))
   {
-    mCRL2log(log::debug) << "formula before resolving name clashes: " << x << std::endl;
+    mCRL2log(log::log_level_t::debug) << "formula before resolving name clashes: " << x << std::endl;
     x = state_formulas::resolve_state_variable_name_clashes(x);
-    mCRL2log(log::debug) << "formula after resolving name clashes: " << x << std::endl;
+    mCRL2log(log::log_level_t::debug) << "formula after resolving name clashes: " << x << std::endl;
   }
   return x;
 }

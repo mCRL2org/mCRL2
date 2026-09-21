@@ -116,7 +116,7 @@ class counter_example_constructor
       if (m_structured_output)
       {
         std::cout << m_name << ": ";
-        result.save("", mcrl2::lts::trace::tfLine);   // Write to stdout.
+        result.save("", mcrl2::lts::trace::trace_format::tfLine);   // Write to stdout.
       }
       else
       {
@@ -125,7 +125,7 @@ class counter_example_constructor
         {
           filename = m_counter_example_file;
         }
-        mCRL2log(log::verbose) << "Saved trace to file " + filename + "\n";
+        mCRL2log(log::log_level_t::verbose) << "Saved trace to file " + filename + "\n";
         result.save(filename);
       }
     }

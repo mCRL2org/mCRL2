@@ -106,7 +106,7 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
     std::size_t prio;
     while ((prio = first_inversion(game)) < game.d())
     {
-        mCRL2log(mcrl2::log::debug) <<"prio=" << prio << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::debug) <<"prio=" << prio << std::endl;
 
         const StaticGraph &graph = game.graph();
         const verti V = graph.V();
@@ -123,10 +123,10 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
                 min_prio_attr.insert(v);
               }
             }
-            mCRL2log(mcrl2::log::debug) <<"|min_prio|=" << min_prio_attr.size() << std::endl;
+            mCRL2log(mcrl2::log::log_level_t::debug) <<"|min_prio|=" << min_prio_attr.size() << std::endl;
             assert(!min_prio_attr.empty());
             make_attractor_set_2(game, player, min_prio_attr, strat);
-            mCRL2log(mcrl2::log::debug) << "|min_prio_attr|=" << min_prio_attr.size() << std::endl;
+            mCRL2log(mcrl2::log::log_level_t::debug) << "|min_prio_attr|=" << min_prio_attr.size() << std::endl;
             if (min_prio_attr.size() == V)
             {
               break;
@@ -138,7 +138,7 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
         {
             ParityGame subgame;
             subgame.make_subgame(game, unsolved.begin(), unsolved.end(),
-                                 true, StaticGraph::EDGE_PREDECESSOR);
+                                 true, StaticGraph::EdgeDirection::EDGE_PREDECESSOR);
             Substrategy substrat(strat, unsolved);
             if (!solve(subgame, substrat))
             {
@@ -155,13 +155,13 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
                     lost_attr.insert(v);
                 }
             }
-            mCRL2log(mcrl2::log::debug) << "|lost|=" << lost_attr.size() << std::endl;
+            mCRL2log(mcrl2::log::log_level_t::debug) << "|lost|=" << lost_attr.size() << std::endl;
             if (lost_attr.empty())
             {
               break;
             }
             make_attractor_set_2(game, opponent, lost_attr, strat);
-            mCRL2log(mcrl2::log::debug) << "|lost_attr|=" << lost_attr.size() << std::endl;
+            mCRL2log(mcrl2::log::log_level_t::debug) << "|lost_attr|=" << lost_attr.size() << std::endl;
             get_complement(V, lost_attr).swap(unsolved);
         }
 
@@ -169,7 +169,7 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
         {
             ParityGame subgame;
             subgame.make_subgame(game, unsolved.begin(), unsolved.end(),
-                                 true, StaticGraph::EDGE_PREDECESSOR);
+                                 true, StaticGraph::EdgeDirection::EDGE_PREDECESSOR);
             Substrategy substrat(strat, unsolved);
             strat.swap(substrat);
             game.swap(subgame);
@@ -182,13 +182,13 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
     // suffices to pick an arbitrary successor for these vertices:
     const StaticGraph &graph = game.graph();
     const verti V = graph.V();
-    if (graph.edge_dir() & StaticGraph::EDGE_SUCCESSOR)
+    if (graph.edge_dir() & StaticGraph::EdgeDirection::EDGE_SUCCESSOR)
     {
         for (verti v = 0; v < V; ++v)
         {
             if (game.priority(v) < prio)
             {
-                if (game.player(v) == game.priority(v)%2)
+                if (static_cast<std::size_t>(game.player(v)) == game.priority(v)%2)
                 {
                     strat[v] = *graph.succ_begin(v);
                 }
@@ -213,7 +213,7 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
 
                 if (game.priority(v) < prio)
                 {
-                    if (game.player(v) == game.priority(v)%2)
+                    if (static_cast<std::size_t>(game.player(v)) == game.priority(v)%2)
                     {
                         strat[v] = w;
                     }

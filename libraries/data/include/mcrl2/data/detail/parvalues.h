@@ -396,7 +396,7 @@ protected:
             [&](const variable& w) { return !m_dataspec.is_certainly_finite(w.sort()); }))
       {
         m_graph.mark_unbounded(v);
-        mCRL2log(log::warning) << "The domain of parameter " << std::string(v)
+        mCRL2log(log::log_level_t::warning) << "The domain of parameter " << std::string(v)
                                << " depends on unconstrained variable(s) " << detail::ppsort(qvars_in_update)
                                << " ranging over an infinite sort; it cannot be enumerated and may be unbounded.\n";
         return;
@@ -405,7 +405,7 @@ protected:
       data_expression quantified_condition;
       make_optimized_exists(quantified_condition, qvars_not_in_update, rewritten_condition);
 
-      mCRL2log(log::debug) << "Enumerate " << detail::ppsort(qvars_in_update) << " in " << quantified_condition << "\n";
+      mCRL2log(log::log_level_t::debug) << "Enumerate " << detail::ppsort(qvars_in_update) << " in " << quantified_condition << "\n";
 
       const std::size_t enumeration_limit = m_qlimit;
       enumerator_algorithm<> enumerator(m_rewriter, m_dataspec, m_rewriter, m_generator, false, enumeration_limit);
@@ -428,7 +428,7 @@ protected:
         {
           if (find_free_variables(d).empty() && d != sort_bool::true_() && d != sort_bool::false_())
           {
-            mCRL2log(log::warning) << "The expression " << d
+            mCRL2log(log::log_level_t::warning) << "The expression " << d
                                    << " does not rewrite to true or false. It is assumed to be true.\n";
           }
           return d == sort_bool::false_();
@@ -566,22 +566,22 @@ public:
   ///        constructor
   void run()
   {
-    mCRL2log(log::debug) << "Start to explore parameter domains" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Start to explore parameter domains" << std::endl;
 
     std::size_t round = 0;
     bool stopped_on_unbounded = false;
     while (round < m_maximal_number_of_rounds && !m_graph.stable())
     {
-      mCRL2log(log::verbose) << "Parameter instantiation round " << round
+      mCRL2log(log::log_level_t::verbose) << "Parameter instantiation round " << round
                              << " (estimated upperbound on the state space: " << m_graph.product_size() << ").\n";
-      mCRL2log(log::debug) << m_graph.report(true);
+      mCRL2log(log::log_level_t::debug) << m_graph.report(true);
 
       round++;
       m_graph.new_round();
 
       for (const influence_graph::edge& edge: m_graph.edges())
       {
-        mCRL2log(log::debug)
+        mCRL2log(log::log_level_t::debug)
           << "Process edge (round " << round << ") " << std::string(edge)
           << "\n==================================================================================\n";
 
@@ -607,14 +607,14 @@ public:
     }
     if (stopped_on_unbounded)
     {
-      mCRL2log(log::warning) << "Exploration stopped after round " << round
+      mCRL2log(log::log_level_t::warning) << "Exploration stopped after round " << round
                              << ": at least one parameter domain is unbounded,"
                              << " hence the state space is infinite. The reported domains are incomplete.\n";
       m_graph.flush();
     }
     else if (round == m_maximal_number_of_rounds)
     {
-      mCRL2log(log::warning)
+      mCRL2log(log::log_level_t::warning)
         << "The maximal number of rounds (" << round << ") has been reached. "
         << "Exploration is stopped prematurely. The domains and the upperbound of the state space can be too low.\n";
       m_graph.new_round();
@@ -624,8 +624,8 @@ public:
       m_graph.new_round();
     }
 
-    mCRL2log(log::verbose) << m_graph.report(true);
-    mCRL2log(log::info) << "This process has at most " << m_graph.product_size() << " states.\n";
+    mCRL2log(log::log_level_t::verbose) << m_graph.report(true);
+    mCRL2log(log::log_level_t::info) << "This process has at most " << m_graph.product_size() << " states.\n";
   }
 };
 

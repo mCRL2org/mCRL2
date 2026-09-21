@@ -51,7 +51,7 @@ std::cerr << "Current action " << a << " compare to " << s << "\n";
 
 BOOST_AUTO_TEST_CASE(test_main)
 {
-  mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
+  mcrl2::log::logger::set_reporting_level(mcrl2::log::log_level_t::debug);
   trace t;
 
   process::action_label_list action_decls = process::parse_action_declaration("a;") +
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_main)
   t.add_action(mcrl2::lps::parse_multi_action("b(1, true)", action_decls));
   t.add_action(mcrl2::lps::parse_multi_action("c", action_decls));
 
-  t.save(filename,trace::tfPlain);
+  t.save(filename,trace::trace_format::tfPlain);
   BOOST_REQUIRE(read_trace(t,filename));
 
   BOOST_REQUIRE(t.number_of_actions() == 3);
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_main)
   t.increase_position();
   t.set_state(lps::state(sort_bool::false_()));
 
-  t.save(filename,trace::tfPlain);
+  t.save(filename,trace::trace_format::tfPlain);
   BOOST_REQUIRE(read_trace(t,filename));
 
   BOOST_REQUIRE(t.number_of_actions() == 3);
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_empty)
 {
   trace t;
 
-  t.save(filename,trace::tfPlain);
+  t.save(filename,trace::trace_format::tfPlain);
   BOOST_REQUIRE(read_trace(t,filename));
 
   BOOST_REQUIRE(t.number_of_actions() == 0);

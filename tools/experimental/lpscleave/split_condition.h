@@ -83,7 +83,7 @@ inline std::pair<cleave_condition, cleave_condition> split_condition(const data:
 {
   assert(data::sort_bool::is_bool(condition.sort()));
 
-  mCRL2log(log::debug) << "Splitting condition " << condition << "...\n";
+  mCRL2log(log::log_level_t::debug) << "Splitting condition " << condition << "...\n";
 
   // First of all consider each clause in a conjunctive form separately.
   std::set<data::data_expression> clauses = split_and(condition);
@@ -122,14 +122,14 @@ inline std::pair<cleave_condition, cleave_condition> split_condition(const data:
           // The condition should be split.
           if (is_subset(left_variables, left_all_parameters) && is_subset(right_variables, right_all_parameters))
           {
-            mCRL2log(log::debug) << "Made condition " << clause << " implicit\n";
+            mCRL2log(log::log_level_t::debug) << "Made condition " << clause << " implicit\n";
             left_condition.implicit.push_back(application[0]);
             right_condition.implicit.push_back(application[1]);
             remove_clause = true;
           }
           else if (is_subset(left_variables, right_all_parameters) && is_subset(right_variables, left_all_parameters))
           {
-            mCRL2log(log::debug) << "Made condition " << clause << " implicit\n";
+            mCRL2log(log::log_level_t::debug) << "Made condition " << clause << " implicit\n";
             left_condition.implicit.push_back(application[1]);
             right_condition.implicit.push_back(application[0]);
             remove_clause = true;
@@ -164,7 +164,7 @@ inline std::pair<cleave_condition, cleave_condition> split_condition(const data:
   left_condition.expression = make_conjuntions(left_clauses);
   right_condition.expression = make_conjuntions(right_clauses);
 
-  mCRL2log(log::debug) << "Split condition into " << left_condition.expression << ", and " << right_condition.expression << "\n";
+  mCRL2log(log::log_level_t::debug) << "Split condition into " << left_condition.expression << ", and " << right_condition.expression << "\n";
   return std::make_pair(left_condition, right_condition);
 }
 

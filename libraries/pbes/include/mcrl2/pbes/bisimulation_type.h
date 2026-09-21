@@ -18,7 +18,7 @@
 namespace mcrl2::pbes_system {
 
 /// \brief An enumerated type for the available bisimulation types
-enum bisimulation_type
+enum class bisimulation_type
 {
   strong_bisim,
   weak_bisim,
@@ -32,22 +32,22 @@ bisimulation_type parse_bisimulation_type(const std::string& type)
 {
   if (type == "strong-bisim")
   {
-    return strong_bisim;
+    return bisimulation_type::strong_bisim;
   }
   else if (type == "weak-bisim")
   {
-    return weak_bisim;
+    return bisimulation_type::weak_bisim;
   }
   else if (type == "branching-bisim")
   {
-    return branching_bisim;
+    return bisimulation_type::branching_bisim;
   }
   else if (type == "branching-sim")
   {
-    return branching_sim;
+    return bisimulation_type::branching_sim;
   }
   throw mcrl2::runtime_error(std::string("unknown bisimulation type ") + type + "!");
-  return strong_bisim;
+  return bisimulation_type::strong_bisim;
 }
 
 /// \brief Returns a description of a bisimulation type
@@ -56,13 +56,13 @@ std::string print_bisimulation_type(const bisimulation_type t)
 {
   switch (t)
   {
-    case strong_bisim:
+    case bisimulation_type::strong_bisim:
       return "strong-bisim";
-    case weak_bisim:
+    case bisimulation_type::weak_bisim:
       return "weak-bisim";
-    case branching_bisim:
+    case bisimulation_type::branching_bisim:
       return "branching-bisim";
-    case branching_sim:
+    case bisimulation_type::branching_sim:
       return "branching-sim";
   }
   throw mcrl2::runtime_error("unknown type");
@@ -74,13 +74,13 @@ std::string description(const bisimulation_type t)
 {
   switch (t)
   {
-    case strong_bisim:
+    case bisimulation_type::strong_bisim:
       return "strong bisimulation";
-    case weak_bisim:
+    case bisimulation_type::weak_bisim:
       return "weak bisimulation";
-    case branching_bisim:
+    case bisimulation_type::branching_bisim:
       return "branching bisimulation";
-    case branching_sim:
+    case bisimulation_type::branching_sim:
       return "branching simulation equivalence";
   }
   throw mcrl2::runtime_error("unknown type");

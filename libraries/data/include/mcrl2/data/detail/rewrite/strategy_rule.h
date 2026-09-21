@@ -25,41 +25,41 @@ class strategy_rule
     // Only one of the fields rewrite_rule, rewrite_index or cpp_function will be used
     // at any given time. As this hardly requires a lot of memory, we do not optimise
     // this using for instance a union type. 
-    enum { data_equation_type, rewrite_index_type, cpp_function_type } m_strategy_element_type;
+    enum class strategy_element_type { data_equation_type, rewrite_index_type, cpp_function_type } m_strategy_element_type;
     data_equation m_rewrite_rule;
     size_t m_rewrite_index = 0UL;
     std::function<void(data_expression&, const data_expression&)> m_cpp_function;
 
   public:
     strategy_rule(const std::size_t n)
-      : m_strategy_element_type(rewrite_index_type),
+      : m_strategy_element_type(strategy_element_type::rewrite_index_type),
         m_rewrite_index(n)
     {}
 
     strategy_rule(const std::function<void(data_expression&, const data_expression&)> f)
-      :  m_strategy_element_type(cpp_function_type),
+      :  m_strategy_element_type(strategy_element_type::cpp_function_type),
          m_cpp_function(f)
     {}
 
     strategy_rule(const data_equation& eq)
-      : m_strategy_element_type(data_equation_type),
+      : m_strategy_element_type(strategy_element_type::data_equation_type),
         m_rewrite_rule(eq)
     {}
 
     bool is_rewrite_index() const
     {
-      return m_strategy_element_type==rewrite_index_type;
+      return m_strategy_element_type==strategy_element_type::rewrite_index_type;
     }
 
     bool is_cpp_code() const
     {
 
-      return m_strategy_element_type==cpp_function_type;
+      return m_strategy_element_type==strategy_element_type::cpp_function_type;
     }
 
     bool is_equation() const
     {
-      return m_strategy_element_type==data_equation_type;
+      return m_strategy_element_type==strategy_element_type::data_equation_type;
     }
 
     const data_equation& equation() const

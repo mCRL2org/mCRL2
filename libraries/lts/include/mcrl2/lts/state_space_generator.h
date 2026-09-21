@@ -50,12 +50,12 @@ bool save_trace(
   try
   {
     tr.save(filename);
-    mCRL2log(log::info) << " and saved trace to '" << filename << "'";
+    mCRL2log(log::log_level_t::info) << " and saved trace to '" << filename << "'";
     return true;
   }
   catch(...)
   {
-    mCRL2log(log::info) << ", but its trace could not be saved to '" << filename << "'";
+    mCRL2log(log::log_level_t::info) << ", but its trace could not be saved to '" << filename << "'";
   }
   return false;
 }
@@ -72,11 +72,11 @@ void save_traces(
   {
     tr.save(filename1);
     tr2.save(filename2);
-    mCRL2log(log::info) << " and saved traces to '" << filename1 << "' and '" << filename2 << "'";
+    mCRL2log(log::log_level_t::info) << " and saved traces to '" << filename1 << "' and '" << filename2 << "'";
   }
   catch(...)
   {
-    mCRL2log(log::info) << ", but its traces could not be saved to '" << filename1 << "' and '" << filename2 << "'";
+    mCRL2log(log::log_level_t::info) << ", but its traces could not be saved to '" << filename1 << "' and '" << filename2 << "'";
   }
 }
 
@@ -252,7 +252,7 @@ class action_detector
       }
       bool result = false;
 
-      mCRL2log(log::info) << "Action '" + lps::pp(a) + "' found (state index: " + std::to_string(s0_index) + ")";
+      mCRL2log(log::log_level_t::info) << "Action '" + lps::pp(a) + "' found (state index: " + std::to_string(s0_index) + ")";
       if (m_trace_count < m_max_trace_count)
       {
         class trace tr = m_trace_constructor.construct_trace(s0);
@@ -262,7 +262,7 @@ class action_detector
         save_trace(tr, filename);
         result = true;
       }
-      mCRL2log(log::info) << ".\n";
+      mCRL2log(log::log_level_t::info) << ".\n";
       if (m_max_trace_count > 0 && m_trace_count >= m_max_trace_count)
       {
         m_trace_constructor.explorer().abort();
@@ -293,7 +293,7 @@ class deadlock_detector
 
     void detect_deadlock(const lps::state& s, std::size_t s_index)
     {
-      mCRL2log(log::info) << "Deadlock found (state index: " + std::to_string(s_index) + ")";
+      mCRL2log(log::log_level_t::info) << "Deadlock found (state index: " + std::to_string(s_index) + ")";
       if (m_trace_count < m_max_trace_count)
       {
         class trace tr = m_trace_constructor.construct_trace(s);
@@ -304,7 +304,7 @@ class deadlock_detector
       {
         m_trace_constructor.explorer().abort();
       }
-      mCRL2log(log::info) << ".\n";
+      mCRL2log(log::log_level_t::info) << ".\n";
     }
 };
 
@@ -350,7 +350,7 @@ class nondeterminism_detector
       }
       else if (i->second != s1) // nondeterminism detected
       {
-        mCRL2log(log::info) << "Nondeterministic state found (state index: " + std::to_string(s0_index) + ")";
+        mCRL2log(log::log_level_t::info) << "Nondeterministic state found (state index: " + std::to_string(s0_index) + ")";
         if (m_trace_count < m_max_trace_count)
         {
           class trace tr = m_trace_constructor.construct_trace(s0);
@@ -360,7 +360,7 @@ class nondeterminism_detector
           save_trace(tr, filename);
           result = true;
         }
-        mCRL2log(log::info) << ".\n";
+        mCRL2log(log::log_level_t::info) << ".\n";
         if (m_max_trace_count > 0 && m_trace_count >= m_max_trace_count)
         {
           m_trace_constructor.explorer().abort();
@@ -448,7 +448,7 @@ class divergence_detector
       {
         std::string message = "Divergent state found (state index: " + std::to_string(s_index) +
                               "), reachable from divergent state with index " + std::to_string(q->second);
-        mCRL2log(log::info) << message << ".\n";
+        mCRL2log(log::log_level_t::info) << message << ".\n";
         m_divergent_states.erase(q);
         return false;
       }
@@ -471,7 +471,7 @@ class divergence_detector
 
           // back_edge
           [&](const lps::state& s0, const lps::multi_action& a, const state_type& s1) {
-            mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
+            mCRL2log(log::log_level_t::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
             if (m_trace_count < m_max_trace_count)
             {
               class trace tr = global_trace_constructor.construct_trace(s);
@@ -487,7 +487,7 @@ class divergence_detector
               save_traces(tr, filename, tr_loop, loop_filename);
               result = true;
             }
-            mCRL2log(log::info) << ".\n";
+            mCRL2log(log::log_level_t::info) << ".\n";
             //--- Workaround for Visual Studio 2019 ---//
             // explorer.abort();
             static_cast<lps::abortable&>(explorer).abort();
@@ -507,7 +507,7 @@ class divergence_detector
 
           // back_edge
           [&](const lps::state& s0, const lps::multi_action& a, const state_type& s1) {
-            mCRL2log(log::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
+            mCRL2log(log::log_level_t::info) << "Divergent state found (state index: " + std::to_string(s_index) + ")";
             if (m_trace_count < m_max_trace_count)
             {
               class trace tr = global_trace_constructor.construct_trace(s);
@@ -523,7 +523,7 @@ class divergence_detector
               save_traces(tr, filename, tr_loop, loop_filename);
               result = true;
             }
-            mCRL2log(log::info) << ".\n";
+            mCRL2log(log::log_level_t::info) << ".\n";
             //--- Workaround for Visual Studio 2019 ---//
             // explorer.abort();
             static_cast<lps::abortable&>(explorer).abort();
@@ -568,13 +568,13 @@ class progress_monitor
       time_t new_log_time = 0;
 
       static std::mutex exclusive_print_mutex;
-      if (search_strategy == lps::es_breadth)
+      if (search_strategy == lps::exploration_strategy::es_breadth)
       {
         ++count;
         if (number_of_threads == 1 && count == level_up) 
         {
           std::scoped_lock guard(exclusive_print_mutex);
-          mCRL2log(log::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
+          mCRL2log(log::log_level_t::debug) << "Number of states at level " << level << " is " << state_count - last_state_count << "\n";
           level++;
           level_up = count + todo_list_size;
           last_state_count = state_count;
@@ -590,14 +590,14 @@ class progress_monitor
           std::size_t lvl_transitions = transition_count - last_transition_count;
           if (number_of_threads>1) // Levels have no meaning with multiple threads. 
           {
-            mCRL2log(log::status) << std::fixed << std::setprecision(2)
+            mCRL2log(log::log_level_t::status) << std::fixed << std::setprecision(2)
                                   << state_count << "st, " << transition_count << "tr"
                                   << ", explored " << 100.0 * (static_cast<float>(count) / static_cast<float>(state_count))
                                   << "%.\n";
           }
           else
           {
-            mCRL2log(log::status) << std::fixed << std::setprecision(2)
+            mCRL2log(log::log_level_t::status) << std::fixed << std::setprecision(2)
                                   << state_count << "st, " << transition_count << "tr"
                                   << ", explored " << 100.0 * (static_cast<float>(count) / static_cast<float>(state_count))
                                   << "%. Last level: " << level << ", " << lvl_states << "st, " 
@@ -612,7 +612,7 @@ class progress_monitor
         {
           std::scoped_lock guard(exclusive_print_mutex);
           last_log_time = new_log_time;
-          mCRL2log(log::status) << "monitor: currently explored "
+          mCRL2log(log::log_level_t::status) << "monitor: currently explored "
                             << count << " state" << ((count==1)?"":"s")
                             << " and " << transition_count << " transition" << ((transition_count==1)?".":"s.")
                             << std::endl;
@@ -622,19 +622,19 @@ class progress_monitor
 
     void finish_exploration(std::size_t state_count, std::size_t number_of_threads)
     {
-      if (search_strategy == lps::es_breadth)
+      if (search_strategy == lps::exploration_strategy::es_breadth)
       {
-        mCRL2log(log::verbose) << "Done with state space generation (";
+        mCRL2log(log::log_level_t::verbose) << "Done with state space generation (";
         if (number_of_threads==1)
         {
-          mCRL2log(log::verbose) << level-1 << " level" << ((level==2)?"":"s") << ", ";
+          mCRL2log(log::log_level_t::verbose) << level-1 << " level" << ((level==2)?"":"s") << ", ";
         }
-        mCRL2log(log::verbose) << state_count << " state" << ((state_count == 1)?"":"s")
+        mCRL2log(log::log_level_t::verbose) << state_count << " state" << ((state_count == 1)?"":"s")
                                << " and " << transition_count << " transition" << ((transition_count==1)?"":"s") << ")" << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "Done with state space generation ("
+        mCRL2log(log::log_level_t::verbose) << "Done with state space generation ("
                           << state_count << " state" << ((state_count == 1)?"":"s")
                           << " and " << transition_count << " transition" << ((transition_count==1)?"":"s") << ")" << std::endl;
       }
@@ -724,7 +724,7 @@ struct state_space_generator
             if (not_reported_yet)
             {
               not_reported_yet=false;
-              mCRL2log(log::verbose) << "Explored the maximum number (" << options.max_states << ") of states, terminating." << std::endl;
+              mCRL2log(log::log_level_t::verbose) << "Explored the maximum number (" << options.max_states << ") of states, terminating." << std::endl;
             }
             //--- Workaround for Visual Studio 2019 ---//
             // explorer.abort();
@@ -805,7 +805,7 @@ struct state_space_generator
     }
     catch (const data::enumerator_error& e)
     {
-      mCRL2log(log::error) << "Error while exploring state space: " << e.what() << ".\n";
+      mCRL2log(log::log_level_t::error) << "Error while exploring state space: " << e.what() << ".\n";
       if (options.save_error_trace)
       {
         const lps::state& s = *source;

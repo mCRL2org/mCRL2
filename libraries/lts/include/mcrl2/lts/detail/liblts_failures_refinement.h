@@ -190,8 +190,8 @@ struct refinement_statistics
 template <typename T>
 void report_statistics(refinement_statistics<T>& stats)
 {
-  mCRL2log(log::debug) << "working (current: " << stats.working.size() << ", max: " << stats.max_working << ").\n";
-  mCRL2log(log::debug) << "antichain (hits: " << stats.antichain_inserts - stats.antichain_misses
+  mCRL2log(log::log_level_t::debug) << "working (current: " << stats.working.size() << ", max: " << stats.max_working << ").\n";
+  mCRL2log(log::log_level_t::debug) << "antichain (hits: " << stats.antichain_inserts - stats.antichain_misses
                        << ", misses: " << stats.antichain_misses << ", size: " << stats.antichain.size()
                        << ", max: " << stats.max_antichain << ")\n";
 }
@@ -268,12 +268,12 @@ bool destructive_refinement_checker(LTS_TYPE& l1,
 
     if (initial_equal && weak_reduction)
     {
-      mCRL2log(log::verbose) << "The two LTSs are";
+      mCRL2log(log::log_level_t::verbose) << "The two LTSs are";
       if (preserve_divergence)
       {
-        mCRL2log(log::verbose) << " divergence-preserving";
+        mCRL2log(log::log_level_t::verbose) << " divergence-preserving";
       }
-      mCRL2log(log::verbose) << " branching bisimilar, so there is no need to check the refinement relation.\n";
+      mCRL2log(log::log_level_t::verbose) << " branching bisimilar, so there is no need to check the refinement relation.\n";
       return true;
     }
   }
@@ -686,7 +686,7 @@ bool refusals_contained_in(const state_type impl,
       }
       else
       {
-        mCRL2log(log::verbose) << "The acceptance of the left process is empty.\n";
+        mCRL2log(log::log_level_t::verbose) << "The acceptance of the left process is empty.\n";
       }
     }
     else
@@ -697,7 +697,7 @@ bool refusals_contained_in(const state_type impl,
       }
       else
       {
-        mCRL2log(log::verbose) << "A stable acceptance set of the left process is:\n";
+        mCRL2log(log::log_level_t::verbose) << "A stable acceptance set of the left process is:\n";
       }
       std::string sep = "";
       for (const label_type a : impl_action_labels)
@@ -709,7 +709,7 @@ bool refusals_contained_in(const state_type impl,
         }
         else
         {
-          mCRL2log(log::verbose) << l.action_label(a) << "\n";
+          mCRL2log(log::log_level_t::verbose) << l.action_label(a) << "\n";
         }
       }
       if (structured_output)
@@ -727,7 +727,7 @@ bool refusals_contained_in(const state_type impl,
       }
       else
       {
-        mCRL2log(log::verbose) << "The process at the right has no acceptance sets.\n";
+        mCRL2log(log::log_level_t::verbose) << "The process at the right has no acceptance sets.\n";
       }
     }
     else
@@ -745,7 +745,7 @@ bool refusals_contained_in(const state_type impl,
       }
       else
       {
-        mCRL2log(log::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
+        mCRL2log(log::log_level_t::verbose) << "Below all corresponding stable acceptance sets of the right process are provided:\n";
       }
       for (const state_type s : stable)
       {
@@ -756,7 +756,7 @@ bool refusals_contained_in(const state_type impl,
         }
         else
         {
-          mCRL2log(log::verbose) << "An acceptance set of the right process is:\n";
+          mCRL2log(log::log_level_t::verbose) << "An acceptance set of the right process is:\n";
         }
         std::string sep = "";
         for (const label_type a : spec_action_labels)
@@ -768,7 +768,7 @@ bool refusals_contained_in(const state_type impl,
           }
           else
           {
-            mCRL2log(log::verbose) << l.action_label(a) << "\n";
+            mCRL2log(log::log_level_t::verbose) << l.action_label(a) << "\n";
           }
         }
         if (structured_output)
@@ -779,7 +779,7 @@ bool refusals_contained_in(const state_type impl,
     }
     if (!structured_output)
     {
-      mCRL2log(log::verbose) << "Finished printing acceptance sets.\n";
+      mCRL2log(log::log_level_t::verbose) << "Finished printing acceptance sets.\n";
     }
     // Done printing acceptance sets.
   }

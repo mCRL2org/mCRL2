@@ -35,7 +35,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
   using super = parallel_tool<rewriter_tool<input_output_tool>>;
 
   lps::explorer_options options{};
-  lts::lts_type output_format = lts::lts_none;
+  lts::lts_type output_format = lts::lts_type::lts_none;
   lps::abortable* current_explorer = nullptr;
   std::set<std::string> trace_multiaction_strings;
 
@@ -116,9 +116,9 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
                  "consider actions that occur in the comma-separated list of action names "
                  "NAMES to be internal. This setting only affects the option --divergence.");
       desc.add_option("strategy", utilities::make_enum_argument<lps::exploration_strategy>("NAME")
-                   .add_value_short(lps::es_breadth, "b", true)
-                   .add_value_short(lps::es_depth, "d")
-                   .add_value_short(lps::es_highway, "h")
+                   .add_value_short(lps::exploration_strategy::es_breadth, "b", true)
+                   .add_value_short(lps::exploration_strategy::es_depth, "d")
+                   .add_value_short(lps::exploration_strategy::es_highway, "h")
         , "explore the state space using strategy NAME:"
         , 's');
       desc.add_option("suppress","in verbose mode, do not print progress messages indicating the number of visited states and transitions.");
@@ -155,7 +155,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
         {
           throw mcrl2::runtime_error(std::string("Multi-action ") + s + " does not exist: " + e.what());
         }
-        mCRL2log(log::verbose) << "Checking for action \"" << s << "\"\n";
+        mCRL2log(log::log_level_t::verbose) << "Checking for action \"" << s << "\"\n";
       }
       if (options.detect_action)
       {
@@ -176,7 +176,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
           }
           else
           {
-            mCRL2log(log::verbose) << "Checking for action " << ta << "\n";
+            mCRL2log(log::log_level_t::verbose) << "Checking for action " << ta << "\n";
           }
         }
       }
@@ -225,11 +225,11 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       {
         options.highway_todo_max = parser.option_argument_as<std::size_t>("todo-max");
       }
-      if (options.search_strategy == lps::es_highway && !parser.has_option("todo-max"))
+      if (options.search_strategy == lps::exploration_strategy::es_highway && !parser.has_option("todo-max"))
       {
         parser.error("Search strategy 'highway' requires that the option todo-max is set.");
       }
-      if (options.search_strategy != lps::es_highway && parser.has_option("todo-max"))
+      if (options.search_strategy != lps::exploration_strategy::es_highway && parser.has_option("todo-max"))
       {
         parser.error("Option 'todo-max' can only be used in combination with highway search.");
       }
@@ -237,19 +237,19 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       if (parser.has_option("out"))
       {
         output_format = lts::detail::parse_format(parser.option_argument("out"));
-        if (output_format == lts::lts_none)
+        if (output_format == lts::lts_type::lts_none)
         {
           parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
         }
       }
 
-      if (output_format == lts::lts_none && !to_stdout)
+      if (output_format == lts::lts_type::lts_none && !to_stdout)
       {
         output_format = lts::detail::guess_format(output_filename());
-        if (output_format == lts::lts_none)
+        if (output_format == lts::lts_type::lts_none)
         {
-          mCRL2log(log::warning) << "No output format set or detected; using default (lts)." << std::endl;
-          output_format = lts::lts_lts;
+          mCRL2log(log::log_level_t::warning) << "No output format set or detected; using default (lts)." << std::endl;
+          output_format = lts::lts_type::lts_lts;
         }
       }
 
@@ -304,19 +304,19 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 
       options.rewrite_strategy = rewrite_strategy();
 
-      if (options.save_at_end && (output_format != lts::lts_aut && output_format != lts::lts_lts))
+      if (options.save_at_end && (output_format != lts::lts_type::lts_aut && output_format != lts::lts_type::lts_lts))
       {
         parser.error("Option '--save-at-end' requires that the output is in .aut or .lts format.");
       }
 
-      if (output_format == lts::lts_aut && to_stdout && !options.save_at_end)
+      if (output_format == lts::lts_type::lts_aut && to_stdout && !options.save_at_end)
       {
         // The aut file contains the total number of states and transition in the header.
         // We cannot stream it to an output stream which does not support seeking as we do not know this beforehand.
         parser.error("The .aut output format requires option '--save-at-end' to be set for stdout.");
       }
 
-      if (options.discard_lts_state_labels && (to_stdout || output_format != lts::lts_lts))
+      if (options.discard_lts_state_labels && (to_stdout || output_format != lts::lts_type::lts_lts))
       {
         parser.error("Option '--no-info' requires that the output is in .lts format.");
       }
@@ -336,7 +336,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
          }
       }
 
-      options.rewrite_actions = output_format!=lts::lts_none ||
+      options.rewrite_actions = output_format!=lts::lts_type::lts_none ||
                                 options.save_error_trace ||
                                 options.generate_traces;
 
@@ -392,7 +392,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
 
     bool run() override
     {
-      mCRL2log(log::debug) << options << std::endl;
+      mCRL2log(log::log_level_t::debug) << options << std::endl;
       options.trace_prefix = input_filename();
       lps::stochastic_specification stochastic_lpsspec;
       lps::load_lps(stochastic_lpsspec, input_filename());
@@ -407,7 +407,7 @@ class lps2lts_tool: public parallel_tool<rewriter_tool<input_output_tool>>
       {
         if (options.use_projections) {
             options.use_projections = false;
-            mCRL2log(log::warning) << "Projections are currently not supported for stochastic specifications. "
+            mCRL2log(log::log_level_t::warning) << "Projections are currently not supported for stochastic specifications. "
                                    << "Projections have been disabled.\n";
         }
 

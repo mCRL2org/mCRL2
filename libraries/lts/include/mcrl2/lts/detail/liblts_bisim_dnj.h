@@ -151,7 +151,7 @@ union iterator_or_counter
     /// \brief Convert the object from counter to iterator
     void convert_to_iterator(const Iterator other)
     {
-        new (&begin) Iterator(other);
+        new (static_cast<void*>(&begin)) Iterator(other);
     }
 
 
@@ -208,7 +208,7 @@ using block_bunch_slice_iter_t = simple_list<block_bunch_slice_t>::iterator;
 using block_bunch_slice_const_iter_t = simple_list<block_bunch_slice_t>::const_iterator;
 using block_bunch_slice_iter_or_null_t = iterator_or_null_t<block_bunch_slice_t>;
 
-enum new_block_mode_t { new_block_is_U, new_block_is_R };
+enum class new_block_mode_t { new_block_is_U, new_block_is_R };
 
 
 /// \class state_info_entry
@@ -619,24 +619,24 @@ class part_state_t
                                                                                         return;
                                                                                       }
 
-                                                                                        mCRL2log(log::debug) << '\t' << message
+                                                                                        mCRL2log(log::log_level_t::debug) << '\t' << message
                                                                                                              << (1 < end_print - begin_print ? "s:\n" : ":\n");
                                                                                         assert(begin_print < end_print);
                                                                                         do
                                                                                         {
-                                                                                            mCRL2log(log::debug) << "\t\t"
+                                                                                            mCRL2log(log::log_level_t::debug) << "\t\t"
                                                                                                                      << begin_print->st->debug_id(partitioner);
                                                                                             if (B != begin_print->st->bl.ock)
                                                                                             {
-                                                                                                mCRL2log(log::debug) << ", inconsistent: points "
+                                                                                                mCRL2log(log::log_level_t::debug) << ", inconsistent: points "
                                                                                                        "to " << begin_print->st->bl.ock->debug_id(partitioner);
                                                                                             }
                                                                                             if (begin_print != begin_print->st->pos)
                                                                                             {
-                                                                                                mCRL2log(log::debug)
+                                                                                                mCRL2log(log::log_level_t::debug)
                                                                                                                << ", inconsistent pointer to state_info_entry";
                                                                                             }
-                                                                                            mCRL2log(log::debug) << '\n';
+                                                                                            mCRL2log(log::log_level_t::debug) << '\n';
                                                                                         }
                                                                                         while (++begin_print < end_print);
                                                                                     }
@@ -648,14 +648,14 @@ class part_state_t
                                                                                     template<class LTS_TYPE>
                                                                                     void print_part(const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {
-                                                                                      if (!mCRL2logEnabled(log::debug))
+                                                                                      if (!mCRL2logEnabled(log::log_level_t::debug))
                                                                                       {
                                                                                         return;
                                                                                       }
                                                                                         const block_t* B(permutation.front().st->bl.ock);
                                                                                         do
                                                                                         {
-                                                                                            mCRL2log(log::debug)<<B->debug_id(partitioner)<<":\n";
+                                                                                            mCRL2log(log::log_level_t::debug)<<B->debug_id(partitioner)<<":\n";
                                                                                             print_block(B, "Bottom state",
                                                                                                                 B->begin, B->marked_bottom_begin, partitioner);
                                                                                             print_block(B, "Marked bottom state",
@@ -2417,7 +2417,7 @@ class part_trans_t
         }
         while (++s_iter < new_block->end);
 
-        if (new_block_is_R == new_block_mode)
+        if (new_block_mode_t::new_block_is_R == new_block_mode)
         {                                                                       assert(splitter_T->source_block() == new_block);
             // The `splitter_T` slice moves completely from the old to the new
             // block.  We move it as a whole to the new block_bunch list.
@@ -2460,7 +2460,7 @@ class part_trans_t
             {
                 new_noninert_block_bunch = nullptr;
             }
-            if (new_block_is_U == new_block_mode)
+            if (new_block_mode_t::new_block_is_U == new_block_mode)
             {                                                                   assert(old_block == new_block->end->st->bl.ock);
                                                                                 assert(new_block->end < partitioner.part_st.permutation.data_end());
                 permutation_entry* target_iter(new_block->begin);               assert(target_iter < new_block->end);
@@ -2490,7 +2490,7 @@ class part_trans_t
                 while (++target_iter < new_block->end);                         assert(0 < old_block->bottom_size());
             }
             else
-            {                                                                   assert(new_block_is_R == new_block_mode);
+            {                                                                   assert(new_block_mode_t::new_block_is_R == new_block_mode);
                     /* We have to be careful because make_noninert may move  */ assert(partitioner.part_st.permutation.data() < new_block->begin);
                     /* a state either forward (to the marked states) or      */ assert(old_block == new_block->begin[-1].st->bl.ock);
                     /* back (to the bottom states).                          */ assert(0 < old_block->bottom_size());
@@ -2540,7 +2540,7 @@ class part_trans_t
                                                                                     template <class LTS_TYPE>
                                                                                     void print_trans(const bisim_partitioner_dnj<LTS_TYPE>& partitioner) const
                                                                                     {
-                                                                                      if (!mCRL2logEnabled(log::debug))
+                                                                                      if (!mCRL2logEnabled(log::log_level_t::debug))
                                                                                       {
                                                                                         return;
                                                                                       }
@@ -2548,14 +2548,14 @@ class part_trans_t
                                                                                         const succ_entry* succ_iter(&succ.cbegin()[1]);
                                                                                         if (succ_iter >= &succ.back())
                                                                                         {
-                                                                                            mCRL2log(log::debug) << "No transitions.\n";
+                                                                                            mCRL2log(log::log_level_t::debug) << "No transitions.\n";
                                                                                             return;
                                                                                         }
                                                                                         const state_info_entry* source(succ_iter->block_bunch->pred->source);
-                                                                                        mCRL2log(log::debug) << source->debug_id(partitioner) << ":\n";
+                                                                                        mCRL2log(log::log_level_t::debug) << source->debug_id(partitioner) << ":\n";
                                                                                         if (succ_iter->block_bunch->slice.is_null())
                                                                                         {
-                                                                                            mCRL2log(log::debug) << "\tInert successors:\n";
+                                                                                            mCRL2log(log::log_level_t::debug) << "\tInert successors:\n";
                                                                                         }
                                                                                         block_bunch_slice_iter_or_null_t current_out_bunch(nullptr);
                                                                                         do
@@ -2564,7 +2564,7 @@ class part_trans_t
                                                                                             if (source != succ_iter->block_bunch->pred->source)
                                                                                             {   assert(source < succ_iter->block_bunch->pred->source);
                                                                                                 source = succ_iter->block_bunch->pred->source;
-                                                                                                mCRL2log(log::debug)
+                                                                                                mCRL2log(log::log_level_t::debug)
                                                                                                     << source->debug_id(partitioner) << ":\n";
                                                                                                 always_print=true;
                                                                                             }
@@ -2573,7 +2573,7 @@ class part_trans_t
                                                                                             {   //assert(!current_out_bunch.is_null());
                                                                                                 if (succ_iter->block_bunch->slice.is_null())
                                                                                                 {   assert(succ_iter == source->succ_inert.begin);
-                                                                                                    mCRL2log(log::debug)<<"\tInert successors:\n";
+                                                                                                    mCRL2log(log::log_level_t::debug)<<"\tInert successors:\n";
                                                                                                     current_out_bunch = nullptr;
                                                                                                 }
                                                                                                 else
@@ -2581,12 +2581,12 @@ class part_trans_t
                                                                                                     //assert(!current_out_bunch.is_null());
                                                                                                     //assert(current_out_bunch == splitter_list.end() ||
                                                                                                     //           current_out_bunch->bunch != succ_iter->bunch());
-                                                                                                    mCRL2log(log::debug) << "\tSuccessors in "
+                                                                                                    mCRL2log(log::log_level_t::debug) << "\tSuccessors in "
                                                                                                       <<succ_iter->bunch()->debug_id_short(partitioner)<<":\n";
                                                                                                     current_out_bunch = succ_iter->block_bunch->slice;
                                                                                                 }
                                                                                             }
-                                                                                            mCRL2log(log::debug) << "\t\t"
+                                                                                            mCRL2log(log::log_level_t::debug) << "\t\t"
                                                                                                 << succ_iter->block_bunch->pred->debug_id(partitioner) << '\n';
                                                                                         }
                                                                                         while (++succ_iter < &succ.back());
@@ -2615,14 +2615,14 @@ class part_trans_t
                                                                                             assert(nullptr != action_block_iter->succ);
                                                                                             if (action_block_iter->succ->block_bunch->slice.is_null())
                                                                                             {   assert(action_block_iter == action_block_inert_begin);
-                                                                                                mCRL2log(log::debug) <<"Inert transition slice [";
+                                                                                                mCRL2log(log::log_level_t::debug) <<"Inert transition slice [";
                                                                                                 action_block_slice_end = bunch_end = action_block.data_end();
                                                                                             }
                                                                                             else
                                                                                             {
                                                                                                 const bunch_t* const bunch(action_block_iter->succ->bunch());
                                                                                                 assert(nullptr != bunch);
-                                                                                                mCRL2log(log::debug) << bunch->debug_id_short(
+                                                                                                mCRL2log(log::log_level_t::debug) << bunch->debug_id_short(
                                                                                                                    partitioner) << ":\n\taction_block-slice [";
                                                                                                 assert(bunch->begin == action_block_iter);
                                                                                                 bunch_end = bunch->end;
@@ -2635,7 +2635,7 @@ class part_trans_t
                                                                                             // for all action_block-slices in bunch
                                                                                             for (;;)
                                                                                             {
-                                                                                                mCRL2log(log::debug) << (action_block_iter -
+                                                                                                mCRL2log(log::log_level_t::debug) << (action_block_iter -
                                                                                                                                     action_block.data()) << ","
                                                                                                    << (action_block_slice_end - action_block.data()) << "):\n";
                                                                                                 // for all transitions in the action_block-slice
@@ -2643,7 +2643,7 @@ class part_trans_t
                                                                                                 do
                                                                                                 {
                                                                                                     assert(nullptr != action_block_iter->succ);
-                                                                                                    mCRL2log(log::debug) << "\t\t"
+                                                                                                    mCRL2log(log::log_level_t::debug) << "\t\t"
                                                                                                             << action_block_iter->succ->block_bunch->
                                                                                                                            pred->debug_id(partitioner) << '\n';
                                                                                                 }
@@ -2664,7 +2664,7 @@ class part_trans_t
                                                                                                 assert(nullptr != action_block_iter->begin_or_before_end);
                                                                                                 action_block_slice_end =
                                                                                                                   action_block_iter->begin_or_before_end + 1;
-                                                                                                mCRL2log(log::debug) << "\taction_block-slice [";
+                                                                                                mCRL2log(log::log_level_t::debug) << "\taction_block-slice [";
                                                                                             }
                                                                                             // go to next bunch
                                                                                             assert(action_block_iter == bunch_end);
@@ -2693,7 +2693,7 @@ inline block_t* block_t::split_off_block(
     if (permutation_entry* const splitpoint(marked_bottom_begin +
                                                     unmarked_nonbottom_size()); assert(begin < splitpoint),  assert(splitpoint < end),
                                                                                 assert(splitpoint->st->pos == splitpoint),
-                                              new_block_is_U == new_block_mode)
+                                              new_block_mode_t::new_block_is_U == new_block_mode)
     {                                                                           assert((state_type) (splitpoint - begin) <= size()/2);
         new_block =
                     #ifdef USE_POOL_ALLOCATOR
@@ -2710,7 +2710,7 @@ inline block_t* block_t::split_off_block(
         nonbottom_begin = marked_nonbottom_begin;
     }
     else
-    {                                                                           assert(new_block_is_R == new_block_mode);
+    {                                                                           assert(new_block_mode_t::new_block_is_R == new_block_mode);
         new_block =
                     #ifdef USE_POOL_ALLOCATOR
                         simple_list<block_bunch_slice_t>::get_pool().
@@ -2887,7 +2887,7 @@ class bisim_partitioner_dnj
 {
   private:
     /// \brief modes that determine details of how split() should work
-    enum refine_mode_t{extend_from_marked_states,
+    enum class refine_mode_t{extend_from_marked_states,
       extend_from_marked_states_add_new_noninert_to_splitter,
       extend_from_splitter };
 
@@ -3087,7 +3087,7 @@ class bisim_partitioner_dnj
     /// same slice.)
     void create_initial_partition()
     {
-        mCRL2log(log::verbose) << "An O(m log n) "
+        mCRL2log(log::log_level_t::verbose) << "An O(m log n) "
              << (branching ? (preserve_divergence
                                            ? "divergence-preserving branching "
                                            : "branching ")
@@ -3097,14 +3097,14 @@ class bisim_partitioner_dnj
 
         if (part_st.state_size() > 2 * aut.num_transitions() + 1)
         {
-            mCRL2log(log::warning) << "There are several isolated states "
+            mCRL2log(log::log_level_t::warning) << "There are several isolated states "
                 "without incoming or outgoing transition. It is not "
                 "guaranteed that branching bisimulation minimisation runs in "
                 "time O(m log n).\n";
         }
 
-        sort_transitions(aut.get_transitions(), tgt_lbl_src);
-        mCRL2log(log::verbose) << "Carried out sorting\n";
+        sort_transitions(aut.get_transitions(), transition_sort_style::tgt_lbl_src);
+        mCRL2log(log::log_level_t::verbose) << "Carried out sorting\n";
         // create one block for all states
         bisim_dnj::block_t* B(
                 #ifdef USE_POOL_ALLOCATOR
@@ -3256,7 +3256,7 @@ class bisim_partitioner_dnj
                 }
                 if (n_square < action_label[label].count)
                 {
-                    mCRL2log(log::warning) << "There are "
+                    mCRL2log(log::log_level_t::warning) << "There are "
                         << action_label[label].count << ' '
                         << pp(aut.action_label(label)) << "-transitions.  "
                         "This is more than n^2 (= " << n_square << "). It is "
@@ -3287,7 +3287,7 @@ class bisim_partitioner_dnj
                                                       next_action_label_begin);
                 if (0 != label && aut.num_transitions() < action_label.size())
                 {
-                    mCRL2log(log::warning) << "Action label "
+                    mCRL2log(log::log_level_t::warning) << "Action label "
                         << pp(aut.action_label(label)) << " has no "
                         "transitions, and the number of action labels exceeds "
                         "the number of transitions. It is not guaranteed that "
@@ -3397,7 +3397,7 @@ class bisim_partitioner_dnj
                 {
                   B = split(B,
                     /* splitter block_bunch */ slice,
-                    extend_from_marked_states_add_new_noninert_to_splitter);
+                    refine_mode_t::extend_from_marked_states_add_new_noninert_to_splitter);
                   // We can ignore possible new non-inert transitions, as
                   // every R-bottom state already has a transition in bunch.
                   B->marked_nonbottom_begin = B->end;
@@ -3757,7 +3757,7 @@ class bisim_partitioner_dnj
             /* Line 2.6: Select some a in Act and B' in Pi_s such that       */ assert(part_tr.nr_of_bunches + part_tr.nr_of_nontrivial_bunches <=
             /*                           |bunch_T_a_Bprime| <= 1/2 |bunch_T| */                                             part_tr.nr_of_action_block_slices);
             bisim_dnj::bunch_t* const bunch_T(part_tr.get_some_nontrivial());
-            if (mCRL2logEnabled(log::verbose))
+            if (mCRL2logEnabled(log::log_level_t::verbose))
             {
                 if (std::clock_t now = std::clock(); next_print_time <= now ||
                                                             nullptr == bunch_T)
@@ -3779,21 +3779,21 @@ class bisim_partitioner_dnj
                         {
                             if (3600 <= now)
                             {
-                                mCRL2log(log::verbose)
+                                mCRL2log(log::log_level_t::verbose)
                                     << now / 3600 << " h ";
                                 now %= 3600;
                             }
-                            mCRL2log(log::verbose)
+                            mCRL2log(log::log_level_t::verbose)
                                 << now / 60 << " min ";
                             now %= 60;
                         }
-                        mCRL2log(log::verbose) << now
+                        mCRL2log(log::log_level_t::verbose) << now
                               << " sec passed since starting the main loop.\n";
                     }
                     #define PRINT_SG_PL(counter, sg_string, pl_string)        \
                             (counter)                                         \
                             << (1 == (counter) ? (sg_string) : (pl_string))
-                    mCRL2log(log::verbose)
+                    mCRL2log(log::log_level_t::verbose)
                         << (nullptr == bunch_T ? "The reduced LTS contains "
                                         : "The reduced LTS contains at least ")
                         << PRINT_SG_PL(part_st.nr_of_blocks,
@@ -3804,13 +3804,13 @@ class bisim_partitioner_dnj
                     {
                         #define PRINT_INT_PERCENTAGE(num,denom)               \
                                 (((num) * 200 + (denom)) / (denom) / 2)
-                        mCRL2log(log::verbose) << " Estimated "
+                        mCRL2log(log::log_level_t::verbose) << " Estimated "
                             << PRINT_INT_PERCENTAGE(part_tr.nr_of_bunches - 1,
                                          part_tr.nr_of_action_block_slices - 1)
                             << "% done.";
                         #undef PRINT_INT_PERCENTAGE
                     }
-                    mCRL2log(log::verbose)
+                    mCRL2log(log::log_level_t::verbose)
                     //  << " Logarithmic estimate: "
                     //  << (int)(100.5+std::log((double) part_tr.nr_of_bunches/
                     //                      part_tr.nr_of_action_block_slices)
@@ -3819,7 +3819,7 @@ class bisim_partitioner_dnj
                         << "\nThe current partition contains ";
                     if (branching)
                     {
-                        mCRL2log(log::verbose)
+                        mCRL2log(log::log_level_t::verbose)
                             << PRINT_SG_PL(part_tr.nr_of_new_bottom_states,
                                 " new bottom state, ", " new bottom states, ");
                     }
@@ -3827,7 +3827,7 @@ class bisim_partitioner_dnj
                     {
                       assert(0 == part_tr.nr_of_new_bottom_states);
                     }
-                    mCRL2log(log::verbose)
+                    mCRL2log(log::log_level_t::verbose)
                         << PRINT_SG_PL(part_tr.nr_of_bunches,
                                     " bunch (of which ", " bunches (of which ")
                         << PRINT_SG_PL(part_tr.nr_of_nontrivial_bunches,
@@ -3837,12 +3837,12 @@ class bisim_partitioner_dnj
                     #undef PRINT_SG_PL
                 }
             }
-            if (nullptr == bunch_T)  { break; }                                 ONLY_IF_DEBUG( mCRL2log(log::debug) << "Refining "
+            if (nullptr == bunch_T)  { break; }                                 ONLY_IF_DEBUG( mCRL2log(log::log_level_t::debug) << "Refining "
             /* Line 2.7: Pi_t := Pi_t \ { bunch_T } union                    */                                          << bunch_T->debug_id(*this) << '\n'; )
             /*              { bunch_T_a_Bprime, bunch_T \ bunch_T_a_Bprime } */ assert(part_tr.nr_of_bunches < part_tr.nr_of_action_block_slices);
             bisim_dnj::bunch_t* const bunch_T_a_Bprime(
                          bunch_T->split_off_small_action_block_slice(part_tr));
-                                                                                ONLY_IF_DEBUG( mCRL2log(log::debug) << "Splitting off "
+                                                                                ONLY_IF_DEBUG( mCRL2log(log::log_level_t::debug) << "Splitting off "
             /*------------ find predecessors of bunch_T_a_Bprime ------------*/                                 << bunch_T_a_Bprime->debug_id(*this) << '\n'; )
                                                                                 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
             /* Line 2.8: for all B in splittableBlocks(bunch_T_a_Bprime) do  */     unsigned const max_splitter_counter(
@@ -3932,8 +3932,8 @@ class bisim_partitioner_dnj
                     // Line 2.16: Remove T'_B--> from the splitter list
                     // Line 2.17: Pi_s := Pi_s \ { B } union { R, U } \ { {} }
                     bisim_dnj::block_t*block_R=split(block_B,splitter_Tprime_B,
-                                is_primary_splitter ? extend_from_marked_states
-                                                    : extend_from_splitter);
+                                is_primary_splitter ? refine_mode_t::extend_from_marked_states
+                                                    : refine_mode_t::extend_from_splitter);
                     if (block_B_begin < block_R->begin)
                     {
                         // The refinement was non-trivial.
@@ -4138,14 +4138,14 @@ class bisim_partitioner_dnj
                                                        enum refine_mode_t mode)
     {                                                                           assert(block_B == splitter_T->source_block());
                                                                                 #ifndef NDEBUG
-                                                                                    mCRL2log(log::debug) << "split("
+                                                                                    mCRL2log(log::log_level_t::debug) << "split("
                                                                                         << block_B->debug_id(*this)
                                                                                         << ',' << splitter_T->debug_id(*this)
-                                                                                        << (extend_from_marked_states_add_new_noninert_to_splitter == mode
+                                                                                        << (refine_mode_t::extend_from_marked_states_add_new_noninert_to_splitter == mode
                                                                                            ? ",extend_from_marked_states_add_new_noninert_to_splitter)\n"
-                                                                                           : (extend_from_marked_states == mode
+                                                                                           : (refine_mode_t::extend_from_marked_states == mode
                                                                                              ? ",extend_from_marked_states)\n"
-                                                                                             : (extend_from_splitter == mode
+                                                                                             : (refine_mode_t::extend_from_splitter == mode
                                                                                                ? ",extend_from_splitter)\n"
                                                                                                : ",UNKNOWN MODE)\n")));
                                                                                 #endif
@@ -4156,7 +4156,7 @@ class bisim_partitioner_dnj
             bisim_dnj::permutation_entry* block;
         } R_s_iter{};
 
-        if (extend_from_splitter == mode)
+        if (refine_mode_t::extend_from_splitter == mode)
         {                                                                       assert(0 == block_B->marked_size());
             // Line 3.2: R := B--Marked(T)--> ; U := Bottom(B) \ R
             R_s_iter.splitter_iter = splitter_T->end;                           assert(splitter_T->marked_begin <= R_s_iter.splitter_iter);
@@ -4262,7 +4262,7 @@ class bisim_partitioner_dnj
                                 goto continuation;
                             }
                             // Line 3.13l: if not (B--T--> subset R) then
-                            if (extend_from_splitter == mode)
+                            if (refine_mode_t::extend_from_splitter == mode)
                             {                                                   assert(U_t != part_tr.succ.front().block_bunch->pred->source);
                                 // Line 3.14l: for all non-inert
                                 //             t --alpha--> u do
@@ -4330,16 +4330,16 @@ class bisim_partitioner_dnj
                 block_B->marked_nonbottom_begin = U_nonbottom_end;
                 block_R = block_B;
                 bisim_dnj::block_t* const block_U(
-                    block_R->split_off_block(bisim_dnj::new_block_is_U,         ONLY_IF_DEBUG( *this, )
+                    block_R->split_off_block(bisim_dnj::new_block_mode_t::new_block_is_U,         ONLY_IF_DEBUG( *this, )
                                                       part_st.nr_of_blocks++));
                 // Line 2.16: Remove Tprime_B--> = Tprime_R--> from the
                 //            splitter list
                 /* and the remainder of Line 2.17                            */ assert(0 == block_U->marked_size());  assert(0 == block_R->marked_size());
                 part_tr.adapt_transitions_for_new_block(block_U,
                   block_R,
-                  ONLY_IF_DEBUG(*this, ) extend_from_marked_states_add_new_noninert_to_splitter == mode,
+                  ONLY_IF_DEBUG(*this, ) refine_mode_t::extend_from_marked_states_add_new_noninert_to_splitter == mode,
                   splitter_T,
-                  bisim_dnj::new_block_is_U);
+                  bisim_dnj::new_block_mode_t::new_block_is_U);
 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     finalise_U_is_smaller(block_U, block_R, *this);
                                                                                 #endif
@@ -4358,7 +4358,7 @@ class bisim_partitioner_dnj
 
                 /* -  -  -  -  -  collect states from B--T-->  -  -  -  -  - */
 
-                if (extend_from_splitter == mode)
+                if (refine_mode_t::extend_from_splitter == mode)
                 {
                     // Line 3.4r: R := R union B--(T \ Marked(T))-->
                     if (U_nonbottom_end < block_B->marked_nonbottom_begin)
@@ -4402,7 +4402,7 @@ class bisim_partitioner_dnj
                         // B--T--> are now in R.
                             // The shared variable `mode` is used
                             // instead of a separate shared variable.
-                        mode = extend_from_marked_states;
+                        mode = refine_mode_t::extend_from_marked_states;
                     }
                                                                                 #ifndef NDEBUG
                                                                                     else
@@ -4486,16 +4486,16 @@ class bisim_partitioner_dnj
                 ABORT_OTHER_COROUTINE();
                 // Line 2.17: Pi_s := Pi_s \ { B } union ({ R, U } \ { {} })
                     // All non-R states are in U.
-                block_R = block_B->split_off_block(bisim_dnj::new_block_is_R,   ONLY_IF_DEBUG( *this, )
+                block_R = block_B->split_off_block(bisim_dnj::new_block_mode_t::new_block_is_R,   ONLY_IF_DEBUG( *this, )
                                                        part_st.nr_of_blocks++);
                 // Line 2.16: Remove Tprime_B--> = Tprime_R--> from the
                 //            splitter list
                 /* and the remainder of Line 2.17                            */ assert(0 == block_B->marked_size());  assert(0 == block_R->marked_size());
                 part_tr.adapt_transitions_for_new_block(block_R,
                   block_B,
-                  ONLY_IF_DEBUG(*this, ) extend_from_marked_states_add_new_noninert_to_splitter == mode,
+                  ONLY_IF_DEBUG(*this, ) refine_mode_t::extend_from_marked_states_add_new_noninert_to_splitter == mode,
                   splitter_T,
-                  bisim_dnj::new_block_is_R);
+                  bisim_dnj::new_block_mode_t::new_block_is_R);
 #if !defined(NDEBUG) || defined(COUNT_WORK_BALANCE)
                                                                                     finalise_R_is_smaller(block_B, block_R, *this);
                                                                                 #endif
@@ -4549,7 +4549,7 @@ class bisim_partitioner_dnj
                                                                                 #endif
                                                                                     block_N = split(block_R,
                                                                                       bbslice_R_tau_U,
-                                                                                      extend_from_marked_states_add_new_noninert_to_splitter);
+                                                                                      refine_mode_t::extend_from_marked_states_add_new_noninert_to_splitter);
                                                                                     assert(part_st.permutation.data()
                                                                                            < block_N->begin);
                                                                                     block_Rprime
@@ -4944,7 +4944,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
     {
         // LTSs with 1 state also need to be reduced because some users call
         // bisimulation minimisation just to remove duplicated transitions.
-        mCRL2log(log::warning) << "There is only 1 state in the LTS. It is "
+        mCRL2log(log::log_level_t::warning) << "There is only 1 state in the LTS. It is "
                 "not guaranteed that branching bisimulation minimisation runs "
                 "in time O(m log n).\n";
     }
@@ -4970,7 +4970,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
     const std::clock_t end_part=std::clock();
     bisim_part.finalize_minimized_LTS();
 
-    if (mCRL2logEnabled(log::verbose))
+    if (mCRL2logEnabled(log::log_level_t::verbose))
     {
         const std::clock_t end_finalizing=std::clock();
         const int prec=static_cast<int>(std::lrint(std::log10(CLOCKS_PER_SEC)+0.19897000433602));
@@ -5002,7 +5002,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
                 }
                 int width = static_cast<int>(trunc(log10(h[0])) + 1);
 
-                mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
+                mCRL2log(log::log_level_t::verbose) << std::fixed << std::setprecision(prec)
                     << "Time spent on contracting SCCs: " << std::setw(width) << h[1] << "h " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
                        "Time spent on initial partition:" << std::setw(width) << h[2] << "h " << std::setw(2) << min[2] << "min " << std::setw(prec+3) << runtime[2] << "s\n"
                        "Time spent on refining:         " << std::setw(width) << h[3] << "h " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
@@ -5013,7 +5013,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
             }
             else
             {
-                mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
+                mCRL2log(log::log_level_t::verbose) << std::fixed << std::setprecision(prec)
                     << "Time spent on contracting SCCs: " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
                        "Time spent on initial partition:" << std::setw(2) << min[2] << "min " << std::setw(prec+3) << runtime[2] << "s\n"
                        "Time spent on refining:         " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
@@ -5025,7 +5025,7 @@ void bisimulation_reduce_dnj(LTS_TYPE& l, bool const branching = false,
         }
         else
         {
-            mCRL2log(log::verbose) << std::fixed << std::setprecision(prec)
+            mCRL2log(log::log_level_t::verbose) << std::fixed << std::setprecision(prec)
                 << "Time spent on contracting SCCs: " << std::setw(prec+3) << runtime[1] << "s\n"
                    "Time spent on initial partition:" << std::setw(prec+3) << runtime[2] << "s\n"
                    "Time spent on refining:         " << std::setw(prec+3) << runtime[3] << "s\n"
@@ -5066,7 +5066,7 @@ bool destructive_bisimulation_compare_dnj(LTS_TYPE& l1, LTS_TYPE& l2,
 {
     if (generate_counter_examples)
     {
-        mCRL2log(log::warning) << "The JGKW20 branching bisimulation "
+        mCRL2log(log::log_level_t::warning) << "The JGKW20 branching bisimulation "
                               "algorithm does not generate counterexamples.\n";
     }
     std::size_t init_l2(l2.initial_state() + l1.num_states());

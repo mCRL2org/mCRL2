@@ -330,11 +330,11 @@ std::vector<std::size_t> compute_variable_order_weighted(const std::vector<boost
   weighted_order_rec(order, S, n, adjacency);
 
   // Print the resulting order. 
-  mCRL2log(log::verbose) << "weighted order = ";
+  mCRL2log(log::log_level_t::verbose) << "weighted order = ";
   for (const auto& val : order) {    
-    mCRL2log(log::verbose) << val << ", ";
+    mCRL2log(log::log_level_t::verbose) << val << ", ";
   }
-  mCRL2log(log::verbose) << std::endl;
+  mCRL2log(log::log_level_t::verbose) << std::endl;
 
   return order;
 }

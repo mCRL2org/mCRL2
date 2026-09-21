@@ -87,18 +87,18 @@ class lts2pres_tool : public pres_output_tool<input_output_tool>
       ltsspec.set_data(data::merge_data_specifications(ltsspec.data(), formspec.data()));
       if (!formspec.action_labels().empty())
       {
-        mCRL2log(log::warning) << "The modal formula contains action declarations. These are ignored.\n";
+        mCRL2log(log::log_level_t::warning) << "The modal formula contains action declarations. These are ignored.\n";
       }
       pres_system::pres result = pres_system::lts2pres(ltsspec, formspec, preprocess_modal_operators);
 
       //save the result
       if (output_filename().empty())
       {
-        mCRL2log(log::verbose) << "Writing PRES to stdout..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Writing PRES to stdout..." << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "Writing PRES to file '" <<  output_filename() << "'..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Writing PRES to file '" <<  output_filename() << "'..." << std::endl;
       }
       save_pres(result, output_filename(), pres_output_format());
       return true;

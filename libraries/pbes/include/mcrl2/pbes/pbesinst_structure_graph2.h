@@ -434,7 +434,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
         const structure_graph::index_type u = m_graph_builder.find_vertex(X);
         const structure_graph::vertex& u_ = m_graph_builder.vertex(u);
         calculation_steps++;
-        if (u_.decoration == structure_graph::d_none && u_.successors.empty())
+        if (u_.decoration == structure_graph::decoration_type::d_none && u_.successors.empty())
         {
           assert(is_propositional_variable_instantiation(u_.formula()));
           new_todo.insert(atermpp::down_cast<propositional_variable_instantiation>(u_.formula()));
@@ -475,7 +475,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       calculation_steps=calculation_steps+new_todo.size();
       for(const propositional_variable_instantiation& X: new_todo)
       {
-        if (m_options.exploration_strategy == breadth_first)
+        if (m_options.exploration_strategy == search_strategy::breadth_first)
         {
           new_todo_list.push_back(X);
         }
@@ -488,17 +488,17 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       assert(todo_has_only_undefined_nodes());
       if (todo.elements().size() == old_todo_size)
       { 
-        mCRL2log(log::verbose) << "Pruning of the  todo list had no effect on its size. ";
+        mCRL2log(log::log_level_t::verbose) << "Pruning of the  todo list had no effect on its size. ";
       }
       else if (todo.elements().size() > old_todo_size)
       { 
-        mCRL2log(log::verbose) << "Pruned the todo list. Added " << todo.elements().size() - old_todo_size << " elements. ";
+        mCRL2log(log::log_level_t::verbose) << "Pruned the todo list. Added " << todo.elements().size() - old_todo_size << " elements. ";
       }
       else
       { 
-        mCRL2log(log::verbose) << "Pruned the todo list. Removed " << old_todo_size - todo.elements().size() << " elements. ";
+        mCRL2log(log::log_level_t::verbose) << "Pruned the todo list. Removed " << old_todo_size - todo.elements().size() << " elements. ";
       }
-      mCRL2log(log::verbose) << "The todo list has size " << todo.elements().size() << ".\n";
+      mCRL2log(log::log_level_t::verbose) << "The todo list has size " << todo.elements().size() << ".\n";
    };
 
    // Execute a prune_todo_list if m_options.prune_todo_list is set. 
@@ -535,23 +535,23 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       simple_structure_graph G(m_graph_builder.vertices());
       for (structure_graph::index_type u: S[0].vertices())
       {
-        if (G.decoration(u) == structure_graph::d_disjunction && tau[0][u] == undefined_vertex())
+        if (G.decoration(u) == structure_graph::decoration_type::d_disjunction && tau[0][u] == undefined_vertex())
         {
-          mCRL2log(log::debug) << "Error: no strategy has been set for disjunctive node " << u << " in S0." << std::endl;
-          mCRL2log(log::debug) << G << std::endl;
-          mCRL2log(log::debug) << "S0 = " << S[0] << std::endl;
-          mCRL2log(log::debug) << "S1 = " << S[1] << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Error: no strategy has been set for disjunctive node " << u << " in S0." << std::endl;
+          mCRL2log(log::log_level_t::debug) << G << std::endl;
+          mCRL2log(log::log_level_t::debug) << "S0 = " << S[0] << std::endl;
+          mCRL2log(log::log_level_t::debug) << "S1 = " << S[1] << std::endl;
           return false;
         }
       }
       for (structure_graph::index_type u: S[1].vertices())
       {
-        if (G.decoration(u) == structure_graph::d_conjunction && tau[1][u] == undefined_vertex())
+        if (G.decoration(u) == structure_graph::decoration_type::d_conjunction && tau[1][u] == undefined_vertex())
         {
-          mCRL2log(log::debug) << "Error: no strategy has been set for conjunctive node " << u << " in S1." << std::endl;
-          mCRL2log(log::debug) << G << std::endl;
-          mCRL2log(log::debug) << "S0 = " << S[0] << std::endl;
-          mCRL2log(log::debug) << "S1 = " << S[1] << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Error: no strategy has been set for conjunctive node " << u << " in S1." << std::endl;
+          mCRL2log(log::log_level_t::debug) << G << std::endl;
+          mCRL2log(log::log_level_t::debug) << "S0 = " << S[0] << std::endl;
+          mCRL2log(log::log_level_t::debug) << "S1 = " << S[1] << std::endl;
           return false;
         }
       }
@@ -620,8 +620,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
 
     void report_found_solutions(stopwatch& timer)
     {
-      mCRL2log(log::verbose) << "Found solution for" << std::setw(12) << S[0].size() + S[1].size() << " BES equations." << std::endl;
-      mCRL2log(log::verbose) << "Finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s).\n";
+      mCRL2log(log::log_level_t::verbose) << "Found solution for" << std::setw(12) << S[0].size() + S[1].size() << " BES equations." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Finished partial solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s).\n";
     }
 
     void on_discovered_elements(const std::set<propositional_variable_instantiation>&  /*elements*/) override
@@ -646,7 +646,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_using_fatal_attractor && 
                (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
-        mCRL2log(log::verbose) << "Start partial solving.\n"; 
+        mCRL2log(log::log_level_t::verbose) << "Start partial solving.\n"; 
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
         simple_structure_graph G(m_graph_builder.vertices());
@@ -660,7 +660,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
                 m_options.optimization <= partial_solve_strategy::solve_subgames_using_solver) && 
                 (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
-        mCRL2log(log::verbose) << "Start partial solving.\n"; 
+        mCRL2log(log::log_level_t::verbose) << "Start partial solving.\n"; 
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
 
@@ -688,7 +688,7 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       else if (m_options.optimization == partial_solve_strategy::detect_winning_loops_original && 
                (m_options.aggressive || on_the_fly_solve_trigger.is_expired()))
       {
-        mCRL2log(log::verbose) << "Start partial solving.\n"; 
+        mCRL2log(log::log_level_t::verbose) << "Start partial solving.\n"; 
 
         std::size_t calculation_steps=0;  // Count how many calculation steps it takes to find loops, and retry this after on_discovered_elements have been called that many times. 
 
@@ -724,8 +724,8 @@ class pbesinst_structure_graph_algorithm2: public pbesinst_structure_graph_algor
       }
       m_graph_builder.erase_vertices(to_be_removed);
 
-      mCRL2log(log::debug) << "\nFinal structure graph " << std::endl;
-      mCRL2log(log::debug) << G << std::endl;
+      mCRL2log(log::log_level_t::debug) << "\nFinal structure graph " << std::endl;
+      mCRL2log(log::log_level_t::debug) << G << std::endl;
     }
 };
 

@@ -38,7 +38,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
   protected:
     using super = rewriter_tool<pres_input_output_tool<input_output_tool>>;
 
-    presinst_strategy m_strategy = presinst_lazy_strategy;
+    presinst_strategy m_strategy = presinst_strategy::presinst_lazy_strategy;
     std::string m_finite_parameter_selection;
     bool m_remove_redundant_equations = false;
 
@@ -54,9 +54,9 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
       {
         m_finite_parameter_selection = parser.option_argument("select");
         boost::trim(m_finite_parameter_selection);
-        if (m_strategy != presinst_finite_strategy)
+        if (m_strategy != presinst_strategy::presinst_finite_strategy)
         {
-          mCRL2log(log::warning) << "Warning: the option --select only has an effect when used together with --strategy=finite." << std::endl;
+          mCRL2log(log::log_level_t::warning) << "Warning: the option --select only has an effect when used together with --strategy=finite." << std::endl;
         }
       }
 
@@ -73,8 +73,8 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
       desc.
       add_option("strategy",
                  make_enum_argument<presinst_strategy>("NAME")
-                 .add_value(presinst_lazy_strategy)
-                 .add_value(presinst_finite_strategy, true),
+                 .add_value(presinst_strategy::presinst_lazy_strategy)
+                 .add_value(presinst_strategy::presinst_finite_strategy, true),
                  "compute the RES using strategy NAME:", 's').
       add_option("select",
                  make_optional_argument("PARAMS", ""),
@@ -111,15 +111,15 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
     {
       using namespace mcrl2::pres_system;
 
-      mCRL2log(verbose) << "parameters of presinst:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  strategy:           " << m_strategy << std::endl;
-      mCRL2log(verbose) << "  output format:      " << pres_output_format() << std::endl;
-      mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
-      if (m_strategy == presinst_finite_strategy)
+      mCRL2log(log_level_t::verbose) << "parameters of presinst:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  strategy:           " << m_strategy << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output format:      " << pres_output_format() << std::endl;
+      mCRL2log(log_level_t::verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
+      if (m_strategy == presinst_strategy::presinst_finite_strategy)
       {
-        mCRL2log(verbose) << "  parameter selection: " << m_finite_parameter_selection << std::endl;
+        mCRL2log(log_level_t::verbose) << "  parameter selection: " << m_finite_parameter_selection << std::endl;
       }
 
       // load the pres
@@ -128,12 +128,12 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
 
       if (!p.is_closed())
       {
-        mCRL2log(log::error) << "The PRES is not closed. Pres2res cannot handle this kind of PRESs"
+        mCRL2log(log::log_level_t::error) << "The PRES is not closed. Pres2res cannot handle this kind of PRESs"
                              << std::endl << "Computation aborted." << std::endl;
         return false;
       }
 
-      if (m_strategy == presinst_lazy_strategy)
+      if (m_strategy == presinst_strategy::presinst_lazy_strategy)
       {
         // TODO: let presinst handle ! and => properly
         if (!is_normalized(p))
@@ -144,7 +144,7 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
         algorithm.run(p);
         p = algorithm.get_result();
       }
-      else if (m_strategy == presinst_finite_strategy)
+      else if (m_strategy == presinst_strategy::presinst_finite_strategy)
       {
         try
         {
@@ -156,22 +156,22 @@ class presinst_tool: public rewriter_tool<pres_input_output_tool<input_output_to
         }
       }
 
-      if (log::logger::get_reporting_level() >= log::verbose)
+      if (log::logger::get_reporting_level() >= log::log_level_t::verbose)
       {
         if (algorithms::is_res(p))
         {
-          mCRL2log(log::debug) << "The result is a RES.\n";
+          mCRL2log(log::log_level_t::debug) << "The result is a RES.\n";
         }
         else
         {
-           mCRL2log(log::debug) << "The result is a PRES.\n";
+           mCRL2log(log::log_level_t::debug) << "The result is a PRES.\n";
         }
       }
 
       if (m_remove_redundant_equations)
       {
         std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
-        mCRL2log(log::verbose) << algorithms::print_removed_equations(V);
+        mCRL2log(log::log_level_t::verbose) << algorithms::print_removed_equations(V);
       }
 
       // save the result

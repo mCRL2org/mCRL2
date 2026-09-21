@@ -19,7 +19,7 @@
 namespace mcrl2::data::detail
 {
 
-enum Compare_Result
+enum class Compare_Result
 {
   compare_result_smaller,
   compare_result_equal,
@@ -45,7 +45,7 @@ class Info
               const Compare_Result& a_result1,
               const Compare_Result& a_result2) const
     {
-      return (a_result1 != compare_result_equal) ? a_result1 : a_result2;
+      return (a_result1 != Compare_Result::compare_result_equal) ? a_result1 : a_result2;
     }
 
     Compare_Result compare_address(
@@ -54,13 +54,13 @@ class Info
     {
       if (term1 < term2)
       {
-        return compare_result_smaller;
+        return Compare_Result::compare_result_smaller;
       }
       if (term2 < term1)
       {
-        return compare_result_bigger;
+        return Compare_Result::compare_result_bigger;
       }
-      return compare_result_equal;
+      return Compare_Result::compare_result_equal;
     }
 
     /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c guard.
@@ -101,13 +101,13 @@ class Info
     {
       if (get_guard_structure(guard1,f_variables) < get_guard_structure(guard2,f_variables))
       {
-        return compare_result_smaller;
+        return Compare_Result::compare_result_smaller;
       }
       if (get_guard_structure(guard1,f_variables) > get_guard_structure(guard2,f_variables))
       {
-        return compare_result_bigger;
+        return Compare_Result::compare_result_bigger;
       }
-      return compare_result_equal;
+      return Compare_Result::compare_result_equal;
     }
 
     /// \brief Compares two guards by their arguments.
@@ -130,7 +130,7 @@ class Info
           return lexico(compare_term(v_g1a0, v_g2a0), compare_term(v_g1a1, v_g2a1));
         }
       }
-      return compare_result_equal;
+      return Compare_Result::compare_result_equal;
     }
 
     Compare_Result compare_term_free_variables(const data_expression& term1, const data_expression& term2) const
@@ -139,13 +139,13 @@ class Info
       bool term2_is_closed = find_free_variables(term2).empty();
       if (term1_is_closed && !term2_is_closed)
       {
-        return compare_result_smaller;
+        return Compare_Result::compare_result_smaller;
       }
       if (!term1_is_closed && term2_is_closed)
       {
-        return compare_result_bigger;
+        return Compare_Result::compare_result_bigger;
       }
-      return compare_result_equal;
+      return Compare_Result::compare_result_equal;
     }
 
     /// \brief Compares terms by their type.
@@ -153,13 +153,13 @@ class Info
     {
       if (is_variable(term1) && !is_variable(term2))
       {
-        return compare_result_bigger;
+        return Compare_Result::compare_result_bigger;
       }
       if (!is_variable(term1) && is_variable(term2))
       {
-        return compare_result_smaller;
+        return Compare_Result::compare_result_smaller;
       }
-      return compare_result_equal;
+      return Compare_Result::compare_result_equal;
     }
 
     /// \brief Compares terms by checking whether one is a part of the other.
@@ -167,13 +167,13 @@ class Info
     {
       if (occurs(term1, term2))
       {
-        return compare_result_bigger;
+        return Compare_Result::compare_result_bigger;
       }
       if (occurs(term2, term1))
       {
-        return compare_result_smaller;
+        return Compare_Result::compare_result_smaller;
       }
-      return compare_result_equal;
+      return Compare_Result::compare_result_equal;
     }
 
   public:

@@ -158,12 +158,12 @@ void SpringLayout::setAttractionCalculation(AttractionFunctionID c)
 {
   if (attrFuncMap.find(c) == attrFuncMap.end())
   {
-    mCRL2log(mcrl2::log::debug) << "Unkown attraction calculation selected \"" << getName(c)
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Unkown attraction calculation selected \"" << getName(c)
                                 << "\". Cause may be invalid settings were loaded or selected function "
                                    "is not implemented."
                                 << std::endl;
     c = AttractionFunctionID::electricalsprings_attr;
-    mCRL2log(mcrl2::log::debug) << "Setting default attraction calculation \"" << getName(c) << "\"." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Setting default attraction calculation \"" << getName(c) << "\"." << std::endl;
   }
 
   m_option_attractionCalculation = c;
@@ -179,12 +179,12 @@ void SpringLayout::setRepulsionCalculation(RepulsionFunctionID c)
 {
   if (repFuncMap.find(c) == repFuncMap.end())
   {
-    mCRL2log(mcrl2::log::debug) << "Unkown repulsion calculation selected \"" << getName(c)
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Unkown repulsion calculation selected \"" << getName(c)
                                 << "\". Cause may be invalid settings were loaded or selected function "
                                    "is not implemented."
                                 << std::endl;
     c = RepulsionFunctionID::electricalsprings_rep;
-    mCRL2log(mcrl2::log::debug) << "Setting default repulsion calculation \"" << getName(c) << "\"." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Setting default repulsion calculation \"" << getName(c) << "\"." << std::endl;
   }
 
   m_option_repulsionCalculation = c;
@@ -646,7 +646,7 @@ void SpringLayout::apply()
       // changed
       center_of_mass_offset = center_of_mass;
       any_anchored = new_anchored;
-      mCRL2log(mcrl2::log::debug) << "Setting new center of mass offset: " << center_of_mass_offset.x() << ", "
+      mCRL2log(mcrl2::log::log_level_t::debug) << "Setting new center of mass offset: " << center_of_mass_offset.x() << ", "
                                   << center_of_mass_offset.y() << ", " << center_of_mass_offset.z() << std::endl;
       drift_timer.restart();
       drift_secs = 0;
@@ -732,7 +732,7 @@ void SpringLayout::apply()
       if (m_stabilityCounter >= m_stabilityMaxCount)
       {
         m_graph.setStable(true);
-        mCRL2log(mcrl2::log::debug) << "The graph is now stable." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::debug) << "The graph is now stable." << std::endl;
         m_ui->m_ui.lblStable->setText("Stable");
       }
     }
@@ -789,14 +789,14 @@ void SpringLayout::notifyNewFrame()
 void SpringLayout::setTreeEnabled(bool b)
 {
   m_tree_enable_for_large_graphs = b;
-  mCRL2log(mcrl2::log::verbose) << (b ? "Enabled" : "Disabled") << " tree acceleration for large graphs." << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::verbose) << (b ? "Enabled" : "Disabled") << " tree acceleration for large graphs." << std::endl;
 }
 
 void SpringLayout::setSpeed(int v)
 {
   m_speed
       = m_speed_scale_func(lerp(v, m_speed_inverse_scale_func(m_min_speed), m_speed_inverse_scale_func(m_max_speed)));
-  mCRL2log(mcrl2::log::verbose) << "Set speed to: " << v << " corresponding to: " << m_speed << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::verbose) << "Set speed to: " << v << " corresponding to: " << m_speed << std::endl;
   if (this->m_ui)
   {
     m_ui->m_ui_advanced.disp_spd->setText(QString::number(m_speed, 'g', 3));
@@ -806,7 +806,7 @@ void SpringLayout::setSpeed(int v)
 void SpringLayout::setAccuracy(int v)
 {
   m_accuracy = lerp(v, m_min_accuracy, m_max_accuracy);
-  mCRL2log(mcrl2::log::verbose) << "Set accuracy to: " << v << " corresponding to: " << m_accuracy << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::verbose) << "Set accuracy to: " << v << " corresponding to: " << m_accuracy << std::endl;
   if (this->m_ui)
   {
     m_ui->m_ui_advanced.disp_acc->setText(QString::number(m_accuracy, 'g', 3));
@@ -820,19 +820,19 @@ void SpringLayout::setAttraction(int v)
   {
     m_ui->m_ui.lbl_attractRepulse->setText(QString::number(1 - m_attraction, 'g', 2));
   }
-  mCRL2log(mcrl2::log::verbose) << "Set attraction scale to: " << v << " corresponding to: " << m_attraction << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::verbose) << "Set attraction scale to: " << v << " corresponding to: " << m_attraction << std::endl;
 }
 
 void SpringLayout::setRepulsion(int v)
 {
   m_repulsion = lerp(v, 0.01f, 0.99f);
-  mCRL2log(mcrl2::log::verbose) << "Set repulsion scale to: " << v << " corresponding to: " << m_repulsion << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::verbose) << "Set repulsion scale to: " << v << " corresponding to: " << m_repulsion << std::endl;
 }
 
 void SpringLayout::setControlPointWeight(int v)
 {
   m_handleDeviation = lerp(v, m_min_handleDeviation, m_max_handleDeviation);
-  mCRL2log(mcrl2::log::verbose) << "Set the handle deviation to: " << m_handleDeviation << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::verbose) << "Set the handle deviation to: " << m_handleDeviation << std::endl;
   if (this->m_ui)
   {
     m_ui->m_ui.dispHandleWeight->setText(QString::number(m_handleDeviation, 'g', 3));
@@ -842,7 +842,7 @@ void SpringLayout::setControlPointWeight(int v)
 void SpringLayout::setNaturalTransitionLength(int v)
 {
   m_natLength = lerp(v, m_min_natLength, m_max_natLength);
-  mCRL2log(mcrl2::log::verbose) << "Set natural length to: " << v << " corresponding to: " << m_natLength << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::verbose) << "Set natural length to: " << v << " corresponding to: " << m_natLength << std::endl;
   if (this->m_ui)
   {
     m_ui->m_ui.dispNatLength->setText(QString::number(m_natLength, 'g', 3));
@@ -858,7 +858,7 @@ void SpringLayout::rulesChanged()
 
 void SpringLayout::resetPositions()
 {
-  mCRL2log(mcrl2::log::debug) << "Resetting positions" << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::debug) << "Resetting positions" << std::endl;
   m_graph.lock(GRAPH_LOCK_TRACE);
   bool exploration = m_graph.hasExploration();
   std::size_t n_nodes = exploration ? m_graph.explorationNodeCount() : m_graph.nodeCount();
@@ -966,7 +966,7 @@ void SpringLayoutUi::onStabilityThresholdChanged(const QString& text)
   if (success && num > 0)
   {
     m_layout.m_stabilityThreshold = num;
-    mCRL2log(mcrl2::log::debug) << "Setting stability threshold to: " << num << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Setting stability threshold to: " << num << std::endl;
   }
 }
 
@@ -977,7 +977,7 @@ void SpringLayoutUi::onStabilityIterationsChanged(const QString& text)
   if (success && num > 0)
   {
     m_layout.m_stabilityMaxCount = num;
-    mCRL2log(mcrl2::log::debug) << "Setting stability iterations to: " << num << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Setting stability iterations to: " << num << std::endl;
   }
 }
 
@@ -1100,15 +1100,15 @@ void SpringLayoutUi::setActive(bool active)
 
 void SpringLayoutUi::onAdvancedDialogShow(bool b)
 {
-  mCRL2log(mcrl2::log::debug) << "OnAdvancedDialogShow called." << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::debug) << "OnAdvancedDialogShow called." << std::endl;
   if (b)
   {
-    mCRL2log(mcrl2::log::debug) << "Opening advanced dialog." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Opening advanced dialog." << std::endl;
     m_ui_advanced_dialog->show();
   }
   else
   {
-    mCRL2log(mcrl2::log::debug) << "Closing advanced dialog." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Closing advanced dialog." << std::endl;
     m_ui_advanced_dialog->hide();
   }
 }

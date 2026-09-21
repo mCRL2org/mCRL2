@@ -279,7 +279,7 @@ const std::array<const char*, check_complexity::TRANS_gj_MAX - check_complexity:
         do                                                                    \
         {                                                                     \
             assert((var) == ctr);                                             \
-            mCRL2log(log::debug) << "work_names[" #ctr "] = \""               \
+            mCRL2log(log::log_level_t::debug) << "work_names[" #ctr "] = \""               \
                                                 << work_names[ctr] << "\".\n";\
             (var) = (enum counter_type) ((var) + 1);                          \
         }                                                                     \

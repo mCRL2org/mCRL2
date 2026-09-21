@@ -39,13 +39,13 @@ class lpspp_tool: public input_output_tool
       lps::stochastic_specification spec;
       load_lps(spec, input_filename());
 
-      mCRL2log(log::verbose) << "printing LPS from "
+      mCRL2log(log::log_level_t::verbose) << "printing LPS from "
                         << (input_filename().empty()?"standard input":input_filename())
                         << " to " << (output_filename().empty()?"standard output":output_filename())
                         << " in the " << core::pp_format_to_string(m_format) << " format" << std::endl;
 
       std::string text;
-      if (m_format == core::print_internal)
+      if (m_format == core::print_format_type::print_internal)
       {
         text = pp(specification_to_aterm(spec));
       }
@@ -74,7 +74,7 @@ class lpspp_tool: public input_output_tool
     }
 
   protected:
-    print_format_type m_format = print_default;
+    print_format_type m_format = print_format_type::print_default;
     bool m_print_summand_numbers = false;
     bool m_precedence_aware = true;
     std::string m_process_name = "P";
@@ -83,8 +83,8 @@ class lpspp_tool: public input_output_tool
     {
       super::add_options(desc);
       desc.add_option("format", make_enum_argument<print_format_type>("FORMAT")
-                      .add_value_desc(print_default, "for a process specification", true)
-                      .add_value_desc(print_internal, "for a textual ATerm representation of the internal format"),
+                      .add_value_desc(print_format_type::print_default, "for a process specification", true)
+                      .add_value_desc(print_format_type::print_internal, "for a textual ATerm representation of the internal format"),
                       "print the LPS in the specified FORMAT:", 'f');
       desc.add_option("print-summand_numbers", "print numbers in front of summands", 'n');
       desc.add_option("no-precedence-aware", "disable printing with precedence aware enabled", 'x');

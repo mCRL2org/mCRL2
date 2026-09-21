@@ -26,7 +26,7 @@ class prover_tool: public Tool
     using smt_solver_type = mcrl2::data::detail::smt_solver_type;
 
     /// The data rewriter strategy
-    smt_solver_type m_solver_type = mcrl2::data::detail::solver_type_cvc;
+    smt_solver_type m_solver_type = mcrl2::data::detail::smt_solver_type::solver_type_cvc;
 
     /// \brief Add options to an interface description. Also includes
     /// rewriter options.
@@ -36,8 +36,8 @@ class prover_tool: public Tool
       Tool::add_options(desc, true);  // The parameter true suppresses messages allowing the jittyp rewriter. 
 
       desc.add_option("smt-solver", utilities::make_enum_argument< smt_solver_type >("SOLVER")
-                      .add_value(data::detail::solver_type_cvc)
-                      .add_value(data::detail::solver_type_z3),
+                      .add_value(data::detail::smt_solver_type::solver_type_cvc)
+                      .add_value(data::detail::smt_solver_type::solver_type_z3),
                       "use SOLVER to remove inconsistent paths from the internally used "
                       "BDDs (by default, no path elimination is applied):",
                       'z');

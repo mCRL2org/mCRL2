@@ -266,7 +266,7 @@ class pres_type_checker
     /// \brief Typecheck the pres presspec
     void operator()(pres& presspec)
     {
-      mCRL2log(log::verbose) << "type checking PRES specification..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "type checking PRES specification..." << std::endl;
 
       pres_system::normalize_sorts(presspec, m_data_type_checker.typechecked_data_specification());
 

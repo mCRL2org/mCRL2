@@ -94,10 +94,7 @@ struct function_traits<ReturnType (ClassType::*)(Args...) const>
 // we specialize for pointers to member function
 {
   // arity is the number of arguments.
-  enum
-  {
-    arity = sizeof...(Args)
-  };
+  static constexpr size_t arity = sizeof...(Args);
 
   using result_type = ReturnType;
 

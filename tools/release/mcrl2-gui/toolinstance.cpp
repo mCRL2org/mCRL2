@@ -425,12 +425,12 @@ void ToolInstance::onRun()
 
   if (m_process->waitForStarted(1000))
   {
-    mCRL2log(mcrl2::log::info) << "Started " << executable().toStdString() << arguments(true).join(" ").toStdString() << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::info) << "Started " << executable().toStdString() << arguments(true).join(" ").toStdString() << std::endl;
     m_ui.tabWidget->setCurrentIndex(1);
   }
   else
   {
-    mCRL2log(mcrl2::log::error) << m_process->errorString().toStdString()
+    mCRL2log(mcrl2::log::log_level_t::error) << m_process->errorString().toStdString()
       << " (" << executable().toStdString() << arguments(true).join(" ").toStdString() << ")" << std::endl;
     onStateChange(QProcess::NotRunning);
   }
@@ -439,13 +439,13 @@ void ToolInstance::onRun()
 void ToolInstance::onAbort()
 {
   assert(!m_info.guiTool);
-  mCRL2log(mcrl2::log::info) << "Attempting to terminate " << executable().toStdString() << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::info) << "Attempting to terminate " << executable().toStdString() << std::endl;
   m_process->terminate();
 
   if (!m_process->waitForFinished(10000)
     && m_process->state() == QProcess::Running)
   {
-    mCRL2log(mcrl2::log::warning) << "Killing " << executable().toStdString() << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::warning) << "Killing " << executable().toStdString() << std::endl;
     m_process->kill();
   }
 }

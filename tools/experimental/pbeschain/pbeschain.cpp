@@ -109,10 +109,10 @@ class pbeschain_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_tool
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbeschain parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  timeout per eq:     " << m_options.timeout << " seconds" << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbeschain parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  timeout per eq:     " << m_options.timeout << " seconds" << std::endl;
 
       m_options.rewrite_strategy = rewrite_strategy();
       pbeschain(input_filename(),

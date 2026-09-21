@@ -27,7 +27,7 @@ namespace data
 
 
 mcrl2::lps::stochastic_specification simplify(mcrl2::lps::stochastic_specification s,
-                                             const rewrite_strategy strat=jitty);
+                                             const rewrite_strategy strat=rewrite_strategy::jitty);
 void normalize_specification(
           const mcrl2::lps::stochastic_specification& s,
           const variable_list& real_parameters,
@@ -106,9 +106,9 @@ protected:
   {
     switch (comp)
     {
-      case detail::less:  return sort_inequality::lt();
-      case detail::less_eq: return sort_inequality::le();
-      case detail::equal: return sort_inequality::le();
+      case detail::comparison_t::less:  return sort_inequality::lt();
+      case detail::comparison_t::less_eq: return sort_inequality::le();
+      case detail::comparison_t::equal: return sort_inequality::le();
     };
     assert(false);
     return sort_inequality::le(); //suppress compiler warning
@@ -268,7 +268,7 @@ protected:
                     dbm_indices.second,
                     bound);
         current_state_conditions.insert(std::make_pair(dbm_indices, bound));
-        if(li.comparison() == detail::equal)
+        if(li.comparison() == detail::comparison_t::equal)
         {
           data_expression bound = li_to_bound(li,true);
           condition = sort_dbm::and_d(condition,
@@ -286,11 +286,11 @@ protected:
         std::pair< std::map< std::pair< data_expression, data_expression > , std::vector< linear_inequality >>::iterator, bool >
           ins_result = next_state_conditions.insert(std::make_pair(dbm_primed_indices, std::vector< linear_inequality >()));
         ins_result.first->second.push_back(li);
-        if(li.comparison() == detail::equal)
+        if(li.comparison() == detail::comparison_t::equal)
         {
           std::pair< std::map< std::pair< data_expression, data_expression > , std::vector< linear_inequality >>::iterator, bool >
             ins_result = next_state_conditions.insert(std::make_pair(std::make_pair(dbm_primed_indices.second, dbm_primed_indices.first), std::vector< linear_inequality >()));
-          ins_result.first->second.push_back(linear_inequality(multiply(li.lhs(), real_minus_one(), r), r(sort_real::times(li.rhs(), real_minus_one())), detail::equal));
+          ins_result.first->second.push_back(linear_inequality(multiply(li.lhs(), real_minus_one(), r), r(sort_real::times(li.rhs(), real_minus_one())), detail::comparison_t::equal));
         }
       }
     }
@@ -595,7 +595,7 @@ protected:
   }
 
 public:
-  realzone_algorithm(Specification& spec, const rewrite_strategy st = jitty)
+  realzone_algorithm(Specification& spec, const rewrite_strategy st = rewrite_strategy::jitty)
     : mcrl2::lps::detail::lps_algorithm<Specification>(spec),
     strat(st),
     r(spec.data(),strat)

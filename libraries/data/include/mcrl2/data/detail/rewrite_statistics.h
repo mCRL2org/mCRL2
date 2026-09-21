@@ -35,7 +35,7 @@ std::size_t rewrite_count()
 inline
 void display_rewrite_statistics()
 {
-  mCRL2log(log::verbose) << "rewrite count = " << rewrite_count() << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "rewrite count = " << rewrite_count() << std::endl;
 }
 
 inline

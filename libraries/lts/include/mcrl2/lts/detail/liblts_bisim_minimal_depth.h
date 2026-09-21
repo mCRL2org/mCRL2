@@ -48,7 +48,7 @@ public:
     {
       initial_block.states.push_back(i);
     }
-    sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::lbl_tgt_src);
+    sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::transition_sort_style::lbl_tgt_src);
     const std::vector<transition>& trans = aut.get_transitions();
     for (const auto& transition: trans)
     {
@@ -92,7 +92,7 @@ public:
         partition.insert(bid);
       }
     }
-    mCRL2log(mcrl2::log::info) << "Partition refinement done, partition contains: " << partition.size()
+    mCRL2log(mcrl2::log::log_level_t::info) << "Partition refinement done, partition contains: " << partition.size()
                                << " blocks, the history contains " << lvl - 1 << " levels." << std::endl;
     save_transitions();
   }
@@ -111,7 +111,7 @@ public:
   mcrl2::state_formulas::state_formula dist_formula_mindepth(const std::size_t s, const std::size_t t)
   {
     formula f = distinguish(block_index_of_a_state[s], block_index_of_a_state[t]);
-    mCRL2log(mcrl2::log::info) << "done with formula \n";
+    mCRL2log(mcrl2::log::log_level_t::info) << "done with formula \n";
     return convert_formula(f);
   };
 
@@ -326,13 +326,13 @@ private:
       {
         // There are flagged and non flagged states. So, the block must be split.
         // Move the unflagged states to the new block.
-        if (mCRL2logEnabled(log::debug))
+        if (mCRL2logEnabled(log::log_level_t::debug))
         {
           const std::size_t m = static_cast<std::size_t>(
               std::pow(10.0, std::floor(std::log10(static_cast<double>((blocks.size() + 1) / 2)))));
           if ((blocks.size() + 1) / 2 % m == 0)
           {
-            mCRL2log(log::debug) << "Bisimulation partitioner: create block " << (blocks.size() + 1) / 2 << std::endl;
+            mCRL2log(log::log_level_t::debug) << "Bisimulation partitioner: create block " << (blocks.size() + 1) / 2 << std::endl;
           }
         }
         // Create a first new block.
@@ -646,7 +646,7 @@ bool destructive_bisimulation_compare_minimal_depth(LTS_TYPE& l1, LTS_TYPE& l2, 
   std::ofstream counter_file(filename);
   counter_file << mcrl2::state_formulas::pp(counter_example_formula);
   counter_file.close();
-  mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
   return false;
 }
 

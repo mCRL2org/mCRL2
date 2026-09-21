@@ -43,7 +43,7 @@ class progress_meter
       if (N < 1000 || (n % (N / 1000) == 0) || n == N)
       {
         std::size_t percentage = 1000 * n / N;
-        mCRL2log(log::status) << (percentage / 10) << "." << (percentage % 10) << " percent completed" << std::endl;
+        mCRL2log(log::log_level_t::status) << (percentage / 10) << "." << (percentage % 10) << " percent completed" << std::endl;
       }
     }
 };

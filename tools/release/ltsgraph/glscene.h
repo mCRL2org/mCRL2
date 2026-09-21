@@ -48,7 +48,7 @@ struct DrawInstances
         draw_mode(draw_mode),
         identifier(identifier)
   {
-    mCRL2log(mcrl2::log::debug) << "Setting scale to: " << scale << " for: " << identifier << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Setting scale to: " << scale << " for: " << identifier << std::endl;
     offsets = std::vector<float>(0);
     colors = std::vector<float>(0);
   }

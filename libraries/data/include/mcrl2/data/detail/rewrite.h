@@ -189,7 +189,7 @@ class Rewriter
  **/
 std::shared_ptr<detail::Rewriter> createRewriter(const data_specification& DataSpec,
   const used_data_equation_selector& equations_selector,
-  rewrite_strategy Strategy = jitty);
+  rewrite_strategy Strategy = data::rewrite_strategy::jitty);
 
 /**
  * \brief Check that an mCRL2 data equation is a valid rewrite rule. If not, an runtime_error is thrown indicating the problem.

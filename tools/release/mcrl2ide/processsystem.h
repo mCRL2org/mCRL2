@@ -338,7 +338,7 @@ public:
     const Property& property = Property(), 
     const QString& expression = QString(), 
     bool evidence = false,
-    mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_eq_none,
+    mcrl2::lts::lts_equivalence equivalence = mcrl2::lts::lts_equivalence::lts_eq_none,
     SpecType specType = SpecType::Main);
 
   private slots:

@@ -27,7 +27,7 @@
 
 namespace mcrl2::pbes_system {
 
-enum pbespg_solver_type
+enum class pbespg_solver_type
 {
   spm_solver,
   alternative_spm_solver,
@@ -40,19 +40,19 @@ pbespg_solver_type parse_solver_type(const std::string& s)
 {
   if (s == "spm")
   {
-    return spm_solver;
+    return pbespg_solver_type::spm_solver;
   }
   else if (s == "altspm")
   {
-    return alternative_spm_solver;
+    return pbespg_solver_type::alternative_spm_solver;
   }
   else if (s == "recursive")
   {
-    return recursive_solver;
+    return pbespg_solver_type::recursive_solver;
   }
   else if (s == "prioprom")
   {
-    return priority_promotion;
+    return pbespg_solver_type::priority_promotion;
   }
   throw mcrl2::runtime_error("unknown solver " + s);
 }
@@ -63,10 +63,10 @@ std::string print(const pbespg_solver_type solver_type)
 {
   switch(solver_type)
   {
-    case spm_solver: return "spm";
-    case alternative_spm_solver: return "altspm";
-    case recursive_solver: return "recursive";
-    case priority_promotion: return "prioprom";
+    case pbespg_solver_type::spm_solver: return "spm";
+    case pbespg_solver_type::alternative_spm_solver: return "altspm";
+    case pbespg_solver_type::recursive_solver: return "recursive";
+    case pbespg_solver_type::priority_promotion: return "prioprom";
   }
   throw mcrl2::runtime_error("unknown solver");
 }
@@ -77,10 +77,10 @@ std::string description(const pbespg_solver_type solver_type)
 {
   switch(solver_type)
   {
-    case spm_solver: return "Small progress measures";
-    case alternative_spm_solver: return "Alternative implementation of small progress measures";
-    case recursive_solver: return "Recursive algorithm";
-    case priority_promotion: return "Priority promotion (experimental)";
+    case pbespg_solver_type::spm_solver: return "Small progress measures";
+    case pbespg_solver_type::alternative_spm_solver: return "Alternative implementation of small progress measures";
+    case pbespg_solver_type::recursive_solver: return "Recursive algorithm";
+    case pbespg_solver_type::priority_promotion: return "Priority promotion (experimental)";
   }
   throw mcrl2::runtime_error("unknown solver");
 }
@@ -113,15 +113,15 @@ std::ostream& operator<<(std::ostream& os, const pbespg_solver_type t)
 inline
 std::string print(StaticGraph::EdgeDirection edge_direction)
 {
-  if (edge_direction == StaticGraph::EDGE_SUCCESSOR)
+  if (edge_direction == StaticGraph::EdgeDirection::EDGE_SUCCESSOR)
   {
     return "successor";
   }
-  else if (edge_direction == StaticGraph::EDGE_PREDECESSOR)
+  else if (edge_direction == StaticGraph::EdgeDirection::EDGE_PREDECESSOR)
   {
     return "predecessor";
   }
-  else if (edge_direction == StaticGraph::EDGE_BIDIRECTIONAL)
+  else if (edge_direction == StaticGraph::EdgeDirection::EDGE_BIDIRECTIONAL)
   {
     return "bidirectional";
   }
@@ -130,13 +130,13 @@ std::string print(StaticGraph::EdgeDirection edge_direction)
 
 struct pbespgsolve_options
 {
-  pbespg_solver_type solver_type = spm_solver;
+  pbespg_solver_type solver_type = pbespg_solver_type::spm_solver;
   bool use_scc_decomposition = true;
   bool use_decycle_solver = false;
   bool use_deloop_solver = true;
   bool verify_solution = true;
   bool only_generate = false;
-  data::rewriter::strategy rewrite_strategy = data::jitty;
+  data::rewriter::strategy rewrite_strategy = data::rewrite_strategy::jitty;
 };
 
 class pbespgsolve_algorithm
@@ -152,9 +152,9 @@ class pbespgsolve_algorithm
       : m_timer(timing),
         m_options(options)
     {
-      if (options.solver_type == spm_solver || options.solver_type == alternative_spm_solver)
+      if (options.solver_type == pbespg_solver_type::spm_solver || options.solver_type == pbespg_solver_type::alternative_spm_solver)
       {
-        bool alternative_solver = (options.solver_type == alternative_spm_solver);
+        bool alternative_solver = (options.solver_type == pbespg_solver_type::alternative_spm_solver);
 
         // Create a SPM solver factory:
         solver_factory = std::make_unique<SmallProgressMeasuresSolverFactory>(
@@ -162,12 +162,12 @@ class pbespgsolve_algorithm
             2,
             alternative_solver);
       }
-      else if (options.solver_type == recursive_solver)
+      else if (options.solver_type == pbespg_solver_type::recursive_solver)
       {
         // Create a recursive solver factory:
         solver_factory = std::make_unique<RecursiveSolverFactory>();
       }
-      else if (options.solver_type == priority_promotion)
+      else if (options.solver_type == pbespg_solver_type::priority_promotion)
       {
         solver_factory = std::make_unique<PriorityPromotionSolverFactory>();
       }
@@ -197,7 +197,7 @@ class pbespgsolve_algorithm
     {
       if (!m_options.only_generate)
       {
-        mCRL2log(log::verbose) << "Solving..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Solving..." << std::endl;
 
         // Create a solver:
         std::unique_ptr<ParityGameSolver> solver(solver_factory->create(pg));
@@ -220,7 +220,7 @@ class pbespgsolve_algorithm
           throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
         }
 
-        return pg.winner(solution, goal_v) == PLAYER_EVEN;
+        return pg.winner(solution, goal_v) == player_t::PLAYER_EVEN;
       }
       return true;
     }
@@ -228,13 +228,13 @@ class pbespgsolve_algorithm
     bool run(pbes& p)
     {
       m_timer.start("initialization");
-      mCRL2log(log::verbose) << "Generating parity game..."  << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Generating parity game..."  << std::endl;
       // Generate the game from a PBES:
       verti goal_v;
       ParityGame pg;
 
-      pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, data::pp(m_options.rewrite_strategy)); // N.B. mCRL2 could raise an exception here
-      mCRL2log(log::verbose) << "Game: " << pg.graph().V() << " vertices, " << pg.graph().E() << " edges." << std::endl;
+      pg.assign_pbes(p, &goal_v, StaticGraph::EdgeDirection::EDGE_BIDIRECTIONAL, data::pp(m_options.rewrite_strategy)); // N.B. mCRL2 could raise an exception here
+      mCRL2log(log::log_level_t::verbose) << "Game: " << pg.graph().V() << " vertices, " << pg.graph().E() << " edges." << std::endl;
       m_timer.finish("initialization");
 
       return run(pg, goal_v);

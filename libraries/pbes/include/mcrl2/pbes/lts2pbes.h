@@ -62,7 +62,7 @@ class lts2pbes_algorithm
       std::size_t num_fixpoints = state_formulas::count_fixpoints(f);
       std::size_t num_steps = num_fixpoints * lts1.state_count();
       m_progress_meter.set_size(num_steps);
-      mCRL2log(log::verbose) << "Generating " << num_steps << " equations." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Generating " << num_steps << " equations." << std::endl;
 
       // compute the equations
       std::vector<pbes_equation> equations;

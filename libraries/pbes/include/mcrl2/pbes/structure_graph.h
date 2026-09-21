@@ -44,7 +44,7 @@ class structure_graph
 
 
   public:
-    enum decoration_type
+    enum class decoration_type
     {
       d_disjunction = 0,
       d_conjunction = 1,
@@ -65,7 +65,7 @@ class structure_graph
       mutable index_type strategy;
 
       explicit vertex(pbes_expression  formula_,
-             decoration_type decoration_ = structure_graph::d_none,
+             decoration_type decoration_ = structure_graph::decoration_type::d_none,
              std::size_t rank_ = data::undefined_index(),
              std::vector<index_type> pred_ = std::vector<index_type>(),
              std::vector<index_type> succ_ = std::vector<index_type>(),
@@ -97,8 +97,8 @@ class structure_graph
 
       bool is_defined() const
       {
-        return  ((decoration != structure_graph::d_none) || (rank != data::undefined_index()))
-             && (!successors.empty() || (decoration == d_true || decoration == d_false));
+        return  ((decoration != structure_graph::decoration_type::d_none) || (rank != data::undefined_index()))
+             && (!successors.empty() || (decoration == decoration_type::d_true || decoration == decoration_type::d_false));
       }
       
       void inline mark(atermpp::term_mark_stack& todo) const
@@ -274,10 +274,10 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::decoration_ty
 {
   switch (decoration)
   {
-    case structure_graph::d_conjunction : { out << "conjunction"; break; }
-    case structure_graph::d_disjunction : { out << "disjunction"; break; }
-    case structure_graph::d_true        : { out << "true";        break; }
-    case structure_graph::d_false       : { out << "false";       break; }
+    case structure_graph::decoration_type::d_conjunction : { out << "conjunction"; break; }
+    case structure_graph::decoration_type::d_disjunction : { out << "disjunction"; break; }
+    case structure_graph::decoration_type::d_true        : { out << "true";        break; }
+    case structure_graph::decoration_type::d_false       : { out << "false";       break; }
     default                             : { out << "none";        break; }
   }
   return out;

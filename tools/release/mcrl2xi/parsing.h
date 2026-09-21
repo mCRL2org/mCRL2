@@ -25,7 +25,7 @@ inline bool contains_keyword_init(const std::string& input)
 inline
 void parseMcrl2Specification(const std::string& input, mcrl2::data::data_specification& data_spec, std::set<mcrl2::data::variable>& vars)
 {
-  mCRL2log(info) << "Parsing and type checking specification" << std::endl;
+  mCRL2log(log_level_t::info) << "Parsing and type checking specification" << std::endl;
 
   try
   {
@@ -38,14 +38,14 @@ void parseMcrl2Specification(const std::string& input, mcrl2::data::data_specifi
       data_spec = spec.data();
       vars = spec.global_variables();
 
-      mCRL2log(info) << "Specification is a valid mCRL2 specification" << std::endl;
+      mCRL2log(log_level_t::info) << "Specification is a valid mCRL2 specification" << std::endl;
       return;
     }
     else
     {
       data_spec = mcrl2::data::parse_data_specification(input);
 
-      mCRL2log(info) << "Specification is a valid data specification" << std::endl;
+      mCRL2log(log_level_t::info) << "Specification is a valid data specification" << std::endl;
       return;
     }
   }

@@ -39,10 +39,10 @@ std::string file_extension(lts::lts_type output_format)
 {
   switch (output_format)
   {
-    case lts::lts_lts: return ".lts";
-    case lts::lts_aut: return ".aut";
-    case lts::lts_fsm: return ".fsm";
-    case lts::lts_dot: return ".dot";
+    case lts::lts_type::lts_lts: return ".lts";
+    case lts::lts_type::lts_aut: return ".aut";
+    case lts::lts_type::lts_fsm: return ".fsm";
+    case lts::lts_type::lts_dot: return ".dot";
     default: throw mcrl2::runtime_error("unsupported format");
   }
 }
@@ -132,7 +132,7 @@ static void check_lps2lts_specification(const std::string& specification,
 
   for (data::rewrite_strategy rstrategy: data::detail::get_test_rewrite_strategies(false))
   {
-    for (lps::exploration_strategy estrategy: { lps::es_breadth, lps::es_depth })
+    for (lps::exploration_strategy estrategy: { lps::exploration_strategy::es_breadth, lps::exploration_strategy::es_depth })
     {
       if (contains_probabilities)
       {

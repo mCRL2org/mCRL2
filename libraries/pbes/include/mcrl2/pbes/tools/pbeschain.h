@@ -200,12 +200,12 @@ struct substitute_propositional_variables_builder : public Builder<substitute_pr
             [this](const propositional_variable_instantiation& v) { return v.name() != m_eq.variable().name(); }))
       {
         // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler.
-        mCRL2log(log::debug) << "Replaced in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
+        mCRL2log(log::log_level_t::debug) << "Replaced in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
         result = p;
         m_stable = false;
         return;
       }
-      mCRL2log(log::debug) << "No Replacement in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
+      mCRL2log(log::log_level_t::debug) << "No Replacement in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
       result = x;
       return;
     }
@@ -309,7 +309,7 @@ struct timing_tracker
   {
     double total_elapsed
       = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count();
-    mCRL2log(log::verbose) << "Total time: " << total_elapsed << "s" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Total time: " << total_elapsed << "s" << std::endl;
 
     if (!measurements.empty())
     {
@@ -323,14 +323,14 @@ struct timing_tracker
       // Log measurements with aligned values
       for (const auto& [label, measurement]: measurements)
       {
-        mCRL2log(log::verbose) << std::left << std::setw(max_label_length) << (label + " ") << ": " << std::right
+        mCRL2log(log::log_level_t::verbose) << std::left << std::setw(static_cast<int>(max_label_length)) << (label + " ") << ": " << std::right
                                << std::setw(2) << std::fixed << measurement.get_total_seconds() << "s ("
                                << measurement.call_count << " calls)" << std::endl;
       }
     }
 
-    mCRL2log(log::verbose) << "Gauss eliminations (path): " << gauss_elimination_path_count << std::endl;
-    mCRL2log(log::verbose) << "Gauss eliminations (direct): " << gauss_elimination_direct_count << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Gauss eliminations (path): " << gauss_elimination_path_count << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Gauss eliminations (direct): " << gauss_elimination_direct_count << std::endl;
   }
 };
 
@@ -341,12 +341,12 @@ inline auto measure_time(timing_tracker& timer, const std::string& name, Func&& 
   auto start = timer.start_measurement();
   if constexpr (std::is_same_v<void, decltype(func())>)
   {
-    func();
+    std::forward<Func>(func)();
     timer.end_measurement(name, start);
   }
   else
   {
-    auto result = func();
+    auto result = std::forward<Func>(func)();
     timer.end_measurement(name, start);
     return result;
   }
@@ -380,7 +380,7 @@ is_avoiding_alternation(const pbeschain_options& options, const propositional_va
 
 inline void log_number_pvi(std::size_t& initial_size, std::size_t& current_size)
 {
-  mCRL2log(log::status) << "New number of pvi: " << initial_size << " --> " << current_size << "" << std::endl;
+  mCRL2log(log::log_level_t::status) << "New number of pvi: " << initial_size << " --> " << current_size << "" << std::endl;
 }
 
 inline void self_substitute(pbes_equation& equation,
@@ -396,7 +396,7 @@ inline void self_substitute(pbes_equation& equation,
 
   if (options.timeout > 0.0)
   {
-    mCRL2log(log::verbose) << "Starting substitution for equation " << equation.variable().name() << " with timeout "
+    mCRL2log(log::log_level_t::verbose) << "Starting substitution for equation " << equation.variable().name() << " with timeout "
                            << options.timeout << "s" << std::endl;
   }
 
@@ -425,7 +425,7 @@ inline void self_substitute(pbes_equation& equation,
         if (elapsed >= options.timeout)
         {
           stable = true;
-          mCRL2log(log::verbose) << "Timeout reached (" << options.timeout << "s) for equation "
+          mCRL2log(log::log_level_t::verbose) << "Timeout reached (" << options.timeout << "s) for equation "
                                  << equation.variable().name() << " after " << elapsed << "s, stopping substitution"
                                  << std::endl;
           break;
@@ -445,7 +445,7 @@ inline void self_substitute(pbes_equation& equation,
       propositional_variable_instantiation cur_x = x;
       pbes_expression result = x;
 
-      mCRL2log(log::debug) << " -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n"
+      mCRL2log(log::log_level_t::debug) << " -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n"
                            << "\n\nStart " << (cur_x) << "\n";
       bool pvi_done = false;
       int depth = 0;
@@ -477,9 +477,9 @@ inline void self_substitute(pbes_equation& equation,
         auto it = find(phi_vector.begin(), phi_vector.end(), cur_x);
         if (it != phi_vector.end())
         {
-          mCRL2log(log::debug) << "Need to replace this with true/false " << pp(cur_x) << "\n";
-          mCRL2log(log::debug) << phi << "\n";
-          mCRL2log(log::debug) << equation.formula() << "\n";
+          mCRL2log(log::log_level_t::debug) << "Need to replace this with true/false " << pp(cur_x) << "\n";
+          mCRL2log(log::log_level_t::debug) << phi << "\n";
+          mCRL2log(log::log_level_t::debug) << equation.formula() << "\n";
 
           if (!options.disable_gauss_elimination || pp(cur_x.name()) == "X_true" || pp(cur_x.name()) == "X_false")
           {
@@ -489,9 +489,9 @@ inline void self_substitute(pbes_equation& equation,
             timer.increment_gauss_elimination_direct_count();
           }
 
-          mCRL2log(log::debug) << phi << "\n";
+          mCRL2log(log::log_level_t::debug) << phi << "\n";
 
-          mCRL2log(log::debug) << "- - - - - - - - - - - - - - - - - - - - \n";
+          mCRL2log(log::log_level_t::debug) << "- - - - - - - - - - - - - - - - - - - - \n";
         }
 
         // Simplify
@@ -540,19 +540,19 @@ inline void self_substitute(pbes_equation& equation,
 
           for (const propositional_variable_instantiation& phi_x: phi_set)
           {
-            mCRL2log(log::debug) << "Trying loop " << phi_x << " in path with \n";
+            mCRL2log(log::log_level_t::debug) << "Trying loop " << phi_x << " in path with \n";
             for (const propositional_variable_instantiation& itr: path)
             {
-              mCRL2log(log::debug) << itr << "\n";
+              mCRL2log(log::log_level_t::debug) << itr << "\n";
             }
 
             if (path.contains(phi_x))
             {
               // We have already seen this, so we are in a loop.
-              mCRL2log(log::debug) << "Loop, seen " << phi_x << " in path after " << cur_x << "    " << phi << "\n";
+              mCRL2log(log::log_level_t::debug) << "Loop, seen " << phi_x << " in path after " << cur_x << "    " << phi << "\n";
               for (const propositional_variable_instantiation& itr: path)
               {
-                mCRL2log(log::debug) << itr << "\n";
+                mCRL2log(log::log_level_t::debug) << itr << "\n";
               }
               if (!options.disable_gauss_elimination || pp(cur_x.name()) == "X_true" || pp(cur_x.name()) == "X_false")
               {
@@ -574,13 +574,13 @@ inline void self_substitute(pbes_equation& equation,
             pvi_substituter.set_replacement(result);
             pvi_substituter.apply(equation.formula(), equation.formula());
 
-            mCRL2log(log::debug) << "new_phi " << result << "\n";
+            mCRL2log(log::log_level_t::debug) << "new_phi " << result << "\n";
             stable = false;
             pvi_done = true;
           }
           else if (all_in_path)
           {
-            mCRL2log(log::debug) << "Loop, but Gauss elimination is disabled; stop expanding " << cur_x << "\n";
+            mCRL2log(log::log_level_t::debug) << "Loop, but Gauss elimination is disabled; stop expanding " << cur_x << "\n";
             stable_set.insert(x);
             stable_set.insert(cur_x);
             pvi_done = true;
@@ -588,7 +588,7 @@ inline void self_substitute(pbes_equation& equation,
           else
           {
             // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler.
-            mCRL2log(log::debug) << "Replaced in PBES equation for " << cur_x << "\n-->\n"
+            mCRL2log(log::log_level_t::debug) << "Replaced in PBES equation for " << cur_x << "\n-->\n"
                                  << phi << "\n"
                                  << core::detail::print_list(phi_set) << "\n";
 
@@ -619,13 +619,13 @@ inline void self_substitute(pbes_equation& equation,
           pvi_substituter.set_replacement(phi);
           pvi_substituter.apply(equation.formula(), equation.formula());
           stable = false;
-          mCRL2log(log::debug) << "Replaced in PBES equation for " << cur_x << ":\n" << x << " \n-->\n " << phi << "\n";
+          mCRL2log(log::log_level_t::debug) << "Replaced in PBES equation for " << cur_x << ":\n" << x << " \n-->\n " << phi << "\n";
           pvi_done = true;
           measure_time(timer, "successful_substitutions", [&]() { return true; });
         }
         else
         {
-          mCRL2log(log::debug) << "Not simpler: " << cur_x << " \n--> size: " << phi_vector.size() << "\n " << phi
+          mCRL2log(log::log_level_t::debug) << "Not simpler: " << cur_x << " \n--> size: " << phi_vector.size() << "\n " << phi
                                << " and size " << phi_vector.size() << "\n";
           pvi_done = true;
           if (depth > 1)
@@ -635,7 +635,7 @@ inline void self_substitute(pbes_equation& equation,
         }
         if (pvi_done)
         {
-          mCRL2log(log::debug) << "Nothing further to do\n";
+          mCRL2log(log::log_level_t::debug) << "Nothing further to do\n";
           break;
         }
         else if (depth >= options.max_depth)
@@ -784,7 +784,7 @@ struct pbeschain_pbes_backward_substituter
     for (std::size_t equation_index = p.equations().size(); equation_index > 0; --equation_index)
     {
       pbes_equation& i = p.equations()[equation_index - 1];
-      mCRL2log(log::verbose) << "Investigating the equation for " << i.variable().name() << "\n";
+      mCRL2log(log::log_level_t::verbose) << "Investigating the equation for " << i.variable().name() << "\n";
       std::size_t original_i = equation_index - 1;
 
       self_substitute(i,
@@ -827,7 +827,7 @@ struct pbeschain_pbes_backward_substituter
 
         std::size_t original_size = pp(original_srf_eq->formula()).size();
         std::size_t new_size = pp(result_srf_eq->formula()).size();
-        mCRL2log(log::verbose) << "Original size: " << original_size << " New size: " << new_size << "\n";
+        mCRL2log(log::log_level_t::verbose) << "Original size: " << original_size << " New size: " << new_size << "\n";
         if (options.srf_factor * (double)original_size <= (double)new_size)
         {
           log_number_pvi(initial_sizes[original_i], initial_sizes[original_i]);
@@ -836,7 +836,7 @@ struct pbeschain_pbes_backward_substituter
         }
       }
 
-      mCRL2log(log::verbose) << "How many unique PVI are left? " << pvi_set.size() << "\n";
+      mCRL2log(log::log_level_t::verbose) << "How many unique PVI are left? " << pvi_set.size() << "\n";
 
       // Substitute back
       if (pvi_set.size() == 0 && options.back_substitution)

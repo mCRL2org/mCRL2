@@ -290,7 +290,7 @@ class RewriterCompilingJitty: public Rewriter
 
     void thread_initialise() override
     {
-      mCRL2log(mcrl2::log::debug) << "Initialise busy/forbidden flags\n";
+      mCRL2log(mcrl2::log::log_level_t::debug) << "Initialise busy/forbidden flags\n";
       m_thread_aterm_pool = &atermpp::detail::g_thread_term_pool();
   }
 };

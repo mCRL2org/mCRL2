@@ -15,7 +15,7 @@
 
 StaticGraph::StaticGraph()
 {
-    reset(0, 0, EDGE_NONE);
+    reset(0, 0, EdgeDirection::EDGE_NONE);
 }
 
 StaticGraph::~StaticGraph()
@@ -28,7 +28,7 @@ StaticGraph::~StaticGraph()
 
 void StaticGraph::clear()
 {
-    reset(0, 0, EDGE_NONE);
+    reset(0, 0, EdgeDirection::EDGE_NONE);
 }
 
 void StaticGraph::reset(verti V, edgei E, EdgeDirection edge_dir)
@@ -42,7 +42,7 @@ void StaticGraph::reset(verti V, edgei E, EdgeDirection edge_dir)
     delete[] successor_index_;
     delete[] predecessor_index_;
 
-    if ((edge_dir & EDGE_SUCCESSOR))
+    if ((edge_dir & EdgeDirection::EDGE_SUCCESSOR))
     {
         successors_      = new verti[E];
         successor_index_ = new edgei[V + 1];
@@ -57,7 +57,7 @@ void StaticGraph::reset(verti V, edgei E, EdgeDirection edge_dir)
       successor_index_ = nullptr;
     }
 
-    if ((edge_dir_ & EDGE_PREDECESSOR))
+    if ((edge_dir_ & EdgeDirection::EDGE_PREDECESSOR))
     {
         predecessors_      = new verti[E];
         predecessor_index_ = new edgei[V + 1];
@@ -132,7 +132,7 @@ void StaticGraph::make_random_scc(edge_list &edges)
             vertis.push_back(sccs[i][rand()%sccs[i].size()]);
         }
     }
-    mCRL2log(mcrl2::log::debug) << "Connecting " << vertis.size()
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Connecting " << vertis.size()
                                 << " of " << V_ << " vertices to create an SCC." << std::endl;
     shuffle_vector(vertis);
     for (verti i = 0; i < sccs.size(); ++i)
@@ -224,7 +224,7 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
     // Iteratively merge clusters:
     for (int i = 0; clusters > 1; ++i)
     {
-        mCRL2log(mcrl2::log::verbose) << "Generating clustered random game level "
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Generating clustered random game level "
                                       << i << "..." << std::endl;
         std::size_t next_clusters = (clusters + cluster_size - 1)/cluster_size;
         StaticGraph *next_subgraphs = new StaticGraph[next_clusters];
@@ -234,7 +234,7 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
             /* Combine clusters [i:j) into one: */
             std::size_t i = c * clusters / next_clusters;
             std::size_t j = (c + 1) * clusters / next_clusters;
-            mCRL2log(mcrl2::log::debug) << "combining " << j-i << " subgraphs ("
+            mCRL2log(mcrl2::log::log_level_t::debug) << "combining " << j-i << " subgraphs ("
                                         << i << " through " << j << " of "
                                         << clusters << ")" << std::endl;
 
@@ -308,13 +308,13 @@ void StaticGraph::assign(const StaticGraph &graph)
 
     reset(graph.V_, graph.E_, graph.edge_dir_);
 
-    if (edge_dir_ & EDGE_SUCCESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_SUCCESSOR)
     {
         std::copy(graph.successors_, graph.successors_ + E_, successors_);
         std::copy(graph.successor_index_, graph.successor_index_ + V_ + 1,
                   successor_index_);
     }
-    if (edge_dir_ & EDGE_PREDECESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_PREDECESSOR)
     {
         std::copy(graph.predecessors_, graph.predecessors_ + E_, predecessors_);
         std::copy(graph.predecessor_index_, graph.predecessor_index_ + V_ + 1,
@@ -345,7 +345,7 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     /* Reallocate memory */
     reset(V, E, edge_dir);
 
-    if (edge_dir_ & EDGE_SUCCESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_SUCCESSOR)
     {
         /* Sort edges by predecessor first, successor second */
         if (!std::ranges::is_sorted(edges, edge_cmp_forward))
@@ -372,7 +372,7 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
         }
     }
 
-    if (edge_dir_ & EDGE_PREDECESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_PREDECESSOR)
     {
         /* Sort edges by successor first, predecessor second */
         std::ranges::sort(edges, edge_cmp_backward);
@@ -402,7 +402,7 @@ void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
     // Add end-of-list marker:
     edges.emplace_back(V_, V_);
 
-    if (edge_dir_ & EDGE_SUCCESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_SUCCESSOR)
     {
         // Sort edges by predecessor first, successor second
         if (!std::ranges::is_sorted(edges, edge_cmp_forward))
@@ -438,7 +438,7 @@ void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
         }
     }
 
-    if (edge_dir_ & EDGE_PREDECESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_PREDECESSOR)
     {
         // Sort edges by successor first, predecessor second
         std::ranges::sort(edges, edge_cmp_backward);
@@ -475,9 +475,9 @@ void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
     edges.pop_back();
 
     // Update edge count
-    if (edge_dir_ & EDGE_SUCCESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_SUCCESSOR)
     {
-        if (edge_dir_ & EDGE_PREDECESSOR)
+        if (edge_dir_ & EdgeDirection::EDGE_PREDECESSOR)
         {
             assert(successor_index_[V_] == predecessor_index_[V_]);
         }
@@ -485,14 +485,14 @@ void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
     }
     else
     {
-        assert(edge_dir_ & EDGE_PREDECESSOR);
+        assert(edge_dir_ & EdgeDirection::EDGE_PREDECESSOR);
         E_ = predecessor_index_[V_];
     }
 }
 
 StaticGraph::edge_list StaticGraph::get_edges() const
 {
-    assert(edge_dir_ & EDGE_SUCCESSOR);  // successor info required for now!
+    assert(edge_dir_ & EdgeDirection::EDGE_SUCCESSOR);  // successor info required for now!
 
     edge_list result;
     result.reserve(E_);
@@ -515,12 +515,12 @@ void StaticGraph::write_raw(std::ostream &os) const
     os.write(reinterpret_cast<const char*>(&V_), sizeof(V_));
     os.write(reinterpret_cast<const char*>(&E_), sizeof(E_));
     os.write(reinterpret_cast<const char*>(&edge_dir_), sizeof(edge_dir_));
-    if (edge_dir_ & EDGE_SUCCESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_SUCCESSOR)
     {
         os.write(reinterpret_cast<const char*>(successors_), static_cast<std::streamsize>(sizeof(verti)*E_));
         os.write(reinterpret_cast<const char*>(successor_index_), static_cast<std::streamsize>(sizeof(edgei)*(V_ + 1)));
     }
-    if (edge_dir_ & EDGE_PREDECESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_PREDECESSOR)
     {
         os.write(reinterpret_cast<const char*>(predecessors_), static_cast<std::streamsize>(sizeof(verti)*E_));
         os.write(reinterpret_cast<const char*>(predecessor_index_), static_cast<std::streamsize>(sizeof(edgei)*(V_ + 1)));
@@ -539,12 +539,12 @@ void StaticGraph::read_raw(std::istream &is)
 
     reset(V, E, edge_dir);
 
-    if (edge_dir & EDGE_SUCCESSOR)
+    if (edge_dir & EdgeDirection::EDGE_SUCCESSOR)
     {
         is.read(reinterpret_cast<char*>(successors_), static_cast<std::streamsize>(sizeof(verti)*E_));
         is.read(reinterpret_cast<char*>(successor_index_), static_cast<std::streamsize>(sizeof(edgei)*(V_ + 1)));
     }
-    if (edge_dir & EDGE_PREDECESSOR)
+    if (edge_dir & EdgeDirection::EDGE_PREDECESSOR)
     {
         is.read(reinterpret_cast<char*>(predecessors_), static_cast<std::streamsize>(sizeof(verti)*E_));
         is.read(reinterpret_cast<char*>(predecessor_index_), static_cast<std::streamsize>(sizeof(edgei)*(V_ + 1)));
@@ -604,13 +604,13 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
     }
 
     // Allocate memory:
-    reset(num_vertices, num_edges, edge_dir ? edge_dir : graph.edge_dir());
+    reset(num_vertices, num_edges, edge_dir != EdgeDirection::EDGE_NONE ? edge_dir : graph.edge_dir());
 
     //
     // TODO: parallellize rest of function!
     //
 
-    if (edge_dir_ & EDGE_SUCCESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_SUCCESSOR)
     {
         // Assign new successors:
         verti v = 0;
@@ -644,7 +644,7 @@ void StaticGraph::make_subgraph_threads( const StaticGraph &graph,
         successor_index_[v] = e;
     }
 
-    if (edge_dir_ & EDGE_PREDECESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_PREDECESSOR)
     {
         // Assign new predecessors:
         verti v = 0;

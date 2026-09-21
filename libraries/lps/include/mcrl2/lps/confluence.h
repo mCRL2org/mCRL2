@@ -413,7 +413,7 @@ class confluence_checker
     // cache for the value of is_confluent for pairs (i, j) with i <= j, and i and j both tau-summands
     mutable std::map<std::pair<std::size_t, std::size_t>, bool> m_cache;
 
-    enum cache_result
+    enum class cache_result
     {
       yes, no, indeterminate
     };
@@ -424,9 +424,9 @@ class confluence_checker
       auto found = m_cache.find(detail::make_sorted_pair(i, j));
       if (found != m_cache.end())
       {
-        return found->second ? yes : no;
+        return found->second ? cache_result::yes : cache_result::no;
       }
-      return indeterminate;
+      return cache_result::indeterminate;
     }
 
     void cache_store(std::size_t i, std::size_t j, bool confluent) const
@@ -487,12 +487,12 @@ class confluence_checker
         if (summand_j.is_tau())
         {
           auto value = cache_lookup(i, j);
-          if (value == yes)
+          if (value == cache_result::yes)
           {
-            mCRL2log(log::info) << '.';
+            mCRL2log(log::log_level_t::info) << '.';
             continue;
           }
-          else if (value == no)
+          else if (value == cache_result::no)
           {
             return { false, i };
           }
@@ -501,7 +501,7 @@ class confluence_checker
         if (check_disjointness && disjoint(summand_i, summand_j))
         {
           cache_store(i, j, true);
-          mCRL2log(log::info) << ':';
+          mCRL2log(log::log_level_t::info) << ':';
           continue;
         }
 
@@ -510,7 +510,7 @@ class confluence_checker
         cache_store(i, j, confluent);
         if (confluent)
         {
-          mCRL2log(log::info) << '+';
+          mCRL2log(log::log_level_t::info) << '+';
         }
         else
         {
@@ -570,7 +570,7 @@ class confluence_checker
           continue;
         }
         tau_summand_count++;
-        mCRL2log(log::info) << "summand " << (j + 1) << " of " << n << " (condition = " << confluence_type << "): ";
+        mCRL2log(log::log_level_t::info) << "summand " << (j + 1) << " of " << n << " (condition = " << confluence_type << "): ";
         bool confluent;
         std::size_t violating_index;
         switch (confluence_type)
@@ -589,15 +589,15 @@ class confluence_checker
         if (confluent)
         {
           result.push_back(j);
-          mCRL2log(log::info) << "Confluent with all summands";
+          mCRL2log(log::log_level_t::info) << "Confluent with all summands";
         }
         else
         {
-          mCRL2log(log::info) << "Not confluent with summand " << (violating_index + 1);
+          mCRL2log(log::log_level_t::info) << "Not confluent with summand " << (violating_index + 1);
         }
-        mCRL2log(log::info) << std::endl;
+        mCRL2log(log::log_level_t::info) << std::endl;
       }
-      mCRL2log(log::info) << result.size() << " of " << tau_summand_count << " tau summands were found to be confluent";
+      mCRL2log(log::log_level_t::info) << result.size() << " of " << tau_summand_count << " tau summands were found to be confluent";
       return result;
     }
 

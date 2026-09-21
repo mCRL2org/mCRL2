@@ -223,7 +223,7 @@ private:
     /*! Returns whehter vertex `v` is lifted to the maximum successor (true)
         or minimum successor (false), which in turn depends on whether it is
         controlled by the player `p_` we are solving for. */
-    inline bool take_max(verti v) const { return game_.player(v) != p_; }
+    inline bool take_max(verti v) const { return static_cast<std::size_t>(game_.player(v)) != p_; }
 
     /*! Returns whether the progress measure for vertex `v` must be strictly
         greater than its successors or not (which is true if its priority has

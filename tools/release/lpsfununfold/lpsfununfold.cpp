@@ -206,7 +206,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
     bool m_possibly_inconsistent = false;
     bool m_disable_pattern_unfolding = false;
 
-    void add_options(interface_description& desc) override
+    void add_options(interface_description&  desc) override
     {
       super::add_options(desc);
       /* desc.add_option("index", make_mandatory_argument("[NUM]"),
@@ -223,7 +223,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
                       "do not unfold pattern matching functions in state updates", 'x'); */
     }
 
-    void parse_options(const command_line_parser& parser) override { super::parse_options(parser); }
+    void parse_options(const command_line_parser&  parser) override { super::parse_options(parser); }
 
     bool add_rewrite_rules_for_functions(const function_sort& s, data_specification& data_spec)
     {                         
@@ -392,7 +392,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
 
           if (!spec.data().is_certainly_finite(s.domain()))
           {
-            mCRL2log(verbose) << "The process parameter " << v << ":" << v.sort() << " is not replaced as its domain does not seem finite.\n";
+            mCRL2log(log_level_t::verbose) << "The process parameter " << v << ":" << v.sort() << " is not replaced as its domain does not seem finite.\n";
             resulting_parameters.push_back(v);
           }
           else
@@ -422,7 +422,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
               new_parameters.emplace_back(fresh_name_generator(v.name()), s.codomain());
               l=reverse(l); // Then new_enumerated_domain_elements were stored in the wrong order. 
             }
-            mCRL2log(verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by " 
+            mCRL2log(log_level_t::verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by " 
                               << new_enumerated_domain_elements.size() << " new parameters.\n";
             representation_for_the_new_parameters.insert({v, replaced_function_parameter(
                                                                 variable_list(new_arguments.begin(), new_arguments.end()), 
@@ -444,7 +444,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
             assert(is_fset_container(t) || is_set_container(t) || is_fbag_container(t) || is_bag_container(t));
             if (!spec.data().is_certainly_finite(s.element_sort()))
             { 
-              mCRL2log(verbose) << "The process parameter " << v << ":" << v.sort() << " is not replaced as its element sort does not seem finite.\n";
+              mCRL2log(log_level_t::verbose) << "The process parameter " << v << ":" << v.sort() << " is not replaced as its element sort does not seem finite.\n";
               resulting_parameters.push_back(v);
             }
             else
@@ -471,7 +471,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
                 { 
                   new_parameters.emplace_back(fresh_name_generator(v.name()), target_sort);
                 }
-                mCRL2log(verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by "
+                mCRL2log(log_level_t::verbose) << "The process parameter " << v << ": " << v.sort() << " is replaced by "
                                   << new_enumerated_domain_elements.size() << " new parameters.\n";
                 representation_for_the_new_parameters.insert({v, replaced_function_parameter(
                                                                     variable_list(new_arguments.begin(), new_arguments.end()),
@@ -480,7 +480,7 @@ class lpsfununfold_tool: public  rewriter_tool<input_output_tool>
               }
               /* else
               {
-                mCRL2log(verbose) << "The process parameter " << v << ":" << v.sort() << " is of type set, bag or fbag, which are not yet handled..\n";
+                mCRL2log(log_level_t::verbose) << "The process parameter " << v << ":" << v.sort() << " is of type set, bag or fbag, which are not yet handled..\n";
                 resulting_parameters.push_back(v);
               } */
             }

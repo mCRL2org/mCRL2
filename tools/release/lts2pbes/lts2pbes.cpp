@@ -98,7 +98,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       ltsspec.set_data(data::merge_data_specifications(ltsspec.data(), formspec.data()));
       if (!formspec.action_labels().empty())
       {
-        mCRL2log(log::warning) << "The modal formula contains action declarations. These are ignored.\n";
+        mCRL2log(log::log_level_t::warning) << "The modal formula contains action declarations. These are ignored.\n";
       }
       lpsspec.action_labels() = lpsspec.action_labels() + formspec.action_labels();
       pbes_system::pbes result = pbes_system::lts2pbes(ltsspec, formspec, preprocess_modal_operators, generate_counter_example);
@@ -106,11 +106,11 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       //save the result
       if (output_filename().empty())
       {
-        mCRL2log(log::verbose) << "Writing PBES to stdout..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Writing PBES to stdout..." << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "Writing PBES to file '" <<  output_filename() << "'..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Writing PBES to file '" <<  output_filename() << "'..." << std::endl;
       }
       save_pbes(result, output_filename(), pbes_output_format());
       return true;

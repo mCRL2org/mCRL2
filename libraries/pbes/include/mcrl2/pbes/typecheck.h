@@ -199,7 +199,7 @@ class pbes_type_checker
     /// \brief Typecheck the pbes pbesspec
     void operator()(pbes& pbesspec)
     {
-      mCRL2log(log::verbose) << "type checking PBES specification..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "type checking PBES specification..." << std::endl;
 
       pbes_system::normalize_sorts(pbesspec, m_data_type_checker.typechecked_data_specification());
 

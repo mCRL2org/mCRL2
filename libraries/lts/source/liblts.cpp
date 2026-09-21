@@ -35,37 +35,37 @@ lts_type guess_format(std::string const& s, const bool be_verbose/*=true*/)
     {
       if (be_verbose)
       {
-        mCRL2log(verbose) << "Detected .aut extension.\n";
+        mCRL2log(log_level_t::verbose) << "Detected .aut extension.\n";
       }
-      return lts_aut;
+      return lts_type::lts_aut;
     }
     else if (ext == "lts")
     {
       if (be_verbose)
       {
-        mCRL2log(verbose) << "Detected .lts extension.\n";
+        mCRL2log(log_level_t::verbose) << "Detected .lts extension.\n";
       }
-      return lts_lts;
+      return lts_type::lts_lts;
     }
     else if (ext == "fsm")
     {
       if (be_verbose)
       {
-        mCRL2log(verbose) << "Detected .fsm extension.\n";
+        mCRL2log(log_level_t::verbose) << "Detected .fsm extension.\n";
       }
-      return lts_fsm;
+      return lts_type::lts_fsm;
     }
     else if (ext == "dot")
     {
       if (be_verbose)
       {
-        mCRL2log(verbose) << "Detected .dot extension.\n";
+        mCRL2log(log_level_t::verbose) << "Detected .dot extension.\n";
       }
-      return lts_dot;
+      return lts_type::lts_dot;
     }
   }
 
-  return lts_none;
+  return lts_type::lts_none;
 }
 
 static const std::array<std::string, 5> type_strings = { "unknown", "lts", "aut", "fsm", "dot" };
@@ -92,44 +92,44 @@ lts_type parse_format(std::string const& s)
 {
   if (s == "lts")
   {
-    return lts_lts;
+    return lts_type::lts_lts;
   }
   else if (s == "aut")
   {
-    return lts_aut;
+    return lts_type::lts_aut;
   }
   else if (s == "fsm")
   {
-    return lts_fsm;
+    return lts_type::lts_fsm;
   }
   else if (s == "dot")
   {
-    return lts_dot;
+    return lts_type::lts_dot;
   }
-  return lts_none;
+  return lts_type::lts_none;
 }
 
 std::string string_for_type(const lts_type type)
 {
-  return (type_strings.at(type));
+  return (type_strings.at(static_cast<std::size_t>(type)));
 }
 
 std::string extension_for_type(const lts_type type)
 {
-  return (extension_strings.at(type));
+  return (extension_strings.at(static_cast<std::size_t>(type)));
 }
 
 std::string mime_type_for_type(const lts_type type)
 {
-  return (mime_type_strings.at(type));
+  return (mime_type_strings.at(static_cast<std::size_t>(type)));
 }
 
 static const std::set<lts_type>& initialise_supported_lts_formats()
 {
   static std::set<lts_type> s;
-  for (std::size_t i = lts_type_min; i<1+(std::size_t)lts_type_max; ++i)
+  for (std::size_t i = static_cast<std::size_t>(lts_type::lts_type_min); i<1+static_cast<std::size_t>(lts_type::lts_type_max); ++i)
   {
-    if (lts_none != (lts_type) i)
+    if (lts_type::lts_none != (lts_type) i)
     {
       s.insert((lts_type) i);
     }
@@ -146,8 +146,8 @@ const std::set<lts_type>& supported_lts_formats()
 template<std::size_t Size, typename T>
 bool lts_named_cmp(const std::array<std::string, Size>& N, T a, T b)
 {
-  return N[a] < N[b];
-} 
+  return N[static_cast<std::size_t>(a)] < N[static_cast<std::size_t>(b)];
+}
 
 std::string supported_lts_formats_text(lts_type default_format, const std::set<lts_type>& supported)
 {
@@ -159,7 +159,7 @@ std::string supported_lts_formats_text(lts_type default_format, const std::set<l
   std::string r;
   for (std::vector<lts_type>::iterator i=types.begin(); i!=types.end(); ++i)
   {
-    r += "  '" + type_strings.at(*i) + "' for the " + type_desc_strings.at(*i);
+    r += "  '" + type_strings.at(static_cast<std::size_t>(*i)) + "' for the " + type_desc_strings.at(static_cast<std::size_t>(*i));
 
     if (*i == default_format)
     {
@@ -184,7 +184,7 @@ std::string supported_lts_formats_text(lts_type default_format, const std::set<l
 
 std::string supported_lts_formats_text(const std::set<lts_type>& supported)
 {
-  return supported_lts_formats_text(lts_none,supported);
+  return supported_lts_formats_text(lts_type::lts_none,supported);
 }
 
 std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_type>& supported)
@@ -199,7 +199,7 @@ std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_
   bool first = true;
   for (auto & type : types)
   {
-    if (extension_strings[type] == prev)   // avoid mentioning extensions more than once
+    if (extension_strings[static_cast<std::size_t>(type)] == prev)   // avoid mentioning extensions more than once
     {
       continue;
     }
@@ -211,8 +211,8 @@ std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_
     {
       r += sep;
     }
-    r += "*." + extension_strings[type];
-    prev = extension_strings[type];
+    r += "*." + extension_strings[static_cast<std::size_t>(type)];
+    prev = extension_strings[static_cast<std::size_t>(type)];
   }
 
   return r;

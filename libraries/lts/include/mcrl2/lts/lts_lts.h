@@ -294,7 +294,7 @@ class lts_lts_base
     /** \brief Yields the type of this lts, in this case lts_lts. */
     static lts_type type()
     {
-      return lts_lts;
+      return lts_type::lts_lts;
     }
 
     /** \brief Returns the mCRL2 data specification of this LTS.

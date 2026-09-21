@@ -18,7 +18,7 @@ namespace mcrl2::lps
 {
 
 /// \brief The available linearisation methods
-enum t_lin_method
+enum class t_lin_method
 {
   lmStack,
   lmRegular,
@@ -33,9 +33,9 @@ std::string print_lin_method(const t_lin_method lin_method)
 {
   switch(lin_method)
   {
-    case lmStack: return "stack";
-    case lmRegular: return "regular";
-    case lmRegular2: return "regular2";
+    case t_lin_method::lmStack: return "stack";
+    case t_lin_method::lmRegular: return "regular";
+    case t_lin_method::lmRegular2: return "regular2";
     default: throw mcrl2::runtime_error("unknown linearisation method");
   }
 }
@@ -45,9 +45,9 @@ std::string description(const t_lin_method lin_method)
 {
   switch(lin_method)
   {
-    case lmStack: return "for using stack data types (useful when 'regular' and 'regular2' do not work)";
-    case lmRegular: return "for generating an LPS in regular form (specification should be regular)";
-    case lmRegular2: return "for a variant of 'regular' that uses more data variables (useful when 'regular' does not work)";
+    case t_lin_method::lmStack: return "for using stack data types (useful when 'regular' and 'regular2' do not work)";
+    case t_lin_method::lmRegular: return "for generating an LPS in regular form (specification should be regular)";
+    case t_lin_method::lmRegular2: return "for a variant of 'regular' that uses more data variables (useful when 'regular' does not work)";
     default: throw mcrl2::runtime_error("unknown linearisation method");
   }
 }
@@ -60,15 +60,15 @@ t_lin_method parse_lin_method(const std::string& s)
 {
   if(s == "stack")
   {
-    return lmStack;
+    return t_lin_method::lmStack;
   }
   else if (s == "regular")
   {
-    return lmRegular;
+    return t_lin_method::lmRegular;
   }
   else if (s == "regular2")
   {
-    return lmRegular2;
+    return t_lin_method::lmRegular2;
   }
   else
   {

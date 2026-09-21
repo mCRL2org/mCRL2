@@ -65,23 +65,23 @@ struct structure_graph_builder
   {
     if (is_true(x))
     {
-      return structure_graph::d_true;
+      return structure_graph::decoration_type::d_true;
     }
     else if (is_false(x))
     {
-      return structure_graph::d_false;
+      return structure_graph::decoration_type::d_false;
     }
     else if (is_propositional_variable_instantiation(x))
     {
-      return structure_graph::d_none;
+      return structure_graph::decoration_type::d_none;
     }
     else if (is_and(x))
     {
-      return structure_graph::d_conjunction;
+      return structure_graph::decoration_type::d_conjunction;
     }
     else if (is_or(x))
     {
-      return structure_graph::d_disjunction;
+      return structure_graph::decoration_type::d_disjunction;
     }
     throw std::runtime_error("structure_graph_builder: encountered unsupported pbes_expression " + pp(x));
   }
@@ -246,7 +246,7 @@ struct manual_structure_graph_builder
   /// \brief Create a vertex, returns the index of the new vertex
   index_type insert_vertex(bool is_conjunctive, std::size_t rank)
   {
-    m_vertices.emplace_back(pbes_expression(), is_conjunctive ? structure_graph::d_conjunction : structure_graph::d_disjunction, rank);
+    m_vertices.emplace_back(pbes_expression(), is_conjunctive ? structure_graph::decoration_type::d_conjunction : structure_graph::decoration_type::d_disjunction, rank);
     return m_vertices.size() - 1;
   }
 

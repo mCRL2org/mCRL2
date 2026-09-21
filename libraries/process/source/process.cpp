@@ -81,7 +81,7 @@ std::set<core::identifier_string> find_identifiers(const process::process_specif
 
 void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equation_limit)
 {
-  mCRL2log(log::verbose) << "applying alphabet reduction..." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "applying alphabet reduction..." << std::endl;
   process_expression init = procspec.init();
 
   // cache the alphabet of pcrl equations and apply alphabet reduction to block({}, init)
@@ -99,12 +99,12 @@ void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equa
   // remove duplicate equations
   if (procspec.equations().size() < duplicate_equation_limit)
   {
-    mCRL2log(log::debug) << "removing duplicate equations..." << std::endl;
+    mCRL2log(log::log_level_t::debug) << "removing duplicate equations..." << std::endl;
     remove_duplicate_equations(procspec);
-    mCRL2log(log::debug) << "removing duplicate equations finished" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "removing duplicate equations finished" << std::endl;
   }
 
-  mCRL2log(log::debug) << "alphabet reduction finished" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "alphabet reduction finished" << std::endl;
 }
 
 process::action_label_list parse_action_declaration(const std::string& text, const data::data_specification& data_spec)

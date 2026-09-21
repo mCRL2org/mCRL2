@@ -14,7 +14,7 @@ PredecessorLiftingStrategy::PredecessorLiftingStrategy(
     bool stack, int version )
     : LiftingStrategy(), LiftingStrategy2(), spm_(spm), stack_(stack)
 {
-    assert(game.graph().edge_dir() & StaticGraph::EDGE_PREDECESSOR);
+    assert(game.graph().edge_dir() & StaticGraph::EdgeDirection::EDGE_PREDECESSOR);
 
     // Initialize data
     const verti V = game.graph().V();
@@ -44,7 +44,7 @@ PredecessorLiftingStrategy::PredecessorLiftingStrategy(
 
 void PredecessorLiftingStrategy::push(verti v)
 {
-    mCRL2log(mcrl2::log::debug) << "push(" << v << ")" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "push(" << v << ")" << std::endl;
     queue_[queue_end_++] = v;
     if (queue_end_ == queue_capacity_)
     {
@@ -82,7 +82,7 @@ verti PredecessorLiftingStrategy::pop()
         }
     }
     --queue_size_;
-    mCRL2log(mcrl2::log::debug) << "pop() -> " << res << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "pop() -> " << res << std::endl;
     return res;
 }
 

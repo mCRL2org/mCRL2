@@ -148,7 +148,7 @@ template <class LTS_TYPE>
     weak_bisimulation_reduce(l1,preserve_divergences);
     weak_bisimulation_reduce(l2,preserve_divergences);
 
-    mCRL2log(log::debug)
+    mCRL2log(log::log_level_t::debug)
       << "Input LTSs now reduced "
       << "(preserve_divergences:" << (preserve_divergences ? "true" : "false") << "), "
       << "continue with reduced version."
@@ -184,7 +184,7 @@ template <class LTS_TYPE>
     std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
         l1_tran_into_node;
 
-    mCRL2log(log::debug)
+    mCRL2log(log::log_level_t::debug)
       << "Find weak transitions."
       << std::endl;
 
@@ -322,7 +322,7 @@ template <class LTS_TYPE>
       } // done l2 tau forest (all tau pathes).
     }
 
-    mCRL2log(log::verbose)
+    mCRL2log(log::log_level_t::verbose)
       << "Creating now the cs-game arena."
       << std::endl;
 
@@ -488,7 +488,7 @@ template <class LTS_TYPE>
       }
     }
 
-    mCRL2log(log::verbose) << "The cs-game arena contains "
+    mCRL2log(log::log_level_t::verbose) << "The cs-game arena contains "
       << attacker_nodes.size() << " attacker nodes and "
       << defender_nodes.size() << " defender nodes."
       << std::endl;
@@ -521,7 +521,7 @@ template <class LTS_TYPE>
     }
     // todo.assign(defender_nodes.begin(), defender_nodes.end());
 
-    mCRL2log(log::verbose)
+    mCRL2log(log::log_level_t::verbose)
       << "Compute the winning area of the defender." << std::endl;
 
     /* Calculate winning region. */
@@ -553,12 +553,12 @@ template <class LTS_TYPE>
       }
     }
 
-    mCRL2log(log::verbose)
+    mCRL2log(log::log_level_t::verbose)
       << "Get coupled simulation from defender's winning area."
       << std::endl;
 
     char seperator[3] = {'\0', ' ', '\0'}; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays) null-terminated buffer streamed as a C-string
-    mCRL2log(log::verbose) << "R = {";
+    mCRL2log(log::log_level_t::verbose) << "R = {";
 
     /* Filter R, where its elemens are coupled similar. */
     std::set<cs_game_node> cs_relation;
@@ -576,12 +576,13 @@ template <class LTS_TYPE>
       if (node_winner[n] == WIN_DEFENDER)
       {
         cs_relation.insert(n);
-        mCRL2log(log::verbose) << seperator << to_string(n);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay) seperator is streamed as a null-terminated C-string
+        mCRL2log(log::log_level_t::verbose) << seperator << to_string(n);
         seperator[0] = ',';
       }
     }
 
-    mCRL2log(log::verbose) << "}" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "}" << std::endl;
 
     /* Return true iff root nodes are in R / won by defender. */
     cs_game_node roots[] // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)

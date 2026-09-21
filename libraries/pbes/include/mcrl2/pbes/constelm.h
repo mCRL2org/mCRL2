@@ -930,13 +930,13 @@ class pbes_constelm_algorithm
       u_init.update(qvar_list(), e_init, constraint_map(), m_data_rewriter);
       todo.push_back(u_init.variable());
 
-      mCRL2log(log::debug) << "\n--- initial vertices ---\n" << print_vertices();
-      mCRL2log(log::debug) << "\n--- edges ---\n" << print_edges();
+      mCRL2log(log::log_level_t::debug) << "\n--- initial vertices ---\n" << print_vertices();
+      mCRL2log(log::log_level_t::debug) << "\n--- edges ---\n" << print_edges();
 
       // propagate constraints over the edges until the todo list is empty
       while (!todo.empty())
       {
-        mCRL2log(log::debug) << print_todo_list(todo);
+        mCRL2log(log::log_level_t::debug) << print_todo_list(todo);
         propositional_variable var = todo.front();
 
         // remove all occurrences of var from todo
@@ -948,16 +948,16 @@ class pbes_constelm_algorithm
         for (const edge& e: u_edges)
         {
           vertex& v = m_vertices[e.target().name()];
-          mCRL2log(log::debug) << print_edge_update(e, u, v);
+          mCRL2log(log::log_level_t::debug) << print_edge_update(e, u, v);
 
           data::rewriter::substitution_type sigma;
           detail::make_constelm_substitution(u.constraints(), sigma);
           pbes_expression needs_update = m_pbes_rewriter(atermpp::down_cast<pbes_expression>(e.condition()), sigma);
-          mCRL2log(log::debug) << print_condition(e, u, needs_update);
+          mCRL2log(log::log_level_t::debug) << print_condition(e, u, needs_update);
 
           if (!is_false(needs_update) && !is_true(needs_update))
           {
-            mCRL2log(log::debug) << print_evaluation_failure(e, u);
+            mCRL2log(log::log_level_t::debug) << print_evaluation_failure(e, u);
           }
           if (!is_false(needs_update))
           {
@@ -971,11 +971,11 @@ class pbes_constelm_algorithm
               todo.push_back(v.variable());
             }
           }
-          mCRL2log(log::debug) << "  <target vertex after > " << v.to_string() << "\n";
+          mCRL2log(log::log_level_t::debug) << "  <target vertex after > " << v.to_string() << "\n";
         }
       }
 
-      mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
+      mCRL2log(log::log_level_t::debug) << "\n--- final vertices ---\n" << print_vertices();
 
       // compute the redundant parameters and the redundant equations
       for (const pbes_equation& eqn: p.equations())
@@ -1019,14 +1019,14 @@ class pbes_constelm_algorithm
       pbes_system::algorithms::remove_parameters(p, m_redundant_parameters);
 
       // print the parameters and equation that are removed
-      if (mCRL2logEnabled(log::verbose))
+      if (mCRL2logEnabled(log::log_level_t::verbose))
       {
-        mCRL2log(log::verbose) << "\nremoved the following constant parameters:" << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "\nremoved the following constant parameters:" << std::endl;
         for (const std::pair<const propositional_variable, std::vector<data::variable>>& i: redundant_parameters())
         {
           for (const data::variable& var: i.second)
           {
-            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i.first.name()) << ", " << data::pp(var) << ")" << std::endl;
+            mCRL2log(log::log_level_t::verbose) << "  (" << mcrl2::core::pp(i.first.name()) << ", " << data::pp(var) << ")" << std::endl;
           }
         }
       }
@@ -1051,7 +1051,7 @@ void constelm(pbes& p,
   const bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
   if (has_counter_example)
   {
-    mCRL2log(log::warning) << "Warning: the PBES has counter example information, which may not be preserved by constant elimination." << std::endl;
+    mCRL2log(log::log_level_t::warning) << "Warning: the PBES has counter example information, which may not be preserved by constant elimination." << std::endl;
   }
   // data rewriter
   data::rewriter datar(p.data(), rewrite_strategy);
@@ -1068,7 +1068,7 @@ void constelm(pbes& p,
       if (remove_redundant_equations)
       {
         std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
-        mCRL2log(log::verbose) << algorithms::print_removed_equations(V);
+        mCRL2log(log::log_level_t::verbose) << algorithms::print_removed_equations(V);
       }
       break;
     }
@@ -1076,15 +1076,15 @@ void constelm(pbes& p,
     case pbes_rewriter_type::quantifier_finite:
     {
       const enumerate_quantifiers_mode enum_mode = (rewriter_type == pbes_rewriter_type::quantifier_all?
-                                                         expand_infinite_sorts_and_use_data_rewriter:
-                                                         expand_finite_sorts);
+                                                         enumerate_quantifiers_mode::expand_infinite_sorts_and_use_data_rewriter:
+                                                         enumerate_quantifiers_mode::expand_finite_sorts);
       enumerate_quantifiers_rewriter pbesr(datar, p.data(), enum_mode);
       pbes_constelm_algorithm<data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, compute_conditions, check_quantifiers);
       if (remove_redundant_equations)
       {
         std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
-        mCRL2log(log::verbose) << algorithms::print_removed_equations(V);
+        mCRL2log(log::log_level_t::verbose) << algorithms::print_removed_equations(V);
       }
       break;
     }

@@ -1237,7 +1237,7 @@ class specification_basic_type
 
       if (!is_application(t))
       {
-        mCRL2log(mcrl2::log::error) << "term of unexpected type " << t << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::error) << "term of unexpected type " << t << std::endl;
       }
 
       assert(is_application(t));
@@ -1901,19 +1901,19 @@ class specification_basic_type
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
       {
-        mCRL2log(mcrl2::log::warning) << "Generated " << numberOfNewProcesses << " new internal processes.";
+        mCRL2log(mcrl2::log::log_level_t::warning) << "Generated " << numberOfNewProcesses << " new internal processes.";
 
-        if (options.lin_method==lmRegular)
+        if (options.lin_method==t_lin_method::lmRegular)
         {
-          mCRL2log(mcrl2::log::warning) << " If linearisation does not terminate, the use of the flag `--lin-method=regular2' or `--lin-method=stack' in mcrl22lps can help." << std::endl;
+          mCRL2log(mcrl2::log::log_level_t::warning) << " If linearisation does not terminate, the use of the flag `--lin-method=regular2' or `--lin-method=stack' in mcrl22lps can help." << std::endl;
         }
-        else if (options.lin_method==lmRegular2)
+        else if (options.lin_method==t_lin_method::lmRegular2)
         {
-          mCRL2log(mcrl2::log::warning) << " If linearisation does not terminate, using the flag `--lin-method=stack' in mcrl22lps can help.\n" << std::endl;
+          mCRL2log(mcrl2::log::log_level_t::warning) << " If linearisation does not terminate, using the flag `--lin-method=stack' in mcrl22lps can help.\n" << std::endl;
         }
         else
         {
-          mCRL2log(mcrl2::log::warning) << std::endl;
+          mCRL2log(mcrl2::log::log_level_t::warning) << std::endl;
         }
         warningNumber=warningNumber*5;
       }
@@ -2918,7 +2918,7 @@ class specification_basic_type
       {
         assert(rwalker!=representedprocesses.end());
         const process_identifier process=*walker;
-        if (match_sequence(process_names,*rwalker,options.lin_method==lmRegular2))
+        if (match_sequence(process_names,*rwalker,options.lin_method==t_lin_method::lmRegular2))
         {
           result=process;
           return true;
@@ -3151,7 +3151,7 @@ class specification_basic_type
         /* There does not exist an appropriate variable,
            so, make it and return its index in n */
         process_expression newbody;
-        if (options.lin_method==lmRegular2)
+        if (options.lin_method==t_lin_method::lmRegular2)
         {
           variable_list pars=parscollect(sequence,newbody);
           new_process=newprocess(pars,newbody,pCRL,
@@ -3170,7 +3170,7 @@ class specification_basic_type
       }
       /* now we must construct arguments */
       variable_list parameters=objectIndex(new_process).parameters;
-      if (options.lin_method==lmRegular2)
+      if (options.lin_method==t_lin_method::lmRegular2)
       {
         const assignment_list args=argscollect_regular2(sequence,parameters);
         assert(check_valid_process_instance_assignment(new_process,args));
@@ -8150,7 +8150,7 @@ class specification_basic_type
       stochastic_distribution& initial_stochastic_distribution,
       lps::detail::ultimate_delay& ultimate_delay_condition)
     {
-      mCRL2log(mcrl2::log::verbose) <<
+      mCRL2log(mcrl2::log::log_level_t::verbose) <<
             (is_allow ? "- calculating the parallel composition modulo the allow operator: " :
              is_block ? "- calculating the parallel composition modulo the block operator: " :
                         "- calculating the parallel composition: ") <<
@@ -8186,7 +8186,7 @@ class specification_basic_type
                             action_summands2,deadlock_summands2,ultimate_delay_condition2,
                             pars1,pars3,allowlist1,is_allow,is_block,action_summands,deadlock_summands);
 
-      mCRL2log(mcrl2::log::verbose) << action_summands.size() << " actions and " << deadlock_summands.size() << " delta summands.\n";
+      mCRL2log(mcrl2::log::log_level_t::verbose) << action_summands.size() << " actions and " << deadlock_summands.size() << " delta summands.\n";
       pars_result=pars1+pars3;
       init_result=init1 + init2;
       initial_stochastic_distribution=stochastic_distribution(
@@ -8529,7 +8529,7 @@ class specification_basic_type
           catch (mcrl2::runtime_error& e)
           {
             // Applying Fourier Motzkin failed. Continue working with the old ultimate delay condition.
-            mCRL2log(mcrl2::log::debug) << "Simplifying a condition using Fourier-Motzkin reduction failed (I). \n" << e.what() << std::endl;
+            mCRL2log(mcrl2::log::log_level_t::debug) << "Simplifying a condition using Fourier-Motzkin reduction failed (I). \n" << e.what() << std::endl;
           }
         }
 
@@ -8859,7 +8859,7 @@ class specification_basic_type
         static bool show_only_once=true;
         if (ct && options.ignore_time && show_only_once)
         {
-          mCRL2log(mcrl2::log::warning) << "process " << procId.name() <<
+          mCRL2log(mcrl2::log::log_level_t::warning) << "process " << procId.name() <<
               " contains time, which is now not preserved. \n"  <<
               "Use --timed or -T, or untick `add deadlocks' for a correct timed linearisation...\n";
           show_only_once=false;
@@ -9913,7 +9913,7 @@ class specification_basic_type
         if (multiaction == action_list({ terminationAction }))
         {
           acts.push_front(terminationAction.label());
-          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) <<
+          mCRL2log(mcrl2::log::log_level_t::warning) << "The action " << process::pp(terminationAction) <<
                            " followed by a deadlock is added to signal termination of the linear process. \n";
           return;
         }
@@ -10024,13 +10024,13 @@ class specification_basic_type
 
       /* Third, transform to GNF by subsitution, such that the
          first variable in a sequence is always an actionvariable */
-      procstorealGNF(init_,options.lin_method!=lmStack);
+      procstorealGNF(init_,options.lin_method!=t_lin_method::lmStack);
 
       lps::detail::ultimate_delay dummy_ultimate_delay_condition;
       generateLPEmCRL(action_summands,
                       deadlock_summands,
                       init_,
-                      options.lin_method!=lmStack,
+                      options.lin_method!=t_lin_method::lmStack,
                       parameters,
                       initial_state,
                       initial_stochastic_distribution,
@@ -10052,7 +10052,7 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
   const mcrl2::lps::t_lin_options& lin_options)
 {
-  mCRL2log(mcrl2::log::verbose) << "linearising the process specification using the '" << lin_options.lin_method << "' method.\n";
+  mCRL2log(mcrl2::log::log_level_t::verbose) << "linearising the process specification using the '" << lin_options.lin_method << "' method.\n";
   mcrl2::process::process_specification input_process=type_checked_spec;
   data_specification data_spec=input_process.data();
 

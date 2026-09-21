@@ -198,7 +198,7 @@ struct explorer_summand
 
   void set_projection_attributes(const std::vector<std::size_t>& Ir, const std::vector<std::size_t>& Iw)
   {
-    mCRL2log(log::verbose) << "Setting projection attributes I_r = " << core::detail::print_list(Ir) << " I_w = " << core::detail::print_list(Iw) << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Setting projection attributes I_r = " << core::detail::print_list(Ir) << " I_w = " << core::detail::print_list(Iw) << std::endl;
     if (!Ir.empty())
     {
       I_r = Ir;

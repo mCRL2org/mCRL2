@@ -26,7 +26,7 @@ namespace mcrl2::lts
  * \details This enumerated type defines equivalence relations on
  * LTSs. They can be used to reduce an LTS or decide whether two LTSs
  * are equivalent. */
-enum lts_probabilistic_equivalence
+enum class lts_probabilistic_equivalence
 {
   lts_probabilistic_eq_none,             /**< Unknown or no equivalence */
   lts_probabilistic_bisim_bem,          /**< Probabilistic bisimulation equivalence using the O(mn (log n + log m)) algorithm [Bier] */
@@ -46,15 +46,15 @@ lts_probabilistic_equivalence parse_probabilistic_equivalence(const std::string&
 {
   if (s == "none")
   {
-    return lts_probabilistic_eq_none;
+    return lts_probabilistic_equivalence::lts_probabilistic_eq_none;
   }
   else if (s == "pbisim-bem")
   {
-    return lts_probabilistic_bisim_bem;
+    return lts_probabilistic_equivalence::lts_probabilistic_bisim_bem;
   }
   else if (s == "pbisim")
   {
-	  return lts_probabilistic_bisim_grv;
+	  return lts_probabilistic_equivalence::lts_probabilistic_bisim_grv;
   }
   else
   {
@@ -88,11 +88,11 @@ inline std::string print_probabilistic_equivalence(const lts_probabilistic_equiv
 {
   switch (eq)
   {
-    case lts_probabilistic_eq_none:
+    case lts_probabilistic_equivalence::lts_probabilistic_eq_none:
       return "none";
-    case lts_probabilistic_bisim_bem:
+    case lts_probabilistic_equivalence::lts_probabilistic_bisim_bem:
       return "pbisim-bem";
-    case lts_probabilistic_bisim_grv:
+    case lts_probabilistic_equivalence::lts_probabilistic_bisim_grv:
       return "pbisim";
     default:
       throw mcrl2::runtime_error("Unknown equivalence.");
@@ -115,11 +115,11 @@ inline std::string description(const lts_probabilistic_equivalence& eq)
 {
   switch(eq)
   {
-    case lts_probabilistic_eq_none:
+    case lts_probabilistic_equivalence::lts_probabilistic_eq_none:
       return "identity equivalence";
-    case lts_probabilistic_bisim_bem:
+    case lts_probabilistic_equivalence::lts_probabilistic_bisim_bem:
       return "probabilistic bisimulation equivalence using the O(mn (log n + log m)) algorithm by Baier, Engelen and Majster-Cederbaum, 2000";
-	case lts_probabilistic_bisim_grv:
+	case lts_probabilistic_equivalence::lts_probabilistic_bisim_grv:
 		return "probabilistic bisimulation equivalence using the O(m(log n)) algorithm by Groote, Rivera-Verduzco and de Vink, 2017";
     default:
       throw mcrl2::runtime_error("Unknown equivalence.");
@@ -131,7 +131,7 @@ inline std::string description(const lts_probabilistic_equivalence& eq)
  * \details This enumerated type defines equivalence relations on
  * LTSs. They can be used to reduce an LTS or decide whether two LTSs
  * are equivalent. */
-enum lts_probabilistic_preorder
+enum class lts_probabilistic_preorder
 {
   lts_probabilistic_pre_none,             /**< Unknown or no preorder */
 };
@@ -148,7 +148,7 @@ lts_probabilistic_preorder parse_probabilistic_preorder(std::string const& s)
 {
   if (s == "none")
   {
-    return lts_probabilistic_pre_none;
+    return lts_probabilistic_preorder::lts_probabilistic_pre_none;
   }
   else
   {
@@ -182,7 +182,7 @@ inline std::string print_probabilistic_preorder(const lts_probabilistic_preorder
 {
   switch (pre)
   {
-    case lts_probabilistic_pre_none:
+    case lts_probabilistic_preorder::lts_probabilistic_pre_none:
       return "none";
     default:
       throw mcrl2::runtime_error("Unknown preorder.");
@@ -205,7 +205,7 @@ inline std::string description(const lts_probabilistic_preorder& pre)
 {
   switch (pre)
   {
-    case lts_probabilistic_pre_none:
+    case lts_probabilistic_preorder::lts_probabilistic_pre_none:
       return "identity preorder";
     default:
       throw mcrl2::runtime_error("Unknown preorder.");

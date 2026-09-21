@@ -65,7 +65,7 @@ class lts2lps_tool : public input_output_tool
       {
         if (1 < parser.options.count("data"))
         {
-          mCRL2log(warning) << "multiple data specification files are specified; can only use one.\n";
+          mCRL2log(log_level_t::warning) << "multiple data specification files are specified; can only use one.\n";
         }
         data_file_type=mcrl2::lts::data_file_type_t::data_e;
         data_file = parser.option_argument("data");
@@ -75,7 +75,7 @@ class lts2lps_tool : public input_output_tool
       {
         if (1 < parser.options.count("lps") || data_file_type!=mcrl2::lts::data_file_type_t::none_e)
         {
-          mCRL2log(warning) << "multiple data specification files are specified; can only use one.\n";
+          mCRL2log(log_level_t::warning) << "multiple data specification files are specified; can only use one.\n";
         }
 
         data_file_type=mcrl2::lts::data_file_type_t::lps_e;
@@ -86,7 +86,7 @@ class lts2lps_tool : public input_output_tool
       {
         if (1 < parser.options.count("mcrl2") || data_file_type!=mcrl2::lts::data_file_type_t::none_e)
         {
-          mCRL2log(warning) << "multiple data specification files are specified; can only use one.\n";
+          mCRL2log(log_level_t::warning) << "multiple data specification files are specified; can only use one.\n";
         }
 
         data_file_type=mcrl2::lts::data_file_type_t::mcrl2_e;

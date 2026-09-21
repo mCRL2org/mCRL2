@@ -109,7 +109,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
     // Applies resetting of variables to the original PBES p.
     void reset_variables_to_original(pbes& p)
     {
-      mCRL2log(log::debug) << "=== resetting variables to the original PBES ---" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "=== resetting variables to the original PBES ---" << std::endl;
 
       // apply the reset variable procedure to all propositional variable instantiations
       std::vector<pbes_equation>& p_eqn = p.equations();
@@ -117,7 +117,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
 
       for (std::size_t k = 0; k < p_eqn.size(); k++)
       {
-        mCRL2log(log::trace) << "--- resetting equation " << p_eqn[k] << std::endl;
+        mCRL2log(log::log_level_t::trace) << "--- resetting equation " << p_eqn[k] << std::endl;
         p_eqn[k].formula() = local_reset_variables(*this, p_eqn[k].formula(), s_eqn[k]);
       }
 
@@ -166,7 +166,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
 
   void push(const pbes_expression& x)
   {
-    mCRL2log(log::trace) << "<push>" << "\n" << x << std::endl;
+    mCRL2log(log::log_level_t::trace) << "<push>" << "\n" << x << std::endl;
     expression_stack.push_back(x);
   }
 
@@ -195,7 +195,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
   void leave(const pbes_system::propositional_variable_instantiation& x)
   {
     pbes_expression result = algorithm.reset_variable(x, eq_X, i);
-    mCRL2log(log::trace) << "reset variable " << x << " with index " << i << " to " << result << std::endl;
+    mCRL2log(log::log_level_t::trace) << "reset variable " << x << " with index " << i << " to " << result << std::endl;
     i++;
     push(result);
   }
@@ -344,7 +344,7 @@ inline data::data_expression_list local_reset_variables_algorithm::reset_variabl
       if (!condition.empty())
       {
         e1[k] = data::if_(data::lazy::join_or(condition.begin(), condition.end()), default_value(Y, k, e1[k].sort()), nth_element(e, k));
-        mCRL2log(log::trace) << "  reset copy Y = " << Y << " k = " << k << " e'[k] = " << e1[k] << std::endl;
+        mCRL2log(log::log_level_t::trace) << "  reset copy Y = " << Y << " k = " << k << " e'[k] = " << e1[k] << std::endl;
       }
     }
   }

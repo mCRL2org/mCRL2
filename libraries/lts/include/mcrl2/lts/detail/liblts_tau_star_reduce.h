@@ -19,7 +19,7 @@ namespace mcrl2::lts::detail
 //Replace sequences tau* a tau* by a single action a.
 
 
-enum t_reach { unknown, reached, explored };
+enum class t_reach { unknown, reached, explored };
 
 /// \brief This procedure calculates the transitive tau
 ///        closure as a separate vector of transitions, for

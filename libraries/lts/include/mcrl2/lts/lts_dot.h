@@ -112,7 +112,7 @@ class lts_dot_base
     */
     lts_type type() const
     {
-      return lts_dot;
+      return lts_type::lts_dot;
     }
 
     /** \brief The standard swap function.

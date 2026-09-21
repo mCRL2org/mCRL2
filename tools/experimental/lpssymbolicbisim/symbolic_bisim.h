@@ -439,7 +439,7 @@ protected:
         {
           if(split_block(phi_k_copy, phi_l_copy, as))
           {
-            mCRL2log(log::verbose) << "Split " << phi_k_copy << " wrt summand\n" << as << "\non block " << phi_l_copy << std::endl;
+            mCRL2log(log::log_level_t::verbose) << "Split " << phi_k_copy << " wrt summand\n" << as << "\non block " << phi_l_copy << std::endl;
             return true;
           }
         }
@@ -534,7 +534,7 @@ protected:
     }
     catch(const smt::translation_error& e)
     {
-      mCRL2log(log::warning) << e.what() << std::endl;
+      mCRL2log(log::log_level_t::warning) << e.what() << std::endl;
       throw mcrl2::runtime_error("Solver failed!");
     }
 
@@ -649,11 +649,11 @@ protected:
     }
 
 
-    mCRL2log(log::verbose) << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
+    mCRL2log(log::log_level_t::verbose) << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
     int i = 0;
     for(const data_expression& block: unreachable)
     {
-      mCRL2log(log::verbose) << "  block " << i << "  " << pp(rewr(block)) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "  block " << i << "  " << pp(rewr(block)) << std::endl;
       i++;
     }
   }
@@ -736,7 +736,7 @@ protected:
     int i = 0;
     for(const data_expression& block: blocks)
     {
-      mCRL2log(log::verbose) << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(rewr(block)) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(rewr(block)) << std::endl;
       i++;
     }
   }
@@ -755,14 +755,14 @@ protected:
   }
 
 public:
-  symbolic_bisim_algorithm(Specification& spec, const simplifier_mode& simplify_strat, const rewrite_strategy& st = jitty)
+  symbolic_bisim_algorithm(Specification& spec, const simplifier_mode& simplify_strat, const rewrite_strategy& st = rewrite_strategy::jitty)
     : mcrl2::lps::detail::lps_algorithm<Specification>(spec)
     , strat(st)
     , rewr(add_iff_rules(merge_data_specifications(m_spec.data(),simplifier::norm_rules_spec())), st)
 #ifdef MCRL2_JITTYC_AVAILABLE
-    , proving_rewr(spec.data(), st == jitty ? jitty_prover : jitty_compiling_prover)
+    , proving_rewr(spec.data(), st == rewrite_strategy::jitty ? rewrite_strategy::jitty_prover : rewrite_strategy::jitty_compiling_prover)
 #else
-    , proving_rewr(spec.data(), jitty_prover)
+    , proving_rewr(spec.data(), rewrite_strategy::jitty_prover)
 #endif
     , m_contains_reals(std::find_if(m_spec.process().process_parameters().begin(), m_spec.process().process_parameters().end(),[](const variable& v){ return v.sort() == sort_real::real_(); }) != m_spec.process().process_parameters().end())
     , simpl(get_simplifier_instance(simplify_strat, rewr, proving_rewr, m_spec.process().process_parameters(), m_spec.data()))
@@ -771,7 +771,7 @@ public:
 
   void run()
   {
-    mCRL2log(mcrl2::log::verbose) << "Running symbolic bisimulation..." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Running symbolic bisimulation..." << std::endl;
 
     process_parameters = m_spec.process().process_parameters();
     data_expression initial_block = lambda(process_parameters, sort_bool::true_());
@@ -779,22 +779,22 @@ public:
     build_summand_maps();
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> t_start = std::chrono::high_resolution_clock::now();
-    mCRL2log(log::verbose) << "Initial partition:" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Initial partition:" << std::endl;
     print_partition(partition);
     int num_iterations = 0;
     while(refine())
     {
-      mCRL2log(log::verbose) << GREEN(THIN) << "Partition:" << NORMAL << std::endl;
+      mCRL2log(log::log_level_t::verbose) << GREEN(THIN) << "Partition:" << NORMAL << std::endl;
       print_partition(partition);
       find_reachable_blocks();
       num_iterations++;
-      mCRL2log(log::status) << "End of iteration " << num_iterations << ", current number of blocks is " << partition.size() << "\n";
+      mCRL2log(log::log_level_t::status) << "End of iteration " << num_iterations << ", current number of blocks is " << partition.size() << "\n";
     }
-    mCRL2log(log::verbose) << "Final partition:" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Final partition:" << std::endl;
     print_partition(partition);
     std::set< data_expression > final_partition;
     std::for_each(partition.begin(), partition.end(), [&](const data_expression& block){ final_partition.insert(rewr(block)); });
-    mCRL2log(log::info) << "Partition refinement completed in " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << " seconds" << std::endl;
+    mCRL2log(log::log_level_t::info) << "Partition refinement completed in " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << " seconds" << std::endl;
 
     save_lts();
   }

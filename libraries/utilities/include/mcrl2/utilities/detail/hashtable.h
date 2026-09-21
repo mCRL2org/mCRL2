@@ -9,7 +9,6 @@
 
 #ifndef MCRL2_UTILITIES_DETAIL_HASHTABLE_H
 #define MCRL2_UTILITIES_DETAIL_HASHTABLE_H
-#pragma once
 
 #include "mcrl2/utilities/power_of_two.h" 
 #include "mcrl2/utilities/hashtable.h"    // necessary for header test.

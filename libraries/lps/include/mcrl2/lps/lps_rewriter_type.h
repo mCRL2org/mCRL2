@@ -19,7 +19,7 @@ namespace mcrl2::lps
 {
 
 /// \brief An enumerated type for the available lps rewriters
-enum lps_rewriter_type
+enum class lps_rewriter_type
 {
   simplify,
   quantifier_one_point,
@@ -33,19 +33,19 @@ lps_rewriter_type parse_lps_rewriter_type(const std::string& type)
 {
   if (type == "simplify")
   {
-    return simplify         ;
+    return lps_rewriter_type::simplify         ;
   }
   if (type == "quantifier-one-point")
   {
-    return quantifier_one_point;
+    return lps_rewriter_type::quantifier_one_point;
   }
   if (type == "condition-one-point")
   {
-    return condition_one_point;
+    return lps_rewriter_type::condition_one_point;
   }
   if (type == "prune-dataspec")
   {
-    return prune_dataspec;
+    return lps_rewriter_type::prune_dataspec;
   }
   throw mcrl2::runtime_error("unknown lps rewriter option " + type);
 }
@@ -56,13 +56,13 @@ std::string print_lps_rewriter_type(const lps_rewriter_type type)
 {
   switch (type)
   {
-    case simplify:
+    case lps_rewriter_type::simplify:
       return "simplify";
-    case quantifier_one_point:
+    case lps_rewriter_type::quantifier_one_point:
       return "quantifier-one-point";
-    case condition_one_point:
+    case lps_rewriter_type::condition_one_point:
       return "condition-one-point";
-    case prune_dataspec:
+    case lps_rewriter_type::prune_dataspec:
       return "prune-dataspec";
     default:
       return "unknown lps rewriter";
@@ -75,13 +75,13 @@ std::string description(const lps_rewriter_type type)
 {
   switch (type)
   {
-    case simplify          :
+    case lps_rewriter_type::simplify          :
       return "for simplification";
-    case quantifier_one_point :
+    case lps_rewriter_type::quantifier_one_point :
       return "for one point rule quantifier elimination";
-    case condition_one_point :
+    case lps_rewriter_type::condition_one_point :
       return "simplify summands using equalities appearing in condition";
-    case prune_dataspec:
+    case lps_rewriter_type::prune_dataspec:
       return "for removing unused data equations and mappings";
   }
   throw mcrl2::runtime_error("unknown lps rewriter");

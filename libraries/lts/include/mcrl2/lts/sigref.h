@@ -44,6 +44,8 @@ public:
   /** \brief Compute a new signature based on \a partition.
     * \param[in] partition The current partition
     */
+  // This pure virtual function is only instantiated by compilers when used; this is intended.
+  // NOLINTNEXTLINE(portability-template-virtual-member-function)
   virtual void compute_signature(const std::vector<std::size_t>& partition) = 0;
 
   /** \brief Compute the transitions for the quotient according to \a partition.
@@ -82,7 +84,7 @@ public:
   signature_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_)
   {
-    mCRL2log(log::verbose) << "initialising signature computation for strong bisimulation" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "initialising signature computation for strong bisimulation" << std::endl;
   }
 
   /** \overload */
@@ -147,7 +149,7 @@ public:
     : signature<LTS_T>(lts_),
       m_prev_transitions(lts_.get_transitions(),lts_.num_states(),false)  // transitions stored backward. 
   {
-    mCRL2log(log::verbose) << "initialising signature computation for branching bisimulation" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "initialising signature computation for branching bisimulation" << std::endl;
   }
 
   /** \overload */
@@ -298,7 +300,7 @@ public:
     : signature_branching_bisim<LTS_T>(lts_),
       m_divergent(lts_.num_states(), false)
   {
-    mCRL2log(log::verbose) << "initialising signature computation for divergence preserving branching bisimulation" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "initialising signature computation for divergence preserving branching bisimulation" << std::endl;
     compute_tau_sccs();
   }
 
@@ -383,11 +385,11 @@ protected:
     std::size_t count_prev = m_count;
     std::size_t iterations = 0;
 
-    sort_transitions(m_lts.get_transitions(), m_lts.hidden_label_set(), mcrl2::lts::lbl_tgt_src);
+    sort_transitions(m_lts.get_transitions(), m_lts.hidden_label_set(), mcrl2::lts::transition_sort_style::lbl_tgt_src);
 
     do
     {
-      mCRL2log(log::verbose) << "Iteration " << iterations
+      mCRL2log(log::log_level_t::verbose) << "Iteration " << iterations
                                        << " currently have " << m_count << " blocks" << std::endl;
 
       m_signature.compute_signature(m_partition);
@@ -401,7 +403,7 @@ protected:
       {
         if(hashtable.find(m_signature.get_signature(i)) == hashtable.end())
         {
-          mCRL2log(log::debug) << "Adding block for signature " << print_sig(m_signature.get_signature(i)) << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Adding block for signature " << print_sig(m_signature.get_signature(i)) << std::endl;
           hashtable[m_signature.get_signature(i)] = m_count++;
         }
       }
@@ -416,7 +418,7 @@ protected:
 
     } while (count_prev != m_count);
 
-    mCRL2log(log::verbose) << "Done after " << iterations << " iterations with " << m_count << " blocks" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Done after " << iterations << " iterations with " << m_count << " blocks" << std::endl;
   }
 
   /** \brief Perform the quotient with respect to the partition that has

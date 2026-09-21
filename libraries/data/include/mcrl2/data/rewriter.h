@@ -63,12 +63,12 @@ class basic_rewriter
     /// \brief Constructor.
     /// \param[in] d A data specification
     /// \param[in] s A rewriter strategy.
-    explicit basic_rewriter(const data_specification& d, const strategy s = jitty) :
+    explicit basic_rewriter(const data_specification& d, const strategy s = rewrite_strategy::jitty) :
       m_rewriter(detail::createRewriter(d, used_data_equation_selector(d), static_cast< rewrite_strategy >(s)))
     { }
 
     /// \brief Constructor.
-    basic_rewriter(const data_specification& d, const used_data_equation_selector& equation_selector, const strategy s = jitty) :
+    basic_rewriter(const data_specification& d, const used_data_equation_selector& equation_selector, const strategy s = rewrite_strategy::jitty) :
       m_rewriter(detail::createRewriter(d, equation_selector, static_cast< rewrite_strategy >(s)))
     {}
 
@@ -123,7 +123,7 @@ class rewriter: public basic_rewriter<data_expression>
     /// \brief Constructor.
     /// \param[in] d A data specification
     /// \param[in] s A rewriter strategy.
-    explicit rewriter(const data_specification& d = rewriter::default_specification(), const strategy s = jitty) :
+    explicit rewriter(const data_specification& d = rewriter::default_specification(), const strategy s = rewrite_strategy::jitty) :
       basic_rewriter<data_expression>(d, s)
     { }
 
@@ -132,7 +132,7 @@ class rewriter: public basic_rewriter<data_expression>
     /// \param[in] selector A component that selects the equations that are converted to rewrite rules
     /// \param[in] s A rewriter strategy.
     template < typename EquationSelector >
-    rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
+    rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = rewrite_strategy::jitty) :
       basic_rewriter<data_expression>(d, selector, s)
     {
     }
@@ -228,11 +228,11 @@ class rewriter: public basic_rewriter<data_expression>
       rewrite_calls++;
 #endif
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(log::debug) << "REWRITE " << d << "\n";
+      mCRL2log(log::log_level_t::debug) << "REWRITE " << d << "\n";
 #endif
       m_rewriter->rewrite(result,d,sigma);
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(log::debug) << " ------------> " << result << std::endl;
+      mCRL2log(log::log_level_t::debug) << " ------------> " << result << std::endl;
 #endif
     }
 

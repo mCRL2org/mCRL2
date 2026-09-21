@@ -78,7 +78,7 @@ class lpsreach_algorithm
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)
     {
-      mCRL2log(log::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
@@ -134,13 +134,13 @@ class lpsreach_algorithm
       data::data_expression_list initial_state(initial_values.begin(), initial_values.end());
 
       m_summand_patterns = compute_read_write_patterns(lpsspec_);
-      mCRL2log(log::debug) << "Original read/write matrix:" << std::endl;
-      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
+      mCRL2log(log::log_level_t::debug) << "Original read/write matrix:" << std::endl;
+      mCRL2log(log::log_level_t::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
 
       symbolic::adjust_read_write_patterns(m_summand_patterns, m_options);
 
       m_variable_order = symbolic::compute_variable_order(m_options.variable_order, m_lts.process_parameters.size(), m_summand_patterns);
-      mCRL2log(log::debug) << "variable order = " << core::detail::print_list(m_variable_order) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "variable order = " << core::detail::print_list(m_variable_order) << std::endl;
       m_summand_patterns = symbolic::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
 
       m_lts.process_parameters = symbolic::permute_copy(m_lts.process_parameters, m_variable_order);
@@ -150,12 +150,12 @@ class lpsreach_algorithm
       }
 
       m_lts.initial_state = symbolic::state2ldd(symbolic::permute_copy(initial_state, m_variable_order), m_lts.data_index);
-      mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_lts.process_parameters) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "process parameters = " << core::detail::print_list(m_lts.process_parameters) << std::endl;
 
       std::vector<std::set<std::size_t>> groups = symbolic::compute_summand_groups(m_options.summand_groups, m_summand_patterns);
       for (const auto& group: groups)
       {
-        mCRL2log(log::debug) << "group " << core::detail::print_set(group) << std::endl;
+        mCRL2log(log::log_level_t::debug) << "group " << core::detail::print_set(group) << std::endl;
       }
       m_group_patterns = symbolic::compute_summand_group_patterns(m_summand_patterns, groups);
       for (std::size_t j = 0; j < m_group_patterns.size(); j++)
@@ -165,11 +165,11 @@ class lpsreach_algorithm
 
       for (std::size_t i = 0; i < m_lts.summand_groups.size(); i++)
       {
-        mCRL2log(log::debug) << "=== summand group " << i << " ===\n" << m_lts.summand_groups[i] << std::endl;
+        mCRL2log(log::log_level_t::debug) << "=== summand group " << i << " ===\n" << m_lts.summand_groups[i] << std::endl;
       }
 
-      mCRL2log(log::debug) << "Final read/write matrix:" << std::endl;
-      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
+      mCRL2log(log::log_level_t::debug) << "Final read/write matrix:" << std::endl;
+      mCRL2log(log::log_level_t::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
     }
 
     /// \brief Computes relprod(U, group).
@@ -178,13 +178,13 @@ class lpsreach_algorithm
       if (m_options.no_relprod)
       {
         ldd z = symbolic::alternative_relprod(U, group);
-        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
         return z;
       }
       else
       {
         ldd z = relprod(U, group.L, group.Ir);
-        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "relprod(" << i << ", todo) = " << print_states(m_lts.data_index, z) << std::endl;
         return z;
       }
     }
@@ -211,7 +211,7 @@ class lpsreach_algorithm
             ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
@@ -235,7 +235,7 @@ class lpsreach_algorithm
             ldd proj = project(todo1, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           // Apply one transition relation repeatedly.
@@ -277,7 +277,7 @@ class lpsreach_algorithm
       auto& R = m_lts.summand_groups;
       std::size_t iteration_count = 0;
 
-      mCRL2log(log::trace) << "initial state = " << core::detail::print_list(m_lts.initial_state) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "initial state = " << core::detail::print_list(m_lts.initial_state) << std::endl;
 
       auto start = std::chrono::steady_clock::now();
       ldd x = m_lts.initial_state;
@@ -291,18 +291,18 @@ class lpsreach_algorithm
       {
         stopwatch loop_start;
         iteration_count++;
-        mCRL2log(log::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
-        mCRL2log(log::trace) << "todo = " << print_states(m_lts.data_index, todo) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
+        mCRL2log(log::log_level_t::trace) << "todo = " << print_states(m_lts.data_index, todo) << std::endl;
 
         std::tie(visited, todo, potential_deadlocks) = step(visited, todo, true, m_options.detect_deadlocks);
 
-        mCRL2log(log::verbose) << "explored " << std::setw(12) << print_size(union_(visited, todo)) << " states after "
+        mCRL2log(log::log_level_t::verbose) << "explored " << std::setw(12) << print_size(union_(visited, todo)) << " states after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
         if (m_options.detect_deadlocks)
         {
           deadlocks = union_(deadlocks, potential_deadlocks);
-          mCRL2log(log::verbose) << "found " << std::setw(12) << print_size(deadlocks) << " deadlocks" << std::endl;
+          mCRL2log(log::log_level_t::verbose) << "found " << std::setw(12) << print_size(deadlocks) << " deadlocks" << std::endl;
         }
 
         sylvan::sylvan_stats_report(stderr);
@@ -310,37 +310,37 @@ class lpsreach_algorithm
 
       elapsed_seconds = std::chrono::steady_clock::now() - start;
       std::cout << "number of states = " << print_size(visited) << " (time = " << std::setprecision(2) << std::fixed << elapsed_seconds.count() << "s)" << std::endl;
-      mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       double total_time = 0.0;
       for (std::size_t i = 0; i < R.size(); i++)
       {
-        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(10) << print_size(R[i].L) << " transitions (learn time = "
+        mCRL2log(log::log_level_t::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(10) << print_size(R[i].L) << " transitions (learn time = "
                                << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls 
                                << " calls, cached " << print_size(R[i].Ldomain) << " values" << ")" << std::endl;
 
         total_time += R[i].learn_time;
       }
-      mCRL2log(log::verbose) << "learning transitions took " << total_time << "s" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "learning transitions took " << total_time << "s" << std::endl;
 
       std::size_t i = 0;
       for (const auto& param : m_lts.process_parameters)
       {
         auto& table = m_lts.data_index[i];
 
-        mCRL2log(log::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values."<< std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values."<< std::endl;
         for (const auto& data : table)
         {
-          mCRL2log(log::debug) << table.index(data) << ": " << data << std::endl;
+          mCRL2log(log::log_level_t::debug) << table.index(data) << ": " << data << std::endl;
         }
 
         ++i;
       }
 
-      mCRL2log(log::verbose) << "There are " << m_lts.action_index.size() << " action labels" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "There are " << m_lts.action_index.size() << " action labels" << std::endl;
       for (const auto& action : m_lts.action_index)
       {
-          mCRL2log(log::debug) << m_lts.action_index.index(action) << ": " << action << std::endl;
+          mCRL2log(log::log_level_t::debug) << m_lts.action_index.index(action) << ": " << action << std::endl;
       }
 
       m_lts.states = visited;

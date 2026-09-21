@@ -75,7 +75,7 @@ mcrl2::lts::lts_equivalence getEquivalenceFromName(const QString& name)
       return item.first;
     }
   }
-  return mcrl2::lts::lts_eq_none;
+  return mcrl2::lts::lts_equivalence::lts_eq_none;
 }
 
 void executeInformationBox(QWidget* parent, const QString& title,

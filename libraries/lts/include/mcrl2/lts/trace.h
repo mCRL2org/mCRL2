@@ -62,7 +62,7 @@ class trace
     /// not known what the format is. In this case it is determined based
     /// on the format of the input file.
     
-    enum trace_format
+    enum class trace_format
     {
       tfMcrl2,  /**< Format is stored as an aterm */
       tfPlain,  /**< Format is stored in plain text. In this format there are only actions */
@@ -115,7 +115,7 @@ class trace
     /// \param[in] filename The name of the file from which the trace is read.
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
-    trace(const std::string& filename, trace_format tf = tfUnknown)
+    trace(const std::string& filename, trace_format tf = trace_format::tfUnknown)
       : m_data_specification_and_act_decls_are_defined(false)
     {
       init();
@@ -133,7 +133,7 @@ class trace
     trace(const std::string& filename,
           const mcrl2::data::data_specification& spec,
           const mcrl2::process::action_label_list& act_decls,
-          trace_format tf = tfUnknown)
+          trace_format tf = trace_format::tfUnknown)
       : m_spec(spec),
         m_act_decls(act_decls),
         m_data_specification_and_act_decls_are_defined(true)
@@ -352,7 +352,7 @@ class trace
     /// \param [in] tf The expected format of the trace in the stream (default: tfUnknown).
     /// \exception mcrl2::runtime_error message in case of failure
 
-    void load(const std::string& filename, trace_format tf = tfUnknown)
+    void load(const std::string& filename, trace_format tf = trace_format::tfUnknown)
     {
       using std::ifstream;
       ifstream is(filename.c_str(),ifstream::binary|ifstream::in);
@@ -364,17 +364,17 @@ class trace
 
       try
       {
-        if (tf == tfUnknown)
+        if (tf == trace_format::tfUnknown)
         {
           tf = detectFormat(is);
         }
 
         switch (tf)
         {
-          case tfMcrl2:
+          case trace_format::tfMcrl2:
             load_mcrl2(filename);
             break;
-          case tfPlain:
+          case trace_format::tfPlain:
             load_plain(is);
             break;
           default:
@@ -395,19 +395,19 @@ class trace
     /// the format is tfPlain only actions are written. Default: tfMcrl2.
     /// \exception mcrl2::runtime_error message in case of failure
 
-    void save(const std::string& filename, trace_format tf = tfMcrl2) const
+    void save(const std::string& filename, trace_format tf = trace_format::tfMcrl2) const
     {
       try
       {
         switch (tf)
         {
-          case tfMcrl2:
+          case trace_format::tfMcrl2:
             save_mcrl2(filename);
             break;
-          case tfPlain:
+          case trace_format::tfPlain:
             save_plain(filename);
             break;
-          case tfLine:
+          case trace_format::tfLine:
             save_line(filename);
             break;
           default:
@@ -440,7 +440,7 @@ class trace
 
     trace_format detectFormat(std::istream& is)
     {
-      trace_format fmt = tfPlain;
+      trace_format fmt = trace_format::tfPlain;
 
       char c=static_cast<char>(is.peek());
       if (is.bad())
@@ -451,7 +451,7 @@ class trace
       if (c==0)  // Weak check. A lts in aterm format starts with a 0. This is not possible 
                  // for a trace in textual format. 
       {
-        fmt = tfMcrl2;
+        fmt = trace_format::tfMcrl2;
       }
 
       return fmt;

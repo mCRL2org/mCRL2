@@ -33,11 +33,11 @@ class pres_rewriter_tool: public Tool
     virtual std::set<pres_system::pres_rewriter_type> available_rewriters() const
     {
       std::set<pres_system::pres_rewriter_type> result;
-      result.insert(pres_system::simplify);
-      result.insert(pres_system::quantifier_all);
-      result.insert(pres_system::quantifier_finite);
-      result.insert(pres_system::quantifier_inside);
-      result.insert(pres_system::quantifier_one_point);
+      result.insert(pres_system::pres_rewriter_type::simplify);
+      result.insert(pres_system::pres_rewriter_type::quantifier_all);
+      result.insert(pres_system::pres_rewriter_type::quantifier_finite);
+      result.insert(pres_system::pres_rewriter_type::quantifier_inside);
+      result.insert(pres_system::pres_rewriter_type::quantifier_one_point);
       return result;
     }
 
@@ -46,7 +46,7 @@ class pres_rewriter_tool: public Tool
     /// \return The string "simplify"
     virtual pres_system::pres_rewriter_type default_rewriter() const
     {
-      return pres_system::simplify;
+      return pres_system::pres_rewriter_type::simplify;
     }
 
     /// \brief Add options to an interface description. Also includes

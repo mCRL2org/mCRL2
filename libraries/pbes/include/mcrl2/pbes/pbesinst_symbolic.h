@@ -53,7 +53,7 @@ class pbesinst_symbolic_algorithm
     std::map<core::identifier_string, std::size_t> m_equation_index;
 
   public:
-    pbesinst_symbolic_algorithm(pbes& p, data::rewriter::strategy rewrite_strategy = data::jitty)
+    pbesinst_symbolic_algorithm(pbes& p, data::rewriter::strategy rewrite_strategy = data::rewrite_strategy::jitty)
       : m_pbes(p),
         datar(p.data(), rewrite_strategy),
         R(datar, p.data())
@@ -73,12 +73,12 @@ class pbesinst_symbolic_algorithm
     {
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.insert(init);
-      mCRL2log(log::debug) << "discovered vertex " << init << std::endl;
+      mCRL2log(log::log_level_t::debug) << "discovered vertex " << init << std::endl;
 
       while (!todo.empty())
       {
         state_type X = *todo.begin();
-        mCRL2log(log::debug) << "handling vertex " << X << std::endl;
+        mCRL2log(log::log_level_t::debug) << "handling vertex " << X << std::endl;
         todo.erase(todo.begin());
         done.insert(X);
         std::size_t index = m_equation_index[X.name()];
@@ -93,7 +93,7 @@ class pbesinst_symbolic_algorithm
           if (done.find(v) == done.end())
           {
             todo.insert(v);
-            mCRL2log(log::debug) << "discovered vertex " << v << std::endl;
+            mCRL2log(log::log_level_t::debug) << "discovered vertex " << v << std::endl;
           }
         }
       }

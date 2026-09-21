@@ -30,7 +30,7 @@ pbes txt2pbes(std::istream& spec_stream, bool normalize = true)
   spec_stream >> result;
   if (normalize)
   {
-    mCRL2log(log::verbose) << "normalizing the PBES ..." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "normalizing the PBES ..." << std::endl;
     pbes_system::algorithms::normalize(result);
   }
   return result;

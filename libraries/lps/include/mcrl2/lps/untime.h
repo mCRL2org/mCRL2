@@ -80,7 +80,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
       // for the elements in the vector is true, it is a candidate time variable.
       std::vector <bool> time_variable_candidates(m_spec.process().process_parameters().size(),true);
       std::vector <bool>::iterator j=time_variable_candidates.begin() ;
-      mCRL2log(log::verbose) << "For untiming to function optimally, it is assumed that the input lps is rewritten to normal form" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "For untiming to function optimally, it is assumed that the input lps is rewritten to normal form" << std::endl;
 
       const data::data_expression_list& process_parameters = m_spec.initial_process().expressions();
       for (data::data_expression_list::const_iterator k = process_parameters.begin(); k != process_parameters.end(); ++j, ++k)
@@ -125,7 +125,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
         }
       }
       assert(j==time_variable_candidates.end());
-      mCRL2log(log::verbose) << "Time invariant " << data::pp(time_invariant) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Time invariant " << data::pp(time_invariant) << std::endl;
       return time_invariant;
     }
 
@@ -185,7 +185,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
             // The application of Fourier Motzkin failed because of mixed Real and
             // non-Real variables. We leave the original condition, but show a
             // warning to the user
-            mCRL2log(log::debug) << "Application of Fourier Motzkin failed with the message\n" << e.what() << std::endl;
+            mCRL2log(log::log_level_t::debug) << "Application of Fourier Motzkin failed with the message\n" << e.what() << std::endl;
           }
         }
       }
@@ -231,12 +231,12 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
 
       if (m_spec.process().has_time())
       {
-        mCRL2log(log::verbose) << "Untiming " << m_spec.process().summand_count() << " summands" << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Untiming " << m_spec.process().summand_count() << " summands" << std::endl;
 
         // Create extra parameter m_last_action_time and add it to the list of process parameters,
         // m_last_action_time is used later on in the code
         m_last_action_time = data::variable(m_identifier_generator("last_action_time"), data::sort_real::real_());
-        mCRL2log(log::verbose) << "Introduced variable " << data::pp(m_last_action_time) << " to denote time of last action" << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Introduced variable " << data::pp(m_last_action_time) << " to denote time of last action" << std::endl;
 
         // Should happen before updating the process
         m_time_invariant = m_add_invariants ? calculate_time_invariant() : (data::data_expression) data::sort_bool::true_();

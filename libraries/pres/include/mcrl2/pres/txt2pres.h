@@ -30,7 +30,7 @@ pres txt2pres(std::istream& spec_stream, bool normalize = true)
   spec_stream >> result;
   if (normalize)
   {
-    mCRL2log(log::verbose) << "normalizing the PRES ..." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "normalizing the PRES ..." << std::endl;
     pres_system::algorithms::normalize(result);
   }
   return result;

@@ -50,7 +50,7 @@ SmallProgressMeasures::SmallProgressMeasures(const ParityGame& game,
     const verti* vmap,
     verti vmap_size)
     : game_(game),
-      p_(player),
+      p_(static_cast<std::size_t>(player)),
       stats_(stats),
       vmap_(vmap),
       vmap_size_(vmap_size),
@@ -99,7 +99,7 @@ void SmallProgressMeasures::initialize_loops()
             ++cnt;
         }
     }
-    mCRL2log(mcrl2::log::debug) << "Initialized " << cnt
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Initialized " << cnt
                                 << "vert" << (cnt == 1 ? "ex" : "ices") << " to top" << std::endl;
 }
 
@@ -267,7 +267,7 @@ verti SmallProgressMeasures::solve_one(LiftingStrategy2 &ls)
 
 verti SmallProgressMeasures::get_strategy(verti v) const
 {
-    return (!is_top(v) && game_.player(v) == p_) ? get_min_succ(v) : NO_VERTEX;
+    return (!is_top(v) && static_cast<std::size_t>(game_.player(v)) == p_) ? get_min_succ(v) : NO_VERTEX;
 }
 
 void SmallProgressMeasures::get_strategy(ParityGame::Strategy &strat) const
@@ -390,12 +390,12 @@ bool SmallProgressMeasures::verify_solution()
             all_ok = all_ok && ok;
         }
 
-        if (!(game_.player(v) == p_ ? one_ok : all_ok))
+        if (!(static_cast<std::size_t>(game_.player(v)) == p_ ? one_ok : all_ok))
         {
             printf( "order constraint not satisfied for vertex %d with "
                     "priority %d and player %s!\n", v, game_.priority(v),
-                game_.player(v) == PLAYER_EVEN ? "even" :
-                game_.player(v) == PLAYER_ODD  ? "odd"  : "???" );
+                game_.player(v) == player_t::PLAYER_EVEN ? "even" :
+                game_.player(v) == player_t::PLAYER_ODD  ? "odd"  : "???" );
             return false;
         }
     }
@@ -425,8 +425,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
     std::vector<verti> won_by_odd;
 
     {
-        mCRL2log(mcrl2::log::verbose) << "Solving for Even..." << std::endl;
-        DenseSPM spm( game(), PLAYER_EVEN,
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Solving for Even..." << std::endl;
+        DenseSPM spm( game(), player_t::PLAYER_EVEN,
                       stats_, vmap_, vmap_size_ );
         std::unique_ptr<LiftingStrategy> ls(lsf_->create(game_, spm));
         while (spm.solve_some(*ls) == 0)
@@ -437,10 +437,10 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
           }
         }
         spm.get_strategy(strategy);
-        spm.get_winning_set( PLAYER_ODD,
+        spm.get_winning_set( player_t::PLAYER_ODD,
             std::back_insert_iterator<std::vector<verti> >(won_by_odd) );
 #ifdef DEBUG
-        mCRL2log(mcrl2::log::verbose) << "Verifying small progress measures." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Verifying small progress measures." << std::endl;
         assert(spm.verify_solution());
 #endif
     }
@@ -449,7 +449,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
     {
         // Make a dual subgame of the vertices won by player Odd
         ParityGame subgame;
-        mCRL2log(mcrl2::log::verbose) << "Constructing subgame of size "
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Constructing subgame of size "
                                       << won_by_odd.size() << " to solve for Odd..." << std::endl;
         subgame.make_subgame(game_, won_by_odd.begin(), won_by_odd.end(), true);
         subgame.compress_priorities();
@@ -466,8 +466,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
         }
 
         // Second pass; solve subgame of vertices won by Odd:
-        mCRL2log(mcrl2::log::verbose) << "Solving for Odd..." << std::endl;
-        DenseSPM spm( subgame, PLAYER_ODD,
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Solving for Odd..." << std::endl;
+        DenseSPM spm( subgame, player_t::PLAYER_ODD,
                       stats_, submap, submap_size );
         std::unique_ptr<LiftingStrategy> ls(lsf_->create(subgame, spm));
         while (spm.solve_some(*ls) == 0)
@@ -481,7 +481,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
         spm.get_strategy(substrat);
         merge_strategies(strategy, substrat, won_by_odd);
 #ifdef DEBUG
-        mCRL2log(mcrl2::log::debug) << "Verifying small progress measures." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::debug) << "Verifying small progress measures." << std::endl;
         assert(spm.verify_solution());
 #endif
     }
@@ -493,15 +493,15 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
 {
     // Create two SPM and two lifting strategy instances:
     std::array<std::unique_ptr<SmallProgressMeasures>, 2> spm;
-    spm[0] = std::make_unique<DenseSPM>(game_, PLAYER_EVEN, stats_, vmap_, vmap_size_);
-    spm[1] = std::make_unique<DenseSPM>(game_, PLAYER_ODD, stats_, vmap_, vmap_size_);
+    spm[0] = std::make_unique<DenseSPM>(game_, player_t::PLAYER_EVEN, stats_, vmap_, vmap_size_);
+    spm[1] = std::make_unique<DenseSPM>(game_, player_t::PLAYER_ODD, stats_, vmap_, vmap_size_);
 
     // Solve games alternatingly:
     int player = 0;
     bool half_solved = false;
     while (!half_solved)
     {
-        mCRL2log(mcrl2::log::verbose) << "Switching to "
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Switching to "
                                        << (player == 0 ? "normal" : "dual") << " game..." << std::endl;
         std::unique_ptr<LiftingStrategy> ls(lsf_->create(game_, *spm[player]));
 
@@ -517,14 +517,14 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_alternate()
             }
         }
 
-        mCRL2log(mcrl2::log::verbose) << "Propagating solved vertices to other game..." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Propagating solved vertices to other game..." << std::endl;
         spm[player]->get_winning_set( (ParityGame::Player)player,
                                       SetToTopIterator(*spm[1 - player]) );
         player = 1 - player;
     }
 
     // One game is solved; solve other game completely too:
-    mCRL2log(mcrl2::log::verbose) << "Finishing " << (player == 0 ? "normal" : "dual") << "game..." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Finishing " << (player == 0 ? "normal" : "dual") << "game..." << std::endl;
     std::unique_ptr<LiftingStrategy> ls(lsf_->create(game_, *spm[player]));
     while (spm[player]->solve_some(*ls) == 0)
     {
@@ -594,8 +594,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
     std::vector<verti> won_by_odd;
 
     {
-        mCRL2log(mcrl2::log::verbose) << "Solving for Even..." << std::endl;
-        DenseSPM spm( game(), PLAYER_EVEN,
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Solving for Even..." << std::endl;
+        DenseSPM spm( game(), player_t::PLAYER_EVEN,
                       stats_, vmap_, vmap_size_ );
         std::unique_ptr<LiftingStrategy2> ls(lsf_->create2(game_, spm));
         spm.initialize_lifting_strategy(*ls);
@@ -607,10 +607,10 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
           }
         }
         spm.get_strategy(strategy);
-        spm.get_winning_set( PLAYER_ODD,
+        spm.get_winning_set( player_t::PLAYER_ODD,
             std::back_insert_iterator<std::vector<verti> >(won_by_odd) );
 #ifdef DEBUG
-        mCRL2log(mcrl2::log::debug) << "Verifying small progress measures." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::debug) << "Verifying small progress measures." << std::endl;
         assert(spm.verify_solution());
 #endif
     }
@@ -619,7 +619,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
     {
         // Make a dual subgame of the vertices won by player Odd
         ParityGame subgame;
-        mCRL2log(mcrl2::log::verbose) << "Constructing subgame of size "
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Constructing subgame of size "
                                       << won_by_odd.size() << " to solve for Odd..." << std::endl;
         subgame.make_subgame(game_, won_by_odd.begin(), won_by_odd.end(), true);
         subgame.compress_priorities();
@@ -636,8 +636,8 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
         }
 
         // Second pass; solve subgame of vertices won by Odd:
-        mCRL2log(mcrl2::log::verbose) << "Solving for Odd..." << std::endl;
-        DenseSPM spm( subgame, PLAYER_ODD,
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Solving for Odd..." << std::endl;
+        DenseSPM spm( subgame, player_t::PLAYER_ODD,
                       stats_, submap, submap_size );
         std::unique_ptr<LiftingStrategy2> ls(lsf_->create2(subgame, spm));
         spm.initialize_lifting_strategy(*ls);
@@ -652,7 +652,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
         spm.get_strategy(substrat);
         merge_strategies(strategy, substrat, won_by_odd);
 #ifdef DEBUG
-        mCRL2log(mcrl2::log::debug) << "Verifying small progress measures." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::debug) << "Verifying small progress measures." << std::endl;
         assert(spm.verify_solution());
 #endif
     }
@@ -664,15 +664,15 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
 {
     // Create two SPM and two lifting strategy instances:
     std::array<std::unique_ptr<SmallProgressMeasures>, 2> spm;
-    spm[0] = std::make_unique<DenseSPM>(game_, PLAYER_EVEN, stats_, vmap_, vmap_size_);
-    spm[1] = std::make_unique<DenseSPM>(game_, PLAYER_ODD, stats_, vmap_, vmap_size_);
+    spm[0] = std::make_unique<DenseSPM>(game_, player_t::PLAYER_EVEN, stats_, vmap_, vmap_size_);
+    spm[1] = std::make_unique<DenseSPM>(game_, player_t::PLAYER_ODD, stats_, vmap_, vmap_size_);
 
     // Solve games alternatingly:
     int player = 0;
     bool half_solved = false;
     while (!half_solved)
     {
-        mCRL2log(mcrl2::log::verbose) << "Switching to " << (player == 0 ? "normal" : "dual") << " game..." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Switching to " << (player == 0 ? "normal" : "dual") << " game..." << std::endl;
         std::unique_ptr<LiftingStrategy2> ls(lsf_->create2(game_, *spm[player]));
         spm[player]->initialize_lifting_strategy(*ls);
 
@@ -686,14 +686,14 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_alternate()
             }
         }
 
-        mCRL2log(mcrl2::log::verbose) << "Propagating solved vertices to other game..." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Propagating solved vertices to other game..." << std::endl;
         spm[player]->get_winning_set( (ParityGame::Player)player,
                                       SetToTopIterator(*spm[1 - player]) );
         player = 1 - player;
     }
 
     // One game is solved; solve other game completely too:
-    mCRL2log(mcrl2::log::verbose) << "Finishing " << (player == 0 ? "normal" : "dual") << " game..." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Finishing " << (player == 0 ? "normal" : "dual") << " game..." << std::endl;
     std::unique_ptr<LiftingStrategy2> ls(lsf_->create2(game_, *spm[player]));
     spm[player]->initialize_lifting_strategy(*ls);
     while (spm[player]->solve_some(*ls) == 0)

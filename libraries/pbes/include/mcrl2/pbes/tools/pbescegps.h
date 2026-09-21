@@ -170,7 +170,7 @@ public:
         bp::opstream input_sym_stream;
         const std::string command
           = "pbessolvesymbolic - " + options.solve_symbolic_args + " --structure-graph-out=" + structure_graph_path;
-        mCRL2log(log::debug) << "Solving symbolic with command: " << command << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Solving symbolic with command: " << command << std::endl;
         sym_process = bp::child(command, bp::std_in<input_sym_stream, bp::std_out> output_sym_stream);
 
         std::ostringstream buffer(std::ios::binary);
@@ -185,7 +185,7 @@ public:
         std::string line;
         while (std::getline(output_sym_stream, line))
         {
-          mCRL2log(log::debug) << "[symbolic]: " << line << std::endl;
+          mCRL2log(log::log_level_t::debug) << "[symbolic]: " << line << std::endl;
           outline.push_back(line);
         }
         sym_process.wait();
@@ -195,20 +195,20 @@ public:
           throw mcrl2::runtime_error(
             "symbolic solver produced invalid output: " + (outline.empty() ? std::string("<empty>") : outline.back()));
         }
-        mCRL2log(log::verbose) << "Result: " << outline.back() << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Result: " << outline.back() << std::endl;
 
         result = outline.back() == "true";
 
         if (std::filesystem::exists(structure_graph_path))
         {
           m_solved_graph = load_structure_graph(structure_graph_path);
-          mCRL2log(log::verbose) << "Loaded symbolic structure graph with " << m_solved_graph.extent() << " vertices"
+          mCRL2log(log::log_level_t::verbose) << "Loaded symbolic structure graph with " << m_solved_graph.extent() << " vertices"
                                  << std::endl;
-          mCRL2log(log::debug) << "Symbolic structure graph:" << std::endl << m_solved_graph << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Symbolic structure graph:" << std::endl << m_solved_graph << std::endl;
         }
         else
         {
-          mCRL2log(log::warning) << "The symbolic solver did not produce a structure graph; refinement will fall back "
+          mCRL2log(log::log_level_t::warning) << "The symbolic solver did not produce a structure graph; refinement will fall back "
                                     "to random selection."
                                  << std::endl;
         }
@@ -242,10 +242,10 @@ public:
 
       // Solve the structure graph
       result = solve_structure_graph(m_solved_graph);
-      mCRL2log(log::verbose) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Structure graph solver returned " << (result ? "TRUE" : "FALSE") << std::endl;
     }
     timer.finish("solving approximation");
-    if (mcrl2::log::mCRL2logEnabled(log::verbose))
+    if (mcrl2::log::mCRL2logEnabled(log::log_level_t::verbose))
     {
       timer.report();
     }
@@ -263,7 +263,7 @@ public:
 
     try
     {
-      mCRL2log(log::verbose) << "Solving " << (is_overapproximation ? "over" : "under") << "approximated PBES"
+      mCRL2log(log::log_level_t::verbose) << "Solving " << (is_overapproximation ? "over" : "under") << "approximated PBES"
                              << std::endl;
       return solve(p_copy, options);
     }
@@ -303,13 +303,13 @@ public:
     auto cached = m_solution_cache.find(key);
     if (cached != m_solution_cache.end())
     {
-      mCRL2log(log::verbose) << "Using cached " << (is_overapproximation ? "over" : "under")
+      mCRL2log(log::log_level_t::verbose) << "Using cached " << (is_overapproximation ? "over" : "under")
                              << "-approximation with result: " << (cached->second.first ? "TRUE" : "FALSE")
                              << std::endl;
-      mCRL2log(log::verbose) << "Remaining parameters:" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Remaining parameters:" << std::endl;
       for (const auto& [eq_name, variables]: remaining_parameters)
       {
-        mCRL2log(log::verbose) << "  " << eq_name << ": " << core::detail::print_list(variables) << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "  " << eq_name << ": " << core::detail::print_list(variables) << std::endl;
       }
       graph = cached->second.second;
       return cached->second.first;
@@ -418,7 +418,7 @@ public:
       }
     }
 
-    mCRL2log(log::trace) << pp(result) << std::endl;
+    mCRL2log(log::log_level_t::trace) << pp(result) << std::endl;
 
     // Rewrite expressions for simplification
     simplify_data_rewriter<data::rewriter> pbesr(*m_datar);
@@ -445,7 +445,7 @@ public:
     }
     reporting_level_scope.reset();
 
-    mCRL2log(log::trace) << pp(result) << std::endl;
+    mCRL2log(log::log_level_t::trace) << pp(result) << std::endl;
 
     return result;
   }
@@ -567,7 +567,7 @@ public:
       {
         if (state.W[eq_name].contains(v))
         {
-          mCRL2log(log::verbose) << "Not abstracting parameter " << v << " of equation " << eq_name
+          mCRL2log(log::log_level_t::verbose) << "Not abstracting parameter " << v << " of equation " << eq_name
                                  << " because it occurs in the guard of a predicate variable instance in the "
                                     "scope of an infinite quantifier."
                                  << std::endl;
@@ -581,7 +581,7 @@ public:
   void make_data_closed(const pbes& p, abstract_param_state& state)
   {
     bool done = false;
-    mCRL2log(log::debug) << "======== Closing the data ======" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "======== Closing the data ======" << std::endl;
     auto global_variables = p.global_variables();
     do
     {
@@ -592,7 +592,7 @@ public:
         for (const propositional_variable_instantiation& pvi: pvis)
         {
           std::size_t i = 0;
-          mCRL2log(log::trace) << "Data-closed: eq " << eq.variable().name() << " pvi " << pvi
+          mCRL2log(log::log_level_t::trace) << "Data-closed: eq " << eq.variable().name() << " pvi " << pvi
                                << " has abstracted parameters at indices "
                                << core::detail::print_list(state.I.at(pvi.name())) << " with "
                                << core::detail::print_list(state.W.at(pvi.name())) << std::endl;
@@ -602,14 +602,14 @@ public:
             if (!contains(state.I.at(pvi.name()), i))
             {
               std::set<data::variable> free_vars = find_free_variables(pvi_param);
-              mCRL2log(log::trace) << "Data-closed: free_vars " << core::detail::print_list(free_vars) << " in \""
+              mCRL2log(log::log_level_t::trace) << "Data-closed: free_vars " << core::detail::print_list(free_vars) << " in \""
                                    << pp(pvi_param) << "\" due to " << pp(pvi) << std::endl;
               for (const data::variable& v: free_vars)
               {
                 if (contains(state.W[eq.variable().name()], v)
                     && std::find(global_variables.begin(), global_variables.end(), v) == global_variables.end())
                 {
-                  mCRL2log(log::debug) << "Data-closed: concrete param " << pp(v)
+                  mCRL2log(log::log_level_t::debug) << "Data-closed: concrete param " << pp(v)
                                        << " in W=" << core::detail::print_list(state.W[eq.variable().name()])
                                        << " of equation " << pvi.name() << " due to " << pp(pvi) << std::endl;
                   // Find the parameter with the same index
@@ -629,7 +629,7 @@ public:
                     throw mcrl2::runtime_error("Data-closed: Could not find parameter " + pp(v.name()) + " in equation "
                                                + pp(eq.variable().name()));
                   }
-                  mCRL2log(log::debug) << "Data-closed: Updated W="
+                  mCRL2log(log::log_level_t::debug) << "Data-closed: Updated W="
                                        << core::detail::print_list(state.W[eq.variable().name()]) << std::endl;
                 }
               }
@@ -640,11 +640,11 @@ public:
       }
     }
     while (!done);
-    mCRL2log(log::debug) << "======== Data closed ======" << std::endl;
-    mCRL2log(log::debug) << "Data closed: W = " << std::endl;
+    mCRL2log(log::log_level_t::debug) << "======== Data closed ======" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Data closed: W = " << std::endl;
     for (const auto& [eq_name, var_set]: state.W)
     {
-      mCRL2log(log::debug) << "" << eq_name << ": " << core::detail::print_list(var_set) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "" << eq_name << ": " << core::detail::print_list(var_set) << std::endl;
     }
   }
 
@@ -705,7 +705,7 @@ public:
       }
 
       state.remove_abstracted_variable(p, eq_name, d_j);
-      mCRL2log(log::debug) << "Rules ideal: un-abstracted " << d_j.name() << " from " << eq_name << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Rules ideal: un-abstracted " << d_j.name() << " from " << eq_name << std::endl;
 
       // dⱼ is now concrete — its rulers must be concrete too.
       auto it = m_ruling_relation.ruled_by.find(eq_name);
@@ -742,16 +742,16 @@ public:
         indices += std::to_string(i);
         indices += " ";
       }
-      mCRL2log(log::verbose) << "Abstracted parameters for " << eq_name << ": " << param_names;
-      mCRL2log(log::debug) << " (indices: " << indices << ")" << std::endl;
-      mCRL2log(log::verbose) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Abstracted parameters for " << eq_name << ": " << param_names;
+      mCRL2log(log::log_level_t::debug) << " (indices: " << indices << ")" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << std::endl;
     }
   }
 
   // Removes one parameter from one equation's abstraction set
   void unabstract_one_parameter(const pbes& p, abstract_param_state& state, const pbescegps_options& options)
   {
-    mCRL2log(log::debug) << "Updating parameters for refinement..." << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Updating parameters for refinement..." << std::endl;
 
     // First non-empty equation
     bool found = false;
@@ -776,7 +776,7 @@ public:
             state.W[eq_name].begin(),
             state.W[eq_name].end(),
             std::inserter(essential_vars, essential_vars.begin()));
-          mCRL2log(log::debug) << "Essential variables: " << eq_name << ": " << essential_vars.size() << " ("
+          mCRL2log(log::log_level_t::debug) << "Essential variables: " << eq_name << ": " << essential_vars.size() << " ("
                                << core::detail::print_list(essential_vars) << ")" << std::endl;
 
           if (essential_vars.empty())
@@ -794,7 +794,7 @@ public:
 
           if (options.var_choice == var_choice_strategy::all)
           {
-            mCRL2log(log::debug) << "Un-abstracted all parameters " << core::detail::print_list(essential_vars)
+            mCRL2log(log::log_level_t::debug) << "Un-abstracted all parameters " << core::detail::print_list(essential_vars)
                                  << " from equation " << eq_name << std::endl;
             for (const data::variable& var: essential_vars)
             {
@@ -832,7 +832,7 @@ public:
 
           if (selected_var)
           {
-            mCRL2log(log::debug) << "Un-abstracted parameter " << selected_var->name() << " from equation " << eq_name
+            mCRL2log(log::log_level_t::debug) << "Un-abstracted parameter " << selected_var->name() << " from equation " << eq_name
                                  << std::endl;
             state.remove_abstracted_variable(p, eq_name, *selected_var);
             found = true;
@@ -921,40 +921,40 @@ public:
 
       if (all_empty)
       {
-        mCRL2log(log::debug) << "No parameters to abstract, solving normally." << std::endl;
+        mCRL2log(log::log_level_t::debug) << "No parameters to abstract, solving normally." << std::endl;
         auto [result, graph] = solve(p, options);
         final_state = state;
         return result;
       }
 
       // Try under-approximation
-      mCRL2log(log::verbose) << "Trying under-approximation..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Trying under-approximation..." << std::endl;
       structure_graph under_graph;
       bool under_result = solve_approximation_cached(p, state, false, options, under_graph);
 
       if (under_result)
       {
-        mCRL2log(log::verbose) << "Under-approximation solved to TRUE" << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Under-approximation solved to TRUE" << std::endl;
         print_abstraction_summary(state);
         final_state = state;
         return true;
       }
 
       // Try over-approximation
-      mCRL2log(log::verbose) << "Trying over-approximation..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Trying over-approximation..." << std::endl;
       structure_graph over_graph;
       bool over_result = solve_approximation_cached(p, state, true, options, over_graph);
 
       if (!over_result)
       {
-        mCRL2log(log::verbose) << "Over-approximation solved to FALSE" << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Over-approximation solved to FALSE" << std::endl;
         print_abstraction_summary(state);
         final_state = state;
         return false;
       }
 
       // Both approximations are inconclusive, refine by un-abstracting one parameter
-      mCRL2log(log::verbose) << "Both approximations inconclusive, refining..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Both approximations inconclusive, refining..." << std::endl;
       p = original_p;
 
       // Create the approximated PBES instances for matching
@@ -995,20 +995,20 @@ inline pbes_expression pbescegps_iterator::apply_abstraction(const pbes_expressi
   const std::map<core::identifier_string, std::set<std::size_t>>& pbes_parameters_abstraction_indices,
   bool is_overapproximation)
 {
-  mCRL2log(log::trace) << "=== Entering apply_abstraction ===" << std::endl;
-  mCRL2log(log::trace) << "Abstraction mode: " << (is_overapproximation ? "OVER-approximation" : "UNDER-approximation")
+  mCRL2log(log::log_level_t::trace) << "=== Entering apply_abstraction ===" << std::endl;
+  mCRL2log(log::log_level_t::trace) << "Abstraction mode: " << (is_overapproximation ? "OVER-approximation" : "UNDER-approximation")
                        << std::endl;
-  mCRL2log(log::trace) << "Number of variables to abstract: " << abstraction_vars.size() << std::endl;
+  mCRL2log(log::log_level_t::trace) << "Number of variables to abstract: " << abstraction_vars.size() << std::endl;
   for (const auto& var: abstraction_vars)
   {
-    mCRL2log(log::trace) << "  - " << var.name() << std::endl;
+    mCRL2log(log::log_level_t::trace) << "  - " << var.name() << std::endl;
   }
 
   pbes_expression result;
   abstraction_rewriter<> rewriter(abstraction_vars, pbes_parameters_abstraction_indices, is_overapproximation);
-  mCRL2log(log::trace) << "Created abstraction_rewriter, now applying to expression" << std::endl;
+  mCRL2log(log::log_level_t::trace) << "Created abstraction_rewriter, now applying to expression" << std::endl;
   rewriter.apply(result, expr);
-  mCRL2log(log::trace) << "=== Exiting apply_abstraction ===" << std::endl;
+  mCRL2log(log::log_level_t::trace) << "=== Exiting apply_abstraction ===" << std::endl;
   return result;
 }
 
@@ -1023,7 +1023,7 @@ inline bool pbescegps(const std::string& input_filename,
   pbescegps_iterator iterator;
   bool result = iterator.run_cegps_algorithm(p, options);
 
-  mCRL2log(log::info) << (result ? "true" : "false") << std::endl;
+  mCRL2log(log::log_level_t::info) << (result ? "true" : "false") << std::endl;
   return result;
 }
 }; // namespace mcrl2::pbes_system

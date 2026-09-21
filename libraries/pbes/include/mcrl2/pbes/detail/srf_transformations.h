@@ -23,7 +23,7 @@ template <bool allow_ce>
 inline detail::pre_srf_pbes<allow_ce> split_conditions(const detail::pre_srf_pbes<allow_ce>& pbes,
   std::size_t granularity)
 {
-  mCRL2log(log::debug) << "splitting conditions" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "splitting conditions" << std::endl;
 
   data::set_identifier_generator id_generator;
   for (const detail::pre_srf_equation<allow_ce>& equation : pbes.equations())

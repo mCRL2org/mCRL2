@@ -64,11 +64,11 @@ class pres_constelm_tool: public pres_input_tool<pres_output_tool<pres_rewriter_
 
     bool run() override
     {
-      mCRL2log(verbose) << "presconstelm parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
-      mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
+      mCRL2log(log_level_t::verbose) << "presconstelm parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
+      mCRL2log(log_level_t::verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
 
       // load the pres
       pres p;

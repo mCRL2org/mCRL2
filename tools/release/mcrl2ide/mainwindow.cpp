@@ -437,7 +437,7 @@ void MainWindow::actionShowLts()
     else
     {
       lastLtsHasReduction = false;
-      processSystem->showLts(mcrl2::lts::lts_eq_none);
+      processSystem->showLts(mcrl2::lts::lts_equivalence::lts_eq_none);
     }
   }
 }

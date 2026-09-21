@@ -56,7 +56,7 @@ ParityGame::Strategy PriorityPromotionSolver::solve()
          query(region_function, strategy, prio);
 
         if (isOpen(region_function, prio, true)) {
-            mCRL2log(mcrl2::log::debug) << "Newly computed region is open in the subgame, with p = " << prio << std::endl;
+            mCRL2log(mcrl2::log::log_level_t::debug) << "Newly computed region is open in the subgame, with p = " << prio << std::endl;
             printRegion(region_function, prio);
 
             // Keep the new region_function and substrategy, but go to the next priority
@@ -80,7 +80,7 @@ ParityGame::Strategy PriorityPromotionSolver::solve()
 
                 // Remove the dominion from the game and keep the unsolved vertices, also reset
                 // lower priorities and set region of prio to the COMPUTED_REGION.
-                mCRL2log(mcrl2::log::debug) << "Found the dominion D, with p = " << prio << std::endl;
+                mCRL2log(mcrl2::log::log_level_t::debug) << "Found the dominion D, with p = " << prio << std::endl;
                 printRegion(region_function, prio);
 
                 // Reset the unsolved set and remove all regions, also add one dominion to statistics
@@ -113,15 +113,15 @@ ParityGame::Strategy PriorityPromotionSolver::solve()
             }
             else {
                 // The game is a dominion, but only in the subgame, so promote its priority.
-                mCRL2log(mcrl2::log::debug) << "Promoted dominion D, with p = " << prio << " to ";
+                mCRL2log(mcrl2::log::log_level_t::debug) << "Promoted dominion D, with p = " << prio << " to ";
                 prio = promoteSubDominion(region_function, strategy, prio);
-                mCRL2log(mcrl2::log::debug) << prio << std::endl;
+                mCRL2log(mcrl2::log::log_level_t::debug) << prio << std::endl;
                 printRegion(region_function, prio);
             }
         }
     }
 
-    mCRL2log(mcrl2::log::verbose) << m_dominions << " dominions found, and " << m_promotions  << " promotions required" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << m_dominions << " dominions found, and " << m_promotions  << " promotions required" << std::endl;
 
     return strategy;
 }
@@ -366,22 +366,22 @@ void PriorityPromotionSolver::printRegion(std::vector<priority_t>& region_functi
     priority_t prio)
 {
     // This costs O(V) so only enable this in debug, prints all vertices v where region_function[v] == prio.
-    if (mCRL2logEnabled(mcrl2::log::debug)) {
-        mCRL2log(mcrl2::log::debug) << "alpha-region[" << prio << "] = { ";
+    if (mCRL2logEnabled(mcrl2::log::log_level_t::debug)) {
+        mCRL2log(mcrl2::log::log_level_t::debug) << "alpha-region[" << prio << "] = { ";
         bool first = true;
         for (verti v : m_unsolved)
         {
             if (region_function[v] == prio) {
                 if (!first) {
-                    mCRL2log(mcrl2::log::debug) << ",";
+                    mCRL2log(mcrl2::log::log_level_t::debug) << ",";
                 }
 
-                mCRL2log(mcrl2::log::debug) << v;
+                mCRL2log(mcrl2::log::log_level_t::debug) << v;
                 first = false;
             }
 
         }
-        mCRL2log(mcrl2::log::debug) << " }" << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::debug) << " }" << std::endl;
     }
 }
 

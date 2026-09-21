@@ -83,7 +83,7 @@ data::variable_list project_parameters(const data::variable_list& parameters, co
     }
     else
     {
-      mCRL2log(log::warning) << "Warning parameter " << name << " is not a parameter of the process.\n";
+      mCRL2log(log::log_level_t::warning) << "Warning parameter " << name << " is not a parameter of the process.\n";
     }
   }
 

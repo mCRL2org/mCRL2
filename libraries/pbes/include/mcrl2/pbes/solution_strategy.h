@@ -20,7 +20,7 @@
 namespace mcrl2::pbes_system
 {
 
-using solution_strategy_t = enum
+enum class solution_strategy_t
 {
   gauss,
   small_progr_measures
@@ -31,10 +31,10 @@ std::string solution_strategy_to_string(const solution_strategy_t s)
 {
   switch (s)
   {
-    case gauss:
+    case solution_strategy_t::gauss:
       return "gauss";
       break;
-    case small_progr_measures:
+    case solution_strategy_t::small_progr_measures:
       return "spm";
       break;
   }
@@ -53,11 +53,11 @@ solution_strategy_t parse_solution_strategy(const std::string& s)
 {
   if (s == "gauss")
   {
-    return gauss;
+    return solution_strategy_t::gauss;
   }
   else if (s == "spm")
   {
-    return small_progr_measures;
+    return solution_strategy_t::small_progr_measures;
   }
   else
   {
@@ -86,10 +86,10 @@ std::string description(const solution_strategy_t s)
 {
   switch (s)
   {
-    case gauss:
+    case solution_strategy_t::gauss:
       return "Gauss elimination (inefficient; plain implementation)";
       break;
-    case small_progr_measures:
+    case solution_strategy_t::small_progr_measures:
       return "Small progress measures";
       break;
   }

@@ -1970,7 +1970,7 @@ bool destructive_bisimulation_compare_gjkw(LTS_TYPE& l1, LTS_TYPE& l2,
 {
   if (generate_counter_examples)
   {
-    mCRL2log(log::warning) << "The GJKW branching bisimulation algorithm does "
+    mCRL2log(log::log_level_t::warning) << "The GJKW branching bisimulation algorithm does "
                                             "not generate counterexamples.\n";
   }
   state_type init_l2 = l2.initial_state() + l1.num_states();

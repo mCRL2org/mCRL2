@@ -60,7 +60,7 @@ class sumelm_tool: public input_output_tool
 
       sumelm_algorithm<stochastic_specification>(spec, m_decluster).run();
 
-      mCRL2log(log::debug) << "Sum elimination completed, saving to " <<  output_filename() << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Sum elimination completed, saving to " <<  output_filename() << std::endl;
       save_lps(spec, output_filename());
       return true;
     }

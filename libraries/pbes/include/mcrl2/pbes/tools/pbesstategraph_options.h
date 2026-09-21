@@ -21,7 +21,7 @@ namespace mcrl2::pbes_system {
 
 struct pbesstategraph_options
 {
-  data::rewrite_strategy rewrite_strategy = data::jitty;
+  data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   bool simplify = true;
   bool use_global_variant = false;
   bool print_influence_graph = false;

@@ -23,7 +23,7 @@ struct LogDebug
 {
   LogDebug()
   {
-    log::logger::set_reporting_level(log::debug);
+    log::logger::set_reporting_level(log::log_level_t::debug);
   }
 };
 BOOST_GLOBAL_FIXTURE(LogDebug);

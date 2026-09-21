@@ -91,7 +91,7 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& te
     std::match_results<std::string::const_iterator> what;
     if (!regex_match(line, what, sre))
     {
-      mCRL2log(log::warning) << "ignoring selection '" << line << "'" << std::endl;
+      mCRL2log(log::log_level_t::warning) << "ignoring selection '" << line << "'" << std::endl;
       continue;
     }
     std::string X = what[1];

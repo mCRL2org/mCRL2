@@ -44,10 +44,10 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
       super::add_options(desc);
       desc.add_option("solver-type",
                       make_enum_argument<pbespg_solver_type>("NAME")
-                      .add_value(spm_solver, true)
-                      .add_value(alternative_spm_solver)
-                      .add_value(recursive_solver)
-                      .add_value(priority_promotion),
+                      .add_value(pbespg_solver_type::spm_solver, true)
+                      .add_value(pbespg_solver_type::alternative_spm_solver)
+                      .add_value(pbespg_solver_type::recursive_solver)
+                      .add_value(pbespg_solver_type::priority_promotion),
                       "Use the solver type NAME:", 's');
       desc.add_option("scc", "Use scc decomposition", 'c');
       desc.add_option("loop", "Eliminate self-loops", 'L');
@@ -89,21 +89,20 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
         "The solution of the first vertex, which also defines the solution of initial equation of the (P)BES, is printed to standard output. "
         "When INFILE is not present, standard input is used."
       )
-    {
-    }
+    {}
 
     bool run() override
     {
       m_options.rewrite_strategy = rewrite_strategy();
 
-      mCRL2log(verbose) << "pbespgsolve parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:        " << input_filename() << std::endl;
-      mCRL2log(verbose) << "  solver type:       " << print(m_options.solver_type) << std::endl;
-      mCRL2log(verbose) << "  eliminate self-loops: " << (m_options.use_deloop_solver?"yes":"no") << std::endl;
-      mCRL2log(verbose) << "  eliminate cycles:  " << (m_options.use_decycle_solver?"yes":"no") << std::endl;
-      mCRL2log(verbose) << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
-      mCRL2log(verbose) << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
-      mCRL2log(verbose) << "  only generate:   " << std::boolalpha << m_options.only_generate << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbespgsolve parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:        " << input_filename() << std::endl;
+      mCRL2log(log_level_t::verbose) << "  solver type:       " << print(m_options.solver_type) << std::endl;
+      mCRL2log(log_level_t::verbose) << "  eliminate self-loops: " << (m_options.use_deloop_solver?"yes":"no") << std::endl;
+      mCRL2log(log_level_t::verbose) << "  eliminate cycles:  " << (m_options.use_decycle_solver?"yes":"no") << std::endl;
+      mCRL2log(log_level_t::verbose) << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
+      mCRL2log(log_level_t::verbose) << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
+      mCRL2log(log_level_t::verbose) << "  only generate:   " << std::boolalpha << m_options.only_generate << std::endl;
 
       bool value;
       if(pbes_input_format() == pbes_system::pbes_format_pgsolver())
@@ -127,7 +126,7 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
         value = pbespgsolve(p, timer(), m_options);
       }
       std::string result = (value ? "true" : "false");
-      mCRL2log(verbose) << "The solution for the initial variable of the pbes is " << result << std::endl;
+      mCRL2log(log_level_t::verbose) << "The solution for the initial variable of the pbes is " << result << std::endl;
       std::cout << result << std::endl;
 
       return true;

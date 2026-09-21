@@ -110,12 +110,12 @@ class parity_game_output: public parity_game_generator
     /// \param todo A todo list
     void print_set(const std::string& name, const std::set<std::size_t>& todo) const
     {
-      mCRL2log(log::verbose) << name << " = {";
+      mCRL2log(log::log_level_t::verbose) << name << " = {";
       for (auto i = todo.begin(); i != todo.end(); ++i)
       {
-        mCRL2log(log::verbose) << (i == todo.begin() ? "" : ", ") << *i;
+        mCRL2log(log::log_level_t::verbose) << (i == todo.begin() ? "" : ", ") << *i;
       }
-      mCRL2log(log::verbose) << "}" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "}" << std::endl;
     }
 
   public:
@@ -185,10 +185,10 @@ class parity_game_output: public parity_game_generator
         std::set<std::size_t> dep_i = get_dependencies(i);
         switch (get_operation(i))
         {
-          case PGAME_AND:
+          case operation_type::PGAME_AND:
             odd_vertices.insert(i);
             break;
-          case PGAME_OR:
+          case operation_type::PGAME_OR:
             even_vertices.insert(i);
             break;
           default:

@@ -111,8 +111,8 @@ void ready_sim_partitioner<LTS_TYPE>::ready2sim_reduction()
   updatei();
   s_Sigma = s_Pi; // <== Key!!
   P.swap(Q);      // <== Key!!
-  mCRL2log(log::debug) << "--------------------- READY PRE-REDUCTION-------------------------" << std::endl;
-  mCRL2log(log::debug) << "  prereduction; number of blocks: " << s_Sigma << std::endl;
+  mCRL2log(log::log_level_t::debug) << "--------------------- READY PRE-REDUCTION-------------------------" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  prereduction; number of blocks: " << s_Sigma << std::endl;
 }
 
 /* ----------------- PARTITIONING ALGORITHM ------------------------- */
@@ -145,10 +145,10 @@ void ready_sim_partitioner<LTS_TYPE>::refinei()
     parent[alpha] = alpha;
   }
 
-  if (mCRL2logEnabled(log::debug))
+  if (mCRL2logEnabled(log::log_level_t::debug))
   {
-    mCRL2log(log::debug) << "---------------- Refinei ---------------------------------------" << std::endl;
-    mCRL2log(log::debug) << print_Sigma_P();
+    mCRL2log(log::log_level_t::debug) << "---------------- Refinei ---------------------------------------" << std::endl;
+    mCRL2log(log::log_level_t::debug) << print_Sigma_P();
   }
 
   /* Some local variables */
@@ -159,8 +159,8 @@ void ready_sim_partitioner<LTS_TYPE>::refinei()
   /* The main loop */  
   for (l = 0; l < aut.num_action_labels(); ++l)
   {
-    mCRL2log(log::debug) << "---------------------------------------------------" << std::endl;
-    mCRL2log(log::debug) << "Label = \"" << mcrl2::lts::pp(aut.action_label(l)) << "\"" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "---------------------------------------------------" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Label = \"" << mcrl2::lts::pp(aut.action_label(l)) << "\"" << std::endl;
 
     touched_blocks.clear();
     initialise_Sigma(UNIVERSAL_PART,l);  // Interested on {N} E<-l- alpha
@@ -202,7 +202,7 @@ template <class LTS_TYPE>
 void ready_sim_partitioner<LTS_TYPE>::updatei()
 {
   using namespace mcrl2::core;
-  mCRL2log(log::debug) << "---------------  Updatei ---------------------------------------" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "---------------  Updatei ---------------------------------------" << std::endl;
 
   std::size_t l;
   std::size_t alpha;
@@ -235,12 +235,12 @@ void ready_sim_partitioner<LTS_TYPE>::updatei()
     }
   }
 
-  mCRL2log(log::debug) << "------ Before Filter ------\nExists2: ";
-  mCRL2log(log::debug) << print_structure(exists2);
-  mCRL2log(log::debug) << "\nForall2: ";
-  mCRL2log(log::debug) << print_structure(forall2);
-  mCRL2log(log::debug) << "\nReady Preorder: ";
-  mCRL2log(log::debug) << print_relation(s_Pi,Q);  
+  mCRL2log(log::log_level_t::debug) << "------ Before Filter ------\nExists2: ";
+  mCRL2log(log::log_level_t::debug) << print_structure(exists2);
+  mCRL2log(log::log_level_t::debug) << "\nForall2: ";
+  mCRL2log(log::log_level_t::debug) << print_structure(forall2);
+  mCRL2log(log::log_level_t::debug) << "\nReady Preorder: ";
+  mCRL2log(log::log_level_t::debug) << print_relation(s_Pi,Q);  
 
   std::size_t beta;
 
@@ -265,12 +265,12 @@ void ready_sim_partitioner<LTS_TYPE>::updatei()
     }
   };
 
-  mCRL2log(log::debug) << "-----  After Filter ------\nExists2: ";
-  mCRL2log(log::debug) << print_structure(exists2);
-  mCRL2log(log::debug) << "\nForall2: ";
-  mCRL2log(log::debug) << print_structure(forall2);
-  mCRL2log(log::debug) << "\nReady Preorder: ";
-  mCRL2log(log::debug) << print_relation(s_Pi,Q);  
+  mCRL2log(log::log_level_t::debug) << "-----  After Filter ------\nExists2: ";
+  mCRL2log(log::log_level_t::debug) << print_structure(exists2);
+  mCRL2log(log::log_level_t::debug) << "\nForall2: ";
+  mCRL2log(log::log_level_t::debug) << print_structure(forall2);
+  mCRL2log(log::log_level_t::debug) << "\nReady Preorder: ";
+  mCRL2log(log::log_level_t::debug) << print_relation(s_Pi,Q);  
 }
 
 template <class LTS_TYPE>

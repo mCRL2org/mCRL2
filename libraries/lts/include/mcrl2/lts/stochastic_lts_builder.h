@@ -317,9 +317,9 @@ std::unique_ptr<stochastic_lts_builder> create_stochastic_lts_builder(const lps:
 {
   switch (output_format)
   {
-    case lts_aut: return std::make_unique<stochastic_lts_aut_builder>();
-    case lts_lts: return std::make_unique<stochastic_lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
-    case lts_fsm: return std::make_unique<stochastic_lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
+    case lts_type::lts_aut: return std::make_unique<stochastic_lts_aut_builder>();
+    case lts_type::lts_lts: return std::make_unique<stochastic_lts_lts_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters(), options.discard_lts_state_labels);
+    case lts_type::lts_fsm: return std::make_unique<stochastic_lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
     default: return std::make_unique<stochastic_lts_none_builder>();
   }
 }

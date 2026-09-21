@@ -38,9 +38,9 @@ class Edge
   protected:
     std::size_t index;   // index in list of graph edges
     std::string label;   // "action label"
-    Node* inNode = 0;
-    Node* outNode = 0;
-    Bundle* bundle = 0;
+    Node* inNode = nullptr;
+    Node* outNode = nullptr;
+    Bundle* bundle = nullptr;
 };
 
 #endif

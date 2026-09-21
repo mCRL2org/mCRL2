@@ -41,8 +41,8 @@ void ToolInformation::load()
   toolProcess.start(path, QStringList("--generate-xml"), QIODevice::ReadOnly);
   if (!toolProcess.waitForFinished(3000))
   {
-    mCRL2log(mcrl2::log::error) << "Command: " << path.toStdString() << " --generate-xml" << std::endl;
-    mCRL2log(mcrl2::log::error) << toolProcess.errorString().toStdString() << " (" << name.toStdString() << ")"
+    mCRL2log(mcrl2::log::log_level_t::error) << "Command: " << path.toStdString() << " --generate-xml" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << toolProcess.errorString().toStdString() << " (" << name.toStdString() << ")"
                                 << std::endl;
     return;
   }
@@ -52,7 +52,7 @@ void ToolInformation::load()
   QDomDocument xml;
   if (!xml.setContent(xmlText, false, &errorMsg))
   {
-    mCRL2log(mcrl2::log::error) << "Could not parse XML output of " << name.toStdString() << ": "
+    mCRL2log(mcrl2::log::log_level_t::error) << "Could not parse XML output of " << name.toStdString() << ": "
                                 << errorMsg.toStdString() << std::endl;
     return;
   }
@@ -60,7 +60,7 @@ void ToolInformation::load()
   QDomElement root = xml.documentElement();
   if (root.tagName() != "tool")
   {
-    mCRL2log(mcrl2::log::error) << "XML output of " << name.toStdString() << " contains no valid tool information"
+    mCRL2log(mcrl2::log::log_level_t::error) << "XML output of " << name.toStdString() << " contains no valid tool information"
                                 << std::endl;
     return;
   }
@@ -80,7 +80,7 @@ void ToolInformation::load()
   }
   else
   {
-    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no description element"
+    mCRL2log(mcrl2::log::log_level_t::warning) << "XML output of " << name.toStdString() << " contains no description element"
                                   << std::endl;
   }
 
@@ -90,7 +90,7 @@ void ToolInformation::load()
   }
   else
   {
-    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no author element"
+    mCRL2log(mcrl2::log::log_level_t::warning) << "XML output of " << name.toStdString() << " contains no author element"
                                   << std::endl;
   }
 
@@ -100,7 +100,7 @@ void ToolInformation::load()
   }
   else
   {
-    mCRL2log(mcrl2::log::warning) << "XML output of " << name.toStdString() << " contains no options element"
+    mCRL2log(mcrl2::log::log_level_t::warning) << "XML output of " << name.toStdString() << " contains no options element"
                                   << std::endl;
   }
 }

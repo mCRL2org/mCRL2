@@ -327,7 +327,7 @@ static void read_from_lts(LTS_TRANSITION_SYSTEM& lts, const std::string& filenam
   }
   catch (const std::exception& ex)
   {
-    mCRL2log(log::error) << ex.what() << "\n";
+    mCRL2log(log::log_level_t::error) << ex.what() << "\n";
     if (filename.empty())
     {
       throw mcrl2::runtime_error("Fail to correctly read an lts from standard input.");
@@ -415,7 +415,7 @@ static void write_to_lts(const LTS_TRANSITION_SYSTEM& lts, const std::string& fi
   }
   catch (const std::exception& ex)
   {
-    mCRL2log(log::error) << ex.what() << "\n";
+    mCRL2log(log::log_level_t::error) << ex.what() << "\n";
     throw mcrl2::runtime_error("Fail to write lts correctly to the file " + filename + ".");
   }
 }
@@ -501,25 +501,25 @@ void write_initial_state(atermpp::aterm_ostream& stream, std::size_t index)
 
 void probabilistic_lts_lts_t::save(const std::string& filename) const
 {
-  mCRL2log(log::verbose) << "Starting to save a probabilistic lts to the file " << filename << ".\n";
+  mCRL2log(log::log_level_t::verbose) << "Starting to save a probabilistic lts to the file " << filename << ".\n";
   detail::write_to_lts(*this, filename);
 }
 
 void lts_lts_t::save(std::string const& filename) const
 {
-  mCRL2log(log::verbose) << "Starting to save an lts to the file " << filename << ".\n";
+  mCRL2log(log::log_level_t::verbose) << "Starting to save an lts to the file " << filename << ".\n";
   detail::write_to_lts(*this, filename);
 }
 
 void probabilistic_lts_lts_t::load(const std::string& filename)
 {
-  mCRL2log(log::verbose) << "Starting to load a probabilistic lts from the file " << filename << ".\n";
+  mCRL2log(log::log_level_t::verbose) << "Starting to load a probabilistic lts from the file " << filename << ".\n";
   detail::read_from_lts(*this, filename);
 }
 
 void lts_lts_t::load(const std::string& filename)
 {
-  mCRL2log(log::verbose) << "Starting to load an lts from the file " << filename << ".\n";
+  mCRL2log(log::log_level_t::verbose) << "Starting to load an lts from the file " << filename << ".\n";
   detail::read_from_lts(*this, filename);
 }
 

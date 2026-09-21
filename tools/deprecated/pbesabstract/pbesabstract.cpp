@@ -87,10 +87,10 @@ class pbes_abstract_tool: public pbes_input_tool<pbes_output_tool<input_output_t
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbesabstract parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  parameters:         " << m_parameter_selection << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbesabstract parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  parameters:         " << m_parameter_selection << std::endl;
 
     // load the pbes
       pbes p;

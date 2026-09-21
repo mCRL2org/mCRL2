@@ -926,7 +926,7 @@ class bisim_partitioner_gj
                                                                                   [[nodiscard]]
                                                                                   bool check_data_structures(const std::string& tag, const bool initialisation=false, const bool check_temporary_complexity_counters=true) const
                                                                                   {
-                                                                                    mCRL2log(log::debug) << "Check data structures: " << tag << ".\n";
+                                                                                    mCRL2log(log::log_level_t::debug) << "Check data structures: " << tag << ".\n";
                                                                                     assert(m_states.size()==m_aut.num_states());
                                                                                     assert(m_states_in_blocks.size()==m_aut.num_states());
                                                                                     assert(m_transitions.size()==m_aut.num_transitions());
@@ -1215,7 +1215,7 @@ class bisim_partitioner_gj
                                                                                            (old_constellation!=null_constellation &&
                                                                                             new_constellation!=null_constellation &&
                                                                                             old_constellation!=new_constellation    ));
-                                                                                    mCRL2log(log::debug) << "Check stability: " << tag << ".\n";
+                                                                                    mCRL2log(log::log_level_t::debug) << "Check stability: " << tag << ".\n";
                                                                                     for (const state_in_block_pointer* si=m_states_in_blocks.data();
                                                                                         m_states_in_blocks.data_end()!=si; si=si->ref_state->block->end_states)
                                                                                     {
@@ -1280,7 +1280,7 @@ class bisim_partitioner_gj
                                                                                             (std::distance(b.start_bottom_states, b.sta.rt_non_bottom_states)))
                                                                                         {
                                                                                           // only splitters should be instable.
-                                                                                          mCRL2log(log::debug) << "Not all "
+                                                                                          mCRL2log(log::log_level_t::debug) << "Not all "
                                                                                             << std::distance(b.start_bottom_states, b.sta.rt_non_bottom_states)
                                                                                               << (m_branching ? " bottom states have a transition in the "
                                                                                                               : " states have a transition in the ")
@@ -1290,24 +1290,24 @@ class bisim_partitioner_gj
                                                                                               all_source_bottom_state:
                                                                                             all_source_bottom_states)
                                                                                           {
-                                                                                            mCRL2log(log::debug)
+                                                                                            mCRL2log(log::log_level_t::debug)
                                                                                               << ' '
                                                                                               << all_source_bottom_state;
                                                                                           }
-                                                                                          mCRL2log(log::debug) << '\n';
+                                                                                          mCRL2log(log::log_level_t::debug) << '\n';
                                                                                           eventual_instability_is_ok = false;
                                                                                         }
                                                                                         if (!ind->is_stable())
                                                                                         {
                                                                                           // only splitters should contain marked transitions.
-                                                                                          mCRL2log(log::debug) << ind->debug_id(*this) << " contains " << std::distance(ind->start_marked_BLC, ind->end_same_BLC) << " marked transitions.\n";
+                                                                                          mCRL2log(log::log_level_t::debug) << ind->debug_id(*this) << " contains " << std::distance(ind->start_marked_BLC, ind->end_same_BLC) << " marked transitions.\n";
                                                                                           eventual_marking_is_ok = false;
                                                                                         }
                                                                                         if (b.contains_new_bottom_states)
                                                                                         {
                                                                                           if (!(eventual_instability_is_ok && eventual_marking_is_ok))
                                                                                           {
-                                                                                            mCRL2log(log::debug) << "  This is ok because " << b.debug_id(*this) << " contains new bottom states.\n";
+                                                                                            mCRL2log(log::log_level_t::debug) << "  This is ok because " << b.debug_id(*this) << " contains new bottom states.\n";
                                                                                             eventual_instability_is_ok = true;
                                                                                             eventual_marking_is_ok = true;
                                                                                           }
@@ -1328,7 +1328,7 @@ class bisim_partitioner_gj
                                                                                             }
                                                                                             if (calM_elt->first<=ind->start_same_BLC && ind->end_same_BLC<=calM_elt->second)
                                                                                             {
-                                                                                              mCRL2log(log::debug) <<"  This is ok because the BLC set ("
+                                                                                              mCRL2log(log::log_level_t::debug) <<"  This is ok because the BLC set ("
                                                                                                   << b.debug_id(*this) << " -" << m_aut.action_label(first_t.label())
                                                                                                   << "-> " << m_states[first_t.to()].
                                                                                                                          block->c.onstellation->debug_id(*this)
@@ -1355,7 +1355,7 @@ class bisim_partitioner_gj
                                                                                                     {
                                                                                                       assert(new_constellation==
                                                                                                                   m_states[main_t.to()].block->c.onstellation);
-                                                                                                      mCRL2log(log::debug) << "  This is ok because the BLC set (" << b.debug_id(*this) << " -" << m_aut.action_label(first_t.label()) << "-> " << old_constellation->debug_id(*this) << ") is soon going to be a co-splitter.\n";
+                                                                                                      mCRL2log(log::log_level_t::debug) << "  This is ok because the BLC set (" << b.debug_id(*this) << " -" << m_aut.action_label(first_t.label()) << "-> " << old_constellation->debug_id(*this) << ") is soon going to be a co-splitter.\n";
                                                                                                       eventual_instability_is_ok = true;
                                                                                                       eventual_marking_is_ok = true;
                                                                                                     }
@@ -1369,7 +1369,7 @@ class bisim_partitioner_gj
                                                                                           {
                                                                                             if (calM_iter->first<=ind->start_same_BLC && ind->end_same_BLC<=calM_iter->second)
                                                                                             {
-                                                                                              mCRL2log(log::debug) <<"  This is ok because the BLC set ("
+                                                                                              mCRL2log(log::log_level_t::debug) <<"  This is ok because the BLC set ("
                                                                                                   << b.debug_id(*this) << " -" << m_aut.action_label(first_t.label())
                                                                                                   << "-> "
                                                                                                   << m_states[first_t.to()].block->c.onstellation->debug_id(*this)
@@ -1396,7 +1396,7 @@ class bisim_partitioner_gj
                                                                                                     {
                                                                                                       assert(new_constellation==
                                                                                                                   m_states[main_t.to()].block->c.onstellation);
-                                                                                                      mCRL2log(log::debug) << "  This is ok because the BLC "
+                                                                                                      mCRL2log(log::log_level_t::debug) << "  This is ok because the BLC "
                                                                                                           "set (" << b.debug_id(*this) << " -"
                                                                                                           << m_aut.action_label(first_t.label())
                                                                                                           << "-> " << old_constellation->debug_id(*this)
@@ -1414,7 +1414,7 @@ class bisim_partitioner_gj
                                                                                         {
                                                                                           if (!eventual_marking_is_ok)
                                                                                           {
-                                                                                            mCRL2log(log::debug) << "  (This is ok because the source block contains only 1 state.)\n";
+                                                                                            mCRL2log(log::log_level_t::debug) << "  (This is ok because the source block contains only 1 state.)\n";
                                                                                             eventual_marking_is_ok = true;
                                                                                           }
                                                                                         }
@@ -1432,19 +1432,19 @@ class bisim_partitioner_gj
                                                                                         }
                                                                                       }
                                                                                     }
-                                                                                    mCRL2log(log::debug) << "Check stability finished: " << tag << ".\n";
+                                                                                    mCRL2log(log::log_level_t::debug) << "Check stability finished: " << tag << ".\n";
                                                                                     return true;
                                                                                   }
 
                                                                                   /// \brief Prints the list of BLC sets as debug output
                                                                                   void display_BLC_list(const block_type* const bi) const
                                                                                   {
-                                                                                    mCRL2log(log::debug) << "\n  BLC_List\n";
+                                                                                    mCRL2log(log::log_level_t::debug) << "\n  BLC_List\n";
                                                                                     for(const BLC_indicators& blc_it: bi->block.to_constellation)
                                                                                     {
                                                                                       const transition& first_t=m_aut.get_transitions()[*blc_it.start_same_BLC];
                                                                                       const label_index l=label_or_divergence(first_t, (label_index) -2);
-                                                                                      mCRL2log(log::debug)
+                                                                                      mCRL2log(log::log_level_t::debug)
                                                                                         << "\n    BLC set "
                                                                                         << std::distance<
                                                                                              BLC_list_const_iterator>(
@@ -1470,7 +1470,7 @@ class bisim_partitioner_gj
                                                                                       {
                                                                                         if (i == blc_it.start_marked_BLC)
                                                                                         {
-                                                                                          mCRL2log(log::debug) << "        (The BLC set is unstable, and the "
+                                                                                          mCRL2log(log::log_level_t::debug) << "        (The BLC set is unstable, and the "
                                                                                                                        " following transitions are marked.)\n";
                                                                                         }
                                                                                         if (i>=blc_it.end_same_BLC)
@@ -1478,45 +1478,45 @@ class bisim_partitioner_gj
                                                                                           break;
                                                                                         }
                                                                                         const transition& t=m_aut.get_transitions()[*i];
-                                                                                        mCRL2log(log::debug) << "        " << t.from() << " -"
+                                                                                        mCRL2log(log::log_level_t::debug) << "        " << t.from() << " -"
                                                                                                            << m_aut.action_label(t.label()) << "-> " << t.to();
                                                                                         if (is_inert_during_init(t) &&
                                                                                             m_states[t.from()].block==m_states[t.to()].block)
                                                                                         {
-                                                                                          mCRL2log(log::debug) << " (block-inert)";
+                                                                                          mCRL2log(log::log_level_t::debug) << " (block-inert)";
                                                                                         }
                                                                                         else if (is_inert_during_init(t) &&
                                                                                                  m_states[t.from()].block->c.onstellation==
                                                                                                                         m_states[t.to()].block->c.onstellation)
                                                                                         {
-                                                                                          mCRL2log(log::debug) << " (constellation-inert)";
+                                                                                          mCRL2log(log::log_level_t::debug) << " (constellation-inert)";
                                                                                         }
-                                                                                        mCRL2log(log::debug) << '\n';
+                                                                                        mCRL2log(log::log_level_t::debug) << '\n';
                                                                                       }
                                                                                     }
-                                                                                    mCRL2log(log::debug) << "  BLC_List end\n";
+                                                                                    mCRL2log(log::log_level_t::debug) << "  BLC_List end\n";
                                                                                   }
 
                                                                                   /// \brief Prints the partition refinement data structure as debug output
                                                                                   void print_data_structures(const std::string& header,
                                                                                                              const bool initialisation=false) const
                                                                                   {
-                                                                                    if (!mCRL2logEnabled(log::debug))  {  return;  }
-                                                                                    mCRL2log(log::debug) << "========= PRINT DATASTRUCTURE: " << header << " =======================================\n"
+                                                                                    if (!mCRL2logEnabled(log::log_level_t::debug))  {  return;  }
+                                                                                    mCRL2log(log::log_level_t::debug) << "========= PRINT DATASTRUCTURE: " << header << " =======================================\n"
                                                                                                             "++++++++++++++++++++    States    ++++++++++++++++++++++++++++\n";
                                                                                     for(state_index si=0; si<m_aut.num_states(); ++si)
                                                                                     {
-                                                                                      mCRL2log(log::debug) << "State " << si <<" (" << m_states[si].block->debug_id(*this) << "):\n"
+                                                                                      mCRL2log(log::log_level_t::debug) << "State " << si <<" (" << m_states[si].block->debug_id(*this) << "):\n"
                                                                                                               "  #Inert outgoing transitions: " << m_states[si].no_of_outgoing_block_inert_transitions << "\n"
 
                                                                                                               "  Incoming transitions:\n";
                                                                                       std::vector<transition>::const_iterator end=(si+1==m_aut.num_states()?m_aut.get_transitions().end():m_states[si+1].start_incoming_transitions);
                                                                                       for(std::vector<transition>::const_iterator it=m_states[si].start_incoming_transitions; it!=end; ++it)
                                                                                       {
-                                                                                         mCRL2log(log::debug) << "    " << ptr(*it) << "\n";
+                                                                                         mCRL2log(log::log_level_t::debug) << "    " << ptr(*it) << "\n";
                                                                                       }
 
-                                                                                      mCRL2log(log::debug) << "  Outgoing transitions:\n";
+                                                                                      mCRL2log(log::log_level_t::debug) << "  Outgoing transitions:\n";
                                                                                       label_index t_label=m_aut.tau_label_index();
                                                                                       const constellation_type* to_constln=null_constellation;
                                                                                       for(outgoing_transitions_const_it it=m_states[si].start_outgoing_transitions;
@@ -1537,7 +1537,7 @@ class bisim_partitioner_gj
                                                                                           const label_index old_t_label=t_label;
                                                                                           t_label=label_or_divergence(t, (label_index) -2);
                                                                                           to_constln=m_states[t.to()].block->c.onstellation;
-                                                                                          mCRL2log(log::debug)
+                                                                                          mCRL2log(log::log_level_t::debug)
                                                                                             << "    -  -  -  - saC "
                                                                                                "slice of "
                                                                                             << (std::cmp_equal(-2,
@@ -1560,16 +1560,16 @@ class bisim_partitioner_gj
                                                                                                      "first\n"
                                                                                                    : ":\n");
                                                                                         }
-                                                                                        mCRL2log(log::debug) << "    " << ptr(t);
+                                                                                        mCRL2log(log::log_level_t::debug) << "    " << ptr(t);
                                                                                         if (start_same_saC_valid)
                                                                                         {
                                                                                           if (label_or_divergence(t, (label_index) -2)!=t_label)
                                                                                           {
-                                                                                            mCRL2log(log::debug) << " -- error: different label";
+                                                                                            mCRL2log(log::log_level_t::debug) << " -- error: different label";
                                                                                           }
                                                                                           if (!initialisation && m_states[t.to()].block->c.onstellation!=to_constln)
                                                                                           {
-                                                                                            mCRL2log(log::debug) << " -- error: different target " << m_states[t.to()].block->c.onstellation->debug_id(*this);
+                                                                                            mCRL2log(log::log_level_t::debug) << " -- error: different target " << m_states[t.to()].block->c.onstellation->debug_id(*this);
                                                                                           }
                                                                                           if (it->start_same_saC->start_same_saC == it)
                                                                                           {
@@ -1586,7 +1586,7 @@ class bisim_partitioner_gj
                                                                                                    m_states[prev_t.to()].block->c.onstellation==
                                                                                                                        m_states[t.to()].block->c.onstellation))
                                                                                               {
-                                                                                                mCRL2log(log::debug) << " -- error: not the beginning of a saC-slice";
+                                                                                                mCRL2log(log::log_level_t::debug) << " -- error: not the beginning of a saC-slice";
                                                                                               }
                                                                                             }
                                                                                             if (it->start_same_saC <= it && std::next(it) < m_outgoing_transitions.end())
@@ -1601,39 +1601,39 @@ class bisim_partitioner_gj
                                                                                                    m_states[next_t.to()].block->c.onstellation==
                                                                                                                        m_states[t.to()].block->c.onstellation))
                                                                                               {
-                                                                                                mCRL2log(log::debug) << " -- error: not the end of a saC-slice";
+                                                                                                mCRL2log(log::log_level_t::debug) << " -- error: not the end of a saC-slice";
                                                                                               }
                                                                                             }
                                                                                           }
                                                                                           else if (it->start_same_saC > it ? it->start_same_saC->start_same_saC > it : it->start_same_saC->start_same_saC < it)
                                                                                           {
-                                                                                            mCRL2log(log::debug) << " -- error: not pointing to its own saC-slice";
+                                                                                            mCRL2log(log::log_level_t::debug) << " -- error: not pointing to its own saC-slice";
                                                                                           }
                                                                                         }
-                                                                                        mCRL2log(log::debug) << '\n';
+                                                                                        mCRL2log(log::log_level_t::debug) << '\n';
                                                                                       }
-                                                                                      mCRL2log(log::debug) << "  Ref states in blocks: " << std::distance<fixed_vector<state_type_gj>::const_iterator>(m_states.cbegin(), m_states[si].ref_states_in_blocks->ref_state) << ". Must be " << si <<".\n";
-                                                                                      mCRL2log(log::debug) << "---------------------------------------------------\n";
+                                                                                      mCRL2log(log::log_level_t::debug) << "  Ref states in blocks: " << std::distance<fixed_vector<state_type_gj>::const_iterator>(m_states.cbegin(), m_states[si].ref_states_in_blocks->ref_state) << ". Must be " << si <<".\n";
+                                                                                      mCRL2log(log::log_level_t::debug) << "---------------------------------------------------\n";
                                                                                     }
-                                                                                    mCRL2log(log::debug) << "++++++++++++++++++++ Transitions ++++++++++++++++++++++++++++\n";
+                                                                                    mCRL2log(log::log_level_t::debug) << "++++++++++++++++++++ Transitions ++++++++++++++++++++++++++++\n";
                                                                                     for(transition_index ti=0; ti<m_transitions.size(); ++ti)
                                                                                     {
                                                                                       const transition& t=m_aut.get_transitions()[ti];
-                                                                                      mCRL2log(log::debug) << "Transition " << ti <<": " << t.from()
+                                                                                      mCRL2log(log::log_level_t::debug) << "Transition " << ti <<": " << t.from()
                                                                                                                             << " -" << m_aut.action_label(t.label()) << "-> "
                                                                                                                             << t.to() << "\n";
                                                                                     }
 
-                                                                                    mCRL2log(log::debug) << "++++++++++++++++++++ Blocks ++++++++++++++++++++++++++++\n";
+                                                                                    mCRL2log(log::log_level_t::debug) << "++++++++++++++++++++ Blocks ++++++++++++++++++++++++++++\n";
                                                                                     for (const state_in_block_pointer* si=m_states_in_blocks.data();
                                                                                         m_states_in_blocks.data_end()!=si; si=si->ref_state->block->end_states)
                                                                                     {
                                                                                       block_type* const bi=si->ref_state->block;
-                                                                                      mCRL2log(log::debug) << "  Block " << bi;
+                                                                                      mCRL2log(log::log_level_t::debug) << "  Block " << bi;
                                                                                       if (!initialisation) {
-                                                                                        mCRL2log(log::debug) << " (" << bi->c.onstellation->debug_id(*this) << ')';
+                                                                                        mCRL2log(log::log_level_t::debug) << " (" << bi->c.onstellation->debug_id(*this) << ')';
                                                                                       }
-                                                                                      mCRL2log(log::debug) << ":\n  " << std::distance(bi->start_bottom_states,
+                                                                                      mCRL2log(log::log_level_t::debug) << ":\n  " << std::distance(bi->start_bottom_states,
                                                                                                                        bi->sta.rt_non_bottom_states)
                                                                                           << (m_branching ? " Bottom state" : " State")
                                                                                           << (1==std::distance(bi->start_bottom_states,
@@ -1641,11 +1641,11 @@ class bisim_partitioner_gj
                                                                                       for (const state_in_block_pointer*
                                                                                          sit=bi->start_bottom_states; sit!=bi->sta.rt_non_bottom_states; ++sit)
                                                                                       {
-                                                                                        mCRL2log(log::debug) << sit->ref_state->debug_id_short(*this) << "  ";
+                                                                                        mCRL2log(log::log_level_t::debug) << sit->ref_state->debug_id_short(*this) << "  ";
                                                                                       }
                                                                                       if (m_branching)
                                                                                       {
-                                                                                        mCRL2log(log::debug) << "\n  " << std::distance
+                                                                                        mCRL2log(log::log_level_t::debug) << "\n  " << std::distance
                                                                                                                  (bi->sta.rt_non_bottom_states, bi->end_states)
                                                                                             << " Non-bottom state" << (1==std::distance
                                                                                                                  (bi->sta.rt_non_bottom_states, bi->end_states)
@@ -1653,7 +1653,7 @@ class bisim_partitioner_gj
                                                                                         for (const state_in_block_pointer*
                                                                                                   sit=bi->sta.rt_non_bottom_states; sit!=bi->end_states; ++sit)
                                                                                         {
-                                                                                          mCRL2log(log::debug) << sit->ref_state->debug_id_short(*this) << "  ";
+                                                                                          mCRL2log(log::log_level_t::debug) << sit->ref_state->debug_id_short(*this) << "  ";
                                                                                         }
                                                                                       }
                                                                                       else
@@ -1664,34 +1664,34 @@ class bisim_partitioner_gj
                                                                                       {
                                                                                         display_BLC_list(bi);
                                                                                       }
-                                                                                      mCRL2log(log::debug) << "\n";
+                                                                                      mCRL2log(log::log_level_t::debug) << "\n";
                                                                                     }
 
-                                                                                    mCRL2log(log::debug) << "++++++++++++++++++++ Constellations ++++++++++++++++++++++++++++\n";
+                                                                                    mCRL2log(log::log_level_t::debug) << "++++++++++++++++++++ Constellations ++++++++++++++++++++++++++++\n";
                                                                                     for (const state_in_block_pointer* si=m_states_in_blocks.data();
                                                                                                      m_states_in_blocks.data_end()!=si;
                                                                                                      si=si->ref_state->block->c.onstellation->end_const_states)
                                                                                     {
                                                                                       const constellation_type* const ci=si->ref_state->block->c.onstellation;
-                                                                                      mCRL2log(log::debug) << "  " << ci->debug_id(*this) << ":\n";
-                                                                                      mCRL2log(log::debug) << "    Blocks in constellation:";
+                                                                                      mCRL2log(log::log_level_t::debug) << "  " << ci->debug_id(*this) << ":\n";
+                                                                                      mCRL2log(log::log_level_t::debug) << "    Blocks in constellation:";
                                                                                       for (const state_in_block_pointer*
                                                                                                             constln_it=ci->start_const_states;
                                                                                                             constln_it<ci->end_const_states; )
                                                                                       {
                                                                                         const block_type* const bi=constln_it->ref_state->block;
-                                                                                        mCRL2log(log::debug) << " " << bi->debug_id(*this);
+                                                                                        mCRL2log(log::log_level_t::debug) << " " << bi->debug_id(*this);
                                                                                         constln_it = bi->end_states;
                                                                                       }
-                                                                                      mCRL2log(log::debug) << "\n";
+                                                                                      mCRL2log(log::log_level_t::debug) << "\n";
                                                                                     }
-                                                                                    mCRL2log(log::debug) << "Non-trivial constellations:";
+                                                                                    mCRL2log(log::log_level_t::debug) << "Non-trivial constellations:";
                                                                                     for (const constellation_type* ci: m_non_trivial_constellations)
                                                                                     {
-                                                                                      mCRL2log(log::debug) << " " << ci->debug_id(*this);
+                                                                                      mCRL2log(log::log_level_t::debug) << " " << ci->debug_id(*this);
                                                                                     }
 
-                                                                                    mCRL2log(log::debug) <<
+                                                                                    mCRL2log(log::log_level_t::debug) <<
                                                                                          "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
                                                                                          "Outgoing transitions:\n";
 
@@ -1700,7 +1700,7 @@ class bisim_partitioner_gj
                                                                                     {
                                                                                       const transition& t=m_aut.get_transitions()[!initialisation
                                                                                                              ? *pi->ref.BLC_transitions : pi->ref.transitions];
-                                                                                      mCRL2log(log::debug) << "  " << t.from() << " -"
+                                                                                      mCRL2log(log::log_level_t::debug) << "  " << t.from() << " -"
                                                                                                            << m_aut.action_label(t.label()) << "-> " << t.to();
                                                                                       if (m_outgoing_transitions.cbegin()<=pi->start_same_saC &&
                                                                                           pi->start_same_saC<m_outgoing_transitions.end())
@@ -1708,7 +1708,7 @@ class bisim_partitioner_gj
                                                                                         const transition& t1=m_aut.get_transitions()[!initialisation
                                                                                                                      ? *pi->start_same_saC->ref.BLC_transitions
                                                                                                                      : pi->start_same_saC->ref.transitions];
-                                                                                        mCRL2log(log::debug) << "  \t(same saC: " << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to();
+                                                                                        mCRL2log(log::log_level_t::debug) << "  \t(same saC: " << t1.from() << " -" << m_aut.action_label(t1.label()) << "-> " << t1.to();
                                                                                         const label_index t_label = label_or_divergence(t);
                                                                                         if (pi->start_same_saC->start_same_saC == pi)
                                                                                         {
@@ -1725,7 +1725,7 @@ class bisim_partitioner_gj
                                                                                                  m_states[prev_t.to()].block->c.onstellation==
                                                                                                                        m_states[t.to()].block->c.onstellation))
                                                                                             {
-                                                                                              mCRL2log(log::debug) << " -- error: not the beginning of a saC-slice";
+                                                                                              mCRL2log(log::log_level_t::debug) << " -- error: not the beginning of a saC-slice";
                                                                                             }
                                                                                           }
                                                                                           if (pi->start_same_saC <= pi && std::next(pi) < m_outgoing_transitions.end())
@@ -1740,27 +1740,27 @@ class bisim_partitioner_gj
                                                                                                  m_states[next_t.to()].block->c.onstellation==
                                                                                                                        m_states[t.to()].block->c.onstellation))
                                                                                             {
-                                                                                              mCRL2log(log::debug) << " -- error: not the end of a saC-slice";
+                                                                                              mCRL2log(log::log_level_t::debug) << " -- error: not the end of a saC-slice";
                                                                                             }
                                                                                           }
                                                                                         }
                                                                                         else if (pi->start_same_saC > pi ? pi->start_same_saC->start_same_saC > pi : pi->start_same_saC->start_same_saC < pi)
                                                                                         {
-                                                                                          mCRL2log(log::debug) << " -- error: not in its own saC-slice";
+                                                                                          mCRL2log(log::log_level_t::debug) << " -- error: not in its own saC-slice";
                                                                                         }
-                                                                                        mCRL2log(log::debug) << ')';
+                                                                                        mCRL2log(log::log_level_t::debug) << ')';
                                                                                       }
-                                                                                      mCRL2log(log::debug) << '\n';
+                                                                                      mCRL2log(log::log_level_t::debug) << '\n';
                                                                                     }
-                                                                                    mCRL2log(log::debug) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+                                                                                    mCRL2log(log::log_level_t::debug) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
                                                                                                             "New bottom blocks to be investigated:";
 
                                                                                     for(const block_type* bi: m_blocks_with_new_bottom_states)
                                                                                     {
-                                                                                      mCRL2log(log::debug) << "  " << bi->debug_id(*this) << '\n';
+                                                                                      mCRL2log(log::log_level_t::debug) << "  " << bi->debug_id(*this) << '\n';
                                                                                     }
 
-                                                                                    mCRL2log(log::debug) << "\n========= END PRINT DATASTRUCTURE: " << header << " =======================================\n";
+                                                                                    mCRL2log(log::log_level_t::debug) << "\n========= END PRINT DATASTRUCTURE: " << header << " =======================================\n";
                                                                                   }
                                                                                 #endif // ifndef NDEBUG
   public:
@@ -5782,7 +5782,7 @@ class bisim_partitioner_gj
 
     void create_initial_partition()
     {
-      mCRL2log(log::verbose) << "An O(m log n) "
+      mCRL2log(log::log_level_t::verbose) << "An O(m log n) "
            << (m_branching ? (m_preserve_divergence
                                          ? "divergence-preserving branching "
                                          : "branching ")
@@ -5887,7 +5887,7 @@ class bisim_partitioner_gj
       }
 
       // Group transitions per outgoing state.
-      // mCRL2log(log::verbose) << "Start setting outgoing transitions\n";
+      // mCRL2log(log::log_level_t::verbose) << "Start setting outgoing transitions\n";
       {
         fixed_vector<transition_index> count_outgoing_transitions_per_state
                                                        (m_aut.num_states(), 0);
@@ -5915,7 +5915,7 @@ class bisim_partitioner_gj
         {                                                                       // mCRL2complexity(&m_states[s], add_work(..., 1), *this);
           if (marked_range<=m_states[s].no_of_outgoing_block_inert_transitions)     // Because every state is touched exactly once,
           {                                                                         // we do not store a physical counter for this.
-            mCRL2log(log::error) << "State " << s << " has "
+            mCRL2log(log::log_level_t::error) << "State " << s << " has "
                     << m_states[s].no_of_outgoing_block_inert_transitions
                     << " outgoing block-inert transitions.  However, the "
                        "four-way-split can handle at most " << (marked_range-1)
@@ -6074,7 +6074,7 @@ class bisim_partitioner_gj
       /* Everything except `m_BLC_transitions` is now completely initialized.*/ //print_data_structures("After initial reading before splitting in the initialisation", true);
                                                                                 assert(check_data_structures("After initial reading before splitting in the initialisation", true, false));
       // The initial partition has been constructed. Continue with the initialisation.
-      // mCRL2log(log::verbose) << "Start refining in the initialisation WITHOUT BLC sets\n";
+      // mCRL2log(log::log_level_t::verbose) << "Start refining in the initialisation WITHOUT BLC sets\n";
 
       // We have not yet fully instantiated the BLC sets.
       // Therefore, we run a kind of simplified stabilisation: we do not need
@@ -6328,7 +6328,7 @@ class bisim_partitioner_gj
       {                                                                         //print_data_structures("MAIN LOOP");
                                                                                 assert(check_data_structures("MAIN LOOP"));
                                                                                 assert(check_stability("MAIN LOOP"));
-        if (mCRL2logEnabled(log::verbose))
+        if (mCRL2logEnabled(log::log_level_t::verbose))
         {
           if (std::clock_t now = std::clock(); next_print_time <= now ||
                                           m_non_trivial_constellations.empty())
@@ -6350,18 +6350,18 @@ class bisim_partitioner_gj
               {
                 if (3600 <= now)
                 {
-                    mCRL2log(log::verbose) << now / 3600 << " h ";
+                    mCRL2log(log::log_level_t::verbose) << now / 3600 << " h ";
                     now %= 3600;
                 }
-                mCRL2log(log::verbose) << now / 60 << " min ";
+                mCRL2log(log::log_level_t::verbose) << now / 60 << " min ";
                 now %= 60;
               }
-              mCRL2log(log::verbose) << now
+              mCRL2log(log::log_level_t::verbose) << now
                               << " sec passed since starting the main loop.\n";
             }
             #define PRINT_SG_PL(counter, sg_string, pl_string) \
                       (counter) << (1 == (counter) ? (sg_string) : (pl_string))
-            mCRL2log(log::verbose)
+            mCRL2log(log::log_level_t::verbose)
               << (m_non_trivial_constellations.empty()
                                         ? "The reduced LTS contains "
                                         : "The reduced LTS contains at least ")
@@ -6372,13 +6372,13 @@ class bisim_partitioner_gj
             {
               #define PRINT_INT_PERCENTAGE(num,denom) \
                                         (((num) * 200 + (denom)) / (denom) / 2)
-              mCRL2log(log::verbose) << " Estimated "
+              mCRL2log(log::log_level_t::verbose) << " Estimated "
                 << PRINT_INT_PERCENTAGE(no_of_constellations - 1,
                                                 no_of_blocks - 1)
                 << "% done.";
               #undef PRINT_INT_PERCENTAGE
             }
-            mCRL2log(log::verbose)
+            mCRL2log(log::log_level_t::verbose)
             //  << " Logarithmic estimate: "
             //  << (int)(100.5+std::log((double) no_of_constellations/
             //                      no_of_blocks)
@@ -6387,11 +6387,11 @@ class bisim_partitioner_gj
                 << "\nThe current partition contains ";
             if (m_branching)
             {
-              mCRL2log(log::verbose)
+              mCRL2log(log::log_level_t::verbose)
                   << PRINT_SG_PL(no_of_new_bottom_states,
                           " new bottom state and ", " new bottom states and ");
             }                                                                   else  {  assert(0==no_of_new_bottom_states);  }
-            mCRL2log(log::verbose)
+            mCRL2log(log::log_level_t::verbose)
               << PRINT_SG_PL(no_of_constellations,
                      " constellation (of which ", " constellations (of which ")
               << PRINT_SG_PL(m_non_trivial_constellations.size(),
@@ -6737,12 +6737,12 @@ class bisim_partitioner_gj
           m_branching(branching),
           m_preserve_divergence(preserve_divergence)
     {                                                                           assert(m_branching || !m_preserve_divergence);
-      // mCRL2log(log::debug) << "Start initialisation.\n";
+      // mCRL2log(log::log_level_t::debug) << "Start initialisation.\n";
       // Apply the hidden labels explicitly as the information about hidden labels is not used.
       aut.rename_hidden_labels_to_tau(); 
       create_initial_partition();
       end_initial_part=std::clock();
-      mCRL2log(log::debug) << "After initialisation there are "
+      mCRL2log(log::log_level_t::debug) << "After initialisation there are "
               << no_of_blocks << " equivalence classes. Start refining. \n";
       refine_partition_until_it_becomes_stable();                               assert(check_data_structures("READY"));
     }
@@ -6781,7 +6781,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
 {
     if (1 >= l.num_states())
     {
-        mCRL2log(log::warning) <<"There is only 1 state in the LTS. It is not "
+        mCRL2log(log::log_level_t::warning) <<"There is only 1 state in the LTS. It is not "
                 "guaranteed that branching bisimulation minimisation runs in "
                 "time O(m log n).\n";
     }
@@ -6802,7 +6802,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
     const std::clock_t end_part=std::clock();
     bisim_part.finalize_minimized_LTS();
 
-    if (mCRL2logEnabled(log::debug))
+    if (mCRL2logEnabled(log::log_level_t::debug))
     {
         const std::clock_t end_finalizing=std::clock();
         const int prec=static_cast<int>
@@ -6835,7 +6835,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
                 }
                 int width = static_cast<int>(std::log10(h[0])) + 1;
 
-                mCRL2log(log::debug) << std::fixed << std::setprecision(prec)
+                mCRL2log(log::log_level_t::debug) << std::fixed << std::setprecision(prec)
                     << "Time spent on contracting SCCs: " << std::setw(width) << h[1] << "h " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
                        "Time spent on initial partition:" << std::setw(width) << h[2] << "h " << std::setw(2) << min[2] << "min " << std::setw(prec+3) << runtime[2] << "s\n"
                        "Time spent on stabilize+refine: " << std::setw(width) << h[3] << "h " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
@@ -6846,7 +6846,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
             }
             else
             {
-                mCRL2log(log::debug) << std::fixed << std::setprecision(prec)
+                mCRL2log(log::log_level_t::debug) << std::fixed << std::setprecision(prec)
                     << "Time spent on contracting SCCs: " << std::setw(2) << min[1] << "min " << std::setw(prec+3) << runtime[1] << "s\n"
                        "Time spent on initial partition:" << std::setw(2) << min[2] << "min " << std::setw(prec+3) << runtime[2] << "s\n"
                        "Time spent on stabilize+refine: " << std::setw(2) << min[3] << "min " << std::setw(prec+3) << runtime[3] << "s\n"
@@ -6858,7 +6858,7 @@ void bisimulation_reduce_gj(LTS_TYPE& l, const bool branching = false,
         }
         else
         {
-            mCRL2log(log::debug) << std::fixed << std::setprecision(prec)
+            mCRL2log(log::log_level_t::debug) << std::fixed << std::setprecision(prec)
                 << "Time spent on contracting SCCs: " << std::setw(prec+3) << runtime[1] << "s\n"
                    "Time spent on initial partition:" << std::setw(prec+3) << runtime[2] << "s\n"
                    "Time spent on stabilize+refine: " << std::setw(prec+3) << runtime[3] << "s\n"
@@ -6899,7 +6899,7 @@ bool destructive_bisimulation_compare_gj(LTS_TYPE& l1, LTS_TYPE& l2,
 {
     if (generate_counter_examples)
     {
-        mCRL2log(log::warning) << "The GJ25 branching bisimulation "
+        mCRL2log(log::log_level_t::warning) << "The GJ25 branching bisimulation "
                               "algorithm does not generate counterexamples.\n";
     }
     std::size_t init_l2(l2.initial_state() + l1.num_states());

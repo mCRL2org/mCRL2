@@ -116,7 +116,7 @@ class lts_fsm_base
     */
     lts_type type() const
     {
-      return lts_fsm;
+      return lts_type::lts_fsm;
     }
 
     /** \brief Standard swap function */

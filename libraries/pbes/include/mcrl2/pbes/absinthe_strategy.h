@@ -18,7 +18,7 @@
 namespace mcrl2::pbes_system {
 
 /// The approximation strategies of the absinthe tool.
-enum absinthe_strategy
+enum class absinthe_strategy
 {
   absinthe_over,
   absinthe_under
@@ -30,11 +30,11 @@ absinthe_strategy parse_absinthe_strategy(const std::string& strategy)
 {
   if (strategy == "over")
   {
-    return absinthe_over;
+    return absinthe_strategy::absinthe_over;
   }
   else if (strategy == "under")
   {
-    return absinthe_under;
+    return absinthe_strategy::absinthe_under;
   }
   else
   {
@@ -48,9 +48,9 @@ std::string print_absinthe_strategy(const absinthe_strategy strategy)
 {
   switch (strategy)
   {
-    case absinthe_over:
+    case absinthe_strategy::absinthe_over:
       return "over";
-    case absinthe_under:
+    case absinthe_strategy::absinthe_under:
       return "under";
   }
   throw mcrl2::runtime_error("unknown absinthe strategy");
@@ -85,9 +85,9 @@ std::string description(const absinthe_strategy strategy)
 {
   switch (strategy)
   {
-    case absinthe_over:
+    case absinthe_strategy::absinthe_over:
       return "an over-approximation";
-    case absinthe_under:
+    case absinthe_strategy::absinthe_under:
       return "an under-approximation";
   }
   throw mcrl2::runtime_error("unknown absinthe strategy");

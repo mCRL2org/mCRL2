@@ -29,7 +29,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     prob_bisim_partitioner_grv(LTS_TYPE& l, utilities::execution_timer& timer)
       : aut(l)
     {
-      mCRL2log(log::verbose) << "Probabilistic bisimulation partitioner created for " <<
+      mCRL2log(log::log_level_t::verbose) << "Probabilistic bisimulation partitioner created for " <<
                                 l.num_states() << " states and " <<
                                 l.num_transitions() << " transitions\n";
       timer.start("bisimulation_reduce (grv)");
@@ -362,7 +362,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
         }
         if (count_state_to_constellation!=*t.state_to_constellation_count_ptr)
         {
-          mCRL2log(log::error) << "Transition " << t.from << "--" << t.label << "->" << t.to << " has inconsistent constellation_count: " <<
+          mCRL2log(log::log_level_t::error) << "Transition " << t.from << "--" << t.label << "->" << t.to << " has inconsistent constellation_count: " <<
                                 *t.state_to_constellation_count_ptr << ". Should be " << count_state_to_constellation << ".\n";
           return false;
                                   

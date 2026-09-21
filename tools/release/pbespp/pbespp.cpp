@@ -40,14 +40,14 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
       pbes_system::pbes p;
       load_pbes(p, input_filename(), pbes_input_format());
 
-      mCRL2log(log::verbose) << "printing PBES from "
+      mCRL2log(log::log_level_t::verbose) << "printing PBES from "
                             << (input_filename().empty()?"standard input":input_filename())
                             << " to " << (output_filename().empty()?"standard output":output_filename())
                             << " in the " << core::pp_format_to_string(format) << " format" << std::endl;
 
       if (output_filename().empty())
       {
-        if (format == core::print_internal)
+        if (format == core::print_format_type::print_internal)
         {
           std::cout << pbes_to_aterm(p);
         }
@@ -65,7 +65,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
         std::ofstream out(output_filename().c_str());
         if (out)
         {
-          if (format == core::print_internal)
+          if (format == core::print_format_type::print_internal)
           {
             out << pbes_to_aterm(p);
           }
@@ -88,7 +88,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
     }
 
   protected:
-    core::print_format_type format = core::print_default;
+    core::print_format_type format = core::print_format_type::print_default;
     bool use_pfnf_printer = false;
     bool m_precedence_aware = true;
 
@@ -96,8 +96,8 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
     {
       super::add_options(desc);
       desc.add_option("format", make_enum_argument<core::print_format_type>("FORMAT")
-                      .add_value_desc(core::print_default, "a PBES specification", true)
-                      .add_value_desc(core::print_internal, "a textual ATerm representation of the internal format"),
+                      .add_value_desc(core::print_format_type::print_default, "a PBES specification", true)
+                      .add_value_desc(core::print_format_type::print_internal, "a textual ATerm representation of the internal format"),
                       "print the PBES in the specified FORMAT:", 'f');
       desc.add_option("pfnf-printer",
                       "format the output according to the structure of PFNF (only has an effect when printing a PBES in PFNF to text)", 

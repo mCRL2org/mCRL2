@@ -509,7 +509,7 @@ private:
       // candidate_label is a multi_action, so its actions are already sorted.
       lps::multi_action label = candidate_label;
 
-      mCRL2log(log::debug) << lps::pp(label) << std::endl;
+      mCRL2log(log::log_level_t::debug) << lps::pp(label) << std::endl;
 
       // Apply communication rules
       label = apply_communication(label);
@@ -517,7 +517,7 @@ private:
       // Check if new transition is blocked or not allowed
       if (!lps::encap(input.block_set, label.actions()) && lps::allow_(input.allow_cache, label.actions(), termination_action))
       {
-        mCRL2log(log::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
 
         // Hide returns a new label; assign it back.
         label = lps::hide_(input.hide_set, label);
@@ -527,7 +527,7 @@ private:
       }
       else
       {
-        mCRL2log(log::trace) << "Multi-action is blocked or not allowed: " << lps::pp(label) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "Multi-action is blocked or not allowed: " << lps::pp(label) << std::endl;
       }
     };
 
@@ -539,7 +539,7 @@ private:
 
 void mcrl2::combine_lts(const combine_lts_static_context& input)
 {
-  mCRL2log(log::verbose) << "Combining " << input.ltss.size() << " LTSs with " << input.nr_of_threads << " threads." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "Combining " << input.ltss.size() << " LTSs with " << input.nr_of_threads << " threads." << std::endl;
   // Calculate which states can be reached in a single outgoing step for both LTSs.
   std::vector<lts::outgoing_transitions_per_state_t> outgoing_transitions;
   for (const lts::lts_lts_t& lts_input: input.ltss)

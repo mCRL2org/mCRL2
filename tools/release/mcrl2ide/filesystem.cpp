@@ -25,7 +25,7 @@ Property::Property()
   : name(""),
     text(""),
     mucalculus(true),
-    equivalence(mcrl2::lts::lts_eq_none),
+    equivalence(mcrl2::lts::lts_equivalence::lts_eq_none),
     text2("")
 {}
 
@@ -773,7 +773,7 @@ Property FileSystem::readPropertyFromFile(const QString& propertyFilePath, const
       if (propertyParts.size() == 3)
       {
         mcrl2::lts::lts_equivalence equivalence = getEquivalenceFromName(propertyParts.at(1));
-        if (equivalence != mcrl2::lts::lts_eq_none)
+        if (equivalence != mcrl2::lts::lts_equivalence::lts_eq_none)
         {
           return Property(propertyName, propertyParts.at(0), false, equivalence, propertyParts.at(2));
         }

@@ -84,7 +84,7 @@ inline void bisim(const symbolic_lts& lts)
   using namespace sylvan::ldds;
 
   // Split all transition groups such that there is only one action label for each. 
-  mCRL2log(log::verbose) << "Preprocessing the transition groups..." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "Preprocessing the transition groups..." << std::endl;
   std::vector<lps_summand_group> new_groups;
 
   for (const auto& group : lts.summand_groups)
@@ -111,7 +111,7 @@ inline void bisim(const symbolic_lts& lts)
   bool refined_any_block = false;
   std::size_t iterations = 0;
 
-  mCRL2log(log::verbose) << "Starting signature refinement..." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "Starting signature refinement..." << std::endl;
   do
   {
     refined_any_block = false;
@@ -153,16 +153,16 @@ inline void bisim(const symbolic_lts& lts)
     new_partition.clear();
 
     ++iterations;
-    mCRL2log(log::verbose) << "found " << std::setw(12) << partition.size() << " equivalence classes after " << std::setw(4) << iterations << " iterations." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "found " << std::setw(12) << partition.size() << " equivalence classes after " << std::setw(4) << iterations << " iterations." << std::endl;
   }
   while (refined_any_block);
 
   // The partition is now a bisimulation.
-  mCRL2log(log::verbose) << "There are " << partition.size() << " equivalence classes." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "There are " << partition.size() << " equivalence classes." << std::endl;
   for (const ldd& C : partition)
   {
-    mCRL2log(log::debug) << symbolic::print_size(C, true, true) << std::endl;
-    mCRL2log(log::debug) << symbolic::print_states(lts.data_index, C) << std::endl;
+    mCRL2log(log::log_level_t::debug) << symbolic::print_size(C, true, true) << std::endl;
+    mCRL2log(log::log_level_t::debug) << symbolic::print_states(lts.data_index, C) << std::endl;
   }
 }
 

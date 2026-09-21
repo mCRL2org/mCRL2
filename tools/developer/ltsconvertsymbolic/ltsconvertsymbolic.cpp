@@ -188,14 +188,14 @@ public:
       {
         if (1 < parser.options.count("out"))
         {
-          mCRL2log(warning) << "multiple output formats specified; can only use one\n";
+          mCRL2log(log_level_t::warning) << "multiple output formats specified; can only use one\n";
         }
 
         outtype = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
-        if (outtype == lts_none)
+        if (outtype == lts_type::lts_none)
         {
-          mCRL2log(warning) << "format '" << parser.option_argument("out") <<
+          mCRL2log(log_level_t::warning) << "format '" << parser.option_argument("out") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }
@@ -225,7 +225,7 @@ public:
     }
 
   private:
-    lts_type outtype = lts_none;
+    lts_type outtype = lts_type::lts_none;
     symbolic_lts_equivalence m_equivalence = symbolic_lts_equivalence::none;
 
     lps::symbolic_lts m_input;
@@ -255,9 +255,9 @@ TASK_IMPL_1(bool, ltsconvertsymbolic_task, arguments*, args)
     lps::explorer_options options;
     options.save_at_end = false;
     
-    if (args->outtype == lts_none)
+    if (args->outtype == lts_type::lts_none)
     {
-      mCRL2log(verbose) << "Trying to detect output format by extension..." << std::endl;
+      mCRL2log(log_level_t::verbose) << "Trying to detect output format by extension..." << std::endl;
 
       args->outtype = mcrl2::lts::detail::guess_format(args->output_filename, true);
     }

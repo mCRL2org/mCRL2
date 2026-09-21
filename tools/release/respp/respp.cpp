@@ -43,13 +43,13 @@ class respp_tool: public pres_input_tool<input_output_tool>
     }
 
   protected:
-    print_format_type format = print_default;
+    print_format_type format = print_format_type::print_default;
 
     void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("format", make_enum_argument<print_format_type>("FORMAT")
-                      .add_value_desc(print_default, "for a RES specification", true),
+                      .add_value_desc(print_format_type::print_default, "for a RES specification", true),
                       "print the PRES in the specified FORMAT:", 'f');
     }
 
@@ -65,7 +65,7 @@ class respp_tool: public pres_input_tool<input_output_tool>
       pres_system::pres res;
       load_pres(res,input_filename(), pres_input_format());
 
-      mCRL2log(verbose) << "printing RES from " << (input_filename().empty()?"standard input":input_filename())
+      mCRL2log(log_level_t::verbose) << "printing RES from " << (input_filename().empty()?"standard input":input_filename())
                         << " to " << (output_filename().empty()?"standard output":output_filename())
                         << " in the " << format << " format";
 

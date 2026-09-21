@@ -19,7 +19,7 @@ namespace mcrl2::pbes_system
 {
 
 /// \brief Search strategy when generating a BES from a PBES.
-enum search_strategy
+enum class search_strategy
 {
   breadth_first, // Generate the rhs of the last generated BES variable last.
   depth_first,   // Generate the rhs of the last generated BES variable first.
@@ -32,19 +32,19 @@ search_strategy parse_search_strategy(const std::string& s)
 {
   if (s == "breadth-first")
   {
-    return breadth_first;
+    return search_strategy::breadth_first;
   }
   else if (s == "b")
   {
-    return breadth_first_short;
+    return search_strategy::breadth_first_short;
   }
   else if (s == "depth-first")
   {
-    return depth_first;
+    return search_strategy::depth_first;
   }
   else if (s == "d")
   {
-    return depth_first_short;
+    return search_strategy::depth_first_short;
   }
   else
   {
@@ -57,10 +57,10 @@ std::string print_search_strategy(const search_strategy s)
 {
   switch(s)
   {
-    case breadth_first: return "breadth-first";
-    case depth_first: return "depth-first";
-    case breadth_first_short: return "b";
-    case depth_first_short: return "d";
+    case search_strategy::breadth_first: return "breadth-first";
+    case search_strategy::depth_first: return "depth-first";
+    case search_strategy::breadth_first_short: return "b";
+    case search_strategy::depth_first_short: return "d";
   }
   throw mcrl2::runtime_error("unknown search strategy");
 }
@@ -93,15 +93,15 @@ std::string description(const search_strategy s)
 {
   switch(s)
   {
-    case breadth_first: return "Compute the right hand side of the boolean variables"
+    case search_strategy::breadth_first: return "Compute the right hand side of the boolean variables"
         " in a first come first served basis. This is comparable with a breadth-first search."
         " This is good for generating counter examples. ";
-    case depth_first: return "Compute the right hand side of a boolean variables where "
+    case search_strategy::depth_first: return "Compute the right hand side of a boolean variables where "
         " the last generated variable is investigated first. This corresponds to a depth-first "
         " search. This can substantially outperform breadth-first search when the validity of a"
         " formula is determined at a larger depth. ";
-    case breadth_first_short: return "Shorthand for breadth-first.";
-    case depth_first_short: return "Shorthand for depth-first.";
+    case search_strategy::breadth_first_short: return "Shorthand for breadth-first.";
+    case search_strategy::depth_first_short: return "Shorthand for depth-first.";
   }
   throw mcrl2::runtime_error("unknown search strategy");
 }

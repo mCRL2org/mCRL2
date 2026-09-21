@@ -54,12 +54,12 @@ public:
     if (m_parameters.empty())
     {
       // Print the parameters and exit
-      mCRL2log(log::info) << "Process parameters: ";
-      print_names(log::info, spec.process().process_parameters());
-      mCRL2log(log::info) << "\n";
+      mCRL2log(log::log_level_t::info) << "Process parameters: ";
+      print_names(log::log_level_t::info, spec.process().process_parameters());
+      mCRL2log(log::log_level_t::info) << "\n";
 
 
-      mCRL2log(log::info) << "Number of summands: " << spec.process().summand_count() << "\n";
+      mCRL2log(log::log_level_t::info) << "Number of summands: " << spec.process().summand_count() << "\n";
     }
     else
     {
@@ -87,11 +87,11 @@ public:
         }
       }
 
-      mCRL2log(log::verbose) << "Left parameters: ";
-      print_names(log::verbose, left_parameters);
-      mCRL2log(log::verbose) << "\nRight parameters: ";
-      print_names(log::verbose, right_parameters);
-      mCRL2log(log::verbose) << "\n";
+      mCRL2log(log::log_level_t::verbose) << "Left parameters: ";
+      print_names(log::log_level_t::verbose, left_parameters);
+      mCRL2log(log::log_level_t::verbose) << "\nRight parameters: ";
+      print_names(log::log_level_t::verbose, right_parameters);
+      mCRL2log(log::log_level_t::verbose) << "\n";
 
       // Load the invariant.
       data::data_expression invariant;
@@ -105,7 +105,7 @@ public:
           throw mcrl2::runtime_error("cannot open input file '" + m_invariant_filename + "'");
         }
 
-        mCRL2log(log::verbose) << "parsing input file '" <<  m_invariant_filename << "'..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "parsing input file '" <<  m_invariant_filename << "'..." << std::endl;
         invariant = data::parse_data_expression(instream, spec.process().process_parameters(), spec.data());
       }
 

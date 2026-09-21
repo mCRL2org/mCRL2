@@ -181,7 +181,7 @@ inline void lts_convert_base_class(const lts_lts_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts to .lts, additional information (data specification, action declarations and process parameters) is ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .lts to .lts, additional information (data specification, action declarations and process parameters) is ignored.\n";
   }
   lts_convert_base_class(base_in, base_out);
 }
@@ -237,7 +237,7 @@ inline void lts_convert_base_class(const lts_lts_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .lts to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert_base_class(base_in, base_out);
 }
@@ -256,7 +256,7 @@ inline void lts_convert_translate_state(const state_label_lts& state_label_in, s
     static bool warning_is_already_printed=false; 
     if (!warning_is_already_printed)
     { 
-      mCRL2log(log::warning) << "The state label " + pp(state_label_in) + " consists of " + std::to_string(state_label_in.size()) +
+      mCRL2log(log::log_level_t::warning) << "The state label " + pp(state_label_in) + " consists of " + std::to_string(state_label_in.size()) +
                                " state vectors and all but the first label are ignored. This warning is only printed once. ";
       warning_is_already_printed=true;
     }
@@ -299,7 +299,7 @@ inline void lts_convert_base_class(const lts_lts_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .lts to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert_base_class(base_in, base_out);
 }
@@ -340,7 +340,7 @@ inline void lts_convert_base_class(const lts_lts_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .lts to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .lts to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert_base_class(base_in, base_out);
 }
@@ -464,7 +464,7 @@ inline void lts_convert_base_class(const lts_fsm_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .fsm to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .fsm to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert_base_class(base_in,base_out);
 }
@@ -495,7 +495,7 @@ inline void lts_convert_base_class(const lts_fsm_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .fsm to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .fsm to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert_base_class(base_in,base_out);
 }
@@ -540,7 +540,7 @@ inline void lts_convert_base_class(const lts_fsm_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .fsm to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .fsm to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert_base_class(base_in,base_out);
 }
@@ -643,7 +643,7 @@ inline void lts_convert_base_class(const lts_aut_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .aut to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .aut to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert_base_class(base_in,base_out);
 }
@@ -674,7 +674,7 @@ inline void lts_convert_base_class(const lts_aut_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .aut to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .aut to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert_base_class(base_in,base_out);
 }
@@ -705,7 +705,7 @@ inline void lts_convert_base_class(const lts_aut_base& base_in,
 {
   if (extra_data_is_defined)
   {
-    mCRL2log(log::warning) << "While translating .aut to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::log_level_t::warning) << "While translating .aut to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert_base_class(base_in,base_out);
 }

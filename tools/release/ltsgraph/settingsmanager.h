@@ -54,7 +54,7 @@ template <typename T> struct GetterSetter
     }
     else
     {
-      mCRL2log(mcrl2::log::warning)
+      mCRL2log(mcrl2::log::log_level_t::warning)
           << "[SettingsManager] "
           << "Attempting to create getter/setter for unknown object type: \""
           << typeid(Obj).name() << "\". Skipping this element." << std::endl;
@@ -114,7 +114,7 @@ class Settings
     }
     else
     {
-      mCRL2log(mcrl2::log::warning)
+      mCRL2log(mcrl2::log::log_level_t::warning)
           << "[SettingsManager] "
           << "Trying to register variable \"" << name.toStdString()
           << "\" of an unknown type : \"" << typeid(T).name() << "\""
@@ -122,7 +122,7 @@ class Settings
       return;
     }
 
-    mCRL2log(mcrl2::log::debug)
+    mCRL2log(mcrl2::log::log_level_t::debug)
         << "[SettingsManager] "
         << "Added \"" << m_class_name.toStdString()
         << "::" << name.toStdString() << "\"" << std::endl;
@@ -130,7 +130,7 @@ class Settings
 
   void load(const QByteArray& bytes)
   {
-    mCRL2log(mcrl2::log::debug) << "[SettingsManager] "
+    mCRL2log(mcrl2::log::log_level_t::debug) << "[SettingsManager] "
         << "Reading JSON for \"" << m_class_name.toStdString() << "\": \n "
                                 << bytes.toStdString() << std::endl;
     m_json = QJsonDocument::fromJson(bytes);
@@ -186,7 +186,7 @@ class Settings
       }
       else
       {
-        mCRL2log(mcrl2::log::debug) << "[SettingsManager] "
+        mCRL2log(mcrl2::log::log_level_t::debug) << "[SettingsManager] "
                                     << "Trying to load an unknown type: \""
                                     << typeid(T).name() << "\"" << std::endl;
       }
@@ -200,7 +200,7 @@ class Settings
       std::string name = it.key().toStdString();
       T value = it.value()->getter();
       json_obj.insert(it.key(), value);
-      mCRL2log(mcrl2::log::debug) << "[SettingsManager] "
+      mCRL2log(mcrl2::log::log_level_t::debug) << "[SettingsManager] "
           << "Saving: " << name << std::endl;
     }
   }

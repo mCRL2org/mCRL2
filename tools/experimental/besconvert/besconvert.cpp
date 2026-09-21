@@ -182,7 +182,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
     /// Initial state of the lts is the state representing the initial equation of the BES.
     void bes_to_lts()
     {
-      mCRL2log(debug) << "Tranforming BES to LTS" << std::endl;
+      mCRL2log(log_level_t::debug) << "Tranforming BES to LTS" << std::endl;
 
       // Collect block indices and operands of all equations
       std::map<propositional_variable, std::pair<std::size_t, boolean_operand_t> > statistics;
@@ -330,7 +330,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
 
     void reduce_lts()
     {
-      mCRL2log(debug) << "Reduce LTS" << std::endl;
+      mCRL2log(log_level_t::debug) << "Reduce LTS" << std::endl;
 
       switch (m_equivalence)
       {
@@ -350,7 +350,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
     /// the self-loops.
     void lts_to_bes()
     {
-      mCRL2log(debug) << "Transforming reduced LTS to BES." << std::endl;
+      mCRL2log(log_level_t::debug) << "Transforming reduced LTS to BES." << std::endl;
 
       // Find deadlock state
       // Only used if m_translation == to_lts_deadlock
@@ -361,7 +361,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         has_outgoing_transition[i] = false;
       }
 
-      sort_transitions(m_lts.get_transitions(), m_lts.hidden_label_set(), lts::src_lbl_tgt);
+      sort_transitions(m_lts.get_transitions(), m_lts.hidden_label_set(), lts::transition_sort_style::src_lbl_tgt);
       const std::vector<lts::transition> &transitions=m_lts.get_transitions();
 
       for (const auto & i : transitions)
@@ -507,14 +507,14 @@ class bes_reduction_algorithm: public detail::bes_algorithm
 
     void run(utilities::execution_timer& timing)
     {
-      mCRL2log(log::verbose) << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
-      mCRL2log(debug) << "Converting BES to standard form" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
+      mCRL2log(log_level_t::debug) << "Converting BES to standard form" << std::endl;
 
       timing.start("standard form conversion");
       make_standard_form(m_bes, true);
       timing.finish("standard form conversion");
 
-      mCRL2log(debug) << "BES Reduction algorithm initialised" << std::endl;
+      mCRL2log(log_level_t::debug) << "BES Reduction algorithm initialised" << std::endl;
 
       timing.start("conversion to LTS");
       bes_to_lts();
@@ -533,7 +533,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       lts_to_bes();
       timing.finish("conversion to BES");
 
-      mCRL2log(log::verbose) << "Removing unreachable equations" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Removing unreachable equations" << std::endl;
       super::remove_unreachable_equations();
     }
 
@@ -643,7 +643,7 @@ class besconvert_tool: public super
 
       pbes b;
 
-      mCRL2log(verbose) << "Loading BES from input file...";
+      mCRL2log(log_level_t::verbose) << "Loading BES from input file...";
       load_pbes(b, input_filename(), pbes_input_format());
 
       if(equivalence != bes_reduction_algorithm::eq_none)
@@ -655,7 +655,7 @@ class besconvert_tool: public super
           throw mcrl2::runtime_error("expect all equations to be reachable");
         }
 
-        mCRL2log(verbose) << "done" << std::endl;
+        mCRL2log(log_level_t::verbose) << "done" << std::endl;
         bes_reduction_algorithm(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
       }
       save_pbes(b, output_filename(), pbes_output_format());

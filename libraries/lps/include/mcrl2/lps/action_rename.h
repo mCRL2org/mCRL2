@@ -431,7 +431,7 @@ lps::stochastic_specification action_rename(
   generator.add_identifiers(data::function_and_mapping_identifiers(lps_old_spec.data()));
 
   //go through the rename rules of the rename file
-  mCRL2log(log::debug) << "Rename rules found: " << rename_rules.size() << "\n";
+  mCRL2log(log::log_level_t::debug) << "Rename rules found: " << rename_rules.size() << "\n";
   for (const action_rename_rule& r: rename_rules)
   {
     stochastic_action_summand_vector lps_new_action_summands;
@@ -510,7 +510,7 @@ lps::stochastic_specification action_rename(
 
 
     //go through the summands of the old lps
-    mCRL2log(log::debug) << "Action summands found: " << lps_old_action_summands.size() << "\n";
+    mCRL2log(log::log_level_t::debug) << "Action summands found: " << lps_old_action_summands.size() << "\n";
     for (const stochastic_action_summand& lps_old_action_summand: lps_old_action_summands)
     {
       process::action_list lps_old_actions = lps_old_action_summand.multi_action().actions();
@@ -528,12 +528,12 @@ lps::stochastic_specification action_rename(
       lps_new_actions(1,process::action_list());
       std::vector < bool > lps_new_actions_is_delta(1,false);
 
-      mCRL2log(log::debug) << "Actions in summand found: " << lps_old_actions.size() << "\n";
+      mCRL2log(log::log_level_t::debug) << "Actions in summand found: " << lps_old_actions.size() << "\n";
       for (const process::action& lps_old_action: lps_old_actions)
       {
         if (equal_signatures(lps_old_action, rule_old_action))
         {
-          mCRL2log(log::debug) << "Renaming action " << rule_old_action << "\n";
+          mCRL2log(log::log_level_t::debug) << "Renaming action " << rule_old_action << "\n";
 
           //rename all previously used variables.
           data_expression renamed_rule_condition=rule_condition;
@@ -697,7 +697,7 @@ lps::stochastic_specification action_rename(
             l.push_front(lps_old_action);
           }
         }
-        mCRL2log(log::debug) << "Action done\n";
+        mCRL2log(log::log_level_t::debug) << "Action done\n";
 
       } //end of action list iterator
 
@@ -735,7 +735,7 @@ lps::stochastic_specification action_rename(
     lps_old_action_summands = lps_new_action_summands;
   } //end of rename rule iterator
 
-  mCRL2log(log::debug) << "Simplifying the result...\n";
+  mCRL2log(log::log_level_t::debug) << "Simplifying the result...\n";
 
   stochastic_linear_process new_process(lps_old_spec.process().process_parameters(),
                                         lps_deadlock_summands,
@@ -758,7 +758,7 @@ lps::stochastic_specification action_rename(
                                         new_process,
                                         lps_old_spec.initial_process());
 
-  mCRL2log(log::debug) << "New lps complete\n";
+  mCRL2log(log::log_level_t::debug) << "New lps complete\n";
   return lps_new_spec;
 } //end of rename(...)
 

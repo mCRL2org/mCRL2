@@ -98,7 +98,7 @@ class symbolic_pbessolve_algorithm
       }
 
       stopwatch timer;
-      mCRL2log(log::debug) << "start zielonka recursion\n";
+      mCRL2log(log::log_level_t::debug) << "start zielonka recursion\n";
 
       // Compute the partitioning of V for players 0 (in V[0]) and 1 (in V[1]).
       std::array<const ldd, 2> Vplayer = m_G.players(V);
@@ -107,7 +107,7 @@ class symbolic_pbessolve_algorithm
       std::size_t alpha = m % 2; // 0 = disjunctive, 1 = conjunctive
 
       const auto [A, A_strategy] = m_G.safe_attractor(U, alpha, V, Vplayer);
-      mCRL2log(log::trace) << "A = attractor(" << m_G.print_nodes(U) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(A) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "A = attractor(" << m_G.print_nodes(U) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(A) << std::endl;
 
       // Original Zielonka version
       symbolic_solution_t solution_V_minus_A = zielonka(minus(V, A));
@@ -127,7 +127,7 @@ class symbolic_pbessolve_algorithm
       else
       {
         const auto [B, B_strategy] = m_G.safe_attractor(solution_V_minus_A.winning[1 - alpha], 1 - alpha, V, Vplayer);
-        mCRL2log(log::trace) << "B = attractor(" << m_G.print_nodes(solution_V_minus_A.winning[1 - alpha]) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(B) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "B = attractor(" << m_G.print_nodes(solution_V_minus_A.winning[1 - alpha]) << ", " << m_G.print_nodes(V) << ") = " << m_G.print_nodes(B) << std::endl;
         solution = zielonka(minus(V, B));
         solution.winning[1 - alpha] = union_(solution.winning[1 - alpha], B);
         if (m_compute_strategy) 
@@ -137,10 +137,10 @@ class symbolic_pbessolve_algorithm
         assert(union_(solution.winning[0], solution.winning[1]) == V);
       }
 
-      mCRL2log(log::debug) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::log_level_t::debug) << "finished zielonka recursion (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
-      mCRL2log(log::trace) << "\n  --- zielonka solution for ---\n" << m_G.print_graph(V) << std::endl;
-      mCRL2log(log::trace) << print_solution(m_G, solution) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "\n  --- zielonka solution for ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::log_level_t::trace) << print_solution(m_G, solution) << std::endl;
 
       assert(union_(solution.winning[0], solution.winning[1]) == V);
       return solution;
@@ -168,7 +168,7 @@ class symbolic_pbessolve_algorithm
       if (!solution.solution_found(initial_vertex) || !allow_early_termination)
       {
         // If the initial vertex has not yet been won then run the zielonka solver as well.
-        mCRL2log(log::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(Vtotal) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "\n--- apply zielonka to ---\n" << m_G.print_graph(Vtotal) << std::endl;
         symbolic_solution_t zielonka_solution = zielonka(Vtotal);
 
         // Ensure that previously solved sets are included.
@@ -181,8 +181,8 @@ class symbolic_pbessolve_algorithm
         }
       }
 
-      mCRL2log(log::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::trace) << print_solution(m_G, solution) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "finished solving (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::log_level_t::trace) << print_solution(m_G, solution) << std::endl;
 
       if (solution.solution_found(initial_vertex))
       {
@@ -265,9 +265,9 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
-      mCRL2log(log::trace) << "\n--- apply solitair winning cycle detection to ---\n"
+      mCRL2log(log::log_level_t::trace) << "\n--- apply solitair winning cycle detection to ---\n"
                            << m_G.print_graph(V) << std::endl;
-      mCRL2log(log::trace) << "detect_solitair_cycles: starting with partial solution\n"
+      mCRL2log(log::log_level_t::trace) << "detect_solitair_cycles: starting with partial solution\n"
         << print_solution(m_G, partial_solution) << "\n" ;
 
       symbolic_solution_t solution = partial_solution;
@@ -293,14 +293,14 @@ class symbolic_pbessolve_algorithm
       if (!safe_variant)
       {
         Vsafe = { m_G.compute_safe_vertices(0, Vtotal, I), m_G.compute_safe_vertices(1, Vtotal, I) };
-        mCRL2log(log::trace) << "detect_solitair_cycles: computed safe vertices\n"
+        mCRL2log(log::log_level_t::trace) << "detect_solitair_cycles: computed safe vertices\n"
                              << "  Vsafe[0] = " << Vsafe[0] << "\n"
                              << "  Vsafe[1] = " << Vsafe[1] << "\n";
       }
 
       for (std::size_t alpha = 0; alpha <= 1; ++alpha)
       {
-        mCRL2log(log::debug) << "solitair winning cycle detection for player " << alpha << "\n";
+        mCRL2log(log::log_level_t::debug) << "solitair winning cycle detection for player " << alpha << "\n";
         // Determine the cycles for this player.
         ldd U = empty_set();
         ldd Unext = intersect(parity[alpha], Vplayer[alpha]);
@@ -312,7 +312,7 @@ class symbolic_pbessolve_algorithm
         std::size_t iter = 0;
         while (U != Unext)
         {
-          mCRL2log(log::trace) << "detect_solitair_cycles: starting iteration " << iter << "\n"
+          mCRL2log(log::log_level_t::trace) << "detect_solitair_cycles: starting iteration " << iter << "\n"
           << "  U = " << m_G.print_nodes(U)
           << "  Unext = " << m_G.print_nodes(Unext) << "\n";
 
@@ -320,15 +320,15 @@ class symbolic_pbessolve_algorithm
           U = Unext;
           Unext = m_G.predecessors(U, U);
 
-          mCRL2log(log::debug) << "iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+          mCRL2log(log::log_level_t::debug) << "iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
           ++iter;
         }
         // At this point, all vertices in U have an edge to another vertex in U, and
         // are thus winning for player alpha. We can set the strategy to U x U.
 
-        mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
-        mCRL2log(log::trace) << "detect_solitair_cycles: states in cycles:\n"
+        mCRL2log(log::log_level_t::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
+        mCRL2log(log::log_level_t::trace) << "detect_solitair_cycles: states in cycles:\n"
         << "U = " << m_G.print_nodes(U) << "\n";
 
         if (m_compute_strategy)
@@ -340,11 +340,11 @@ class symbolic_pbessolve_algorithm
 
         if (solution.strategy[alpha].has_value())
         {
-            mCRL2log(log::trace) << "detect_solitair_cycles: extended strategy for player " << alpha << " to \n"
+            mCRL2log(log::log_level_t::trace) << "detect_solitair_cycles: extended strategy for player " << alpha << " to \n"
             << "  S[alpha] = " << m_G.print_strategy(solution.strategy[alpha].value()) << "\n"; // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
         }
 
-        mCRL2log(log::trace) << "detect_solitair_cycles: computing safe attractor for player " << alpha << " into extended winning set\n";
+        mCRL2log(log::log_level_t::trace) << "detect_solitair_cycles: computing safe attractor for player " << alpha << " into extended winning set\n";
 
         if (safe_variant)
         {
@@ -368,13 +368,13 @@ class symbolic_pbessolve_algorithm
               assert(!attr.second.has_value());
           }
         }
-        mCRL2log(log::trace) << "detect_solitair_cycles: extended winning sets and strategy for player " << alpha
+        mCRL2log(log::log_level_t::trace) << "detect_solitair_cycles: extended winning sets and strategy for player " << alpha
                              << " to \n"
                              << "  W[alpha] = " << m_G.print_nodes(solution.winning[alpha]) << "\n"
                              << (solution.strategy[alpha].has_value() ? "  S[alpha] = " + m_G.print_strategy(solution.strategy[alpha].value()) + "\n" : ""); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
       }
 
-      mCRL2log(log::trace) << "detect_solitair_cycles: partial solution after detecting solitair cycles:\n"
+      mCRL2log(log::log_level_t::trace) << "detect_solitair_cycles: partial solution after detecting solitair cycles:\n"
         << print_solution(m_G, solution) << std::endl;
 
       return solution;
@@ -403,7 +403,7 @@ class symbolic_pbessolve_algorithm
         return solution;
       }
 
-      mCRL2log(log::trace) << "\n--- apply forced winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "\n--- apply forced winning cycle detection to ---\n" << m_G.print_graph(V) << std::endl;
 
       // Computes two vertex sets of all even priority and odd priority nodes respectively.
       std::array<ldd, 2> parity;
@@ -429,7 +429,7 @@ class symbolic_pbessolve_algorithm
           Unext = intersect(Unext, Vsafe[alpha]);
         }
 
-        mCRL2log(log::debug) << "forced winning cycle detection for player " << alpha << "\n";
+        mCRL2log(log::log_level_t::debug) << "forced winning cycle detection for player " << alpha << "\n";
 
         std::size_t iter = 0;
         while (U != Unext)
@@ -445,12 +445,12 @@ class symbolic_pbessolve_algorithm
             Unext = intersect(U, m_G.safe_control_predecessors(alpha, U, Vsafe[alpha], U, Vplayer));
           }
 
-          mCRL2log(log::debug) << "iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+          mCRL2log(log::log_level_t::debug) << "iteration " << iter << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
 
           ++iter;
         }
 
-        mCRL2log(log::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
+        mCRL2log(log::log_level_t::debug) << "found " << std::setw(12) << satcount(U) << " states in cycles for player " << alpha << "\n";
 
         // Overapproximate strategy for the forced winning cycles
         if (m_compute_strategy) 
@@ -484,7 +484,7 @@ class symbolic_pbessolve_algorithm
         }
       }
 
-      mCRL2log(log::trace) << print_solution(m_G, solution) << std::endl;
+      mCRL2log(log::log_level_t::trace) << print_solution(m_G, solution) << std::endl;
 
       return solution;
     }
@@ -519,14 +519,14 @@ class symbolic_pbessolve_algorithm
         Vsafe = { m_G.compute_safe_vertices(0, Vtotal, I), m_G.compute_safe_vertices(1, Vtotal, I) };
       }
 
-      mCRL2log(log::trace) << "\n--- apply fatal attractor detection to ---\n" << m_G.print_graph(Vtotal) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "\n--- apply fatal attractor detection to ---\n" << m_G.print_graph(Vtotal) << std::endl;
 
       // For priorities in descending order
       for (auto it = m_G.ranks().rbegin(); it != m_G.ranks().rend(); it++)
       {
         std::size_t c = it->first;
         std::size_t alpha = c % 2;
-        mCRL2log(log::debug) << "fatal attractor detection for priority " << c << "\n";
+        mCRL2log(log::log_level_t::debug) << "fatal attractor detection for priority " << c << "\n";
         ldd X = safe_variant ? it->second : intersect(it->second, Vsafe[alpha]);
         ldd Y = empty_set();
 
@@ -546,7 +546,7 @@ class symbolic_pbessolve_algorithm
             {
               winning[alpha] = union_(winning[alpha], m_G.safe_attractor(Z, alpha, Vsafe[alpha], Vplayer).first);
             }
-            mCRL2log(log::debug) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for priority " << c << "\n";
+            mCRL2log(log::log_level_t::debug) << "found " << std::setw(12) << satcount(Z) << " states in fatal attractors for priority " << c << "\n";
             break;
           }
           else
@@ -556,9 +556,9 @@ class symbolic_pbessolve_algorithm
         }
       }
 
-      mCRL2log(log::debug) << "finished fatal attractor detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
-      mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
-      mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "finished fatal attractor detection (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)\n";
+      mCRL2log(log::log_level_t::trace) << "W0 = " << m_G.print_nodes(winning[0]) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "W1 = " << m_G.print_nodes(winning[1]) << std::endl;
 
       return { winning[0], winning[1] };
     }
@@ -582,9 +582,9 @@ class symbolic_pbessolve_algorithm
     {
       using namespace sylvan::ldds;
 
-      mCRL2log(log::debug) << "Checking the strategy of the solved parity game..." << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Checking the strategy of the solved parity game..." << std::endl;
       symbolic_parity_game new_G = m_G.apply_strategy(alpha, alpha?solution.strategy[1].value():solution.strategy[0].value()); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
-      mCRL2log(log::trace) << "Minimal parity game G = " << new_G.print_graph(V) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "Minimal parity game G = " << new_G.print_graph(V) << std::endl;
       // there may be new sinks due to vertices whose strategy is not defined.
       ldd new_Vsinks = compute_deadlocks(V, new_G);
 
@@ -603,10 +603,10 @@ class symbolic_pbessolve_algorithm
               && solution.winning[1] == solution_prime.winning[1]
               && result != alpha))
         {
-          mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << "\n";
-          mCRL2log(log::trace) << "W0' = " << m_G.print_nodes(solution_prime.winning[0]) << "\n";
-          mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << "\n";
-          mCRL2log(log::trace) << "W1' = " << m_G.print_nodes(solution.winning[1]) << "\n";
+          mCRL2log(log::log_level_t::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << "\n";
+          mCRL2log(log::log_level_t::trace) << "W0' = " << m_G.print_nodes(solution_prime.winning[0]) << "\n";
+          mCRL2log(log::log_level_t::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << "\n";
+          mCRL2log(log::log_level_t::trace) << "W1' = " << m_G.print_nodes(solution.winning[1]) << "\n";
           throw mcrl2::runtime_error("Computed strategy does not match the winning partition");
         }
       }
@@ -619,10 +619,10 @@ class symbolic_pbessolve_algorithm
               && includes(solution_prime.winning[1], solution.winning[1])
               && result != alpha))
         {
-          mCRL2log(log::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << "\n";
-          mCRL2log(log::trace) << "W0' = " << m_G.print_nodes(solution_prime.winning[0]) << "\n";
-          mCRL2log(log::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << "\n";
-          mCRL2log(log::trace) << "W1' = " << m_G.print_nodes(solution.winning[1]) << "\n";
+          mCRL2log(log::log_level_t::trace) << "W0 = " << m_G.print_nodes(solution.winning[0]) << "\n";
+          mCRL2log(log::log_level_t::trace) << "W0' = " << m_G.print_nodes(solution_prime.winning[0]) << "\n";
+          mCRL2log(log::log_level_t::trace) << "W1 = " << m_G.print_nodes(solution.winning[1]) << "\n";
+          mCRL2log(log::log_level_t::trace) << "W1' = " << m_G.print_nodes(solution.winning[1]) << "\n";
           throw mcrl2::runtime_error("Computed strategy of partially solved game does not match the winning partition");
         }
       }

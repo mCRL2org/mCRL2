@@ -36,9 +36,9 @@ protected:
     super::add_options(desc);
     desc.add_option("lin-method",
         mcrl2::utilities::make_enum_argument<mcrl2::lps::t_lin_method>("NAME")
-            .add_value(mcrl2::lps::lmRegular, true)
-            .add_value(mcrl2::lps::lmRegular2)
-            .add_value(mcrl2::lps::lmStack),
+            .add_value(mcrl2::lps::t_lin_method::lmRegular, true)
+            .add_value(mcrl2::lps::t_lin_method::lmRegular2)
+            .add_value(mcrl2::lps::t_lin_method::lmStack),
         "use linearisation method NAME:",
         'l');
     desc.add_option("cluster",
@@ -159,7 +159,7 @@ protected:
       m_linearisation_options.lin_method = parser.option_argument_as< mcrl2::lps::t_lin_method >("lin-method");
 
       //check for dangerous and illegal option combinations
-      if (m_linearisation_options.newstate && m_linearisation_options.lin_method == mcrl2::lps::lmStack)
+      if (m_linearisation_options.newstate && m_linearisation_options.lin_method == mcrl2::lps::t_lin_method::lmStack)
       {
         parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
       }
@@ -184,12 +184,12 @@ protected:
       if (input_filename().empty())
       {
         //parse specification from stdin
-        mCRL2log(mcrl2::log::verbose) << "Reading input from stdin..." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Reading input from stdin..." << std::endl;
         spec = mcrl2::process::parse_process_specification(std::cin);
       }
       else
       {
-        mCRL2log(mcrl2::log::verbose) << "Reading input from file '"
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Reading input from file '"
                                       <<  input_filename() << "'..." << std::endl;
         std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
         if (!instream.is_open())
@@ -205,12 +205,12 @@ protected:
       {
         if (input_filename().empty())
         {
-          mCRL2log(mcrl2::log::info) << "stdin contains a well-formed mCRL2 specification"
+          mCRL2log(mcrl2::log::log_level_t::info) << "stdin contains a well-formed mCRL2 specification"
                                      << std::endl;
         }
         else
         {
-          mCRL2log(mcrl2::log::info) << "the file '" << input_filename()
+          mCRL2log(mcrl2::log::log_level_t::info) << "the file '" << input_filename()
                                      << "' contains a well-formed mCRL2 specification" << std::endl;
         }
         return true;
@@ -224,7 +224,7 @@ protected:
 
       //store the result
       mcrl2::lps::stochastic_specification linear_spec(mcrl2::lps::linearise(spec, m_linearisation_options));
-      mCRL2log(mcrl2::log::verbose) << "Writing LPS to "
+      mCRL2log(mcrl2::log::log_level_t::verbose) << "Writing LPS to "
                                     << (output_filename().empty() ? "stdout"
                                                                   : "file " + output_filename())
                                     << "..." << std::endl;

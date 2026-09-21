@@ -282,7 +282,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << OldPar << " to sort Nat by applying Pos2Nat to it." << std::endl;
+        mCRL2log(log_level_t::warning) << "Upcasting " << OldPar << " to sort Nat by applying Pos2Nat to it." << std::endl;
       }
       return sort_nat::nat();
     }
@@ -306,7 +306,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << OldPar << " to sort Int by applying Pos2Int to it." << std::endl;
+        mCRL2log(log_level_t::warning) << "Upcasting " << OldPar << " to sort Int by applying Pos2Int to it." << std::endl;
       }
       return sort_int::int_();
     }
@@ -317,7 +317,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << OldPar << " to sort Int by applying Nat2Int to it." << std::endl;
+        mCRL2log(log_level_t::warning) << "Upcasting " << OldPar << " to sort Int by applying Nat2Int to it." << std::endl;
       }
       return sort_int::int_();
     }
@@ -345,7 +345,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << OldPar << " to sort Real by applying Pos2Real to it." << std::endl;
+        mCRL2log(log_level_t::warning) << "Upcasting " << OldPar << " to sort Real by applying Pos2Real to it." << std::endl;
       }
       return sort_real::real_();
     }
@@ -358,7 +358,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << OldPar << " to sort Real by applying Nat2Real to it." << std::endl;
+        mCRL2log(log_level_t::warning) << "Upcasting " << OldPar << " to sort Real by applying Nat2Real to it." << std::endl;
       }
       return sort_real::real_();
     }
@@ -369,7 +369,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << OldPar << " to sort Real by applying Int2Real to it." << std::endl;
+        mCRL2log(log_level_t::warning) << "Upcasting " << OldPar << " to sort Real by applying Int2Real to it." << std::endl;
       }
       return sort_real::real_();
     }
@@ -4146,7 +4146,7 @@ void mcrl2::data::data_type_checker::read_sort(const sort_expression& sort_expr)
       {
         if (!proj.name().empty() && duplicate_projections_warner.count(proj.name())>0 && duplicate_projections_warner[proj.name()]!=proj.sort())
         {
-          mCRL2log(warning) << "Warning. Projection function " << proj.name() << " occurs multiple times with different sorts in " << struct_sort << ". " << std::endl;
+          mCRL2log(log_level_t::warning) << "Warning. Projection function " << proj.name() << " occurs multiple times with different sorts in " << struct_sort << ". " << std::endl;
         }
         else
         {
@@ -4483,7 +4483,7 @@ void mcrl2::data::data_type_checker::operator()(data_equation_vector& eqns)
     if (was_warning_upcasting)
     {
       was_warning_upcasting=false;
-      mCRL2log(warning) << "Warning occurred while typechecking " << left << " as left hand side of equation " << eqn << "." << std::endl;
+      mCRL2log(log_level_t::warning) << "Warning occurred while typechecking " << left << " as left hand side of equation " << eqn << "." << std::endl;
     }
 
     data_expression cond=eqn.condition();
@@ -4520,7 +4520,7 @@ void mcrl2::data::data_type_checker::operator()(data_equation_vector& eqns)
       if (was_warning_upcasting)
       {
         was_warning_upcasting=false;
-        mCRL2log(warning) << "Warning occurred while typechecking " << left << " as left hand side of equation " << eqn << "." << std::endl;
+        mCRL2log(log_level_t::warning) << "Warning occurred while typechecking " << left << " as left hand side of equation " << eqn << "." << std::endl;
       }
       right=eqn.rhs();
       try
@@ -4596,7 +4596,7 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
     const auto find_result = lhs_map.find(std::make_pair(eqn.condition(), eqn.lhs()));
     if(find_result != lhs_map.end())
     {
-      mCRL2log(warning) << "Warning: condition and left-hand side of equations " << find_result->second << " and " << eqn << " completely overlap." << std::endl;
+      mCRL2log(log_level_t::warning) << "Warning: condition and left-hand side of equations " << find_result->second << " and " << eqn << " completely overlap." << std::endl;
     }
     else
     {

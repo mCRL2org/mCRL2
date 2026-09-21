@@ -47,7 +47,7 @@ class Simulation : public QObject
 
   public:
     Simulation(mcrl2::data::rewrite_strategy strategy)
-        : m_strategy(strategy),  m_simulation(nullptr) {}
+        : m_strategy(strategy)  {}
     ~Simulation() override 
     { 
       delete m_simulation; 
@@ -89,7 +89,7 @@ class Simulation : public QObject
     // assumption that a term is destroyed on the thread that created it.
     std::unique_ptr<mcrl2::lps::stochastic_specification> m_stochastic_spec;
 
-    mcrl2::lps::simulation *m_simulation;
+    mcrl2::lps::simulation *m_simulation = nullptr;
     QStringList m_parameters;
     Trace m_trace;
     QMutex m_traceMutex;

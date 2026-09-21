@@ -187,19 +187,19 @@ struct eliminate_trivial_equations_algorithm
 
   void print_chains() const
   {
-    mCRL2log(log::verbose) << "--- chains ---" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "--- chains ---" << std::endl;
     for (const std::vector<process_identifier>& chain: chains)
     {
-      mCRL2log(log::verbose) << core::detail::print_list(chain) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << core::detail::print_list(chain) << std::endl;
     }
   }
 
   void print_substitutions() const
   {
-    mCRL2log(log::verbose) << "--- substitutions ---" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "--- substitutions ---" << std::endl;
     for (const auto& i: substitutions)
     {
-      mCRL2log(log::verbose) << process_instance(i.first, detail::make_data_expression_list(i.first.variables())) << " -> " << i.second << std::endl;
+      mCRL2log(log::log_level_t::verbose) << process_instance(i.first, detail::make_data_expression_list(i.first.variables())) << " -> " << i.second << std::endl;
     }
   }
 

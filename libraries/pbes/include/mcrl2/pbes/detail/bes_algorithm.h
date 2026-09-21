@@ -34,7 +34,7 @@ class bes_algorithm
     /// \brief Flag for verbose output
     bool verbose() const
     {
-      return mCRL2logEnabled(log::verbose);
+      return mCRL2logEnabled(log::log_level_t::verbose);
     }
 
     /// \brief Perform reachability analysis on equations of m_bes, and remove
@@ -90,7 +90,7 @@ class bes_algorithm
 
       m_bes.equations() = reachable_equations;
 
-      mCRL2log(log::verbose) << "Removed the following unreachable equations: " << pbes_system::pp(unreachable_equations) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Removed the following unreachable equations: " << pbes_system::pp(unreachable_equations) << std::endl;
 
       return false;
     }

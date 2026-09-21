@@ -92,10 +92,10 @@ BOOST_AUTO_TEST_CASE(test_reflexive)
 {
   BOOST_CHECK(preorder_compare(l2a,l2a,lts_preorder::lts_pre_sim));
   BOOST_CHECK(preorder_compare(l2a,l2a,lts_preorder::lts_pre_trace));
-  BOOST_CHECK(compare(l2a,l2a,lts_eq_sim));
-  BOOST_CHECK(compare(l2a,l2a,lts_eq_trace));
+  BOOST_CHECK(compare(l2a,l2a,lts_equivalence::lts_eq_sim));
+  BOOST_CHECK(compare(l2a,l2a,lts_equivalence::lts_eq_trace));
   BOOST_CHECK(preorder_compare(l2a,l2a,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(compare(l2a,l2a,lts_eq_ready_sim));    
+  BOOST_CHECK(compare(l2a,l2a,lts_equivalence::lts_eq_ready_sim));    
 }
 
 
@@ -103,24 +103,24 @@ BOOST_AUTO_TEST_CASE(test_sim_1_2)
 {
   BOOST_CHECK(!preorder_compare(lts1,lts2,lts_preorder::lts_pre_sim));  
   BOOST_CHECK(preorder_compare(lts2,lts1,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!compare(lts2,lts1,lts_eq_sim));
-  BOOST_CHECK(!compare(lts1,lts2,lts_eq_sim));    
+  BOOST_CHECK(!compare(lts2,lts1,lts_equivalence::lts_eq_sim));
+  BOOST_CHECK(!compare(lts1,lts2,lts_equivalence::lts_eq_sim));    
 }
 
 BOOST_AUTO_TEST_CASE(test_sim_2_2a)
 {
   BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_sim));
   BOOST_CHECK(!preorder_compare(l2a,lts2,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!compare(l2a,lts2,lts_eq_sim));
-  BOOST_CHECK(!compare(lts2,l2a,lts_eq_sim));    
+  BOOST_CHECK(!compare(l2a,lts2,lts_equivalence::lts_eq_sim));
+  BOOST_CHECK(!compare(lts2,l2a,lts_equivalence::lts_eq_sim));    
 }
 
 BOOST_AUTO_TEST_CASE(test_sim_1_3)
 {
   BOOST_CHECK(!preorder_compare(lts1,l3,lts_preorder::lts_pre_sim));
   BOOST_CHECK(!preorder_compare(l3,lts1,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!compare(l3,lts1,lts_eq_sim));
-  BOOST_CHECK(!compare(lts1,l3,lts_eq_sim));    
+  BOOST_CHECK(!compare(l3,lts1,lts_equivalence::lts_eq_sim));
+  BOOST_CHECK(!compare(lts1,l3,lts_equivalence::lts_eq_sim));    
 }
 
 
@@ -128,8 +128,8 @@ BOOST_AUTO_TEST_CASE(test_sim_1_4)
 {
   BOOST_CHECK(!preorder_compare(lts1,l4,lts_preorder::lts_pre_sim));
   BOOST_CHECK(preorder_compare(l4,lts1,lts_preorder::lts_pre_sim));
-  BOOST_CHECK(!compare(lts1,l4,lts_eq_sim));
-  BOOST_CHECK(!compare(l4,lts1,lts_eq_sim));
+  BOOST_CHECK(!compare(lts1,l4,lts_equivalence::lts_eq_sim));
+  BOOST_CHECK(!compare(l4,lts1,lts_equivalence::lts_eq_sim));
 }
 
 
@@ -137,39 +137,39 @@ BOOST_AUTO_TEST_CASE(test_ready_sim_1_2)
 {
   BOOST_CHECK(!preorder_compare(lts1,lts2,lts_preorder::lts_pre_ready_sim));
   BOOST_CHECK(!preorder_compare(lts2,lts1,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!compare(lts2,lts1,lts_eq_ready_sim));
-  BOOST_CHECK(!compare(lts1,lts2,lts_eq_ready_sim));  
+  BOOST_CHECK(!compare(lts2,lts1,lts_equivalence::lts_eq_ready_sim));
+  BOOST_CHECK(!compare(lts1,lts2,lts_equivalence::lts_eq_ready_sim));  
 }
 
 BOOST_AUTO_TEST_CASE(test_ready_sim_2_2a)
 {
   BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_ready_sim));      
   BOOST_CHECK(!preorder_compare(l2a,lts2,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!compare(lts2,l2a,lts_eq_ready_sim));      
-  BOOST_CHECK(!compare(l2a,lts2,lts_eq_ready_sim));  
+  BOOST_CHECK(!compare(lts2,l2a,lts_equivalence::lts_eq_ready_sim));      
+  BOOST_CHECK(!compare(l2a,lts2,lts_equivalence::lts_eq_ready_sim));  
 }
 
 BOOST_AUTO_TEST_CASE(test_ready_sim_1_3)
 {
   BOOST_CHECK(!preorder_compare(lts1,l3,lts_preorder::lts_pre_ready_sim));
   BOOST_CHECK(!preorder_compare(l3,lts1,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!compare(l3,lts1,lts_eq_ready_sim));  
+  BOOST_CHECK(!compare(l3,lts1,lts_equivalence::lts_eq_ready_sim));  
 }
 
 BOOST_AUTO_TEST_CASE(test_ready_sim_1_4)
 {
   BOOST_CHECK(!preorder_compare(lts1,l4,lts_preorder::lts_pre_ready_sim));
   BOOST_CHECK(!preorder_compare(l4,lts1,lts_preorder::lts_pre_ready_sim));
-  BOOST_CHECK(!compare(lts1,l4,lts_eq_ready_sim));  
+  BOOST_CHECK(!compare(lts1,l4,lts_equivalence::lts_eq_ready_sim));  
 }
 
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2)
 {
-  BOOST_CHECK(compare(lts1,lts2,lts_eq_trace));
-  BOOST_CHECK(compare(lts2,lts1,lts_eq_trace));
-  BOOST_CHECK(!compare(lts2,lts1,lts_eq_bisim));
-  BOOST_CHECK(!compare(lts2,lts1,lts_eq_bisim_gv));
-  BOOST_CHECK(!compare(lts2,lts1,lts_eq_bisim_gjkw));
+  BOOST_CHECK(compare(lts1,lts2,lts_equivalence::lts_eq_trace));
+  BOOST_CHECK(compare(lts2,lts1,lts_equivalence::lts_eq_trace));
+  BOOST_CHECK(!compare(lts2,lts1,lts_equivalence::lts_eq_bisim));
+  BOOST_CHECK(!compare(lts2,lts1,lts_equivalence::lts_eq_bisim_gv));
+  BOOST_CHECK(!compare(lts2,lts1,lts_equivalence::lts_eq_bisim_gjkw));
   BOOST_CHECK(preorder_compare(lts1,lts2,lts_preorder::lts_pre_trace));
   BOOST_CHECK(preorder_compare(lts2,lts1,lts_preorder::lts_pre_trace));
   BOOST_CHECK(preorder_compare(lts1,lts2,lts_preorder::lts_pre_trace_anti_chain));
@@ -182,11 +182,11 @@ BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2)
 
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2a)
 {
-  BOOST_CHECK(compare(lts2,l2a,lts_eq_trace));
-  BOOST_CHECK(compare(l2a,lts2,lts_eq_trace));
-  BOOST_CHECK(!compare(l2a,lts2,lts_eq_bisim));
-  BOOST_CHECK(!compare(l2a,lts2,lts_eq_bisim_gv));
-  BOOST_CHECK(!compare(l2a,lts2,lts_eq_bisim_gjkw));
+  BOOST_CHECK(compare(lts2,l2a,lts_equivalence::lts_eq_trace));
+  BOOST_CHECK(compare(l2a,lts2,lts_equivalence::lts_eq_trace));
+  BOOST_CHECK(!compare(l2a,lts2,lts_equivalence::lts_eq_bisim));
+  BOOST_CHECK(!compare(l2a,lts2,lts_equivalence::lts_eq_bisim_gv));
+  BOOST_CHECK(!compare(l2a,lts2,lts_equivalence::lts_eq_bisim_gjkw));
   BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_trace));
   BOOST_CHECK(preorder_compare(l2a,lts2,lts_preorder::lts_pre_trace));
   BOOST_CHECK(preorder_compare(lts2,l2a,lts_preorder::lts_pre_trace_anti_chain));
@@ -199,10 +199,10 @@ BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2a)
 
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_3)
 {
-  BOOST_CHECK(!compare(lts1,l3,lts_eq_trace));
-  BOOST_CHECK(!compare(l3,lts1,lts_eq_trace));
-  BOOST_CHECK(compare(lts1,l3,lts_eq_weak_trace));
-  BOOST_CHECK(compare(l3,lts1,lts_eq_weak_trace));
+  BOOST_CHECK(!compare(lts1,l3,lts_equivalence::lts_eq_trace));
+  BOOST_CHECK(!compare(l3,lts1,lts_equivalence::lts_eq_trace));
+  BOOST_CHECK(compare(lts1,l3,lts_equivalence::lts_eq_weak_trace));
+  BOOST_CHECK(compare(l3,lts1,lts_equivalence::lts_eq_weak_trace));
   BOOST_CHECK(!preorder_compare(lts1,l3,lts_preorder::lts_pre_trace_anti_chain));
   BOOST_CHECK(!preorder_compare(l3,lts1,lts_preorder::lts_pre_trace_anti_chain));
   BOOST_CHECK(preorder_compare(lts1,l3,lts_preorder::lts_pre_weak_trace_anti_chain));
@@ -217,26 +217,26 @@ BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_3)
 
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_4)
 {
-  BOOST_CHECK(!compare(lts1,l4,lts_eq_trace));
-  BOOST_CHECK(!compare(l4,lts1,lts_eq_trace));
+  BOOST_CHECK(!compare(lts1,l4,lts_equivalence::lts_eq_trace));
+  BOOST_CHECK(!compare(l4,lts1,lts_equivalence::lts_eq_trace));
 }
 
 BOOST_AUTO_TEST_CASE(test_symmetric_weak_trace_2_3)
 {
-  BOOST_CHECK(compare(lts2,l3,lts_eq_weak_trace));
-  BOOST_CHECK(compare(l3,lts2,lts_eq_weak_trace));
+  BOOST_CHECK(compare(lts2,l3,lts_equivalence::lts_eq_weak_trace));
+  BOOST_CHECK(compare(l3,lts2,lts_equivalence::lts_eq_weak_trace));
 }
 
 BOOST_AUTO_TEST_CASE(test_symmetric_weak_trace_3_4)
 {
-  BOOST_CHECK(!compare(l4,l3,lts_eq_weak_trace));
-  BOOST_CHECK(!compare(l3,l4,lts_eq_weak_trace));
+  BOOST_CHECK(!compare(l4,l3,lts_equivalence::lts_eq_weak_trace));
+  BOOST_CHECK(!compare(l3,l4,lts_equivalence::lts_eq_weak_trace));
 }
 
 // Regression test for bug #1082
 BOOST_AUTO_TEST_CASE(test_bisim_a_b)
 {
-  BOOST_CHECK(!compare(a,b,lts_eq_bisim, true));
+  BOOST_CHECK(!compare(a,b,lts_equivalence::lts_eq_bisim, true));
 }
 
 // a.(b.c1+d1) + a.(b.c2+d2)
@@ -421,7 +421,7 @@ BOOST_AUTO_TEST_CASE(properly_order_multiactions)
     "des (0,1,1)\n"
     "(0,\"b|a\",0)\n";
 
-  BOOST_CHECK(compare(ab, ba, lts_eq_bisim)); // These transition systems must be equal. 
+  BOOST_CHECK(compare(ab, ba, lts_equivalence::lts_eq_bisim)); // These transition systems must be equal. 
 }
 
 // Test cases for coupled similarity
@@ -450,6 +450,6 @@ const std::string philosophers_merged =
 
 BOOST_AUTO_TEST_CASE(coupled_similarity_test)
 {
-  BOOST_CHECK(compare(philosophers_gradual, philosophers_merged, lts_eq_coupled_sim)); // These transition systems must be equal.
-  BOOST_CHECK(!compare(philosophers_gradual, philosophers_merged, lts_eq_bisim)); // These transition systems must be different.
+  BOOST_CHECK(compare(philosophers_gradual, philosophers_merged, lts_equivalence::lts_eq_coupled_sim)); // These transition systems must be equal.
+  BOOST_CHECK(!compare(philosophers_gradual, philosophers_merged, lts_equivalence::lts_eq_bisim)); // These transition systems must be different.
 }

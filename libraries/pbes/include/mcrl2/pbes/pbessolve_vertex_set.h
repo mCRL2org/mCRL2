@@ -350,17 +350,17 @@ structure_graph::index_type find_successor_in(const StructureGraph& G, structure
       return v;
     }
   }
-  mCRL2log(log::debug) << "No successor found for node " << u << " in " << A << std::endl;
+  mCRL2log(log::log_level_t::debug) << "No successor found for node " << u << " in " << A << std::endl;
   return undefined_vertex();
 }
 
 template <typename StructureGraph>
 void log_vertex_set(const StructureGraph& G, const vertex_set& V, const std::string& name)
 {
-  mCRL2log(log::debug) << "--- " << name << " ---" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "--- " << name << " ---" << std::endl;
   for (auto v: V.vertices())
   {
-    mCRL2log(log::debug) << "  " << v << " " << G.find_vertex(v) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "  " << v << " " << G.find_vertex(v) << std::endl;
   }
 }
 
@@ -466,7 +466,7 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
     structure_graph::index_type u = *todo.begin();
     todo.erase(todo.begin());
     done.insert(u);
-    if ((S0.contains(u) && G.decoration(u) == structure_graph::d_disjunction) || (S1.contains(u) && G.decoration(u) == structure_graph::d_conjunction))
+    if ((S0.contains(u) && G.decoration(u) == structure_graph::decoration_type::d_disjunction) || (S1.contains(u) && G.decoration(u) == structure_graph::decoration_type::d_conjunction))
     {
       // explore only the strategy edge
       structure_graph::index_type v = G.strategy(u);
@@ -488,9 +488,9 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(StructureG
       }
     }
   }
-  mCRL2log(log::debug) << "Extracted minimal structure graph " << core::detail::print_set(done) << std::endl;
+  mCRL2log(log::log_level_t::debug) << "Extracted minimal structure graph " << core::detail::print_set(done) << std::endl;
   for (const auto& index : done) {
-    mCRL2log(log::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
+    mCRL2log(log::log_level_t::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
   }
 
   return done;
@@ -518,7 +518,7 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(
     structure_graph::index_type u = *todo.begin();
     todo.erase(todo.begin());
     done.insert(u);
-    if (S0.contains(u) && G.decoration(u) == structure_graph::d_disjunction)
+    if (S0.contains(u) && G.decoration(u) == structure_graph::decoration_type::d_disjunction)
     {
       // explore only the strategy edge
       structure_graph::index_type v = tau0[u];
@@ -528,7 +528,7 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(
         todo.insert(v);
       }
     }
-    else if (S1.contains(u) && G.decoration(u) == structure_graph::d_conjunction)
+    else if (S1.contains(u) && G.decoration(u) == structure_graph::decoration_type::d_conjunction)
     {
       // explore only the strategy edge
       structure_graph::index_type v = tau1[u];
@@ -550,9 +550,9 @@ std::set<structure_graph::index_type> extract_minimal_structure_graph(
       }
     }
   }
-  mCRL2log(log::debug) << "\nExtracted minimal structure graph " << core::detail::print_set(done) << std::endl;
+  mCRL2log(log::log_level_t::debug) << "\nExtracted minimal structure graph " << core::detail::print_set(done) << std::endl;
   for (const auto& index : done) {
-    mCRL2log(log::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
+    mCRL2log(log::log_level_t::debug) << std::setw(4) << index << " " << G.find_vertex(index) << std::endl;
   }
 
   return done;

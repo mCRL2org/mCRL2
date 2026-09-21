@@ -777,7 +777,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_bool2pred = false;
 
       f_formula = "  :formula (and";
-      mCRL2log(log::verbose) << "Formula to be solved: " << data::pp(a_formula) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Formula to be solved: " << data::pp(a_formula) << std::endl;
       while (!a_formula.empty())
       {
         v_clause = a_formula.front();
@@ -799,7 +799,7 @@ class SMT_LIB_Solver: public SMT_Solver
         "(benchmark nameless\n" + f_sorts_notes + f_operators_notes + f_predicates_notes +
         f_extrasorts + f_operators_extrafuns + f_variables_extrafuns + f_extrapreds + f_formula +
         ")\n";
-      mCRL2log(log::verbose) << "Corresponding benchmark:" << std::endl << f_benchmark;;
+      mCRL2log(log::log_level_t::verbose) << "Corresponding benchmark:" << std::endl << f_benchmark;;
     }
 
 

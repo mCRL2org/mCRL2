@@ -295,7 +295,7 @@ struct abstract_param_state
     {
       auto asdf = atermpp::down_cast<data::variable>(as_vector(eq_opt->get().variable().parameters())[i]);
       W[eq_name].erase(asdf);
-      mCRL2log(log::debug) << "removed " << std::to_string(i) << " (parameter " << pp(asdf) << ") from " << pp(eq_name)
+      mCRL2log(log::log_level_t::debug) << "removed " << std::to_string(i) << " (parameter " << pp(asdf) << ") from " << pp(eq_name)
                            << std::endl;
     }
   }
@@ -313,7 +313,7 @@ struct abstract_param_state
         if (param.name() == var.name())
         {
           I[eq_name].erase(i);
-          mCRL2log(log::debug) << "removed " << std::to_string(i) << " (parameter " << pp(var) << ") from "
+          mCRL2log(log::log_level_t::debug) << "removed " << std::to_string(i) << " (parameter " << pp(var) << ") from "
                                << pp(eq_name) << std::endl;
           found = true;
           break;
@@ -366,7 +366,7 @@ inline const std::map<data::variable, std::size_t>& get_or_compute_variable_coun
   auto var_count_it = cache.find(var_name);
   if (var_count_it == cache.end())
   {
-    mCRL2log(log::debug) << "Cache miss for " << var_name << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Cache miss for " << var_name << std::endl;
     var_count_it = cache.emplace(var_name, count_free_variable_occurrences(equation_formula, false)).first;
   }
   return var_count_it->second;
@@ -385,7 +385,7 @@ inline std::optional<data::variable> choose_variable_by_count(const core::identi
   {
     if (var_counts.find(var) != var_counts.end())
     {
-      mCRL2log(log::debug) << "  - " << var.name() << " -> " << var_counts.at(var) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "  - " << var.name() << " -> " << var_counts.at(var) << std::endl;
       std::size_t count = var_counts.at(var);
       if (count > best_count)
       {
@@ -424,7 +424,7 @@ inline std::optional<data::variable> choose_variable_by_rhs_order(const pbes_exp
   const std::set<data::variable>& essential_vars)
 {
   const std::vector<data::variable> vars = find_free_variables_in_order(formula, data::variable_list(), false);
-  mCRL2log(log::debug) << "vars: " << core::detail::print_list(vars);
+  mCRL2log(log::log_level_t::debug) << "vars: " << core::detail::print_list(vars);
   for (const data::variable& var: vars)
   {
     if (essential_vars.contains(var))
@@ -538,7 +538,7 @@ inline std::optional<data::variable> choose_variable_by_ruling_order(const core:
       size = tree_sizes.contains(var) ? tree_sizes.at(var) : 0;
     }
 
-    mCRL2log(log::debug) << "  - " << var.name() << " -> candidate " << candidate->name() << " (tree size: " << size
+    mCRL2log(log::log_level_t::debug) << "  - " << var.name() << " -> candidate " << candidate->name() << " (tree size: " << size
                          << ", count: " << count(*candidate) << ")" << std::endl;
 
     if (size > best_tree_size
@@ -814,7 +814,7 @@ inline void flip_frozen_rulers(ruling_statistics_type& stats)
 // Logs raw ruling statistics per equation.
 inline void log_ruling_statistics(const ruling_statistics_type& stats)
 {
-  mCRL2log(log::debug) << "=== Ruling statistics ===" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "=== Ruling statistics ===" << std::endl;
   for (const auto& [eq_name, ruled_by_counts]: stats.counts)
   {
     for (const auto& [d_m, rulers_counts]: ruled_by_counts)
@@ -825,23 +825,23 @@ inline void log_ruling_statistics(const ruling_statistics_type& stats)
       const std::size_t total = is_frozen ? 0 : changes_eq.at(d_m);
       if (is_frozen)
       {
-        mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " never changes (frozen)" << std::endl;
+        mCRL2log(log::log_level_t::debug) << eq_name << ": " << pp(d_m) << " never changes (frozen)" << std::endl;
       }
       else
       {
-        mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " changes in " << total << " transitions" << std::endl;
+        mCRL2log(log::log_level_t::debug) << eq_name << ": " << pp(d_m) << " changes in " << total << " transitions" << std::endl;
       }
       for (const auto& [d_j, count_j]: rulers_counts)
       {
         if (is_frozen)
         {
-          mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " ruled by " << pp(d_j) << " (" << count_j
+          mCRL2log(log::log_level_t::debug) << eq_name << ": " << pp(d_m) << " ruled by " << pp(d_j) << " (" << count_j
                                << " transitions)" << std::endl;
         }
         else
         {
           const double pct = static_cast<double>(count_j) / static_cast<double>(total);
-          mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " ruled by " << pp(d_j) << " (" << count_j << "/"
+          mCRL2log(log::log_level_t::debug) << eq_name << ": " << pp(d_m) << " ruled by " << pp(d_j) << " (" << count_j << "/"
                                << total << " = " << pct * 100 << "%)" << std::endl;
         }
       }
@@ -1089,12 +1089,12 @@ inline void remove_transitive_rulings(ruling_relation_type& relation)
 
 inline void log_ruling_relation(const ruling_relation_type& relation)
 {
-  mCRL2log(log::debug) << "=== Ruling relation ===" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "=== Ruling relation ===" << std::endl;
   for (const auto& [eq_name, ruled_by_map]: relation.ruled_by)
   {
     for (const auto& [d_m, parameters]: ruled_by_map)
     {
-      mCRL2log(log::debug) << eq_name << ": " << pp(d_m) << " ruled by " << core::detail::print_list(parameters)
+      mCRL2log(log::log_level_t::debug) << eq_name << ": " << pp(d_m) << " ruled by " << core::detail::print_list(parameters)
                            << std::endl;
     }
   }
@@ -1104,7 +1104,7 @@ inline void log_ruling_relation(const ruling_relation_type& relation)
     {
       if (size > 0)
       {
-        mCRL2log(log::debug) << eq_name << ": " << pp(d_j) << " rules " << size << " parameters (tree size)"
+        mCRL2log(log::log_level_t::debug) << eq_name << ": " << pp(d_j) << " rules " << size << " parameters (tree size)"
                              << std::endl;
       }
     }

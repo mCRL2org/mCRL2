@@ -40,14 +40,14 @@ class prespp_tool: public pres_input_tool<input_output_tool>
       pres_system::pres p;
       load_pres(p, input_filename(), pres_input_format());
 
-      mCRL2log(log::verbose) << "printing PRES from "
+      mCRL2log(log::log_level_t::verbose) << "printing PRES from "
                             << (input_filename().empty()?"standard input":input_filename())
                             << " to " << (output_filename().empty()?"standard output":output_filename())
                             << " in the " << core::pp_format_to_string(format) << " format" << std::endl;
 
       if (output_filename().empty())
       {
-        if (format == core::print_internal)
+        if (format == core::print_format_type::print_internal)
         {
           std::cout << pres_to_aterm(p);
         }
@@ -61,7 +61,7 @@ class prespp_tool: public pres_input_tool<input_output_tool>
         std::ofstream out(output_filename().c_str());
         if (out)
         {
-          if (format == core::print_internal)
+          if (format == core::print_format_type::print_internal)
           {
             out << pres_to_aterm(p);
           }
@@ -80,15 +80,15 @@ class prespp_tool: public pres_input_tool<input_output_tool>
     }
 
   protected:
-    core::print_format_type format = core::print_default;
+    core::print_format_type format = core::print_format_type::print_default;
 
     void add_options(interface_description& desc) override
     {
       // NOLINTNEXTLINE(bugprone-parent-virtual-call) -- intentional: add_options chain
       input_output_tool::add_options(desc);
       desc.add_option("format", make_enum_argument<core::print_format_type>("FORMAT")
-                      .add_value_desc(core::print_default, "a PRES specification", true)
-                      .add_value_desc(core::print_internal, "a textual ATerm representation of the internal format"),
+                      .add_value_desc(core::print_format_type::print_default, "a PRES specification", true)
+                      .add_value_desc(core::print_format_type::print_internal, "a textual ATerm representation of the internal format"),
                       "print the PRES in the specified FORMAT:", 'f');
     }
 

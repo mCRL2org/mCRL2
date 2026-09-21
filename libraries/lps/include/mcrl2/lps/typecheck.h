@@ -96,7 +96,7 @@ class action_rename_type_checker
     **/
     action_rename_specification operator()(const action_rename_specification& arspec, const stochastic_specification& lpsspec)
     {
-      mCRL2log(log::verbose) << "type checking action rename specification..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "type checking action rename specification..." << std::endl;
       m_data_type_checker = data::data_type_checker(lpsspec.data() + arspec.data());
       action_rename_specification result = arspec;
       result.data() = m_data_type_checker.typechecked_data_specification();
@@ -109,7 +109,7 @@ class action_rename_type_checker
       {
         rule = typecheck_action_rename_rule(rule, action_labels);
       }
-      mCRL2log(log::debug) << "type checking action rename specification finished" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "type checking action rename specification finished" << std::endl;
       return result;
     }
 };

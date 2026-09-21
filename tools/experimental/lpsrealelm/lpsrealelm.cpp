@@ -75,11 +75,11 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
     ///i applies real time abstraction to it and writes the result to output_file.
     bool run() override
     {
-      mCRL2log(verbose) << "Parameters of lpsrealelm:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  data rewriter       " << m_rewrite_strategy << std::endl;
-      mCRL2log(verbose) << "  max_iterations:     " << max_iterations << std::endl;
+      mCRL2log(log_level_t::verbose) << "Parameters of lpsrealelm:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  data rewriter       " << m_rewrite_strategy << std::endl;
+      mCRL2log(log_level_t::verbose) << "  max_iterations:     " << max_iterations << std::endl;
 
       stochastic_specification spec;
       load_lps(spec, input_filename());
@@ -88,7 +88,7 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
       // rewriter r=create_rewriter(lps_specification.data());
       stochastic_specification new_spec = realelm(spec, max_iterations, rewrite_strategy());
 
-      mCRL2log(verbose) << "Real time abstraction completed, saving to " << m_output_filename << "\n";
+      mCRL2log(log_level_t::verbose) << "Real time abstraction completed, saving to " << m_output_filename << "\n";
       save_lps(new_spec, output_filename());
 
       return true;

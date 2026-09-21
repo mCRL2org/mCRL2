@@ -223,7 +223,7 @@ std::vector<cf_graph> extract_local_control_flow_graphs(const pbes_system::detai
     initialize_control_flow_bitsets(g, edge_labels, action_summand_count);
     result.push_back(std::move(g));
 
-    if (mCRL2logEnabled(log::debug))
+    if (mCRL2logEnabled(log::log_level_t::debug))
     {
       print_edge_label_map(edge_labels);
     }
@@ -374,7 +374,7 @@ struct update_active_cfg_vertices_timer
     const double seconds =
       std::chrono::duration<double>(total_time).count();
 
-    mCRL2log(log::debug) << "[timing] update_active_cfg_vertices total time: "
+    mCRL2log(log::log_level_t::debug) << "[timing] update_active_cfg_vertices total time: "
               << seconds << " s\n";
   }
 };

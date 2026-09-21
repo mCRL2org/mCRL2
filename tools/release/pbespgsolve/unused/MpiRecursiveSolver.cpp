@@ -64,7 +64,7 @@ ParityGame::Strategy MpiRecursiveSolver::solve()
     else
     if (mpi_rank == 0)
     {
-        mCRL2log(mcrl2::log::verbose) << "Combining strategy..." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Combining strategy..." << std::endl;
         for (verti v = 0; v < V; ++v)
         {
             int i = (*vpart_)(v);

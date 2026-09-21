@@ -99,7 +99,7 @@ inline std::string pp_vector(const TYPE& inequalities);
 
 namespace detail
 {
-  enum comparison_t { less, less_eq, equal };
+  enum class comparison_t { less, less_eq, equal };
 
   inline std::string pp(const detail::lhs_t& lhs);
 
@@ -107,20 +107,20 @@ namespace detail
   {
     switch (t)
     {
-      case detail::less:  return detail::less_eq;
-      case detail::less_eq: return detail::less;
-      case detail::equal: return detail::equal;
+      case detail::comparison_t::less:  return detail::comparison_t::less_eq;
+      case detail::comparison_t::less_eq: return detail::comparison_t::less;
+      case detail::comparison_t::equal: return detail::comparison_t::equal;
     };
-    return detail::equal;  // This return statement should be unreachable. It is added to suppress a compiler warning.
+    return detail::comparison_t::equal;  // This return statement should be unreachable. It is added to suppress a compiler warning.
   }
 
   inline std::string pp(const detail::comparison_t t)
   {
     switch (t)
     {
-      case detail::less:  return "<";
-      case detail::less_eq: return "<=";
-      case detail::equal: return "==";
+      case detail::comparison_t::less:  return "<";
+      case detail::comparison_t::less_eq: return "<=";
+      case detail::comparison_t::equal: return "==";
     };
     return "##";  // This return statement should be unreachable. It is added to suppress a compiler warning.
   }
@@ -639,18 +639,18 @@ class linear_inequality: public atermpp::aterm
 
     /// \brief Constructor yielding an inconsistent inequality.
     linear_inequality()
-      : linear_inequality(detail::lhs_t(),real_zero(),detail::less)
+      : linear_inequality(detail::lhs_t(),real_zero(),detail::comparison_t::less)
     {}
 
     /// Basic constructor.
     linear_inequality(const detail::lhs_t& lhs, const data_expression& r, detail::comparison_t t)
-     : atermpp::aterm((t==detail::less?
+     : atermpp::aterm((t==detail::comparison_t::less?
                       detail::linear_inequality_less():
-                      (t==detail::less_eq?detail::linear_inequality_less_equal():detail::linear_inequality_equal())),
+                      (t==detail::comparison_t::less_eq?detail::linear_inequality_less_equal():detail::linear_inequality_equal())),
                   lhs,r)
     {
       assert(detail::is_well_formed(lhs));
-      assert(t==detail::less || t==detail::less_eq || t==detail::equal);
+      assert(t==detail::comparison_t::less || t==detail::comparison_t::less_eq || t==detail::comparison_t::equal);
     }
 
     /// \brief constructor.
@@ -687,16 +687,16 @@ class linear_inequality: public atermpp::aterm
 
       if (new_lhs.empty())
       {
-        if ((comparison==detail::equal && new_rhs==real_zero()) ||
-            (comparison==detail::less_eq && (new_rhs == real_zero() || is_positive(new_rhs,r))) ||
-            (comparison==detail::less && is_positive(new_rhs,r)))
+        if ((comparison==detail::comparison_t::equal && new_rhs==real_zero()) ||
+            (comparison==detail::comparison_t::less_eq && (new_rhs == real_zero() || is_positive(new_rhs,r))) ||
+            (comparison==detail::comparison_t::less && is_positive(new_rhs,r)))
         {
           // The linear inequality represents true.
-          *this=linear_inequality(detail::lhs_t(),real_one(),detail::less);
+          *this=linear_inequality(detail::lhs_t(),real_one(),detail::comparison_t::less);
           return;
         }
         // The linear inequality represents false.
-        *this=linear_inequality(detail::lhs_t(),real_minus_one(),detail::less);
+        *this=linear_inequality(detail::lhs_t(),real_minus_one(),detail::comparison_t::less);
         return;
       }
 
@@ -729,24 +729,24 @@ class linear_inequality: public atermpp::aterm
       bool negate(false);
       if (is_equal_to_application(e))
       {
-        comparison=detail::equal;
+        comparison=detail::comparison_t::equal;
       }
       else if (is_less_application(e))
       {
-        comparison=detail::less;
+        comparison=detail::comparison_t::less;
       }
       else if (is_less_equal_application(e))
       {
-        comparison=detail::less_eq;
+        comparison=detail::comparison_t::less_eq;
       }
       else if (is_greater_application(e))
       {
-        comparison=detail::less;
+        comparison=detail::comparison_t::less;
         negate=true;
       }
       else if (is_greater_equal_application(e))
       {
-        comparison=detail::less_eq;
+        comparison=detail::comparison_t::less_eq;
         negate=true;
       }
       else
@@ -790,43 +790,43 @@ class linear_inequality: public atermpp::aterm
     {
       if (this->function()==detail::linear_inequality_less())
       {
-        return detail::less;
+        return detail::comparison_t::less;
       }
       else if (this->function()==detail::linear_inequality_less_equal())
       {
-        return detail::less_eq;
+        return detail::comparison_t::less_eq;
       }
       assert(this->function()==detail::linear_inequality_equal());
-      return detail::equal;
+      return detail::comparison_t::equal;
     }
 
     data_expression transform_to_data_expression() const
     {
       const detail::comparison_t c=comparison();
-      if (c==detail::less_eq)
+      if (c==detail::comparison_t::less_eq)
       {
         return data::less_equal(lhs().transform_to_data_expression(),rhs());
       }
-      if (c==detail::less)
+      if (c==detail::comparison_t::less)
       {
         return data::less(lhs().transform_to_data_expression(),rhs());
       }
-      assert(c==detail::equal);
+      assert(c==detail::comparison_t::equal);
       return data::equal_to(lhs().transform_to_data_expression(),rhs());
     }
 
     bool is_false(const rewriter& r) const
     {
       return lhs().empty() &&
-             ((comparison()==detail::less_eq)?is_negative(rhs(),r):
-              ((comparison()==detail::equal)?!is_zero(rhs()):!is_positive(rhs(),r)));
+             ((comparison()==detail::comparison_t::less_eq)?is_negative(rhs(),r):
+              ((comparison()==detail::comparison_t::equal)?!is_zero(rhs()):!is_positive(rhs(),r)));
     }
 
     bool is_true(const rewriter& r) const
     {
       return lhs().empty() &&
-             ((comparison()==detail::less_eq)?!is_negative(rhs(),r):
-              ((comparison()==detail::equal)?is_zero(rhs()):is_positive(rhs(),r)));
+             ((comparison()==detail::comparison_t::less_eq)?!is_negative(rhs(),r):
+              ((comparison()==detail::comparison_t::equal)?is_zero(rhs()):is_positive(rhs(),r)));
     }
 
     /// \brief Return this inequality as a typical pair of terms of the form <x1+c2 x2+...+cn xn, d> where c2,...,cn, d are real constants.
@@ -886,15 +886,15 @@ class linear_inequality: public atermpp::aterm
                                                     rewrite_with_memory(real_negate(p.factor()),r));});
 
       const data_expression new_rhs=rewrite_with_memory(real_negate(rhs()),r);
-      if (comparison()==detail::less)
+      if (comparison()==detail::comparison_t::less)
       {
-        return linear_inequality(new_lhs,new_rhs,detail::less_eq);
+        return linear_inequality(new_lhs,new_rhs,detail::comparison_t::less_eq);
       }
-      else if (comparison()==detail::less_eq)
+      else if (comparison()==detail::comparison_t::less_eq)
       {
-        return linear_inequality(new_lhs,new_rhs,detail::less);
+        return linear_inequality(new_lhs,new_rhs,detail::comparison_t::less);
       }
-      return linear_inequality(new_lhs,new_rhs,detail::equal);
+      return linear_inequality(new_lhs,new_rhs,detail::comparison_t::equal);
     }
 
     void add_variables(std::set < variable >&  variable_set) const
@@ -1105,12 +1105,12 @@ inline bool is_a_redundant_inequality(
 #endif
   // Check whether the inequalities, with the i-th equality with a reversed comparison operator is inconsistent.
   // If yes, the i-th inequality is redundant.
-  if (i->comparison()==detail::equal)
+  if (i->comparison()==detail::comparison_t::equal)
   {
     // An inequality t==u is only redundant for equalities if
     // t<u and t>u are both inconsistent
     const linear_inequality old_inequality=*i;
-    *i=linear_inequality(i->lhs(),i->rhs(),detail::less);
+    *i=linear_inequality(i->lhs(),i->rhs(),detail::comparison_t::less);
     if (is_inconsistent(inequalities,r))
     {
       *i=i->invert(r);
@@ -1175,7 +1175,7 @@ inline void remove_redundant_inequalities(
   {
     // Check whether the inequalities, with the i-th equality with a reversed comparison operator is inconsistent.
     // If yes, the i-th inequality is redundant.
-    if (resulting_inequalities[i].comparison()==detail::equal)
+    if (resulting_inequalities[i].comparison()==detail::comparison_t::equal)
     {
       // Do nothing, as removing redundant inequalities is expensive.
       ++i;
@@ -1216,7 +1216,7 @@ static void pivot_and_update(
   std::map < variable, detail::lhs_t >& working_equalities,
   const rewriter& r)
 {
-  mCRL2log(log::trace) << "Pivoting " << pp(xi) << "   " << pp(xj) << "\n";
+  mCRL2log(log::log_level_t::trace) << "Pivoting " << pp(xi) << "   " << pp(xj) << "\n";
   const data_expression aij=working_equalities[xi][xj];
   const data_expression theta=rewrite_with_memory(real_divides(real_minus(v,beta[xi]),aij),r);
   const data_expression theta_delta_correction=rewrite_with_memory(real_divides(real_minus(v,beta_delta_correction[xi]),aij),r);
@@ -1225,10 +1225,10 @@ static void pivot_and_update(
   beta[xj]=rewrite_with_memory(real_plus(beta[xj],theta),r);
   beta_delta_correction[xj]=rewrite_with_memory(real_plus(beta_delta_correction[xj],theta_delta_correction),r);
 
-  mCRL2log(log::trace) << "Pivoting phase 0\n";
+  mCRL2log(log::log_level_t::trace) << "Pivoting phase 0\n";
   for (const variable& basic_variable: basic_variables)
   {
-    mCRL2log(log::trace) << "Working equalities " << basic_variable << ":  " << pp(working_equalities[basic_variable]) << "\n";
+    mCRL2log(log::log_level_t::trace) << "Working equalities " << basic_variable << ":  " << pp(working_equalities[basic_variable]) << "\n";
     if ((basic_variable!=xi) && (working_equalities[basic_variable].count(xj)>0))
     {
       const data_expression akj=working_equalities[basic_variable][xj];
@@ -1237,7 +1237,7 @@ static void pivot_and_update(
     }
   }
   // Apply pivoting on variables xi and xj;
-  mCRL2log(log::trace) << "Pivoting phase 1\n";
+  mCRL2log(log::log_level_t::trace) << "Pivoting phase 1\n";
   basic_variables.erase(xi);
   basic_variables.insert(xj);
 
@@ -1245,8 +1245,8 @@ static void pivot_and_update(
   expression_for_xj=expression_for_xj.erase(xj);
   expression_for_xj=set_factor_for_a_variable(expression_for_xj,xi,real_minus_one());
   expression_for_xj=multiply(expression_for_xj,real_divides(real_minus_one(),aij),r);
-  mCRL2log(log::trace) << "Expression for xj:" << pp(expression_for_xj) << "\n";
-  mCRL2log(log::trace) << "Pivoting phase 2\n";
+  mCRL2log(log::log_level_t::trace) << "Expression for xj:" << pp(expression_for_xj) << "\n";
+  mCRL2log(log::log_level_t::trace) << "Pivoting phase 2\n";
   working_equalities.erase(xi);
 
   for (auto & working_equalitie : working_equalities)
@@ -1254,7 +1254,7 @@ static void pivot_and_update(
     if (working_equalitie.second.count(xj)>0)
     {
       const data_expression factor=working_equalitie.second[xj];
-      mCRL2log(log::trace) << "VAR: " << pp(working_equalitie.first) << " Factor " << pp(factor) << "\n";
+      mCRL2log(log::log_level_t::trace) << "VAR: " << pp(working_equalitie.first) << " Factor " << pp(factor) << "\n";
       working_equalitie.second=working_equalitie.second.erase(xj);
       // We need a temporary copy of expression_for_xj as otherwise the multiply
       // below will change this expression.
@@ -1265,7 +1265,7 @@ static void pivot_and_update(
 
   working_equalities[xj]=expression_for_xj;
 
-  mCRL2log(log::trace) << "Pivoting phase 3\n";
+  mCRL2log(log::log_level_t::trace) << "Pivoting phase 3\n";
   // Calculate the values for beta and beta_delta_correction for the basic variables
   for (std::map < variable, detail::lhs_t >::const_iterator i=working_equalities.begin();
        i!=working_equalities.end() ; ++i)
@@ -1274,18 +1274,18 @@ static void pivot_and_update(
     beta_delta_correction[i->first]=i->second.evaluate(make_map_substitution(beta_delta_correction),r);
   }
 
-  mCRL2log(log::trace) << "End pivoting " << pp(xj) << "\n";
-  if (mCRL2logEnabled(log::trace))
+  mCRL2log(log::log_level_t::trace) << "End pivoting " << pp(xj) << "\n";
+  if (mCRL2logEnabled(log::log_level_t::trace))
   {
     for (std::map < variable,data_expression >::const_iterator i=beta.begin();
          i!=beta.end(); ++i)
     {
-      mCRL2log(log::trace) << "(1) beta[" << pp(i->first) << "]= " << pp(beta[i->first]) << "+ delta* " << pp(beta_delta_correction[i->first]) << "\n";
+      mCRL2log(log::log_level_t::trace) << "(1) beta[" << pp(i->first) << "]= " << pp(beta[i->first]) << "+ delta* " << pp(beta_delta_correction[i->first]) << "\n";
     }
     for (std::map < variable, detail::lhs_t >::const_iterator i=working_equalities.begin();
          i!=working_equalities.end() ; ++i)
     {
-      mCRL2log(log::trace) << "EQ: " << pp(i->first) << " := " << pp(i->second) << "\n";
+      mCRL2log(log::log_level_t::trace) << "EQ: " << pp(i->first) << " := " << pp(i->second) << "\n";
     }
   }
 }
@@ -1293,7 +1293,7 @@ static void pivot_and_update(
 namespace detail
 {
   /* False end nodes could be associated with NULL */
-enum node_type
+enum class node_type
 {
   true_end_node,
   false_end_node,
@@ -1345,7 +1345,7 @@ enum node_type
       inequality_inconsistency_cache& operator=(const inequality_consistency_cache& )=delete;
 
       inequality_inconsistency_cache()
-        : m_cache(std::make_unique<inequality_inconsistency_cache_base>(false_end_node))
+        : m_cache(std::make_unique<inequality_inconsistency_cache_base>(node_type::false_end_node))
       {}
 
       bool is_inconsistent(const std::vector < linear_inequality >& inequalities_in_) const
@@ -1356,24 +1356,24 @@ enum node_type
         {
           /* First walk down the three until an endnode is found
              that with l<=current_root.m_inequality. */
-          while (current_root->m_node==intermediate_node && l>current_root->m_inequality)
+          while (current_root->m_node==node_type::intermediate_node && l>current_root->m_inequality)
           {
             current_root=current_root->m_non_present_branch.get();
           }
-          if (current_root->m_node==intermediate_node)
+          if (current_root->m_node==node_type::intermediate_node)
           {
             if (l==current_root->m_inequality)
             {
               current_root=current_root->m_present_branch.get();
             }
-            assert(current_root->m_node!=intermediate_node || l<current_root->m_inequality);
+            assert(current_root->m_node!=node_type::intermediate_node || l<current_root->m_inequality);
           }
           else
           {
-            return current_root->m_node==true_end_node;
+            return current_root->m_node==node_type::true_end_node;
           }
         }
-        return current_root->m_node==true_end_node;
+        return current_root->m_node==node_type::true_end_node;
       }
 
       void add_inconsistent_inequality_set(const std::vector < linear_inequality >& inequalities_in_)
@@ -1384,28 +1384,28 @@ enum node_type
         {
           /* First walk down the tree until an endnode is found
                 that with l<=current_root->m_inequality. */
-          while ((*current_root)->m_node==intermediate_node && l>(*current_root)->m_inequality)
+          while ((*current_root)->m_node==node_type::intermediate_node && l>(*current_root)->m_inequality)
           {
             current_root=&((*current_root)->m_non_present_branch);
           }
-          if ((*current_root)->m_node==intermediate_node)
+          if ((*current_root)->m_node==node_type::intermediate_node)
           {
             if (l==(*current_root)->m_inequality)
             {
               current_root=&((*current_root)->m_present_branch);
-              assert((*current_root)->m_node!=intermediate_node || l<(*current_root)->m_inequality);
+              assert((*current_root)->m_node!=node_type::intermediate_node || l<(*current_root)->m_inequality);
             }
             else
             {
               // Add the node.
-              *current_root = std::make_unique<inequality_inconsistency_cache_base>(intermediate_node,l,
-                  std::make_unique<inequality_inconsistency_cache_base>(false_end_node),std::move(*current_root));
+              *current_root = std::make_unique<inequality_inconsistency_cache_base>(node_type::intermediate_node,l,
+                  std::make_unique<inequality_inconsistency_cache_base>(node_type::false_end_node),std::move(*current_root));
               current_root = &((*current_root)->m_present_branch);
             }
           }
           else
           {
-            if ((*current_root)->m_node==true_end_node)
+            if ((*current_root)->m_node==node_type::true_end_node)
             {
               // A shorter sequence than the linear inequality set is already inconsistent.
               // This should not occur, assuming that the linear inequality sequence is checked
@@ -1415,18 +1415,18 @@ enum node_type
             else
             {
               // Add the remaining sequence.
-              *current_root = std::make_unique<inequality_inconsistency_cache_base>(intermediate_node,l,
-                  std::make_unique<inequality_inconsistency_cache_base>(false_end_node),std::move(*current_root));
+              *current_root = std::make_unique<inequality_inconsistency_cache_base>(node_type::intermediate_node,l,
+                  std::make_unique<inequality_inconsistency_cache_base>(node_type::false_end_node),std::move(*current_root));
               current_root = &((*current_root)->m_present_branch);
             }
           }
         }
         // At this point the sequence of inequalities has been explored, but the tree has not ended.
-        // We expect the current node to be a true_end_node. If not, we replace it by one.
-        if ((*current_root)->m_node!=true_end_node)
+        // We expect the current node to be a node_type::true_end_node. If not, we replace it by one.
+        if ((*current_root)->m_node!=node_type::true_end_node)
         {
           assert(*current_root!=nullptr);
-          *current_root=std::make_unique<inequality_inconsistency_cache_base>(true_end_node);
+          *current_root=std::make_unique<inequality_inconsistency_cache_base>(node_type::true_end_node);
         }
       }
   };
@@ -1442,9 +1442,8 @@ enum node_type
       inequality_consistency_cache& operator=(const inequality_consistency_cache& )=delete;
 
       inequality_consistency_cache()
-        : m_cache(std::make_unique<inequality_inconsistency_cache_base>(false_end_node))
-      {
-      }
+        : m_cache(std::make_unique<inequality_inconsistency_cache_base>(node_type::false_end_node))
+      {}
 
       // Sort the vector inequalities_in if not sorted.
       bool is_consistent(const std::vector < linear_inequality >& inequalities_in_) const
@@ -1453,11 +1452,11 @@ enum node_type
         const inequality_inconsistency_cache_base* current_root=m_cache.get();
         for(std::set < linear_inequality >::const_iterator i=inequalities_in.begin(); i!=inequalities_in.end(); ++i)
         {
-          while (current_root->m_node==intermediate_node && *i>current_root->m_inequality)
+          while (current_root->m_node==node_type::intermediate_node && *i>current_root->m_inequality)
           {
             current_root=current_root->m_non_present_branch.get();
           }
-          if (current_root->m_node==intermediate_node)
+          if (current_root->m_node==node_type::intermediate_node)
           {
             if (*i==current_root->m_inequality)
             {
@@ -1467,11 +1466,11 @@ enum node_type
             {
               return false; // there are more inequalities than available in the tree. We know nothing about it being consistent.
             }
-            assert(current_root->m_node!=intermediate_node || *i<current_root->m_inequality);
+            assert(current_root->m_node!=node_type::intermediate_node || *i<current_root->m_inequality);
           }
           else
           {
-            return current_root->m_node!=false_end_node && i==inequalities_in.end();
+            return current_root->m_node!=node_type::false_end_node && i==inequalities_in.end();
           }
         }
         return true;
@@ -1485,30 +1484,30 @@ enum node_type
         {
           /* First walk down the three until an endnode is found
              with l<=current_root->m_inequality. */
-          while ((*current_root)->m_node==intermediate_node && l>(*current_root)->m_inequality)
+          while ((*current_root)->m_node==node_type::intermediate_node && l>(*current_root)->m_inequality)
           {
             current_root=&((*current_root)->m_non_present_branch);
           }
-          if ((*current_root)->m_node==intermediate_node)
+          if ((*current_root)->m_node==node_type::intermediate_node)
           {
             if (l==(*current_root)->m_inequality)
             {
               current_root=&((*current_root)->m_present_branch);
-              assert((*current_root)->m_node!=intermediate_node || l<(*current_root)->m_inequality);
+              assert((*current_root)->m_node!=node_type::intermediate_node || l<(*current_root)->m_inequality);
             }
             else
             {
               // Add the node.
-              *current_root = std::make_unique<inequality_inconsistency_cache_base>(intermediate_node,l,
-                  std::make_unique<inequality_inconsistency_cache_base>(true_end_node),std::move(*current_root));
+              *current_root = std::make_unique<inequality_inconsistency_cache_base>(node_type::intermediate_node,l,
+                  std::make_unique<inequality_inconsistency_cache_base>(node_type::true_end_node),std::move(*current_root));
               current_root = &((*current_root)->m_present_branch);
             }
           }
           else
           {
             // Add the remaining sequence.
-            *current_root = std::make_unique<inequality_inconsistency_cache_base>(intermediate_node,l,
-                std::make_unique<inequality_inconsistency_cache_base>(true_end_node),std::move(*current_root));
+            *current_root = std::make_unique<inequality_inconsistency_cache_base>(node_type::intermediate_node,l,
+                std::make_unique<inequality_inconsistency_cache_base>(node_type::true_end_node),std::move(*current_root));
             current_root = &((*current_root)->m_present_branch);
           }
         }
@@ -1545,7 +1544,7 @@ inline bool is_inconsistent(
   // First remove all equalities by Gauss elimination and make a fresh variable
   // generator.
 
-  mCRL2log(log::trace) << "Starting an inconsistency check on " + pp_vector(inequalities_in) << "\n";
+  mCRL2log(log::log_level_t::trace) << "Starting an inconsistency check on " + pp_vector(inequalities_in) << "\n";
 
   static detail::inequality_inconsistency_cache inconsistency_cache;
   static detail::inequality_consistency_cache consistency_cache;
@@ -1578,7 +1577,7 @@ inline bool is_inconsistent(
   {
     if (i->is_false(r))
     {
-      mCRL2log(log::trace) << "Inconsistent, because linear inequalities contains an inconsistent inequality\n";
+      mCRL2log(log::log_level_t::trace) << "Inconsistent, because linear inequalities contains an inconsistent inequality\n";
       if (use_cache)
       {
         inconsistency_cache.add_inconsistent_inequality_set(inequalities_in); // Necessary? Only false should be added.
@@ -1608,8 +1607,8 @@ inline bool is_inconsistent(
   non_basic_variables.clear(); // gauss_elimination has removed certain variables. So, we reconstruct the non
   // basic variables again below.
 
-  mCRL2log(log::trace) << "Resulting equalities " << pp_vector(equalities) << "\n";
-  mCRL2log(log::trace) << "Resulting inequalities " << pp_vector(inequalities) << "\n";
+  mCRL2log(log::log_level_t::trace) << "Resulting equalities " << pp_vector(equalities) << "\n";
+  mCRL2log(log::log_level_t::trace) << "Resulting inequalities " << pp_vector(inequalities) << "\n";
 
   // Now bring the linear equalities in the basic form described
   // in the article by Bruno Dutertre and Leonardo de Moura.
@@ -1618,10 +1617,10 @@ inline bool is_inconsistent(
   // if required.
   for (linear_inequality& inequality: inequalities)
   {
-    mCRL2log(log::trace) << "Investigate inequality: " << ":=" << pp(inequality) << " ||  " << pp(inequality.lhs()) << "\n";
+    mCRL2log(log::log_level_t::trace) << "Investigate inequality: " << ":=" << pp(inequality) << " ||  " << pp(inequality.lhs()) << "\n";
     if (inequality.is_false(r))
     {
-      mCRL2log(log::trace) << "Inconsistent, because linear inequalities contains an inconsistent inequality after Gauss elimination\n";
+      mCRL2log(log::log_level_t::trace) << "Inconsistent, because linear inequalities contains an inconsistent inequality after Gauss elimination\n";
       if (use_cache)
       {
         inconsistency_cache.add_inconsistent_inequality_set(inequalities_in); // Necessary? Only false should be added.
@@ -1631,7 +1630,7 @@ inline bool is_inconsistent(
     }
     if (!inequality.is_true(r))  // This inequality is redundant and can be skipped.
     {
-      assert(inequality.comparison()!=detail::equal);
+      assert(inequality.comparison()!=detail::comparison_t::equal);
       assert(inequality.lhs().size()>0); // this signals a redundant or an inconsistent inequality.
       inequality.add_variables(non_basic_variables);
 
@@ -1649,7 +1648,7 @@ inline bool is_inconsistent(
           {
             upperbounds[v]=bound;
             upperbounds_delta_correction[v]=
-              ((inequality.comparison()==detail::less)?real_minus_one():real_zero());
+              ((inequality.comparison()==detail::comparison_t::less)?real_minus_one():real_zero());
 
           }
           else
@@ -1658,7 +1657,7 @@ inline bool is_inconsistent(
             {
               upperbounds_delta_correction[v]=
                 min(upperbounds_delta_correction[v],
-                    ((inequality.comparison()==detail::less)?real_minus_one():real_zero()),r);
+                    ((inequality.comparison()==detail::comparison_t::less)?real_minus_one():real_zero()),r);
             }
           }
         }
@@ -1670,7 +1669,7 @@ inline bool is_inconsistent(
           {
             lowerbounds[v]=bound;
             lowerbounds_delta_correction[v]=
-              ((inequality.comparison()==detail::less)?real_one():real_zero());
+              ((inequality.comparison()==detail::comparison_t::less)?real_one():real_zero());
           }
           else
           {
@@ -1678,7 +1677,7 @@ inline bool is_inconsistent(
             {
               lowerbounds_delta_correction[v]=
                 max(lowerbounds_delta_correction[v],
-                    ((inequality.comparison()==detail::less)?real_one():real_zero()),r);
+                    ((inequality.comparison()==detail::comparison_t::less)?real_one():real_zero()),r);
             }
           }
         }
@@ -1691,9 +1690,9 @@ inline bool is_inconsistent(
         basic_variables.insert(new_basic_variable);
         upperbounds[new_basic_variable]=inequality.rhs();
         upperbounds_delta_correction[new_basic_variable]=
-          ((inequality.comparison()==detail::less)?real_minus_one():real_zero());
+          ((inequality.comparison()==detail::comparison_t::less)?real_minus_one():real_zero());
         working_equalities[new_basic_variable]=inequality.lhs();
-        mCRL2log(log::trace) << "New slack variable: " << pp(new_basic_variable) << ":=" << pp(inequality) << "   " << pp(inequality.lhs()) << "\n";
+        mCRL2log(log::log_level_t::trace) << "New slack variable: " << pp(new_basic_variable) << ":=" << pp(inequality) << "   " << pp(inequality.lhs()) << "\n";
       }
     }
   }
@@ -1709,7 +1708,7 @@ inline bool is_inconsistent(
            ((upperbounds[non_basic_variable]==lowerbounds[non_basic_variable]) &&
             (rewrite_with_memory(less(upperbounds_delta_correction[non_basic_variable],lowerbounds_delta_correction[non_basic_variable]),r)==sort_bool::true_()))))
       {
-        mCRL2log(log::trace) << "Inconsistent, preprocessing " << pp(non_basic_variable) << "\n";
+        mCRL2log(log::log_level_t::trace) << "Inconsistent, preprocessing " << pp(non_basic_variable) << "\n";
         if (use_cache)
         {
           inconsistency_cache.add_inconsistent_inequality_set(inequalities_in);
@@ -1730,7 +1729,7 @@ inline bool is_inconsistent(
       beta[non_basic_variable]=real_zero();
       beta_delta_correction[non_basic_variable]=real_zero();
     }
-    mCRL2log(log::trace) << "(2) beta[" << pp(non_basic_variable) << "]=" << pp(beta[non_basic_variable])<< "+delta*" << pp(beta_delta_correction[non_basic_variable]) <<"\n";
+    mCRL2log(log::log_level_t::trace) << "(2) beta[" << pp(non_basic_variable) << "]=" << pp(beta[non_basic_variable])<< "+delta*" << pp(beta_delta_correction[non_basic_variable]) <<"\n";
   }
 
   // Subsequently set the values for the basic variables
@@ -1739,7 +1738,7 @@ inline bool is_inconsistent(
     beta[basic_variable]=working_equalities[basic_variable].evaluate(make_map_substitution(beta),r);
     beta_delta_correction[basic_variable]=working_equalities[basic_variable].
                               evaluate(make_map_substitution(beta_delta_correction),r);
-    mCRL2log(log::trace) << "(3) beta[" << pp(basic_variable) << "]=" << pp(beta[basic_variable])<< "+delta*" << pp(beta_delta_correction[basic_variable]) <<"\n";
+    mCRL2log(log::log_level_t::trace) << "(3) beta[" << pp(basic_variable) << "]=" << pp(beta[basic_variable])<< "+delta*" << pp(beta_delta_correction[basic_variable]) <<"\n";
   }
 
   // Now the basic data structure has been set up.
@@ -1755,11 +1754,11 @@ inline bool is_inconsistent(
     variable xi;
     for (const auto & basic_variable : basic_variables)
     {
-      mCRL2log(log::trace) << "Evaluate start\n";
+      mCRL2log(log::log_level_t::trace) << "Evaluate start\n";
       assert(!found);
       data_expression value=beta[basic_variable]; // working_equalities[*i].evaluate(beta,r);
       data_expression value_delta_correction=beta_delta_correction[basic_variable]; // working_equalities[*i].evaluate(beta_delta_correction,r);
-      mCRL2log(log::trace) << "Evaluate end\n";
+      mCRL2log(log::log_level_t::trace) << "Evaluate end\n";
       if ((upperbounds.count(basic_variable)>0) &&
           ((rewrite_with_memory(less(upperbounds[basic_variable],value),r)==sort_bool::true_()) ||
            ((upperbounds[basic_variable]==value) &&
@@ -1767,7 +1766,7 @@ inline bool is_inconsistent(
       {
         // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
-        mCRL2log(log::trace) << "Upperbound violation " << pp(basic_variable) << "  bound: " << pp(upperbounds[basic_variable]) << "\n";
+        mCRL2log(log::log_level_t::trace) << "Upperbound violation " << pp(basic_variable) << "  bound: " << pp(upperbounds[basic_variable]) << "\n";
         found=true;
         xi=basic_variable;
         lowerbound_violation=false;
@@ -1780,7 +1779,7 @@ inline bool is_inconsistent(
       {
         // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
-        mCRL2log(log::trace) << "Lowerbound violation " << pp(basic_variable) << "  bound: " << pp(lowerbounds[basic_variable]) << "\n";
+        mCRL2log(log::log_level_t::trace) << "Lowerbound violation " << pp(basic_variable) << "  bound: " << pp(lowerbounds[basic_variable]) << "\n";
         found=true;
         xi=basic_variable;
         lowerbound_violation=true;
@@ -1790,7 +1789,7 @@ inline bool is_inconsistent(
     if (!found)
     {
       // The inequalities are consistent. Return false.
-      mCRL2log(log::trace) << "Consistent while pivoting\n";
+      mCRL2log(log::log_level_t::trace) << "Consistent while pivoting\n";
       if (use_cache)
       {
         consistency_cache.add_consistent_inequality_set(inequalities_in);
@@ -1799,17 +1798,17 @@ inline bool is_inconsistent(
       return false;
     }
 
-    mCRL2log(log::trace) << "The smallest basic variable that does not satisfy the bounds is " << pp(xi) << "\n";
+    mCRL2log(log::log_level_t::trace) << "The smallest basic variable that does not satisfy the bounds is " << pp(xi) << "\n";
     if (lowerbound_violation)
     {
-      mCRL2log(log::trace) << "Lowerbound violation \n";
+      mCRL2log(log::log_level_t::trace) << "Lowerbound violation \n";
       // select the smallest non-basic variable with which pivoting can take place.
       bool found=false;
       const detail::lhs_t& lhs=working_equalities[xi];
       for (const detail::variable_with_a_rational_factor& lh : lhs)
       {
         const variable xj = lh.variable_name();
-        mCRL2log(log::trace) << pp(xj) << "  --  " << pp(lh.factor()) << "\n";
+        mCRL2log(log::log_level_t::trace) << pp(xj) << "  --  " << pp(lh.factor()) << "\n";
         if ((is_positive(lh.factor(), r)
                 && ((upperbounds.count(xj) == 0)
                     || ((rewrite_with_memory(less(beta[xj], upperbounds[xj]), r) == sort_bool::true_())
@@ -1836,7 +1835,7 @@ inline bool is_inconsistent(
       if (!found)
       {
         // The inequalities are inconsistent.
-        mCRL2log(log::trace) << "Inconsistent while pivoting\n";
+        mCRL2log(log::log_level_t::trace) << "Inconsistent while pivoting\n";
         if (use_cache)
         {
           inconsistency_cache.add_inconsistent_inequality_set(inequalities_in);
@@ -1848,14 +1847,14 @@ inline bool is_inconsistent(
     }
     else  // Upperbound violation.
     {
-      mCRL2log(log::trace) << "Upperbound violation \n";
+      mCRL2log(log::log_level_t::trace) << "Upperbound violation \n";
       // select the smallest non-basic variable with which pivoting can take place.
       bool found=false;
       for (detail::lhs_t::const_iterator xj_it=working_equalities[xi].begin();
            xj_it!=working_equalities[xi].end(); ++xj_it)
       {
         const variable xj=xj_it->variable_name();
-        mCRL2log(log::trace) << pp(xj) << "  --  " << pp(xj_it->factor()) <<  " POS " << is_positive(xj_it->factor(),r) << "\n";
+        mCRL2log(log::log_level_t::trace) << pp(xj) << "  --  " << pp(xj_it->factor()) <<  " POS " << is_positive(xj_it->factor(),r) << "\n";
         if ((is_negative(xj_it->factor(),r) &&
              ((upperbounds.count(xj)==0) ||
               ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool::true_()) ||
@@ -1875,7 +1874,7 @@ inline bool is_inconsistent(
       if (!found)
       {
         // The inequalities are inconsistent.
-        mCRL2log(log::trace) << "Inconsistent while pivoting (1)\n";
+        mCRL2log(log::log_level_t::trace) << "Inconsistent while pivoting (1)\n";
         if (use_cache)
         {
           inconsistency_cache.add_inconsistent_inequality_set(inequalities_in);
@@ -1932,7 +1931,7 @@ std::set < variable >  gauss_elimination(
     }
     else if (!inequality.is_true(r)) // Do not consider redundant equations.
     {
-      if (inequality.comparison()==detail::equal)
+      if (inequality.comparison()==detail::comparison_t::equal)
       {
         resulting_equalities.push_back(inequality);
       }

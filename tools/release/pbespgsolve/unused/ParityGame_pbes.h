@@ -54,8 +54,8 @@ void ParityGame::assign_pbes( mcrl2::pbes_system::pbes &pbes,
     for (verti v = begin; v < end; ++v)
     {
         bool and_op = pgg.get_operation(v) ==
-                        pg_generator::PGAME_AND;
-        vertex_[v - begin].player = and_op ? PLAYER_ODD : PLAYER_EVEN;
+                        pg_generator::operation_type::PGAME_AND;
+        vertex_[v - begin].player = and_op ? player_t::PLAYER_ODD : player_t::PLAYER_EVEN;
         vertex_[v - begin].priority = pgg.get_priority(v);
     }
     recalculate_cardinalities(end - begin);

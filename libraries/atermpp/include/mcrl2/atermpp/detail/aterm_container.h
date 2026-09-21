@@ -167,6 +167,7 @@ struct markable_aterm<T> : unprotected_aterm_core
     : unprotected_aterm_core(detail::address(other))
   {}
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) unprotected_aterm_core is a non-owning pointer wrapper; there is nothing to move.
   markable_aterm(unprotected_aterm_core&& other) noexcept
     : unprotected_aterm_core(detail::address(other))
   {}
@@ -178,6 +179,7 @@ struct markable_aterm<T> : unprotected_aterm_core
     return *this;
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) unprotected_aterm_core is a non-owning pointer wrapper; there is nothing to move.
   markable_aterm& operator=(unprotected_aterm_core&& other) noexcept
   {
     mcrl2::utilities::shared_guard guard = lock_shared_aterm_pool();
@@ -232,6 +234,7 @@ public:
     : super(markable_t<F>(other.first), markable_t<S>(other.second))
   {}
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) other.first and other.second are moved above.
   markable_aterm(std_pair&& other)
     : super(markable_t<F>(std::move(other.first)), markable_t<S>(std::move(other.second)))
   {}
@@ -243,6 +246,7 @@ public:
     return *this;
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) other.first and other.second are moved below.
   markable_aterm& operator=(std_pair&& other)
   {
     super::first = std::move(other.first);
@@ -291,6 +295,7 @@ public:
       this->emplace_back(v);
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) elements of other are moved below.
   markable_aterm(std_vector&& other)
   {
     this->reserve(other.size());
@@ -307,6 +312,7 @@ public:
     return *this;
   }
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) elements of other are moved below.
   markable_aterm& operator=(std_vector&& other)
   {
     this->clear();

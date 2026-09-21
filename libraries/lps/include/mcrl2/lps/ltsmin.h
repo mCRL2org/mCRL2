@@ -319,7 +319,7 @@ class pins
 
     /// \brief guard evaluations have ternary logic. A guard may not always rewrite
     /// to true or false
-    enum guard_evaluation_t { GUARD_FALSE = 0, GUARD_TRUE = 1, GUARD_MAYBE = 2 };
+    enum class guard_evaluation_t { GUARD_FALSE = 0, GUARD_TRUE = 1, GUARD_MAYBE = 2 };
 
     using substitution_t = data::rewriter::substitution_type;
 
@@ -603,7 +603,7 @@ class pins
                 use_conjunct_as_guard = false;
 
                 std::string printed_guard(data::pp(conjunct).substr(0, 80));
-                mCRL2log(log::verbose)
+                mCRL2log(log::log_level_t::verbose)
                     << "Guard '" << printed_guard + (printed_guard.size() > 80?"...":"") << "' in summand "
                     << reduced_summands.size()
                     << " introduces local variables. To remove the guard from the condition, try instantiating the summand with 'lpssuminst'."
@@ -947,11 +947,11 @@ class pins
           substitution);
 
       if(result == data::sort_bool::false_()) { // the guard rewrites to false.
-        return GUARD_FALSE;
+        return guard_evaluation_t::GUARD_FALSE;
       } else if(result == data::sort_bool::true_()) { // the guard rewrites to true.
-        return GUARD_TRUE;
+        return guard_evaluation_t::GUARD_TRUE;
       } else { // the guard does not rewrite to true or false, so maybe...
-        return GUARD_MAYBE;
+        return guard_evaluation_t::GUARD_MAYBE;
       }
     }
 

@@ -73,7 +73,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
         (*this)(s);
       }
 
-      mCRL2log(log::verbose) << "Removed " << m_removed << " summation variables" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Removed " << m_removed << " summation variables" << std::endl;
     }
 
     /// \brief Apply the sum elimination lemma to summand s.

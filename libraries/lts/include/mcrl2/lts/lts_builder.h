@@ -140,7 +140,7 @@ class lts_aut_disk_builder: public lts_builder
   public:
     explicit lts_aut_disk_builder(const std::string& filename)
     {
-      mCRL2log(log::verbose) << "writing state space in AUT format to '" << filename << "'." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "writing state space in AUT format to '" << filename << "'." << std::endl;
       out.open(filename.c_str());
       if (!out.is_open())
       {
@@ -276,7 +276,7 @@ class lts_lts_disk_builder: public lts_builder
           throw mcrl2::runtime_error("Fail to open file " + filename + " for writing.");
         }
 
-        mCRL2log(log::verbose) << "writing state space in LTS format to '" << filename << "'." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "writing state space in LTS format to '" << filename << "'." << std::endl;
       }
       stream = std::make_unique<atermpp::binary_aterm_ostream>(to_stdout ? std::cout : fstream);
 
@@ -359,7 +359,7 @@ std::unique_ptr<lts_builder> create_lts_builder(const lps::specification& lpsspe
 {
   switch (output_format)
   {
-    case lts_aut:
+    case lts_type::lts_aut:
     {
       if (options.save_at_end)
       {
@@ -370,9 +370,9 @@ std::unique_ptr<lts_builder> create_lts_builder(const lps::specification& lpsspe
         return std::make_unique<lts_aut_disk_builder>(output_filename);
       }
     }
-    case lts_dot: return std::make_unique<lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-    case lts_fsm: return std::make_unique<lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
-    case lts_lts:
+    case lts_type::lts_dot: return std::make_unique<lts_dot_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
+    case lts_type::lts_fsm: return std::make_unique<lts_fsm_builder>(lpsspec.data(), lpsspec.action_labels(), lpsspec.process().process_parameters());
+    case lts_type::lts_lts:
     {
       if (options.save_at_end)
       {

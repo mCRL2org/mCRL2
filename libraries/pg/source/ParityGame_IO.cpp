@@ -80,7 +80,7 @@ void ParityGame::read_pgsolver( std::istream &is,
     }
 
     // Invalid vertex (used to mark uninitialized vertices)
-    ParityGameVertex invalid = {.player = PLAYER_EVEN, .priority = (priority_t)-1};
+    ParityGameVertex invalid = {.player = player_t::PLAYER_EVEN, .priority = (priority_t)-1};
 
     // Read vertex specs
     while (is)
@@ -210,7 +210,7 @@ void ParityGame::write_pgsolver(std::ostream &os) const
     os << "parity " << (long long)graph_.V() - 1 << ";\n";
     for (verti v = 0; v < graph_.V(); ++v)
     {
-        os << v << ' ' << (max_prio - priority(v)) << ' ' << player(v);
+        os << v << ' ' << (max_prio - priority(v)) << ' ' << static_cast<int>(player(v));
         StaticGraph::const_iterator it = graph_.succ_begin(v);
         StaticGraph::const_iterator end = graph_.succ_end(v);
         assert(it < end);
@@ -281,8 +281,8 @@ void ParityGame::assign_pbes(mcrl2::pbes_system::pbes &pbes, verti *goal_vertex,
     for (verti v = begin; v < end; ++v)
     {
         bool and_op = pgg.get_operation(v) ==
-                        mcrl2::pbes_system::parity_game_generator::PGAME_AND;
-        vertex_[v - begin].player = and_op ? PLAYER_ODD : PLAYER_EVEN;
+                        mcrl2::pbes_system::parity_game_generator::operation_type::PGAME_AND;
+        vertex_[v - begin].player = and_op ? player_t::PLAYER_ODD : player_t::PLAYER_EVEN;
         vertex_[v - begin].priority = pgg.get_priority(v);
     }
     recalculate_cardinalities(end - begin);
@@ -320,12 +320,12 @@ void ParityGame::write_dot(std::ostream &os) const
     os << "digraph {\n";
     for (verti v = 0; v < graph_.V(); ++v)
     {
-        bool even = player(v) == PLAYER_EVEN;
+        bool even = player(v) == player_t::PLAYER_EVEN;
         os << v << " ["
            << "shape=" << (even ? "diamond" : "box") << ", "
            << "label=\"" << priority(v) << " (" << v << ")\"]\n";
 
-        if (graph_.edge_dir() & StaticGraph::EDGE_SUCCESSOR)
+        if (graph_.edge_dir() & StaticGraph::EdgeDirection::EDGE_SUCCESSOR)
         {
             for ( StaticGraph::const_iterator it = graph_.succ_begin(v);
                   it != graph_.succ_end(v); ++it )
@@ -355,11 +355,11 @@ void ParityGame::write_debug(const Strategy &s, std::ostream &os) const
         // Print controlling player and vertex priority:
         char l = ' ';
         char r = ' ';
-        if (player(v) == PLAYER_EVEN)
+        if (player(v) == player_t::PLAYER_EVEN)
         {
           l = '<', r = '>';
         }
-        if (player(v) == PLAYER_ODD)
+        if (player(v) == player_t::PLAYER_ODD)
         {
           l = '[', r = ']';
         }

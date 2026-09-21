@@ -385,7 +385,7 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
       return super::apply(x);
     }
 
-    mCRL2log(log::trace) << "Or expression " << x << "\n";
+    mCRL2log(log::log_level_t::trace) << "Or expression " << x << "\n";
 
     // Special case for pre-SRF with simple expressions.
     std::set<pbes_expression> clauses = split_or(x, false);
@@ -405,20 +405,20 @@ struct srf_or_traverser : public pbes_expression_traverser<srf_or_traverser<allo
       // No simple clauses, so we have a disjunction of non-simple ors.
       for (const pbes_expression& clause : clauses)
       {
-        mCRL2log(log::trace) << "Clause " << clause << "\n";
+        mCRL2log(log::log_level_t::trace) << "Clause " << clause << "\n";
         apply(clause);
       }
       return;
     }
 
     pbes_expression condition = make_disjunction(simple_clauses.begin(), simple_clauses.end());
-    mCRL2log(log::trace) << "Simple condition " << condition << "\n";
+    mCRL2log(log::log_level_t::trace) << "Simple condition " << condition << "\n";
 
     for (const pbes_expression& clause: clauses)
     {
       if (!m_merge_simple_expressions || !is_simple_expression_cached(clause, false))
       {
-        mCRL2log(log::trace) << "Clause " << clause << "\n";
+        mCRL2log(log::log_level_t::trace) << "Clause " << clause << "\n";
         std::size_t size = summands.size();
         apply(clause);
         for (auto i = summands.begin() + size; i != summands.end(); ++i)
@@ -622,7 +622,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
       return;
     }
 
-    mCRL2log(log::trace) << "Expression " << x << "\n";
+    mCRL2log(log::log_level_t::trace) << "Expression " << x << "\n";
 
     // Special case for pre-SRF with simple expressions.
     std::set<pbes_expression> clauses = split_and(x, false);
@@ -645,7 +645,7 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
       // No simple clauses, so we have a conjunction of non-simple ands.
       for (const pbes_expression& clause : clauses)
       {
-        mCRL2log(log::trace) << "Clause " << clause << "\n";
+        mCRL2log(log::log_level_t::trace) << "Clause " << clause << "\n";
         apply(clause);
       }
       return;
@@ -653,14 +653,14 @@ struct srf_and_traverser : public pbes_expression_traverser<srf_and_traverser<al
 
     // condition used for strengthening guards of dependencies.
     pbes_expression condition = make_conjunction(simple_clauses.begin(), simple_clauses.end());
-    mCRL2log(log::trace) << "Simple condition " << condition << "\n";
+    mCRL2log(log::log_level_t::trace) << "Simple condition " << condition << "\n";
 
     // Recursively apply (pre)SRF transformation.
     for (const pbes_expression& clause : clauses)
     {
       if (!m_merge_simple_expressions || !is_simple_expression_cached(clause, false))
       {
-        mCRL2log(log::trace) << "Clause " << clause << "\n";
+        mCRL2log(log::log_level_t::trace) << "Clause " << clause << "\n";
         std::size_t size = summands.size();
         apply(clause);
         for (auto i = summands.begin() + size; i != summands.end(); ++i)

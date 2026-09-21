@@ -96,12 +96,12 @@ struct substitute_propositional_variables_builder: public Builder<substitute_pro
                       [this](const propositional_variable_instantiation& v){ return v.name()!=m_eq.variable().name(); }))
       {
         // The result does not contain the variable m_eq.variable().name() and is therefore considered simpler. 
-        mCRL2log(log::verbose) << "Replaced in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
+        mCRL2log(log::log_level_t::verbose) << "Replaced in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
         result=p;
         m_stable=false;
         return;
       }
-      mCRL2log(log::debug) << "No Replacement in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
+      mCRL2log(log::log_level_t::debug) << "No Replacement in PBES equation for " << name << ":\n" << x << " --> " << p << "\n";
       result=x;
       return;
     }
@@ -146,7 +146,7 @@ struct pbesbackelm_pbes_backward_substituter
     for(std::vector<pbes_equation>::reverse_iterator i=p.equations().rbegin(); i!=p.equations().rend(); i++)
     {
       // Simplify the equation *i by substituting in itself. 
-      mCRL2log(log::verbose) << "Investigating the equation for " <<  i->variable().name() << "\n";
+      mCRL2log(log::log_level_t::verbose) << "Investigating the equation for " <<  i->variable().name() << "\n";
       self_substitute(*i,substituter);
       for(std::vector<pbes_equation>::reverse_iterator j=i+1; j!=p.equations().rend(); j++)
       {

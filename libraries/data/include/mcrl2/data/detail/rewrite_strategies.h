@@ -26,17 +26,17 @@ static inline
 std::vector<data::rewrite_strategy> initialise_test_rewrite_strategies(const bool with_prover)
 {
   std::vector<data::rewrite_strategy> result;
-  result.push_back(data::jitty);
+  result.push_back(data::rewrite_strategy::jitty);
   if (with_prover)
   {
-    result.push_back(data::jitty_prover);
+    result.push_back(data::rewrite_strategy::jitty_prover);
   }
 #ifdef MCRL2_TEST_JITTYC
 #ifdef MCRL2_ENABLE_JITTYC
-  result.push_back(data::jitty_compiling);
+  result.push_back(data::rewrite_strategy::jitty_compiling);
   if (with_prover)
   {
-    result.push_back(data::jitty_compiling_prover);
+    result.push_back(data::rewrite_strategy::jitty_compiling_prover);
   }
 #endif // MCRL2_ENABLE_JITTYC
 #endif // MCRL2_TEST_JITTYC

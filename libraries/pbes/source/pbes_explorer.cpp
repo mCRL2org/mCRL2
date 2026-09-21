@@ -175,7 +175,7 @@ lts_info::lts_info(pbes& p, detail::pbes_greybox_interface* pgg, bool reset = fa
 
 void lts_info::compute_lts_type()
 {
-    mCRL2log(log::verbose) << "Compute LTS type." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Compute LTS type." << std::endl;
     std::vector<std::string> params;
     std::map<std::string,std::string> paramtypes;
     data::representative_generator default_expression_generator(p.data());
@@ -220,7 +220,7 @@ void lts_info::compute_lts_type()
     this->type.add_state_label("priority", "int");
     this->type.add_state_label("type", "int");
 
-    mCRL2log(log::verbose) << "end of compute_lts_type." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "end of compute_lts_type." << std::endl;
 }
 
 
@@ -404,11 +404,11 @@ std::vector<pbes_expression> lts_info::split_expression_and_substitute_variables
 
 void lts_info::compute_transition_groups()
 {
-    mCRL2log(log::verbose) << "Compute transition groups." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Compute transition groups." << std::endl;
 
     int group = 0;
     int priority = 0;
-    operation_type type = parity_game_generator::PGAME_AND;
+    operation_type type = parity_game_generator::operation_type::PGAME_AND;
     fixpoint_symbol symbol = fixpoint_symbol::nu();
     detail::ppg_visitor checker;
 
@@ -430,7 +430,7 @@ void lts_info::compute_transition_groups()
     priority++;
 
     name = "false";
-    type = parity_game_generator::PGAME_OR;
+    type = parity_game_generator::operation_type::PGAME_OR;
     symbol = fixpoint_symbol::mu();
     propositional_variable f{core::identifier_string(name), data::variable_list()};
     this->variables[name] = f;
@@ -461,7 +461,7 @@ void lts_info::compute_transition_groups()
             priority++;
             symbol = eqn.symbol();
         }
-        mCRL2log(log::debug) << "Adding var " << variable_name << ", priority=" << priority << ", symbol=" << symbol << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Adding var " << variable_name << ", priority=" << priority << ", symbol=" << symbol << std::endl;
         this->variable_priority[variable_name] = priority;
         this->variable_parameters[variable_name] = eqn.variable().parameters();
         this->variable_parameter_signatures[variable_name] = get_param_sequence(eqn.variable().parameters());
@@ -499,12 +499,12 @@ void lts_info::compute_transition_groups()
                  variable_set.insert(occ_vars.begin(), occ_vars.end());
             }
         }
-        mCRL2log(log::debug) << "Set of 'used' variables: " << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Set of 'used' variables: " << std::endl;
         for (const auto & var_str : variable_set)
         {
-            mCRL2log(log::debug) << "  " << var_str << std::endl;
+            mCRL2log(log::log_level_t::debug) << "  " << var_str << std::endl;
         }
-        mCRL2log(log::debug) << std::endl;
+        mCRL2log(log::log_level_t::debug) << std::endl;
     }
 
     for (auto & eqn : p.equations()) {
@@ -515,28 +515,28 @@ void lts_info::compute_transition_groups()
             priority = this->variable_priority[variable_name];
             pbes_expression expr = this->variable_expression[variable_name];
             std::set<std::string> vars_stack;
-            mCRL2log(log::debug) << std::endl << "Generating groups for equation " << variable_name << std::endl;
+            mCRL2log(log::log_level_t::debug) << std::endl << "Generating groups for equation " << variable_name << std::endl;
             std::vector<pbes_expression> expression_parts = split_expression_and_substitute_variables(expr, priority, type, vars_stack);
             for (const auto & expression_part : expression_parts) {
                 this->transition_expression_plain.push_back(expression_part);
                 this->transition_expression.push_back(pgg->rewrite_and_simplify_expression(expression_part));
                 this->transition_variable_name.push_back(variable_name);
                 this->transition_type.push_back(type);
-                mCRL2log(log::debug) << "Add transition group " << group << ": "
-                        << (type==parity_game_generator::PGAME_AND ? "AND" : "OR") << " " << variable_name << " "
+                mCRL2log(log::log_level_t::debug) << "Add transition group " << group << ": "
+                        << (type==parity_game_generator::operation_type::PGAME_AND ? "AND" : "OR") << " " << variable_name << " "
                         << pbes_system::pp(expression_part) << std::endl;
                 group++;
             }
         }
     }
     number_of_groups = group;
-    mCRL2log(log::debug) << "end of compute_transition_groups." << std::endl;
+    mCRL2log(log::log_level_t::debug) << "end of compute_transition_groups." << std::endl;
 }
 
 
 void lts_info::compute_dependency_matrix()
 {
-    mCRL2log(log::verbose) << "Compute dependency matrix." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Compute dependency matrix." << std::endl;
     for(int group=0; group < number_of_groups; group++)
     {
         std::vector<bool> dep_row;
@@ -561,7 +561,7 @@ void lts_info::compute_dependency_matrix()
         read_matrix[group] = read_row;
         write_matrix[group] = write_row;
     }
-    mCRL2log(log::verbose) << "end of compute_dependency_matrix." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "end of compute_dependency_matrix." << std::endl;
 }
 
 
@@ -691,7 +691,7 @@ bool lts_info::is_read_dependent_parameter(int group, int part)
     return false;
   }
     std::string p = type.get_state_names()[part];
-    mCRL2log(log::debug) << "is_read_dependent_parameter (group=" << group << ", part=" << part << " [" << p << "]" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "is_read_dependent_parameter (group=" << group << ", part=" << part << " [" << p << "]" << std::endl;
     pbes_expression phi = transition_expression_plain[group];
     std::string X = transition_variable_name[group];
     std::set<std::string> params = lts_info::get_param_set(variable_parameters[X]);
@@ -1076,7 +1076,7 @@ std::string lts_info::state_to_string(const ltsmin_state& state)
     std::string result;
     std::stringstream ss;
     operation_type type = detail::map_at(get_variable_types(), state.get_variable());
-    ss << (type==parity_game_generator::PGAME_AND ? "AND" : "OR");
+    ss << (type==parity_game_generator::operation_type::PGAME_AND ? "AND" : "OR");
     ss << ":" << state.get_variable();
     ss << "(";
     const std::vector<data_expression>& param_values = state.get_parameter_values();
@@ -1276,7 +1276,7 @@ std::string ltsmin_state::state_to_string() const
 {
     std::string result;
     std::stringstream ss;
-    ss << (type==parity_game_generator::PGAME_AND ? "AND" : "OR");
+    ss << (type==parity_game_generator::operation_type::PGAME_AND ? "AND" : "OR");
     ss << ":" << var;
     ss << "[" << std::endl;
     for (std::vector<data_expression>::const_iterator entry =
@@ -1303,9 +1303,9 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
     pbes_system::algorithms::normalize(p);
     if (!detail::is_ppg(p))
     {
-        mCRL2log(log::info) << "Rewriting to PPG..." << std::endl;
+        mCRL2log(log::log_level_t::info) << "Rewriting to PPG..." << std::endl;
         p = detail::to_ppg(p);
-        mCRL2log(log::info) << "Rewriting done." << std::endl;
+        mCRL2log(log::log_level_t::info) << "Rewriting done." << std::endl;
     }
     this->pgg = new detail::pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
@@ -1625,12 +1625,12 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
             if (is_propositional_variable_instantiation(successor)) {
                 result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(successor)));
             } else if (is_true(successor)) {
-                if (type != parity_game_generator::PGAME_AND)
+                if (type != parity_game_generator::operation_type::PGAME_AND)
                 {
                     result.push_back(true_state());
                 }
             } else if (is_false(successor)) {
-                if (type != parity_game_generator::PGAME_OR)
+                if (type != parity_game_generator::operation_type::PGAME_OR)
                 {
                     result.push_back(false_state());
                 }
@@ -1673,12 +1673,12 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
                 if (is_propositional_variable_instantiation(successor)) {
                     result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(successor)));
                 } else if (is_true(successor)) {
-                    if (type != parity_game_generator::PGAME_AND)
+                    if (type != parity_game_generator::operation_type::PGAME_AND)
                     {
                         result.push_back(true_state());
                     }
                 } else if (is_false(successor)) {
-                    if (type != parity_game_generator::PGAME_OR)
+                    if (type != parity_game_generator::operation_type::PGAME_OR)
                     {
                         result.push_back(false_state());
                     }

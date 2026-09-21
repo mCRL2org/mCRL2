@@ -107,11 +107,11 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       //load LPS
       if (input_filename().empty())
       {
-        mCRL2log(verbose) << "Reading LPS from stdin..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Reading LPS from stdin..." << std::endl;
       }
       else
       {
-        mCRL2log(verbose) << "Reading LPS from file '" <<  input_filename() << "'..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Reading LPS from file '" <<  input_filename() << "'..." << std::endl;
       }
       stochastic_specification old_spec;
       load_lps(old_spec, input_filename());
@@ -126,7 +126,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       if (m_use_renamefile)
       {
         //load action rename file
-        mCRL2log(verbose) << "Reading input from file '" <<  m_action_rename_filename << "'..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Reading input from file '" <<  m_action_rename_filename << "'..." << std::endl;
         std::ifstream rename_stream(m_action_rename_filename.c_str());
         if (!rename_stream.is_open())
         {
@@ -141,7 +141,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         rename_stream.close();
 
         //rename all assigned actions
-        mCRL2log(verbose) << "Renaming actions in LPS..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Renaming actions in LPS..." << std::endl;
         new_spec = action_rename(action_rename_spec, old_spec, datar, m_rewrite);
       }
       else
@@ -154,12 +154,12 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         std::regex matching_regex(m_regex.substr(0, slash_pos));
         std::string replacing_fmt(m_regex.substr(slash_pos+1));
 
-        mCRL2log(verbose) << "Renaming actions in LPS..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Renaming actions in LPS..." << std::endl;
         new_spec = action_rename(matching_regex, replacing_fmt, old_spec);
       }
       if (m_typecheck)
       {
-        mCRL2log(verbose) << "Type checking resulting LPS..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Type checking resulting LPS..." << std::endl;
         if (!check_well_typedness(new_spec))
         {
           throw mcrl2::runtime_error("Type checking the specification obtained after renaming was unsuccesful.");
@@ -167,17 +167,17 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       }
       if (m_rewrite)
       {
-        mCRL2log(verbose) << "Rewriting data expressions in LPS..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Rewriting data expressions in LPS..." << std::endl;
         lps::rewrite(new_spec, datar);
         lps::remove_trivial_summands(new_spec);
       }
       if (m_sumelm)
       {
-        mCRL2log(verbose) << "Applying sum elimination..." << std::endl;
-        sumelm_algorithm<lps::stochastic_specification>(new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
+        mCRL2log(log_level_t::verbose) << "Applying sum elimination..." << std::endl;
+        sumelm_algorithm<lps::stochastic_specification>(new_spec, mCRL2logEnabled(log_level_t::verbose)||mCRL2logEnabled(log_level_t::debug)).run();
         if (m_rewrite)
         {
-          mCRL2log(verbose) << "Rewriting data expressions in LPS again..." << std::endl;
+          mCRL2log(log_level_t::verbose) << "Rewriting data expressions in LPS again..." << std::endl;
           lps::rewrite(new_spec, datar);
           lps::remove_trivial_summands(new_spec);
         }
@@ -185,11 +185,11 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       //save the result
       if (output_filename().empty())
       {
-        mCRL2log(verbose) << "Writing LPS to stdout..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Writing LPS to stdout..." << std::endl;
       }
       else
       {
-        mCRL2log(verbose) << "Writing LPS to file '" <<  output_filename() << "'..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Writing LPS to file '" <<  output_filename() << "'..." << std::endl;
       }
       save_lps(new_spec, output_filename());
 

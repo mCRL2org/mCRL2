@@ -21,7 +21,7 @@ namespace mcrl2::pbes_system
 {
 
 /// \brief BES variable remove level when generating a BES from a PBES.
-enum remove_level
+enum class remove_level
 {
   none,   // Do not remove bes variables.
   some,   // Remove bes variables that are not used, and of which
@@ -35,15 +35,15 @@ remove_level parse_remove_level(const std::string& s)
 {
   if (s == "none")
   {
-    return none;
+    return remove_level::none;
   }
   else if (s == "some")
   {
-    return some;
+    return remove_level::some;
   }
   else if (s == "all")
   {
-    return all;
+    return remove_level::all;
   }
   else
   {
@@ -56,9 +56,9 @@ std::string print_remove_level(const remove_level s)
 {
   switch(s)
   {
-    case none: return "none";
-    case some: return "some";
-    case all: return "all";
+    case remove_level::none: return "none";
+    case remove_level::some: return "some";
+    case remove_level::all: return "all";
   }
   throw mcrl2::runtime_error("unknown remove_level");
 }
@@ -91,12 +91,12 @@ std::string description(const remove_level s)
 {
   switch(s)
   {
-    case none: return "never remove a generated bes variable and its equation. This can lead to excessive"
+    case remove_level::none: return "never remove a generated bes variable and its equation. This can lead to excessive"
         " memory usage.";
-    case some: return "remove generated bes variables that do not occur anymore in the generated BES, except if"
+    case remove_level::some: return "remove generated bes variables that do not occur anymore in the generated BES, except if"
         " the right hand side of its equation is true or false. The rhss of removed variables"
         " must have to be recalculated, when this bes variable is encountered again.";
-    case all: return "remove the equation for bes variables that do not occur anymore in generated boolean equation system."
+    case remove_level::all: return "remove the equation for bes variables that do not occur anymore in generated boolean equation system."
         " This is quite memory efficient, but it can be very time consuming as the rhss of removed bes"
         " variables may have to be recalculated quite often.";
   }

@@ -226,7 +226,7 @@ private:
   {
     Entry* chunk;
     {
-      std::lock_guard<MutexType> lock(m_mutex);
+      std::scoped_lock<MutexType> lock(m_mutex);
       if (m_block_list.free_chunks.empty())
       {
         return false;
@@ -240,7 +240,7 @@ private:
 
   T* allocate_new_block(LocalState& state)
   {
-    std::lock_guard<MutexType> lock(m_mutex);
+    std::scoped_lock<MutexType> lock(m_mutex);
     Block* block = new Block;
     block->next = m_block_list.head;
     m_block_list.head = block;
@@ -291,7 +291,7 @@ private:
       state.bump_offset = N;
     });
 
-    std::lock_guard<MutexType> lock(m_mutex);
+    std::scoped_lock<MutexType> lock(m_mutex);
 
     // Step 2: Mark entries in shared free chunks with the sentinel.
     for (Entry* chunk : m_block_list.free_chunks)

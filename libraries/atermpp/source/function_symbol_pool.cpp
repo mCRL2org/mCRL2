@@ -196,10 +196,10 @@ void function_symbol_pool::sweep()
     auto sweep_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
 
     // Print the relevant information.
-    mCRL2log(mcrl2::log::info) << "function_symbol_pool: Garbage collected " << old_size - size() << " function symbols, " << size() << " function symbols remaining in "
+    mCRL2log(mcrl2::log::log_level_t::info) << "function_symbol_pool: Garbage collected " << old_size - size() << " function symbols, " << size() << " function symbols remaining in "
       << sweep_duration << " ms.\n";
 
-    mCRL2log(mcrl2::log::info) << "function_symbol_pool: Consolidate removed " << erased_blocks << " blocks.\n";
+    mCRL2log(mcrl2::log::log_level_t::info) << "function_symbol_pool: Consolidate removed " << erased_blocks << " blocks.\n";
   }
 
   if constexpr (EnableHashtableMetrics)
@@ -209,12 +209,12 @@ void function_symbol_pool::sweep()
 
   if constexpr (EnableCreationMetrics)
   {
-    mCRL2log(mcrl2::log::info) << "g_function_symbol_pool: Stores " << size() << " function symbols. create() " << m_function_symbol_metrics.message() << ".\n";
+    mCRL2log(mcrl2::log::log_level_t::info) << "g_function_symbol_pool: Stores " << size() << " function symbols. create() " << m_function_symbol_metrics.message() << ".\n";
   }
 
   if constexpr (EnableReferenceCountMetrics)
   {
-    mCRL2log(mcrl2::log::info) << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
+    mCRL2log(mcrl2::log::log_level_t::info) << "g_function_symbol_pool: all reference counts changed " << _function_symbol::reference_count_changes() << " times.\n";
   }
 }
 

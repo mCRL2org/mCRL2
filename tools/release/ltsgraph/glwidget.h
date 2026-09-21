@@ -79,7 +79,7 @@ class GLWidget : public QOpenGLWidget
    */
   bool event(QEvent* e) override
   {
-    mCRL2log(mcrl2::log::debug) << "Processing Qt event " << e->type() << "\n";
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Processing Qt event " << e->type() << "\n";
 
     // call super's event. 
     return QOpenGLWidget::event(e);

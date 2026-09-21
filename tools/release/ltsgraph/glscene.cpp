@@ -224,9 +224,9 @@ void GLScene::initialize()
 
   int recommended_max_buffer_size;
   glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &recommended_max_buffer_size);
-  mCRL2log(mcrl2::log::verbose) << "The recommended maximum vertices per buffer on this machine is "
+  mCRL2log(mcrl2::log::log_level_t::verbose) << "The recommended maximum vertices per buffer on this machine is "
                                 << recommended_max_buffer_size << std::endl;
-  mCRL2log(mcrl2::log::verbose) << "Based on maximum recommended, setting batch rendering size to "
+  mCRL2log(mcrl2::log::log_level_t::verbose) << "Based on maximum recommended, setting batch rendering size to "
                                 << recommended_max_buffer_size / 4 << std::endl;
   // To be safe we divide by 4 since a mat4 is technically 4 vec4s stacked
   // together
@@ -275,7 +275,7 @@ void GLScene::initialize()
   int arc_ctrl_4_attrib_location = m_arc_shader.attributeLocation("ctrl4");
   int arc_color_attrib_location = m_arc_shader.attributeLocation("color");
 
-  mCRL2log(mcrl2::log::debug) << "vertex: " << arc_vertex_attrib_location << " ctrl1 " << arc_ctrl_1_attrib_location
+  mCRL2log(mcrl2::log::log_level_t::debug) << "vertex: " << arc_vertex_attrib_location << " ctrl1 " << arc_ctrl_1_attrib_location
                               << " ctrl2 " << arc_ctrl_2_attrib_location << " ctrl3 " << arc_ctrl_3_attrib_location
                               << " ctrl4 " << arc_ctrl_4_attrib_location << " color " << arc_color_attrib_location
                               << std::endl;
@@ -425,11 +425,11 @@ void GLScene::project2D()
   QVector3D eye = m_camera.position();
   QVector3D e_z = QVector3D(0, 0, 1);
   QVector3D _debug_e_z = cam_anti_rotate(cam_rotate(e_z));
-  mCRL2log(mcrl2::log::debug) << "Rot^-1 Rot (e_z): " << _debug_e_z.x() << "," << _debug_e_z.y() << ","
+  mCRL2log(mcrl2::log::log_level_t::debug) << "Rot^-1 Rot (e_z): " << _debug_e_z.x() << "," << _debug_e_z.y() << ","
                               << _debug_e_z.z() << std::endl;
   QVector3D forward = (-m_camera.center() - eye).normalized();
 
-  mCRL2log(mcrl2::log::debug) << "Forward: " << forward.x() << ", " << forward.y() << ", " << forward.z() << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::debug) << "Forward: " << forward.x() << ", " << forward.y() << ", " << forward.z() << std::endl;
 
   auto perp_distance = [&](const QVector3D& u)
   {
@@ -446,12 +446,12 @@ void GLScene::project2D()
   QVector3D relative_reference_point = forward * plane_dist;
   QVector3D reference_point = eye + relative_reference_point;
 
-  mCRL2log(mcrl2::log::debug) << "Cam pos: " << eye.x() << ", " << eye.y() << ", " << eye.z() << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::debug) << "Cam pos: " << eye.x() << ", " << eye.y() << ", " << eye.z() << std::endl;
 
-  mCRL2log(mcrl2::log::debug) << "R: (" << reference_point.x() << "," << reference_point.y() << ","
+  mCRL2log(mcrl2::log::log_level_t::debug) << "R: (" << reference_point.x() << "," << reference_point.y() << ","
                               << reference_point.z() << ")" << std::endl;
 
-  mCRL2log(mcrl2::log::debug) << "dist: " << plane_dist << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::debug) << "dist: " << plane_dist << std::endl;
 
   auto project = [&](const QVector3D& u)
   {
@@ -465,7 +465,7 @@ void GLScene::project2D()
     {
       float t = QVector3D::dotProduct(relative_reference_point, forward) / denom;
       QVector3D projection = eye + t * dir;
-      /*mCRL2log(mcrl2::log::debug)
+      /*mCRL2log(mcrl2::log::log_level_t::debug)
           << "u: (" << u.x() << "," << u.y() << "," << u.z() << ") -> ("
           << projection.x() << "," << projection.y() << "," << projection.z()
           << ") t: " << t << " dir: (" << dir.x() << "," << dir.y() << ","

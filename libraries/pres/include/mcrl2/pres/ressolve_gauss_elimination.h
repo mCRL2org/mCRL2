@@ -903,12 +903,12 @@ inline pres_expression solve_fixed_point_inner(const propositional_variable& v,
     make_optimized_eqninf(eqninf_m, m);
     pres_expression cond4;
     make_optimized_or(cond4, cond1, cond2);
-    pres_expression exp1;
-    make_optimized_condeq(exp1, cond4, U, true_());
-    pres_expression exp2;
-    make_optimized_condeq(exp2, eqninf_m, false_(), exp1);
+    pres_expression expr1;
+    make_optimized_condeq(expr1, cond4, U, true_());
+    pres_expression expr2;
+    make_optimized_condeq(expr2, eqninf_m, false_(), expr1);
     pres_expression solution;
-    make_optimized_condeq(solution, eqinf_cond, exp2, true_());
+    make_optimized_condeq(solution, eqinf_cond, expr2, true_());
     pres_expression rewritten_solution=simplify_data_rewriter(dataspec, rewriter)(solution);
     return rewritten_solution;
   }
@@ -1206,7 +1206,7 @@ class ressolve_by_gauss_elimination_algorithm
 
       for(std::vector<pres_equation>::reverse_iterator equation_it=res_equations.rbegin(); equation_it!=res_equations.rend(); equation_it++)
       {
-        mCRL2log(log::debug) << "Solving    " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";
+        mCRL2log(log::log_level_t::debug) << "Solving    " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";
         if (equation_it->symbol().is_mu())
         {
           conjunctive_normal_form_builder.apply(result, m_R(equation_it->formula()));
@@ -1217,7 +1217,7 @@ class ressolve_by_gauss_elimination_algorithm
           disjunctive_normal_form_builder.apply(result, m_R(equation_it->formula()));
           result=detail::group_sums_conjuncts_disjuncts(result, m_datar);
         }
-        mCRL2log(log::debug) << "Norm. Form " << equation_it->symbol() << " " << equation_it->variable() << " = " << result << "\n";  
+        mCRL2log(log::log_level_t::debug) << "Norm. Form " << equation_it->symbol() << " " << equation_it->variable() << " = " << result << "\n";  
 
         pres_expression solution = detail::solve_single_equation(equation_it->symbol(),
                                                                  equation_it->variable(),
@@ -1225,7 +1225,7 @@ class ressolve_by_gauss_elimination_algorithm
                                                                  m_input_pres.data(),
                                                                  m_datar);
         equation_it->formula() = solution;
-        mCRL2log(log::debug) << "Solution   " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";
+        mCRL2log(log::log_level_t::debug) << "Solution   " << equation_it->symbol() << " " << equation_it->variable() << " = " << equation_it->formula() << "\n";
 
         substitute_pres_equation_builder substitute_pres_equation(equation_it->variable(), solution);
        
@@ -1247,7 +1247,7 @@ class ressolve_by_gauss_elimination_algorithm
             substitution_equation_it->formula() = detail::group_sums_conjuncts_disjuncts(substitution_equation_it->formula(), m_datar);
           }
         }
-        mCRL2log(log::debug) << "Substituted the solution backwards.\n";
+        mCRL2log(log::log_level_t::debug) << "Substituted the solution backwards.\n";
       }
       return m_R(res_equations.front().formula());
     } 

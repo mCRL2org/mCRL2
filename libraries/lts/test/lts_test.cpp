@@ -360,19 +360,19 @@ BOOST_AUTO_TEST_CASE(failing_test_groote_wijs_algorithm)
   lts::lts_aut_t l_gw;
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim);
   BOOST_CHECK(test_lts("gw problem (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim_gv);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim_gv);
   BOOST_CHECK(test_lts("gw problem (branching bisimulation [Groote/Vaandrager 1990])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim_gjkw);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim_gjkw);
   BOOST_CHECK(test_lts("gw problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim_sigref);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim_sigref);
   BOOST_CHECK(test_lts("gw problem (branching bisimulation signature [Blom/Orzan 2003])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
 }
@@ -419,11 +419,11 @@ void counterexample_jk_1(std::size_t k)
     lts::lts_aut_t l_cjk1;
     l_cjk1.load(is);
     lts::lts_aut_t l=l_cjk1;
-    reduce(l,lts::lts_eq_branching_bisim);
+    reduce(l,lts::lts_equivalence::lts_eq_branching_bisim);
     BOOST_CHECK(test_lts("counterexample JK 1 (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
                          l,expected_label_count, expected_state_count, expected_transition_count));
     l=l_cjk1;
-    reduce(l,lts::lts_eq_branching_bisim_gv);
+    reduce(l,lts::lts_equivalence::lts_eq_branching_bisim_gv);
     BOOST_CHECK(test_lts("counterexample JK 1 (branching bisimulation [Groote/Vaandrager 1990])",
                          l,expected_label_count, expected_state_count, expected_transition_count));
 }
@@ -495,19 +495,19 @@ BOOST_AUTO_TEST_CASE(counterexample_postprocessing)
   lts::lts_aut_t l_gw;
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim);
   BOOST_CHECK(test_lts("postprocessing problem (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim_gv);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim_gv);
   BOOST_CHECK(test_lts("postprocessing problem (branching bisimulation [Groote/Vaandrager 1990])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim_gjkw);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim_gjkw);
   BOOST_CHECK(test_lts("postprocessing problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
-  reduce(l,lts::lts_eq_branching_bisim_sigref);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim_sigref);
   BOOST_CHECK(test_lts("postprocessing problem (branching bisimulation signature [Blom/Orzan 2003])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
 }
@@ -689,19 +689,19 @@ BOOST_AUTO_TEST_CASE(regression_delete_old_bb_slice)
   lts::lts_aut_t l_gw;
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
-  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim);
+  reduce(l,lts::lts_equivalence::lts_eq_divergence_preserving_branching_bisim);
   BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Jansen/Groote/Keiren/Wijs 2019])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
-  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gv);
+  reduce(l,lts::lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gv);
   BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Groote/Vaandrager 1990])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
-  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gjkw);
+  reduce(l,lts::lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gjkw);
   BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
   l=l_gw;
-  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_sigref);
+  reduce(l,lts::lts_equivalence::lts_eq_divergence_preserving_branching_bisim_sigref);
   BOOST_CHECK(test_lts("regression test for GJKW bug (branching bisimulation signature [Blom/Orzan 2003])",
                        l,expected_label_count, expected_state_count, expected_transition_count));
 }
@@ -746,7 +746,7 @@ BOOST_AUTO_TEST_CASE(hide_actions1)
   l.load(is);
   std::vector<std::string>hidden_actions(1,"hello");
   l.apply_hidden_actions(hidden_actions);
-  reduce(l,lts::lts_eq_bisim);
+  reduce(l,lts::lts_equivalence::lts_eq_bisim);
   std::size_t expected_label_count = 5;
   std::size_t expected_state_count = 3;
   std::size_t expected_transition_count = 3;
@@ -769,7 +769,7 @@ BOOST_AUTO_TEST_CASE(hide_actions2)
   l.load(is);
   std::vector<std::string>hidden_actions(1,"hello");
   l.apply_hidden_actions(hidden_actions);
-  reduce(l,lts::lts_eq_branching_bisim);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim);
   std::size_t expected_label_count = 5;
   std::size_t expected_state_count = 2;
   std::size_t expected_transition_count = 3;
@@ -791,7 +791,7 @@ BOOST_AUTO_TEST_CASE(hide_actions3)
   l.load(is);
   std::vector<std::string>hidden_actions(1,"hello");
   l.record_hidden_actions(hidden_actions);
-  reduce(l,lts::lts_eq_bisim);
+  reduce(l,lts::lts_equivalence::lts_eq_bisim);
   std::size_t expected_label_count = 5;
   std::size_t expected_state_count = 3;
   std::size_t expected_transition_count = 3;
@@ -813,7 +813,7 @@ BOOST_AUTO_TEST_CASE(hide_actions4)
   l.load(is);
   std::vector<std::string>hidden_actions(1,"hello");
   l.record_hidden_actions(hidden_actions);
-  reduce(l,lts::lts_eq_branching_bisim);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim);
   std::size_t expected_label_count = 5;
   std::size_t expected_state_count = 2;
   std::size_t expected_transition_count = 3;
@@ -834,7 +834,7 @@ BOOST_AUTO_TEST_CASE(hide_actions5)
   l.load(is);
   std::vector<std::string>hidden_actions(1,"a");
   l.record_hidden_actions(hidden_actions);
-  reduce(l,lts::lts_eq_branching_bisim);
+  reduce(l,lts::lts_equivalence::lts_eq_branching_bisim);
   std::size_t expected_label_count = 4;
   std::size_t expected_state_count = 2;
   std::size_t expected_transition_count = 2;

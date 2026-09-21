@@ -234,7 +234,7 @@ public:
       return;
     }
 
-    mCRL2log(log::debug) << "determinize strategy for " << X << ": keeping " << chosen << " out of " << count
+    mCRL2log(log::log_level_t::debug) << "determinize strategy for " << X << ": keeping " << chosen << " out of " << count
                          << " successors" << std::endl;
 
     pbes_system::simplify_rewriter simplify;
@@ -369,14 +369,14 @@ private:
       // the rewrite_star substitution is only applicable to closed PVIs.
       if (!find_free_variables(Y).empty())
       {
-        mCRL2log(log::trace) << "rewrite_star " << Y << " contains free variables, not applying substitution\n";
+        mCRL2log(log::log_level_t::trace) << "rewrite_star " << Y << " contains free variables, not applying substitution\n";
         return Y;
       }
 
       if (mcrl2::pbes_system::detail::is_counter_example_name(Y.name()))
       {
         // If Y in L return Y
-        mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
+        mCRL2log(log::log_level_t::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
         return Y;
       }
 
@@ -388,7 +388,7 @@ private:
         // this is expected and not worth reporting.
         if (!m_X_is_counter_example)
         {
-          mCRL2log(log::debug) << "rewrite_star " << X << " could not be resolved to a known vertex, not pruning"
+          mCRL2log(log::log_level_t::debug) << "rewrite_star " << X << " could not be resolved to a known vertex, not pruning"
                                << std::endl;
         }
         return Y;
@@ -410,7 +410,7 @@ private:
         if (in_strategy)
         {
           // If Y in E0
-          mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+          mCRL2log(log::log_level_t::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
           return Y;
         }
         else
@@ -418,20 +418,20 @@ private:
           if (alpha == 0)
           {
             // If Y is not reachable, replace it by false
-            mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
+            mCRL2log(log::log_level_t::debug) << "rewrite_star " << Y << " is not reachable, becomes false" << std::endl;
             return false_();
           }
           else
           {
             // If Y is not reachable, replace it by true
-            mCRL2log(log::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
+            mCRL2log(log::log_level_t::debug) << "rewrite_star " << Y << " is not reachable, becomes true" << std::endl;
             return true_();
           }
         }
       }
       else
       {
-        mCRL2log(log::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
+        mCRL2log(log::log_level_t::debug) << "rewrite_star " << Y << " is reachable" << std::endl;
         return Y;
       }
     }
@@ -758,7 +758,7 @@ void solve(pbes_system::pbes pbesspec,
   if ((has_counter_example || emit_structure_graph) && (options_.solve_strategy == 5 || options_.solve_strategy == 6))
   {
     // TODO: Cannot use the partial solvers.
-    mCRL2log(mcrl2::log::warning)
+    mCRL2log(mcrl2::log::log_level_t::warning)
       << "Warning: Cannot use partial solving using fatal attractor solving (solve strategies 5 and 6) when the PBES "
          "has counter example information or a structure graph is requested, using solving strategy 0 instead."
       << std::endl;
@@ -769,14 +769,14 @@ void solve(pbes_system::pbes pbesspec,
   {
     if (lpsfile.empty() && ltsfile.empty())
     {
-      mCRL2log(log::warning)
+      mCRL2log(log::log_level_t::warning)
         << "Warning: the PBES has counter example information, but no witness will be generated due to lack of --file"
         << std::endl;
     }
   }
   else if (!lpsfile.empty() || !ltsfile.empty())
   {
-    mCRL2log(log::warning) << "Warning: the PBES has no counter example information. Did you "
+    mCRL2log(log::log_level_t::warning) << "Warning: the PBES has no counter example information. Did you "
                               "use the"
                               " --counter-example option when generating the PBES?"
                            << std::endl;
@@ -790,8 +790,8 @@ void solve(pbes_system::pbes pbesspec,
   {
     pbes_system::srf_pbes_with_ce pre_srf_pbes = preprocess<true>(pbesspec, options_);
 
-    mCRL2log(log::trace) << "============== Pre-SRF PBES ==============" << std::endl;
-    mCRL2log(log::trace) << pre_srf_pbes.to_pbes() << std::endl;
+    mCRL2log(log::log_level_t::trace) << "============== Pre-SRF PBES ==============" << std::endl;
+    mCRL2log(log::log_level_t::trace) << pre_srf_pbes.to_pbes() << std::endl;
 
     srf_pbes = pre_srf2srfpbes(pre_srf_pbes);
     pbesspec = pre_srf_pbes.to_pbes();
@@ -800,8 +800,8 @@ void solve(pbes_system::pbes pbesspec,
   {
     srf_pbes = preprocess<false>(pbesspec, options_);
 
-    mCRL2log(log::trace) << "============== SRF PBES ==============" << std::endl;
-    mCRL2log(log::trace) << srf_pbes.to_pbes() << std::endl;
+    mCRL2log(log::log_level_t::trace) << "============== SRF PBES ==============" << std::endl;
+    mCRL2log(log::log_level_t::trace) << srf_pbes.to_pbes() << std::endl;
 
     pbesspec = srf_pbes.to_pbes();
   }
@@ -819,7 +819,7 @@ void solve(pbes_system::pbes pbesspec,
         || options_.naive_counter_example_instantiation)
     {
       PbesReachAlgorithm reach(srf_pbes, options_);
-      mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
+      mCRL2log(log::log_level_t::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
 
       timer.start("instantiation");
       reach.run();
@@ -848,7 +848,7 @@ void solve(pbes_system::pbes pbesspec,
           G.print_information();
           pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy, options_.compute_strategy);
 
-          mCRL2log(log::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
+          mCRL2log(log::log_level_t::debug) << pbes_system::detail::print_pbes_info(reach.pbes()) << std::endl;
           timer.start("solving");
           auto [result, solution]
             = solver.solve(reach.initial_state(), reach.V(), reach.deadlocks(), reach.partial_solution());
@@ -935,10 +935,10 @@ void solve(pbes_system::pbes pbesspec,
         mCRL2log(log::log_level_t::verbose) << (result ? "true" : "false") << std::endl;
 
         // Based on the result remove the unnecessary equations related to counter example information.
-        mCRL2log(log::verbose) << "Removing unnecessary counter example information for other player." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Removing unnecessary counter example information for other player." << std::endl;
         pbes_system::pbes pbesspec_simplified
           = mcrl2::pbes_system::detail::remove_counterexample_info(pbesspec, !result, result);
-        mCRL2log(log::trace) << pbesspec_simplified << std::endl;
+        mCRL2log(log::log_level_t::trace) << pbesspec_simplified << std::endl;
 
         structure_graph SG;
 
@@ -974,7 +974,7 @@ void solve(pbes_system::pbes pbesspec,
         second_instantiate.run();
         timer.finish("second-instantiation");
 
-        mCRL2log(log::verbose) << "Number of vertices in the structure graph: " << SG.all_vertices().size()
+        mCRL2log(log::log_level_t::verbose) << "Number of vertices in the structure graph: " << SG.all_vertices().size()
                                << std::endl;
         [[maybe_unused]]
         bool final_result = pbes_system::detail::run_solve(pbesspec,
@@ -998,7 +998,7 @@ void solve(pbes_system::pbes pbesspec,
           timer.start("save-structure-graph");
           pbes_system::save_structure_graph(SG, structure_graph_filename);
           timer.finish("save-structure-graph");
-          mCRL2log(log::verbose) << "Saved structure graph in " << structure_graph_filename << std::endl;
+          mCRL2log(log::log_level_t::verbose) << "Saved structure graph in " << structure_graph_filename << std::endl;
         }
       }
     }
@@ -1007,7 +1007,7 @@ void solve(pbes_system::pbes pbesspec,
 
 TASK_IMPL_1(bool, pbessolvesymbolic_task, arguments*, args) // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
 {
-  mCRL2log(log::verbose) << args->options << std::endl;
+  mCRL2log(log::log_level_t::verbose) << args->options << std::endl;
 
   pbes_system::pbes pbesspec = pbes_system::detail::load_pbes(args->input_filename);
 

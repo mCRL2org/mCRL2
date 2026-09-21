@@ -27,10 +27,10 @@ struct t_tool_options
 {
   std::string name_for_first;
   std::string name_for_second;
-  lts_type format_for_first = lts_none;
-  lts_type format_for_second = lts_none;
-  lts_probabilistic_equivalence equivalence = lts_probabilistic_eq_none;
-  lts_probabilistic_preorder preorder = lts_probabilistic_pre_none;
+  lts_type format_for_first = lts_type::lts_none;
+  lts_type format_for_second = lts_type::lts_none;
+  lts_probabilistic_equivalence equivalence = lts_probabilistic_equivalence::lts_probabilistic_eq_none;
+  lts_probabilistic_preorder preorder = lts_probabilistic_preorder::lts_probabilistic_pre_none;
   std::vector<std::string> tau_actions; // Actions with these labels must be considered equal to tau.
 
   t_tool_options()
@@ -50,12 +50,12 @@ class ltspcompare_tool : public ltscompare_base
     // --equivalence or --preorder options
     void check_preconditions()
     {
-      if (tool_options.equivalence != lts_probabilistic_eq_none && tool_options.preorder != lts_probabilistic_pre_none)
+      if (tool_options.equivalence != lts_probabilistic_equivalence::lts_probabilistic_eq_none && tool_options.preorder != lts_probabilistic_preorder::lts_probabilistic_pre_none)
       {
         throw mcrl2::runtime_error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
       }
 
-      if (tool_options.equivalence == lts_probabilistic_eq_none && tool_options.preorder == lts_probabilistic_pre_none)
+      if (tool_options.equivalence == lts_probabilistic_equivalence::lts_probabilistic_eq_none && tool_options.preorder == lts_probabilistic_preorder::lts_probabilistic_pre_none)
       {
         throw mcrl2::runtime_error("one of the options -e/--equivalence and -p/--preorder must be used");
       }
@@ -95,16 +95,16 @@ class ltspcompare_tool : public ltscompare_base
       l2.record_hidden_actions(tool_options.tau_actions);
 
       bool result = true;
-      if (tool_options.equivalence != lts_probabilistic_eq_none)
+      if (tool_options.equivalence != lts_probabilistic_equivalence::lts_probabilistic_eq_none)
       {
-        mCRL2log(verbose) << "comparing LTSs using " <<
+        mCRL2log(log_level_t::verbose) << "comparing LTSs using " <<
                      tool_options.equivalence << "..." << std::endl;
 
-        if (tool_options.equivalence==lts_probabilistic_bisim_bem)
+        if (tool_options.equivalence==lts_probabilistic_equivalence::lts_probabilistic_bisim_bem)
         {
           result=destructive_probabilistic_bisimulation_compare_bem(l1, l2, timer());
         }
-        else if (tool_options.equivalence==lts_probabilistic_bisim_grv)
+        else if (tool_options.equivalence==lts_probabilistic_equivalence::lts_probabilistic_bisim_grv)
         {
           result=destructive_probabilistic_bisimulation_compare_grv(l1, l2, timer());
         }
@@ -114,19 +114,19 @@ class ltspcompare_tool : public ltscompare_base
                                                   description(tool_options.equivalence) + ".");
         }
 
-        mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ")
+        mCRL2log(log_level_t::info) << "LTSs are " << ((result) ? "" : "not ")
                        << "equal ("
                        << description(tool_options.equivalence) << ")\n";
       }
 
-      if (tool_options.preorder != lts_probabilistic_pre_none)
+      if (tool_options.preorder != lts_probabilistic_preorder::lts_probabilistic_pre_none)
       {
-        mCRL2log(verbose) << "comparing LTSs using the equivalence " <<
+        mCRL2log(log_level_t::verbose) << "comparing LTSs using the equivalence " <<
                      description(tool_options.preorder) << ".\n";
 
         assert(0); // As it stands there is no probabilistic preorder. 
 
-        mCRL2log(info) << "The LTS in " << tool_options.name_for_first
+        mCRL2log(log_level_t::info) << "The LTS in " << tool_options.name_for_first
                        << " is " << ((result) ? "" : "not ")
                        << "included in"
                        << " the LTS in " << tool_options.name_for_second
@@ -142,12 +142,12 @@ class ltspcompare_tool : public ltscompare_base
     {
       check_preconditions();
 
-      if (tool_options.format_for_first==lts_none)
+      if (tool_options.format_for_first==lts_type::lts_none)
       {
         tool_options.format_for_first = guess_format(tool_options.name_for_first);
       }
 
-      if (tool_options.format_for_second==lts_none)
+      if (tool_options.format_for_second==lts_type::lts_none)
       {
         tool_options.format_for_second = guess_format(tool_options.name_for_second);
       }
@@ -159,28 +159,28 @@ class ltspcompare_tool : public ltscompare_base
 
       switch (tool_options.format_for_first)
       {
-        case lts_lts:
+        case lts_type::lts_lts:
         {
           return lts_probabilistic_compare<probabilistic_lts_lts_t>();
         }
-        case lts_none:
-          mCRL2log(mcrl2::log::warning) << "No input format is specified. Assuming .aut format.\n";
+        case lts_type::lts_none:
+          mCRL2log(mcrl2::log::log_level_t::warning) << "No input format is specified. Assuming .aut format.\n";
           [[fallthrough]];
-        case lts_aut:
+        case lts_type::lts_aut:
         {
           return lts_probabilistic_compare<probabilistic_lts_aut_t>();
         }
-        case lts_fsm:
+        case lts_type::lts_fsm:
         {
           return lts_probabilistic_compare<probabilistic_lts_fsm_t>();
         }
-        case lts_dot:
+        case lts_type::lts_dot:
         {
           throw mcrl2::runtime_error("Reading the .dot format is not supported anymore.");
         }
-        case lts_lts_probabilistic:
-        case lts_aut_probabilistic:
-        case lts_fsm_probabilistic:
+        case lts_type::lts_lts_probabilistic:
+        case lts_type::lts_aut_probabilistic:
+        case lts_type::lts_fsm_probabilistic:
         {
           throw mcrl2::runtime_error("The tool ltscompare cannot be used for probabilistic transition systems. Use ltspcompare instead. ");
         }
@@ -213,12 +213,12 @@ class ltspcompare_tool : public ltscompare_base
       add_option("in2", make_mandatory_argument("FORMAT"),
                  "use FORMAT as the format for INFILE2", 'j').
       add_option("equivalence", make_enum_argument<lts_probabilistic_equivalence>("NAME)")
-                 .add_value(lts_probabilistic_eq_none, true)
-                 .add_value(lts_probabilistic_bisim_grv)
-                 .add_value(lts_probabilistic_bisim_bem),
+                 .add_value(lts_probabilistic_equivalence::lts_probabilistic_eq_none, true)
+                 .add_value(lts_probabilistic_equivalence::lts_probabilistic_bisim_grv)
+                 .add_value(lts_probabilistic_equivalence::lts_probabilistic_bisim_bem),
                  "use equivalence NAME (not allowed in combination with -p/--preorder):", 'e').
       add_option("preorder", make_enum_argument<lts_probabilistic_preorder>("NAME")
-                 .add_value(lts_probabilistic_pre_none, true),
+                 .add_value(lts_probabilistic_preorder::lts_probabilistic_pre_none, true),
                  "use preorder NAME (not allowed in combination with -e/--equivalence):", 'p').
       add_option("tau", make_mandatory_argument("ACTNAMES"),
                  "consider actions with a name in the comma separated list ACTNAMES to "
@@ -252,9 +252,9 @@ class ltspcompare_tool : public ltscompare_base
       {
         tool_options.format_for_first = mcrl2::lts::detail::parse_format(parser.option_argument("in1"));
 
-        if (tool_options.format_for_first == lts_none)
+        if (tool_options.format_for_first == lts_type::lts_none)
         {
-          mCRL2log(warning) << "format '" << parser.option_argument("in1") <<
+          mCRL2log(log_level_t::warning) << "format '" << parser.option_argument("in1") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }
@@ -264,16 +264,16 @@ class ltspcompare_tool : public ltscompare_base
       }
       else
       {
-        mCRL2log(warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
-        tool_options.format_for_first = lts_aut;
+        mCRL2log(log_level_t::warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
+        tool_options.format_for_first = lts_type::lts_aut;
       }
       if (parser.has_option("in2"))
       {
         tool_options.format_for_second = mcrl2::lts::detail::parse_format(parser.option_argument("in2"));
 
-        if (tool_options.format_for_second == lts_none)
+        if (tool_options.format_for_second == lts_type::lts_none)
         {
-          mCRL2log(warning) << "format '" << parser.option_argument("in2") <<
+          mCRL2log(log_level_t::warning) << "format '" << parser.option_argument("in2") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }

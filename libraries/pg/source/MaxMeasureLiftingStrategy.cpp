@@ -22,7 +22,7 @@ MaxMeasureLiftingStrategy2::MaxMeasureLiftingStrategy2(const ParityGame& game,
       spm_(spm),
       order_(order),
       metric_(metric),
-      insert_id_(order < HEAP ? new uint64_t[game.graph().V()] : nullptr),
+      insert_id_(order < Order::HEAP ? new uint64_t[game.graph().V()] : nullptr),
       pq_pos_(new verti[game.graph().V()]),
       pq_(new verti[game.graph().V()])
 {
@@ -98,7 +98,7 @@ void MaxMeasureLiftingStrategy2::swap(verti i, verti j)
 
 void MaxMeasureLiftingStrategy2::push(verti v)
 {
-    mCRL2log(mcrl2::log::debug) <<"push(" << v << ")" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) <<"push(" << v << ")" << std::endl;
     assert(pq_pos_[v] == NO_VERTEX);
     pq_[pq_size_] = v;
     pq_pos_[v] = pq_size_;
@@ -112,7 +112,7 @@ void MaxMeasureLiftingStrategy2::push(verti v)
 
 void MaxMeasureLiftingStrategy2::bump(verti v)
 {
-    mCRL2log(mcrl2::log::debug) << "bump(" << v << ")" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "bump(" << v << ")" << std::endl;
     bumped_.push_back(pq_pos_[v]);
 }
 
@@ -136,7 +136,7 @@ verti MaxMeasureLiftingStrategy2::pop()
 
         // CHECKME: why is this necessary for MAX_STEP too?
         //          shouldn't this just be for MIN_STEP?
-        if (metric_ != MAX_VALUE)
+        if (metric_ != Metric::MAX_VALUE)
         {
             /* Note: minimization is a bit trickier than maximization, since
                we need to move bumped vertices down the heap (rather than up
@@ -174,7 +174,7 @@ verti MaxMeasureLiftingStrategy2::pop()
 
     // Extract top element from the heap.
     verti v = pq_[0];
-    mCRL2log(mcrl2::log::debug) << "pop() -> " << v << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "pop() -> " << v << std::endl;
     pq_pos_[v] = NO_VERTEX;
     if (--pq_size_ > 0)
     {
@@ -245,15 +245,15 @@ int MaxMeasureLiftingStrategy2::cmp(verti i, verti j)
 
   switch (metric_)
   {
-  case MAX_VALUE:
+  case Metric::MAX_VALUE:
     d = spm_.vector_cmp(spm_.get_successor(v), spm_.get_successor(w), static_cast<int>(spm_.len_));
     break;
 
-  case MIN_VALUE:
+  case Metric::MIN_VALUE:
     d = -spm_.vector_cmp(spm_.get_successor(v), spm_.get_successor(w), static_cast<int>(spm_.len_));
     break;
 
-  case MAX_STEP:
+  case Metric::MAX_STEP:
 #ifdef DEBUG
         // We assume vertices are only queued when they can be lifted;
         // i.e. their value is less than (or equal to) their successor:
@@ -275,8 +275,8 @@ int MaxMeasureLiftingStrategy2::cmp(verti i, verti j)
         // mode, or largest insert-id first in stack mode.
         switch (order_)
         {
-        case QUEUE: d = cmp_ids(insert_id_[w], insert_id_[v]); break;
-        case STACK: d = cmp_ids(insert_id_[v], insert_id_[w]); break;
+        case Order::QUEUE: d = cmp_ids(insert_id_[w], insert_id_[v]); break;
+        case Order::STACK: d = cmp_ids(insert_id_[v], insert_id_[w]); break;
         default:    break;
         }
     }

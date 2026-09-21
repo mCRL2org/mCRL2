@@ -31,7 +31,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
   using super::leave;
   using super::apply;
 
-  enum expression_mode {
+  enum class expression_mode {
     BOUNDED_FORALL, BOUNDED_EXISTS,
     CONJUNCTIVE, UNIVERSAL,
     DISJUNCTIVE, EXISTENTIAL,
@@ -49,17 +49,17 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     {
       switch(mode)
       {
-      case UNDETERMINED:
-      case BOUNDED_EXISTS:
-        mode = BOUNDED_FORALL;
-      case BOUNDED_FORALL:
+      case expression_mode::UNDETERMINED:
+      case expression_mode::BOUNDED_EXISTS:
+        mode = expression_mode::BOUNDED_FORALL;
+      case expression_mode::BOUNDED_FORALL:
         break;
-      case CONJUNCTIVE:
-        mode = UNIVERSAL;
-      case UNIVERSAL:
+      case expression_mode::CONJUNCTIVE:
+        mode = expression_mode::UNIVERSAL;
+      case expression_mode::UNIVERSAL:
         break;
-      case DISJUNCTIVE:
-      case EXISTENTIAL:
+      case expression_mode::DISJUNCTIVE:
+      case expression_mode::EXISTENTIAL:
         result = false;
         break;
       default:
@@ -82,16 +82,16 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     {
       switch(mode)
       {
-      case UNDETERMINED:
-      case BOUNDED_FORALL:
-        mode = BOUNDED_EXISTS;
-      case BOUNDED_EXISTS:
+      case expression_mode::UNDETERMINED:
+      case expression_mode::BOUNDED_FORALL:
+        mode = expression_mode::BOUNDED_EXISTS;
+      case expression_mode::BOUNDED_EXISTS:
         break;
-      case DISJUNCTIVE:
-      case CONJUNCTIVE:
-      case UNIVERSAL:
-        mode = EXISTENTIAL;
-      case EXISTENTIAL:
+      case expression_mode::DISJUNCTIVE:
+      case expression_mode::CONJUNCTIVE:
+      case expression_mode::UNIVERSAL:
+        mode = expression_mode::EXISTENTIAL;
+      case expression_mode::EXISTENTIAL:
         break;
       default:
         break;
@@ -113,12 +113,12 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     {
       switch(mode)
       {
-      case UNDETERMINED:
-      case BOUNDED_FORALL:
-        mode = CONJUNCTIVE;
-      case CONJUNCTIVE:
+      case expression_mode::UNDETERMINED:
+      case expression_mode::BOUNDED_FORALL:
+        mode = expression_mode::CONJUNCTIVE;
+      case expression_mode::CONJUNCTIVE:
         break;
-      case BOUNDED_EXISTS:
+      case expression_mode::BOUNDED_EXISTS:
       {
         std::size_t count = 0;
         for(const pbes_expression& conjunct: split_conjuncts(x))
@@ -130,13 +130,13 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
         }
         if (count > 1)
         {
-          mode = CONJUNCTIVE;
+          mode = expression_mode::CONJUNCTIVE;
         }
         break;
       }
-      case UNIVERSAL:
-      case DISJUNCTIVE:
-      case EXISTENTIAL:
+      case expression_mode::UNIVERSAL:
+      case expression_mode::DISJUNCTIVE:
+      case expression_mode::EXISTENTIAL:
       {
         std::size_t count = 0;
         for(const pbes_expression& conjunct : split_conjuncts(x))
@@ -172,14 +172,14 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
     {
       switch(mode)
       {
-      case UNDETERMINED:
-      case BOUNDED_EXISTS:
-        mode = DISJUNCTIVE;
-      case DISJUNCTIVE:
+      case expression_mode::UNDETERMINED:
+      case expression_mode::BOUNDED_EXISTS:
+        mode = expression_mode::DISJUNCTIVE;
+      case expression_mode::DISJUNCTIVE:
         break;
-      case BOUNDED_FORALL:
-      case CONJUNCTIVE:
-      case UNIVERSAL:
+      case expression_mode::BOUNDED_FORALL:
+      case expression_mode::CONJUNCTIVE:
+      case expression_mode::UNIVERSAL:
       {
         std::size_t count = 0;
         for(const pbes_expression& disjunct: split_disjuncts(x))
@@ -191,11 +191,11 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
         }
         if (count > 1)
         {
-          mode = DISJUNCTIVE;
+          mode = expression_mode::DISJUNCTIVE;
         }
         break;
       }
-      case EXISTENTIAL:
+      case expression_mode::EXISTENTIAL:
         result = false;
         break;
       default:
@@ -212,7 +212,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
 
   void enter(const pbes_equation& /*x*/)
   {
-    mode_stack.push(UNDETERMINED);
+    mode_stack.push(expression_mode::UNDETERMINED);
   }
 
   void leave(const pbes_equation& /*x*/)

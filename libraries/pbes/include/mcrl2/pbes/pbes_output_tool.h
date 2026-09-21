@@ -93,13 +93,13 @@ class pbes_output_tool: public Tool
         }
         if (m_pbes_output_format == utilities::file_format())
         {
-          mCRL2log(log::warning) << "Invalid input format given (" << arg << ").\n";
+          mCRL2log(log::log_level_t::warning) << "Invalid input format given (" << arg << ").\n";
         }
       }
       if (m_pbes_output_format == utilities::file_format())
       {
         m_pbes_output_format = default_output_format();
-        mCRL2log(log::verbose) << "Guessing output format: " << m_pbes_output_format.description()
+        mCRL2log(log::log_level_t::verbose) << "Guessing output format: " << m_pbes_output_format.description()
                                << std::endl;
       }
     }

@@ -28,7 +28,7 @@ class prob_bisim_partitioner_bem
      */
     prob_bisim_partitioner_bem(LTS_TYPE& l, utilities::execution_timer& timer):aut(l)
     {
-      mCRL2log(log::verbose) << "Probabilistic bisimulation partitioner created for "
+      mCRL2log(log::log_level_t::verbose) << "Probabilistic bisimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
       timer.start("bisimulation_reduce (bem)");

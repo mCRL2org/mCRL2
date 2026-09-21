@@ -29,7 +29,7 @@ namespace mcrl2::symbolic {
 
 struct symbolic_reachability_options
 {
-  data::rewrite_strategy rewrite_strategy = data::jitty;
+  data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   std::size_t max_workers = 0;
   std::size_t max_iterations = 0;
   bool cached = false;
@@ -108,7 +108,7 @@ void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
   {    
     if (!data::find_quantifier_variables(p.expression()).empty()) 
     {
-      mCRL2log(log::info) << "The condition contains quantifiers, which means that rewriting to normal form could fail when the quantifier enumeration limit is too low. Use ---qlimit/-Q to increase the limit." << std::endl;
+      mCRL2log(log::log_level_t::info) << "The condition contains quantifiers, which means that rewriting to normal form could fail when the quantifier enumeration limit is too low. Use ---qlimit/-Q to increase the limit." << std::endl;
     }
 
     throw data::enumerator_error("Expression does not rewrite to true or false: " + data::pp(p.expression()));
@@ -177,7 +177,7 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
                                xy[xy_size - 1] = algorithm.action_index().insert(algorithm.rewrite_action(group.actions[i], rewr, sigma)).first;
                              }
 
-                             mCRL2log(log::trace) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
+                             mCRL2log(log::log_level_t::trace) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
                              group.L = options.no_relprod ? union_cube(group.L, xy.data(), xy_size) : union_cube_copy(group.L, xy.data(), smd.copy.data(), xy_size);
                              return false;
                            },

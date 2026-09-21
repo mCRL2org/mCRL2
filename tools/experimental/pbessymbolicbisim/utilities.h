@@ -289,7 +289,7 @@ public:
 
   void print_size() const
   {
-    mCRL2log(log::verbose) << "Refinement cache size " << m_refinement_cache.size() << " transition cache size " << m_transition_cache.size() << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Refinement cache size " << m_refinement_cache.size() << " transition cache size " << m_transition_cache.size() << std::endl;
   }
 
   template <typename Iterator>

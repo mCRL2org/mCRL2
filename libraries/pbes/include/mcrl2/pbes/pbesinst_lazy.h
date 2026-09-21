@@ -282,7 +282,7 @@ class pbesinst_lazy_algorithm
 
     void next_todo(propositional_variable_instantiation& result)
     {
-      if (m_options.exploration_strategy == breadth_first)
+      if (m_options.exploration_strategy == search_strategy::breadth_first)
       {
         result = todo.front();
         todo.pop_front();
@@ -339,7 +339,7 @@ class pbesinst_lazy_algorithm
 
       if (m_options.number_of_threads > 1)
       {
-        mCRL2log(log::debug) << "Start thread " << thread_index << ".\n";
+        mCRL2log(log::log_level_t::debug) << "Start thread " << thread_index << ".\n";
       }
       R.thread_initialise();
 
@@ -356,7 +356,7 @@ class pbesinst_lazy_algorithm
           std::size_t local_current_prune_round = global_current_prune_round;
           if (std::optional<std::string> message = status_message(m_iteration_count))
           {
-            mCRL2log(log::status) << *message;
+            mCRL2log(log::log_level_t::status) << *message;
           }
 
           detail::check_bes_equation_limit(m_iteration_count);
@@ -390,7 +390,7 @@ class pbesinst_lazy_algorithm
           // will be explored further, potentially leading to massively wasted exploration and solving effort.
           if (local_current_prune_round == global_current_prune_round)
           {
-            mCRL2log(log::debug) << "generated equation " << X_e << " = " << psi_e
+            mCRL2log(log::log_level_t::debug) << "generated equation " << X_e << " = " << psi_e
                                  << " with rank " << k << std::endl;
             on_report_equation(thread_index, X_e, psi_e, k);
             todo.insert(occ.begin(), occ.end(), discovered, thread_index);
@@ -422,7 +422,7 @@ class pbesinst_lazy_algorithm
 
       if (m_options.number_of_threads > 1)
       {
-        mCRL2log(log::debug) << "Stop thread " << thread_index << ".\n";
+        mCRL2log(log::log_level_t::debug) << "Stop thread " << thread_index << ".\n";
       }
     }
 
@@ -480,7 +480,7 @@ class pbesinst_lazy_algorithm
       }
       on_end_while_loop();
 
-      mCRL2log(log::verbose) << "Generated " << m_iteration_count << " BES equations" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Generated " << m_iteration_count << " BES equations" << std::endl;
     }
 
     const pbes_equation_index& equation_index() const

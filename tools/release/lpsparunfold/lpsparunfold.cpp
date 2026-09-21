@@ -151,7 +151,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
       for (std::size_t i =0; i != m_repeat_unfold; ++i)
       {
-        mCRL2log(verbose) << "Pass: " << i+1 << " of " << m_repeat_unfold << std::endl;
+        mCRL2log(log_level_t::verbose) << "Pass: " << i+1 << " of " << m_repeat_unfold << std::endl;
 
         //Calculate process parameters indices where m_unfoldsort occurs
         if (!m_unfoldsort.empty())
@@ -164,7 +164,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
           if (!search_sort_expression(spec.data().sorts(), sort))
           {
-            mCRL2log(warning) << "No sorts found of name " << m_unfoldsort << std::endl;
+            mCRL2log(log_level_t::warning) << "No sorts found of name " << m_unfoldsort << std::endl;
             break;
           }
           mcrl2::data::data_expression_list el = spec.initial_process().expressions();
@@ -180,7 +180,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
           if (m_set_index.empty())
           {
-            mCRL2log(warning) << "No process parameters found of sort " << m_unfoldsort << std::endl;
+            mCRL2log(log_level_t::warning) << "No process parameters found of sort " << m_unfoldsort << std::endl;
             break;
           }
         }

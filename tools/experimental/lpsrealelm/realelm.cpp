@@ -466,7 +466,7 @@ static void add_postponed_inequalities_to_context(
       {
         variable xi(variable_generator("xi"), sort_bool::bool_());
         context.emplace_back(xi,inequalities_to_add_lhs[i], inequalities_to_add_rhs[i], inequalities_to_add_comparison_operator[i]);
-        mCRL2log(verbose) << "Introduced variable " <<  data::pp(xi) << " for <" << data::pp(inequalities_to_add_lhs[i]) <<
+        mCRL2log(log_level_t::verbose) << "Introduced variable " <<  data::pp(xi) << " for <" << data::pp(inequalities_to_add_lhs[i]) <<
                     " "  << pp(inequalities_to_add_comparison_operator[i]) << " " <<  data::pp(inequalities_to_add_rhs[i]) << ">\n";
 
         for (auto & j : summand_info)
@@ -774,7 +774,7 @@ stochastic_specification realelm(stochastic_specification s, const std::size_t m
     new_inequalities_rhss.clear();
     new_comparison_operators.clear();
     iteration++;
-    mCRL2log(verbose) << "Iteration " <<  iteration << ", starting with " <<  context.size() << " context variables" << std::endl;
+    mCRL2log(log_level_t::verbose) << "Iteration " <<  iteration << ", starting with " <<  context.size() << " context variables" << std::endl;
 
     for (summand_information& i: summand_info)
     {
@@ -811,7 +811,7 @@ stochastic_specification realelm(stochastic_specification s, const std::size_t m
 
         if (!condition3.empty() && !is_inconsistent(condition3,r))
         {
-          mCRL2log(debug) << "Add new conditions " << pp_vector(condition3) << "\nin summand " << i.get_real_summation_variables() << "  " << i.get_multi_action() << "  " << i.get_assignments() << "\n" <<
+          mCRL2log(log_level_t::debug) << "Add new conditions " << pp_vector(condition3) << "\nin summand " << i.get_real_summation_variables() << "  " << i.get_multi_action() << "  " << i.get_assignments() << "\n" <<
                 "Linear inequality " << pp_vector(*nextstate_combination) << "\n";;
           // condition contains the inequalities over the process parameters
           add_inequalities_to_context_postponed(new_inequalities_sizes,
@@ -834,20 +834,20 @@ stochastic_specification realelm(stochastic_specification s, const std::size_t m
   }
   while ((iteration < max_iterations) && !new_inequalities_sizes.empty());
 
-  mCRL2log(verbose) << "Generated the following variables in " <<  iteration << " iterations:" << std::endl;
+  mCRL2log(log_level_t::verbose) << "Generated the following variables in " <<  iteration << " iterations:" << std::endl;
   for (auto & i : context)
   {
-    mCRL2log(verbose) << "< " << data::pp(i.get_lowerbound()) << " " << pp(i.comparison_operator()) << " " << data::pp(i.get_upperbound())
+    mCRL2log(log_level_t::verbose) << "< " << data::pp(i.get_lowerbound()) << " " << pp(i.comparison_operator()) << " " << data::pp(i.get_upperbound())
                       << " > " << data::pp(i.get_variable()) << std::endl;
   }
 
   if (!new_inequalities_sizes.empty())
   {
-    mCRL2log(verbose) << "A may-bisimilar lps is being generated, which is most likely not strongly bisimilar." << std::endl;
+    mCRL2log(log_level_t::verbose) << "A may-bisimilar lps is being generated, which is most likely not strongly bisimilar." << std::endl;
   }
   else
   {
-    mCRL2log(verbose) << "A strongly bisimilar lps is being generated." << std::endl;
+    mCRL2log(log_level_t::verbose) << "A strongly bisimilar lps is being generated." << std::endl;
   }
 
 

@@ -68,9 +68,9 @@ class pbesfixpointsolve_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbesfixpointsolve parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbesfixpointsolve parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
 
       m_options.rewrite_strategy = rewrite_strategy();
                  
@@ -82,9 +82,9 @@ class pbesfixpointsolve_tool: public pbes_input_tool<pbes_output_tool<pbes_rewri
       fixpoint_iterator.run(p, m_options);
       save_pbes(p, output_filename(), pbes_output_format());
       
-      log::logger::set_reporting_level(log::status);
+      log::logger::set_reporting_level(log::log_level_t::status);
       bool result = mcrl2::pbes_system::detail::pbessolve(p);
-      mCRL2log(info) << (result ? "true" : "false") << std::endl;
+      mCRL2log(log_level_t::info) << (result ? "true" : "false") << std::endl;
       
       return true;
     }

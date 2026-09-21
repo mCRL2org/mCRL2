@@ -75,7 +75,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
     const StaticGraph& graph = game_.graph();
     const verti V = graph.V();
 
-    if (player == p_)
+    if (static_cast<std::size_t>(player) == p_)
     {
         // Conservatively estimate vertices won by player.
         std::vector<char> marked(V, 0);
@@ -99,7 +99,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
             dirty.pop_front();
             assert(queued[v] && !marked[v]);
             queued[v] = false;
-            if (game_.player(v) == p_)
+            if (static_cast<std::size_t>(game_.player(v)) == p_)
             {
                 // Look for an unmarked successor with a progress value
                 // less than (or equal to, if priority is even) that of v:

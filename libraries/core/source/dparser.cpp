@@ -342,11 +342,11 @@ bool is_all_of_type(D_ParseNode** nodes, int n, const char* type, const core::pa
 inline
 void print_ambiguous_nodes(D_ParseNode** nodes, int n, const char* type, const core::parser_table& table)
 {
-  mCRL2log(log::verbose) << "--- " << type << " ambiguity" << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "--- " << type << " ambiguity" << std::endl;
   for (int i = 0; i < n; ++i)
   {
     core::parse_node vi(nodes[i]);
-    mCRL2log(log::verbose) << "ALT " << table.tree(vi) << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "ALT " << table.tree(vi) << std::endl;
   }
 }
 
@@ -354,7 +354,7 @@ inline
 void print_chosen_node(D_ParseNode* node, const core::parser_table& table)
 {
   core::parse_node vi(node);
-  mCRL2log(log::verbose) << "CHOOSE " << table.tree(vi) << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "CHOOSE " << table.tree(vi) << std::endl;
 }
 
 /// \brief Function for resolving parser ambiguities.
@@ -375,7 +375,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
     core::parse_node vi(v[i]);
     if (table.symbol_name(vi) == "RegFrm" && table.symbol_name(vi.child(0)) == "ActFrm")
     {
-      mCRL2log(log::trace) << "Prioritising the bracket rule for RegFrm." << std::endl;
+      mCRL2log(log::log_level_t::trace) << "Prioritising the bracket rule for RegFrm." << std::endl;
       return vi.node;
     }
   }
@@ -384,7 +384,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   // in the expression a * b + c, the parse tree (a * b) + c has "+" as root, and not "*", which would be a * (b + c), whereas * has a higher priority than +.
   // There are at least two nodes.
   core::parse_node candidate(v[0]);
-  mCRL2log(log::trace) << "First candidate " << candidate.tree() << " with priority " << candidate.priority() << std::endl;
+  mCRL2log(log::log_level_t::trace) << "First candidate " << candidate.tree() << " with priority " << candidate.priority() << std::endl;
 
   // Indicates that that the candidate is actually lower priority than another node.
   bool chosen_candidate = true;
@@ -396,13 +396,13 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
       if (vi.priority() == candidate.priority())
       {
         // There are two nodes with the same priority.
-        mCRL2log(log::trace) << "Two candidates with the same priority." << std::endl;
+        mCRL2log(log::log_level_t::trace) << "Two candidates with the same priority." << std::endl;
         chosen_candidate = false;
       }
 
       if (vi.priority() < candidate.priority())
       {
-        mCRL2log(log::trace) << "Selecting " << vi.tree() << " as the parse tree with lower priority " << vi.priority() <<  std::endl;
+        mCRL2log(log::log_level_t::trace) << "Selecting " << vi.tree() << " as the parse tree with lower priority " << vi.priority() <<  std::endl;
         candidate = vi;
       }
     }
@@ -410,7 +410,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
 
   if (chosen_candidate) {
     // The candidate has a lower priority than the other nodes.
-    mCRL2log(log::trace) << "The parse tree with the lowest priority: " << candidate.tree() << std::endl;
+    mCRL2log(log::log_level_t::trace) << "The parse tree with the lowest priority: " << candidate.tree() << std::endl;
     return candidate.node;
   }
 
@@ -419,8 +419,8 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   for (int i = 0; i < n; ++i)
   {
     core::parse_node vi(v[i]);
-    mCRL2log(log::info) << "Candidate: " << vi.tree() << std::endl;
-    mCRL2log(log::debug) << "Candidate (verbose): " << table.tree(vi) << std::endl;
+    mCRL2log(log::log_level_t::info) << "Candidate: " << vi.tree() << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Candidate (verbose): " << table.tree(vi) << std::endl;
   }
 
   throw mcrl2::runtime_error("Failed to parse the input. Several ambiguous parse trees where found, see the candidates above.");
@@ -447,7 +447,7 @@ static void log_location(struct D_Parser *ap)
   {
     message = message + " after '" + after + "'";
   }
-  mCRL2log(log::error) << add_context(&ap->loc, message) << std::endl;
+  mCRL2log(log::log_level_t::error) << add_context(&ap->loc, message) << std::endl;
 }
 
 void syntax_error_fn(struct D_Parser *ap)
@@ -460,7 +460,7 @@ void syntax_error_fn(struct D_Parser *ap)
   log_location(ap);
   if (ap->loc.s == nullptr)
   {
-    mCRL2log(log::error) << "Unexpected end of input." << std::endl;
+    mCRL2log(log::log_level_t::error) << "Unexpected end of input." << std::endl;
   }
   else
   {
@@ -487,13 +487,13 @@ void syntax_error_fn(struct D_Parser *ap)
       case D_SYMBOL_TOKEN:
         {
           std::locale loc;
-          mCRL2log(log::error) << "Unexpected "
+          mCRL2log(log::log_level_t::error) << "Unexpected "
                                          << (std::isalpha(n.string()[0], loc) ? "keyword " : "")
                                          << "'" << n.string() << "'" << std::endl;
         }
         break;
       case D_SYMBOL_NTERM:
-        mCRL2log(log::error) << "Unexpected " << s.name << " '" << n.string() << "'" << std::endl;
+        mCRL2log(log::log_level_t::error) << "Unexpected " << s.name << " '" << n.string() << "'" << std::endl;
         break;
       default:
         // TODO: check if we can give more sensible output in the remaining cases.
@@ -513,7 +513,7 @@ void parser::custom_parse_error(const std::string& message) const
     return;
   }
   detail::log_location(m_parser);
-  mCRL2log(log::error) << message << std::endl;
+  mCRL2log(log::log_level_t::error) << message << std::endl;
 }
 
 } // namespace mcrl2::core

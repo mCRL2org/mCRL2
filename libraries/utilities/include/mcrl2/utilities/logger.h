@@ -27,7 +27,7 @@ namespace mcrl2::log {
 
 /// \brief Log levels that are supported
 /// \note log_debugi with i>=1 automatically indent 2*i spaces.
-enum log_level_t
+enum class log_level_t
 {
   quiet, // No log message should ever be printed to this log level!
   error,
@@ -45,10 +45,10 @@ inline
 std::string_view log_level_to_string(const log_level_t level)
 {
   static std::array<std::string_view,87> buffer = { "quiet", "error", "warning", "info", "status", "verbose", "debug", "trace" };
-  if ((unsigned) level >= buffer.size()) {
+  if (static_cast<std::size_t>(level) >= buffer.size()) {
     return "unknown level";
   }
-  return buffer[level];
+  return buffer[static_cast<std::size_t>(level)];
 }
 
 /// \brief Convert string to log level
@@ -57,35 +57,35 @@ log_level_t log_level_from_string(const std::string_view s)
 {
   if (s == "quiet")
   {
-    return quiet;
+    return log_level_t::quiet;
   }
   else if (s == "error")
   {
-    return error;
+    return log_level_t::error;
   }
   else if (s == "warning")
   {
-    return warning;
+    return log_level_t::warning;
   }
   else if (s == "info")
   {
-    return info;
+    return log_level_t::info;
   }
   else if (s == "status")
   {
-    return status;
+    return log_level_t::status;
   }
   else if (s == "verbose")
   {
-    return verbose;
+    return log_level_t::verbose;
   }
   else if (s == "debug")
   {
-    return debug;
+    return log_level_t::debug;
   }
   else if (s == "trace")
   {
-    return trace;
+    return log_level_t::trace;
   }
   else
   {
@@ -163,7 +163,7 @@ class logger: private utilities::noncopyable
     /// \brief Default constructor
     logger(const log_level_t l)
     {
-      assert(quiet != l);
+      assert(log_level_t::quiet != l);
       m_level = l;
       std::time(&m_timestamp);
     }
@@ -272,7 +272,7 @@ public:
     /// suppress non used variable warnings.
     (void)level; (void)timestamp; (void)print_time_information;
 
-    assert(quiet != level);
+    assert(log_level_t::quiet != level);
     return msg;
   }
 }; 
@@ -361,7 +361,7 @@ class file_output: public output_policy
         const std::string& msg,
         const bool print_time_information) override
     {
-      assert(quiet != level);
+      assert(log_level_t::quiet != level);
       FILE* p_stream = get_stream();
       if (!p_stream)
       {

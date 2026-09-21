@@ -89,7 +89,7 @@ bool mcrl2rewriter_tool::run()
   }
   catch (const std::exception& ex)
   {
-    mCRL2log(log::error) << ex.what();
+    mCRL2log(log::log_level_t::error) << ex.what();
   }
 
   return true;

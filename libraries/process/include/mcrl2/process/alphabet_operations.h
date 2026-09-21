@@ -322,11 +322,11 @@ comm_inverse_cache calculate_comm_inverse_cache(const communication_expression_l
 inline
 void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& action_names, const multi_action_name& alpha1, const multi_action_name& alpha2, const bool A_includes_subsets, multi_action_name_set& result)
 {
-  mCRL2log(log::trace) << "comm_inverse: action_names = " << core::pp(action_names) << ", alpha1 = " << pp(alpha1) << ", alpha2 = " << pp(alpha2) << "\n";
+  mCRL2log(log::log_level_t::trace) << "comm_inverse: action_names = " << core::pp(action_names) << ", alpha1 = " << pp(alpha1) << ", alpha2 = " << pp(alpha2) << "\n";
 
   if (includes(action_names, alpha1) && includes(action_names, alpha2))
   {
-    mCRL2log(log::trace) << "comm_inverse: result += {" << multiset_union(alpha1, alpha2) << "}\n";
+    mCRL2log(log::log_level_t::trace) << "comm_inverse: result += {" << multiset_union(alpha1, alpha2) << "}\n";
     result.insert(multiset_union(alpha1, alpha2));
   }
   else if (A_includes_subsets)
@@ -348,7 +348,7 @@ void comm_inverse(const comm_inverse_cache& C_inverse, const action_name_set& ac
       }
     }
     result.insert(alpha);
-    mCRL2log(log::trace) << "comm_inverse: result += {" << alpha << "}\n";
+    mCRL2log(log::log_level_t::trace) << "comm_inverse: result += {" << alpha << "}\n";
   }
 
   if (!alpha1.empty())
@@ -389,7 +389,7 @@ inline multi_action_name_set comm_inverse1(
   const multi_action_name_set& A,
   const bool A_includes_subsets = false)
 {
-  mCRL2log(log::trace) << "comm_inverse1: C = " << core::pp(C) << ", action_names = " << core::pp(action_names) << ", A = " << pp(A) << "\n";
+  mCRL2log(log::log_level_t::trace) << "comm_inverse1: C = " << core::pp(C) << ", action_names = " << core::pp(action_names) << ", A = " << pp(A) << "\n";
   multi_action_name_set result;
   multi_action_name empty;
   const comm_inverse_cache C_inverse = calculate_comm_inverse_cache(C);
@@ -397,7 +397,7 @@ inline multi_action_name_set comm_inverse1(
   {
     comm_inverse(C_inverse, action_names, alpha, empty, A_includes_subsets, result);
   }
-  mCRL2log(log::trace) << "comm_inverse1: result = " << pp(result) << "\n";
+  mCRL2log(log::log_level_t::trace) << "comm_inverse1: result = " << pp(result) << "\n";
   return result;
 }
 

@@ -66,7 +66,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
   using super::leave;
   using super::apply;
 
-  enum expression_mode {
+  enum class expression_mode {
     CONJUNCTIVE, UNIVERSAL,
     DISJUNCTIVE, EXISTENTIAL,
     UNDETERMINED
@@ -131,11 +131,11 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       expression_mode mode = mode_stack.top();
       switch(mode)
       {
-      case UNDETERMINED:
-      case CONJUNCTIVE:
-        mode = UNIVERSAL;
+      case expression_mode::UNDETERMINED:
+      case expression_mode::CONJUNCTIVE:
+        mode = expression_mode::UNIVERSAL;
         [[fallthrough]];
-      case UNIVERSAL:
+      case expression_mode::UNIVERSAL:
       {
         quantifier_variable_stack.push(quantifier_variable_stack.top() + x.variables());
         mode_stack.push(mode);
@@ -148,12 +148,12 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
         quantifier_variable_stack.pop();
         break;
       }
-      case DISJUNCTIVE:
-      case EXISTENTIAL:
+      case expression_mode::DISJUNCTIVE:
+      case expression_mode::EXISTENTIAL:
         expression_stack.push(split_here(x));
         break;
       default:
-        std::clog << "mode = " << mode << std::endl;
+        std::clog << "mode = " << static_cast<int>(mode) << std::endl;
         throw std::runtime_error("unexpected forall");
         break;
       }
@@ -174,11 +174,11 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       expression_mode mode = mode_stack.top();
       switch(mode)
       {
-      case UNDETERMINED:
-      case DISJUNCTIVE:
-        mode = EXISTENTIAL;
+      case expression_mode::UNDETERMINED:
+      case expression_mode::DISJUNCTIVE:
+        mode = expression_mode::EXISTENTIAL;
         [[fallthrough]];
-      case EXISTENTIAL:
+      case expression_mode::EXISTENTIAL:
       {
         quantifier_variable_stack.push(quantifier_variable_stack.top() + x.variables());
         mode_stack.push(mode);
@@ -191,12 +191,12 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
         quantifier_variable_stack.pop();
         break;
       }
-      case CONJUNCTIVE:
-      case UNIVERSAL:
+      case expression_mode::CONJUNCTIVE:
+      case expression_mode::UNIVERSAL:
         expression_stack.push(split_here(x));
         break;
       default:
-        std::clog << "mode = " << mode << std::endl;
+        std::clog << "mode = " << static_cast<int>(mode) << std::endl;
         throw std::runtime_error("unexpected exists");
         break;
       }
@@ -217,10 +217,10 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       expression_mode mode = mode_stack.top();
       switch(mode)
       {
-      case UNDETERMINED:
-        mode = CONJUNCTIVE;
+      case expression_mode::UNDETERMINED:
+        mode = expression_mode::CONJUNCTIVE;
         [[fallthrough]];
-      case CONJUNCTIVE:
+      case expression_mode::CONJUNCTIVE:
       {
         mode_stack.push(mode);
         this->apply(x.left());
@@ -234,11 +234,11 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
         expression_stack.push(expr);
         break;
       }
-      case UNIVERSAL:
+      case expression_mode::UNIVERSAL:
         expression_stack.push(split_here(x));
         break;
-      case EXISTENTIAL:
-      case DISJUNCTIVE:
+      case expression_mode::EXISTENTIAL:
+      case expression_mode::DISJUNCTIVE:
       {
         std::vector<pbes_expression> conjuncts = split_conjuncts(x);
         bool split = false;
@@ -286,7 +286,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
         break;
       }
       default:
-        std::clog << "mode = " << mode << std::endl;
+        std::clog << "mode = " << static_cast<int>(mode) << std::endl;
         throw std::runtime_error("unexpected and");
         break;
       }
@@ -307,10 +307,10 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       expression_mode mode = mode_stack.top();
       switch(mode)
       {
-      case UNDETERMINED:
-        mode = DISJUNCTIVE;
+      case expression_mode::UNDETERMINED:
+        mode = expression_mode::DISJUNCTIVE;
         [[fallthrough]];
-      case DISJUNCTIVE:
+      case expression_mode::DISJUNCTIVE:
       {
         mode_stack.push(mode);
         this->apply(x.left());
@@ -324,11 +324,11 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
         expression_stack.push(expr);
         break;
       }
-      case EXISTENTIAL:
+      case expression_mode::EXISTENTIAL:
         expression_stack.push(split_here(x));
         break;
-      case UNIVERSAL:
-      case CONJUNCTIVE:
+      case expression_mode::UNIVERSAL:
+      case expression_mode::CONJUNCTIVE:
       {
         std::vector<pbes_expression> disjuncts = split_disjuncts(x);
         bool split = false;
@@ -377,7 +377,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
         break;
       }
       default:
-        std::clog << "mode = " << mode << std::endl;
+        std::clog << "mode = " << static_cast<int>(mode) << std::endl;
         throw std::runtime_error("unexpected or");
         break;
       }
@@ -391,7 +391,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
     variable_stack.push(x.variable());
     data::variable_list l;
     quantifier_variable_stack.push(l);
-    mode_stack.push(UNDETERMINED);
+    mode_stack.push(expression_mode::UNDETERMINED);
   }
 
 #ifndef NDEBUG

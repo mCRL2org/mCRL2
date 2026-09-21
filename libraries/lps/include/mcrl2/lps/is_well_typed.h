@@ -390,7 +390,7 @@ bool check_well_typedness(const T& x)
   bool result = checker(x);
   if (!result)
   {
-    mCRL2log(log::error) << checker.error.str();
+    mCRL2log(log::log_level_t::error) << checker.error.str();
   }
   return result;
 }

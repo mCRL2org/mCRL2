@@ -45,13 +45,13 @@ class bespp_tool: public pbes_input_tool<input_output_tool>
     }
 
   protected:
-    print_format_type format = print_default;
+    print_format_type format = print_format_type::print_default;
 
     void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("format", make_enum_argument<print_format_type>("FORMAT")
-                      .add_value_desc(print_default, "for a BES specification", true),
+                      .add_value_desc(print_format_type::print_default, "for a BES specification", true),
                       "print the PBES in the specified FORMAT:", 'f');
     }
 
@@ -67,7 +67,7 @@ class bespp_tool: public pbes_input_tool<input_output_tool>
       pbes_system::pbes bes;
       load_pbes(bes,input_filename(), pbes_input_format());
 
-      mCRL2log(verbose) << "printing BES from " << (input_filename().empty()?"standard input":input_filename())
+      mCRL2log(log_level_t::verbose) << "printing BES from " << (input_filename().empty()?"standard input":input_filename())
                         << " to " << (output_filename().empty()?"standard output":output_filename())
                         << " in the " << format << " format";
 

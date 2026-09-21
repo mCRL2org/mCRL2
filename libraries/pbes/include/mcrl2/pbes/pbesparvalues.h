@@ -141,7 +141,7 @@ public:
 
       detail::guard_traverser guard_traverser(m_rewriter);
       guard_traverser.apply(formulas.at(name));
-      mCRL2log(log::debug) << "Equation " << core::pp(name) << " has "
+      mCRL2log(log::log_level_t::debug) << "Equation " << core::pp(name) << " has "
                            << guard_traverser.expression_stack.back().guards.size() << " guarded PVI(s)." << std::endl;
       for (const auto& [pvi, guard]: guard_traverser.expression_stack.back().guards)
       {

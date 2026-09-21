@@ -73,7 +73,7 @@ namespace mcrl2::data::detail
  * example is a valuation for which it does not hold.
 */
 
-enum Answer
+enum class Answer
 {
   answer_yes,
   answer_no,
@@ -151,26 +151,26 @@ class BDD_Prover: protected rewriter
       data_expression v_previous_1;
       data_expression v_previous_2;
 
-      mCRL2log(log::debug) << "Formula: " << f_formula << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Formula: " << f_formula << std::endl;
 
       data_expression intermediate_bdd = f_formula;
 
       intermediate_bdd = m_rewriter->rewrite(intermediate_bdd,bdd_sigma);
       intermediate_bdd = f_manipulator.orient(intermediate_bdd);
 
-      mCRL2log(log::trace) << "Formula rewritten and oriented: " << intermediate_bdd << std::endl;
+      mCRL2log(log::log_level_t::trace) << "Formula rewritten and oriented: " << intermediate_bdd << std::endl;
 
       while (v_previous_1 != intermediate_bdd && v_previous_2 != intermediate_bdd)
       {
         v_previous_2 = v_previous_1;
         v_previous_1 = intermediate_bdd;
         intermediate_bdd = bdd_down(intermediate_bdd);
-        mCRL2log(log::trace) << "End of iteration." << std::endl;
-        mCRL2log(log::trace) << "Intermediate BDD: " << intermediate_bdd << std::endl;
+        mCRL2log(log::log_level_t::trace) << "End of iteration." << std::endl;
+        mCRL2log(log::log_level_t::trace) << "Intermediate BDD: " << intermediate_bdd << std::endl;
       }
 
       f_bdd = intermediate_bdd;
-      mCRL2log(log::debug) << "Resulting BDD: " << f_bdd << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Resulting BDD: " << f_bdd << std::endl;
 
     }
 
@@ -186,7 +186,7 @@ class BDD_Prover: protected rewriter
 
       if (f_time_limit != 0 && (f_deadline <= std::chrono::system_clock::now().time_since_epoch()))
       {
-        mCRL2log(log::debug) << "The time limit has passed." << std::endl;
+        mCRL2log(log::log_level_t::debug) << "The time limit has passed." << std::endl;
         return formula;
       }
 
@@ -219,7 +219,7 @@ class BDD_Prover: protected rewriter
       }
       else
       {
-        mCRL2log(log::trace) << indent(a_indent) << "Smallest guard: " << v_guard << std::endl;
+        mCRL2log(log::log_level_t::trace) << indent(a_indent) << "Smallest guard: " << v_guard << std::endl;
       }
 
       const size_t extra_indent = a_indent + 2;
@@ -227,16 +227,16 @@ class BDD_Prover: protected rewriter
       data_expression v_term1 = f_manipulator.set_true(formula, v_guard);
       v_term1 = m_rewriter->rewrite(v_term1,bdd_sigma);
       v_term1 = f_manipulator.orient(v_term1);
-      mCRL2log(log::trace) << indent(extra_indent) << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
+      mCRL2log(log::log_level_t::trace) << indent(extra_indent) << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
       v_term1 = bdd_down(v_term1, extra_indent);
-      mCRL2log(log::trace) << indent(extra_indent) << "BDD of the true-branch: " << v_term1 << std::endl;
+      mCRL2log(log::log_level_t::trace) << indent(extra_indent) << "BDD of the true-branch: " << v_term1 << std::endl;
 
       data_expression v_term2 = f_manipulator.set_false(formula, v_guard);
       v_term2 = m_rewriter->rewrite(v_term2,bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
-      mCRL2log(log::trace) << indent(extra_indent) << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
+      mCRL2log(log::log_level_t::trace) << indent(extra_indent) << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
       v_term2 = bdd_down(v_term2, extra_indent);
-      mCRL2log(log::trace) << indent(extra_indent) << "BDD of the false-branch: " << v_term2 << std::endl;
+      mCRL2log(log::log_level_t::trace) << indent(extra_indent) << "BDD of the false-branch: " << v_term2 << std::endl;
 
       data_expression v_bdd = Manipulator::make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[formula]=v_bdd;
@@ -255,10 +255,10 @@ class BDD_Prover: protected rewriter
                              .count();
       if (v_new_time_limit > 0 || f_time_limit == 0)
       {
-        mCRL2log(log::debug) << "Simplifying the BDD:" << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Simplifying the BDD:" << std::endl;
         f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, time(nullptr)));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
-        mCRL2log(log::debug) << "Resulting BDD: " << f_bdd << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Resulting BDD: " << f_bdd << std::endl;
       }
     }
 
@@ -276,15 +276,15 @@ class BDD_Prover: protected rewriter
           f_induction.initialize(v_original_formula);
           while (f_induction.can_apply_induction() && !BDD_Info::is_true(f_bdd))
           {
-            mCRL2log(log::debug) << "Applying induction." << std::endl;
+            mCRL2log(log::log_level_t::debug) << "Applying induction." << std::endl;
             f_formula = f_induction.apply_induction();
             build_bdd();
             eliminate_paths();
           }
           if (BDD_Info::is_true(f_bdd))
           {
-            f_tautology = answer_yes;
-            f_contradiction = answer_no;
+            f_tautology = Answer::answer_yes;
+            f_contradiction = Answer::answer_no;
           }
           else
           {
@@ -293,7 +293,7 @@ class BDD_Prover: protected rewriter
             f_induction.initialize(v_original_formula);
             while (f_induction.can_apply_induction() && !BDD_Info::is_true(f_bdd))
             {
-              mCRL2log(log::debug) << "Applying induction on the negated formula." << std::endl;
+              mCRL2log(log::log_level_t::debug) << "Applying induction on the negated formula." << std::endl;
               f_formula = f_induction.apply_induction();
               build_bdd();
               eliminate_paths();
@@ -301,14 +301,14 @@ class BDD_Prover: protected rewriter
             if (BDD_Info::is_true(f_bdd))
             {
               f_bdd = sort_bool::false_();
-              f_tautology = answer_no;
-              f_contradiction = answer_yes;
+              f_tautology = Answer::answer_no;
+              f_contradiction = Answer::answer_yes;
             }
             else
             {
               f_bdd = v_original_bdd;
-              f_tautology = answer_undefined;
-              f_contradiction = answer_undefined;
+              f_tautology = Answer::answer_undefined;
+              f_contradiction = Answer::answer_undefined;
             }
           }
         }
@@ -316,18 +316,18 @@ class BDD_Prover: protected rewriter
         {
           if (BDD_Info::is_true(f_bdd))
           {
-            f_tautology = answer_yes;
-            f_contradiction = answer_no;
+            f_tautology = Answer::answer_yes;
+            f_contradiction = Answer::answer_no;
           }
           else if (BDD_Info::is_false(f_bdd))
           {
-            f_tautology = answer_no;
-            f_contradiction = answer_yes;
+            f_tautology = Answer::answer_no;
+            f_contradiction = Answer::answer_yes;
           }
           else
           {
-            f_tautology = answer_undefined;
-            f_contradiction = answer_undefined;
+            f_tautology = Answer::answer_undefined;
+            f_contradiction = Answer::answer_undefined;
           }
         }
         f_processed = true;
@@ -393,7 +393,7 @@ class BDD_Prover: protected rewriter
             // By default, the ordering of selecting the guard to pivot changes based on how
             // the brackets of the expression are placed. Choose the ordering of the variables
             // based on the order in which they appear in the formula.
-            if (f_info.compare_guard(v_small, result, f_variables) == compare_result_smaller)
+            if (f_info.compare_guard(v_small, result, f_variables) == Compare_Result::compare_result_smaller)
             {
               result = v_small;
             }
@@ -469,10 +469,10 @@ class BDD_Prover: protected rewriter
 
     BDD_Prover(const data_specification& data_spec,
         const used_data_equation_selector& equations_selector,
-        mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
+        mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewrite_strategy::jitty,
         double a_time_limit = 0,
         bool a_path_eliminator = false,
-        smt_solver_type a_solver_type = solver_type_cvc,
+        smt_solver_type a_solver_type = smt_solver_type::solver_type_cvc,
         bool a_apply_induction = false)
         : rewriter(data_spec, equations_selector, a_rewrite_strategy),
           f_time_limit(a_time_limit),
@@ -483,17 +483,17 @@ class BDD_Prover: protected rewriter
       rewriter::thread_initialise();
       switch (a_rewrite_strategy)
       {
-        case(jitty):
+        case(data::rewrite_strategy::jitty):
 #ifdef MCRL2_ENABLE_JITTYC
-        case(jitty_compiling):
+        case(data::rewrite_strategy::jitty_compiling):
 #endif
         {
           /* These provers are ok */
           break;
         }
-        case(jitty_prover):
+        case(data::rewrite_strategy::jitty_prover):
 #ifdef MCRL2_ENABLE_JITTYC
-        case(jitty_compiling_prover):
+        case(data::rewrite_strategy::jitty_compiling_prover):
 #endif
         {
           throw mcrl2::runtime_error("The proving rewriters are not supported by the prover (only jitty and jittyc are supported).");
@@ -505,7 +505,7 @@ class BDD_Prover: protected rewriter
         }
       }
 
-      mCRL2log(log::debug) << "Flags:" << std::endl
+      mCRL2log(log::log_level_t::debug) << "Flags:" << std::endl
                       << "  Reverse: " << std::boolalpha << f_reverse << "," << std::endl
                       << "  Full: " << f_full << "," << std::endl;
     }
@@ -556,19 +556,19 @@ class BDD_Prover: protected rewriter
     data_expression get_witness()
     {
       update_answers();
-      if (is_contradiction() == answer_yes)
+      if (is_contradiction() == Answer::answer_yes)
       {
-        mCRL2log(log::debug) << "The formula is a contradiction." << std::endl;
+        mCRL2log(log::log_level_t::debug) << "The formula is a contradiction." << std::endl;
         return sort_bool::true_();
       }
-      else if (is_tautology() == answer_yes)
+      else if (is_tautology() == Answer::answer_yes)
       {
-        mCRL2log(log::debug) << "The formula is a tautology." << std::endl;
+        mCRL2log(log::log_level_t::debug) << "The formula is a tautology." << std::endl;
         return sort_bool::false_();
       }
       else
       {
-        mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
+        mCRL2log(log::log_level_t::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
         data_expression result;
         bool success = get_branch(f_bdd, true, result);
         if (!success)
@@ -584,19 +584,19 @@ class BDD_Prover: protected rewriter
     data_expression get_counter_example()
     {
       update_answers();
-      if (is_contradiction() == answer_yes)
+      if (is_contradiction() == Answer::answer_yes)
       {
-        mCRL2log(log::debug) << "The formula is a contradiction." << std::endl;
+        mCRL2log(log::log_level_t::debug) << "The formula is a contradiction." << std::endl;
         return sort_bool::false_();
       }
-      else if (is_tautology() == answer_yes)
+      else if (is_tautology() == Answer::answer_yes)
       {
-        mCRL2log(log::debug) << "The formula is a tautology." << std::endl;
+        mCRL2log(log::log_level_t::debug) << "The formula is a tautology." << std::endl;
         return sort_bool::true_();
       }
       else
       {
-        mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
+        mCRL2log(log::log_level_t::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
         data_expression result;
         bool success=get_branch(f_bdd, false,result);
         if (!success)
@@ -627,7 +627,7 @@ class BDD_Prover: protected rewriter
       f_formula = formula;
       f_processed = false;
       f_variables = find_free_variables_in_order(f_formula);
-      mCRL2log(log::debug) << "The formula has been set." << std::endl;
+      mCRL2log(log::log_level_t::debug) << "The formula has been set." << std::endl;
     }
 
     BDD_Prover clone()

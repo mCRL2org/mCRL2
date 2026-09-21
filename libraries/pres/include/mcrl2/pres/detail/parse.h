@@ -144,7 +144,7 @@ std::cerr << "EXPRESSION " << expression << "\n";
   }
   catch (const std::runtime_error& e)
   {
-    mCRL2log(log::error) << "parse_pres_expression: parse error detected in the generated specification\n"
+    mCRL2log(log::log_level_t::error) << "parse_pres_expression: parse error detected in the generated specification\n"
                          << presspec
                          << std::endl;
     throw e;
@@ -227,7 +227,7 @@ pres_expression parse_pres_expression(const std::string& expr, const std::string
   }
   catch (const std::runtime_error& e)
   {
-    mCRL2log(log::error) << "parse_pres_expression: parse error detected in the generated specification\n"
+    mCRL2log(log::log_level_t::error) << "parse_pres_expression: parse error detected in the generated specification\n"
                          << presspec
                          << std::endl;
     throw e;

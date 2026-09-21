@@ -34,7 +34,7 @@ LTS_TYPE translate_lps_to_lts(const lps::stochastic_specification& specification
 {
   lps::explorer_options options;
   options.trace_prefix = "linearization_instantiation_compare_test";
-  options.search_strategy = lps::es_breadth;
+  options.search_strategy = lps::exploration_strategy::es_breadth;
   options.save_at_end = true;
   const std::string& output_filename = utilities::temporary_filename("linearization_instantiation_probabilistic_compare_test_file");
 
@@ -79,16 +79,16 @@ void run_linearisation_test_case(const std::string& spec, const lts::probabilist
 
     run_linearisation_instance(spec, options, expected_statespace);
 
-    options.lin_method=lmRegular2;
+    options.lin_method=t_lin_method::lmRegular2;
     run_linearisation_instance(spec, options, expected_statespace);
 
-    options.lin_method=lmStack;
+    options.lin_method=t_lin_method::lmStack;
     run_linearisation_instance(spec, options, expected_statespace);
 
     options.binary=true;
     run_linearisation_instance(spec, options, expected_statespace);
 
-    options.lin_method=lmRegular;
+    options.lin_method=t_lin_method::lmRegular;
     run_linearisation_instance(spec, options, expected_statespace);
 
     options.binary=false; // reset binary

@@ -46,7 +46,7 @@ class bessolve_tool: public pbes_input_tool<input_tool>
       pbes_system::pbes bes;
       load_pbes(bes,input_filename(),pbes_input_format());
 
-      mCRL2log(verbose) << "solving BES in " <<
+      mCRL2log(log_level_t::verbose) << "solving BES in " <<
                    (input_filename().empty()?"standard input":input_filename()) << " using " <<
                    solution_strategy_to_string(strategy) << "" << std::endl;
 
@@ -56,10 +56,10 @@ class bessolve_tool: public pbes_input_tool<input_tool>
       timer().start("solving");
       switch (strategy)
       {
-        case gauss:
+        case solution_strategy_t::gauss:
           result = gauss_elimination(bes);
           break;
-        case small_progr_measures:
+        case solution_strategy_t::small_progr_measures:
           result = small_progress_measures(bes);
           break;
         default:
@@ -67,20 +67,20 @@ class bessolve_tool: public pbes_input_tool<input_tool>
       }
       timer().finish("solving");
 
-      mCRL2log(info) << "The solution for the initial variable of the BES is " << (result?"true":"false") << std::endl;
+      mCRL2log(log_level_t::info) << "The solution for the initial variable of the BES is " << (result?"true":"false") << std::endl;
 
       return true;
     }
 
   protected:
-    solution_strategy_t strategy = small_progr_measures;
+    solution_strategy_t strategy = solution_strategy_t::small_progr_measures;
 
     void add_options(interface_description& desc) override
     {
       super::add_options(desc);
       desc.add_option("strategy", make_enum_argument<solution_strategy_t>("STRATEGY")
-                      .add_value(small_progr_measures, true)
-                      .add_value(gauss),
+                      .add_value(solution_strategy_t::small_progr_measures, true)
+                      .add_value(solution_strategy_t::gauss),
                       "solve the BES using the specified STRATEGY:", 's');
     }
 

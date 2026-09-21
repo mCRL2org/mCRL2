@@ -448,7 +448,7 @@ class Graph
 
   private:
     Exploration* m_exploration = nullptr;                 ///< The exploration of the current graph (or null).
-    mcrl2::lts::lts_type m_type = mcrl2::lts::lts_lts;                ///< The type of the current graph.
+    mcrl2::lts::lts_type m_type = mcrl2::lts::lts_type::lts_lts;                ///< The type of the current graph.
     QString m_empty;                            ///< Empty string that is returned as label if none present.
     mutable QReadWriteLock m_lock;              ///< Lock protecting the structure from being changed while rendering and simulating
     bool m_stable = true;                              ///< When true, the graph is considered stable, spring forces should not be applied.

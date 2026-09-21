@@ -432,7 +432,7 @@ BOOST_AUTO_TEST_CASE(Test12)
   BOOST_CHECK(reduce_lts_in_various_ways("Test12", test12, e));
 
   lts_aut_t t12=parse_aut(test12);
-  reduce(t12,lts_red_tau_star); //Tau star reduction
+  reduce(t12,lts_equivalence::lts_red_tau_star); //Tau star reduction
   BOOST_CHECK(t12.num_states()==2 && t12.num_transitions()==3); 
 }
   
@@ -464,7 +464,7 @@ BOOST_AUTO_TEST_CASE(Test13)
   BOOST_CHECK(reduce_lts_in_various_ways("Test13", test13, e));
 
   lts_aut_t t13=parse_aut(test13);
-  reduce(t13,lts_red_tau_star); //Tau star reduction
+  reduce(t13,lts_equivalence::lts_red_tau_star); //Tau star reduction
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==1);
 }
 

@@ -71,15 +71,15 @@ protected:
 
     bool run() override
     {
-      mCRL2log(verbose) << "lpsstategraph parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:                       " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:                      " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  simplify:                         " << std::boolalpha << options.simplify << std::endl;
-      mCRL2log(verbose) << "  cache marking updates:            " << std::boolalpha << options.cache_marking_updates << std::endl;
-      mCRL2log(verbose) << "  marking algorithm:                " << options.marking_algorithm << std::endl;
-      mCRL2log(verbose) << "  use alternative lcfp criterion:   " << std::boolalpha << options.use_alternative_lcfp_criterion << std::endl;
-      mCRL2log(verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
-      mCRL2log(verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
+      mCRL2log(log_level_t::verbose) << "lpsstategraph parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:                       " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:                      " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  simplify:                         " << std::boolalpha << options.simplify << std::endl;
+      mCRL2log(log_level_t::verbose) << "  cache marking updates:            " << std::boolalpha << options.cache_marking_updates << std::endl;
+      mCRL2log(log_level_t::verbose) << "  marking algorithm:                " << options.marking_algorithm << std::endl;
+      mCRL2log(log_level_t::verbose) << "  use alternative lcfp criterion:   " << std::boolalpha << options.use_alternative_lcfp_criterion << std::endl;
+      mCRL2log(log_level_t::verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
+      mCRL2log(log_level_t::verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
 
       lps::specification lpsspec;
       lps::load_lps(lpsspec, input_filename());
@@ -98,8 +98,8 @@ protected:
       lps::save_lps(lpsspec, output_filename());
       if (!lps::detail::is_well_typed(lpsspec))
       {
-        mCRL2log(log::error) << "lpsstategraph error: not well typed!" << std::endl;
-        mCRL2log(log::error) << pp(lpsspec) << std::endl;
+        mCRL2log(log::log_level_t::error) << "lpsstategraph error: not well typed!" << std::endl;
+        mCRL2log(log::log_level_t::error) << pp(lpsspec) << std::endl;
       }
       return true;
     }

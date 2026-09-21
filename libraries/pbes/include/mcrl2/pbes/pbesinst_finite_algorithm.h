@@ -208,7 +208,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     std::vector<data::data_expression> finite_parameters;
     std::vector<data::data_expression> infinite_parameters;
     split_parameters(x, m_index_map, finite_parameters, infinite_parameters);
-    mCRL2log(log::debug) << print_parameters(finite_parameters, infinite_parameters);
+    mCRL2log(log::log_level_t::debug) << print_parameters(finite_parameters, infinite_parameters);
     data::data_expression_list d(finite_parameters.begin(), finite_parameters.end());
     data::data_expression_list e(infinite_parameters.begin(), infinite_parameters.end());
     const core::identifier_string& Xi = x.name();
@@ -318,7 +318,7 @@ class pbesinst_finite_algorithm
 
     /// \brief Constructor.
     /// \param rewriter_strategy Strategy to be used for the data rewriter.
-    explicit pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::jitty)
+    explicit pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::rewrite_strategy::jitty)
       : m_rewriter_strategy(rewriter_strategy)
     {}
 
@@ -367,8 +367,8 @@ class pbesinst_finite_algorithm
                       pbes_expression formula;
                       visitor.apply(formula, eqn.formula());
                       equations.emplace_back(eqn.symbol(), X, formula);
-                      mCRL2log(log::debug) << print_equation_count(++m_equation_count);
-                      mCRL2log(log::debug) << "Added equation " << pbes_system::pp(eqn) << "\n";
+                      mCRL2log(log::log_level_t::debug) << print_equation_count(++m_equation_count);
+                      mCRL2log(log::log_level_t::debug) << "Added equation " << pbes_system::pp(eqn) << "\n";
                       return false;
                     }
         );
@@ -426,7 +426,7 @@ void pbesinst_finite(pbes& p, data::rewrite_strategy rewrite_strategy, const std
   }
   if (is_empty)
   {
-    mCRL2log(log::verbose) << "Warning: no parameters were found that match the string \"" + finite_parameter_selection + "\"" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Warning: no parameters were found that match the string \"" + finite_parameter_selection + "\"" << std::endl;
   }
   else
   {

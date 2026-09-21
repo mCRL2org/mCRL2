@@ -95,10 +95,10 @@ public:
   /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is
   /// equal to 0, no time limit will be enforced
   Invariant_Checker(const Specification& a_lps,
-      data::rewriter::strategy a_rewrite_strategy = data::jitty,
+      data::rewriter::strategy a_rewrite_strategy = data::rewrite_strategy::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      data::detail::smt_solver_type a_solver_type = data::detail::solver_type_cvc,
+      data::detail::smt_solver_type a_solver_type = data::detail::smt_solver_type::solver_type_cvc,
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_all_violations = false,
@@ -118,7 +118,7 @@ void Invariant_Checker<Specification>::print_counter_example()
   {
     data::data_expression v_counter_example(f_bdd_prover.get_counter_example());
     assert(v_counter_example.defined());
-    mCRL2log(log::info) << "  Counter example: " << data::pp(v_counter_example) << "\n";
+    mCRL2log(log::log_level_t::info) << "  Counter example: " << data::pp(v_counter_example) << "\n";
   }
 }
 
@@ -160,13 +160,13 @@ bool Invariant_Checker<Specification>::check_init(const data::data_expression& a
 
   data::data_expression b_invariant = data::replace_variables_capture_avoiding(a_invariant, v_substitutions);
   f_bdd_prover.set_formula(b_invariant);
-  if (f_bdd_prover.is_tautology() == data::detail::answer_yes)
+  if (f_bdd_prover.is_tautology() == data::detail::Answer::answer_yes)
   {
     return true;
   }
   else
   {
-    if (f_bdd_prover.is_contradiction() != data::detail::answer_yes)
+    if (f_bdd_prover.is_contradiction() != data::detail::Answer::answer_yes)
     {
       print_counter_example();
       save_dot_file(std::numeric_limits<std::size_t>::max());
@@ -197,15 +197,15 @@ bool Invariant_Checker<Specification>::check_summand(
 
   const data::data_expression v_formula = implies(and_(a_invariant, v_condition), v_subst_invariant);
   f_bdd_prover.set_formula(v_formula);
-  if (f_bdd_prover.is_tautology() == data::detail::answer_yes)
+  if (f_bdd_prover.is_tautology() == data::detail::Answer::answer_yes)
   {
-    mCRL2log(log::verbose) << "The invariant holds for summand " << a_summand_number << "." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "The invariant holds for summand " << a_summand_number << "." << std::endl;
     return true;
   }
   else
   {
-    mCRL2log(log::info) << "The invariant does not hold for summand " << a_summand_number << std::endl;
-    if (f_bdd_prover.is_contradiction() != data::detail::answer_yes)
+    mCRL2log(log::log_level_t::info) << "The invariant does not hold for summand " << a_summand_number << std::endl;
+    if (f_bdd_prover.is_contradiction() != data::detail::Answer::answer_yes)
     {
       print_counter_example();
       save_dot_file(a_summand_number);
@@ -257,32 +257,32 @@ bool Invariant_Checker<Specification>::check_invariant(const data::data_expressi
 
   if (check_init(a_invariant))
   {
-    mCRL2log(log::verbose) << "The invariant holds for the initial state." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "The invariant holds for the initial state." << std::endl;
   }
   else
   {
-    mCRL2log(log::info) << "The invariant does not hold for the initial state." << std::endl;
+    mCRL2log(log::log_level_t::info) << "The invariant does not hold for the initial state." << std::endl;
     v_result = false;
   }
   if ((f_all_violations || v_result))
   {
     if (check_summands(a_invariant))
     {
-      mCRL2log(log::verbose) << "The invariant holds for all summands." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "The invariant holds for all summands." << std::endl;
     }
     else
     {
-      mCRL2log(log::info) << "The invariant does not hold for all summands." << std::endl;
+      mCRL2log(log::log_level_t::info) << "The invariant does not hold for all summands." << std::endl;
       v_result = false;
     }
   }
   if (v_result)
   {
-    mCRL2log(log::info) << "The invariant holds for this LPS." << std::endl;
+    mCRL2log(log::log_level_t::info) << "The invariant holds for this LPS." << std::endl;
   }
   else
   {
-    mCRL2log(log::info) << "The invariant does not hold for this LPS." << std::endl;
+    mCRL2log(log::log_level_t::info) << "The invariant does not hold for this LPS." << std::endl;
   }
 
   return v_result;

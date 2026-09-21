@@ -20,30 +20,30 @@
  *   show in the interface
  */
 const std::map<mcrl2::lts::lts_equivalence, QString> LTSEQUIVALENCENAMES = {
-    {mcrl2::lts::lts_eq_none, "None"},
-    {mcrl2::lts::lts_eq_bisim, "Strong Bisimulation"},
-    {mcrl2::lts::lts_eq_trace, "Trace equivalence"},
-    {mcrl2::lts::lts_eq_divergence_preserving_branching_bisim,
+    {mcrl2::lts::lts_equivalence::lts_eq_none, "None"},
+    {mcrl2::lts::lts_equivalence::lts_eq_bisim, "Strong Bisimulation"},
+    {mcrl2::lts::lts_equivalence::lts_eq_trace, "Trace equivalence"},
+    {mcrl2::lts::lts_equivalence::lts_eq_divergence_preserving_branching_bisim,
      "Divergence Preserving Branching Bisimulation"},
-    {mcrl2::lts::lts_eq_branching_bisim, "Branching Bisimulation"},
-    {mcrl2::lts::lts_eq_weak_bisim, "Weak Bisimulation"},
-    {mcrl2::lts::lts_eq_weak_trace, "Weak Trace Equivalence"}};
+    {mcrl2::lts::lts_equivalence::lts_eq_branching_bisim, "Branching Bisimulation"},
+    {mcrl2::lts::lts_equivalence::lts_eq_weak_bisim, "Weak Bisimulation"},
+    {mcrl2::lts::lts_equivalence::lts_eq_weak_trace, "Weak Trace Equivalence"}};
 
 /**
  * @brief LTSEQUIVALENCESWITHABSTRACTION Defines which equivalences use
  *   abstraction
  */
 const std::list<mcrl2::lts::lts_equivalence> LTSEQUIVALENCESWITHABSTRACTION = {
-    mcrl2::lts::lts_eq_branching_bisim,
-    mcrl2::lts::lts_eq_divergence_preserving_branching_bisim,
-    mcrl2::lts::lts_eq_weak_bisim, mcrl2::lts::lts_eq_weak_trace};
+    mcrl2::lts::lts_equivalence::lts_eq_branching_bisim,
+    mcrl2::lts::lts_equivalence::lts_eq_divergence_preserving_branching_bisim,
+    mcrl2::lts::lts_equivalence::lts_eq_weak_bisim, mcrl2::lts::lts_equivalence::lts_eq_weak_trace};
 
 /**
  * @brief LTSEQUIVALENCESWITHOUTABSTRACTION Defines which equivalences do not
  *   use abstraction
  */
 const std::list<mcrl2::lts::lts_equivalence> LTSEQUIVALENCESWITHOUTABSTRACTION =
-    {mcrl2::lts::lts_eq_bisim, mcrl2::lts::lts_eq_trace};
+    {mcrl2::lts::lts_equivalence::lts_eq_bisim, mcrl2::lts::lts_equivalence::lts_eq_trace};
 
 /**
  * @brief The EquivalenceComboBox class defines a combobox for selecting an

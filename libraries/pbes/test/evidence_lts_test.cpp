@@ -54,7 +54,7 @@ static bool run(const std::string& spec_text, const std::string& formula_text, c
   pbesinst_structure_graph_algorithm algorithm(options, p, G);
   algorithm.run();
 
-  return solve_structure_graph_with_evidence_lts(G, lpsspec, p, algorithm.equation_index(), options.rewrite_strategy, lts::lts_aut, filename);
+  return solve_structure_graph_with_evidence_lts(G, lpsspec, p, algorithm.equation_index(), options.rewrite_strategy, lts::lts_type::lts_aut, filename);
 }
 
 // P has a single state (no process parameters), so every evidence LTS for it collapses onto a
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_witness)
   lts::lts_aut_t expected = parse_aut(R"(des (0,1,1)
 (0,"a",0)
 )");
-  BOOST_CHECK(lts::destructive_compare(evidence, expected, lts::lts_eq_bisim));
+  BOOST_CHECK(lts::destructive_compare(evidence, expected, lts::lts_equivalence::lts_eq_bisim));
 }
 
 BOOST_AUTO_TEST_CASE(test_counterexample)
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_counterexample)
   lts::lts_aut_t expected = parse_aut(R"(des (0,1,1)
 (0,"a",0)
 )");
-  BOOST_CHECK(lts::destructive_compare(evidence, expected, lts::lts_eq_bisim));
+  BOOST_CHECK(lts::destructive_compare(evidence, expected, lts::lts_equivalence::lts_eq_bisim));
 }
 
 // A process with an actual data parameter, so the evidence LTS has more than one state and the
@@ -108,5 +108,5 @@ BOOST_AUTO_TEST_CASE(test_multi_state_witness)
 (0,"inc",1)
 (1,"reset",0)
 )");
-  BOOST_CHECK(lts::destructive_compare(evidence, expected, lts::lts_eq_bisim));
+  BOOST_CHECK(lts::destructive_compare(evidence, expected, lts::lts_equivalence::lts_eq_bisim));
 }

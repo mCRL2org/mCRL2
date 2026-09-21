@@ -30,14 +30,14 @@ namespace mcrl2::lts
  *   etc. are available. Files in which the lts's are stored have
  *   the name file.lts, file.aut, etc.
  */
-enum lts_type
+enum class lts_type
 {
   lts_none,                  /**< unknown or no format */
   lts_lts,                   /**< mCRL2 SVC format */
   lts_aut,                   /**< Ald&eacute;baran format (CADP) */
   lts_fsm,                   /**< FSM format */
   lts_dot,                   /**< GraphViz format */
-  lts_lts_probabilistic,     
+  lts_lts_probabilistic,
   lts_aut_probabilistic,
   lts_fsm_probabilistic,
   lts_type_min=lts_none,

@@ -19,7 +19,7 @@ namespace mcrl2::pres_system
 {
 
 /// \brief An enumerated type for the available pres rewriters
-enum pres_rewriter_type
+enum class pres_rewriter_type
 {
   simplify,
   quantifier_all,
@@ -35,27 +35,27 @@ pres_rewriter_type parse_pres_rewriter_type(const std::string& type)
 {
   if (type == "simplify")
   {
-    return simplify;
+    return pres_rewriter_type::simplify;
   }
   if (type == "quantifier-all")
   {
-    return quantifier_all;
+    return pres_rewriter_type::quantifier_all;
   }
   if (type == "quantifier-finite")
   {
-    return quantifier_finite;
+    return pres_rewriter_type::quantifier_finite;
   }
   if (type == "quantifier-inside")
   {
-    return quantifier_inside;
+    return pres_rewriter_type::quantifier_inside;
   }
   if (type == "quantifier-one-point")
   {
-    return quantifier_one_point;
+    return pres_rewriter_type::quantifier_one_point;
   }
   if (type == "prune-dataspec")
   {
-    return prune_dataspec;
+    return pres_rewriter_type::prune_dataspec;
   }
   throw mcrl2::runtime_error("unknown pres rewriter option " + type);
 }
@@ -66,17 +66,17 @@ std::string print_pres_rewriter_type(const pres_rewriter_type type)
 {
   switch (type)
   {
-    case simplify:
+    case pres_rewriter_type::simplify:
       return "simplify";
-    case quantifier_all:
+    case pres_rewriter_type::quantifier_all:
       return "quantifier-all";
-    case quantifier_finite:
+    case pres_rewriter_type::quantifier_finite:
       return "quantifier-finite";
-    case quantifier_inside:
+    case pres_rewriter_type::quantifier_inside:
       return "quantifier-inside";
-    case quantifier_one_point:
+    case pres_rewriter_type::quantifier_one_point:
       return "quantifier-one-point";
-    case prune_dataspec:
+    case pres_rewriter_type::prune_dataspec:
       return "prune-dataspec";
     default:
       return "unknown pres rewriter";
@@ -89,17 +89,17 @@ std::string description(const pres_rewriter_type type)
 {
   switch (type)
   {
-    case simplify          :
+    case pres_rewriter_type::simplify          :
       return "for simplification";
-    case quantifier_all    :
+    case pres_rewriter_type::quantifier_all    :
       return "for eliminating all quantifiers";
-    case quantifier_finite :
+    case pres_rewriter_type::quantifier_finite :
       return "for eliminating finite quantifier variables";
-    case quantifier_inside :
+    case pres_rewriter_type::quantifier_inside :
       return "for pushing quantifiers inside";
-    case quantifier_one_point :
+    case pres_rewriter_type::quantifier_one_point :
       return "for one point rule quantifier elimination";
-    case prune_dataspec:
+    case pres_rewriter_type::prune_dataspec:
       return "for removing unused data equations and mappings";
   }
   throw mcrl2::runtime_error("unknown pres rewriter");

@@ -37,7 +37,7 @@ inline
 pbes pbesinst_finite(const pbes& p)
 {
   pbes q = p;
-  pbesinst_finite_algorithm algorithm(data::jitty);
+  pbesinst_finite_algorithm algorithm(data::rewrite_strategy::jitty);
   algorithm.run(q);
   return q;
 }
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_pbesinst_finite)
     "init X(d1);                                                     \n"
     ;
   pbes p1 = txt2pbes(text);
-  pbesinst_finite_algorithm algorithm(data::jitty);
+  pbesinst_finite_algorithm algorithm(data::rewrite_strategy::jitty);
   pbesinst_variable_map variable_map = mcrl2::pbes_system::detail::parse_pbes_parameter_map(p1, "X(*:D)");
   algorithm.run(p1, variable_map);
 }
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(test_abp_no_deadlock)
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec, false);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
-  data::rewriter::strategy rewriter_strategy = data::jitty;
+  data::rewriter::strategy rewriter_strategy = data::rewrite_strategy::jitty;
   bool print_equations = true;
   pbes_system::pbesinst_algorithm algorithm(p.data(), rewriter_strategy, print_equations);
   algorithm.run(p);
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(test_functions)
     "init X(one, f);                      \n"
     ;
   pbes p = txt2pbes(text);
-  data::rewriter::strategy rewrite_strategy = data::jitty;
+  data::rewriter::strategy rewrite_strategy = data::rewrite_strategy::jitty;
   pbesinst_finite_algorithm algorithm(rewrite_strategy);
   mcrl2::pbes_system::detail::pbes_parameter_map parameter_map = mcrl2::pbes_system::detail::parse_pbes_parameter_map(p, "X(*:D)");
   algorithm.run(p, parameter_map);

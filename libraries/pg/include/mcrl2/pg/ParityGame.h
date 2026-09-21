@@ -13,15 +13,11 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/pg/Graph.h"
 
+#include <cstdint>
+
 // Forward declaration of mcrl2::pbes_system::pbes, which may or may not be
 // defined later depending on whether mCRL2 support is compiled in.
  namespace mcrl2::pbes_system { class pbes; } 
-
-#if __GNUC__ >= 3
-#   define ATTR_PACKED  __attribute__((__packed__))
-#else
-#   define ATTR_PACKED
-#endif
 
 /*! \defgroup ParityGameData Parity game data structures
 
@@ -32,21 +28,25 @@
  using priority_t = std::size_t;
 
  /*! The two players in a parity game (Even and Odd) */
- enum player_t
+ // Explicit std::uint8_t underlying type instead of ATTR_PACKED: this preserves the
+ // exact 1-byte size/layout that ATTR_PACKED gave the previous unscoped enum (needed
+ // because ParityGameVertex is read/written directly via sizeof() in ParityGame_IO.cpp),
+ // since enum class does not honour a trailing __attribute__((packed)) the same way.
+ enum class player_t : std::uint8_t
  {
    PLAYER_EVEN = 0, //!< Even (0)
    PLAYER_ODD = 1   //!< Odd (1)
-              } ATTR_PACKED;
+ };
 
 inline
 player_t opponent(const player_t p)
 {
     switch(p)
     {
-      case PLAYER_EVEN:
-        return PLAYER_ODD;
-      case PLAYER_ODD:
-        return PLAYER_EVEN;
+      case player_t::PLAYER_EVEN:
+        return player_t::PLAYER_ODD;
+      case player_t::PLAYER_ODD:
+        return player_t::PLAYER_EVEN;
       default:
         throw mcrl2::runtime_error("unknown player");
     }
@@ -150,14 +150,14 @@ public:
       ForwardIterator vertices_begin,
       ForwardIterator vertices_end,
       bool proper,
-      StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_NONE);
+      StaticGraph::EdgeDirection edge_dir = StaticGraph::EdgeDirection::EDGE_NONE);
 
 #ifdef MCRL2_ENABLE_MULTITHREADING
   void make_subgame_threads(const ParityGame& game,
     const verti* verts,
     verti nvert,
     bool proper,
-    StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_NONE);
+    StaticGraph::EdgeDirection edge_dir = StaticGraph::EdgeDirection::EDGE_NONE);
 #endif // MCRL2_ENABLE_MULTITHREADING
 
     //!@}
@@ -217,7 +217,7 @@ public:
 
     /*! Read a game description in PGSolver format. */
     void read_pgsolver( std::istream &is,
-        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL );
+        StaticGraph::EdgeDirection edge_dir = StaticGraph::EdgeDirection::EDGE_BIDIRECTIONAL );
 
     /*! Write a game description in PGSolver format. */
     void write_pgsolver(std::ostream &os) const;
@@ -225,7 +225,7 @@ public:
     /*! Read a game description from an mCRL2 PBES. */
     void read_pbes(const std::string& file_path,
         verti* goal_vertex = nullptr,
-        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL,
+        StaticGraph::EdgeDirection edge_dir = StaticGraph::EdgeDirection::EDGE_BIDIRECTIONAL,
         const std::string& rewrite_strategy = "jitty");
 
     /*! Read raw parity game data from input stream */
@@ -290,7 +290,7 @@ public:
     /*! Generate a parity game from an mCRL2 PBES. */
     void assign_pbes(mcrl2::pbes_system::pbes& pbes,
         verti* goal_vertex = nullptr,
-        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL,
+        StaticGraph::EdgeDirection edge_dir = StaticGraph::EdgeDirection::EDGE_BIDIRECTIONAL,
         const std::string& rewrite_strategy = "jitty");
 
   protected:

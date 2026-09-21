@@ -233,10 +233,10 @@ public:
   /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is
   /// equal to 0, no time limit will be enforced
   Confluence_Checker(Specification& a_lps,
-      data::rewriter::strategy a_rewrite_strategy = data::jitty,
+      data::rewriter::strategy a_rewrite_strategy = data::rewrite_strategy::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      data::detail::smt_solver_type a_solver_type = data::detail::solver_type_cvc,
+      data::detail::smt_solver_type a_solver_type = data::detail::smt_solver_type::solver_type_cvc,
       bool a_apply_induction = false,
       bool a_check_all = false,
       bool a_no_sums = false,
@@ -579,7 +579,7 @@ void Confluence_Checker<Specification>::print_counter_example()
   if (f_counter_example)
   {
     const data::data_expression v_counter_example(f_bdd_prover.get_counter_example());
-    mCRL2log(log::info) << "  Counter example: " << v_counter_example << "\n";
+    mCRL2log(log::log_level_t::info) << "  Counter example: " << v_counter_example << "\n";
   }
 }
 
@@ -669,7 +669,7 @@ bool Confluence_Checker<Specification>::check_summands(
 
   if ((a_condition_type == 'c' || a_condition_type == 'd') && f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2))
   {
-    mCRL2log(log::info) << ":";
+    mCRL2log(log::log_level_t::info) << ":";
   }
   else
   {
@@ -682,32 +682,32 @@ bool Confluence_Checker<Specification>::check_summands(
 
     const data::data_expression v_condition = get_confluence_condition(a_invariant, a_summand_1, tagged, v_variables, a_condition_type);
     f_bdd_prover.set_formula(v_condition);
-    if (f_bdd_prover.is_tautology() == data::detail::answer_yes)
+    if (f_bdd_prover.is_tautology() == data::detail::Answer::answer_yes)
     {
-      mCRL2log(log::info) << "+";
+      mCRL2log(log::log_level_t::info) << "+";
     }
     else
     {
       if (f_generate_invariants)
       {
         const data::data_expression v_new_invariant(f_bdd_prover.get_bdd());
-        mCRL2log(log::verbose) << "\nChecking invariant: " << data::pp(v_new_invariant) << "\n";
+        mCRL2log(log::log_level_t::verbose) << "\nChecking invariant: " << data::pp(v_new_invariant) << "\n";
         if (f_invariant_checker.check_invariant(v_new_invariant))
         {
-          mCRL2log(log::verbose) << "Invariant holds" << std::endl;
-          mCRL2log(log::info) << "i";
+          mCRL2log(log::log_level_t::verbose) << "Invariant holds" << std::endl;
+          mCRL2log(log::log_level_t::info) << "i";
         }
         else
         {
-          mCRL2log(log::verbose) << "Invariant doesn't hold" << std::endl;
+          mCRL2log(log::log_level_t::verbose) << "Invariant doesn't hold" << std::endl;
           v_is_confluent = false;
           if (f_check_all)
           {
-            mCRL2log(log::info) << "-";
+            mCRL2log(log::log_level_t::info) << "-";
           }
           else
           {
-            mCRL2log(log::info) << "Not confluent with summand " << a_summand_number_2 << ".";
+            mCRL2log(log::log_level_t::info) << "Not confluent with summand " << a_summand_number_2 << ".";
           }
           print_counter_example();
           save_dot_file(a_summand_number_1, a_summand_number_2);
@@ -718,11 +718,11 @@ bool Confluence_Checker<Specification>::check_summands(
         v_is_confluent = false;
         if (f_check_all)
         {
-          mCRL2log(log::info) << "-";
+          mCRL2log(log::log_level_t::info) << "-";
         }
         else
         {
-          mCRL2log(log::info) << "Not confluent with summand " << a_summand_number_2 << ".";
+          mCRL2log(log::log_level_t::info) << "Not confluent with summand " << a_summand_number_2 << ".";
         }
         print_counter_example();
         save_dot_file(a_summand_number_1, a_summand_number_2);
@@ -759,7 +759,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
     if (!a_summand_sum_variables.empty())
     {
       v_is_confluent = false;
-      mCRL2log(log::info) << "Summand " << a_summand_number << " is not proven confluent because it contains a sum operator.";
+      mCRL2log(log::log_level_t::info) << "Summand " << a_summand_number << " is not proven confluent because it contains a sum operator.";
     }
   }
 
@@ -772,7 +772,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
       // Check the cache
       if (f_intermediate[v_summand_number] > a_summand_number)
       {
-        mCRL2log(log::info) << ".";
+        mCRL2log(log::log_level_t::info) << ".";
       }
       else
       {
@@ -780,11 +780,11 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
         {
           if (f_check_all)
           {
-            mCRL2log(log::info) << "-";
+            mCRL2log(log::log_level_t::info) << "-";
           }
           else
           {
-            mCRL2log(log::info) << "Not confluent with summand " << v_summand_number << ".";
+            mCRL2log(log::log_level_t::info) << "Not confluent with summand " << v_summand_number << ".";
           }
           v_is_confluent = false;
         }
@@ -812,7 +812,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
 
   if (v_is_confluent)
   {
-    mCRL2log(log::info) << "Confluent with all summands.";
+    mCRL2log(log::log_level_t::info) << "Confluent with all summands.";
     a_is_marked = true;
     a_summand.multi_action() = multi_action(make_ctau_action());
   }
@@ -917,9 +917,9 @@ void Confluence_Checker<Specification>::check_confluence_and_mark(const data::da
       {
         bool summand_is_marked = false;
 
-        mCRL2log(log::info) << "summand " << std::setw(3) << v_summand_number << " of " << v_summands.size() << " (condition = " << v_condition_type << "): ";
+        mCRL2log(log::log_level_t::info) << "summand " << std::setw(3) << v_summand_number << " of " << v_summands.size() << " (condition = " << v_condition_type << "): ";
         check_confluence_and_mark_summand(s, v_summand_number, a_invariant, v_condition_type, summand_is_marked);
-        mCRL2log(log::info) << std::endl;
+        mCRL2log(log::log_level_t::info) << std::endl;
 
         if (summand_is_marked)
         {
@@ -937,7 +937,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark(const data::da
     f_lps.action_labels().push_front(make_ctau_act_id());
   }
 
-  mCRL2log(log::info) << v_marked_summands.size() << " of " << (v_marked_summands.size() + v_unmarked_summands.size()) <<
+  mCRL2log(log::log_level_t::info) << v_marked_summands.size() << " of " << (v_marked_summands.size() + v_unmarked_summands.size()) <<
                          " tau summands were found to be confluent" << std::endl;
 
   f_intermediate = std::vector<std::size_t>();

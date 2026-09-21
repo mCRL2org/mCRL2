@@ -89,7 +89,7 @@ class symbolic_exploration_algorithm
       data::variable_list parameters(m_variables.begin(), m_variables.end());
       pbes_equation eqn(fixpoint_symbol::mu(), propositional_variable(X, parameters), x);
       m_cluster_equations.push_back(eqn);
-      mCRL2log(log::debug) << "\nadding cluster " << pbes_system::pp(eqn);
+      mCRL2log(log::log_level_t::debug) << "\nadding cluster " << pbes_system::pp(eqn);
       check_equation(eqn);
       data::data_expression_list e = data::make_data_expression_list(parameters);
       return propositional_variable_instantiation(X, e);
@@ -202,7 +202,7 @@ class symbolic_exploration_algorithm
       {
         result = x;
       }
-      mCRL2log(log::debug) << "\n<expr_or> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
+      mCRL2log(log::log_level_t::debug) << "\n<expr_or> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
       pop_variables(v);
       return result;
     }
@@ -234,7 +234,7 @@ class symbolic_exploration_algorithm
       {
         result = x;
       }
-      mCRL2log(log::debug) << "\n<expr_and> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
+      mCRL2log(log::log_level_t::debug) << "\n<expr_and> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
       pop_variables(v);
       return result;
     }
@@ -281,7 +281,7 @@ class symbolic_exploration_algorithm
       {
         throw mcrl2::runtime_error("unknown pbes expression encountered in F_or: " + pbes_system::pp(x));
       }
-      mCRL2log(log::debug) << "\n<F_or> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
+      mCRL2log(log::log_level_t::debug) << "\n<F_or> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
       return result;
     }
 
@@ -327,7 +327,7 @@ class symbolic_exploration_algorithm
       {
         throw mcrl2::runtime_error("unknown pbes expression encountered in F_and: " + pbes_system::pp(x));
       }
-      mCRL2log(log::debug) << "\n<F_and> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
+      mCRL2log(log::log_level_t::debug) << "\n<F_and> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
       return result;
     }
 
@@ -343,7 +343,7 @@ class symbolic_exploration_algorithm
       {
         result = F_or(x);
       }
-      mCRL2log(log::debug) << "\n<F> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
+      mCRL2log(log::log_level_t::debug) << "\n<F> " << pbes_system::pp(x) << " -> " << pbes_system::pp(result);
       pop_variables(v);
       return result;
     }

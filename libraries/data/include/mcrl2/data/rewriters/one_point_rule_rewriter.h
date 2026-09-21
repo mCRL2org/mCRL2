@@ -51,17 +51,17 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
         auto [sigma, remaining_variables] = make_one_point_rule_substitution(inequalities, x.variables());
         if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
         {
-          mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
           body = data::replace_variables_capture_avoiding(body, sigma);
-          mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
+          mCRL2log(log::log_level_t::debug) << "sigma(x) = " << body << std::endl;
           if (remaining_variables.empty())
           {
-            mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
+            mCRL2log(log::log_level_t::debug) << "Replaced " << x << "\nwith " << body << std::endl;
             result = body;
             return;
           }
           data::variable_list v(remaining_variables.begin(), remaining_variables.end());
-          mCRL2log(log::debug) << "Replaced " << x << "\nwith " << forall(v, body) << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Replaced " << x << "\nwith " << forall(v, body) << std::endl;
           make_forall(result, v, body);
           return;
         }
@@ -82,17 +82,17 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
         auto [sigma, remaining_variables] = make_one_point_rule_substitution(equalities, x.variables());
         if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
         {
-          mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
           body = data::replace_variables_capture_avoiding(body, sigma);
-          mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
+          mCRL2log(log::log_level_t::debug) << "sigma(x) = " << body << std::endl;
           if (remaining_variables.empty())
           {
-            mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
+            mCRL2log(log::log_level_t::debug) << "Replaced " << x << "\nwith " << body << std::endl;
             result = body;
             return;
           }
           data::variable_list v(remaining_variables.begin(), remaining_variables.end());
-          mCRL2log(log::debug) << "Replaced " << x << "\nwith " << exists(v, body) << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Replaced " << x << "\nwith " << exists(v, body) << std::endl;
           make_exists(result, v, body);
           return;
         }

@@ -66,7 +66,7 @@ namespace AttractionFunctions
 
   struct ElectricalSprings : AttractionFunction
   {
-    virtual ~ElectricalSprings() = default;
+    ~ElectricalSprings() override = default;
     QVector3D diff = { 0, 0, 0 };
     const float scaling = 1e-2f;
     QVector3D operator()(const QVector3D& a, 
@@ -80,7 +80,7 @@ namespace AttractionFunctions
 
   struct SimpleSpring : AttractionFunction
   {
-    virtual ~SimpleSpring() = default;
+    ~SimpleSpring() override = default;
     QVector3D diff = { 0, 0, 0 };
     const float spring_constant = 1e-4f;
     QVector3D operator()(const QVector3D& a, 

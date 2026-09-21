@@ -8,7 +8,6 @@
 
 #ifndef MCRL2_UTILITIES_UNORDERED_SET_IMPLEMENTATION_H
 #define MCRL2_UTILITIES_UNORDERED_SET_IMPLEMENTATION_H
-#pragma once
 
 #define MCRL2_UNORDERED_SET_TEMPLATES template<typename Key, typename Hash, typename Equals, typename Allocator, bool ThreadSafe, bool Resize>
 #define MCRL2_UNORDERED_SET_CLASS unordered_set<Key, Hash, Equals, Allocator, ThreadSafe, Resize>
@@ -248,11 +247,11 @@ void print_performance_statistics(const T& unordered_set)
     ++histogram[bucket_length];
   }
 
-  mCRL2log(mcrl2::log::info) << "Table stores " << unordered_set.size() << " keys in " << unordered_set.bucket_count() << " buckets.\n";
+  mCRL2log(mcrl2::log::log_level_t::info) << "Table stores " << unordered_set.size() << " keys in " << unordered_set.bucket_count() << " buckets.\n";
 
   for (std::size_t i = 0; i < histogram.size(); ++i)
   {
-    mCRL2log(mcrl2::log::debug) << "There are " << histogram[i] << " buckets that store " << i << " keys.\n";
+    mCRL2log(mcrl2::log::log_level_t::debug) << "There are " << histogram[i] << " buckets that store " << i << " keys.\n";
   }
 }
 
@@ -282,7 +281,7 @@ auto MCRL2_UNORDERED_SET_CLASS::emplace_impl(size_type bucket_index, Args&&... a
     else
     {
       // Obtain exclusive access to this bucket.
-      std::lock_guard g(m_bucket_mutexes[bucket_index % m_bucket_mutexes.size()]);
+      std::scoped_lock g(m_bucket_mutexes[bucket_index % m_bucket_mutexes.size()]);
 
       iterator it = find_impl(bucket_index, std::forward<Args>(args)...);
       if (it != end())

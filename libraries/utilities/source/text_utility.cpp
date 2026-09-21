@@ -69,7 +69,7 @@ std::string read_text(const std::string& filename, bool warn)
   {
     if (warn)
     {
-      mCRL2log(log::warning) << "Could not open input file: " << filename << std::endl;
+      mCRL2log(log::log_level_t::warning) << "Could not open input file: " << filename << std::endl;
       return "";
     }
     else

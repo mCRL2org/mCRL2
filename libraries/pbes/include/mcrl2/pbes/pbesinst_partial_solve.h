@@ -33,9 +33,9 @@ void partial_solve(structure_graph& G,
                    const detail::structure_graph_builder& graph_builder
                   )
 {
-  mCRL2log(log::debug) << "\n  === partial solve (equation " << equation_count << ") ===\n" << G << std::endl;
-  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
-  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "\n  === partial solve (equation " << equation_count << ") ===\n" << G << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S1 = " << S[1] << std::endl;
 
   std::size_t N = G.extent();
 
@@ -43,9 +43,9 @@ void partial_solve(structure_graph& G,
   S[0].truncate(N);
   S[1].truncate(N);
 
-  mCRL2log(log::debug) << "  computing S0 = attr_default_with_tau(G, S0, 0, tau0)" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  computing S0 = attr_default_with_tau(G, S0, 0, tau0)" << std::endl;
   S[0] = attr_default_with_tau(G, S[0], 0, tau);
-  mCRL2log(log::debug) << "  computing S1 = attr_default_with_tau(G, S1, 1, tau1)" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  computing S1 = attr_default_with_tau(G, S1, 1, tau1)" << std::endl;
   S[1] = attr_default_with_tau(G, S[1], 1, tau);
 
   // Si_todo := Si U todo
@@ -72,9 +72,9 @@ void partial_solve(structure_graph& G,
     {
       continue;
     }
-    if (G.decoration(v) == structure_graph::d_conjunction)
+    if (G.decoration(v) == structure_graph::decoration_type::d_conjunction)
     {
-      auto tau_v = G.decoration(v);
+      auto tau_v = static_cast<structure_graph::index_type>(G.decoration(v));
       local_strategy(tau, 1).set_strategy(v, tau_v);
     }
   }
@@ -86,18 +86,18 @@ void partial_solve(structure_graph& G,
     {
       continue;
     }
-    if (G.decoration(v) == structure_graph::d_disjunction)
+    if (G.decoration(v) == structure_graph::decoration_type::d_disjunction)
     {
-      auto tau_v = G.decoration(v);
+      auto tau_v = static_cast<structure_graph::index_type>(G.decoration(v));
       local_strategy(tau, 0).set_strategy(v, tau_v);
     }
   }
 
-  mCRL2log(log::debug) << "\n  === result of partial solve (iteration " << equation_count << ") ===" << std::endl;
-  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
-  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
-  mCRL2log(log::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
-  mCRL2log(log::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
+  mCRL2log(log::log_level_t::debug) << "\n  === result of partial solve (iteration " << equation_count << ") ===" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S1 = " << S[1] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
 }
 
 } // namespace mcrl2::pbes_system::detail

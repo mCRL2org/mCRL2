@@ -54,7 +54,7 @@ std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(con
       // does not occur in the LTS.
       if (label.actions().size() > 0 && first == process::action())
       {
-        mCRL2log(log::error) << "Label " << label << " does not contain a tag or synchronisation action.\n";
+        mCRL2log(log::log_level_t::error) << "Label " << label << " does not contain a tag or synchronisation action.\n";
         throw mcrl2::runtime_error("Unexpected transition.");
       }
     }
@@ -68,7 +68,7 @@ std::vector<std::pair<process::action, lps::multi_action>> preprocess_labels(con
 
     if (label.has_time())
     {
-      mCRL2log(log::error) << "Label " << label << " contains time and this tool does not deal properly with time.\n";
+      mCRL2log(log::log_level_t::error) << "Label " << label << " contains time and this tool does not deal properly with time.\n";
       throw mcrl2::runtime_error("Unexpected timed transition.");
     }
 

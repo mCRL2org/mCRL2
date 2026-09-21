@@ -29,7 +29,7 @@ static const std::size_t const_tau_label_index=0;
  * \details This enumerated type defines sort styles for transitions.
  * They can be used to sort the transitions of an LTS based on various
  * criteria. */
-enum transition_sort_style
+enum class transition_sort_style
 {
   src_lbl_tgt, /**< Sort first on source state, then on label, then on target state */
   lbl_tgt_src, /**< Sort first on label, then on target state, then on source state */

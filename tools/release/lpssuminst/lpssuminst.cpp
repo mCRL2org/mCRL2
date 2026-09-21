@@ -100,7 +100,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
         sorts = std::set<data::sort_expression>(sort_set.begin(),sort_set.end());
       }
 
-      mCRL2log(log::verbose) << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
 
       mcrl2::data::rewriter r(spec.data(), m_rewrite_strategy);
       lps::suminst_algorithm<data::rewriter, stochastic_specification>(spec, r, sorts, m_tau_summands_only).run();

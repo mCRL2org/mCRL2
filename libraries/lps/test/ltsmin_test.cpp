@@ -153,12 +153,12 @@ void test_ltsmin(const lps::specification& lpsspec, const std::string& filename,
   for (std::size_t group = 0; group < p.group_count(); group++)
   {
 
-    std::size_t all_true = p.GUARD_TRUE;
-    for(std::size_t guard = 0; guard < p.guard_info(group).size() && all_true == p.GUARD_TRUE; guard++) {
+    lps::pins::guard_evaluation_t all_true = lps::pins::guard_evaluation_t::GUARD_TRUE;
+    for(std::size_t guard = 0; guard < p.guard_info(group).size() && all_true == lps::pins::guard_evaluation_t::GUARD_TRUE; guard++) {
       all_true = p.eval_guard_long(initial_state, p.guard_info(group)[guard]);
     }
 
-    if (all_true == p.GUARD_TRUE) {
+    if (all_true == lps::pins::guard_evaluation_t::GUARD_TRUE) {
       state_callback_function f_long(p.process_parameter_count());
       p.update_long(initial_state, group, f_long, dest_state, labels);
       std::cout << "group " << group << " count = " << f_long.state_count << std::endl;

@@ -43,7 +43,7 @@ class lts_default_base
     /** \brief Provides the type of this lts, in casu lts_none.  */
     lts_type type()
     {
-      return lts_none;
+      return lts_type::lts_none;
     }
 
     /** \brief Standard swap function. */
@@ -194,8 +194,10 @@ class lts: public LTS_BASE
 
     /** \brief Standard assignment operator.
      *  \param[in] l The lts to be assigned. */
-    lts& operator=(const lts& l) 
+    lts& operator=(const lts& l)
     {
+      // NOLINTNEXTLINE(cppcoreguidelines-slicing) intentional: only the LTS_BASE part is assigned here;
+      // the derived-only members of l are assigned explicitly below.
       static_cast<LTS_BASE&>(*this)=l;
       m_nstates = l.m_nstates;
       m_init_state = l.m_init_state;

@@ -185,7 +185,7 @@ RewriterJitty::RewriterJitty(
       }
       catch (std::runtime_error& e)
       {
-        mCRL2log(warning) << e.what() << std::endl;
+        mCRL2log(log_level_t::warning) << e.what() << std::endl;
         continue;
       }
 
@@ -924,7 +924,7 @@ data_expression RewriterJitty::rewrite(
 
 rewrite_strategy RewriterJitty::getStrategy()
 {
-  return jitty;
+  return data::rewrite_strategy::jitty;
 }
 }
 

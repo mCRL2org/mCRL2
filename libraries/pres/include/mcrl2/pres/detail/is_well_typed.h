@@ -178,7 +178,7 @@ bool is_well_typed(const pres_equation& eqn)
       )
      )
   {
-    mCRL2log(log::error) << "pres_equation::is_well_typed() failed: the names of the binding variable parameters are not unique" << std::endl;
+    mCRL2log(log::log_level_t::error) << "pres_equation::is_well_typed() failed: the names of the binding variable parameters are not unique" << std::endl;
     return false;
   }
 
@@ -192,7 +192,7 @@ bool is_well_typed(const pres_equation& eqn)
       )
      )
   {
-    mCRL2log(log::error) << "pres_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << pres_system::pp(eqn.formula()) << std::endl;
+    mCRL2log(log::log_level_t::error) << "pres_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << pres_system::pp(eqn.formula()) << std::endl;
     return false;
   }
 
@@ -201,7 +201,7 @@ bool is_well_typed(const pres_equation& eqn)
   nvisitor.apply(eqn.formula());
   if (nvisitor.result)
   {
-    mCRL2log(log::error) << "pres_equation::is_well_typed() failed: the quantifier variable " << nvisitor.name_clash << " occurs within the scope of a quantifier variable with the same name." << std::endl;
+    mCRL2log(log::log_level_t::error) << "pres_equation::is_well_typed() failed: the quantifier variable " << nvisitor.name_clash << " occurs within the scope of a quantifier variable with the same name." << std::endl;
     return false;
   }
 
@@ -243,7 +243,7 @@ bool is_well_typed_equation(const pres_equation& eqn,
       )
      )
   {
-    mCRL2log(log::error) << "pres::is_well_typed() failed: some of the sorts of the binding variable "
+    mCRL2log(log::log_level_t::error) << "pres::is_well_typed() failed: some of the sorts of the binding variable "
               << eqn.variable()
               << " are not declared in the data specification "
               << data_spec
@@ -260,7 +260,7 @@ bool is_well_typed_equation(const pres_equation& eqn,
       )
      )
   {
-    mCRL2log(log::error) << "pres::is_well_typed() failed: some of the sorts of the quantifier variables "
+    mCRL2log(log::log_level_t::error) << "pres::is_well_typed() failed: some of the sorts of the quantifier variables "
               << data::pp(quantifier_variables)
               << " are not declared in the data specification "
               << data_spec
@@ -271,7 +271,7 @@ bool is_well_typed_equation(const pres_equation& eqn,
   // check 7)
   if (!utilities::detail::set_intersection(declared_global_variables, quantifier_variables).empty())
   {
-    mCRL2log(log::error) << "pres::is_well_typed() failed: the declared free variables and the quantifier variables have collisions" << std::endl;
+    mCRL2log(log::log_level_t::error) << "pres::is_well_typed() failed: the declared free variables and the quantifier variables have collisions" << std::endl;
     return false;
   }
   return true;
@@ -295,7 +295,7 @@ bool is_well_typed_pres(const std::set<data::sort_expression>& declared_sorts,
       )
      )
   {
-    mCRL2log(log::error) << "pres::is_well_typed() failed: some of the sorts of the free variables "
+    mCRL2log(log::log_level_t::error) << "pres::is_well_typed() failed: some of the sorts of the free variables "
               << data::pp(declared_global_variables)
               << " are not declared in the data specification "
               << data_spec
@@ -311,7 +311,7 @@ bool is_well_typed_pres(const std::set<data::sort_expression>& declared_sorts,
       )
      )
   {
-    mCRL2log(log::error) << "pres::is_well_typed() failed: the names of the binding variables are not unique" << std::endl;
+    mCRL2log(log::log_level_t::error) << "pres::is_well_typed() failed: the names of the binding variables are not unique" << std::endl;
     return false;
   }
 
@@ -323,7 +323,7 @@ bool is_well_typed_pres(const std::set<data::sort_expression>& declared_sorts,
                     )
      )
   {
-    mCRL2log(log::error) << "pres::is_well_typed() failed: not all of the free variables are declared\n"
+    mCRL2log(log::log_level_t::error) << "pres::is_well_typed() failed: not all of the free variables are declared\n"
               << "free variables: " << data::pp(occurring_global_variables) << "\n"
               << "declared free variables: " << data::pp(declared_global_variables)
               << std::endl;
@@ -337,7 +337,7 @@ bool is_well_typed_pres(const std::set<data::sort_expression>& declared_sorts,
       )
      )
   {
-    mCRL2log(log::error) << "pres::is_well_typed() failed: the free variables have no unique names" << std::endl;
+    mCRL2log(log::log_level_t::error) << "pres::is_well_typed() failed: the free variables have no unique names" << std::endl;
     return false;
   }
 
@@ -346,7 +346,7 @@ bool is_well_typed_pres(const std::set<data::sort_expression>& declared_sorts,
   {
     if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), v, data_spec))
     {
-      mCRL2log(log::error) << "pres::is_well_typed() failed: the occurring variable " << pres_system::pp(v) << " conflicts with its declaration!" << std::endl;
+      mCRL2log(log::log_level_t::error) << "pres::is_well_typed() failed: the occurring variable " << pres_system::pp(v) << " conflicts with its declaration!" << std::endl;
       return false;
     }
   }
@@ -354,7 +354,7 @@ bool is_well_typed_pres(const std::set<data::sort_expression>& declared_sorts,
   // check 9)
   if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), init, data_spec))
   {
-    mCRL2log(log::error) << "pres::is_well_typed() failed: the initial state " << pres_system::pp(init) << " conflicts with its declaration!" << std::endl;
+    mCRL2log(log::log_level_t::error) << "pres::is_well_typed() failed: the initial state " << pres_system::pp(init) << " conflicts with its declaration!" << std::endl;
     return false;
   }
   return true;

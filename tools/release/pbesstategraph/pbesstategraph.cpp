@@ -76,17 +76,17 @@ protected:
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbesstategraph parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:                       " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:                      " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  simplify:                         " << std::boolalpha << options.simplify << std::endl;
-      mCRL2log(verbose) << "  use global variant:               " << std::boolalpha << options.use_global_variant << std::endl;
-      mCRL2log(verbose) << "  print influence graph:            " << std::boolalpha << options.print_influence_graph << std::endl;
-      mCRL2log(verbose) << "  cache marking updates:            " << std::boolalpha << options.cache_marking_updates << std::endl;
-      mCRL2log(verbose) << "  marking algorithm:                " << options.marking_algorithm << std::endl;
-      mCRL2log(verbose) << "  use alternative lcfp criterion:   " << std::boolalpha << options.use_alternative_lcfp_criterion << std::endl;
-      mCRL2log(verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
-      mCRL2log(verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbesstategraph parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:                       " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:                      " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  simplify:                         " << std::boolalpha << options.simplify << std::endl;
+      mCRL2log(log_level_t::verbose) << "  use global variant:               " << std::boolalpha << options.use_global_variant << std::endl;
+      mCRL2log(log_level_t::verbose) << "  print influence graph:            " << std::boolalpha << options.print_influence_graph << std::endl;
+      mCRL2log(log_level_t::verbose) << "  cache marking updates:            " << std::boolalpha << options.cache_marking_updates << std::endl;
+      mCRL2log(log_level_t::verbose) << "  marking algorithm:                " << options.marking_algorithm << std::endl;
+      mCRL2log(log_level_t::verbose) << "  use alternative lcfp criterion:   " << std::boolalpha << options.use_alternative_lcfp_criterion << std::endl;
+      mCRL2log(log_level_t::verbose) << "  use alternative gcfp relation:    " << std::boolalpha << options.use_alternative_gcfp_relation << std::endl;
+      mCRL2log(log_level_t::verbose) << "  use alternative gcfp consistency: " << std::boolalpha << options.use_alternative_gcfp_consistency << std::endl;
 
       pbes p;
       load_pbes(p, input_filename(), pbes_input_format());
@@ -96,8 +96,8 @@ protected:
       save_pbes(p, output_filename(), pbes_output_format(), false);
       if (!p.is_well_typed())
       {
-        mCRL2log(log::error) << "pbesstategraph error: not well typed!" << std::endl;
-        mCRL2log(log::error) << pp(p) << std::endl;
+        mCRL2log(log::log_level_t::error) << "pbesstategraph error: not well typed!" << std::endl;
+        mCRL2log(log::log_level_t::error) << pp(p) << std::endl;
       }
       return true;
     }

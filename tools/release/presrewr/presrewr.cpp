@@ -61,10 +61,10 @@ class pres_rewriter : public pres_input_tool<pres_output_tool<pres_rewriter_tool
       using namespace pres_system;
       using namespace utilities;
 
-      mCRL2log(verbose) << "presrewr parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  pres rewriter:      " << m_pres_rewriter_type << std::endl;
+      mCRL2log(log_level_t::verbose) << "presrewr parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  pres rewriter:      " << m_pres_rewriter_type << std::endl;
 
       // load the pres
       pres p;
@@ -76,31 +76,31 @@ class pres_rewriter : public pres_input_tool<pres_output_tool<pres_rewriter_tool
       // pres rewriter
       switch (rewriter_type())
       {
-        case simplify:
+        case pres_rewriter_type::simplify:
         {
           simplify_data_rewriter<data::rewriter> presr(p.data(), datar);
           pres_rewrite(p, presr);
           break;
         }
-        case quantifier_all:
+        case pres_rewriter_type::quantifier_all:
         {
-          enumerate_quantifiers_rewriter presr(datar, p.data(), pbes_system::expand_infinite_sorts);
+          enumerate_quantifiers_rewriter presr(datar, p.data(), pbes_system::enumerate_quantifiers_mode::expand_infinite_sorts);
           pres_rewrite(p, presr);
           break;
         }
-        case quantifier_finite:
+        case pres_rewriter_type::quantifier_finite:
         {
-          enumerate_quantifiers_rewriter presr(datar, p.data(), pbes_system::expand_finite_sorts);
+          enumerate_quantifiers_rewriter presr(datar, p.data(), pbes_system::enumerate_quantifiers_mode::expand_finite_sorts);
           pres_rewrite(p, presr);
           break;
         }
-        case quantifier_inside:
+        case pres_rewriter_type::quantifier_inside:
         {
           quantifiers_inside_rewriter presr;
           pres_rewrite(p, presr);
           break;
         }
-        case quantifier_one_point:
+        case pres_rewriter_type::quantifier_one_point:
         {
           // apply the one point rule rewriter
           one_point_rule_rewriter presr;

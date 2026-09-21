@@ -90,7 +90,7 @@ bool run_solve(const pbes_system::pbes& pbesspec,
 
     // Guess the requested evidence format from the file extension.
     lts::lts_type format = lts::detail::guess_format(evidence_file, false);
-    if (format == lts::lts_none)
+    if (format == lts::lts_type::lts_none)
     {
       lps::specification evidence;
       timer.start("solving");
@@ -109,7 +109,7 @@ bool run_solve(const pbes_system::pbes& pbesspec,
       timer.finish("solving");
       std::cout << (result ? "true" : "false") << std::endl;
     }
-    mCRL2log(log::verbose)
+    mCRL2log(log::log_level_t::verbose)
         << "Saved " << (result ? "witness" : "counter example") << " in "
         << evidence_file << std::endl;
   }
@@ -128,7 +128,7 @@ bool run_solve(const pbes_system::pbes& pbesspec,
       evidence_file = input_filename + ".evidence.lts";
     }
     ltsspec.save(evidence_file);
-    mCRL2log(log::verbose)
+    mCRL2log(log::log_level_t::verbose)
         << "Saved " << (result ? "witness" : "counter example") << " in "
         << evidence_file << std::endl;
   }
@@ -163,8 +163,8 @@ class pbessolve_tool
       desc.add_hidden_option("check-strategy", "do a sanity check on the computed strategy", 'c');
       desc.add_option("search-strategy",
           utilities::make_enum_argument<search_strategy>("NAME")
-              .add_value_desc(breadth_first, "Leads to smaller counter examples", true)
-              .add_value_desc(depth_first, ""),
+              .add_value_desc(search_strategy::breadth_first, "Leads to smaller counter examples", true)
+              .add_value_desc(search_strategy::depth_first, ""),
           "Use search strategy NAME:",
           'z');
       desc.add_option("file",
@@ -347,7 +347,7 @@ class pbessolve_tool
       auto it = std::find(X_hatparams.begin(), X_hatparams.end(), params[i]);
       if (it == X_hatparams.end())
       {
-        mCRL2log(log::debug) << params[i] << " is redundant" << std::endl;
+        mCRL2log(log::log_level_t::debug) << params[i] << " is redundant" << std::endl;
         R.insert(static_cast<int>(i));
       }
     }
@@ -372,7 +372,7 @@ class pbessolve_tool
           found = true;
           pbes_system::propositional_variable X = e.variable();
           pbes_system::propositional_variable X_hat = e_hat.variable();
-          mCRL2log(log::debug) << "found " << X.name() << " from " << original_pbes_file << " as " << X_hat.name()
+          mCRL2log(log::log_level_t::debug) << "found " << X.name() << " from " << original_pbes_file << " as " << X_hat.name()
                                << std::endl;
           R[X.name()] = get_param_difference(X.parameters(), X_hat.parameters());
         }
@@ -394,14 +394,14 @@ class pbessolve_tool
     {
       if (lpsfile.empty() && ltsfile.empty())
       {
-        mCRL2log(log::warning)
+        mCRL2log(log::log_level_t::warning)
             << "Warning: the PBES has counter example information, but no witness will be generated due to lack of --file"
             << std::endl;
       }
     }
     else if ((!lpsfile.empty() || !ltsfile.empty()))
     {
-      mCRL2log(log::warning)
+      mCRL2log(log::log_level_t::warning)
           << "Warning: the PBES has no counter example information. Did you "
             "use the --counter-example option when generating the PBES?"
           << std::endl;
@@ -410,7 +410,7 @@ class pbessolve_tool
     // When the original has counter example information we remove it and store the provided pbes.
     if (!has_counter_example || options.naive_counter_example_instantiation)
     {      
-      mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Generating parity game..." << std::endl;
       structure_graph G;
       PbesInstAlgorithm instantiate(options, pbesspec, G);
 
@@ -423,9 +423,9 @@ class pbessolve_tool
     else
     {
       // Remove the counter example information, but store it for the later step.
-      mCRL2log(log::verbose) << "Removing counter example information for first pass." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Removing counter example information for first pass." << std::endl;
       pbes_system::pbes pbesspec_without_counterexample = detail::remove_counterexample_info(pbesspec);
-      mCRL2log(log::trace) << pbesspec_without_counterexample;
+      mCRL2log(log::log_level_t::trace) << pbesspec_without_counterexample;
 
       // Construct the rewriter from the full data specification, including the functions
       // that only occur in the counter example equations (e.g. those generated for a
@@ -433,7 +433,7 @@ class pbessolve_tool
       // that the second pass can still rewrite counter example expressions.
       data::rewriter shared_rewriter = detail::construct_rewriter(options, pbesspec);
 
-      mCRL2log(log::verbose) << "Generating parity game..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Generating parity game..." << std::endl;
       structure_graph initial_G;
       PbesInstAlgorithm first_instantiate(options, pbesspec_without_counterexample, initial_G, shared_rewriter);
 
@@ -441,7 +441,7 @@ class pbessolve_tool
       first_instantiate.run();
       timer().finish("first-instantiation");
 
-      mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
+      mCRL2log(log::log_level_t::verbose) << "Number of vertices in the structure graph: "
                              << initial_G.all_vertices().size() << std::endl;      
 
       // Solve the initial pbes and obtain the strategies in G.
@@ -457,14 +457,14 @@ class pbessolve_tool
       {
         pbes_system::pbes original_pbes = pbes_system::detail::load_pbes(original_pbes_file);
         R = construct_R(pbesspec, original_pbes);
-        mCRL2log(log::verbose) << "Using provided custom PBES for the second round of solving." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Using provided custom PBES for the second round of solving." << std::endl;
         pbes_system::detail::replace_global_variables(original_pbes, sigma);
         second_pbes = original_pbes;
       }
       // Based on the result remove the unnecessary equations related to counter example information. 
-      mCRL2log(log::verbose) << "Removing unnecessary example information for other player." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Removing unnecessary example information for other player." << std::endl;
       pbesspec = detail::remove_counterexample_info(second_pbes, !result, result);
-      mCRL2log(log::trace) << pbesspec << std::endl;
+      mCRL2log(log::log_level_t::trace) << pbesspec << std::endl;
 
       structure_graph G;
       PbesInstAlgorithmCE second_instantiate(options, pbesspec, initial_G, !result, mapping, G, first_instantiate.data_rewriter(), R);
@@ -474,7 +474,7 @@ class pbessolve_tool
       second_instantiate.run();
       timer().finish("second-instantiation");
 
-      mCRL2log(log::verbose) << "Number of vertices in the structure graph: "
+      mCRL2log(log::log_level_t::verbose) << "Number of vertices in the structure graph: "
                              << G.all_vertices().size() << std::endl;
       
       bool final_result = detail::run_solve(pbesspec, sigma, G, second_instantiate.equation_index(), options, input_filename(), lpsfile, ltsfile, evidence_file, timer());
@@ -536,7 +536,7 @@ class pbessolve_tool
     }
     if (options.prune_todo_list && options.optimization < partial_solve_strategy::propagate_solved_equations_using_substitution)
     {
-      mCRL2log(log::warning) << "Option --prune-todo-list has no effect for " 
+      mCRL2log(log::log_level_t::warning) << "Option --prune-todo-list has no effect for " 
                              << "strategies less than 2."
                              << std::endl;
     }

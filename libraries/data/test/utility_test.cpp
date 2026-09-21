@@ -122,7 +122,7 @@ void list_construction_test()
 
   data_specification specification;
 
-  mcrl2::data::rewriter R(specification, jitty);
+  mcrl2::data::rewriter R(specification, mcrl2::data::rewrite_strategy::jitty);
 
   representation_check(R, sort_list::list(bool_(), expressions),
                        R(cons_(bool_(), expressions[0], cons_(bool_(), expressions[1],

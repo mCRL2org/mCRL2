@@ -53,9 +53,9 @@ public:
   bool run() override /*< The virtual function `run` executes the tool.
                  The user has to override this function to add behavior. >*/
   {
-    mCRL2log(verbose) << "pbesparelm parameters:" << std::endl;
-    mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-    mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+    mCRL2log(log_level_t::verbose) << "pbesparelm parameters:" << std::endl;
+    mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+    mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
 
     // load the pbes
     pbes p;

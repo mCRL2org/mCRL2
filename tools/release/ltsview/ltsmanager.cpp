@@ -24,7 +24,7 @@ void LtsManagerHelper::loadLts(QString filename)
     if (!lts->readFromFile(filename.toStdString()))
     {
       delete lts;
-      mCRL2log(mcrl2::log::error) << "Error loading file: " << filename.toStdString();
+      mCRL2log(mcrl2::log::log_level_t::error) << "Error loading file: " << filename.toStdString();
       emit finished();
       return;
     }
@@ -32,7 +32,7 @@ void LtsManagerHelper::loadLts(QString filename)
   catch (const mcrl2::runtime_error& e)
   {
     delete lts;
-    mCRL2log(mcrl2::log::error) << e.what();
+    mCRL2log(mcrl2::log::log_level_t::error) << e.what();
     emit finished();
     return;
   }

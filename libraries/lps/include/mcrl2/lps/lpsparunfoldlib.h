@@ -550,7 +550,7 @@ namespace detail
           super::apply(intermediate_result2, intermediate_result1);
           m_current_depth--;
 
-          mCRL2log(log::debug) << "Unfolded " << x[0] << " into " << intermediate_result2 << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Unfolded " << x[0] << " into " << intermediate_result2 << std::endl;
           data::make_application(result, x.head(), intermediate_result2);
           m_currently_recursing = false;
         }

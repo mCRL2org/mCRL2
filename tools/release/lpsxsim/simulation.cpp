@@ -23,12 +23,12 @@ void Simulation::init(const QString& filename, bool do_not_use_dummies)
   }
   catch (mcrl2::runtime_error& e)
   {
-    mCRL2log(mcrl2::log::error) << "Error loading LPS: " << e.what() << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << "Error loading LPS: " << e.what() << std::endl;
     return;
   }
   catch (...)
   {
-    mCRL2log(mcrl2::log::error) << "Error loading LPS: unknown error" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << "Error loading LPS: unknown error" << std::endl;
     return;
   }
 
@@ -174,12 +174,12 @@ void Simulation::load(QString filename)
   }
   catch (mcrl2::runtime_error& e)
   {
-    mCRL2log(mcrl2::log::error) << "Error loading trace: " << e.what() << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << "Error loading trace: " << e.what() << std::endl;
     return;
   }
   catch (...)
   {
-    mCRL2log(mcrl2::log::error) << "Error loading trace: unknown error" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << "Error loading trace: unknown error" << std::endl;
     return;
   }
   updateTrace(0);
@@ -193,10 +193,10 @@ void Simulation::save(QString filename)
   }
   catch (mcrl2::runtime_error& e)
   {
-    mCRL2log(mcrl2::log::error) << "Error saving trace: " << e.what() << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << "Error saving trace: " << e.what() << std::endl;
   }
   catch (...)
   {
-    mCRL2log(mcrl2::log::error) << "Error saving trace: unknown error" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << "Error saving trace: unknown error" << std::endl;
   }
 }

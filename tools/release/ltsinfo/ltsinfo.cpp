@@ -27,7 +27,7 @@ class ltsinfo_tool : public ltsinfo_base
   private:
 
     std::string                 infilename;
-    mcrl2::lts::lts_type intype = mcrl2::lts::lts_none;
+    mcrl2::lts::lts_type intype = mcrl2::lts::lts_type::lts_none;
     bool print_action_labels = false;
     bool print_state_labels = false;
     bool print_branching_factor = false;
@@ -89,7 +89,7 @@ class ltsinfo_tool : public ltsinfo_base
         }
 
         intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
-        if (intype == lts_none || intype == lts_dot)
+        if (intype == lts_type::lts_none || intype == lts_type::lts_dot)
         {
           parser.error("Option -i/--in has illegal argument '" +
                        parser.option_argument("in") + "'.");
@@ -125,14 +125,14 @@ class ltsinfo_tool : public ltsinfo_base
       if (count_non_trivial_probabilistic_states>0)
       { 
         // The initial state can be probabilistic, so it is added separately. 
-        mCRL2log(info) << "This lts has " << l.num_probabilistic_states()+1 << " probabilistic states.\n";
-        mCRL2log(info) << "Out of these " << count_non_trivial_probabilistic_states << " contain" << ((count_non_trivial_probabilistic_states<2)?"s":"") 
+        mCRL2log(log_level_t::info) << "This lts has " << l.num_probabilistic_states()+1 << " probabilistic states.\n";
+        mCRL2log(log_level_t::info) << "Out of these " << count_non_trivial_probabilistic_states << " contain" << ((count_non_trivial_probabilistic_states<2)?"s":"") 
                        << " a non-trivial probability distribution.\n";
-        mCRL2log(info) << "The initial state is " << ((l.initial_probabilistic_state().size()>1)?"":"not ") << "probabilistic.\n";
+        mCRL2log(log_level_t::info) << "The initial state is " << ((l.initial_probabilistic_state().size()>1)?"":"not ") << "probabilistic.\n";
       }
       else
       {
-        mCRL2log(info) << "This lts has no probabilistic states.\n";
+        mCRL2log(log_level_t::info) << "This lts has no probabilistic states.\n";
       }
 
     }
@@ -148,10 +148,10 @@ class ltsinfo_tool : public ltsinfo_base
     {
       if (!print_action_labels) { return; }
 
-      mCRL2log(info) << "The action labels of this transition system: \n";
+      mCRL2log(log_level_t::info) << "The action labels of this transition system: \n";
       for (auto& action_label : l.action_labels())
       {
-         mCRL2log(info) << action_label << "\n";
+         mCRL2log(log_level_t::info) << action_label << "\n";
       }
     }
 
@@ -189,7 +189,7 @@ class ltsinfo_tool : public ltsinfo_base
       }
 
       // Print the results.
-      mCRL2log(info) << "The branching factor is min: " << min
+      mCRL2log(log_level_t::info) << "The branching factor is min: " << min
         << ", max: " << max
         << ", median: " << median
         << " and average: " << average_branching_factor << "\n";
@@ -202,14 +202,14 @@ class ltsinfo_tool : public ltsinfo_base
       {
         if (!l.has_state_info())
         {
-          mCRL2log(info) << "This transition system has no state labels. Therefore they cannot be printed.\n";
+          mCRL2log(log_level_t::info) << "This transition system has no state labels. Therefore they cannot be printed.\n";
         }
         else 
         {
-          mCRL2log(info) << "The state labels of this .fsm format. Note that state labels in .fsm files are only partly preserved by state space reductions.\n";
+          mCRL2log(log_level_t::info) << "The state labels of this .fsm format. Note that state labels in .fsm files are only partly preserved by state space reductions.\n";
           for(std::size_t i=0; i<l.num_states(); ++i)
           {
-            mCRL2log(info) << i << ": " << pp(l.state_label(i)) << "\n";
+            mCRL2log(log_level_t::info) << i << ": " << pp(l.state_label(i)) << "\n";
           }
         }
       }
@@ -220,7 +220,7 @@ class ltsinfo_tool : public ltsinfo_base
     {
       if (print_state_labels)
       {
-        mCRL2log(info) << "Transition systems in .aut format have no state labels. Therefore, they cannot be listed.\n"; 
+        mCRL2log(log_level_t::info) << "Transition systems in .aut format have no state labels. Therefore, they cannot be listed.\n"; 
       }
     }
 
@@ -231,22 +231,22 @@ class ltsinfo_tool : public ltsinfo_base
       {
         if (!l.has_state_info())
         {
-          mCRL2log(info) << "This transition system has no state labels. Therefore they cannot be printed.\n";
+          mCRL2log(log_level_t::info) << "This transition system has no state labels. Therefore they cannot be printed.\n";
         }
         else 
         {
-          mCRL2log(info) << "The state labels of this labelled transition system:\n";
+          mCRL2log(log_level_t::info) << "The state labels of this labelled transition system:\n";
           for(std::size_t i=0; i<l.num_states(); ++i)
           {
             if (l.state_label(i).size()==0)
             {
-              mCRL2log(info) << i << ": no label.\n";
+              mCRL2log(log_level_t::info) << i << ": no label.\n";
             }
             else 
             { 
               for(const mcrl2::lps::state& lab: l.state_label(i))
               { 
-                mCRL2log(info) << i << ": (" << pp(lab) << ").\n";
+                mCRL2log(log_level_t::info) << i << ": (" << pp(lab) << ").\n";
               }
             }
           }
@@ -260,36 +260,36 @@ class ltsinfo_tool : public ltsinfo_base
       LTS_TYPE l;
       l.load(infilename);
 
-      mCRL2log(info) 
+      mCRL2log(log_level_t::info) 
           << "Number of states: " << l.num_states() << ".\n"
           << "Number of action labels: " << l.num_action_labels() << " (including a tau label).\n"
           << "Number of transitions: " << l.num_transitions() << ".\n";
 
       if (l.has_state_info())
       {
-        mCRL2log(info) << "Number of state labels: " << l.num_state_labels() << ".\n";
+        mCRL2log(log_level_t::info) << "Number of state labels: " << l.num_state_labels() << ".\n";
       }
       else
       {
         if (!print_state_labels) // This is to prevent the same message being printed twice.
         {
-          mCRL2log(info) << "There are no state labels." << std::endl;
+          mCRL2log(log_level_t::info) << "There are no state labels." << std::endl;
         }
       }
 
-      mCRL2log(verbose) << "Checking reachability..." << std::endl;
+      mCRL2log(log_level_t::verbose) << "Checking reachability..." << std::endl;
       if (!reachability_check(l))
       {
-        mCRL2log(info) << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
+        mCRL2log(log_level_t::info) << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
       }
 
-      mCRL2log(verbose) << "Checking whether lts is deterministic..." << std::endl;
-      mCRL2log(info) << "LTS is ";
+      mCRL2log(log_level_t::verbose) << "Checking whether lts is deterministic..." << std::endl;
+      mCRL2log(log_level_t::info) << "LTS is ";
       if (!is_deterministic(l))
       {
-        mCRL2log(info) << "not ";
+        mCRL2log(log_level_t::info) << "not ";
       }
-      mCRL2log(info) << "deterministic." << std::endl;
+      mCRL2log(log_level_t::info) << "deterministic." << std::endl;
 
       provide_probabilistic_information(l);
 
@@ -307,32 +307,32 @@ class ltsinfo_tool : public ltsinfo_base
       using namespace mcrl2::lts;
       using namespace mcrl2::lts::detail;
 
-      if (intype==lts_none)
+      if (intype==lts_type::lts_none)
       {
         intype = guess_format(infilename);
       }
 
       switch (intype)
       {
-        case lts_lts:
-        case lts_lts_probabilistic:
+        case lts_type::lts_lts:
+        case lts_type::lts_lts_probabilistic:
         {
           return provide_information<probabilistic_lts_lts_t>();
         }
-        case lts_none:
-          mCRL2log(warning) << "No input format is specified. Assuming .aut format.\n";
+        case lts_type::lts_none:
+          mCRL2log(log_level_t::warning) << "No input format is specified. Assuming .aut format.\n";
           [[fallthrough]];
-        case lts_aut:
-        case lts_aut_probabilistic:
+        case lts_type::lts_aut:
+        case lts_type::lts_aut_probabilistic:
         {
           return provide_information<probabilistic_lts_aut_t>();
         }
-        case lts_fsm:
-        case lts_fsm_probabilistic:
+        case lts_type::lts_fsm:
+        case lts_type::lts_fsm_probabilistic:
         {
           return provide_information<probabilistic_lts_fsm_t>();
         }
-        case lts_dot:
+        case lts_type::lts_dot:
         {
           throw mcrl2::runtime_error("Cannot read .dot files anymore.");
         }

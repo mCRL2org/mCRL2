@@ -72,43 +72,43 @@ std::set<process::action_label> find_action_labels(const LTS_TYPE& ltsspec)
  * \param[in] ts The sort style to use.
  */
 
-inline void sort_transitions(std::vector<transition>& transitions, 
+inline void sort_transitions(std::vector<transition>& transitions,
                       const std::set<transition::size_type>& hidden_label_set,
-                      transition_sort_style ts = src_lbl_tgt)
+                      transition_sort_style ts = transition_sort_style::src_lbl_tgt)
 {
   switch (ts)
   {
-    case lbl_tgt_src:
+    case transition_sort_style::lbl_tgt_src:
     {
       const detail::compare_transitions_lts compare(hidden_label_set);
       sort(transitions.begin(),transitions.end(),compare);
       break;
     }
-    case tgt_src_lbl:
+    case transition_sort_style::tgt_src_lbl:
     {
       const detail::compare_transitions_tsl compare(hidden_label_set);
       sort(transitions.begin(),transitions.end(),compare);
       break;
     }
-    case tgt_lbl_src:
+    case transition_sort_style::tgt_lbl_src:
     {
       const detail::compare_transitions_tls compare(hidden_label_set);
       sort(transitions.begin(),transitions.end(),compare);
       break;
     }
-    case tgt_lbl:
+    case transition_sort_style::tgt_lbl:
     {
       const detail::compare_transitions_tl compare(hidden_label_set);
       sort(transitions.begin(),transitions.end(),compare);
       break;
     }
-    case target:
+    case transition_sort_style::target:
     {
       const detail::compare_transitions_target compare;
       sort(transitions.begin(),transitions.end(),compare);
       break;
     }
-    case src_lbl_tgt:
+    case transition_sort_style::src_lbl_tgt:
     default:
     {
       const detail::compare_transitions_slt compare(hidden_label_set);
@@ -433,7 +433,7 @@ inline void group_transitions_on_tgt_label(LTS_TYPE& aut)
  * \param[in] ts The sort style to use.
  */
 
-inline void sort_transitions(std::vector<transition>& transitions, transition_sort_style ts = src_lbl_tgt)
+inline void sort_transitions(std::vector<transition>& transitions, transition_sort_style ts = transition_sort_style::src_lbl_tgt)
 {
   sort_transitions(transitions, std::set<transition::size_type>(), ts);
 }

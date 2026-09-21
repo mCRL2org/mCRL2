@@ -21,7 +21,7 @@ namespace mcrl2::data
 {
 
 mcrl2::lps::stochastic_specification
-realelm(mcrl2::lps::stochastic_specification s, std::size_t max_iterations = 5, rewrite_strategy strat = jitty);
+realelm(mcrl2::lps::stochastic_specification s, std::size_t max_iterations = 5, rewrite_strategy strat = rewrite_strategy::jitty);
 
 template <typename Term, typename MapContainer>
 Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements);

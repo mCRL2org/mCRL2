@@ -27,7 +27,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
   using super::leave;
   using super::apply;
 
-  enum expression_mode {
+  enum class expression_mode {
     CONJUNCTIVE, UNIVERSAL,
     DISJUNCTIVE, EXISTENTIAL,
     UNDETERMINED
@@ -37,19 +37,19 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
   {
     switch(mode)
     {
-    case CONJUNCTIVE:
+    case expression_mode::CONJUNCTIVE:
       return "Conjunctive";
       break;
-    case UNIVERSAL:
+    case expression_mode::UNIVERSAL:
       return "Universal";
       break;
-    case DISJUNCTIVE:
+    case expression_mode::DISJUNCTIVE:
       return "Disjunctive";
       break;
-    case EXISTENTIAL:
+    case expression_mode::EXISTENTIAL:
       return "Existential";
       break;
-    case UNDETERMINED:
+    case expression_mode::UNDETERMINED:
       return "Undetermined";
       break;
     default:
@@ -78,13 +78,13 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     {
       switch(mode)
       {
-      case UNDETERMINED:
-      case CONJUNCTIVE:
-        mode = UNIVERSAL;
-      case UNIVERSAL:
+      case expression_mode::UNDETERMINED:
+      case expression_mode::CONJUNCTIVE:
+        mode = expression_mode::UNIVERSAL;
+      case expression_mode::UNIVERSAL:
         break;
-      case DISJUNCTIVE:
-      case EXISTENTIAL:
+      case expression_mode::DISJUNCTIVE:
+      case expression_mode::EXISTENTIAL:
         result = false;
         break;
       default:
@@ -107,13 +107,13 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     {
       switch(mode)
       {
-      case UNDETERMINED:
-      case DISJUNCTIVE:
-        mode = EXISTENTIAL;
-      case EXISTENTIAL:
+      case expression_mode::UNDETERMINED:
+      case expression_mode::DISJUNCTIVE:
+        mode = expression_mode::EXISTENTIAL;
+      case expression_mode::EXISTENTIAL:
         break;
-      case CONJUNCTIVE:
-      case UNIVERSAL:
+      case expression_mode::CONJUNCTIVE:
+      case expression_mode::UNIVERSAL:
         result = false;
         break;
       default:
@@ -136,15 +136,15 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     {
       switch(mode)
       {
-      case UNDETERMINED:
-        mode = CONJUNCTIVE;
-      case CONJUNCTIVE:
+      case expression_mode::UNDETERMINED:
+        mode = expression_mode::CONJUNCTIVE;
+      case expression_mode::CONJUNCTIVE:
         break;
-      case UNIVERSAL:
+      case expression_mode::UNIVERSAL:
         result = false;
         break;
-      case EXISTENTIAL:
-      case DISJUNCTIVE:
+      case expression_mode::EXISTENTIAL:
+      case expression_mode::DISJUNCTIVE:
       {
         std::size_t count = 0;
         std::vector<pbes_expression> conjuncts = split_conjuncts(x);
@@ -182,15 +182,15 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
     {
       switch(mode)
       {
-      case UNDETERMINED:
-        mode = DISJUNCTIVE;
-      case DISJUNCTIVE:
+      case expression_mode::UNDETERMINED:
+        mode = expression_mode::DISJUNCTIVE;
+      case expression_mode::DISJUNCTIVE:
         break;
-      case EXISTENTIAL:
+      case expression_mode::EXISTENTIAL:
         result = false;
         break;
-      case UNIVERSAL:
-      case CONJUNCTIVE:
+      case expression_mode::UNIVERSAL:
+      case expression_mode::CONJUNCTIVE:
       {
         std::size_t count = 0;
         std::vector<pbes_expression>  disjuncts = split_disjuncts(x);
@@ -223,7 +223,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
 
   void enter(const pbes_equation& /*x*/)
   {
-    mode_stack.push(UNDETERMINED);
+    mode_stack.push(expression_mode::UNDETERMINED);
   }
 
   void leave(const pbes_equation& /*x*/)

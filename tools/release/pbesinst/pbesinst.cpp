@@ -38,7 +38,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
   protected:
     using super = rewriter_tool<pbes_input_output_tool<input_output_tool>>;
 
-    pbesinst_strategy m_strategy = pbesinst_lazy_strategy;
+    pbesinst_strategy m_strategy = pbesinst_strategy::pbesinst_lazy_strategy;
     std::string m_finite_parameter_selection;
     bool m_remove_redundant_equations = false;
     search_strategy m_search_strategy;
@@ -58,9 +58,9 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       {
         m_finite_parameter_selection = parser.option_argument("select");
         boost::trim(m_finite_parameter_selection);
-        if(m_strategy != pbesinst_finite_strategy)
+        if(m_strategy != pbesinst_strategy::pbesinst_finite_strategy)
         {
-          mCRL2log(log::warning) << "Warning: the option --select only has an effect when used together with --strategy=finite." << std::endl;
+          mCRL2log(log::log_level_t::warning) << "Warning: the option --select only has an effect when used together with --strategy=finite." << std::endl;
         }
       }
 
@@ -77,23 +77,23 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       desc.
       add_option("strategy",
                  make_enum_argument<pbesinst_strategy>("NAME")
-                 .add_value(pbesinst_lazy_strategy)
-                 .add_value(pbesinst_alternative_lazy_strategy, true)
-                 .add_value(pbesinst_finite_strategy),
+                 .add_value(pbesinst_strategy::pbesinst_lazy_strategy)
+                 .add_value(pbesinst_strategy::pbesinst_alternative_lazy_strategy, true)
+                 .add_value(pbesinst_strategy::pbesinst_finite_strategy),
                  "compute the BES using strategy NAME:", 's').
       add_option("search",
                  make_enum_argument<search_strategy>("NAME")
-                 .add_value(breadth_first, true)
-                 .add_value(depth_first)
-                 .add_value(breadth_first_short)
-                 .add_value(depth_first_short),
+                 .add_value(search_strategy::breadth_first, true)
+                 .add_value(search_strategy::depth_first)
+                 .add_value(search_strategy::breadth_first_short)
+                 .add_value(search_strategy::depth_first_short),
                  "search the state space using strategy NAME:", 'z').
       add_option("transformation",
                  make_enum_argument<transformation_strategy>("NAME")
-                 .add_value(lazy, true)
-                 .add_value(optimize)
-                 .add_value(on_the_fly)
-                 .add_value(on_the_fly_with_fixed_points),
+                 .add_value(transformation_strategy::lazy, true)
+                 .add_value(transformation_strategy::optimize)
+                 .add_value(transformation_strategy::on_the_fly)
+                 .add_value(transformation_strategy::on_the_fly_with_fixed_points),
                  "optimize the BES using strategy NAME:", 'O').
       add_option("select",
                  make_optional_argument("PARAMS", ""),
@@ -130,15 +130,15 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
     {
       using namespace mcrl2::pbes_system;
 
-      mCRL2log(verbose) << "parameters of pbesinst:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  strategy:           " << m_strategy << std::endl;
-      mCRL2log(verbose) << "  output format:      " << pbes_output_format() << std::endl;
-      mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
-      if (m_strategy == pbesinst_finite_strategy)
+      mCRL2log(log_level_t::verbose) << "parameters of pbesinst:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  strategy:           " << m_strategy << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output format:      " << pbes_output_format() << std::endl;
+      mCRL2log(log_level_t::verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
+      if (m_strategy == pbesinst_strategy::pbesinst_finite_strategy)
       {
-        mCRL2log(verbose) << "  parameter selection: " << m_finite_parameter_selection << std::endl;
+        mCRL2log(log_level_t::verbose) << "  parameter selection: " << m_finite_parameter_selection << std::endl;
       }
 
       // load the pbes
@@ -147,12 +147,12 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
 
       if (!p.is_closed())
       {
-        mCRL2log(log::error) << "The PBES is not closed. Pbes2bes cannot handle this kind of PBESs"
+        mCRL2log(log::log_level_t::error) << "The PBES is not closed. Pbes2bes cannot handle this kind of PBESs"
                              << std::endl << "Computation aborted." << std::endl;
         return false;
       }
 
-      if (m_strategy == pbesinst_lazy_strategy)
+      if (m_strategy == pbesinst_strategy::pbesinst_lazy_strategy)
       {
         // TODO: let pbesinst handle ! and => properly
         if (!is_normalized(p))
@@ -163,7 +163,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         algorithm.run(p);
         p = algorithm.get_result();
       }
-      else if (m_strategy == pbesinst_alternative_lazy_strategy)
+      else if (m_strategy == pbesinst_strategy::pbesinst_alternative_lazy_strategy)
       {
         if (!is_normalized(p))
         {
@@ -174,7 +174,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         algorithm.run(p);
         p = algorithm.get_result();
       }
-      else if (m_strategy == pbesinst_finite_strategy)
+      else if (m_strategy == pbesinst_strategy::pbesinst_finite_strategy)
       {
         try
         {
@@ -186,22 +186,22 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         }
       }
 
-      if (log::logger::get_reporting_level() >= log::verbose)
+      if (log::logger::get_reporting_level() >= log::log_level_t::verbose)
       {
         if (algorithms::is_bes(p))
         {
-          mCRL2log(log::debug) << "The result is a BES.\n";
+          mCRL2log(log::log_level_t::debug) << "The result is a BES.\n";
         }
         else
         {
-           mCRL2log(log::debug) << "The result is a PBES.\n";
+           mCRL2log(log::log_level_t::debug) << "The result is a PBES.\n";
         }
       }
 
       if (m_remove_redundant_equations)
       {
         std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
-        mCRL2log(log::verbose) << algorithms::print_removed_equations(V);
+        mCRL2log(log::log_level_t::verbose) << algorithms::print_removed_equations(V);
       }
 
       // save the result

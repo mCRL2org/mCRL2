@@ -198,7 +198,7 @@ public:
 
 TASK_IMPL_1(bool, lpsreach_task, arguments*, arguments) // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
 {
-  mCRL2log(log::verbose) << arguments->options << std::endl;
+  mCRL2log(log::log_level_t::verbose) << arguments->options << std::endl;
 
   lps::stochastic_specification stochastic_lpsspec;
   lps::load_lps(stochastic_lpsspec, arguments->input_filename);

@@ -185,7 +185,7 @@ class qt_tool: public Tool
       }
       catch (...)
       {
-        mCRL2log(mcrl2::log::error) << "Creating QApplication failed." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::error) << "Creating QApplication failed." << std::endl;
         return false;
       }
       return true;

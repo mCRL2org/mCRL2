@@ -30,8 +30,8 @@
 class MaxMeasureLiftingStrategy2 : public LiftingStrategy2
 {
 public:
-    enum Order { QUEUE = 0, STACK = 1, HEAP = 2 }; 
-    enum Metric { MAX_VALUE = 0, MAX_STEP = 1, MIN_VALUE = 2 };
+    enum class Order { QUEUE = 0, STACK = 1, HEAP = 2 }; 
+    enum class Metric { MAX_VALUE = 0, MAX_STEP = 1, MIN_VALUE = 2 };
 
     MaxMeasureLiftingStrategy2( const ParityGame &game,
                                 const SmallProgressMeasures &spm,
@@ -86,9 +86,9 @@ class MaxMeasureLiftingStrategyFactory : public LiftingStrategyFactory
 public:
     MaxMeasureLiftingStrategyFactory(
             MaxMeasureLiftingStrategy2::Order order =
-                MaxMeasureLiftingStrategy2::HEAP,
+                MaxMeasureLiftingStrategy2::Order::HEAP,
             MaxMeasureLiftingStrategy2::Metric metric =
-                MaxMeasureLiftingStrategy2::MAX_VALUE )
+                MaxMeasureLiftingStrategy2::Metric::MAX_VALUE )
         : order_(order), metric_(metric) { };
 
     bool supports_version(int version) override;

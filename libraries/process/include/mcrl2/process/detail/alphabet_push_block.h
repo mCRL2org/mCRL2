@@ -246,7 +246,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   void apply(T& result, const process::block& x)
   {
     std::set<core::identifier_string> B1 = block_operations::set_union(B, x.block_set());
-    mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
+    mCRL2log(log::log_level_t::debug) << push_block_printer(B).print(x, B1);
     result = push_block(B1, x.operand(), equations, W, id_generator);
   }
 
@@ -255,7 +255,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   {
     const core::identifier_string_list& I = x.hide_set();
     std::set<core::identifier_string> B1 = block_operations::set_difference(B, I);
-    mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
+    mCRL2log(log::log_level_t::debug) << push_block_printer(B).print(x, B1);
     make_hide(result, I, push_block(B1, x.operand(), equations, W, id_generator));
   }
 
@@ -264,7 +264,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   {
     const rename_expression_list& R = x.rename_set();
     std::set<core::identifier_string> B1 = block_operations::rename_inverse(R, B);
-    mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
+    mCRL2log(log::log_level_t::debug) << push_block_printer(B).print(x, B1);
     process::make_rename(result, R, push_block(B1, x.operand(), equations, W, id_generator));
   }
 
@@ -302,7 +302,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     std::set<core::identifier_string> B1 = restrict_block(B, x.comm_set());
     process_expression y = push_block(B1, x.operand(), equations, W, id_generator);
     result = make_block(core::identifier_string_list(B.begin(), B.end()), make_comm(x.comm_set(), y));
-    mCRL2log(log::debug) << push_block_printer(B).print(x, result);
+    mCRL2log(log::log_level_t::debug) << push_block_printer(B).print(x, result);
   }
 
   template <class T>
@@ -313,7 +313,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     allow_set A1(alphabet_operations::block(B1, A.A));
     detail::push_allow_cache W_allow(id_generator, W.pcrl_equation_cache);
     detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations, W_allow, true);
-    mCRL2log(log::debug) << push_block_printer(B).print(x, A1);
+    mCRL2log(log::log_level_t::debug) << push_block_printer(B).print(x, A1);
     result = node.expression;
   }
 

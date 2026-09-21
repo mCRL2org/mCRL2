@@ -400,7 +400,7 @@ class type_checker: public sort_type_checker
 
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors)
     {
-      mCRL2log(log::debug) << "Start Read-in Func" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Start Read-in Func" << std::endl;
 
       std::size_t constr_number=constructors.size();
       function_symbol_vector functions_and_constructors=constructors;
@@ -461,7 +461,7 @@ class type_checker: public sort_type_checker
           }
         }
 
-        mCRL2log(log::debug) << "Read-in Func " << f.name() << ", Types " << fsort << "" << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Read-in Func " << f.name() << ", Types " << fsort << "" << std::endl;
       }
 
       // Check that the constructors are defined such that they cannot generate an empty sort.

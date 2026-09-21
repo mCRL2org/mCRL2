@@ -25,7 +25,7 @@ class rewriter_tool: public Tool
 {
   protected:
     /// The data rewriter strategy
-    data::rewrite_strategy m_rewrite_strategy = mcrl2::data::jitty;
+    data::rewrite_strategy m_rewrite_strategy = mcrl2::data::rewrite_strategy::jitty;
     /// The limit on the number of rewriting steps in quantifiers. By default 10;
     std::size_t m_qlimit=10;
 
@@ -38,13 +38,13 @@ class rewriter_tool: public Tool
       Tool::add_options(desc);
 
       utilities::interface_description::enum_argument<data::rewrite_strategy> rewriter_option("NAME");
-      rewriter_option.add_value(data::jitty, true);
+      rewriter_option.add_value(data::rewrite_strategy::jitty, true);
 #ifdef MCRL2_ENABLE_JITTYC
-      rewriter_option.add_value(data::jitty_compiling);
+      rewriter_option.add_value(data::rewrite_strategy::jitty_compiling);
 #endif
       if (!suppress_jittyp)
       {
-        rewriter_option.add_value(data::jitty_prover);
+        rewriter_option.add_value(data::rewrite_strategy::jitty_prover);
       }
 
       desc.add_option(

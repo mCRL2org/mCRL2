@@ -163,7 +163,7 @@ void read_spec(atermpp::aterm_istream& stream, stochastic_specification& spec)
   }
   catch (std::exception& ex)
   {
-    mCRL2log(log::error) << ex.what() << "\n";
+    mCRL2log(log::log_level_t::error) << ex.what() << "\n";
     throw mcrl2::runtime_error(std::string("Error reading linear process specification (LPS)."));
   }
 }

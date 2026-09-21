@@ -118,7 +118,7 @@ protected:
   {
     std::string filename = parser.option_argument("comm");
     std::stringstream stringstream(filename);
-    mCRL2log(log::debug) << "Reading synchronisation actions from " << filename << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Reading synchronisation actions from " << filename << std::endl;
     std::ifstream file_input(filename.c_str());
     std::istream* syncs_inputs = &file_input;
     if (!file_input.good())
@@ -139,11 +139,11 @@ protected:
     {
       // File doesn't exist
       block_input = &stringstream;
-      mCRL2log(log::debug) << "Reading blocked actions from input" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Reading blocked actions from input" << std::endl;
     }
     else
     {
-      mCRL2log(log::debug) << "Reading blocked actions from file " << filename << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Reading blocked actions from file " << filename << std::endl;
     }
 
     block_set = parse_block_set(*block_input);
@@ -153,7 +153,7 @@ protected:
   {
     std::string filename = parser.option_argument("allow");
     std::stringstream stringstream(filename);
-    mCRL2log(log::debug) << "Reading allowed multi-actions from file " << filename << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Reading allowed multi-actions from file " << filename << std::endl;
     std::ifstream file_input(filename.c_str());
     std::istream* allow_input = &file_input;
     if (!file_input.good())
@@ -169,7 +169,7 @@ protected:
   {
     std::string filename = parser.option_argument("hide");
     std::stringstream stringstream(filename);
-    mCRL2log(log::debug) << "Reading hidden actions from file " << filename << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Reading hidden actions from file " << filename << std::endl;
     std::ifstream file_input(filename.c_str());
     std::istream* hide_input = &file_input;
     if (!file_input.good())

@@ -43,12 +43,12 @@ void Rewriter::rewrite(QString specification, QString dataExpression)
 
       std::string stdDataExpression = dataExpression.toStdString();
 
-      mCRL2log(info) << "Evaluate: \"" << stdDataExpression << "\"" << std::endl;
-      mCRL2log(info) << "Parsing data expression: \"" << stdDataExpression << "\"" << std::endl;
+      mCRL2log(log_level_t::info) << "Evaluate: \"" << stdDataExpression << "\"" << std::endl;
+      mCRL2log(log_level_t::info) << "Parsing data expression: \"" << stdDataExpression << "\"" << std::endl;
 
       mcrl2::data::data_expression term = mcrl2::data::parse_data_expression(stdDataExpression, m_vars, m_data_spec);
 
-      mCRL2log(info) << "Rewriting data expression: \"" << stdDataExpression << "\"" << std::endl;
+      mCRL2log(log_level_t::info) << "Rewriting data expression: \"" << stdDataExpression << "\"" << std::endl;
 
       std::set<mcrl2::data::sort_expression> all_sorts=find_sort_expressions(term);
       m_data_spec.add_context_sorts(all_sorts);
@@ -57,7 +57,7 @@ void Rewriter::rewrite(QString specification, QString dataExpression)
 
       std::string result = mcrl2::data::pp(rewr(term,assignments));
 
-      mCRL2log(info) << "Result: \"" << result << "\"" << std::endl;
+      mCRL2log(log_level_t::info) << "Result: \"" << result << "\"" << std::endl;
 
       emit rewritten(QString::fromStdString(result));
 

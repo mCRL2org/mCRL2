@@ -62,9 +62,9 @@ class pbes_eqelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_too
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbeseqelm parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbeseqelm parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
                  
       // load the pbes
       pbes p;

@@ -1538,7 +1538,7 @@ class testable_sort_type_checker: public data::sort_type_checker
       }
       catch (mcrl2::runtime_error& e)
       {
-        mCRL2log(log::debug) << e.what() << std::endl;
+        mCRL2log(log::log_level_t::debug) << e.what() << std::endl;
         first = false;
       }
       try
@@ -1549,7 +1549,7 @@ class testable_sort_type_checker: public data::sort_type_checker
       }
       catch (mcrl2::runtime_error& e)
       {
-        mCRL2log(log::debug) << e.what() << std::endl;
+        mCRL2log(log::log_level_t::debug) << e.what() << std::endl;
         second = false;
       }
       return std::make_pair(first, second);

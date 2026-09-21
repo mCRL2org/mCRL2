@@ -88,7 +88,7 @@ public:
       num_blocks_created = refine_partition();
       assert(level2blocksidx[level].size() == num_blocks_created);
       state2sig = std::map<state_type, signature_type>();
-      mCRL2log(mcrl2::log::verbose) << "Refined partition to " << num_blocks_created
+      mCRL2log(mcrl2::log::log_level_t::verbose) << "Refined partition to " << num_blocks_created
         << " blocks on level " << level << "."
         << std::endl;
     }
@@ -653,7 +653,7 @@ bool destructive_branching_bisimulation_compare_minimal_depth(LTS_TYPE& l1,
 
   std::ofstream counter_file(filename);
   counter_file << mcrl2::state_formulas::pp(counter_example_formula);
-  mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
+  mCRL2log(mcrl2::log::log_level_t::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
   return false;
 }
 

@@ -56,7 +56,7 @@ class bisim_partitioner
           store_counter_info(generate_counter_examples)
     {
       assert(branching || !preserve_divergence);
-      mCRL2log(log::verbose) << (preserve_divergence?"Divergence preserving b":"B") <<
+      mCRL2log(log::log_level_t::verbose) << (preserve_divergence?"Divergence preserving b":"B") <<
                   (branching?"ranching b":"") << "isimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
@@ -289,7 +289,7 @@ class bisim_partitioner
       block initial_partition;
 
       // First store the bottom and non bottom states.
-      sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::src_lbl_tgt);
+      sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::transition_sort_style::src_lbl_tgt);
 
       state_type last_non_stored_state_number=0;
       bool bottom_state=true;
@@ -374,7 +374,7 @@ class bisim_partitioner
       order_on_tau_reachability(initial_partition.non_bottom_states);
 
       // Store the non-inert transitions (i.e. the non tau transitions)
-      sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::lbl_tgt_src);
+      sort_transitions(aut.get_transitions(), aut.hidden_label_set(), mcrl2::lts::transition_sort_style::lbl_tgt_src);
       const std::vector<transition> & trans1=aut.get_transitions();
       for (auto t: trans1)
       {
@@ -521,12 +521,13 @@ class bisim_partitioner
           // There are flagged and non flagged states. So, the block must be split.
           // Move the unflagged states to the new block.
 
-          if (mCRL2logEnabled(log::debug))
+          if (mCRL2logEnabled(log::log_level_t::debug))
           {
-            const std::size_t m = static_cast<std::size_t>(std::pow(10.0, std::floor(std::log10(static_cast<double>((blocks.size()+1)/2)))));
-            if ((blocks.size()+1)/2 % m==0)
+            const std::size_t new_block_count = (blocks.size()+1)/2;
+            const std::size_t m = static_cast<std::size_t>(std::pow(10.0, std::floor(std::log10(static_cast<double>(new_block_count)))));
+            if (new_block_count % m==0)
             {
-              mCRL2log(log::debug) << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << std::endl;
+              mCRL2log(log::log_level_t::debug) << "Bisimulation partitioner: create block " << new_block_count << std::endl;
             }
           }
 
@@ -1224,7 +1225,7 @@ bool destructive_bisimulation_compare(
     std::ofstream counter_file(filename);
     counter_file << mcrl2::state_formulas::pp(counter_example_formula);
     counter_file.close();
-    mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
 
   }
   return bisim_part.in_same_class(l1.initial_state(),init_l2);

@@ -595,9 +595,7 @@ public:
      Mlist(),
      stack({ match_tree_list_list() }),
      upstack()
-
-  {
-  }
+  {}
 };
 
 

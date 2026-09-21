@@ -2995,7 +2995,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   rewriter_so = std::make_shared<uncompiled_library>(compile_script);
 
-  mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
+  mCRL2log(log_level_t::verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
   stopwatch time;
 
   jittyc_eqns.clear();
@@ -3007,7 +3007,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   std::string cpp_file = generate_cpp_filename(reinterpret_cast<std::size_t>(this));
   generate_code(cpp_file);
 
-  mCRL2log(verbose) << "generated " << cpp_file << " in " << time.time() << "ms, compiling..." << std::endl;
+  mCRL2log(log_level_t::verbose) << "generated " << cpp_file << " in " << time.time() << "ms, compiling..." << std::endl;
   time.reset();
 
   try
@@ -3020,7 +3020,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     throw mcrl2::runtime_error(std::string("Could not compile rewriter: ") + e.what());
   }
 
-  mCRL2log(verbose) << "compiled in " << time.time() << "ms, loading rewriter..." << std::endl;
+  mCRL2log(log_level_t::verbose) << "compiled in " << time.time() << "ms, loading rewriter..." << std::endl;
 
   bool (*init)(rewriter_interface*, RewriterCompilingJitty* this_rewriter);
   rewriter_interface interface = {.caller_toolset_version = mcrl2::utilities::get_toolset_version(),
@@ -3042,7 +3042,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
 
 #ifdef NDEBUG // In non debug mode clear compiled files directly after loading.
-  if (logger::get_reporting_level()<debug)  // leave the files in debug mode. 
+  if (logger::get_reporting_level()<log_level_t::debug)  // leave the files in debug mode. 
   {
     try
     {
@@ -3050,7 +3050,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     }
     catch (std::runtime_error& error)
     {
-      mCRL2log(mcrl2::log::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
+      mCRL2log(mcrl2::log::log_level_t::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
     }
   }
 #endif
@@ -3064,7 +3064,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   so_rewr_cleanup = interface.rewrite_cleanup;
   so_rewr = interface.rewrite_external;
 
-  mCRL2log(verbose) << interface.status << std::endl;
+  mCRL2log(log_level_t::verbose) << interface.status << std::endl;
 }
 
 RewriterCompilingJitty::RewriterCompilingJitty(
@@ -3099,7 +3099,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(
       }
       catch (std::runtime_error& error)
       {
-        mCRL2log(warning) << error.what() << std::endl;
+        mCRL2log(log_level_t::warning) << error.what() << std::endl;
       }
     }
   }
@@ -3164,7 +3164,7 @@ data_expression RewriterCompilingJitty::rewrite(
 
 rewrite_strategy RewriterCompilingJitty::getStrategy()
 {
-  return jitty_compiling;
+  return data::rewrite_strategy::jitty_compiling;
 }
 
 }

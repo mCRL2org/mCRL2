@@ -293,46 +293,46 @@ class small_progress_measures_algorithm
 
     bool run(const propositional_variable_instantiation& first_variable)
     {
-      mCRL2log(log::verbose) << "Applying small progress measures.\n";
-      mCRL2log(log::debug)  << "BES " << pbes_system::pp(m_bes) << "\n\n";
+      mCRL2log(log::log_level_t::verbose) << "Applying small progress measures.\n";
+      mCRL2log(log::log_level_t::debug)  << "BES " << pbes_system::pp(m_bes) << "\n\n";
       initialize_vertices();
-      mCRL2log(log::debug) << "--- vertices ---\n" << print_vertices();
-      mCRL2log(log::debug) << "\nbeta = " << core::detail::print_list(m_beta) << "\n";
+      mCRL2log(log::log_level_t::debug) << "--- vertices ---\n" << print_vertices();
+      mCRL2log(log::log_level_t::debug) << "\nbeta = " << core::detail::print_list(m_beta) << "\n";
       for (;;) // forever
       {
         bool changed = false;
         for (auto &i: m_vertices)
         {
           vertex& v = i.second;
-          mCRL2log(log::debug) << "\nchoose vertex " << print_vertex(v);
+          mCRL2log(log::log_level_t::debug) << "\nchoose vertex " << print_vertex(v);
           int m = v.rank;
           std::vector<progress_measures_vertex*>::const_iterator j;
-          mCRL2log(log::debug) << "\n    neighbors:" << print_neighbors(v);
+          mCRL2log(log::log_level_t::debug) << "\n    neighbors:" << print_neighbors(v);
           if (v.even)
           {
             j = std::min_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(m));
-            mCRL2log(log::debug) << "\n    minimum neighbor " << print_vertex(**j);
+            mCRL2log(log::log_level_t::debug) << "\n    minimum neighbor " << print_vertex(**j);
           }
           else
           {
             j = std::max_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(m));
-            mCRL2log(log::debug) << "\n    maximum neighbor " << print_vertex(**j);
+            mCRL2log(log::log_level_t::debug) << "\n    maximum neighbor " << print_vertex(**j);
           }
           std::vector<int> alpha(m_d, 0);
           const progress_measures_vertex& w = **j;
           std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m + 1, alpha.begin());
           if (utilities::is_odd(m))
           {
-            mCRL2log(log::debug) << "\n    inc(" << core::detail::print_list(alpha) << ", " << std::to_string(m) << ") = ";
+            mCRL2log(log::log_level_t::debug) << "\n    inc(" << core::detail::print_list(alpha) << ", " << std::to_string(m) << ") = ";
             inc(alpha, m, m_beta);
-            mCRL2log(log::debug) << (alpha[0] < 0 ? "top" : core::detail::print_list(alpha));
+            mCRL2log(log::log_level_t::debug) << (alpha[0] < 0 ? "top" : core::detail::print_list(alpha));
           }
 
           if (!std::equal(alpha.begin(), alpha.end(), v.alpha.v.begin()))
           {
             changed = true;
             v.alpha.v = alpha;
-            mCRL2log(log::debug) << "\nupdate vertex " << print_vertex(v);
+            mCRL2log(log::log_level_t::debug) << "\nupdate vertex " << print_vertex(v);
           }
         }
         if (!changed)
@@ -340,7 +340,7 @@ class small_progress_measures_algorithm
           break;
         }
       }
-      mCRL2log(log::debug) << "\n--- vertices ---\n" << print_vertices();
+      mCRL2log(log::log_level_t::debug) << "\n--- vertices ---\n" << print_vertices();
       return !m_vertices[first_variable].alpha.is_top();
     }
 };

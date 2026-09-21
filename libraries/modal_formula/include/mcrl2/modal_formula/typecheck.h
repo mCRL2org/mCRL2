@@ -765,7 +765,7 @@ class state_formula_type_checker
     //4) check for monotonicity of fixpoint variables
     state_formula typecheck_state_formula(const state_formula& x)
     {
-      mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "type checking state formula..." << std::endl;
       state_formula result;
       detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context, m_state_variable_context, m_formula_is_quantitative).
                apply(result, state_formulas::normalize_sorts(x, m_data_type_checker.typechecked_data_specification()));

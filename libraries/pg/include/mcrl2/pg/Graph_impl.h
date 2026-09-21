@@ -96,7 +96,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
     {
       const_iterator a;
       const_iterator b;
-      if (graph.edge_dir() & EDGE_SUCCESSOR)
+      if (graph.edge_dir() & EdgeDirection::EDGE_SUCCESSOR)
       {
         a = graph.succ_begin(*it);
         b = graph.succ_end(*it);
@@ -113,9 +113,9 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
     }
 
     // Allocate memory:
-    reset(num_vertices, num_edges, edge_dir ? edge_dir : graph.edge_dir());
+    reset(num_vertices, num_edges, edge_dir != EdgeDirection::EDGE_NONE ? edge_dir : graph.edge_dir());
 
-    if (edge_dir_ & EDGE_SUCCESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_SUCCESSOR)
     {
         // Assign new successors:
         verti v = 0;
@@ -148,7 +148,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
         successor_index_[v] = e;
     }
 
-    if (edge_dir_ & EDGE_PREDECESSOR)
+    if (edge_dir_ & EdgeDirection::EDGE_PREDECESSOR)
     {
         // Assign new predecessors:
         verti v = 0;

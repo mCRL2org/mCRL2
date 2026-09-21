@@ -33,10 +33,10 @@ class lps_rewriter_tool: public Tool
     virtual std::set<lps::lps_rewriter_type> available_rewriters() const
     {
       std::set<lps::lps_rewriter_type> result;
-      result.insert(lps::simplify);
-      result.insert(lps::quantifier_one_point);
-      result.insert(lps::condition_one_point);
-      result.insert(lps::prune_dataspec);
+      result.insert(lps::lps_rewriter_type::simplify);
+      result.insert(lps::lps_rewriter_type::quantifier_one_point);
+      result.insert(lps::lps_rewriter_type::condition_one_point);
+      result.insert(lps::lps_rewriter_type::prune_dataspec);
       return result;
     }
 
@@ -45,7 +45,7 @@ class lps_rewriter_tool: public Tool
     /// \return The string "simplify"
     virtual lps::lps_rewriter_type default_rewriter() const
     {
-      return lps::simplify;
+      return lps::lps_rewriter_type::simplify;
     }
 
     /// \brief Add options to an interface description. Also includes

@@ -49,33 +49,33 @@ class lps_rewriter : public lps_rewriter_tool<rewriter_tool< input_output_tool >
     {
       using namespace utilities;
 
-      mCRL2log(verbose) << "lpsrewr parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  lps rewriter:       " << m_lps_rewriter_type << std::endl;
+      mCRL2log(log_level_t::verbose) << "lpsrewr parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  lps rewriter:       " << m_lps_rewriter_type << std::endl;
 
       stochastic_specification spec;
       load_lps(spec, input_filename());
       switch (rewriter_type())
       {
-        case simplify:
+        case lps_rewriter_type::simplify:
         {
           mcrl2::data::rewriter R(spec.data(), rewrite_strategy());
           lps::rewrite(spec, R);
           break;
         }
-        case quantifier_one_point:
+        case lps_rewriter_type::quantifier_one_point:
         {
           one_point_rule_rewrite(spec);
           break;
         }
-        case condition_one_point:
+        case lps_rewriter_type::condition_one_point:
         {
           mcrl2::data::rewriter R(spec.data(), rewrite_strategy());
           lps::one_point_condition_rewrite(spec, R);
           break;
         }
-        case prune_dataspec:
+        case lps_rewriter_type::prune_dataspec:
         {
           dataspec_prune_rewriter<stochastic_specification> rewr;
           spec = rewr(spec);

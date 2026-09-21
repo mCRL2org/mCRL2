@@ -72,7 +72,7 @@ std::vector<per_summand_information> static_analysis(
 
   for (std::size_t index = 0; index < summands.size(); ++index)
   {
-    mCRL2log(log::debug) << "Analysing summand " << index << ":\n";
+    mCRL2log(log::log_level_t::debug) << "Analysing summand " << index << ":\n";
     const auto& summand = summands[index]; // The original summand.
 
     per_summand_information& result = results[index]; // The information for that summand.
@@ -280,9 +280,9 @@ std::vector<per_summand_information> static_analysis(
 
       result.synchronised.insert(right_synchronised.begin(), right_synchronised.end());
 
-      mCRL2log(log::debug) << "Synchronisation vector: ";
-      print_names(log::debug, result.synchronised);
-      mCRL2log(log::debug) << "\n";
+      mCRL2log(log::log_level_t::debug) << "Synchronisation vector: ";
+      print_names(log::log_level_t::debug, result.synchronised);
+      mCRL2log(log::log_level_t::debug) << "\n";
     }
   }
 
@@ -330,14 +330,14 @@ std::vector<per_summand_information> static_analysis(
   }
 
   // Present the information to the user.
-  mCRL2log(log::verbose) << "There are " << nof_left_independent << " left independent, and " << nof_right_independent << " right independent summands.\n";
-  mCRL2log(log::verbose) << "Parameters synchronised more than once:\n";
+  mCRL2log(log::log_level_t::verbose) << "There are " << nof_left_independent << " left independent, and " << nof_right_independent << " right independent summands.\n";
+  mCRL2log(log::log_level_t::verbose) << "Parameters synchronised more than once:\n";
 
   for (const auto& [var, count] : synchronised_count)
   {
     if (count > 0)
     {
-      mCRL2log(log::verbose) << "Variable " << var.name() << " occurs " << count << " times.\n";
+      mCRL2log(log::log_level_t::verbose) << "Variable " << var.name() << " occurs " << count << " times.\n";
     }
   }
 
@@ -345,7 +345,7 @@ std::vector<per_summand_information> static_analysis(
   {
     if (info.occurs_unbounded)
     {
-       mCRL2log(log::verbose) << "Parameter " << var.name() << " occurs unbounded.\n";
+       mCRL2log(log::log_level_t::verbose) << "Parameter " << var.name() << " occurs unbounded.\n";
     }
   }
 
@@ -427,13 +427,13 @@ void merge_summands(const lps::stochastic_action_summand_vector& summands,
         {
           if (can_be_merged(summand, other_summand, info.left, other_info.left, left_parameters))
           {
-            mCRL2log(log::verbose) << "Merged left summands " << i << " and " << j << ".\n";
+            mCRL2log(log::log_level_t::verbose) << "Merged left summands " << i << " and " << j << ".\n";
             other_info.index = i;
           }
 
           if (can_be_merged(summand, other_summand, info.right, other_info.right, right_parameters))
           {
-            mCRL2log(log::verbose) << "Merged right summands " << i << " and " << j << ".\n";
+            mCRL2log(log::log_level_t::verbose) << "Merged right summands " << i << " and " << j << ".\n";
             other_info.index = i;
           }
         }        
@@ -672,8 +672,8 @@ std::pair<lps::stochastic_specification, lps::stochastic_specification> mcrl2::c
     // Abort when any of these labels already exists.
     if (std::find(action_labels.begin(), action_labels.end(), label) != action_labels.end())
     {
-      mCRL2log(log::error) << "The action label " << label << " is already present in the specification.\n";
-      mCRL2log(log::error) << "This means that we cannot ensure that this composition is valid.\n";
+      mCRL2log(log::log_level_t::error) << "The action label " << label << " is already present in the specification.\n";
+      mCRL2log(log::log_level_t::error) << "This means that we cannot ensure that this composition is valid.\n";
       throw mcrl2::runtime_error("Aborted decomposition due to an error.");
     }
 

@@ -91,7 +91,7 @@ struct duplicate_equation_removal
     {
       groups.push_back(i.second);
     }
-    mCRL2log(log::debug) << "==========================================================\n" << print_groups() << std::endl;
+    mCRL2log(log::log_level_t::debug) << "==========================================================\n" << print_groups() << std::endl;
   }
 
   // assigns a unique process identifier to each process identifier within a group
@@ -151,7 +151,7 @@ struct duplicate_equation_removal
       {
         break;
       }
-      mCRL2log(log::debug) << "==========================================================\n" << print_groups() << std::endl;
+      mCRL2log(log::log_level_t::debug) << "==========================================================\n" << print_groups() << std::endl;
     }
 
     // Choose one equation per group (the one with the lowest index in equations),

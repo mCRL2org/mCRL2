@@ -38,7 +38,7 @@ class lts_aut_base
     /** \brief Provides the type of this lts, in casu lts_aut.  */
     lts_type type()
     {
-      return lts_aut;
+      return lts_type::lts_aut;
     }
 
     /** \brief Standard swap function. */

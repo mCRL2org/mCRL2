@@ -92,7 +92,7 @@ bool compute_finite_set_elements(const container_sort& sort,
   }
   if (all_element_expressions.size() > 16)  // If there are more than 2^16 functions, provide a warning.
   {
-    mCRL2log(log::warning) << "Generate 2^" << all_element_expressions.size() << " sets to enumerate sort " << sort << "\n";
+    mCRL2log(log::log_level_t::warning) << "Generate 2^" << all_element_expressions.size() << " sets to enumerate sort " << sort << "\n";
   }
   const std::size_t number_of_sets = utilities::power_size_t(2, all_element_expressions.size());
   for (std::size_t i = 0; i < number_of_sets; ++i)
@@ -131,7 +131,7 @@ bool compute_finite_function_sorts(const function_sort& sort,
 
   if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) > 16)  // If there are more than 2^16 functions, provide a warning.
   {
-    mCRL2log(log::warning) << "Generate " << codomain_expressions.size() << "^" << total_domain_size << " functions to enumerate sort " << sort << "\n";
+    mCRL2log(log::log_level_t::warning) << "Generate " << codomain_expressions.size() << "^" << total_domain_size << " functions to enumerate sort " << sort << "\n";
   }
 
   function_parameter_list = variable_list(function_parameters.begin(), function_parameters.end());
@@ -431,7 +431,7 @@ class enumerator_list_element_with_substitution: public enumerator_list_element<
     {
       mark_term(*atermpp::detail::address(m_variables), todo);
       mark_term(*atermpp::detail::address(m_expressions), todo);
-      static_cast<enumerator_list_element<Expression>>(*this).mark(todo);
+      enumerator_list_element<Expression>::mark(todo);
     }
     
     /// \brief Set the variable ands and the expression explicitly

@@ -60,13 +60,13 @@ protected:
       if (input_filename().empty())
       {
         //parse specification from stdin
-        mCRL2log(log::verbose) << "reading input from stdin..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "reading input from stdin..." << std::endl;
         p = txt2pbes(std::cin, m_normalize);
       }
       else
       {
         //parse specification from input filename
-        mCRL2log(log::verbose) << "reading input from file '" <<  input_filename() << "'..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "reading input from file '" <<  input_filename() << "'..." << std::endl;
         std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
         if (!instream)
         {

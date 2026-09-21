@@ -172,7 +172,7 @@ bool parse_clauses(pbes_expression expression, bool disjunctive, propositional_v
 		propositional_variable_instantiation instantiation(expression);
 		
 		if (negate) {
-			mCRL2log(log::error) << "Found negatively occurring propositional variable instantiation " << pbes_system::pp(instantiation) << ", giving up.\n";
+			mCRL2log(log::log_level_t::error) << "Found negatively occurring propositional variable instantiation " << pbes_system::pp(instantiation) << ", giving up.\n";
 			return false;
 		}
 		

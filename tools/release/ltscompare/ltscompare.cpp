@@ -24,11 +24,11 @@ struct t_tool_options
 {
   std::string     name_for_first  = "";
   std::string     name_for_second = "";
-  lts_type        format_for_first = lts_none;
-  lts_type        format_for_second = lts_none;
-  lts_equivalence equivalence = lts_eq_none;
+  lts_type        format_for_first = lts_type::lts_none;
+  lts_type        format_for_second = lts_type::lts_none;
+  lts_equivalence equivalence = lts_equivalence::lts_eq_none;
   lts_preorder    preorder = lts_preorder::lts_pre_none;
-  mcrl2::lps::exploration_strategy strategy = mcrl2::lps::es_breadth;
+  mcrl2::lps::exploration_strategy strategy = mcrl2::lps::exploration_strategy::es_breadth;
   std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
   bool generate_counter_examples = false;
   std::string counter_example_file = "";
@@ -47,12 +47,12 @@ class ltscompare_tool : public ltscompare_base
     // --equivalence or --preorder options
     void check_preconditions()
     {
-      if (tool_options.equivalence != lts_eq_none && tool_options.preorder != lts_preorder::lts_pre_none)
+      if (tool_options.equivalence != lts_equivalence::lts_eq_none && tool_options.preorder != lts_preorder::lts_pre_none)
       {
         throw mcrl2::runtime_error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
       }
 
-      if (tool_options.equivalence == lts_eq_none && tool_options.preorder == lts_preorder::lts_pre_none)
+      if (tool_options.equivalence == lts_equivalence::lts_eq_none && tool_options.preorder == lts_preorder::lts_pre_none)
       {
         throw mcrl2::runtime_error("one of the options -e/--equivalence and -p/--preorder must be used");
       }
@@ -96,21 +96,21 @@ class ltscompare_tool : public ltscompare_base
       l2.record_hidden_actions(tool_options.tau_actions);
 
       bool result = true;
-      if (tool_options.equivalence != lts_eq_none)
+      if (tool_options.equivalence != lts_equivalence::lts_eq_none)
       {
-        mCRL2log(verbose) << "comparing LTSs using " <<
+        mCRL2log(log_level_t::verbose) << "comparing LTSs using " <<
                      tool_options.equivalence << "..." << std::endl;
 
         result = destructive_compare(l1, l2, tool_options.equivalence, tool_options.generate_counter_examples, tool_options.counter_example_file, tool_options.structured_output);
 
-        mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ")
+        mCRL2log(log_level_t::info) << "LTSs are " << ((result) ? "" : "not ")
                        << "equal ("
                        << description(tool_options.equivalence) << ")\n";
       }
 
       if (tool_options.preorder != lts_preorder::lts_pre_none)
       {
-        mCRL2log(verbose) << "comparing LTSs for " <<
+        mCRL2log(log_level_t::verbose) << "comparing LTSs for " <<
                      description(tool_options.preorder) << "..."
                      " using the " << print_exploration_strategy(tool_options.strategy) << " strategy.\n";
 
@@ -118,7 +118,7 @@ class ltscompare_tool : public ltscompare_base
 
         if (!tool_options.structured_output)
         {
-          mCRL2log(info) << "The LTS in " << tool_options.name_for_first
+          mCRL2log(log_level_t::info) << "The LTS in " << tool_options.name_for_first
                          << " is " << ((result) ? "" : "not ")
                          << "included in"
                          << " the LTS in " << tool_options.name_for_second
@@ -136,12 +136,12 @@ class ltscompare_tool : public ltscompare_base
     {
       check_preconditions();
 
-      if (tool_options.format_for_first==lts_none)
+      if (tool_options.format_for_first==lts_type::lts_none)
       {
         tool_options.format_for_first = guess_format(tool_options.name_for_first);
       }
 
-      if (tool_options.format_for_second==lts_none)
+      if (tool_options.format_for_second==lts_type::lts_none)
       {
         tool_options.format_for_second = guess_format(tool_options.name_for_second);
       }
@@ -153,25 +153,25 @@ class ltscompare_tool : public ltscompare_base
 
       switch (tool_options.format_for_first)
       {
-        case lts_lts:
-        case lts_lts_probabilistic:
+        case lts_type::lts_lts:
+        case lts_type::lts_lts_probabilistic:
         {
           return lts_compare<lts_lts_t>();
         }
-        case lts_none:
-          mCRL2log(mcrl2::log::warning) << "No input format is specified. Assuming .aut format.\n";
+        case lts_type::lts_none:
+          mCRL2log(mcrl2::log::log_level_t::warning) << "No input format is specified. Assuming .aut format.\n";
           [[fallthrough]];
-        case lts_aut:
-        case lts_aut_probabilistic:
+        case lts_type::lts_aut:
+        case lts_type::lts_aut_probabilistic:
         {
           return lts_compare<lts_aut_t>();
         }
-        case lts_fsm:
-        case lts_fsm_probabilistic:
+        case lts_type::lts_fsm:
+        case lts_type::lts_fsm_probabilistic:
         {
           return lts_compare<lts_fsm_t>();
         }
-        case lts_dot:
+        case lts_type::lts_dot:
         {
           throw mcrl2::runtime_error("Reading the .dot format is not supported anymore.");
         }
@@ -204,32 +204,32 @@ class ltscompare_tool : public ltscompare_base
       add_option("in2", make_mandatory_argument("FORMAT"),
                  "use FORMAT as the format for INFILE2", 'j').
       add_option("equivalence", make_enum_argument<lts_equivalence>("NAME)")
-                 .add_value(lts_eq_none, true)
-                 .add_value(lts_eq_bisim)
-                 .add_hidden_value(lts_eq_bisim_gv)
-                 .add_hidden_value(lts_eq_bisim_gjkw)
-                 .add_hidden_value(lts_eq_bisim_jgkw)
-                 .add_hidden_value(lts_eq_bisim_gj)
-                 .add_hidden_value(lts_eq_bisim_gj_lazy_BLC)
-                 .add_value(lts_eq_branching_bisim)
-                 .add_hidden_value(lts_eq_branching_bisim_gv)
-                 .add_hidden_value(lts_eq_branching_bisim_gjkw)
-                 .add_hidden_value(lts_eq_branching_bisim_jgkw)
-                 .add_hidden_value(lts_eq_branching_bisim_gj)
-                 .add_hidden_value(lts_eq_branching_bisim_gj_lazy_BLC)
-                 .add_value(lts_eq_divergence_preserving_branching_bisim)
-                 .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gv)
-                 .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gjkw)
-                 .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_jgkw)
-                 .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gj)
-                 .add_hidden_value(lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC)
-                 .add_value(lts_eq_weak_bisim)
-                 .add_value(lts_eq_divergence_preserving_weak_bisim)
-                 .add_value(lts_eq_sim)
-                 .add_value(lts_eq_ready_sim)
-                 .add_value(lts_eq_trace)
-                 .add_value(lts_eq_weak_trace)
-                 .add_value(lts_eq_coupled_sim),
+                 .add_value(lts_equivalence::lts_eq_none, true)
+                 .add_value(lts_equivalence::lts_eq_bisim)
+                 .add_hidden_value(lts_equivalence::lts_eq_bisim_gv)
+                 .add_hidden_value(lts_equivalence::lts_eq_bisim_gjkw)
+                 .add_hidden_value(lts_equivalence::lts_eq_bisim_jgkw)
+                 .add_hidden_value(lts_equivalence::lts_eq_bisim_gj)
+                 .add_hidden_value(lts_equivalence::lts_eq_bisim_gj_lazy_BLC)
+                 .add_value(lts_equivalence::lts_eq_branching_bisim)
+                 .add_hidden_value(lts_equivalence::lts_eq_branching_bisim_gv)
+                 .add_hidden_value(lts_equivalence::lts_eq_branching_bisim_gjkw)
+                 .add_hidden_value(lts_equivalence::lts_eq_branching_bisim_jgkw)
+                 .add_hidden_value(lts_equivalence::lts_eq_branching_bisim_gj)
+                 .add_hidden_value(lts_equivalence::lts_eq_branching_bisim_gj_lazy_BLC)
+                 .add_value(lts_equivalence::lts_eq_divergence_preserving_branching_bisim)
+                 .add_hidden_value(lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gv)
+                 .add_hidden_value(lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gjkw)
+                 .add_hidden_value(lts_equivalence::lts_eq_divergence_preserving_branching_bisim_jgkw)
+                 .add_hidden_value(lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gj)
+                 .add_hidden_value(lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC)
+                 .add_value(lts_equivalence::lts_eq_weak_bisim)
+                 .add_value(lts_equivalence::lts_eq_divergence_preserving_weak_bisim)
+                 .add_value(lts_equivalence::lts_eq_sim)
+                 .add_value(lts_equivalence::lts_eq_ready_sim)
+                 .add_value(lts_equivalence::lts_eq_trace)
+                 .add_value(lts_equivalence::lts_eq_weak_trace)
+                 .add_value(lts_equivalence::lts_eq_coupled_sim),
                  "use equivalence NAME (not allowed in combination with -p/--preorder, use --help-all for all possible arguments):", 'e').
       add_option("preorder", make_enum_argument<lts_preorder>("NAME")
                  .add_value(lts_preorder::lts_pre_none, true)
@@ -245,8 +245,8 @@ class ltscompare_tool : public ltscompare_base
                  .add_value(lts_preorder::lts_pre_impossible_futures),
                  "use preorder NAME (not allowed in combination with -e/--equivalence):", 'p').
       add_option("strategy", make_enum_argument<mcrl2::lps::exploration_strategy>("NAME")
-                 .add_value_short(mcrl2::lps::es_breadth, "b", true)
-                 .add_value_short(mcrl2::lps::es_depth, "d")
+                 .add_value_short(mcrl2::lps::exploration_strategy::es_breadth, "b", true)
+                 .add_value_short(mcrl2::lps::exploration_strategy::es_depth, "d")
                  , "explore the state space using strategy NAME (only for antichain based algorithms; includes all failures refinements) :"
                  , 's').
       add_option("tau", make_mandatory_argument("ACTNAMES"),
@@ -323,9 +323,9 @@ class ltscompare_tool : public ltscompare_base
       {
         tool_options.strategy = mcrl2::lps::parse_exploration_strategy(parser.option_argument("strategy"));
 
-        if (tool_options.strategy != mcrl2::lps::es_breadth && tool_options.generate_counter_examples)
+        if (tool_options.strategy != mcrl2::lps::exploration_strategy::es_breadth && tool_options.generate_counter_examples)
         {
-          mCRL2log(mcrl2::log::warning) << "Generated counter example might not be the shortest with the " << print_exploration_strategy(tool_options.strategy) << " strategy.\n";
+          mCRL2log(mcrl2::log::log_level_t::warning) << "Generated counter example might not be the shortest with the " << print_exploration_strategy(tool_options.strategy) << " strategy.\n";
         }
 
         if (tool_options.preorder != lts_preorder::lts_pre_trace_anti_chain
@@ -342,9 +342,9 @@ class ltscompare_tool : public ltscompare_base
       {
         tool_options.format_for_first = mcrl2::lts::detail::parse_format(parser.option_argument("in1"));
 
-        if (tool_options.format_for_first == lts_none)
+        if (tool_options.format_for_first == lts_type::lts_none)
         {
-          mCRL2log(warning) << "format '" << parser.option_argument("in1") <<
+          mCRL2log(log_level_t::warning) << "format '" << parser.option_argument("in1") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }
@@ -354,16 +354,16 @@ class ltscompare_tool : public ltscompare_base
       }
       else
       {
-        mCRL2log(warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
-        tool_options.format_for_first = lts_aut;
+        mCRL2log(log_level_t::warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
+        tool_options.format_for_first = lts_type::lts_aut;
       }
       if (parser.has_option("in2"))
       {
         tool_options.format_for_second = mcrl2::lts::detail::parse_format(parser.option_argument("in2"));
 
-        if (tool_options.format_for_second == lts_none)
+        if (tool_options.format_for_second == lts_type::lts_none)
         {
-          mCRL2log(warning) << "format '" << parser.option_argument("in2") <<
+          mCRL2log(log_level_t::warning) << "format '" << parser.option_argument("in2") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }

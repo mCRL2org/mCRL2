@@ -51,10 +51,10 @@ class lpsbisim2pbes_tool: public super
       super::add_options(desc);
       desc.add_option("normalize", "normalize the result", 'n');
       desc.add_option("bisimulation", make_enum_argument<bisimulation_type>("NAME")
-                      .add_value(strong_bisim, true)  // This is the default
-                      .add_value(weak_bisim)
-                      .add_value(branching_bisim)
-                      .add_value(branching_sim)
+                      .add_value(bisimulation_type::strong_bisim, true)  // This is the default
+                      .add_value(bisimulation_type::weak_bisim)
+                      .add_value(bisimulation_type::branching_bisim)
+                      .add_value(bisimulation_type::branching_sim)
                       ,"generate a PBES for the bisimulation type NAME:"
                       ,'b'
                      );
@@ -74,12 +74,12 @@ class lpsbisim2pbes_tool: public super
 
     bool run() override
     {
-      mCRL2log(verbose) << "lpsbisim2pbes parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file 1 :         " << input_filename1() << std::endl;
-      mCRL2log(verbose) << "  input file 2 :         " << input_filename2() << std::endl;
-      mCRL2log(verbose) << "  output file  :         " << output_filename() << std::endl;
-      mCRL2log(verbose) << "  bisimulation :         " << m_bisimulation_type << std::endl;
-      mCRL2log(verbose) << "  normalize    :         " << m_normalize << std::endl;
+      mCRL2log(log_level_t::verbose) << "lpsbisim2pbes parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file 1 :         " << input_filename1() << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file 2 :         " << input_filename2() << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file  :         " << output_filename() << std::endl;
+      mCRL2log(log_level_t::verbose) << "  bisimulation :         " << m_bisimulation_type << std::endl;
+      mCRL2log(log_level_t::verbose) << "  normalize    :         " << m_normalize << std::endl;
 
       lps::specification M;
       lps::specification S;
@@ -89,16 +89,16 @@ class lpsbisim2pbes_tool: public super
       pbes result;
       switch (m_bisimulation_type)
       {
-        case strong_bisim:
+        case bisimulation_type::strong_bisim:
           result = strong_bisimulation(M, S);
           break;
-        case weak_bisim:
+        case bisimulation_type::weak_bisim:
           result = weak_bisimulation(M, S);
           break;
-        case branching_bisim:
+        case bisimulation_type::branching_bisim:
           result = branching_bisimulation(M, S);
           break;
-        case branching_sim:
+        case bisimulation_type::branching_sim:
           result = branching_simulation_equivalence(M, S);
           break;
       }

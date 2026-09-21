@@ -91,7 +91,7 @@ void ParityGame::make_random( verti V, unsigned clustersize, unsigned outdeg,
     reset(V, d);
     for (verti v = 0; v < V; ++v)
     {
-        vertex_[v].player   = (rand()%2 == 0) ? PLAYER_EVEN : PLAYER_ODD;
+        vertex_[v].player   = (rand()%2 == 0) ? player_t::PLAYER_EVEN : player_t::PLAYER_ODD;
         vertex_[v].priority = rand()%d;
     }
     recalculate_cardinalities(V);

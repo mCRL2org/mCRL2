@@ -211,13 +211,13 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   : aut(l),
     block_index_of_a_state(aut.num_states(),0)
 {
-  mCRL2log(log::debug) << "A tau-loop (SCC) partitioner is created for " << l.num_states() << " states and " <<
+  mCRL2log(log::log_level_t::debug) << "A tau-loop (SCC) partitioner is created for " << l.num_states() << " states and " <<
               l.num_transitions() << " transitions." << std::endl;
 
   // Give all sccs a number in block index of a state, where the deepest sccs get the lowest number.
   number_sccs();
 
-  mCRL2log(log::debug) << "The tau-loop (SCC) partitioner reduces the LTS to " << equivalence_class_index << " states." << std::endl;
+  mCRL2log(log::log_level_t::debug) << "The tau-loop (SCC) partitioner reduces the LTS to " << equivalence_class_index << " states." << std::endl;
 }
 
 
@@ -235,7 +235,7 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
     t.set_to(block_index_of_a_state[t.to()]);
   }
   
-  sort_transitions(aut.get_transitions(),std::set<transition::size_type>(),tgt_lbl_src);
+  sort_transitions(aut.get_transitions(),std::set<transition::size_type>(),transition_sort_style::tgt_lbl_src);
   
   // Compress the transitions while removing double occurrences, and if needed self-loops. 
   constexpr std::size_t non_existent=-1;

@@ -68,7 +68,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     const PbesSubstitution& sigma_pbes,
     const data::data_specification& dataspec,
     data::enumerator_identifier_generator& id_generator,
-    enumerate_quantifiers_mode enum_mode = expand_infinite_sorts_and_use_data_rewriter )
+    enumerate_quantifiers_mode enum_mode = enumerate_quantifiers_mode::expand_infinite_sorts_and_use_data_rewriter )
     : super(R, sigma, sigma_pbes),
       // m_R(R),
       // m_sigma(sigma),
@@ -159,7 +159,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     data::variable_list non_enumerable;
     data::variable_list unused;
 
-    if (m_enum_mode==expand_finite_sorts)
+    if (m_enum_mode==enumerate_quantifiers_mode::expand_finite_sorts)
     {
       data::detail::split_finite_variables(x.variables(), m_dataspec,
                                            enumerable, non_enumerable, unused,
@@ -205,7 +205,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     data::variable_list non_enumerable;
     data::variable_list unused;
     
-    if (m_enum_mode==expand_finite_sorts)
+    if (m_enum_mode==enumerate_quantifiers_mode::expand_finite_sorts)
     {
       data::detail::split_finite_variables(x.variables(), m_dataspec,
                                            enumerable, non_enumerable, unused,
@@ -243,14 +243,14 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <atermpp::IsATerm T>
   void apply(T& result, const data::data_expression& x)
   { 
-    if (m_enum_mode==expand_infinite_sorts_and_use_data_rewriter)
+    if (m_enum_mode==enumerate_quantifiers_mode::expand_infinite_sorts_and_use_data_rewriter)
     {
       R(atermpp::assign_cast<data::data_expression>(result),x,sigma);
     }
     else 
     {
       data::data_expression temporary_result;
-      data::enumerate_quantifiers_rewriter(R,m_dataspec,m_id_generator,m_enum_mode==expand_infinite_sorts)(temporary_result, x, sigma);
+      data::enumerate_quantifiers_rewriter(R,m_dataspec,m_id_generator,m_enum_mode==enumerate_quantifiers_mode::expand_infinite_sorts)(temporary_result, x, sigma);
       R(atermpp::assign_cast<data::data_expression>(result),temporary_result,sigma);
     }
   }
@@ -353,7 +353,7 @@ struct enumerate_quantifiers_rewriter
 
     enumerate_quantifiers_rewriter(const data::rewriter& R, 
                                    const data::data_specification& dataspec, 
-                                   const enumerate_quantifiers_mode enum_mode = expand_infinite_sorts_and_use_data_rewriter)
+                                   const enumerate_quantifiers_mode enum_mode = enumerate_quantifiers_mode::expand_infinite_sorts_and_use_data_rewriter)
       : m_rewriter(R), 
         m_dataspec(dataspec), 
         m_enum_mode(enum_mode)

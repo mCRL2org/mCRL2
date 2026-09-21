@@ -193,13 +193,13 @@ struct hash<mcrl2::pbes_system::summand_equivalence_key>
 namespace mcrl2::pbes_system
 {
 
-enum tribool
+enum class tribool
 {
   no, maybe, yes
 };
 static inline bool operator&&(tribool a, tribool b)
 {
-  return a == yes || b == yes || (a == maybe && b == maybe);
+  return a == tribool::yes || b == tribool::yes || (a == tribool::maybe && b == tribool::maybe);
 }
 // Short-circuit version of the operator && for tribools
 // The second function will be told whether a 'yes' answer is required to satisfy
@@ -207,11 +207,11 @@ static inline bool operator&&(tribool a, tribool b)
 static inline bool operator&&(const std::function<tribool()>& a, const std::function<tribool(bool)>& b)
 {
   tribool a_result = a();
-  if(a_result == yes)
+  if(a_result == tribool::yes)
   {
     return true;
   }
-  return a_result && b(a_result == no);
+  return a_result && b(a_result == tribool::no);
 }
 
 struct pbespor_options
@@ -394,25 +394,25 @@ class partial_order_reduction_algorithm
         // Check whether the maybe clause is satisfied by affect sets and it is sufficient to return maybe
         if (affect_set && !needs_yes)
         {
-          return maybe;
+          return tribool::maybe;
         }
 
         data::data_expression antecedent = make_antecedent();
         data::data_expression yes_condition = data::optimized_forall(combined_quantified_vars, data::sort_bool::not_(antecedent));
         if (parent.is_true(yes_condition))
         {
-          return yes;
+          return tribool::yes;
         }
         if (needs_yes)
         {
           // we were not able to return yes, now it doesn't matter what we return
-          return no;
+          return tribool::no;
         }
 
         data::data_expression consequent = make_consequent();
         data::data_expression condition = data::optimized_forall(combined_quantified_vars, data::sort_bool::implies(antecedent, consequent));
 
-        return parent.is_true(condition) ? maybe : no;
+        return parent.is_true(condition) ? tribool::maybe : tribool::no;
       }
 
     public:
@@ -832,7 +832,7 @@ class partial_order_reduction_algorithm
         data::data_expression result = m_rewr(data::one_point_rule_rewrite((m_rewr(expr))));
         if (result != data::sort_bool::true_() && result != data::sort_bool::false_())
         {
-          mCRL2log(log::verbose) << "Cannot rewrite " << result << " any further" << std::endl;
+          mCRL2log(log::log_level_t::verbose) << "Cannot rewrite " << result << " any further" << std::endl;
         }
         return result == data::sort_bool::true_();
       }
@@ -949,7 +949,7 @@ class partial_order_reduction_algorithm
     tribool left_accords_equations(std::size_t k, std::size_t k1) const
     {
       std::size_t n = m_pbes.equations().size();
-      tribool result = yes;
+      tribool result = tribool::yes;
 
       for (std::size_t i = 0; i < n; i++)
       {
@@ -961,7 +961,7 @@ class partial_order_reduction_algorithm
             bool X1_k_Xprime = depends(i1, k, i_prime);
             if (X_k1_X1 && X1_k_Xprime)
             {
-              result = maybe;
+              result = tribool::maybe;
               bool found = false;
               for (std::size_t i2 = 0; i2 < n; i2++)
               {
@@ -974,7 +974,7 @@ class partial_order_reduction_algorithm
               }
               if (!found)
               {
-                return no;
+                return tribool::no;
               }
             }
           }
@@ -986,7 +986,7 @@ class partial_order_reduction_algorithm
     tribool square_accords_equations(std::size_t k, std::size_t k1) const
     {
       std::size_t n = m_pbes.equations().size();
-      tribool result = yes;
+      tribool result = tribool::yes;
 
       for (std::size_t i = 0; i < n; i++)
       {
@@ -998,7 +998,7 @@ class partial_order_reduction_algorithm
             bool X_k_X2 = depends(i, k, i2);
             if (X_k1_X1 && X_k_X2)
             {
-              result = maybe;
+              result = tribool::maybe;
               bool found = false;
               for (std::size_t i_prime = 0; i_prime < n; i_prime++)
               {
@@ -1012,7 +1012,7 @@ class partial_order_reduction_algorithm
               }
               if (!found)
               {
-                return no;
+                return tribool::no;
               }
             }
           }
@@ -1024,7 +1024,7 @@ class partial_order_reduction_algorithm
     tribool triangle_accords_equations(std::size_t k, std::size_t k1) const
     {
       std::size_t n = m_pbes.equations().size();
-      tribool result = yes;
+      tribool result = tribool::yes;
 
       for (std::size_t i = 0; i < n; i++)
       {
@@ -1037,10 +1037,10 @@ class partial_order_reduction_algorithm
             bool X2_k1_X1 = depends(i2, k1, i1);
             if (X_k1_X1 && X_k_X2)
             {
-              result = maybe;
+              result = tribool::maybe;
               if(!X2_k1_X1)
               {
-                return no;
+                return tribool::no;
               }
             }
           }
@@ -1065,12 +1065,12 @@ class partial_order_reduction_algorithm
 
       for (std::size_t k = 0; k < N; k++)
       {
-        mCRL2log(log::verbose) << std::setw(3) << k << " = ";
+        mCRL2log(log::log_level_t::verbose) << std::setw(3) << k << " = ";
         for (std::size_t k1 = 0; k1 < N; k1++)
         {
           if (k == k1)
           {
-            mCRL2log(log::verbose) << ". ";
+            mCRL2log(log::log_level_t::verbose) << ". ";
             continue;
           }
           bool DNL_DNS_affect_sets = has_empty_intersection(set_intersection(Vs(k), Vs(k1)), set_union(Ws(k), Ws(k1)));
@@ -1103,19 +1103,19 @@ class partial_order_reduction_algorithm
           if (!accords)
           {
             DNA(k).set(k1);
-            mCRL2log(log::verbose) << "- ";
+            mCRL2log(log::log_level_t::verbose) << "- ";
           }
           else
           {
-            mCRL2log(log::verbose) << (DNL_DNS_affect_sets ? ": " : "+ ");
+            mCRL2log(log::log_level_t::verbose) << (DNL_DNS_affect_sets ? ": " : "+ ");
           }
-          mCRL2log(log::verbose) << std::flush;
+          mCRL2log(log::log_level_t::verbose) << std::flush;
           if (can_enable)
           {
             NES(k).set(k1);
           }
         }
-        mCRL2log(log::verbose) << "\n";
+        mCRL2log(log::log_level_t::verbose) << "\n";
       }
     }
 
@@ -1313,12 +1313,12 @@ class partial_order_reduction_algorithm
     void print_summand(const srf_summand& summand, bool is_conjunctive) const
     {
       std::size_t k = summand_index(summand);
-      mCRL2log(log::verbose) << "   (" << k << ") ";
+      mCRL2log(log::log_level_t::verbose) << "   (" << k << ") ";
       if (!summand.parameters().empty())
       {
-        mCRL2log(log::verbose) << (is_conjunctive ? "forall " : "exists ") << print_variables(summand.parameters()) << ". ";
+        mCRL2log(log::log_level_t::verbose) << (is_conjunctive ? "forall " : "exists ") << print_variables(summand.parameters()) << ". ";
       }
-      mCRL2log(log::verbose) << summand.condition()
+      mCRL2log(log::log_level_t::verbose) << summand.condition()
                 << (is_conjunctive ? " => " : " && ")
                 << summand.variable()
                 << std::endl;
@@ -1326,15 +1326,15 @@ class partial_order_reduction_algorithm
 
     void print_pbes() const
     {
-      mCRL2log(log::verbose) << "srf_pbes" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "srf_pbes" << std::endl;
       for (const srf_equation& eqn: m_pbes.equations())
       {
-        mCRL2log(log::verbose) << eqn.symbol() << " " << eqn.variable() << " = " << (eqn.is_conjunctive() ? "conjunction" : "disjunction") << " of summands\n";
+        mCRL2log(log::log_level_t::verbose) << eqn.symbol() << " " << eqn.variable() << " = " << (eqn.is_conjunctive() ? "conjunction" : "disjunction") << " of summands\n";
         for (const srf_summand& summand: eqn.summands())
         {
           print_summand(summand, eqn.is_conjunctive());
         }
-        mCRL2log(log::verbose) << std::endl;
+        mCRL2log(log::log_level_t::verbose) << std::endl;
       }
     }
 
@@ -1342,19 +1342,19 @@ class partial_order_reduction_algorithm
     {
       using utilities::detail::contains;
 
-      if(mCRL2logEnabled(log::verbose))
+      if(mCRL2logEnabled(log::log_level_t::verbose))
       {
         std::size_t N = m_summand_classes.size();
         for (std::size_t k = 0; k < N; k++)
         {
           const summand_class& summand = m_summand_classes[k];
-          mCRL2log(log::verbose) << "\n--- summand class " << k << " ---" << std::endl;
-          mCRL2log(log::verbose) << "visible = " << std::boolalpha << m_vis.test(k) << "\n";
-          summand.print(log::logger(log::verbose).get());
+          mCRL2log(log::log_level_t::verbose) << "\n--- summand class " << k << " ---" << std::endl;
+          mCRL2log(log::log_level_t::verbose) << "visible = " << std::boolalpha << m_vis.test(k) << "\n";
+          summand.print(log::logger(log::log_level_t::verbose).get());
         }
         for (std::size_t i = 0; i < m_pbes.equations().size(); i++)
         {
-          mCRL2log(log::verbose) << "dependency NES[" << std::setw(3) << i << "]  " << print_summand_set(m_dependency_nes[i]) << std::endl;
+          mCRL2log(log::log_level_t::verbose) << "dependency NES[" << std::setw(3) << i << "]  " << print_summand_set(m_dependency_nes[i]) << std::endl;
         }
       }
     }
@@ -1440,7 +1440,7 @@ class partial_order_reduction_algorithm
       const std::chrono::time_point<std::chrono::high_resolution_clock> t_start =
         std::chrono::high_resolution_clock::now();
 
-      enum todo_state
+      enum class todo_state
       {
         NEW,            ///< Will be partially expanded
         DONE_PARTIALLY, ///< Has been partially expanded
@@ -1453,7 +1453,7 @@ class partial_order_reduction_algorithm
       // the node is currently in the DFS stack and not fully explored, ie, its state in the
       // stack is DONE_PARTIALLY.
       std::unordered_map<propositional_variable_instantiation, std::pair<std::size_t, bool>> seen;
-      std::deque<todo_pair> todo{todo_pair(X_init, NEW)};
+      std::deque<todo_pair> todo{todo_pair(X_init, todo_state::NEW)};
       // Each state is given unique index, based on the order of discovery.
       // This means that the indices in the DFS stack are sorted from low to high.
       std::size_t index = 0;
@@ -1473,9 +1473,9 @@ class partial_order_reduction_algorithm
         todo_pair& p = todo.back();
         const propositional_variable_instantiation X_e = p.first;
         todo_state& s = p.second;
-        mCRL2log(log::debug) << "choose X_e = " << X_e << std::endl;
+        mCRL2log(log::log_level_t::debug) << "choose X_e = " << X_e << std::endl;
 
-        if (s == DONE || s == DONE_PARTIALLY)
+        if (s == todo_state::DONE || s == todo_state::DONE_PARTIALLY)
         {
           todo.pop_back();
           seen[X_e].second = false;
@@ -1485,14 +1485,14 @@ class partial_order_reduction_algorithm
         std::set<propositional_variable_instantiation> next;
         summand_set en_X_e = en(X_e);
 
-        if (s == NEW)
+        if (s == todo_state::NEW)
         {
           summand_set stubborn_set_X_e = stubborn_set(X_e, en_X_e);
-          mCRL2log(log::debug) << "stubborn_set(X_e) = " << print_summand_set(stubborn_set_X_e) << std::endl;
+          mCRL2log(log::log_level_t::debug) << "stubborn_set(X_e) = " << print_summand_set(stubborn_set_X_e) << std::endl;
           next = succ(X_e, stubborn_set_X_e & en_X_e);
 
           bool vis_expanded = m_vis.is_subset_of(stubborn_set_X_e);
-          s = vis_expanded ? DONE : DONE_PARTIALLY;
+          s = vis_expanded ? todo_state::DONE : todo_state::DONE_PARTIALLY;
           if (!vis_expanded)
           {
             seen[X_e].second = true;
@@ -1528,32 +1528,32 @@ class partial_order_reduction_algorithm
               auto it = std::find_if(todo.rbegin(), todo.rend(), [&](const auto& pair){ return pair.first == min_node; });
               assert(it != todo.rend());
               auto& [Y_f, Y_f_state] = *it;
-              if(Y_f_state == DONE_PARTIALLY)
+              if(Y_f_state == todo_state::DONE_PARTIALLY)
               {
-                Y_f_state = STARTS_CYCLE;
+                Y_f_state = todo_state::STARTS_CYCLE;
                 seen[Y_f].second = false;
               }
             }
-            else if (num_cycles > 1 && s == DONE_PARTIALLY)
+            else if (num_cycles > 1 && s == todo_state::DONE_PARTIALLY)
             {
               // Generate the remainder of the successors
               for (auto& Y_f: succ(X_e, en_X_e - stubborn_set_X_e))
               {
                 next.insert(Y_f);
               }
-              s = DONE;
+              s = todo_state::DONE;
               seen[X_e].second = false;
             }
           }
         }
         else
         {
-          assert(s == STARTS_CYCLE);
+          assert(s == todo_state::STARTS_CYCLE);
           next = succ(X_e, en_X_e);
-          s = DONE;
+          s = todo_state::DONE;
         }
 
-        mCRL2log(log::debug) << "next = " << core::detail::print_set(next) << std::endl;
+        mCRL2log(log::log_level_t::debug) << "next = " << core::detail::print_set(next) << std::endl;
         for (const propositional_variable_instantiation& Y_f: next)
         {
           if (seen.find(Y_f) == seen.end())
@@ -1564,7 +1564,7 @@ class partial_order_reduction_algorithm
             emit_node(Y_f, is_conjunctive, rank);
             seen.insert(std::make_pair(Y_f, std::make_pair(index, false)));
             index++;
-            todo.emplace_back(Y_f, NEW);
+            todo.emplace_back(Y_f, todo_state::NEW);
           }
         }
         for (const propositional_variable_instantiation& Y_f: next)
@@ -1575,14 +1575,14 @@ class partial_order_reduction_algorithm
         iteration++;
         if(iteration == 100)
         {
-          mCRL2log(log::status) << "Found " << seen.size() << " nodes. Todo set contains " << todo.size() << " nodes.\n";
+          mCRL2log(log::log_level_t::status) << "Found " << seen.size() << " nodes. Todo set contains " << todo.size() << " nodes.\n";
           iteration = 0;
         }
       }
-      mCRL2log(log::verbose) << "Finished exploration, found " << seen.size() << " nodes." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Finished exploration, found " << seen.size() << " nodes." << std::endl;
 
       m_exploration_duration = std::chrono::high_resolution_clock::now() - t_start;
-      mCRL2log(log::info) << "timing pbespor (wall clock time in seconds):"
+      mCRL2log(log::log_level_t::info) << "timing pbespor (wall clock time in seconds):"
         "\n  static analysis: " << std::chrono::duration<double>(m_static_analysis_duration).count() <<
         "\n  exploration:     " << std::chrono::duration<double>(m_exploration_duration).count() << std::endl;
     }
@@ -1619,7 +1619,7 @@ class partial_order_reduction_algorithm
       {
         const propositional_variable_instantiation X_e = todo.back();
         todo.pop_back();
-        mCRL2log(log::debug) << "choose X_e = " << X_e << std::endl;
+        mCRL2log(log::log_level_t::debug) << "choose X_e = " << X_e << std::endl;
 
         std::size_t X_index = m_equation_index.index(X_e.name());
         for(std::size_t i = 0; i < N; i++)
@@ -1629,9 +1629,9 @@ class partial_order_reduction_algorithm
             summands_X.set(i);
           }
         }
-        mCRL2log(log::debug) << "enabled according to dependencies = " << print_summand_set(summands_X) << std::endl;
+        mCRL2log(log::log_level_t::debug) << "enabled according to dependencies = " << print_summand_set(summands_X) << std::endl;
         std::set<propositional_variable_instantiation> next = succ(X_e, summands_X);
-        mCRL2log(log::debug) << "next = " << core::detail::print_set(next) << std::endl;
+        mCRL2log(log::log_level_t::debug) << "next = " << core::detail::print_set(next) << std::endl;
         summands_X.reset();
 
         for (const propositional_variable_instantiation& Y_f: next)
@@ -1654,14 +1654,14 @@ class partial_order_reduction_algorithm
         iteration++;
         if(iteration == 100)
         {
-          mCRL2log(log::status) << "Found " << seen.size() << " nodes. Todo set contains " << todo.size() << " nodes.\n";
+          mCRL2log(log::log_level_t::status) << "Found " << seen.size() << " nodes. Todo set contains " << todo.size() << " nodes.\n";
           iteration = 0;
         }
       }
-      mCRL2log(log::verbose) << "Finished exploration, found " << seen.size() << " nodes." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Finished exploration, found " << seen.size() << " nodes." << std::endl;
 
       m_exploration_duration = std::chrono::high_resolution_clock::now() - t_start;
-      mCRL2log(log::info) << "timing pbespor (wall clock time in seconds):"
+      mCRL2log(log::log_level_t::info) << "timing pbespor (wall clock time in seconds):"
         "\n  exploration:     " << std::chrono::duration<double>(m_exploration_duration).count() << std::endl;
     }
 };

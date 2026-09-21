@@ -108,6 +108,7 @@ public:
   {}
 
   /// \brief Constructor.
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) x.m_container is moved below.
   deque(deque&& x, const allocator_type& alloc)
    : m_container(std::move(x.m_container), alloc),
      container_wrapper(m_container)     

@@ -189,7 +189,7 @@ class pbes2cvc4_tool: public pbes_input_tool<input_output_tool>
       {
         if (!parse_pbes(p, true, parsed))
         {
-          mCRL2log(log::error) << "This is not a disjunctive PBES, giving up.\n";
+          mCRL2log(log::log_level_t::error) << "This is not a disjunctive PBES, giving up.\n";
           return false;
         }
       }
@@ -197,7 +197,7 @@ class pbes2cvc4_tool: public pbes_input_tool<input_output_tool>
       {
         if (!parse_pbes(p, false, parsed))
         {
-          mCRL2log(log::error) << "This is not a conjunctive PBES, giving up.\n";
+          mCRL2log(log::log_level_t::error) << "This is not a conjunctive PBES, giving up.\n";
           return false;
         }
       }

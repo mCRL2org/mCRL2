@@ -20,46 +20,46 @@ using namespace mcrl2::log;
 
 void print_all_log_levels()
 {
-  mCRL2log(error) << "An error message" << std::endl;
-  mCRL2log(warning) << "A warning" << std::endl;
-  mCRL2log(info) << "Some information" << std::endl;
-  mCRL2log(verbose) << "Detailed information" << std::endl;
-  mCRL2log(debug) << "Debugging info" << std::endl;
+  mCRL2log(log_level_t::error) << "An error message" << std::endl;
+  mCRL2log(log_level_t::warning) << "A warning" << std::endl;
+  mCRL2log(log_level_t::info) << "Some information" << std::endl;
+  mCRL2log(log_level_t::verbose) << "Detailed information" << std::endl;
+  mCRL2log(log_level_t::debug) << "Debugging info" << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_logging_use_case)
 {
-  mCRL2log(info) << "Entering logging use case" << std::endl;
+  mCRL2log(log_level_t::info) << "Entering logging use case" << std::endl;
   const int count = 3;
-  mCRL2log(debug) << "A loop with " << count << " iterations" << std::endl;
+  mCRL2log(log_level_t::debug) << "A loop with " << count << " iterations" << std::endl;
   for (int i = 0; i < count; ++i)
   {
-    mCRL2log(debug) << "the counter i = " << i << std::endl;
+    mCRL2log(log_level_t::debug) << "the counter i = " << i << std::endl;
     if(i >= 2)
     {
-      mCRL2log(debug) << "the counter is greater then 2" << std::endl;
+      mCRL2log(log_level_t::debug) << "the counter is greater then 2" << std::endl;
     }
   }
 }
 
 BOOST_AUTO_TEST_CASE(test_indentation)
 {
-  mCRL2log(info) << "Entering indentation test" << std::endl;
+  mCRL2log(log_level_t::info) << "Entering indentation test" << std::endl;
   const int count = 3;
-  mCRL2log(info) << "A loop with " << count << " iterations" << std::endl;
+  mCRL2log(log_level_t::info) << "A loop with " << count << " iterations" << std::endl;
   for (int i = 0; i < count; ++i)
   {
-    mCRL2log(debug) << "the counter i = " << i << std::endl;
+    mCRL2log(log_level_t::debug) << "the counter i = " << i << std::endl;
     if(i >= 2)
     {
-      mCRL2log(debug) << "the counter is greater then 2" << std::endl;
+      mCRL2log(log_level_t::debug) << "the counter is greater then 2" << std::endl;
     }
   }
 }
 
 BOOST_AUTO_TEST_CASE(test_logging_multiline)
 {
-  mCRL2log(info) << "Testing multiline logging (line 1)" << std::endl
+  mCRL2log(log_level_t::info) << "Testing multiline logging (line 1)" << std::endl
                  << "line 2" << std::endl
                  << "the last last line" << std::endl;
 }
@@ -71,10 +71,10 @@ BOOST_AUTO_TEST_CASE(test_file_logging)
   BOOST_REQUIRE(pFile != nullptr);
 
   file_output::set_stream(pFile);
-  mCRL2log(info) << "This line is written to logger_test_file.txt" << std::endl;
+  mCRL2log(log_level_t::info) << "This line is written to logger_test_file.txt" << std::endl;
   file_output::set_stream(stderr);
   fclose(pFile);
-  mCRL2log(info) << "This line is written to stderr" << std::endl;
+  mCRL2log(log_level_t::info) << "This line is written to stderr" << std::endl;
 }
 
 std::string test_assert()
@@ -94,8 +94,8 @@ BOOST_AUTO_TEST_CASE(test_fflush)
 
 BOOST_AUTO_TEST_CASE(test_multiline_nonewline)
 {
-  mCRL2log(info) << "There is just one newline";
-  mCRL2log(info) << "in this message" << std::endl;
+  mCRL2log(log_level_t::info) << "There is just one newline";
+  mCRL2log(log_level_t::info) << "in this message" << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_parallel_logging)
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(test_parallel_logging)
 
   for (int i = 0; i < 10; ++i) {
     threads.emplace_back([]() {
-      mCRL2log(info) << "A message";
+      mCRL2log(log_level_t::info) << "A message";
     });
   }
 

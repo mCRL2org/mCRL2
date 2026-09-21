@@ -119,7 +119,7 @@ public:
         else if (label==1)
         {
             lts_info::operation_type type = map_at(this->get_info()->get_variable_types(), varname);
-            return type==parity_game_generator::PGAME_AND ? 1 : 0;
+            return type==parity_game_generator::operation_type::PGAME_AND ? 1 : 0;
         }
         return 0;
     }
@@ -338,7 +338,7 @@ struct logging_fixture
 {
   logging_fixture()
   {
-    mcrl2::log::logger::set_reporting_level(mcrl2::log::debug);
+    mcrl2::log::logger::set_reporting_level(mcrl2::log::log_level_t::debug);
   }
 };
 

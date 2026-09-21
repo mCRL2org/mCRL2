@@ -178,12 +178,12 @@ class Induction
       f_count++;
       if (f_count == 1)
       {
-        mCRL2log(log::verbose) << "Induction on one variable." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Induction on one variable." << std::endl;
         v_result = apply_induction_one(fresh_identifier_generator("dummy$"));
       }
       else
       {
-        mCRL2log(log::verbose) << "Induction on " << f_count << " variables." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Induction on " << f_count << " variables." << std::endl;
         data_expression_list v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, variable_list(), variable_list());
         v_result = v_list_of_clauses.front();
         v_list_of_clauses.pop_front();

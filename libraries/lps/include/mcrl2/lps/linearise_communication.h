@@ -313,6 +313,9 @@ public:
         }
 
         // as long as there are still unmatched actions in lhs i...
+        // NOLINTBEGIN(bugprone-unchecked-optional-access) rest[i] is only dereferenced while the loop invariant
+        // asserted below holds; every path that sets rest[i] to std::nullopt immediately breaks out before rest[i]
+        // is dereferenced again.
         while (m_lhs_iters[i] != m_lhs[i].end())
         {
           assert(rest[i] != std::nullopt);
@@ -345,6 +348,7 @@ public:
           ++(*rest[i]);
           ++m_lhs_iters[i];
         }
+        // NOLINTEND(bugprone-unchecked-optional-access)
 
         if (rest[i] != std::nullopt) // lhs was found in rest[i]
         {
@@ -413,7 +417,7 @@ public:
     /* We follow the implementation of Muck van Weerdenburg, described in
        a note: Calculation of communication with open terms. */
 
-    mCRL2log(mcrl2::log::verbose) << (m_is_allow
+    mCRL2log(mcrl2::log::log_level_t::verbose) << (m_is_allow
                                           ? "- calculating the communication operator modulo the allow operator on "
                                       : m_is_block
                                           ? "- calculating the communication operator modulo the block operator on "
@@ -431,11 +435,11 @@ public:
     [[maybe_unused]]
     std::size_t false_condition_summands = 0; // removed because condition is false
 
-    mCRL2log(mcrl2::log::trace) << "Calculating communication operator using a set of " << m_communications.size()
+    mCRL2log(mcrl2::log::log_level_t::trace) << "Calculating communication operator using a set of " << m_communications.size()
                                 << " communication expressions." << std::endl;
-    mCRL2log(mcrl2::log::trace) << "Communication expressions: " << std::endl
+    mCRL2log(mcrl2::log::log_level_t::trace) << "Communication expressions: " << std::endl
                                 << core::detail::print_set(m_communications) << std::endl;
-    mCRL2log(mcrl2::log::trace) << "Allow list: " << std::endl << core::detail::print_set(m_allowlist) << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::trace) << "Allow list: " << std::endl << core::detail::print_set(m_allowlist) << std::endl;
 
     deadlock_summand_vector resulting_deadlock_summands;
     deadlock_summands.swap(resulting_deadlock_summands);
@@ -498,13 +502,13 @@ public:
       // expressions this list in principle contains one summand (unless the condition can be rewritten to false, in
       // which case it is omitted).
 
-      mCRL2log(mcrl2::log::trace) << "Calculating communication on multiaction with " << multiaction.size()
+      mCRL2log(mcrl2::log::log_level_t::trace) << "Calculating communication on multiaction with " << multiaction.size()
                                   << " actions." << std::endl;
-      mCRL2log(mcrl2::log::trace) << "  Multiaction: " << process::pp(multiaction) << std::endl;
+      mCRL2log(mcrl2::log::log_level_t::trace) << "  Multiaction: " << process::pp(multiaction) << std::endl;
 
       const tuple_list multiactionconditionlist = apply(multiaction);
 
-      mCRL2log(mcrl2::log::trace) << "Calculating communication on multiaction with " << multiaction.size()
+      mCRL2log(mcrl2::log::log_level_t::trace) << "Calculating communication on multiaction with " << multiaction.size()
                                   << " actions results in " << multiactionconditionlist.size() << " potential summands"
                                   << std::endl;
 
@@ -580,7 +584,7 @@ public:
           false_condition_summands);
     }
 
-    mCRL2log(mcrl2::log::verbose) << " resulting in " << action_summands.size() << " action summands and "
+    mCRL2log(mcrl2::log::log_level_t::verbose) << " resulting in " << action_summands.size() << " action summands and "
                                   << deadlock_summands.size() << " delta summands\n";
   }
 

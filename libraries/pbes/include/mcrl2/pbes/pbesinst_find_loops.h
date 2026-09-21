@@ -33,7 +33,7 @@ bool find_loop(const simple_structure_graph& G,
 )
 {
   const auto& w_ = G.find_vertex(w);
-  if (w_.decoration == structure_graph::d_true || w_.decoration == structure_graph::d_false)
+  if (w_.decoration == structure_graph::decoration_type::d_true || w_.decoration == structure_graph::decoration_type::d_false)
   {
     return false;
   }
@@ -50,7 +50,7 @@ bool find_loop(const simple_structure_graph& G,
   if (U.contains(w))
   {
     visited[w] = false;
-    if (w_.decoration == structure_graph::d_none || w_.decoration == p % 2)
+    if (w_.decoration == structure_graph::decoration_type::d_none || w_.decoration == static_cast<structure_graph::decoration_type>(p % 2))
     {
       for (structure_graph::index_type u: w_.successors)
       {
@@ -58,7 +58,7 @@ bool find_loop(const simple_structure_graph& G,
         {
           global_strategy<simple_structure_graph>(G).set_strategy(w, u == v ? v : u);
           visited[w] = true;
-          mCRL2log(log::debug) << "       case 1: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
+          mCRL2log(log::log_level_t::debug) << "       case 1: found a loop starting in " << v << " with current vertex w = " << w << std::endl;
           return true;
         }
       }
@@ -79,7 +79,7 @@ inline void find_loops(const simple_structure_graph& G,
                        const detail::structure_graph_builder& graph_builder
                       )
 {
-  mCRL2log(log::debug) << "Apply find loops (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
+  mCRL2log(log::log_level_t::debug) << "Apply find loops (iteration " << iteration_count << ") to graph:\n" << G << std::endl;
 
   // count the number of insertions in the sets S[0] and S[1]
   std::size_t insertion_count = 0;
@@ -115,7 +115,7 @@ inline void find_loops(const simple_structure_graph& G,
     const auto& u_ = G.find_vertex(u);
     assert(u_.rank != data::undefined_index());
 
-    mCRL2log(log::debug) << "--- choose u = " << u << std::endl;
+    mCRL2log(log::log_level_t::debug) << "--- choose u = " << u << std::endl;
     auto i = visited.find(u);
     if (i != visited.end())
     {
@@ -130,14 +130,14 @@ inline void find_loops(const simple_structure_graph& G,
         S[0].insert(u);
         b0 = true;
         insertion_count++;
-        mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S[0]" << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Find loops: insert vertex " << u << " in S[0]" << std::endl;
       }
       else
       {
         S[1].insert(u);
         b1 = true;
         insertion_count++;
-        mCRL2log(log::debug) << "Find loops: insert vertex " << u << " in S[1]" << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Find loops: insert vertex " << u << " in S[1]" << std::endl;
       }
     }
     if (b0)
@@ -150,7 +150,7 @@ inline void find_loops(const simple_structure_graph& G,
     }
   }
 
-  mCRL2log(log::debug) << "Find loops: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
+  mCRL2log(log::log_level_t::debug) << "Find loops: (iteration " << iteration_count << ") inserted " << insertion_count << " vertices." << std::endl;
 }
 
 } // namespace mcrl2::pbes_system::detail

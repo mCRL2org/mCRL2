@@ -48,7 +48,7 @@ struct fsm_writer
   void write_parameters()
   {
     // print parameters with used values
-    mCRL2log(log::verbose) << "writing parameter table..." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "writing parameter table..." << std::endl;
     for (std::size_t i = 0; i < fsm.process_parameters().size(); i++)
     {
       const std::vector<std::string>& values = fsm.state_element_values(i);
@@ -63,7 +63,7 @@ struct fsm_writer
 
   void write_states()
   {
-    mCRL2log(log::verbose) << "writing states..." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "writing states..." << std::endl;
     for (std::size_t i = 0; i < fsm.num_states(); i++)
     {
       if (fsm.has_state_info())
@@ -113,7 +113,7 @@ struct fsm_writer
 
   void write_transitions()
   {
-    mCRL2log(log::verbose) << "writing transitions..." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "writing transitions..." << std::endl;
     for (const transition& t: fsm.get_transitions())
     {
       // correct state numbering, by adding 1.

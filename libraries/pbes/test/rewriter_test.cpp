@@ -576,7 +576,7 @@ BOOST_AUTO_TEST_CASE(test_enumerate_quantifiers_rewriter_finite)
   data::data_specification data_spec = data::data_specification();
   data_spec.add_context_sort(data::sort_list::list(data::sort_nat::nat()));
   data::rewriter datar(data_spec);
-  pbes_system::enumerate_quantifiers_rewriter R(datar, data_spec, expand_finite_sorts);
+  pbes_system::enumerate_quantifiers_rewriter R(datar, data_spec, enumerate_quantifiers_mode::expand_finite_sorts);
   pbes_system::simplify_data_rewriter<data::rewriter> S(datar);
 
   test_expressions(R, "forall n:Nat, b:Bool.Z(b,n)", S, "forall n:Nat.Z(false,n) && Z(true,n)");

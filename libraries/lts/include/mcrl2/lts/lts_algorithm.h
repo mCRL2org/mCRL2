@@ -77,116 +77,116 @@ bool destructive_compare(LTS_TYPE& l1,
 
   switch (eq)
   {
-    case lts_eq_none:
+    case lts_equivalence::lts_eq_none:
       return false;
-    case lts_eq_bisim_jgkw:
+    case lts_equivalence::lts_eq_bisim_jgkw:
     {
       return detail::destructive_bisimulation_compare_dnj(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_bisim_gv:
+    case lts_equivalence::lts_eq_bisim_gv:
     {
       return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_bisim_gjkw:
+    case lts_equivalence::lts_eq_bisim_gjkw:
     {
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_bisim:
+    case lts_equivalence::lts_eq_bisim:
     {
       if (generate_counter_examples)
       {
-        mCRL2log(mcrl2::log::warning) << "A slower partition refinement algorithm is used to generate minimal-depth counter examples.\n";
+        mCRL2log(mcrl2::log::log_level_t::warning) << "A slower partition refinement algorithm is used to generate minimal-depth counter examples.\n";
         return detail::destructive_bisimulation_compare_minimal_depth(l1, l2, counter_example_file);
       }
       return detail::destructive_bisimulation_compare_gj(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_bisim_gj:
+    case lts_equivalence::lts_eq_bisim_gj:
     {
       return detail::destructive_bisimulation_compare_gj(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_bisim_gj_lazy_BLC:
+    case lts_equivalence::lts_eq_bisim_gj_lazy_BLC:
     {
       return detail::destructive_bisimulation_compare_gj_lazy_BLC(l1,l2, false,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_branching_bisim_jgkw:
+    case lts_equivalence::lts_eq_branching_bisim_jgkw:
     {
       return detail::destructive_bisimulation_compare_dnj(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_branching_bisim_gv:
+    case lts_equivalence::lts_eq_branching_bisim_gv:
     {
       return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_branching_bisim_gjkw:
+    case lts_equivalence::lts_eq_branching_bisim_gjkw:
     {
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_branching_bisim:
+    case lts_equivalence::lts_eq_branching_bisim:
     {
       if (generate_counter_examples)
       {
-        mCRL2log(mcrl2::log::warning) << "The default branching bisimulation comparison algorithm cannot generate counter examples. A slower partition refinement algorithm (Martens/Groote 2024) is used instead.\n";
+        mCRL2log(mcrl2::log::log_level_t::warning) << "The default branching bisimulation comparison algorithm cannot generate counter examples. A slower partition refinement algorithm (Martens/Groote 2024) is used instead.\n";
         return detail::destructive_branching_bisimulation_compare_minimal_depth(l1, l2, counter_example_file);
       }
       return detail::destructive_bisimulation_compare_gj(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_branching_bisim_gj:
+    case lts_equivalence::lts_eq_branching_bisim_gj:
     {
       return detail::destructive_bisimulation_compare_gj(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_branching_bisim_gj_lazy_BLC:
+    case lts_equivalence::lts_eq_branching_bisim_gj_lazy_BLC:
     {
       return detail::destructive_bisimulation_compare_gj_lazy_BLC(l1,l2, true,false,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_divergence_preserving_branching_bisim_jgkw:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_jgkw:
     {
       return detail::destructive_bisimulation_compare_dnj(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_divergence_preserving_branching_bisim_gv:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gv:
     {
       return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_divergence_preserving_branching_bisim_gjkw:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gjkw:
     {
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_divergence_preserving_branching_bisim:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim:
     {
       if (generate_counter_examples)
       {
-        mCRL2log(mcrl2::log::warning) << "The default divergence-preserving branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
+        mCRL2log(mcrl2::log::log_level_t::warning) << "The default divergence-preserving branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
         return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
       }
       return detail::destructive_bisimulation_compare_gj(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_divergence_preserving_branching_bisim_gj:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gj:
     {
       return detail::destructive_bisimulation_compare_gj(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC:
     {
       return detail::destructive_bisimulation_compare_gj_lazy_BLC(l1,l2, true,true,generate_counter_examples,counter_example_file,structured_output);
     }
-    case lts_eq_weak_bisim:
+    case lts_equivalence::lts_eq_weak_bisim:
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter examples for weak bisimulation\n";
+        mCRL2log(log::log_level_t::warning) << "Cannot generate counter examples for weak bisimulation\n";
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2,false);
     }
-    case lts_eq_divergence_preserving_weak_bisim:
+    case lts_equivalence::lts_eq_divergence_preserving_weak_bisim:
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter examples for divergence-preserving weak bisimulation\n";
+        mCRL2log(log::log_level_t::warning) << "Cannot generate counter examples for divergence-preserving weak bisimulation\n";
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2, true);
     }
-    case lts_eq_sim:
+    case lts_equivalence::lts_eq_sim:
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter examples for simulation equivalence\n";
+        mCRL2log(log::log_level_t::warning) << "Cannot generate counter examples for simulation equivalence\n";
       }
       // Run the partitioning algorithm on this merged LTS
       std::size_t init_l2 = l2.initial_state() + l1.num_states();
@@ -197,11 +197,11 @@ bool destructive_compare(LTS_TYPE& l1,
 
       return sp.in_same_class(l1.initial_state(),init_l2);
     }
-    case lts_eq_ready_sim:
+    case lts_equivalence::lts_eq_ready_sim:
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter examples for ready-simulation equivalence\n";
+        mCRL2log(log::log_level_t::warning) << "Cannot generate counter examples for ready-simulation equivalence\n";
       }
       // Run the partitioning algorithm on this merged LTS
       std::size_t init_l2 = l2.initial_state() + l1.num_states();
@@ -212,7 +212,7 @@ bool destructive_compare(LTS_TYPE& l1,
 
       return rsp.in_same_class(l1.initial_state(),init_l2);
     }
-    case lts_eq_trace:
+    case lts_equivalence::lts_eq_trace:
     {
       // Determinise first LTS
       detail::bisimulation_reduce_gj(l1, false);
@@ -229,7 +229,7 @@ bool destructive_compare(LTS_TYPE& l1,
       }
       return detail::destructive_bisimulation_compare(l1, l2, false, false, generate_counter_examples, counter_example_file, structured_output);
     }
-    case lts_eq_weak_trace:
+    case lts_equivalence::lts_eq_weak_trace:
     {
       if (generate_counter_examples)
       {
@@ -259,7 +259,7 @@ bool destructive_compare(LTS_TYPE& l1,
       // Weak trace equivalence now corresponds to bisimilarity
       return detail::destructive_bisimulation_compare(l1,l2,false,false,false,counter_example_file,structured_output);
     }
-    case lts_eq_coupled_sim:
+    case lts_equivalence::lts_eq_coupled_sim:
     {
       return detail::coupled_simulation_compare(l1,l2);
     }
@@ -318,7 +318,7 @@ bool destructive_compare(LTS_TYPE& l1,
   bool generate_counter_example,
   const std::string& counter_example_file = "",
   bool structured_output = false,
-  lps::exploration_strategy strategy = lps::es_breadth,
+  lps::exploration_strategy strategy = lps::exploration_strategy::es_breadth,
   bool preprocess = true);
 
 /** \brief Checks whether this LTS is smaller than another LTS according
@@ -342,7 +342,7 @@ bool compare(const LTS_TYPE& l1,
   bool generate_counter_example,
   const std::string& counter_example_file = "",
   bool structured_output = false,
-  lps::exploration_strategy strategy = lps::es_breadth,
+  lps::exploration_strategy strategy = lps::exploration_strategy::es_breadth,
   bool preprocess = true);
 
 /** \brief Determinises this LTS. */
@@ -652,123 +652,123 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
 
   switch (eq)
   {
-    case lts_eq_none:
+    case lts_equivalence::lts_eq_none:
       return;
-    case lts_eq_bisim:
+    case lts_equivalence::lts_eq_bisim:
     {
       detail::bisimulation_reduce_gj(l,false,false);
       return;
     }
-    case lts_eq_bisim_gv:
+    case lts_equivalence::lts_eq_bisim_gv:
     {
       detail::bisimulation_reduce(l,false,false);
       return;
     }
-    case lts_eq_bisim_gjkw:
+    case lts_equivalence::lts_eq_bisim_gjkw:
     {
       detail::bisimulation_reduce_gjkw(l,false,false);
       return;
     }
-    case lts_eq_bisim_jgkw:
+    case lts_equivalence::lts_eq_bisim_jgkw:
     {
       detail::bisimulation_reduce_dnj(l,false,false);
       return;
     }
-    case lts_eq_bisim_gj:
+    case lts_equivalence::lts_eq_bisim_gj:
     {
       detail::bisimulation_reduce_gj(l,false,false);
       return;
     }
-    case lts_eq_bisim_gj_lazy_BLC:
+    case lts_equivalence::lts_eq_bisim_gj_lazy_BLC:
     {
       detail::bisimulation_reduce_gj_lazy_BLC(l,false,false);
       return;
     }
-    case lts_eq_bisim_sigref:
+    case lts_equivalence::lts_eq_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s(l);
       s.run();
       return;
     }
-    case lts_eq_branching_bisim:
+    case lts_equivalence::lts_eq_branching_bisim:
     {
       detail::bisimulation_reduce_gj(l,true,false);
       return;
     }
-    case lts_eq_branching_bisim_gv:
+    case lts_equivalence::lts_eq_branching_bisim_gv:
     {
       detail::bisimulation_reduce(l,true,false);
       return;
     }
-    case lts_eq_branching_bisim_gjkw:
+    case lts_equivalence::lts_eq_branching_bisim_gjkw:
     {
       detail::bisimulation_reduce_gjkw(l,true,false);
       return;
     }
-    case lts_eq_branching_bisim_jgkw:
+    case lts_equivalence::lts_eq_branching_bisim_jgkw:
     {
       detail::bisimulation_reduce_dnj(l,true,false);
       return;
     }
-    case lts_eq_branching_bisim_gj:
+    case lts_equivalence::lts_eq_branching_bisim_gj:
     {
       detail::bisimulation_reduce_gj(l,true,false);
       return;
     }
-    case lts_eq_branching_bisim_gj_lazy_BLC:
+    case lts_equivalence::lts_eq_branching_bisim_gj_lazy_BLC:
     {
       detail::bisimulation_reduce_gj_lazy_BLC(l,true,false);
       return;
     }
-    case lts_eq_branching_bisim_sigref:
+    case lts_equivalence::lts_eq_branching_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_branching_bisim<LTS_TYPE> > s(l);
       s.run();
       return;
     }
-    case lts_eq_divergence_preserving_branching_bisim:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim:
     {
       detail::bisimulation_reduce_gj(l,true,true);
       return;
     }
-    case lts_eq_divergence_preserving_branching_bisim_gv:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gv:
     {
       detail::bisimulation_reduce(l,true,true);
       return;
     }
-    case lts_eq_divergence_preserving_branching_bisim_gjkw:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gjkw:
     {
       detail::bisimulation_reduce_gjkw(l,true,true);
       return;
     }
-    case lts_eq_divergence_preserving_branching_bisim_jgkw:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_jgkw:
     {
       detail::bisimulation_reduce_dnj(l,true,true);
       return;
     }
-    case lts_eq_divergence_preserving_branching_bisim_gj:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gj:
     {
       detail::bisimulation_reduce_gj(l,true,true);
       return;
     }
-    case lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_gj_lazy_BLC:
     {
       detail::bisimulation_reduce_gj_lazy_BLC(l,true,true);
       return;
     }
-    case lts_eq_divergence_preserving_branching_bisim_sigref:
+    case lts_equivalence::lts_eq_divergence_preserving_branching_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s(l);
       s.run();
       return;
     }
-    case lts_eq_weak_bisim:
+    case lts_equivalence::lts_eq_weak_bisim:
     {
       detail::weak_bisimulation_reduce(l,false);
       return;
     }
     /*
-    case lts_eq_weak_bisim_sigref:
+    case lts_equivalence::lts_eq_weak_bisim_sigref:
     {
      {
       sigref<LTS_TYPE, signature_branching_bisim<LTS_TYPE> > s1(l);
@@ -783,12 +783,12 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       return;
     }
     */
-    case lts_eq_divergence_preserving_weak_bisim:
+    case lts_equivalence::lts_eq_divergence_preserving_weak_bisim:
     {
       detail::weak_bisimulation_reduce(l,true);
       return;
     }
-    case lts_eq_sim:
+    case lts_equivalence::lts_eq_sim:
     {
       // Run the partitioning algorithm on this LTS
       detail::sim_partitioner<LTS_TYPE> sp(l);
@@ -815,7 +815,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
 
       return;
     }
-    case lts_eq_ready_sim:
+    case lts_equivalence::lts_eq_ready_sim:
     {
       // Run the partitioning algorithm on this LTS
       detail::ready_sim_partitioner<LTS_TYPE> rsp(l);
@@ -842,12 +842,12 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
 
       return;
     }
-    case lts_eq_trace:
+    case lts_equivalence::lts_eq_trace:
       detail::bisimulation_reduce_gj(l,false);
       determinise(l);
       detail::bisimulation_reduce_gj(l,false);
       return;
-    case lts_eq_weak_trace:
+    case lts_equivalence::lts_eq_weak_trace:
     {
       detail::bisimulation_reduce_gj(l,true,false);
       detail::tau_star_reduce(l);
@@ -856,19 +856,19 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce_gj(l,false);
       return;
     }
-    case lts_red_tau_star:
+    case lts_equivalence::lts_red_tau_star:
     {
       detail::bisimulation_reduce_gj(l,true,false);
       detail::tau_star_reduce(l);
       detail::bisimulation_reduce_gj(l,false);
       return;
     }
-    case lts_red_determinisation:
+    case lts_equivalence::lts_red_determinisation:
     {
       determinise(l);
       return;
     }
-    case lts_red_tau_scc:
+    case lts_equivalence::lts_red_tau_scc:
     {
       scc_reduce(l);
       return;
@@ -883,7 +883,7 @@ bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_equivalence eq, c
 {
   switch (eq)
   {
-    case lts_eq_none:
+    case lts_equivalence::lts_eq_none:
       return false;
     default:
       LTS_TYPE l1_copy(l1);
@@ -1035,7 +1035,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       throw mcrl2::runtime_error("Expected a valid preorder");
     }
     default:
-      mCRL2log(log::error) << "Comparison for this preorder is not available\n";
+      mCRL2log(log::log_level_t::error) << "Comparison for this preorder is not available\n";
       return false;
   }
 }
@@ -1050,7 +1050,7 @@ bool is_deterministic(const LTS_TYPE& l)
   }
 
   std::vector<transition> temporary_copy_of_transitions = l.get_transitions();
-  sort_transitions(temporary_copy_of_transitions, l.hidden_label_set(), src_lbl_tgt);
+  sort_transitions(temporary_copy_of_transitions, l.hidden_label_set(), transition_sort_style::src_lbl_tgt);
   
   // Traverse the ordered transitions, and search for two consecutive pairs <s,l,t> and <s,l,t'> with t!=t'. 
   // Such a pair exists iff l is not deterministic.
@@ -1169,7 +1169,7 @@ void determinise(LTS_TYPE& l)
 
         if (d_ntransitions%10000 == 0)
         {
-          mCRL2log(log::debug) <<
+          mCRL2log(log::log_level_t::debug) <<
             "generated " << tss.get_next_tag() << " states and " << d_ntransitions
                          << " transitions; explored " << d_id << " states" << std::endl;
         }

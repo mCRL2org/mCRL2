@@ -52,9 +52,8 @@ class RTree
 class PackedRTreeBuilder
 {
   public:
-    PackedRTreeBuilder():
-      rtree(nullptr)
-    { }
+    PackedRTreeBuilder()
+    = default;
 
     ~PackedRTreeBuilder()
     = default;
@@ -73,7 +72,7 @@ class PackedRTreeBuilder
 
   private:
     std::vector< QVector2D > points;
-    RTree* rtree;
+    RTree* rtree = nullptr;
     // The maximum number of children for a node in the RTree
     static const unsigned int MAX_FANOUT;
 };

@@ -165,7 +165,7 @@ GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
   setAttribute(Qt::WA_NoSystemBackground, true);
   m_current_device_pixel_ratio = devicePixelRatio();
   m_scene.setDevicePixelRatio(static_cast<float>(devicePixelRatio()));
-  mCRL2log(mcrl2::log::debug)
+  mCRL2log(mcrl2::log::log_level_t::debug)
       << "Devicepixelratio: " << devicePixelRatio() << std::endl;
 }
 
@@ -281,7 +281,7 @@ void GLWidget::initializeGL()
     // Check the minimum run-time requirement; the pair ordering is
     // lexicographical.
     QPair<int, int> version = format().version();
-    mCRL2log(mcrl2::log::verbose) << "Created an OpenGL " << version.first
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Created an OpenGL " << version.first
                                   << "." << version.second << " context.\n";
 
     QPair<int, int> required(3, 3);
@@ -294,7 +294,7 @@ void GLWidget::initializeGL()
               << version.second
               << ") is below the least supported version of OpenGL ("
               << required.first << "." << required.second << ").";
-      mCRL2log(mcrl2::log::error) << message.str().c_str() << "\n";
+      mCRL2log(mcrl2::log::log_level_t::error) << message.str().c_str() << "\n";
 
       QMessageBox box(QMessageBox::Warning, "Unsupported OpenGL Version",
                       message.str().c_str(), QMessageBox::Ok);
@@ -331,7 +331,7 @@ void GLWidget::initializeGL()
   }
   else
   {
-    mCRL2log(mcrl2::log::debug) << "QOpenGLDebugLogger initialisation failed" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::debug) << "QOpenGLDebugLogger initialisation failed" << std::endl;
   }
   m_scene.initialize();
 }
@@ -676,7 +676,7 @@ void GLWidget::saveBitmap(const QString& filename)
 
 void GLWidget::logMessage(const QOpenGLDebugMessage& debugMessage)
 {
-  mCRL2log(mcrl2::log::debug)
+  mCRL2log(mcrl2::log::log_level_t::debug)
       << "OpenGL: " << debugMessage.message().toStdString() << "\n";
 }
 

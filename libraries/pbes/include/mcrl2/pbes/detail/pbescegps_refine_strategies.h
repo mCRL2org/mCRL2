@@ -200,7 +200,7 @@ private:
       const auto& pvi = atermpp::down_cast<propositional_variable_instantiation>(formula);
       if (!is_known_equation(pvi.name()))
       {
-        mCRL2log(log::debug) << "Ignoring structure graph vertex for auxiliary equation " << pvi.name() << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Ignoring structure graph vertex for auxiliary equation " << pvi.name() << std::endl;
         continue;
       }
       formula_key equation_key{pvi.name()};
@@ -229,11 +229,11 @@ private:
     const propositional_variable_instantiation& b,
     bool find_in_over) const
   {
-    mCRL2log(log::trace) << "pvis_match_by_common_parameters comparing " << a << " with " << b << std::endl;
+    mCRL2log(log::log_level_t::trace) << "pvis_match_by_common_parameters comparing " << a << " with " << b << std::endl;
 
     if (a.name() != b.name())
     {
-      mCRL2log(log::trace) << "  Different names => NO MATCH" << std::endl;
+      mCRL2log(log::log_level_t::trace) << "  Different names => NO MATCH" << std::endl;
       return false;
     }
 
@@ -252,10 +252,10 @@ private:
     const std::vector<data::data_expression>& a_args = as_vector(a.parameters());
     const std::vector<data::data_expression>& b_args = as_vector(b.parameters());
 
-    mCRL2log(log::trace) << "  Original params: ";
+    mCRL2log(log::log_level_t::trace) << "  Original params: ";
     for (const auto& p: orig_params)
-      mCRL2log(log::trace) << p.name() << " ";
-    mCRL2log(log::trace) << std::endl;
+      mCRL2log(log::log_level_t::trace) << p.name() << " ";
+    mCRL2log(log::log_level_t::trace) << std::endl;
 
     auto it_under = m_under_params.find(a.name());
     auto it_over = m_over_params.find(a.name());
@@ -275,7 +275,7 @@ private:
       }
     }
 
-    mCRL2log(log::trace) << "  MATCH" << std::endl;
+    mCRL2log(log::log_level_t::trace) << "  MATCH" << std::endl;
     return true;
   }
 
@@ -305,13 +305,13 @@ private:
     for (std::size_t i = 0; i < a_params.size(); ++i)
     {
       a_values[a_params[i].name()] = a_args[i];
-      mCRL2log(log::trace) << "    a[" << a_params[i].name() << "]=" << pp(a_args[i]) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "    a[" << a_params[i].name() << "]=" << pp(a_args[i]) << std::endl;
     }
 
     for (std::size_t i = 0; i < b_params.size(); ++i)
     {
       b_values[b_params[i].name()] = b_args[i];
-      mCRL2log(log::trace) << "    b[" << b_params[i].name() << "]=" << pp(b_args[i]) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "    b[" << b_params[i].name() << "]=" << pp(b_args[i]) << std::endl;
     }
 
     // Find common parameters and check they have the same values
@@ -321,14 +321,14 @@ private:
       if (it_b != b_values.end())
       {
         const data::data_expression& b_val = it_b->second;
-        mCRL2log(log::trace) << "    Common param " << param_name << ": a=" << pp(a_val) << " vs b=" << pp(b_val);
+        mCRL2log(log::log_level_t::trace) << "    Common param " << param_name << ": a=" << pp(a_val) << " vs b=" << pp(b_val);
 
         if (a_val != b_val)
         {
-          mCRL2log(log::trace) << " => NOT EQUAL" << std::endl;
+          mCRL2log(log::log_level_t::trace) << " => NOT EQUAL" << std::endl;
           return false;
         }
-        mCRL2log(log::trace) << " => EQUAL" << std::endl;
+        mCRL2log(log::log_level_t::trace) << " => EQUAL" << std::endl;
       }
     }
 
@@ -460,13 +460,13 @@ private:
         if (ig < g_params.size() && g_params[ig] == param)
         {
           sigma[param] = pvi_values[ig];
-          mCRL2log(log::debug) << "sigma[" << param << "] = " << pvi_values[ig] << " (regular)" << std::endl;
+          mCRL2log(log::log_level_t::debug) << "sigma[" << param << "] = " << pvi_values[ig] << " (regular)" << std::endl;
           ++ig;
         }
         if (ig_prima < g_prime_params.size() && g_prime_params[ig_prima] == param)
         {
           sigma[param] = matching_pvi_values[ig_prima];
-          mCRL2log(log::trace) << "sigma[" << param << "] = " << matching_pvi_values[ig_prima] << " (matching)"
+          mCRL2log(log::log_level_t::trace) << "sigma[" << param << "] = " << matching_pvi_values[ig_prima] << " (matching)"
                                << std::endl;
           ++ig_prima;
         }
@@ -476,7 +476,7 @@ private:
 
     simplify_data_rewriter<data::rewriter> pbes_rewriter(*m_datar);
     pbes_expression instantiated_formula = pbes_rewrite(equation_formula, pbes_rewriter, sigma);
-    mCRL2log(log::debug) << "Phase " << phase << ": Instantiated " << current_vertex << std::endl
+    mCRL2log(log::log_level_t::debug) << "Phase " << phase << ": Instantiated " << current_vertex << std::endl
                          << "to " << instantiated_formula << std::endl;
 
     std::set<data::variable> essential_vars = wit->second;
@@ -547,7 +547,7 @@ private:
         }
       }
 
-      mCRL2log(log::debug) << "Candidate PVIs: " << core::detail::print_list(candidate_pvis) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Candidate PVIs: " << core::detail::print_list(candidate_pvis) << std::endl;
       if (!candidate_pvis.empty())
       {
         detail::guard_traverser guard_trav(*m_datar);
@@ -561,7 +561,7 @@ private:
           {
             continue;
           }
-          mCRL2log(log::trace) << "Guard for " << pvi << ": " << guard_expr << std::endl;
+          mCRL2log(log::log_level_t::trace) << "Guard for " << pvi << ": " << guard_expr << std::endl;
           std::set<data::variable> guard_vars = detail::find_free_variables(guard_expr, data::variable_list(), false);
           std::set<data::variable> common_vars;
           std::set_intersection(state.W[var_name].begin(),
@@ -573,8 +573,8 @@ private:
           {
             essential_vars = std::move(common_vars);
             guard_formula = guard_expr;
-            mCRL2log(log::debug) << "Guard vars: " << core::detail::print_list(guard_vars) << std::endl;
-            mCRL2log(log::debug) << "Guard formula: " << guard_formula << std::endl;
+            mCRL2log(log::log_level_t::debug) << "Guard vars: " << core::detail::print_list(guard_vars) << std::endl;
+            mCRL2log(log::log_level_t::debug) << "Guard formula: " << guard_formula << std::endl;
             break;
           }
         }
@@ -583,7 +583,7 @@ private:
 
     if (options.var_choice == var_choice_strategy::all && guard_formula != instantiated_formula)
     {
-      mCRL2log(log::debug) << "Phase " << phase << ": Un-abstracting " << core::detail::print_list(essential_vars)
+      mCRL2log(log::log_level_t::debug) << "Phase " << phase << ": Un-abstracting " << core::detail::print_list(essential_vars)
                            << " from " << var_name << std::endl;
       for (const data::variable& var: essential_vars)
       {
@@ -630,8 +630,8 @@ private:
 
     if (selected_var)
     {
-      mCRL2log(log::debug) << "Phase " << phase << ": " << std::endl;
-      mCRL2log(log::verbose) << "Un-abstracting " << selected_var->name() << " from " << var_name << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Phase " << phase << ": " << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Un-abstracting " << selected_var->name() << " from " << var_name << std::endl;
       state.remove_abstracted_variable(p, var_name, *selected_var);
       return true;
     }
@@ -643,12 +643,12 @@ private:
     const std::string& phase,
     bool primary_is_under)
   {
-    mCRL2log(log::debug) << "Phase " << phase << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Phase " << phase << std::endl;
     index_type current_idx = primary.initial_vertex();
     std::set<index_type> visited;
     while (current_idx != undefined_vertex())
     {
-      mCRL2log(log::debug) << "Find first index " << current_idx << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Find first index " << current_idx << std::endl;
       const vertex& current_vertex = primary.find_vertex(current_idx);
       const index_type strategy_idx = current_vertex.strategy;
       const bool has_terminal_decoration
@@ -660,18 +660,18 @@ private:
       {
         matching_idx = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
       }
-      mCRL2log(log::debug) << "Phase " << phase << " vertex " << current_vertex;
+      mCRL2log(log::log_level_t::debug) << "Phase " << phase << " vertex " << current_vertex;
       if (matching_idx != undefined_vertex())
       {
-        mCRL2log(log::debug) << " trying other dec " << other.find_vertex(matching_idx);
+        mCRL2log(log::log_level_t::debug) << " trying other dec " << other.find_vertex(matching_idx);
       }
-      mCRL2log(log::debug) << std::endl;
+      mCRL2log(log::log_level_t::debug) << std::endl;
       if (has_terminal_decoration
           && (matching_idx == undefined_vertex()
               || current_vertex.decoration != other.find_vertex(matching_idx).decoration)
           && (current_vertex.rank % 2 == 0 || current_vertex.decoration == decoration_type::d_true))
       {
-        mCRL2log(log::debug) << "Phase " << phase << " choose vertex " << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Phase " << phase << " choose vertex " << std::endl;
         if (select_variable(primary, current_idx, other, matching_idx, phase, primary_is_under))
           return true;
       }
@@ -710,7 +710,7 @@ private:
     const std::string& phase,
     bool primary_is_under)
   {
-    mCRL2log(log::debug) << "Phase " << phase << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Phase " << phase << std::endl;
 
     // Walk the strategy path and try to refine on edges that miss a counterpart
     // in the other structure graph. Edges that go from one equation to a
@@ -738,40 +738,40 @@ private:
               || (primary_is_under ? current_vertex.decoration == structure_graph::d_disjunction
                                    : current_vertex.decoration == structure_graph::d_conjunction))
           {
-            mCRL2log(log::debug) << "Special case: strategy undefined for vertex " << current_vertex << std::endl;
+            mCRL2log(log::log_level_t::debug) << "Special case: strategy undefined for vertex " << current_vertex << std::endl;
             const index_type matching_idx
               = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
-            mCRL2log(log::trace) << "Some index found " << matching_idx << std::endl;
+            mCRL2log(log::log_level_t::trace) << "Some index found " << matching_idx << std::endl;
             if (matching_idx == undefined_vertex())
             {
               break;
             }
 
             const index_type other_strategy_idx = other.find_vertex(matching_idx).strategy;
-            mCRL2log(log::trace) << "Strategy index found " << other_strategy_idx << std::endl;
+            mCRL2log(log::log_level_t::trace) << "Strategy index found " << other_strategy_idx << std::endl;
             if (other_strategy_idx == undefined_vertex())
             {
               break;
             }
 
             const vertex& other_strategy_vertex = other.find_vertex(other_strategy_idx);
-            mCRL2log(log::trace) << "Other strategy vertex found " << other_strategy_vertex << std::endl;
+            mCRL2log(log::log_level_t::trace) << "Other strategy vertex found " << other_strategy_vertex << std::endl;
             const propositional_variable_instantiation& current_pvi
               = atermpp::down_cast<propositional_variable_instantiation>(current_vertex.formula());
             const propositional_variable_instantiation& other_strategy_pvi
               = atermpp::down_cast<propositional_variable_instantiation>(other_strategy_vertex.formula());
             const bool cross_equation = current_pvi.name() != other_strategy_pvi.name();
-            mCRL2log(log::trace) << "Cross equation " << cross_equation << std::endl;
-            mCRL2log(log::trace) << " Finding the strat location in primary " << std::endl;
+            mCRL2log(log::log_level_t::trace) << "Cross equation " << cross_equation << std::endl;
+            mCRL2log(log::log_level_t::trace) << " Finding the strat location in primary " << std::endl;
             const index_type& other_strategy_in_primary_idx
               = find_vertex_index_by_formula(primary, other_strategy_vertex.formula(), !primary_is_under);
             if (cross_equation_only ? cross_equation : !cross_equation)
             {
-              mCRL2log(log::trace) << " Index for other strat " << other_strategy_in_primary_idx << std::endl;
+              mCRL2log(log::log_level_t::trace) << " Index for other strat " << other_strategy_in_primary_idx << std::endl;
               if (other_strategy_in_primary_idx == undefined_vertex()
                   || !has_edge(primary, current_idx, other_strategy_in_primary_idx))
               {
-                mCRL2log(log::debug) << " found other edge for vertex " << current_vertex << std::endl;
+                mCRL2log(log::log_level_t::debug) << " found other edge for vertex " << current_vertex << std::endl;
                 if (select_variable(primary, current_idx, other, matching_idx, phase, primary_is_under))
                   return true;
               }
@@ -786,7 +786,7 @@ private:
           }
           else
           {
-            mCRL2log(log::debug) << "No special case: strategy undefined for vertex " << current_vertex << std::endl;
+            mCRL2log(log::log_level_t::debug) << "No special case: strategy undefined for vertex " << current_vertex << std::endl;
             break;
           }
         }
@@ -802,22 +802,22 @@ private:
           if (!cross_equation_only || cross_equation)
           {
             index_type matching_idx = find_vertex_index_by_formula(other, current_vertex.formula(), primary_is_under);
-            mCRL2log(log::debug) << "Phase " << phase << " vertex " << current_vertex;
+            mCRL2log(log::log_level_t::debug) << "Phase " << phase << " vertex " << current_vertex;
             if (matching_idx != undefined_vertex())
             {
               const index_type strategy_match_idx
                 = find_vertex_index_by_formula(other, strategy_vertex.formula(), primary_is_under);
-              mCRL2log(log::debug) << " trying other edge if " << strategy_match_idx << " is in "
+              mCRL2log(log::log_level_t::debug) << " trying other edge if " << strategy_match_idx << " is in "
                                    << core::detail::print_list(other.find_vertex(matching_idx).successors);
 
               if (strategy_match_idx == undefined_vertex() || !has_edge(other, matching_idx, strategy_match_idx))
               {
-                mCRL2log(log::debug) << " found other edge for vertex " << current_vertex << std::endl;
+                mCRL2log(log::log_level_t::debug) << " found other edge for vertex " << current_vertex << std::endl;
                 if (select_variable(primary, current_idx, other, matching_idx, phase, primary_is_under))
                   return true;
               }
             }
-            mCRL2log(log::debug) << std::endl;
+            mCRL2log(log::log_level_t::debug) << std::endl;
           }
 
           visited.insert(current_idx);
@@ -849,7 +849,7 @@ public:
   {
     if (under_graph.is_empty() || over_graph.is_empty())
     {
-      mCRL2log(log::warning) << "Counterexample or witness information missing, falling back to random selection."
+      mCRL2log(log::log_level_t::warning) << "Counterexample or witness information missing, falling back to random selection."
                              << std::endl;
       return false;
     }
@@ -865,9 +865,9 @@ public:
     build_common_parameter_indices();
     build_formula_indices(under_graph, over_graph);
 
-    mCRL2log(log::debug) << "Refining using strategies" << std::endl;
-    mCRL2log(log::trace) << "Under: " << under_graph << std::endl;
-    mCRL2log(log::trace) << "Over: " << over_graph << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Refining using strategies" << std::endl;
+    mCRL2log(log::log_level_t::trace) << "Under: " << under_graph << std::endl;
+    mCRL2log(log::log_level_t::trace) << "Over: " << over_graph << std::endl;
 
     if (step_decorations(under_graph, over_graph, "dec-cex", true))
       return true;

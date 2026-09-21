@@ -260,13 +260,13 @@ class pbes_parelm_algorithm
         sfirst = slast;
       }
 
-      if (mCRL2logEnabled(log::debug))
+      if (mCRL2logEnabled(log::log_level_t::debug))
       {
         print_dependencies(p, predicate_variables, significant_variables, G);
       }
 
       // print verbose output
-      if (mCRL2logEnabled(log::verbose))
+      if (mCRL2logEnabled(log::log_level_t::verbose))
       {
         print_removed_parameters(predicate_variables, propvar_offsets, removals);
       }
@@ -279,28 +279,28 @@ class pbes_parelm_algorithm
                                   const std::map<core::identifier_string, std::size_t>& propvar_offsets,
                                   const std::map<core::identifier_string, std::vector<std::size_t>>& removals) const
     {
-      mCRL2log(log::verbose) << "\nremoving the following parameters:" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "\nremoving the following parameters:" << std::endl;
       for (auto& removal: removals)
       {
         core::identifier_string X1 = removal.first;
         for (std::size_t j: removal.second)
         {
           data::variable v1 = predicate_variables[j + propvar_offsets.at(X1)];
-          mCRL2log(log::verbose) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
+          mCRL2log(log::log_level_t::verbose) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
         }
       }
     }
 
     static void print_dependencies(const pbes& p, const std::vector<data::variable>& predicate_variables, const std::set<std::size_t>& significant_variables, const graph& G)
     {
-      mCRL2log(log::debug) << "\ninfluential parameters:" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "\ninfluential parameters:" << std::endl;
       for (std::size_t i: significant_variables)
       {
         core::identifier_string X1 = find_predicate_variable(p, i);
         data::variable v1 = predicate_variables[i];
-        mCRL2log(log::debug) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
+        mCRL2log(log::log_level_t::debug) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
       }
-      mCRL2log(log::debug) << "\ndependencies:" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "\ndependencies:" << std::endl;
       using edge_iterator = boost::graph_traits<graph>::edge_iterator;
       std::pair<edge_iterator, edge_iterator> e = edges(G);
       edge_iterator first = e.first;
@@ -316,7 +316,7 @@ class pbes_parelm_algorithm
         data::variable v2 = predicate_variables[i2];
         std::string left  = "(" + core::pp(X1) + ", " + data::pp(v1) + ")";
         std::string right = "(" + core::pp(X2) + ", " + data::pp(v2) + ")";
-        mCRL2log(log::debug) << left << " -> " << right << std::endl;
+        mCRL2log(log::log_level_t::debug) << left << " -> " << right << std::endl;
       }
     }
 };
@@ -329,7 +329,7 @@ void parelm(pbes& p, bool ignore_cex)
   const bool has_counter_example = pbes_system::detail::has_counter_example_information(p);
   if (has_counter_example)
   {
-    mCRL2log(log::warning) << "Warning: the PBES has counter example information, which may not be preserved by parameter elimination." << std::endl;
+    mCRL2log(log::log_level_t::warning) << "Warning: the PBES has counter example information, which may not be preserved by parameter elimination." << std::endl;
   }
   pbes_parelm_algorithm algorithm;
   algorithm.run(p, ignore_cex);

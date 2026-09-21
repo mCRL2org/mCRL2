@@ -36,7 +36,7 @@ answer smt_solver::execute_and_check(const std::string& s, const std::chrono::mi
   }
   else
   {
-    mCRL2log(log::error) << "Error when checking satisfiability of \n" << s.substr(0, 500) << "...." << std::endl;
+    mCRL2log(log::log_level_t::error) << "Error when checking satisfiability of \n" << s.substr(0, 500) << "...." << std::endl;
     throw mcrl2::runtime_error("Got unexpected response from SMT-solver:\n" + result);
   }
 }

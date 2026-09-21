@@ -58,11 +58,11 @@ std::ostream& operator<<(std::ostream& os, const partial_solve_strategy& strateg
 
 struct pbessolve_options
 {
-  data::rewrite_strategy rewrite_strategy = data::jitty;
+  data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   bool replace_constants_by_variables = false;
   bool remove_unused_rewrite_rules = false;
   bool prune_todo_list = false;
-  search_strategy exploration_strategy = breadth_first;
+  search_strategy exploration_strategy = search_strategy::breadth_first;
   partial_solve_strategy optimization = partial_solve_strategy::no_optimisation;
 
   // if true, apply optimization and pruning more frequently than by default.

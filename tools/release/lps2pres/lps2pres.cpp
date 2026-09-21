@@ -82,15 +82,15 @@ protected:
       }
       if (input_filename().empty())
       {
-        mCRL2log(log::verbose) << "reading LPS from stdin..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "reading LPS from stdin..." << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "reading LPS from file '" <<  input_filename() << "'..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "reading LPS from file '" <<  input_filename() << "'..." << std::endl;
       }
       lps::stochastic_specification lpsspec;
       load_lps(lpsspec, input_filename());
-      mCRL2log(log::verbose) << "reading input from file '" <<  formula_filename << "'..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "reading input from file '" <<  formula_filename << "'..." << std::endl;
       std::ifstream from(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
       if (!from)
       {
@@ -100,13 +100,13 @@ protected:
       const bool formula_is_quantitative = true;
       state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec, formula_is_quantitative);
       state_formulas::check_formula_actions(formspec.formula(), lps::find_action_labels(lpsspec.process()), "LPS");
-      mCRL2log(log::verbose) << "converting state formula and LPS to a PRES..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "converting state formula and LPS to a PRES..." << std::endl;
       const bool structured=false;
       pres_system::pres result = pres_system::lps2pres(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators, check_only);
 
       if (check_only)
       {
-        mCRL2log(mcrl2::log::info)
+        mCRL2log(mcrl2::log::log_level_t::info)
           << "the file '" << formula_filename
           << "' contains a well-formed state formula" << std::endl;
         return true;
@@ -114,11 +114,11 @@ protected:
 
       if (output_filename().empty())
       {
-        mCRL2log(log::verbose) << "writing PRES to stdout..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "writing PRES to stdout..." << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "writing PRES to file '" <<  output_filename() << "'..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "writing PRES to file '" <<  output_filename() << "'..." << std::endl;
       }
       save_pres(result, output_filename(), m_pres_output_format);
       return true;

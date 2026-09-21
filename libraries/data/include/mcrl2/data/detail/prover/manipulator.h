@@ -186,7 +186,7 @@ class Manipulator
       {
         const data_expression& v_term1(v_result[0]);
         const data_expression& v_term2(v_result[1]);
-        if (f_info.compare_term(v_term1, v_term2) == compare_result_bigger)
+        if (f_info.compare_term(v_term1, v_term2) == Compare_Result::compare_result_bigger)
         {
           v_result = application(v_result.head(), v_term2, v_term1);
         }

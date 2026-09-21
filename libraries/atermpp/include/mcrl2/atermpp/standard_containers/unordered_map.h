@@ -17,7 +17,6 @@
 
 #ifndef MCRL2_ATERMPP_STANDARD_CONTAINER_UNORDERED_MAP_H
 #define MCRL2_ATERMPP_STANDARD_CONTAINER_UNORDERED_MAP_H
-#pragma once
 
 #include <concepts>
 #include <unordered_map>
@@ -108,6 +107,7 @@ public:
 
 
   /// \brief Constructor.
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved) x.m_container is moved below.
   unordered_map(unordered_map&& x, const allocator_type& alloc)
    : m_container(std::move(x.m_container), alloc),
      container_wrapper(m_container)

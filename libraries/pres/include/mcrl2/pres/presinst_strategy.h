@@ -18,7 +18,7 @@
 namespace mcrl2::pres_system {
 
 /// \brief presinst transformation strategies
-enum presinst_strategy
+enum class presinst_strategy
 {
   presinst_lazy_strategy,
   presinst_finite_strategy
@@ -30,11 +30,11 @@ presinst_strategy parse_presinst_strategy(const std::string& s)
 {
   if (s == "finite")
   {
-    return presinst_finite_strategy;
+    return presinst_strategy::presinst_finite_strategy;
   }
   else if (s == "lazy")
   {
-    return presinst_lazy_strategy;
+    return presinst_strategy::presinst_lazy_strategy;
   }
   else
   {
@@ -62,11 +62,11 @@ std::istream& operator>>(std::istream& is, presinst_strategy& s)
 inline
 std::string print_presinst_strategy(const presinst_strategy strategy)
 {
-  if (strategy == presinst_finite_strategy)
+  if (strategy == presinst_strategy::presinst_finite_strategy)
   {
     return "finite";
   }
-  else if (strategy == presinst_lazy_strategy)
+  else if (strategy == presinst_strategy::presinst_lazy_strategy)
   {
     return "lazy";
   }
@@ -84,11 +84,11 @@ std::ostream& operator<<(std::ostream& os, const presinst_strategy strategy)
 inline
 std::string description(const presinst_strategy strategy)
 {
-  if (strategy == presinst_finite_strategy)
+  if (strategy == presinst_strategy::presinst_finite_strategy)
   {
     return "for computing all possible boolean equations";
   }
-  else if (strategy == presinst_lazy_strategy)
+  else if (strategy == presinst_strategy::presinst_lazy_strategy)
   {
     return "for computing only boolean equations which can be reached from the initial state";
   }

@@ -59,12 +59,12 @@ protected:
 
     bool run() override
     {
-      mCRL2log(verbose) << "symbolic_exploration parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  optimized:          " << std::boolalpha << m_optimized << std::endl;
-      mCRL2log(verbose) << "  clustered:          " << std::boolalpha << m_clustered << std::endl;
-      mCRL2log(verbose) << "  instantiate:        " << std::boolalpha << m_instantiate << std::endl;
+      mCRL2log(log_level_t::verbose) << "symbolic_exploration parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  optimized:          " << std::boolalpha << m_optimized << std::endl;
+      mCRL2log(log_level_t::verbose) << "  clustered:          " << std::boolalpha << m_clustered << std::endl;
+      mCRL2log(log_level_t::verbose) << "  instantiate:        " << std::boolalpha << m_instantiate << std::endl;
       pbes_system::detail::symbolic_exploration(input_filename(),
                                                 output_filename(),
                                                 pbes_input_format(),

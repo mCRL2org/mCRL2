@@ -12,7 +12,6 @@
 
 #ifndef MCRL2_UTILITIES_DETAIL_INDEXED_SET_H
 #define MCRL2_UTILITIES_DETAIL_INDEXED_SET_H
-#pragma once
 
 #include "mcrl2/utilities/indexed_set.h"    // necessary for header test. 
 

@@ -315,9 +315,9 @@ ParityGame::Strategy MpiSpmSolver::solve()
            code from DenseSPM and instead always use DeloopSolver/DecycleSolver
            to remove loops from the game before solving.
         */
-        spm[0].reset( new DenseSPM( part_.game(), ParityGame::PLAYER_EVEN,
+        spm[0].reset( new DenseSPM( part_.game(), ParityGame::Player::PLAYER_EVEN,
                                     stats.get(), nullptr, 0 ) );
-        spm[1].reset( new DenseSPM( part_.game(), ParityGame::PLAYER_ODD,
+        spm[1].reset( new DenseSPM( part_.game(), ParityGame::Player::PLAYER_ODD,
                                     stats.get(), nullptr, 0 ) );
     }
 

@@ -35,7 +35,7 @@ data::mutable_map_substitution<> instantiate_global_variables(Specification& lps
 {
   data::mutable_map_substitution<> sigma;
 
-  mCRL2log(log::verbose) << "Replacing global variables with dummy values." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "Replacing global variables with dummy values." << std::endl;
   data::representative_generator default_expression_generator(lpsspec.data());
   for (const data::variable& v : lpsspec.global_variables())
   {
@@ -47,7 +47,7 @@ data::mutable_map_substitution<> instantiate_global_variables(Specification& lps
     sigma[v] = d;
   }
 
-  mCRL2log(log::debug) << "instantiating global LPS variables " << sigma << std::endl;
+  mCRL2log(log::log_level_t::debug) << "instantiating global LPS variables " << sigma << std::endl;
   replace_global_variables(lpsspec, sigma);
 
   return sigma;

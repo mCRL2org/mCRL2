@@ -151,7 +151,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
       if (!infilename.empty())
       {
         //load data specification from file infilename
-        mCRL2log(verbose) << "Reading LPS or PBES from '" <<  infilename << "'" << std::endl;
+        mCRL2log(log_level_t::verbose) << "Reading LPS or PBES from '" <<  infilename << "'" << std::endl;
         try
         {
           lps::specification s;

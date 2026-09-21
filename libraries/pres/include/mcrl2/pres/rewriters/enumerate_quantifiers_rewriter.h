@@ -63,7 +63,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
                                 MutableSubstitution& sigma,
                                 const data::data_specification& dataspec,
                                 data::enumerator_identifier_generator& id_generator,
-                                const pbes_system::enumerate_quantifiers_mode enum_mode = pbes_system::expand_infinite_sorts_and_use_data_rewriter)
+                                const pbes_system::enumerate_quantifiers_mode enum_mode = pbes_system::enumerate_quantifiers_mode::expand_infinite_sorts_and_use_data_rewriter)
     : super(dataspec, R, sigma), 
       m_dataspec(dataspec), 
       m_enum_mode(enum_mode), 
@@ -180,7 +180,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
-    if (m_enum_mode==pbes_system::expand_finite_sorts)
+    if (m_enum_mode==pbes_system::enumerate_quantifiers_mode::expand_finite_sorts)
     {
       data::variable_list finite;
       data::variable_list infinite;
@@ -227,7 +227,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
-    if (m_enum_mode==pbes_system::expand_finite_sorts)
+    if (m_enum_mode==pbes_system::enumerate_quantifiers_mode::expand_finite_sorts)
     {
       data::variable_list finite;
       data::variable_list infinite;
@@ -274,7 +274,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     atermpp::vector<data::data_expression> undo = undo_substitution(x.variables());
     derived().apply(result, x.body());
     std::set<data::variable> free_variables = find_free_variables(result);
-    if (m_enum_mode==pbes_system::expand_finite_sorts)
+    if (m_enum_mode==pbes_system::enumerate_quantifiers_mode::expand_finite_sorts)
     {
       data::variable_list finite;
       data::variable_list infinite;
@@ -318,14 +318,14 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   template <atermpp::IsATerm T>
   void apply(T& result, const data::data_expression& x)
   { 
-    if (m_enum_mode==pbes_system::expand_infinite_sorts_and_use_data_rewriter)
+    if (m_enum_mode==pbes_system::enumerate_quantifiers_mode::expand_infinite_sorts_and_use_data_rewriter)
     {
       R(atermpp::assign_cast<data::data_expression>(result),x,sigma);
     }
     else
     {
       data::data_expression temporary_result;
-      data::enumerate_quantifiers_rewriter(R,m_dataspec,m_id_generator,m_enum_mode==pbes_system::expand_infinite_sorts)(temporary_result, x, sigma);
+      data::enumerate_quantifiers_rewriter(R,m_dataspec,m_id_generator,m_enum_mode==pbes_system::enumerate_quantifiers_mode::expand_infinite_sorts)(temporary_result, x, sigma);
       R(atermpp::assign_cast<data::data_expression>(result),temporary_result,sigma);
     }
   }
@@ -387,7 +387,7 @@ struct enumerate_quantifiers_rewriter
     using term_type = pres_expression;
     using variable_type = data::variable;
 
-    enumerate_quantifiers_rewriter(const data::rewriter& R, const data::data_specification& dataspec, const pbes_system::enumerate_quantifiers_mode enum_mode = pbes_system::expand_infinite_sorts_and_use_data_rewriter)
+    enumerate_quantifiers_rewriter(const data::rewriter& R, const data::data_specification& dataspec, const pbes_system::enumerate_quantifiers_mode enum_mode = pbes_system::enumerate_quantifiers_mode::expand_infinite_sorts_and_use_data_rewriter)
       : m_rewriter(R), m_dataspec(dataspec), m_enum_mode(enum_mode)
     {}
 

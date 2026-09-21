@@ -93,7 +93,7 @@ protected:
       return false;
     }
 
-    mCRL2log(log::verbose) << "Splitting\n" << phi_k << "wrt\n" << phi_l << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Splitting\n" << phi_k << "wrt\n" << phi_l << std::endl;
 
     // Try to split
     const std::pair<block, block> split_result = phi_k.split(phi_l, subblocks, use_optimisations);
@@ -279,7 +279,7 @@ protected:
     }
 
 
-    mCRL2log(log::verbose) << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
+    mCRL2log(log::log_level_t::verbose) << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
     int i = 0;
     for(const block_t& block: unreachable)
     {
@@ -294,7 +294,7 @@ protected:
         // we can really throw away the unreachable blocks.
         m_other_blocks.push_front(block);
       }
-      mCRL2log(log::verbose) << "  block " << i << "\n" << pp(block);
+      mCRL2log(log::log_level_t::verbose) << "  block " << i << "\n" << pp(block);
       i++;
     }
   }
@@ -355,7 +355,7 @@ protected:
     int i = 0;
     for(const block_t& block: blocks)
     {
-      mCRL2log(log::verbose) << YELLOW(THIN) << "  block " << i << NORMAL << " index: " << block.index << "\n" << block;
+      mCRL2log(log::log_level_t::verbose) << YELLOW(THIN) << "  block " << i << NORMAL << " index: " << block.index << "\n" << block;
       ++i;
     }
   }
@@ -456,9 +456,9 @@ public:
 
   void print() const
   {
-    mCRL2log(log::verbose) << GREEN(THIN) << "Partition proof blocks:" << NORMAL << std::endl;
+    mCRL2log(log::log_level_t::verbose) << GREEN(THIN) << "Partition proof blocks:" << NORMAL << std::endl;
     print_partition(m_proof_blocks);
-    mCRL2log(log::verbose) << GREEN(THIN) << "Partition other blocks:" << NORMAL << std::endl;
+    mCRL2log(log::log_level_t::verbose) << GREEN(THIN) << "Partition other blocks:" << NORMAL << std::endl;
     print_partition(m_other_blocks);
   }
 
@@ -492,7 +492,7 @@ public:
       // certain that they are unreachable when considering
       // the whole graph.
       find_reachable_blocks(true);
-      mCRL2log(log::verbose) << "End of a refinement step " << num_iterations << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "End of a refinement step " << num_iterations << std::endl;
     }
     // Check reachability in the full graph.
     // In this case, unreachable blocks will really be
@@ -500,12 +500,12 @@ public:
     find_reachable_blocks(false);
     if(num_iterations == 0 || num_steps == 0)
     {
-      mCRL2log(log::verbose) << "Final partition:" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Final partition:" << std::endl;
       print_partition(m_proof_blocks);
     }
     if(num_steps == 0)
     {
-      mCRL2log(log::info) << "Number of iterations " << num_iterations+1 << std::endl;
+      mCRL2log(log::log_level_t::info) << "Number of iterations " << num_iterations+1 << std::endl;
     }
     return num_iterations == 0;
   }

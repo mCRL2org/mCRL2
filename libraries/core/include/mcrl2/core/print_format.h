@@ -19,7 +19,7 @@ namespace mcrl2::core
 {
 
 /// \brief print_format_type represents the available pretty print formats
-using print_format_type = enum
+enum class print_format_type
 {
   print_default,
   print_internal
@@ -35,9 +35,9 @@ std::string pp_format_to_string(const print_format_type pp_format)
 {
   switch (pp_format)
   {
-    case print_default:
+    case print_format_type::print_default:
       return "default";
-    case print_internal:
+    case print_format_type::print_internal:
       return "internal";
     default:
       throw mcrl2::runtime_error("Unknown pretty print format");
@@ -56,11 +56,11 @@ print_format_type parse_pp_format(const std::string& s)
 {
   if(s == "default")
   {
-    return print_default;
+    return print_format_type::print_default;
   }
   else if(s == "internal")
   {
-    return print_internal;
+    return print_format_type::print_internal;
   }
   else
   {

@@ -54,8 +54,8 @@ class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_t
 
       desc.add_option("strategy",
                        make_enum_argument<absinthe_strategy>("NAME")
-                      .add_value(absinthe_over)
-                      .add_value(absinthe_under),
+                      .add_value(absinthe_strategy::absinthe_over)
+                      .add_value(absinthe_strategy::absinthe_under),
                        "use the approximation strategy NAME:",
                        's');
       desc.add_option("used-function-symbols", "print used function symbols", 'u');
@@ -76,11 +76,11 @@ class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_t
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbesabsinthe parameters:  " << std::endl;
-      mCRL2log(verbose) << "  input file:             " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:            " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  abstraction file:       " << m_abstraction_file << std::endl;
-      mCRL2log(verbose) << "  approximation strategy: " << print_absinthe_strategy(m_strategy) << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbesabsinthe parameters:  " << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:             " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:            " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  abstraction file:       " << m_abstraction_file << std::endl;
+      mCRL2log(log_level_t::verbose) << "  approximation strategy: " << print_absinthe_strategy(m_strategy) << std::endl;
 
       // load the pbes
       pbes p;
@@ -97,7 +97,7 @@ class pbes_absinthe_tool: public pbes_input_tool<pbes_output_tool<input_output_t
         abstraction_text = utilities::read_text(m_abstraction_file);
       }
 
-      bool over_approximation = (m_strategy == absinthe_over);
+      bool over_approximation = (m_strategy == absinthe_strategy::absinthe_over);
 
       absinthe_algorithm algorithm;
       if (m_enable_logging)

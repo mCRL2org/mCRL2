@@ -32,11 +32,11 @@ BOOST_AUTO_TEST_CASE(test_presrewr1)
     "init X(e1);                                           \n"
     ;
   pres p = txt2pres(pres_text);
-  data::rewriter datar(p.data(), data::jitty);
-  enumerate_quantifiers_rewriter presr1(datar, p.data(), pbes_system::expand_infinite_sorts);
+  data::rewriter datar(p.data(), data::rewrite_strategy::jitty);
+  enumerate_quantifiers_rewriter presr1(datar, p.data(), pbes_system::enumerate_quantifiers_mode::expand_infinite_sorts);
   pres_rewrite(p, presr1);
   BOOST_CHECK(p.is_well_typed());
-  enumerate_quantifiers_rewriter presr2(datar, p.data(), pbes_system::expand_finite_sorts);
+  enumerate_quantifiers_rewriter presr2(datar, p.data(), pbes_system::enumerate_quantifiers_mode::expand_finite_sorts);
   pres_rewrite(p, presr2);
   BOOST_CHECK(p.is_well_typed());
   enumerate_quantifiers_rewriter presr3(datar, p.data());
@@ -52,11 +52,11 @@ BOOST_AUTO_TEST_CASE(test_presrewr2)
   pres p = lps2pres(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
 
-  data::rewriter datar(p.data(), data::jitty);
-  enumerate_quantifiers_rewriter presr1(datar, p.data(), pbes_system::expand_infinite_sorts);
+  data::rewriter datar(p.data(), data::rewrite_strategy::jitty);
+  enumerate_quantifiers_rewriter presr1(datar, p.data(), pbes_system::enumerate_quantifiers_mode::expand_infinite_sorts);
   pres_rewrite(p, presr1);
   BOOST_CHECK(p.is_well_typed());
-  enumerate_quantifiers_rewriter presr2(datar, p.data(), pbes_system::expand_finite_sorts);
+  enumerate_quantifiers_rewriter presr2(datar, p.data(), pbes_system::enumerate_quantifiers_mode::expand_finite_sorts);
   pres_rewrite(p, presr2);
   BOOST_CHECK(p.is_well_typed());
   enumerate_quantifiers_rewriter presr3(datar, p.data());

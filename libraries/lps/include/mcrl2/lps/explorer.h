@@ -323,7 +323,7 @@ class explorer: public abortable
 
         if (!data::find_quantifier_variables(p_expression).empty()) 
         {
-          mCRL2log(log::info) << "The condition contains quantifiers, which means that rewriting to normal form could fail when the quantifier enumeration limit is too low. Use ---qlimit/-Q to increase the limit." << std::endl;
+          mCRL2log(log::log_level_t::info) << "The condition contains quantifiers, which means that rewriting to normal form could fail when the quantifier enumeration limit is too low. Use ---qlimit/-Q to increase the limit." << std::endl;
         }
 
         throw data::enumerator_error("Condition " + data::pp(reduced_condition) +
@@ -756,9 +756,9 @@ class explorer: public abortable
     {
       switch (m_options.search_strategy)
       {
-        case lps::es_breadth: return std::make_unique<breadth_first_todo_set>(init);
-        case lps::es_depth: return std::make_unique<depth_first_todo_set>(init);
-        case lps::es_highway: return std::make_unique<highway_todo_set>(init, m_options.highway_todo_max);
+        case lps::exploration_strategy::es_breadth: return std::make_unique<breadth_first_todo_set>(init);
+        case lps::exploration_strategy::es_depth: return std::make_unique<depth_first_todo_set>(init);
+        case lps::exploration_strategy::es_highway: return std::make_unique<highway_todo_set>(init, m_options.highway_todo_max);
         default: throw mcrl2::runtime_error("unsupported search strategy");
       }
     }
@@ -768,9 +768,9 @@ class explorer: public abortable
     {
       switch (m_options.search_strategy)
       {
-        case lps::es_breadth: return std::make_unique<breadth_first_todo_set>(first, last);
-        case lps::es_depth: return std::make_unique<depth_first_todo_set>(first, last);
-        case lps::es_highway: return std::make_unique<highway_todo_set>(first, last, m_options.highway_todo_max);
+        case lps::exploration_strategy::es_breadth: return std::make_unique<breadth_first_todo_set>(first, last);
+        case lps::exploration_strategy::es_depth: return std::make_unique<depth_first_todo_set>(first, last);
+        case lps::exploration_strategy::es_highway: return std::make_unique<highway_todo_set>(first, last, m_options.highway_todo_max);
         default: throw mcrl2::runtime_error("unsupported search strategy");
       }
     }
@@ -810,7 +810,7 @@ class explorer: public abortable
         {
           lps::specification control_flow_lpsspec = lpsspec;
           std::vector<cf_graph> graphs = compute_control_flow_graphs(control_flow_lpsspec, stategraph_options, compute_marking);
-          if (mCRL2logEnabled(log::debug))
+          if (mCRL2logEnabled(log::log_level_t::debug))
           {
             for (const cf_graph& G: graphs)
             {

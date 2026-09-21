@@ -35,9 +35,9 @@ namespace mcrl2::log {
                                 const std::string& msg,
                                 const bool print_time_information)
   {
-    assert(quiet != level);
+    assert(log_level_t::quiet != level);
     // Construct the message header, with or without time and debug level info.
-    const bool print_log_level= level >= debug;
+    const bool print_log_level= level >= log_level_t::debug;
     std::stringstream start_of_line;
     if (print_time_information || print_log_level)
     {
@@ -78,7 +78,7 @@ namespace mcrl2::log {
     bool overwrite = false;
     if (last_message_was_status())
     {
-      if (level == status)
+      if (level == log_level_t::status)
       {
         if (last_message_ended_with_newline())
         {
@@ -138,7 +138,7 @@ namespace mcrl2::log {
     // of another type, restore the trailing newline.
     if(msg_ends_with_newline)
     {
-      if (level == status)
+      if (level == log_level_t::status)
       {
         last_caret_pos() = caret_pos().load();
       }
@@ -152,7 +152,7 @@ namespace mcrl2::log {
     // Store information about this message so next time we can determine
     // whether we should overwrite the last line or not.
     last_message_ended_with_newline() = msg_ends_with_newline;
-    if (level == status)
+    if (level == log_level_t::status)
     {
       last_message_was_status() = msg != "\n";
     }

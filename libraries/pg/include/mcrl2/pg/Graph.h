@@ -80,13 +80,21 @@ public:
       can be used to iterate over predecessors.
       When storing bidirectional edges, both pairs of functions can be used,
       but this requires more memory. */
-  enum EdgeDirection
+  enum class EdgeDirection
   {
     EDGE_NONE = 0, /* for internal use only! */
     EDGE_SUCCESSOR = 1,
     EDGE_PREDECESSOR = 2,
     EDGE_BIDIRECTIONAL = 3
     };
+
+  // Tests whether the flag(s) in b are set in a. EdgeDirection is used as a
+  // bit flag set (EDGE_BIDIRECTIONAL = EDGE_SUCCESSOR | EDGE_PREDECESSOR),
+  // and this operator is always used in a boolean context to test membership.
+  friend constexpr bool operator&(EdgeDirection a, EdgeDirection b)
+  {
+    return (static_cast<int>(a) & static_cast<int>(b)) != 0;
+  }
 
     StaticGraph();          /*!< Construct an empty static graph. */
     ~StaticGraph();         /*!< Destroy the static graph. */
@@ -151,13 +159,13 @@ public:
                         ForwardIterator vertices_begin,
                         ForwardIterator vertices_end,
                         bool proper,
-                        EdgeDirection edge_dir = EDGE_NONE );
+                        EdgeDirection edge_dir = EdgeDirection::EDGE_NONE );
 
     void make_subgraph_threads(const StaticGraph& graph,
       const verti* verts,
       verti nvert,
       bool proper,
-      EdgeDirection edge_dir = EDGE_NONE);
+      EdgeDirection edge_dir = EdgeDirection::EDGE_NONE);
 
     /*! Removes the given edges from the graph. The contents of the edge list
         may be reordered by this function! */
@@ -261,7 +269,7 @@ protected:
                         ForwardIterator vertices_end,
                         VertexMapT &vertex_map,
                         bool proper,
-                        EdgeDirection edge_dir = EDGE_NONE );
+                        EdgeDirection edge_dir = EdgeDirection::EDGE_NONE );
 
 public:
   explicit StaticGraph(const StaticGraph& graph) = delete;

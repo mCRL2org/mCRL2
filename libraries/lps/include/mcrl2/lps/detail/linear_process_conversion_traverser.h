@@ -93,7 +93,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
       if (m_next_state_changed)
       {
         m_action_summands.emplace_back(m_sum_variables, m_condition, m_multi_action, m_next_state);
-        mCRL2log(log::debug) << "adding action summand\n" << m_action_summands.back() << std::endl;
+        mCRL2log(log::log_level_t::debug) << "adding action summand\n" << m_action_summands.back() << std::endl;
         clear_summand();
       }
       else
@@ -104,7 +104,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     else if (m_deadlock_changed)
     {
       m_deadlock_summands.emplace_back(m_sum_variables, m_condition, m_deadlock);
-      mCRL2log(log::debug) << "adding deadlock summand\n" << m_deadlock_summands.back() << std::endl;
+      mCRL2log(log::log_level_t::debug) << "adding deadlock summand\n" << m_deadlock_summands.back() << std::endl;
       clear_summand();
     }
   }
@@ -115,7 +115,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   {
     m_deadlock = lps::deadlock();
     m_deadlock_changed = true;
-    mCRL2log(log::debug) << "adding deadlock\n" << m_deadlock << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding deadlock\n" << m_deadlock << std::endl;
   }
 
   /// \brief Visit tau node
@@ -124,7 +124,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   {
     m_multi_action = lps::multi_action();
     m_multi_action_changed = true;
-    mCRL2log(log::debug) << "adding multi action tau\n" << m_multi_action << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding multi action tau\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit action node
@@ -134,7 +134,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     action a(x.label(), x.arguments());
     m_multi_action = lps::multi_action(a);
     m_multi_action_changed = true;
-    mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding multi action\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit sum node
@@ -142,7 +142,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   void leave(const process::sum& x)
   {
     m_sum_variables = m_sum_variables + x.variables();
-    mCRL2log(log::debug) << "adding sum variables\n" << data::pp(x.variables()) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding sum variables\n" << data::pp(x.variables()) << std::endl;
   }
 
   /// \brief Visit block node
@@ -190,7 +190,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     lps::multi_action r = m_multi_action;
     m_multi_action = l + r;
     m_multi_action_changed = true;
-    mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding multi action\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit at node
@@ -200,12 +200,12 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     if (is_delta(x))
     {
       m_deadlock.time() = x.time_stamp();
-      mCRL2log(log::debug) << "adding deadlock\n" << m_deadlock << std::endl;
+      mCRL2log(log::log_level_t::debug) << "adding deadlock\n" << m_deadlock << std::endl;
     }
     else
     {
       m_multi_action=lps::multi_action(m_multi_action.actions(), x.time_stamp());
-      mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
+      mCRL2log(log::log_level_t::debug) << "adding multi action\n" << m_multi_action << std::endl;
     }
   }
 
@@ -246,7 +246,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
       throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered with an unexpected right hand side");
     }
 
-    mCRL2log(log::debug) << "adding next state\n" << data::pp(m_next_state) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding next state\n" << data::pp(m_next_state) << std::endl;
   }
 
   /// \brief Visit if_then node
@@ -254,7 +254,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   void leave(const process::if_then& x)
   {
     m_condition = x.condition();
-    mCRL2log(log::debug) << "adding condition\n" << data::pp(m_condition) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding condition\n" << data::pp(m_condition) << std::endl;
   }
 
   /// \brief Visit if_then_else node
@@ -440,7 +440,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
       if (m_next_state_changed)
       {
         m_action_summands.emplace_back(m_sum_variables, m_condition, m_multi_action, m_next_state, m_distribution);
-        mCRL2log(log::debug) << "adding action summand\n" << m_action_summands.back() << std::endl;
+        mCRL2log(log::log_level_t::debug) << "adding action summand\n" << m_action_summands.back() << std::endl;
         clear_summand();
       }
       else
@@ -451,7 +451,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     else if (m_deadlock_changed)
     {
       m_deadlock_summands.emplace_back(m_sum_variables, m_condition, m_deadlock);
-      mCRL2log(log::debug) << "adding deadlock summand\n" << m_deadlock_summands.back() << std::endl;
+      mCRL2log(log::log_level_t::debug) << "adding deadlock summand\n" << m_deadlock_summands.back() << std::endl;
       clear_summand();
     }
   }
@@ -462,7 +462,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   {
     m_deadlock = lps::deadlock();
     m_deadlock_changed = true;
-    mCRL2log(log::debug) << "adding deadlock\n" << m_deadlock << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding deadlock\n" << m_deadlock << std::endl;
   }
 
   /// \brief Visit tau node
@@ -471,7 +471,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   {
     m_multi_action = lps::multi_action();
     m_multi_action_changed = true;
-    mCRL2log(log::debug) << "adding multi action tau\n" << m_multi_action << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding multi action tau\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit action node
@@ -481,7 +481,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     action a(x.label(), x.arguments());
     m_multi_action = lps::multi_action(a);
     m_multi_action_changed = true;
-    mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding multi action\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit sum node
@@ -489,7 +489,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   void leave(const process::sum& x)
   {
     m_sum_variables = m_sum_variables + x.variables();
-    mCRL2log(log::debug) << "adding sum variables\n" << data::pp(x.variables()) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding sum variables\n" << data::pp(x.variables()) << std::endl;
   }
 
   /// \brief Visit block node
@@ -537,7 +537,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     lps::multi_action r = m_multi_action;
     m_multi_action = l + r;
     m_multi_action_changed = true;
-    mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding multi action\n" << m_multi_action << std::endl;
   }
 
   /// \brief Visit at node
@@ -547,12 +547,12 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
     if (is_delta(x))
     {
       m_deadlock.time() = x.time_stamp();
-      mCRL2log(log::debug) << "adding deadlock\n" << m_deadlock << std::endl;
+      mCRL2log(log::log_level_t::debug) << "adding deadlock\n" << m_deadlock << std::endl;
     }
     else
     {
       m_multi_action=lps::multi_action(m_multi_action.actions(), x.time_stamp());
-      mCRL2log(log::debug) << "adding multi action\n" << m_multi_action << std::endl;
+      mCRL2log(log::log_level_t::debug) << "adding multi action\n" << m_multi_action << std::endl;
     }
   }
 
@@ -601,7 +601,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
       throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered with an unexpected right hand side");
     }
 
-    mCRL2log(log::debug) << "adding next state\n" << data::pp(m_next_state) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding next state\n" << data::pp(m_next_state) << std::endl;
   }
 
   /// \brief Visit if_then node
@@ -609,7 +609,7 @@ struct stochastic_linear_process_conversion_traverser: public process_expression
   void leave(const process::if_then& x)
   {
     m_condition = x.condition();
-    mCRL2log(log::debug) << "adding condition\n" << data::pp(m_condition) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "adding condition\n" << data::pp(m_condition) << std::endl;
   }
 
   /// \brief Visit if_then_else node

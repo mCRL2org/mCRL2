@@ -68,7 +68,7 @@ struct push_allow_cache
   // - unknown: the alphabet computation has not started yet
   // - busy: the alphabet computation is busy
   // - finished: the alphabet computation is finished
-  enum alphabet_status { unknown, busy, finished };
+  enum class alphabet_status { unknown, busy, finished };
 
   struct alphabet_key
   {
@@ -153,9 +153,9 @@ struct push_allow_cache
   {
     switch(status)
     {
-      case unknown: return "unknown";
-      case busy: return "busy";
-      case finished: return "finished";
+      case alphabet_status::unknown: return "unknown";
+      case alphabet_status::busy: return "busy";
+      case alphabet_status::finished: return "finished";
     }
     throw mcrl2::runtime_error("unknown status!");
   }
@@ -171,7 +171,7 @@ struct push_allow_cache
       core::identifier_string name = id_generator(P.name());
       process_identifier P1(name, P.variables());
       multi_action_name_set empty_set;
-      alphabet_value value(empty_set, unknown, P1);
+      alphabet_value value(empty_set, alphabet_status::unknown, P1);
       auto p = alphabet_map.insert(std::make_pair(key, value));
       return p.first->second;
     }
@@ -197,9 +197,9 @@ char print_alphabet_status(push_allow_cache::alphabet_status status)
 {
   switch (status)
   {
-    case push_allow_cache::unknown:  { return 'u'; }
-    case push_allow_cache::busy:     { return 'b'; }
-    case push_allow_cache::finished: { return 'f'; }
+    case push_allow_cache::alphabet_status::unknown:  { return 'u'; }
+    case push_allow_cache::alphabet_status::busy:     { return 'b'; }
+    case push_allow_cache::alphabet_status::finished: { return 'f'; }
   }
   return '?';
 }
@@ -347,7 +347,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       multi_action_name_set A1;
       push(push_allow_node(A1, process::delta()));
     }
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   void leave(const process::process_instance& x)
@@ -369,32 +369,32 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       node.apply_allow(A);
       push(node);
       alpha.alphabet = node.alphabet;
-      alpha.status = push_allow_cache::finished;
+      alpha.status = push_allow_cache::alphabet_status::finished;
       return;
     }
 
-    if (status == push_allow_cache::finished)
+    if (status == push_allow_cache::alphabet_status::finished)
     {
       // we already know the result for (A, P)
       push_allow_node node(alphabet, P1e);
       push(node);
-      mCRL2log(log::debug) << log(x);
+      mCRL2log(log::log_level_t::debug) << log(x);
       return;
     }
-    else if (status == push_allow_cache::busy)
+    else if (status == push_allow_cache::alphabet_status::busy)
     {
       // the alphabet of (A, x) is currently being computed; it suffices to return (emptyset, P1e)
       W.dependent_nodes.insert(key);
       multi_action_name_set empty_set;
       push_allow_node node(empty_set, P1e);
       push(node);
-      mCRL2log(log::debug) << log(x);
+      mCRL2log(log::log_level_t::debug) << log(x);
       return;
     }
 
-    if (status == push_allow_cache::unknown)
+    if (status == push_allow_cache::alphabet_status::unknown)
     {
-      alpha.status = push_allow_cache::busy;
+      alpha.status = push_allow_cache::alphabet_status::busy;
 
       // N.B. A copy is made, because a call to push_allow may invalidate a reference.
       const process_equation& eqn = find_equation(equations, x.identifier());
@@ -415,18 +415,18 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
         equations.push_back(eqn1);
 
         alpha.alphabet = node.alphabet;
-        alpha.status = push_allow_cache::finished;
+        alpha.status = push_allow_cache::alphabet_status::finished;
         node.apply_allow(A);
       }
       else
       {
-        alpha.status = push_allow_cache::unknown;
+        alpha.status = push_allow_cache::alphabet_status::unknown;
         W.set_unfinished(A, x);
       }
 
       node.expression = P1e;
       push(node);
-      mCRL2log(log::debug) << log(x);
+      mCRL2log(log::log_level_t::debug) << log(x);
     }
   }
 
@@ -446,55 +446,55 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void leave(const process::delta& x)
   {
     apply_pcrl_node(x);
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   void leave(const process::tau& x)
   {
     apply_pcrl_node(x);
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   void leave(const process::sum& x)
   {
     apply_pcrl_node(x);
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   void leave(const process::at& x)
   {
     apply_pcrl_node(x);
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   void leave(const process::seq& x)
   {
     apply_pcrl_node(x);
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   void leave(const process::if_then& x)
   {
     apply_pcrl_node(x);
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   void leave(const process::if_then_else& x)
   {
     apply_pcrl_node(x);
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   void leave(const process::bounded_init& x)
   {
     apply_pcrl_node(x);
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   void leave(const process::choice& x)
   {
     apply_pcrl_node(x);
-    mCRL2log(log::debug) << log(x);
+    mCRL2log(log::log_level_t::debug) << log(x);
   }
 
   std::string log_hide(const process::hide& x, const allow_set& A1)
@@ -510,7 +510,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     allow_set A1 = alphabet_operations::hide_inverse(I, A);
     push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(push_allow_node(alphabet_operations::hide(I, node.alphabet), process::hide(I, node.expression)));
-    mCRL2log(log::debug) << log(x, log_hide(x, A1));
+    mCRL2log(log::log_level_t::debug) << log(x, log_hide(x, A1));
   }
 
   std::string log_block(const process::block& x, const allow_set& A1)
@@ -526,7 +526,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     allow_set A1 = alphabet_operations::block(B, A);
     push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(node);
-    mCRL2log(log::debug) << log(x, log_block(x, A1));
+    mCRL2log(log::log_level_t::debug) << log(x, log_block(x, A1));
   }
 
   std::string log_rename(const process::rename& x, const allow_set& A1)
@@ -542,7 +542,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     allow_set A1 = alphabet_operations::rename_inverse(R, A);
     push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(push_allow_node(alphabet_operations::rename(R, node.alphabet), process::rename(R, node.expression)));
-    mCRL2log(log::debug) << log(x, log_rename(x, A1));
+    mCRL2log(log::log_level_t::debug) << log(x, log_rename(x, A1));
   }
 
   std::string log_comm(const process::comm& x, const allow_set& A, const allow_set& A1)
@@ -561,7 +561,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     communication_expression_list C1 = alphabet_operations::filter_comm_set(C, node.alphabet);
     push(push_allow_node(alphabet_operations::comm(C1, node.alphabet), make_comm(C1, node.expression)));
     top().apply_allow(A);
-    mCRL2log(log::debug) << log(x, log_comm(x, A, A1));
+    mCRL2log(log::log_level_t::debug) << log(x, log_comm(x, A, A1));
   }
 
   std::string log_allow(const process::allow& x, const allow_set& A1)
@@ -577,7 +577,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     allow_set A1 = alphabet_operations::allow(V, A);
     push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(node);
-    mCRL2log(log::debug) << log(x, log_allow(x, A1));
+    mCRL2log(log::log_level_t::debug) << log(x, log_allow(x, A1));
   }
 
   std::string log_merge(const process::merge& x, const allow_set& A, const allow_set& A_sub, const allow_set& A_arrow)
@@ -596,7 +596,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     auto [Apq, allow_required] = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
     push(push_allow_node(Apq, make_merge(p1.expression, q1.expression)));
     top().apply_allow(A, allow_required);
-    mCRL2log(log::debug) << log(x, log_merge(x, A, A_sub, A_arrow));
+    mCRL2log(log::log_level_t::debug) << log(x, log_merge(x, A, A_sub, A_arrow));
   }
 
   std::string log_left_merge(const process::left_merge& x, const allow_set& A, const allow_set& A_sub, const allow_set& A_arrow)
@@ -615,7 +615,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     auto [Apq, allow_required] = alphabet_operations::bounded_left_merge(p1.alphabet, q1.alphabet, A);
     push(push_allow_node(Apq, make_left_merge(p1.expression, q1.expression)));
     top().apply_allow(A, allow_required);
-    mCRL2log(log::debug) << log(x, log_left_merge(x, A, A_sub, A_arrow));
+    mCRL2log(log::log_level_t::debug) << log(x, log_left_merge(x, A, A_sub, A_arrow));
   }
 
   std::string log_sync(const process::sync& x, const allow_set& A, const allow_set& A_sub, const allow_set& A_arrow)
@@ -651,7 +651,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     auto [Apq, allow_required] = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
     push(push_allow_node(Apq, make_sync(p1.expression, q1.expression)));
     top().apply_allow(A, allow_required);
-    mCRL2log(log::debug) << log(x, log_sync(x, A, A_sub, A_arrow));
+    mCRL2log(log::log_level_t::debug) << log(x, log_sync(x, A, A_sub, A_arrow));
   }
 };
 
@@ -683,9 +683,9 @@ push_allow_node push_allow(const process_expression& x, const allow_set& A, std:
       detail::push_allow_cache::alphabet_key key(v.A, v.P.identifier());
       W.unfinished.erase(W.unfinished.begin());
       detail::push_allow_cache::alphabet_value& value = W.alphabet(key.A, key.P);
-      if (value.status != detail::push_allow_cache::finished)
+      if (value.status != detail::push_allow_cache::alphabet_status::finished)
       {
-        mCRL2log(log::debug) << "generating unfinished equation for " << key << " -> " << value << std::endl;
+        mCRL2log(log::log_level_t::debug) << "generating unfinished equation for " << key << " -> " << value << std::endl;
         push_allow(v.P, v.A, equations, W);
       }
     }

@@ -194,14 +194,14 @@ static void trace2aut(std::ostream& os, mcrl2::lts::trace& trace)
 
 inline void save_trace(mcrl2::lts::trace& trace, output_type outtype, std::ostream& out, const std::string& name, const std::string& output_filename)
 {
-  mCRL2log(verbose) << "writing result in " << description(outtype) << "..." << std::endl;
+  mCRL2log(log_level_t::verbose) << "writing result in " << description(outtype) << "..." << std::endl;
   switch (outtype)
   {
     case otPlain:
-      trace.save(output_filename,trace::tfPlain);
+      trace.save(output_filename,trace::trace_format::tfPlain);
       break;
     case otMcrl2:
-      trace.save(output_filename,trace::tfMcrl2);
+      trace.save(output_filename,trace::trace_format::tfMcrl2);
       break;
     case otAut:
       trace2aut(out,trace);
@@ -239,13 +239,13 @@ class tracepp_tool: public input_output_tool
 
       if (input_filename().empty())
       {
-        mCRL2log(verbose) << "reading input from stdin..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "reading input from stdin..." << std::endl;
 
         trace.load("");  // Load from stdin. 
       }
       else
       {
-        mCRL2log(verbose) << "reading input from '" <<  input_filename() << "'..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "reading input from '" <<  input_filename() << "'..." << std::endl;
 
         std::ifstream in(input_filename().c_str(), std::ios_base::binary|std::ios_base::in);
 
@@ -262,12 +262,12 @@ class tracepp_tool: public input_output_tool
 
       if (output_filename().empty())
       {
-        mCRL2log(verbose) << "writing result to stdout..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "writing result to stdout..." << std::endl;
         save_trace(trace, format_for_output, std::cout,"stdin", output_filename());
       }
       else
       {
-        mCRL2log(verbose) << "writing result to '" <<  output_filename() << "'..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "writing result to '" <<  output_filename() << "'..." << std::endl;
 
         std::ofstream out(output_filename().c_str(), std::ios_base::binary|std::ios_base::out|std::ios_base::trunc);
 

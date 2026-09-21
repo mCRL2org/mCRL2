@@ -107,7 +107,7 @@ vertex_set attr_min_rank_generic(const StructureGraph& G, vertex_set A, std::siz
     // N.B. Use a breadth first search, to minimize counter examples
     auto u = todo.pop_front();
 
-    if (G.decoration(u) == alpha || includes_successors(G, u, A))
+    if (G.decoration(u) == static_cast<structure_graph::decoration_type>(alpha) || includes_successors(G, u, A))
     {
       global_strategy<StructureGraph>(G).set_strategy(u, find_successor_in(G, u, A));
 
@@ -115,7 +115,7 @@ vertex_set attr_min_rank_generic(const StructureGraph& G, vertex_set A, std::siz
 
       for (auto v: G.predecessors(u))
       {
-        if (U.contains(v) && (compare(G.rank(v), j) || (G.rank(v) == data::undefined_index() && G.decoration(v) <= 1)) && !A.contains(v))
+        if (U.contains(v) && (compare(G.rank(v), j) || (G.rank(v) == data::undefined_index() && static_cast<int>(G.decoration(v)) <= 1)) && !A.contains(v))
         {
           todo.insert(v);
         }
@@ -136,9 +136,9 @@ void fatal_attractors_generic(const simple_structure_graph& G,
                               Compare compare
                              )
 {
-  mCRL2log(log::debug) << "\n  === fatal attractors (equation " << equation_count << ") ===\n" << G << std::endl;
-  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
-  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "\n  === fatal attractors (equation " << equation_count << ") ===\n" << G << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S1 = " << S[1] << std::endl;
 
   // count the number of insertions in the sets S[0] and S[1]
   std::size_t insertion_count = 0;
@@ -162,11 +162,11 @@ void fatal_attractors_generic(const simple_structure_graph& G,
   {
     std::size_t j = p.first;
     auto alpha = j % 2;
-    mCRL2log(log::debug) << "  --- iteration j = " << j << " ---" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "  --- iteration j = " << j << " ---" << std::endl;
 
     vertex_set& U_j = p.second;
     U_j = set_minus(U_j, S[1 - alpha]);
-    mCRL2log(log::debug) << "  U_" << std::to_string(j) << " = " << U_j << std::endl;
+    mCRL2log(log::log_level_t::debug) << "  U_" << std::to_string(j) << " = " << U_j << std::endl;
     vertex_set U = set_union(U_j, S[alpha]);
     vertex_set X = detail::attr_min_rank_generic(G, U, alpha, V, j, compare);
     vertex_set Y = set_minus(V, attr_default(G, set_minus(V, X), 1 - alpha));
@@ -174,12 +174,12 @@ void fatal_attractors_generic(const simple_structure_graph& G,
     while (X != Y)
     {
       calculation_steps++;
-      mCRL2log(log::debug) << "  X = " << X << std::endl;
-      mCRL2log(log::debug) << "  Y = " << Y << std::endl;
+      mCRL2log(log::log_level_t::debug) << "  X = " << X << std::endl;
+      mCRL2log(log::log_level_t::debug) << "  Y = " << Y << std::endl;
       X = detail::attr_min_rank_generic(G, set_intersection(U, Y), alpha, V, j, compare);
       Y = set_minus(Y, attr_default(G, set_minus(Y, X), 1 - alpha));
     }
-    mCRL2log(log::debug) << "  X (final) = " << X << std::endl;
+    mCRL2log(log::log_level_t::debug) << "  X (final) = " << X << std::endl;
 
     // set strategy for v \in X \ S[alpha]
     for (structure_graph::index_type v: X.vertices())
@@ -189,7 +189,7 @@ void fatal_attractors_generic(const simple_structure_graph& G,
       {
         continue;
       }
-      if ((alpha == 0 && G.decoration(v) == structure_graph::d_disjunction) || (alpha == 1 && G.decoration(v) == structure_graph::d_conjunction))
+      if ((alpha == 0 && G.decoration(v) == structure_graph::decoration_type::d_disjunction) || (alpha == 1 && G.decoration(v) == structure_graph::decoration_type::d_conjunction))
       {
         if (U_j.contains(v))
         {
@@ -210,17 +210,17 @@ void fatal_attractors_generic(const simple_structure_graph& G,
       calculation_steps++;
       insertion_count++;
       S[alpha].insert(x);
-      mCRL2log(log::debug) << "  insert vertex " << x << " in S" << alpha << std::endl;
+      mCRL2log(log::log_level_t::debug) << "  insert vertex " << x << " in S" << alpha << std::endl;
     }
 
     S[alpha] = attr_default_with_tau(G, S[alpha], alpha, tau);
   }
-  mCRL2log(log::debug) << "\n  === result of fatal attractors (equation " << equation_count << ") ===" << std::endl;
-  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
-  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
-  mCRL2log(log::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
-  mCRL2log(log::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
-  mCRL2log(log::debug) << "  inserted " << insertion_count << " vertices." << std::endl;
+  mCRL2log(log::log_level_t::debug) << "\n  === result of fatal attractors (equation " << equation_count << ") ===" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S1 = " << S[1] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  inserted " << insertion_count << " vertices." << std::endl;
 }
 
 inline
@@ -260,7 +260,7 @@ vertex_set attr_min_rank_original(const StructureGraph& G, vertex_set A, std::si
   vertex_set X(A.extent());
   for (auto u: todo.vertices())
   {
-    if (A.contains(u) && (G.decoration(u) == alpha || includes_successors(G, u, A)))
+    if (A.contains(u) && (G.decoration(u) == static_cast<structure_graph::decoration_type>(alpha) || includes_successors(G, u, A)))
     {
       X.insert(u);
     }
@@ -271,7 +271,7 @@ vertex_set attr_min_rank_original(const StructureGraph& G, vertex_set A, std::si
     // N.B. Use a breadth first search, to minimize counter examples
     auto u = todo.pop_front();
 
-    if (G.decoration(u) == alpha || includes_successors(G, u, lazy_union(A, X)))
+    if (G.decoration(u) == static_cast<structure_graph::decoration_type>(alpha) || includes_successors(G, u, lazy_union(A, X)))
     {
       global_strategy<StructureGraph>(G).set_strategy(u, find_successor_in(G, u, lazy_union(A, X)));
 
@@ -279,7 +279,7 @@ vertex_set attr_min_rank_original(const StructureGraph& G, vertex_set A, std::si
 
       for (auto v: G.predecessors(u))
       {
-        if (U.contains(v) && (G.rank(v) >= j || (G.rank(v) == data::undefined_index() && G.decoration(v) <= 1)) && !X.contains(v))
+        if (U.contains(v) && (G.rank(v) >= j || (G.rank(v) == data::undefined_index() && static_cast<int>(G.decoration(v)) <= 1)) && !X.contains(v))
         {
           todo.insert(v);
         }
@@ -298,9 +298,9 @@ void fatal_attractors_original(const simple_structure_graph& G,
                                std::size_t equation_count
 )
 {
-  mCRL2log(log::debug) << "\n  === fatal attractors original (equation " << equation_count << ") ===\n" << G << std::endl;
-  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
-  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "\n  === fatal attractors original (equation " << equation_count << ") ===\n" << G << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S1 = " << S[1] << std::endl;
 
   // count the number of insertions in the sets S[0] and S[1]
   std::size_t insertion_count = 0;
@@ -324,7 +324,7 @@ void fatal_attractors_original(const simple_structure_graph& G,
   {
     std::size_t j = p.first;
     auto alpha = j % 2;
-    mCRL2log(log::debug) << "  --- iteration j = " << j << " ---" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "  --- iteration j = " << j << " ---" << std::endl;
 
     vertex_set& U_j = p.second;
     U_j = set_minus(U_j, S[1 - alpha]);
@@ -333,13 +333,13 @@ void fatal_attractors_original(const simple_structure_graph& G,
 
     while (!U_j.is_empty() && U_j != X)
     {
-      mCRL2log(log::debug) << "  U_" + std::to_string(j) << " = " << U_j << std::endl;
+      mCRL2log(log::log_level_t::debug) << "  U_" + std::to_string(j) << " = " << U_j << std::endl;
       X = U_j;
-      mCRL2log(log::debug) << "  X = " << X << std::endl;
-      mCRL2log(log::debug) << "  X U S_" + std::to_string(alpha) << " = " << set_union(X, S[alpha]) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "  X = " << X << std::endl;
+      mCRL2log(log::log_level_t::debug) << "  X U S_" + std::to_string(alpha) << " = " << set_union(X, S[alpha]) << std::endl;
       vertex_set Y = detail::attr_min_rank_original(G, set_union(X, S[alpha]), alpha, V, j);
-      mCRL2log(log::debug) << "  Y = " << Y << std::endl;
-      mCRL2log(log::debug) << "  U_" + std::to_string(j) << " is " << (is_subset_of(U_j, Y) ? "a" : "no") << " subset of Y" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "  Y = " << Y << std::endl;
+      mCRL2log(log::log_level_t::debug) << "  U_" + std::to_string(j) << " is " << (is_subset_of(U_j, Y) ? "a" : "no") << " subset of Y" << std::endl;
       if (is_subset_of(U_j, Y))
       {
         // set strategy for v \in Y \ S[alpha]
@@ -350,7 +350,7 @@ void fatal_attractors_original(const simple_structure_graph& G,
           {
             continue;
           }
-          if ((alpha == 0 && G.decoration(v) == structure_graph::d_disjunction) || (alpha == 1 && G.decoration(v) == structure_graph::d_conjunction))
+          if ((alpha == 0 && G.decoration(v) == structure_graph::decoration_type::d_disjunction) || (alpha == 1 && G.decoration(v) == structure_graph::decoration_type::d_conjunction))
           {
             if (U_j.contains(v))
             {
@@ -371,7 +371,7 @@ void fatal_attractors_original(const simple_structure_graph& G,
           calculation_steps++;
           insertion_count++;
           S[alpha].insert(y);
-          mCRL2log(log::debug) << "  insert vertex " << y << " in S" << alpha << std::endl;
+          mCRL2log(log::log_level_t::debug) << "  insert vertex " << y << " in S" << alpha << std::endl;
         }
 
         S[alpha] = attr_default_with_tau(G, S[alpha], alpha, tau);
@@ -383,12 +383,12 @@ void fatal_attractors_original(const simple_structure_graph& G,
       }
     }
   }
-  mCRL2log(log::debug) << "\n  === result of fatal attractors original (equation " << equation_count << ") ===" << std::endl;
-  mCRL2log(log::debug) << "  S0 = " << S[0] << std::endl;
-  mCRL2log(log::debug) << "  S1 = " << S[1] << std::endl;
-  mCRL2log(log::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
-  mCRL2log(log::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
-  mCRL2log(log::debug) << "  inserted " << insertion_count << " vertices." << std::endl;
+  mCRL2log(log::log_level_t::debug) << "\n  === result of fatal attractors original (equation " << equation_count << ") ===" << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S0 = " << S[0] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  S1 = " << S[1] << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  tau0 = " << print_strategy_vector(S[0], tau[0]) << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  tau1 = " << print_strategy_vector(S[1], tau[1]) << std::endl;
+  mCRL2log(log::log_level_t::debug) << "  inserted " << insertion_count << " vertices." << std::endl;
 }
 
 } // namespace mcrl2::pbes_system::detail

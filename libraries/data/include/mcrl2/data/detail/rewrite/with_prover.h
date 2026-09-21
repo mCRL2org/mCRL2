@@ -39,11 +39,11 @@ class RewriterProver: public Rewriter
     {
       switch (prover_obj.rewriter_strategy())
       {
-        case jitty:
-          return jitty_prover;
+        case data::rewrite_strategy::jitty:
+          return data::rewrite_strategy::jitty_prover;
 #ifdef MCRL2_ENABLE_JITTYC
-        case jitty_compiling:
-          return jitty_compiling_prover;
+        case data::rewrite_strategy::jitty_compiling:
+          return data::rewrite_strategy::jitty_compiling_prover;
 #endif
         default:
           throw mcrl2::runtime_error("invalid rewrite strategy");

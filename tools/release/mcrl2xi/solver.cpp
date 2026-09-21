@@ -46,7 +46,7 @@ void Solver::solve(QString specification, QString dataExpression)
     {
       std::string stdDataExpression = dataExpression.toStdString();
 
-      mCRL2log(info) << "Solving: \"" << stdDataExpression << "\"" << std::endl;
+      mCRL2log(log_level_t::info) << "Solving: \"" << stdDataExpression << "\"" << std::endl;
 
       std::size_t dotpos = stdDataExpression.find('.');
       if (dotpos  == std::string::npos)
@@ -89,7 +89,7 @@ void Solver::solve(QString specification, QString dataExpression)
       mcrl2::data::enumerator_queue<enumerator_element> enumerator_deque(enumerator_element(variable_list(m_vars.begin(),m_vars.end()), term));
       for (enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() && !m_abort; ++i)
       {
-        mCRL2log(verbose) << "Solution found" << std::endl;
+        mCRL2log(log_level_t::verbose) << "Solution found" << std::endl;
 
         QString s('[');
 
@@ -114,7 +114,7 @@ void Solver::solve(QString specification, QString dataExpression)
         if (m_abort)
           break;
       }
-      mCRL2log(info) << (m_abort ? "Abort by user." : "Done solving.") << std::endl;
+      mCRL2log(log_level_t::info) << (m_abort ? "Abort by user." : "Done solving.") << std::endl;
     }
     catch (const mcrl2::runtime_error& e)
     {

@@ -55,7 +55,7 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
   }
   else if (pid < 0)
   {
-    mCRL2log(error) << strerror(errno) << std::endl;
+    mCRL2log(log_level_t::error) << strerror(errno) << std::endl;
 
     ::close(pipe_stdin[0]);
     ::close(pipe_stdin[1]);
@@ -87,7 +87,7 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
     {
       if (strncmp(output.data(), "sat", 3) == 0)
       {
-        mCRL2log(verbose) << "The formula is satisfiable" << std::endl;
+        mCRL2log(log_level_t::verbose) << "The formula is satisfiable" << std::endl;
 
         ::close(pipe_stdout[0]);
         ::close(pipe_stderr[0]);
@@ -98,11 +98,11 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
       }
       else if (strncmp(output.data(), "unsat", 5) == 0)
       {
-        mCRL2log(verbose) << "The formula is unsatisfiable" << std::endl;
+        mCRL2log(log_level_t::verbose) << "The formula is unsatisfiable" << std::endl;
       }
       else if (strncmp(output.data(), "unknown", 7) == 0)
       {
-        mCRL2log(verbose) << T::name() << " cannot determine whether this formula is satisfiable or not." << std::endl;
+        mCRL2log(log_level_t::verbose) << T::name() << " cannot determine whether this formula is satisfiable or not." << std::endl;
       }
     }
     else

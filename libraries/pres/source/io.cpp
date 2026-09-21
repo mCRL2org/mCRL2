@@ -49,7 +49,7 @@ void save_pres(const pres& pres,
   {
     format = pres_format_internal();
   }
-  mCRL2log(log::verbose) << "Saving result in " << format.shortname() << " format..." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "Saving result in " << format.shortname() << " format..." << std::endl;
   if (format == pres_format_internal())
   {
     atermpp::binary_aterm_ostream(stream) << pres;
@@ -77,7 +77,7 @@ void load_pres(pres& pres, std::istream& stream, utilities::file_format format, 
   {
     format = pres_format_internal();
   }
-  mCRL2log(log::verbose) << "Loading PRES in " << format.shortname() << " format..." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "Loading PRES in " << format.shortname() << " format..." << std::endl;
   if (format == pres_format_internal())
   {
     atermpp::binary_aterm_istream(stream) >> pres;
@@ -257,7 +257,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pres& pres)
   }
   catch (std::exception& ex)
   {
-    mCRL2log(log::error) << ex.what() << "\n";
+    mCRL2log(log::log_level_t::error) << ex.what() << "\n";
     throw mcrl2::runtime_error(std::string("Error reading parameterised real equation system (PRES)."));
   }
 

@@ -85,11 +85,11 @@ static void set_stream_binary([[maybe_unused]] const std::string& name, [[maybe_
 #ifdef MCRL2_PLATFORM_WINDOWS
   if (_setmode(_fileno(handle), _O_BINARY) == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "Cannot set " << name << " to binary mode.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "Cannot set " << name << " to binary mode.\n";
   }
   else
   {
-    mCRL2log(mcrl2::log::debug) << "Converted " << name << " to binary mode.\n";
+    mCRL2log(mcrl2::log::log_level_t::debug) << "Converted " << name << " to binary mode.\n";
   }
 
   fflush(stderr);

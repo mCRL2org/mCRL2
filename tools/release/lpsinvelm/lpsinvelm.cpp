@@ -180,7 +180,7 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
           throw mcrl2::runtime_error("cannot open input file '" + m_invariant_file_name + "'");
         }
 
-        mCRL2log(log::verbose) << "parsing input file '" <<  m_invariant_file_name << "'..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "parsing input file '" <<  m_invariant_file_name << "'..." << std::endl;
 
         data::variable_list& parameters=spec.process().process_parameters();
         invariant = data::parse_data_expression(instream, parameters, spec.data());
@@ -194,7 +194,7 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
       if (m_no_check)
       {
-        mCRL2log(log::warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
+        mCRL2log(log::log_level_t::warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
       }
       else
       {

@@ -191,7 +191,7 @@ class solve_structure_graph_algorithm
     std::pair<vertex_set, vertex_set> solve_recursive(structure_graph& G, std::size_t& calculation_steps)
     {
       calculation_steps++;
-      mCRL2log(log::debug) << "\n  --- solve_recursive input ---\n" << G << std::endl;
+      mCRL2log(log::log_level_t::debug) << "\n  --- solve_recursive input ---\n" << G << std::endl;
       std::size_t N = G.extent();
 
       if (G.is_empty())
@@ -210,7 +210,7 @@ class solve_structure_graph_algorithm
       {
         calculation_steps++;
         const auto& u = G.find_vertex(ui);
-        if (u.decoration == alpha)
+        if (u.decoration == static_cast<structure_graph::decoration_type>(alpha))
         {
           // auto v = succ(G, ui); // N.B. this may lead to a wrong strategy!
           auto v = succ(G, ui, U);
@@ -259,9 +259,9 @@ class solve_structure_graph_algorithm
          }
       }
 
-      mCRL2log(log::debug) << "\n  --- solution for solve_recursive input ---\n" << G;
-      mCRL2log(log::debug) << "   W0 = " << W[0] << std::endl;
-      mCRL2log(log::debug) << "   W1 = " << W[1] << std::endl;
+      mCRL2log(log::log_level_t::debug) << "\n  --- solution for solve_recursive input ---\n" << G;
+      mCRL2log(log::log_level_t::debug) << "   W0 = " << W[0] << std::endl;
+      mCRL2log(log::log_level_t::debug) << "   W1 = " << W[1] << std::endl;
       assert(W[0].size() + W[1].size() + G.exclude().count() == N);
       return { W[0], W[1] };
     }
@@ -270,7 +270,7 @@ class solve_structure_graph_algorithm
     inline
     std::pair<vertex_set, vertex_set> solve_recursive_extended(structure_graph& G, std::size_t& calculation_steps)
     {
-      mCRL2log(log::debug) << "\n  --- solve_recursive_extended input ---\n" << G << std::endl;
+      mCRL2log(log::log_level_t::debug) << "\n  --- solve_recursive_extended input ---\n" << G << std::endl;
       calculation_steps++;
 
       std::size_t N = G.extent();
@@ -286,11 +286,11 @@ class solve_structure_graph_algorithm
           continue;
         }
         const auto& v = G.find_vertex(vi);
-        if (v.decoration == structure_graph::d_false)
+        if (v.decoration == structure_graph::decoration_type::d_false)
         {
           Vconj.insert(vi);
         }
-        else if (v.decoration == structure_graph::d_true)
+        else if (v.decoration == structure_graph::decoration_type::d_true)
         {
           Vdisj.insert(vi);
         }
@@ -337,7 +337,7 @@ class solve_structure_graph_algorithm
     {
       using utilities::detail::contains;
 
-      mCRL2log(log::debug) << "\n--- CHECK STRATEGY ---" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "\n--- CHECK STRATEGY ---" << std::endl;
       log_vertex_set(G, Wconj, "Wconj");
       log_vertex_set(G, Wdisj, "Wdisj");
 
@@ -363,7 +363,7 @@ class solve_structure_graph_algorithm
         structure_graph::index_type u = *todo.begin();
         todo.erase(todo.begin());
         done.insert(u);
-        if ((is_disjunctive && G.decoration(u) == structure_graph::d_disjunction) || (!is_disjunctive && G.decoration(u) == structure_graph::d_conjunction))
+        if ((is_disjunctive && G.decoration(u) == structure_graph::decoration_type::d_disjunction) || (!is_disjunctive && G.decoration(u) == structure_graph::decoration_type::d_conjunction))
         {
           // explore only the strategy edge
           structure_graph::index_type v = G.strategy(u);
@@ -451,8 +451,8 @@ class solve_structure_graph_algorithm
     inline
     std::pair<vertex_set, vertex_set> solve_partitions(structure_graph& G, std::size_t& calculation_steps)
     {
-      mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
-      mCRL2log(log::debug) << G << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Solving parity game..." << std::endl;
+      mCRL2log(log::log_level_t::debug) << G << std::endl;
       assert(G.extent() > 0);
       assert(G.is_defined());
       calculation_steps++;
@@ -476,8 +476,8 @@ class solve_structure_graph_algorithm
         check_solve_recursive_solution(G, is_disjunctive, W.first, W.second, calculation_steps);
       }
 
-      mCRL2log(log::debug) << "\nSolved structure graph " << std::endl;
-      mCRL2log(log::debug) << G << std::endl;
+      mCRL2log(log::log_level_t::debug) << "\nSolved structure graph " << std::endl;
+      mCRL2log(log::log_level_t::debug) << G << std::endl;
       return W;
     }
 
@@ -488,14 +488,14 @@ class solve_structure_graph_algorithm
     inline
     std::pair<bool, std::set<structure_graph::index_type>> extract_evidence(structure_graph& G)
     {
-      mCRL2log(log::verbose) << "Solving parity game..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Solving parity game..." << std::endl;
       vertex_set Wconj;
       vertex_set Wdisj;
       std::size_t calculation_steps = 0;
       std::tie(Wdisj, Wconj) = solve_recursive_extended(G, calculation_steps);
       structure_graph::index_type init = G.initial_vertex();
 
-      mCRL2log(log::verbose) << "Extracting evidence..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Extracting evidence..." << std::endl;
       std::set<structure_graph::index_type> W = extract_minimal_structure_graph(G, init, Wdisj, Wconj);
       return { Wdisj.contains(init), W };
     }

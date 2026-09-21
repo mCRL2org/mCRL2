@@ -30,7 +30,7 @@ namespace detail {
 // stored as double's and variables are stored by their index. 
 //
 // The values of true and false are represented by the real constants -infinity and infinity.
-enum internal_res_expression_type
+enum class internal_res_expression_type
 {
   propositional_variable,
   real_constant,
@@ -314,7 +314,7 @@ class ressolve_by_numerical_iteration_directed
       {
         error = std::max(error,std::abs(m_new_solution[i]-m_previous_solution[i]));
       }
-      mCRL2log(log::debug) << "Current solution: " << std::setprecision(static_cast<int>(m_options.precision)) 
+      mCRL2log(log::log_level_t::debug) << "Current solution: " << std::setprecision(static_cast<int>(m_options.precision)) 
                            << detail::evaluate_directed(translated_pres_expressions[m_input_pres.initial_state()],m_new_solution) << "   " 
                            << " Difference with previous iteration: " << error << "\n";     
       return error<=pow(0.1,static_cast<double>(m_options.precision));

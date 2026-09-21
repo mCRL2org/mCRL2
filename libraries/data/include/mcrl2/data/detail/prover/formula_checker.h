@@ -89,7 +89,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(log::info) << "  Witness: " << v_witness << std::endl;
+          mCRL2log(log::log_level_t::info) << "  Witness: " << v_witness << std::endl;
         }
       }
     }
@@ -109,7 +109,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(log::info) << "  Counter-example: " << v_counter_example << std::endl;
+          mCRL2log(log::log_level_t::info) << "  Counter-example: " << v_counter_example << std::endl;
         }
       }
     }
@@ -129,10 +129,10 @@ class Formula_Checker
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     Formula_Checker(mcrl2::data::data_specification a_data_spec,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewrite_strategy::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,
+      mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::smt_solver_type::solver_type_cvc,
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_witness = false,
@@ -161,21 +161,21 @@ class Formula_Checker
 
       for (const auto& v_formula: a_formulas)
       {
-        mCRL2log(log::info) << "'" << v_formula << "'";
+        mCRL2log(log::log_level_t::info) << "'" << v_formula << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();
         Answer v_is_contradiction = f_bdd_prover.is_contradiction();
-        if (v_is_tautology == answer_yes)
+        if (v_is_tautology == Answer::answer_yes)
         {
-          mCRL2log(log::info) << "Tautology" << std::endl;
+          mCRL2log(log::log_level_t::info) << "Tautology" << std::endl;
         }
-        else if (v_is_contradiction == answer_yes)
+        else if (v_is_contradiction == Answer::answer_yes)
         {
-          mCRL2log(log::info) << "Contradiction" << std::endl;
+          mCRL2log(log::log_level_t::info) << "Contradiction" << std::endl;
         }
         else
         {
-          mCRL2log(log::info) << "Undeterminable" << std::endl;
+          mCRL2log(log::log_level_t::info) << "Undeterminable" << std::endl;
           print_counter_example();
           print_witness();
           save_dot_file(v_formula_number);

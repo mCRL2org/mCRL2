@@ -45,7 +45,7 @@ public:
 
     // First instantiate the finite sorts in the sum operator.
     std::set<data::sort_expression> sorts = lps::finite_sorts(m_spec.data());
-    mCRL2log(log::verbose) << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
     lps::suminst_algorithm<DataRewriter, Specification>(m_spec, m_rewriter, sorts).run();
 
     //TODO: consider stochastic action summands as well

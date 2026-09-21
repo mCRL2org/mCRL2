@@ -80,17 +80,17 @@ class uncompiled_library : public dynamic_library
           std::string line(buf.data());
           assert(*line.rbegin() == '\n');
           line.erase(line.size() - 1);
-          mCRL2log(mcrl2::log::debug) << "  Read line: " << line << std::endl;
+          mCRL2log(mcrl2::log::log_level_t::debug) << "  Read line: " << line << std::endl;
           
           // Check that reported file exists. If not, produce error message and
           // flush script output to the log.
           if (!mcrl2::utilities::file_exists(line))
           {
-            mCRL2log(mcrl2::log::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
-            mCRL2log(mcrl2::log::error) << line << std::endl;
+            mCRL2log(mcrl2::log::log_level_t::error) << "Compile script " << m_compile_script << " produced unexpected output:\n";
+            mCRL2log(mcrl2::log::log_level_t::error) << line << std::endl;
             while (fgets(buf.data(), buf.size(), stream) != nullptr)
             {
-              mCRL2log(mcrl2::log::error) << std::string(buf.data());
+              mCRL2log(mcrl2::log::log_level_t::error) << std::string(buf.data());
             }
             pclose(stream);
             throw std::runtime_error("Compile script failed.");
@@ -102,7 +102,7 @@ class uncompiled_library : public dynamic_library
             // On OSX, interrupts sometimes arrive during the call to read(), which
             // is called by fgets. If an interrupt arrives, we just ignore it
             // an clear the error status of the stream, and try again.
-            mCRL2log(mcrl2::log::debug) << "Reading was interrupted. Clearing error status and retrying" << std::endl;
+            mCRL2log(mcrl2::log::log_level_t::debug) << "Reading was interrupted. Clearing error status and retrying" << std::endl;
             perror("Error according to errno");
             clearerr(stream);
         }
@@ -136,7 +136,7 @@ class uncompiled_library : public dynamic_library
         }
         else
         {
-          mCRL2log(mcrl2::log::debug) << "Temporary file '" << tempfile << "' deleted." << std::endl;
+          mCRL2log(mcrl2::log::log_level_t::debug) << "Temporary file '" << tempfile << "' deleted." << std::endl;
         }
       }
     }
@@ -151,7 +151,7 @@ class uncompiled_library : public dynamic_library
       }
       catch (std::runtime_error &error)
       {
-        mCRL2log(mcrl2::log::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::error) << "Could not cleanup temporary files: " << error.what() << std::endl;
       }
 #endif
     }

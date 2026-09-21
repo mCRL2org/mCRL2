@@ -76,12 +76,12 @@ class complps2pbes_tool : public mcrl2::pbes_system::tools::pbes_output_tool<inp
       std::string text;
       if (input_filename().empty())
       {
-        mCRL2log(log::verbose) << "reading mCRL2 specification from stdin..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "reading mCRL2 specification from stdin..." << std::endl;
         text = utilities::read_text(std::cin);
       }
       else
       {
-        mCRL2log(log::verbose) << "reading mCRL2 specification from file '" <<  input_filename() << "'..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "reading mCRL2 specification from file '" <<  input_filename() << "'..." << std::endl;
         std::ifstream from(input_filename().c_str());
         text = utilities::read_text(from);
       }
@@ -91,7 +91,7 @@ class complps2pbes_tool : public mcrl2::pbes_system::tools::pbes_output_tool<inp
       lps::specification temp_spec = remove_stochastic_operators(lps::linearise(procspec)); // Just to check that there are no stochastic operators. 
 
       // load state formula
-      mCRL2log(log::verbose) << "reading formula from file '" <<  formfilename << "'..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "reading formula from file '" <<  formfilename << "'..." << std::endl;
       std::ifstream instream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
       if (!instream)
       {
@@ -106,11 +106,11 @@ class complps2pbes_tool : public mcrl2::pbes_system::tools::pbes_output_tool<inp
       // save the result
       if (output_filename().empty())
       {
-        mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "writing PBES to stdout..." << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename() << "'..." << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "writing PBES to file '" <<  output_filename() << "'..." << std::endl;
       }
       
       save_pbes(result, output_filename(), m_pbes_output_format);

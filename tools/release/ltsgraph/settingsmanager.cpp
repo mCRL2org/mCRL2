@@ -9,14 +9,14 @@ void SettingsManager::_addSettings(QString class_name)
 {
   if (m_settings_map.find(class_name) == m_settings_map.end())
   {
-    mCRL2log(mcrl2::log::debug) << "[SettingsManager] "
+    mCRL2log(mcrl2::log::log_level_t::debug) << "[SettingsManager] "
                                 << "Added \"" << class_name.toStdString()
                                 << "\"" << std::endl;
     m_settings_map[class_name] = new Settings(class_name);
   }
   else
   {
-    mCRL2log(mcrl2::log::warning)
+    mCRL2log(mcrl2::log::log_level_t::warning)
         << "[SettingsManager] "
         << "Trying to add \"" << class_name.toStdString()
         << "\" This key already exists." << std::endl;
@@ -34,7 +34,7 @@ Settings* SettingsManager::_getSettings(QString class_name)
 {
   if (m_settings_map.find(class_name) == m_settings_map.end())
   {
-    mCRL2log(mcrl2::log::warning)
+    mCRL2log(mcrl2::log::log_level_t::warning)
         << "[SettingsManager] "
         << "Attempting to retrieve \"" << class_name.toStdString()
         << "\" but it is unknown." << std::endl;

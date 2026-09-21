@@ -57,7 +57,7 @@ inline void glCheckError()
 
   if (result != GL_NO_ERROR)
   {
-    mCRL2log(mcrl2::log::error) << "OpenGL error: " << glErrorString(result) << "\n";
+    mCRL2log(mcrl2::log::log_level_t::error) << "OpenGL error: " << glErrorString(result) << "\n";
     std::abort();
   }
 }

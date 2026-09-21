@@ -162,7 +162,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       check_action_declared(a, x);
       if (!actions.insert(a).second)  // The action was already in the set.
       {
-        mCRL2log(log::warning) << "Used action " << a << " twice (typechecking " << x << ").`" << std::endl;
+        mCRL2log(log::log_level_t::warning) << "Used action " << a << " twice (typechecking " << x << ").`" << std::endl;
       }
     }
   }
@@ -172,7 +172,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     if (c.empty())
     {
-      mCRL2log(log::warning) << msg << " (typechecking " << x << ")." << std::endl;
+      mCRL2log(log::log_level_t::warning) << msg << " (typechecking " << x << ")." << std::endl;
     }
   }
 
@@ -181,7 +181,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     if (first == second)
     {
-      mCRL2log(log::warning) << msg << " " << first << "(typechecking " << x << ")." << std::endl;
+      mCRL2log(log::log_level_t::warning) << msg << " " << first << "(typechecking " << x << ")." << std::endl;
     }
   }
 
@@ -275,7 +275,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   template <class T>
   void apply(T& result, const untyped_process_assignment& x)
   {
-    mCRL2log(log::debug) << "typechecking a process call with short-hand assignments " << x << "" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "typechecking a process call with short-hand assignments " << x << "" << std::endl;
     if (!is_process_name(x.name()))
     {
       throw mcrl2::runtime_error("Could not find a matching declaration for action or process expression " + print_untyped_process_assignment(x) + ".");
@@ -545,7 +545,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       }
       if (multi_actions_contains(A.names(), MActs))
       {
-        mCRL2log(log::warning) << "allowing (multi)action " << A.names() << " twice (typechecking " << x << ")" << std::endl;
+        mCRL2log(log::log_level_t::warning) << "allowing (multi)action " << A.names() << " twice (typechecking " << x << ")" << std::endl;
       }
       else
       {
@@ -681,7 +681,7 @@ class process_type_checker
     /// \brief Typecheck the process specification procspec
     void operator()(process_specification& procspec)
     {
-      mCRL2log(log::verbose) << "type checking process specification..." << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "type checking process specification..." << std::endl;
 
       // reset the context
       m_data_type_checker = data::data_type_checker(procspec.data());
@@ -711,7 +711,7 @@ class process_type_checker
       procspec.data().translate_user_notation();
       
 
-      mCRL2log(log::debug) << "type checking process specification finished" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "type checking process specification finished" << std::endl;
     }
 
   protected:

@@ -138,7 +138,7 @@ class dynamic_library
       }
       catch(std::runtime_error& error)
       {
-        mCRL2log(mcrl2::log::error) << "Error while unloading dynamic library: " << error.what() << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::error) << "Error while unloading dynamic library: " << error.what() << std::endl;
       }
     }
   

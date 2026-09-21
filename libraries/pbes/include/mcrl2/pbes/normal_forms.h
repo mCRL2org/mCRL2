@@ -20,7 +20,7 @@ namespace mcrl2::pbes_system
 namespace detail
 {
 
-enum standard_form_type
+enum class standard_form_type
 {
   standard_form_both,
   standard_form_and,
@@ -108,7 +108,7 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
       propositional_variable var=fresh_variable(hint);
       propositional_variable_instantiation varinst(var.name(), data::data_expression_list());;
       m_table[expr] = varinst;
-      if (type == standard_form_and)
+      if (type == standard_form_type::standard_form_and)
       {
         m_equations2.emplace_back(m_symbol, var, expr);
       }
@@ -155,13 +155,13 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
       if (data::sort_bool::is_false_function_symbol(x))
       {
         m_has_false = true;
-        push(m_false, standard_form_both);
+        push(m_false, standard_form_type::standard_form_both);
       }
       else
       {
         assert(data::sort_bool::is_true_function_symbol(x));
         m_has_true = true;
-        push(m_true, standard_form_both);
+        push(m_true, standard_form_type::standard_form_both);
       }
     }
 
@@ -169,7 +169,7 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     /// \param x A pbes variable.
     void enter(const propositional_variable_instantiation& x)
     {
-      push(x, standard_form_both);
+      push(x, standard_form_type::standard_form_both);
     }
 
     /// \brief Leave not node.
@@ -183,15 +183,15 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     {
       standard_form_pair right = pop();
       standard_form_pair left = pop();
-      if (left.second == standard_form_or)
+      if (left.second == standard_form_type::standard_form_or)
       {
-        left.first = create_variable(left.first, standard_form_or, m_name);
+        left.first = create_variable(left.first, standard_form_type::standard_form_or, m_name);
       }
-      if (right.second == standard_form_or)
+      if (right.second == standard_form_type::standard_form_or)
       {
-        right.first = create_variable(right.first, standard_form_or, m_name);
+        right.first = create_variable(right.first, standard_form_type::standard_form_or, m_name);
       }
-      push(and_(left.first, right.first), standard_form_and);
+      push(and_(left.first, right.first), standard_form_type::standard_form_and);
     }
 
     /// \brief Leave or node
@@ -199,15 +199,15 @@ class standard_form_traverser: public pbes_system::pbes_expression_traverser<sta
     {
       standard_form_pair right = pop();
       standard_form_pair left = pop();
-      if (left.second == standard_form_and)
+      if (left.second == standard_form_type::standard_form_and)
       {
-        left.first = create_variable(left.first, standard_form_and, m_name);
+        left.first = create_variable(left.first, standard_form_type::standard_form_and, m_name);
       }
-      if (right.second == standard_form_and)
+      if (right.second == standard_form_type::standard_form_and)
       {
-        right.first = create_variable(right.first, standard_form_and, m_name);
+        right.first = create_variable(right.first, standard_form_type::standard_form_and, m_name);
       }
-      push(or_(left.first, right.first), standard_form_or);
+      push(or_(left.first, right.first), standard_form_type::standard_form_or);
     }
 
     /// \brief Leave imp node

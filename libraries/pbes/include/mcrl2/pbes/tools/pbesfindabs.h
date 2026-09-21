@@ -546,10 +546,10 @@ public:
     master.initialize(p, options.cepgps);
 
     std::vector<abstractable_parameter> universe = build_universe(p, options, master);
-    mCRL2log(log::verbose) << "Universe of abstractable parameters (" << universe.size() << "):" << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Universe of abstractable parameters (" << universe.size() << "):" << std::endl;
     for (const abstractable_parameter& param: universe)
     {
-      mCRL2log(log::verbose) << "  " << param.equation << " : " << param.variable << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "  " << param.equation << " : " << param.variable << std::endl;
     }
 
     // Open the checkpoint, if any, and validate it against the universe just
@@ -562,7 +562,7 @@ public:
     if (progress.resuming())
     {
       is_overapproximation = progress.is_overapproximation();
-      mCRL2log(log::info) << "Resuming from progress file " << options.state_file << " (" << progress.size()
+      mCRL2log(log::log_level_t::info) << "Resuming from progress file " << options.state_file << " (" << progress.size()
                           << " checked sets recorded); the original PBES is not solved again and the stored direction "
                           << "is " << (is_overapproximation ? "over" : "under") << "." << std::endl;
     }
@@ -577,11 +577,11 @@ public:
       bool original_answer = master.solve(p, options.cepgps).first;
       timer.finish("solving the original PBES");
       is_overapproximation = !original_answer;
-      mCRL2log(log::info) << "The original PBES solves to " << (original_answer ? "true" : "false") << "; "
+      mCRL2log(log::log_level_t::info) << "The original PBES solves to " << (original_answer ? "true" : "false") << "; "
                           << (is_overapproximation ? "only over-approximations will be checked."
                                                    : "only under-approximations will be checked.")
                           << std::endl;
-      if (mcrl2::log::mCRL2logEnabled(log::verbose))
+      if (mcrl2::log::mCRL2logEnabled(log::log_level_t::verbose))
       {
         timer.report();
       }
@@ -679,7 +679,7 @@ public:
       const std::size_t closed_count = static_cast<std::size_t>(std::count_if(outcomes.begin(),
         outcomes.end(),
         [](const check_outcome& outcome) { return counts_as_data_closed(outcome); }));
-      mCRL2log(log::info) << "Level " << level << ": " << candidates.size() << " candidate abstraction set"
+      mCRL2log(log::log_level_t::info) << "Level " << level << ": " << candidates.size() << " candidate abstraction set"
                           << (candidates.size() == 1 ? "" : "s") << " to check (" << closed_count << " data-closed)."
                           << std::endl;
 
@@ -696,7 +696,7 @@ public:
       }
     }
 
-    mCRL2log(log::info) << "Found " << m_valid_count << " valid abstraction set" << (m_valid_count == 1 ? "" : "s")
+    mCRL2log(log::log_level_t::info) << "Found " << m_valid_count << " valid abstraction set" << (m_valid_count == 1 ? "" : "s")
                         << " (written to " << options.output_file << ")." << std::endl;
     return m_valid_count;
   }
@@ -840,7 +840,7 @@ private:
     {
       // Verdict unknown: not reported, but also not used for pruning, so its
       // supersets are still explored.
-      mCRL2log(log::warning) << "Abstraction set " << writer.describe(universe, set)
+      mCRL2log(log::log_level_t::warning) << "Abstraction set " << writer.describe(universe, set)
                              << " is skipped: checking it exceeded the time limit of " << options.timeout << "s."
                              << std::endl;
       next_frontier.push_back(set);
@@ -850,7 +850,7 @@ private:
     switch (std::get<abstraction_set_verdict>(outcome))
     {
     case abstraction_set_verdict::valid:
-      mCRL2log(log::info) << "Found valid abstraction set " << writer.describe(universe, set) << "." << std::endl;
+      mCRL2log(log::log_level_t::info) << "Found valid abstraction set " << writer.describe(universe, set) << "." << std::endl;
       writer.write(universe, set);
       next_frontier.push_back(set);
       ++m_valid_count;
@@ -858,14 +858,14 @@ private:
     case abstraction_set_verdict::not_closed:
       // Not data closed: reported as not valid, but not used for pruning,
       // since a superset may well be data closed.
-      mCRL2log(log::debug) << "Abstraction set " << writer.describe(universe, set)
+      mCRL2log(log::log_level_t::debug) << "Abstraction set " << writer.describe(universe, set)
                            << " is not valid: it is not data closed." << std::endl;
       next_frontier.push_back(set);
       break;
     case abstraction_set_verdict::blocked:
       // The approximation is solvable but does not prove the answer; all
       // supersets behave the same, so this set prunes its own up-set.
-      mCRL2log(log::verbose) << "Abstraction set " << writer.describe(universe, set)
+      mCRL2log(log::log_level_t::verbose) << "Abstraction set " << writer.describe(universe, set)
                              << " is not valid: the approximation does not prove the answer of the original PBES."
                              << std::endl;
       break;

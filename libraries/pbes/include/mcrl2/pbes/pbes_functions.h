@@ -91,7 +91,7 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
       : allow_counter_example_variables(allow_counter_example_variables)
   {}
 
-  void apply(const pbes_expression& x)
+  void apply(const pbes_expression&  x)
   {
     // Abort traversal if result is already false;
     if (!result)

@@ -120,7 +120,7 @@ bool check_term_DataAppl(const Term& t)
   {
     if (!check_term_argument(child, check_rule_DataExpr<atermpp::aterm>))
     {
-      mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
       return false;
     }
   }
@@ -1125,12 +1125,12 @@ bool check_term_SortCons([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_SortConsType<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_SortConsType" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortConsType" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_SortExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1163,7 +1163,7 @@ bool check_term_SortStruct([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_StructCons<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_StructCons" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StructCons" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1196,12 +1196,12 @@ bool check_term_SortArrow([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_SortExpr<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_SortExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1260,7 +1260,7 @@ bool check_term_UntypedSortsPossible([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_SortExpr<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1293,7 +1293,7 @@ bool check_term_UntypedSortVariable([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_Number<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_Number" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1326,7 +1326,7 @@ bool check_term_SortId([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1489,17 +1489,17 @@ bool check_term_StructCons([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_StructProj<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_StructProj" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StructProj" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_StringOrEmpty<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StringOrEmpty" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StringOrEmpty" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1532,12 +1532,12 @@ bool check_term_StructProj([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_StringOrEmpty<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StringOrEmpty" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StringOrEmpty" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_SortExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1570,17 +1570,17 @@ bool check_term_Binder([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_BindingOperator<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_BindingOperator" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_BindingOperator" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1613,12 +1613,12 @@ bool check_term_Whr([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_WhrDecl<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_WhrDecl" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_WhrDecl" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1651,7 +1651,7 @@ bool check_term_UntypedIdentifier([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1684,12 +1684,12 @@ bool check_term_DataVarId([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_SortExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1722,17 +1722,17 @@ bool check_term_OpId([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_SortExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_Number<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_Number" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_Number" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1765,12 +1765,12 @@ bool check_term_UntypedDataParameter([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1959,12 +1959,12 @@ bool check_term_DataVarIdInit([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataVarId<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1997,12 +1997,12 @@ bool check_term_UntypedIdentifierAssignment([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2035,22 +2035,22 @@ bool check_term_DataSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_SortSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_SortSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ConsSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ConsSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ConsSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_MapSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_MapSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_MapSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[3], check_rule_DataEqnSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataEqnSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataEqnSpec" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2083,7 +2083,7 @@ bool check_term_SortSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_SortDecl<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_SortDecl" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortDecl" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2116,7 +2116,7 @@ bool check_term_ConsSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_OpId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_OpId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_OpId" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2149,7 +2149,7 @@ bool check_term_MapSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_OpId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_OpId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_OpId" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2182,7 +2182,7 @@ bool check_term_DataEqnSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataEqn<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataEqn" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataEqn" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2215,12 +2215,12 @@ bool check_term_SortRef([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_SortId<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_SortId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_SortExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2253,22 +2253,22 @@ bool check_term_DataEqn([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[3], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2301,7 +2301,7 @@ bool check_term_MultAct([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_Action<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_Action" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_Action" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2334,12 +2334,12 @@ bool check_term_TimedMultAct([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_Action<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_Action" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_Action" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2372,7 +2372,7 @@ bool check_term_UntypedMultiAction([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_UntypedDataParameter<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_UntypedDataParameter" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_UntypedDataParameter" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2405,12 +2405,12 @@ bool check_term_Action([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ActId<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActId" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2443,12 +2443,12 @@ bool check_term_ActId([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_SortExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_SortExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_SortExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2481,12 +2481,12 @@ bool check_term_Process([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcVarId<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcVarId" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2519,12 +2519,12 @@ bool check_term_ProcessAssignment([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcVarId<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcVarId" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataVarIdInit<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarIdInit" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarIdInit" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2609,12 +2609,12 @@ bool check_term_Sum([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2647,12 +2647,12 @@ bool check_term_Block([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_String<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2685,12 +2685,12 @@ bool check_term_Hide([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_String<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2723,12 +2723,12 @@ bool check_term_Rename([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_RenameExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_RenameExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RenameExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2761,12 +2761,12 @@ bool check_term_Comm([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_CommExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_CommExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_CommExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2799,12 +2799,12 @@ bool check_term_Allow([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_MultActName<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_MultActName" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_MultActName" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2837,12 +2837,12 @@ bool check_term_Sync([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2875,12 +2875,12 @@ bool check_term_AtTime([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2913,12 +2913,12 @@ bool check_term_Seq([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2951,12 +2951,12 @@ bool check_term_IfThen([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2989,17 +2989,17 @@ bool check_term_IfThenElse([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3032,12 +3032,12 @@ bool check_term_BInit([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3070,12 +3070,12 @@ bool check_term_Merge([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3108,12 +3108,12 @@ bool check_term_LMerge([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3146,12 +3146,12 @@ bool check_term_Choice([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3184,17 +3184,17 @@ bool check_term_StochasticOperator([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3227,12 +3227,12 @@ bool check_term_UntypedProcessAssignment([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_UntypedIdentifierAssignment<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_UntypedIdentifierAssignment" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_UntypedIdentifierAssignment" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3265,12 +3265,12 @@ bool check_term_ProcVarId([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3303,7 +3303,7 @@ bool check_term_MultActName([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_String<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3336,12 +3336,12 @@ bool check_term_RenameExpr([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3374,12 +3374,12 @@ bool check_term_CommExpr([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_MultActName<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_MultActName" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_MultActName" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3412,27 +3412,27 @@ bool check_term_ProcSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ActSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_GlobVarSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_GlobVarSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_GlobVarSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[3], check_rule_ProcEqnSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcEqnSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcEqnSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[4], check_rule_ProcInit<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcInit" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcInit" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3465,7 +3465,7 @@ bool check_term_ActSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_ActId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_ActId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActId" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3498,7 +3498,7 @@ bool check_term_GlobVarSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3531,7 +3531,7 @@ bool check_term_ProcEqnSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_ProcEqn<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_ProcEqn" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcEqn" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3564,17 +3564,17 @@ bool check_term_ProcEqn([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcVarId<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcVarId" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3607,7 +3607,7 @@ bool check_term_ProcessInit([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ProcExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ProcExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ProcExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3640,12 +3640,12 @@ bool check_term_Distribution([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3678,27 +3678,27 @@ bool check_term_LinProcSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ActSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_GlobVarSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_GlobVarSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_GlobVarSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[3], check_rule_LinearProcess<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_LinearProcess" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_LinearProcess" << std::endl;
     return false;
   }
   if (!check_term_argument(term[4], check_rule_LinearProcessInit<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_LinearProcessInit" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_LinearProcessInit" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3731,12 +3731,12 @@ bool check_term_LinearProcess([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_LinearProcessSummand<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_LinearProcessSummand" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_LinearProcessSummand" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3769,32 +3769,32 @@ bool check_term_LinearProcessSummand([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_MultActOrDelta<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_MultActOrDelta" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_MultActOrDelta" << std::endl;
     return false;
   }
   if (!check_term_argument(term[3], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_list_argument(term[4], check_rule_DataVarIdInit<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarIdInit" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarIdInit" << std::endl;
     return false;
   }
   if (!check_term_argument(term[5], check_rule_Distribution<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_Distribution" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_Distribution" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3827,12 +3827,12 @@ bool check_term_LinearProcessInit([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_Distribution<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_Distribution" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_Distribution" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3917,7 +3917,7 @@ bool check_term_StateNot([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3950,7 +3950,7 @@ bool check_term_StateMinus([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3983,12 +3983,12 @@ bool check_term_StateAnd([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4021,12 +4021,12 @@ bool check_term_StateOr([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4059,12 +4059,12 @@ bool check_term_StateImp([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4097,12 +4097,12 @@ bool check_term_StatePlus([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4135,12 +4135,12 @@ bool check_term_StateConstantMultiply([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4173,12 +4173,12 @@ bool check_term_StateConstantMultiplyAlt([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4211,12 +4211,12 @@ bool check_term_StateForall([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4249,12 +4249,12 @@ bool check_term_StateExists([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4287,12 +4287,12 @@ bool check_term_StateInfimum([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4325,12 +4325,12 @@ bool check_term_StateSupremum([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4363,12 +4363,12 @@ bool check_term_StateSum([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4401,12 +4401,12 @@ bool check_term_StateMust([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4439,12 +4439,12 @@ bool check_term_StateMay([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4503,7 +4503,7 @@ bool check_term_StateYaledTimed([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4562,7 +4562,7 @@ bool check_term_StateDelayTimed([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4595,12 +4595,12 @@ bool check_term_StateVar([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4633,17 +4633,17 @@ bool check_term_StateNu([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataVarIdInit<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarIdInit" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarIdInit" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4676,17 +4676,17 @@ bool check_term_StateMu([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataVarIdInit<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarIdInit" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarIdInit" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_StateFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_StateFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_StateFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4745,12 +4745,12 @@ bool check_term_RegSeq([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4783,12 +4783,12 @@ bool check_term_RegAlt([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4821,7 +4821,7 @@ bool check_term_RegTrans([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4854,7 +4854,7 @@ bool check_term_RegTransOrNil([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4887,17 +4887,17 @@ bool check_term_UntypedRegFrm([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_RegFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_RegFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_RegFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4982,7 +4982,7 @@ bool check_term_ActNot([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5015,12 +5015,12 @@ bool check_term_ActAnd([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5053,12 +5053,12 @@ bool check_term_ActOr([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5091,12 +5091,12 @@ bool check_term_ActImp([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5129,12 +5129,12 @@ bool check_term_ActForall([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5167,12 +5167,12 @@ bool check_term_ActExists([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5205,12 +5205,12 @@ bool check_term_ActAt([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_ActFrm<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActFrm" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActFrm" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5243,7 +5243,7 @@ bool check_term_ActMultAct([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_Action<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_Action" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_Action" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5276,7 +5276,7 @@ bool check_term_ActionRenameRules([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_ActionRenameRule<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_ActionRenameRule" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActionRenameRule" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5309,22 +5309,22 @@ bool check_term_ActionRenameRule([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_ParamIdOrAction<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ParamIdOrAction" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ParamIdOrAction" << std::endl;
     return false;
   }
   if (!check_term_argument(term[3], check_rule_ActionRenameRuleRHS<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActionRenameRuleRHS" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActionRenameRuleRHS" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5357,17 +5357,17 @@ bool check_term_ActionRenameSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_ActSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_ActionRenameRules<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_ActionRenameRules" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_ActionRenameRules" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5400,22 +5400,22 @@ bool check_term_PBES([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_GlobVarSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_GlobVarSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_GlobVarSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_PBEqnSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBEqnSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBEqnSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[3], check_rule_PBInit<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBInit" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBInit" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5448,7 +5448,7 @@ bool check_term_PBEqnSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_PBEqn<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_PBEqn" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBEqn" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5481,7 +5481,7 @@ bool check_term_PBInit([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PropVarInst<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PropVarInst" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PropVarInst" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5514,17 +5514,17 @@ bool check_term_PBEqn([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_FixPoint<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_FixPoint" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_FixPoint" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PropVarDecl<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PropVarDecl" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PropVarDecl" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5609,12 +5609,12 @@ bool check_term_PropVarDecl([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataVarId<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5699,7 +5699,7 @@ bool check_term_PBESNot([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5732,12 +5732,12 @@ bool check_term_PBESAnd([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5770,12 +5770,12 @@ bool check_term_PBESOr([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5808,12 +5808,12 @@ bool check_term_PBESImp([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5846,12 +5846,12 @@ bool check_term_PBESForall([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5884,12 +5884,12 @@ bool check_term_PBESExists([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PBExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PBExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PBExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5922,12 +5922,12 @@ bool check_term_PropVarInst([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_String<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_String" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_String" << std::endl;
     return false;
   }
   if (!check_list_argument(term[1], check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -5960,22 +5960,22 @@ bool check_term_PRES([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_GlobVarSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_GlobVarSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_GlobVarSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_PREqnSpec<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PREqnSpec" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PREqnSpec" << std::endl;
     return false;
   }
   if (!check_term_argument(term[3], check_rule_PRInit<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRInit" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRInit" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6008,7 +6008,7 @@ bool check_term_PREqnSpec([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_PREqn<atermpp::aterm>, 0))
   {
-    mCRL2log(log::debug) << "check_rule_PREqn" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PREqn" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6041,7 +6041,7 @@ bool check_term_PRInit([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PropVarInst<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PropVarInst" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PropVarInst" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6074,17 +6074,17 @@ bool check_term_PREqn([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_FixPoint<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_FixPoint" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_FixPoint" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PropVarDecl<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PropVarDecl" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PropVarDecl" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6169,7 +6169,7 @@ bool check_term_PRESMinus([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6202,12 +6202,12 @@ bool check_term_PRESAnd([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6240,12 +6240,12 @@ bool check_term_PRESOr([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6278,12 +6278,12 @@ bool check_term_PRESImp([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6316,12 +6316,12 @@ bool check_term_PRESPlus([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6354,12 +6354,12 @@ bool check_term_PRESConstantMultiply([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6392,12 +6392,12 @@ bool check_term_PRESConstantMultiplyAlt([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_DataExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_DataExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6430,12 +6430,12 @@ bool check_term_PRESInfimum([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6468,12 +6468,12 @@ bool check_term_PRESSupremum([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6506,12 +6506,12 @@ bool check_term_PRESSum([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_list_argument(term[0], check_rule_DataVarId<atermpp::aterm>, 1))
   {
-    mCRL2log(log::debug) << "check_rule_DataVarId" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_DataVarId" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6544,7 +6544,7 @@ bool check_term_PRESEqInf([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6577,7 +6577,7 @@ bool check_term_PRESEqNInf([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6610,17 +6610,17 @@ bool check_term_PRESCondSm([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -6653,17 +6653,17 @@ bool check_term_PRESCondEq([[maybe_unused]] const Term& t)
 #ifndef MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(term[0], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[1], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
   if (!check_term_argument(term[2], check_rule_PRExpr<atermpp::aterm>))
   {
-    mCRL2log(log::debug) << "check_rule_PRExpr" << std::endl;
+    mCRL2log(log::log_level_t::debug) << "check_rule_PRExpr" << std::endl;
     return false;
   }
 #endif // MCRL2_NO_RECURSIVE_SOUNDNESS_CHECKS

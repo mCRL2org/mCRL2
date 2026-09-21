@@ -102,15 +102,15 @@ class tool
 #ifndef MCRL2_TOOL_CLASSES_NO_CORE
       if (parser.options.count("quiet"))
       {
-        log::logger::set_reporting_level(log::quiet);
+        log::logger::set_reporting_level(log::log_level_t::quiet);
       }
       if (parser.options.count("verbose"))
       {
-        log::logger::set_reporting_level(log::verbose);
+        log::logger::set_reporting_level(log::log_level_t::verbose);
       }
       if (parser.options.count("debug"))
       {
-        log::logger::set_reporting_level(log::debug);
+        log::logger::set_reporting_level(log::log_level_t::debug);
       }
       if (parser.options.count("log-level"))
       {
@@ -229,11 +229,11 @@ class tool
       }
       catch (mcrl2::runtime_error& e)
       {
-        mCRL2log(mcrl2::log::error) << e.what() << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::error) << e.what() << std::endl;
       }
       catch (std::exception& e)
       {
-        mCRL2log(mcrl2::log::error) << e.what() << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::error) << e.what() << std::endl;
       }
       return EXIT_FAILURE;
     }

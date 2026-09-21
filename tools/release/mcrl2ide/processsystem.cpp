@@ -194,7 +194,7 @@ QProcess* ProcessSystem::createSubprocess(SubprocessType subprocessType,
   SpecType specType)
 {
   return createSubprocess(subprocessType, processid, subprocessIndex, property, QString(), 
-                          false, mcrl2::lts::lts_eq_none, specType);
+                          false, mcrl2::lts::lts_equivalence::lts_eq_none, specType);
 }
 
 QProcess* ProcessSystem::createSubprocess(
@@ -302,7 +302,7 @@ QProcess* ProcessSystem::createSubprocess(
   case SubprocessType::Lps2lts:
     program = "lps2lts";
     inputFile = fileSystem->lpsFilePath(specType, property.name, evidence);
-    outputFile = fileSystem->ltsFilePath(mcrl2::lts::lts_eq_none, specType,
+    outputFile = fileSystem->ltsFilePath(mcrl2::lts::lts_equivalence::lts_eq_none, specType,
                                          property.name, evidence);
     arguments << inputFile << outputFile
               << "--strategy=breadth"
@@ -332,9 +332,9 @@ QProcess* ProcessSystem::createSubprocess(
 
   case SubprocessType::Ltscompare:
     program = "ltscompare";
-    inputFile = fileSystem->ltsFilePath(mcrl2::lts::lts_eq_none,
+    inputFile = fileSystem->ltsFilePath(mcrl2::lts::lts_equivalence::lts_eq_none,
                                         SpecType::First, property.name);
-    inputFile2 = fileSystem->ltsFilePath(mcrl2::lts::lts_eq_none,
+    inputFile2 = fileSystem->ltsFilePath(mcrl2::lts::lts_equivalence::lts_eq_none,
                                          SpecType::Second, property.name);
     arguments << "--equivalence=" +
                      QString::fromStdString(
@@ -501,7 +501,7 @@ int ProcessSystem::showLts(mcrl2::lts::lts_equivalence reduction)
     ProcessType processType = ProcessType::LtsCreation;
     processTypes[processid] = processType;
     consoleDock->setConsoleTab(processType);
-    bool noReduction = reduction == mcrl2::lts::lts_eq_none;
+    bool noReduction = reduction == mcrl2::lts::lts_equivalence::lts_eq_none;
 
     showLtsProcesses.push_back(
         createSubprocess(SubprocessType::ParseMcrl2, processid, 0));

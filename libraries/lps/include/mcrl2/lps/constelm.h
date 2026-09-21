@@ -41,18 +41,18 @@ protected:
       const std::string& constant_removed_msg = "",
       const std::string& nothing_removed_msg = "")
   {
-    if (mCRL2logEnabled(log::verbose))
+    if (mCRL2logEnabled(log::log_level_t::verbose))
     {
       if (sigma.empty())
       {
-        mCRL2log(log::verbose) << nothing_removed_msg;
+        mCRL2log(log::log_level_t::verbose) << nothing_removed_msg;
       }
       else
       {
-        mCRL2log(log::verbose) << constant_removed_msg;
+        mCRL2log(log::log_level_t::verbose) << constant_removed_msg;
         for (const auto& i : sigma)
         {
-          mCRL2log(log::verbose) << data::pp(i.first) << " := " << data::pp(i.second) << std::endl;
+          mCRL2log(log::log_level_t::verbose) << data::pp(i.first) << " := " << data::pp(i.second) << std::endl;
         }
       }
     }
@@ -65,9 +65,9 @@ protected:
                               const std::string& msg = ""
                              )
     {
-      if (mCRL2logEnabled(log::debug))
+      if (mCRL2logEnabled(log::log_level_t::debug))
       {
-        mCRL2log(log::debug) << msg
+        mCRL2log(log::log_level_t::debug) << msg
                         << data::pp(d_j) << "\n"
                         << "      value before: " << Rd_j << "\n"
                         << "      value after:  " << Rg_ij << "\n"
@@ -82,9 +82,9 @@ protected:
                       )
 
     {
-      if (mCRL2logEnabled(log::debug))
+      if (mCRL2logEnabled(log::log_level_t::debug))
       {
-        mCRL2log(log::debug) << msg
+        mCRL2log(log::log_level_t::debug) << msg
                         << cond
                         << sigma
                         << " -> "

@@ -64,7 +64,7 @@ inline void find_equality_conjuncts(const data::data_expression& x,
       }
     }
   }
-  mCRL2log(log::trace) << "  computing one point variables: expression = " << x << ", result = " << core::detail::print_map(result) << std::endl;
+  mCRL2log(log::log_level_t::trace) << "  computing one point variables: expression = " << x << ", result = " << core::detail::print_map(result) << std::endl;
 }
 
 template <typename DataRewriter>

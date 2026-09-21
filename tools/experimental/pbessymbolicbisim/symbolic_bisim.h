@@ -58,13 +58,13 @@ protected:
 
 public:
   symbolic_bisim_algorithm(const pbes_system::pbes& spec, const std::size_t& refine_steps,
-    const rewrite_strategy& st = jitty, const simplifier_mode& mode = simplify_auto,
+    const rewrite_strategy& st = rewrite_strategy::jitty, const simplifier_mode& mode = simplify_auto,
     bool fine_initial = false, bool early_termination = true, bool randomize = false)
     : rewr(make_rewriter(spec, merge_data_specifications(spec.data(),simplifier::norm_rules_spec()),st))
 #ifdef MCRL2_JITTYC_AVAILABLE
-    , proving_rewr(make_rewriter(spec, spec.data(), st == jitty ? jitty_prover : jitty_compiling_prover))
+    , proving_rewr(make_rewriter(spec, spec.data(), st == rewrite_strategy::jitty ? rewrite_strategy::jitty_prover : rewrite_strategy::jitty_compiling_prover))
 #else
-    , proving_rewr(make_rewriter(spec, spec.data(), jitty_prover))
+    , proving_rewr(make_rewriter(spec, spec.data(), rewrite_strategy::jitty_prover))
 #endif
     , m_spec(pbes_system::detail::ppg_pbes(spec).simplify(rewr))
     , m_partition(m_spec, rewr, proving_rewr, mode, m_structure_graph, fine_initial, early_termination, randomize)
@@ -73,11 +73,11 @@ public:
 
   void run()
   {
-    mCRL2log(mcrl2::log::verbose) << "Running symbolic bisimulation..." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Running symbolic bisimulation..." << std::endl;
     const std::chrono::time_point<std::chrono::high_resolution_clock> t_start =
       std::chrono::high_resolution_clock::now();
 
-    mCRL2log(log::verbose) << m_spec << std::endl;
+    mCRL2log(log::log_level_t::verbose) << m_spec << std::endl;
 
     bool latest_solution = false;
     if(m_num_refine_steps != 0)
@@ -90,26 +90,26 @@ public:
       {
         latest_solution = sg_solver.solve(m_structure_graph);
         std::set<sg_index_t> proof_graph = extract_minimal_structure_graph(m_structure_graph, m_structure_graph.initial_vertex(), latest_solution);
-        if(mCRL2logEnabled(log::verbose))
+        if(mCRL2logEnabled(log::log_level_t::verbose))
         {
-          mCRL2log(log::verbose) << m_structure_graph;
-          mCRL2log(log::verbose) << "initial state: " << m_structure_graph.initial_vertex() << std::endl;
-          mCRL2log(log::verbose) << "solution " << (latest_solution ? "true" : "false") << std::endl;
-          mCRL2log(log::verbose) << "Proof graph contains nodes ";
+          mCRL2log(log::log_level_t::verbose) << m_structure_graph;
+          mCRL2log(log::log_level_t::verbose) << "initial state: " << m_structure_graph.initial_vertex() << std::endl;
+          mCRL2log(log::log_level_t::verbose) << "solution " << (latest_solution ? "true" : "false") << std::endl;
+          mCRL2log(log::log_level_t::verbose) << "Proof graph contains nodes ";
           for(const sg_index_t& v: proof_graph)
           {
-            mCRL2log(log::verbose) << v << ", ";
+            mCRL2log(log::log_level_t::verbose) << v << ", ";
           }
-          mCRL2log(log::verbose) << std::endl;
+          mCRL2log(log::log_level_t::verbose) << std::endl;
         }
         m_partition.set_proof(proof_graph);
 
         num_iterations++;
-        mCRL2log(log::status) << "End of iteration " << num_iterations << ", " << (latest_solution ? "positive" : "negative")
+        mCRL2log(log::log_level_t::status) << "End of iteration " << num_iterations << ", " << (latest_solution ? "positive" : "negative")
          << " proof graph has size " << proof_graph.size()
          << ", total amount of blocks " << (m_partition.size()) << "\n";
       } while(!m_partition.refine_n_steps(m_num_refine_steps, latest_solution));
-      mCRL2log(log::info) << "Partition refinement completed in " <<
+      mCRL2log(log::log_level_t::info) << "Partition refinement completed in " <<
           std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
           " seconds." << std::endl;
 
@@ -120,8 +120,8 @@ public:
 
       latest_solution = pbes_system::solve_structure_graph(m_structure_graph);
 
-      mCRL2log(log::status) << "Amount of blocks " << m_partition.size() << "\n";
-      mCRL2log(log::info) << "Partition refinement completed in " <<
+      mCRL2log(log::log_level_t::status) << "Amount of blocks " << m_partition.size() << "\n";
+      mCRL2log(log::log_level_t::info) << "Partition refinement completed in " <<
           std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() <<
           " seconds." << std::endl;
     }

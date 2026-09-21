@@ -120,7 +120,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
         }
         else
         {
-          mCRL2log(verbose) << "Checking confluence of summand number " <<  m_summand_number << "." << std::endl;
+          mCRL2log(log_level_t::verbose) << "Checking confluence of summand number " <<  m_summand_number << "." << std::endl;
         }
       }
       if (parser.options.count("time-limit"))
@@ -198,10 +198,10 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     bool run() override
     {
-      mCRL2log(verbose) << "lpsconfcheck parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
+      mCRL2log(log_level_t::verbose) << "lpsconfcheck parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
 
       stochastic_specification spec;
       load_lps(spec, input_filename());
@@ -215,7 +215,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
           throw mcrl2::runtime_error("Cannot open input file '" + m_invariant_filename + "'.");
         }
 
-        mCRL2log(verbose) << "Parsing input file '" <<  m_invariant_filename << "'..." << std::endl;
+        mCRL2log(log_level_t::verbose) << "Parsing input file '" <<  m_invariant_filename << "'..." << std::endl;
 
         m_invariant = parse_data_expression(instream, spec.data());
 
@@ -255,7 +255,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
         }
         else
         {
-          mCRL2log(warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
+          mCRL2log(log_level_t::warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
         }
       }
 

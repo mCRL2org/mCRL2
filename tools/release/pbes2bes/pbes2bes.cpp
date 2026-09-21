@@ -59,10 +59,10 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
     // Tool options.
     /// The output file name
     transformation_strategy m_transformation_strategy
-        = mcrl2::pbes_system::lazy; // The strategy to propagate true/false.
+        = mcrl2::pbes_system::transformation_strategy::lazy; // The strategy to propagate true/false.
     search_strategy m_search_strategy
-        = mcrl2::pbes_system::breadth_first;          // The search strategy (breadth or depth first).
-    remove_level m_erase_unused_bes_variables = none; // Remove bes variables whenever they are not used anymore.
+        = mcrl2::pbes_system::search_strategy::breadth_first;          // The search strategy (breadth or depth first).
+    remove_level m_erase_unused_bes_variables = remove_level::none; // Remove bes variables whenever they are not used anymore.
     bool m_data_elm = true;                           // The data elimination option
     std::size_t m_maximal_todo_size;              // The maximal size of the todo queue when generating a bes
     bool m_approximate_true = true;               // If approximate_true holds, rhs's of variables that cannot
@@ -115,23 +115,23 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
       super::add_options(desc);
       desc.
       add_option("strategy", make_enum_argument<transformation_strategy>("STRAT")
-                 .add_value(mcrl2::pbes_system::lazy, true)
-                 .add_value(optimize)
-                 .add_value(on_the_fly)
-                 .add_value(on_the_fly_with_fixed_points),
+                 .add_value(mcrl2::pbes_system::transformation_strategy::lazy, true)
+                 .add_value(transformation_strategy::optimize)
+                 .add_value(transformation_strategy::on_the_fly)
+                 .add_value(transformation_strategy::on_the_fly_with_fixed_points),
                  "use substitution strategy STRAT:",
                  's').
       add_option("search", make_enum_argument<search_strategy>("SEARCH")
-                 .add_value(breadth_first, true)
-                 .add_value(depth_first)
-                 .add_value(breadth_first_short)
-                 .add_value(depth_first_short),
+                 .add_value(search_strategy::breadth_first, true)
+                 .add_value(search_strategy::depth_first)
+                 .add_value(search_strategy::breadth_first_short)
+                 .add_value(search_strategy::depth_first_short),
                  "use search strategy SEARCH:",
                  'z').
       add_option("erase", make_enum_argument<remove_level>("LEVEL")
-                 .add_value(none, true)
-                 .add_value(some)
-                 .add_value(all),
+                 .add_value(remove_level::none, true)
+                 .add_value(remove_level::some)
+                 .add_value(remove_level::all),
                  "use remove level LEVEL to remove bes variables",
                  'e').
       add_option("unused_data",
@@ -144,16 +144,16 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<pbes_output_tool<input
     {
       using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
-      mCRL2log(verbose) << "pbes2bes parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:            " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:           " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  data rewriter:         " << m_rewrite_strategy << std::endl;
-      mCRL2log(verbose) << "  substitution strategy: " << m_transformation_strategy << std::endl;
-      mCRL2log(verbose) << "  search strategy:       " << m_search_strategy << std::endl;
-      mCRL2log(verbose) << "  erase level:           " << m_erase_unused_bes_variables << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbes2bes parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:            " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:           " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  data rewriter:         " << m_rewrite_strategy << std::endl;
+      mCRL2log(log_level_t::verbose) << "  substitution strategy: " << m_transformation_strategy << std::endl;
+      mCRL2log(log_level_t::verbose) << "  search strategy:       " << m_search_strategy << std::endl;
+      mCRL2log(log_level_t::verbose) << "  erase level:           " << m_erase_unused_bes_variables << std::endl;
       if (m_maximal_todo_size != std::numeric_limits<std::size_t>::max())
       {
-        mCRL2log(verbose) << "  limit the todo buffer to " << m_maximal_todo_size << " bes variables and replace removed variables by " <<
+        mCRL2log(log_level_t::verbose) << "  limit the todo buffer to " << m_maximal_todo_size << " bes variables and replace removed variables by " <<
                (m_approximate_true?"false":"true") << std::endl;
       }
 

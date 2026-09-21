@@ -51,7 +51,7 @@ class binary_tool: public rewriter_tool<input_output_tool>
         trim(m_parameter_selection);
         if (m_parameter_selection.empty())
         {
-          mCRL2log(mcrl2::log::info) << "Ignoring option --select since its argument is empty." << std::endl;
+          mCRL2log(mcrl2::log::log_level_t::info) << "Ignoring option --select since its argument is empty." << std::endl;
         }
       }
     }

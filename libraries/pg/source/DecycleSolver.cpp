@@ -90,7 +90,7 @@ int CycleFinder::operator()(const verti *scc, std::size_t scc_size)
                 verti w = scc[j];
                 if (subgame_.graph().has_succ(v, w))
                 {
-                    if (subgame_.player(v) == static_cast<int>(prio_%2))
+                    if (static_cast<int>(subgame_.player(v)) == static_cast<int>(prio_%2))
                     {
                         substrat_[v] = w;
                     }
@@ -120,7 +120,7 @@ DecycleSolver::~DecycleSolver()
 
 ParityGame::Strategy DecycleSolver::solve()
 {
-    mCRL2log(mcrl2::log::verbose) << "Searching for winner-controlled cycles..." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Searching for winner-controlled cycles..." << std::endl;
 
     const verti V = game_.graph().V();
     ParityGame::Strategy strategy(V, NO_VERTEX);
@@ -137,7 +137,7 @@ ParityGame::Strategy DecycleSolver::solve()
         {
             if ( solved_set.count(v) == 0 &&
                  game_.priority(v) >= prio &&
-                 ( game_.player(v) == static_cast<int>(prio%2) ||
+                 ( static_cast<int>(game_.player(v)) == static_cast<int>(prio%2) ||
                    game_.graph().outdegree(v) == 1 ) )
             {
                 mapping.push_back(v);
@@ -156,7 +156,7 @@ ParityGame::Strategy DecycleSolver::solve()
         verti new_size = solved_set.size();
         if (old_size < new_size)
         {
-            mCRL2log(mcrl2::log::verbose) << "Identified " << new_size - old_size
+            mCRL2log(mcrl2::log::log_level_t::verbose) << "Identified " << new_size - old_size
                                                            << " vertices in " << prio << "-dominated cycles" << std::endl;
         }
 
@@ -170,7 +170,7 @@ ParityGame::Strategy DecycleSolver::solve()
     if (solved_set.empty())
     {
         // Don't construct a subgame if it is identical to the input game:
-        mCRL2log(mcrl2::log::verbose) << "No suitable cycles found! Solving..." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "No suitable cycles found! Solving..." << std::endl;
         std::unique_ptr<ParityGameSolver> subsolver(
             pgsf_.create(game_, vmap_, vmap_size_) );
         subsolver->solve().swap(strategy);
@@ -178,7 +178,7 @@ ParityGame::Strategy DecycleSolver::solve()
     }
 
     const verti num_unsolved = V - (verti)solved_set.size();
-    mCRL2log(mcrl2::log::verbose) << "Creating subgame with " << num_unsolved
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Creating subgame with " << num_unsolved
                                                    << " vertices remaining..." << std::endl;
 
     // Gather remaining unsolved vertices:
@@ -214,11 +214,11 @@ ParityGame::Strategy DecycleSolver::solve()
             pgsf_.create(subgame, &unsolved[0], unsolved.size()) );
     }
 
-    mCRL2log(mcrl2::log::verbose) << "Solving..." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Solving..." << std::endl;
     ParityGame::Strategy substrat = subsolver->solve();
     if (!substrat.empty())
     {
-        mCRL2log(mcrl2::log::verbose) << "Merging strategies..." << std::endl;
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Merging strategies..." << std::endl;
         merge_strategies(strategy, substrat, unsolved);
     }
 

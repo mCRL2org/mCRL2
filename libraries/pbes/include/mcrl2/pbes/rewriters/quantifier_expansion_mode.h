@@ -19,7 +19,7 @@ namespace mcrl2::pbes_system
 // expand_infinite_sorts means replace quantifiers over finite and infinite sorts. This may not terminate.
 // expand_infinite_sorts_and_use_data_rewriter expands infinite sorts in PBESs, and uses the term rewriter to deal with 
 //        quantifiers in data expressions. This last mode is typically used to instantiate a PBES to a BES. 
-enum enumerate_quantifiers_mode { expand_finite_sorts, expand_infinite_sorts, expand_infinite_sorts_and_use_data_rewriter };
+enum class enumerate_quantifiers_mode { expand_finite_sorts, expand_infinite_sorts, expand_infinite_sorts_and_use_data_rewriter };
 
 } // mcrl2::pbes_system
 

@@ -37,9 +37,9 @@ struct global_strategy
   {
     if (v == undefined_vertex())
     {
-      mCRL2log(log::debug) << "Error: undefined strategy for node " << u << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Error: undefined strategy for node " << u << std::endl;
     }
-    mCRL2log(log::debug) << "  set tau[" << u << "] = " << v << std::endl;
+    mCRL2log(log::log_level_t::debug) << "  set tau[" << u << "] = " << v << std::endl;
     G.find_vertex(u).strategy = v;
   }
 };
@@ -58,9 +58,9 @@ struct local_strategy
   {
     if (v == undefined_vertex())
     {
-      mCRL2log(log::debug) << "Error: undefined strategy for node " << u << std::endl;
+      mCRL2log(log::log_level_t::debug) << "Error: undefined strategy for node " << u << std::endl;
     }
-    mCRL2log(log::debug) << "  set tau" << alpha << "[" << u << "] = " << v << std::endl;
+    mCRL2log(log::log_level_t::debug) << "  set tau" << alpha << "[" << u << "] = " << v << std::endl;
     tau[alpha][u] = v;
   }
 };
@@ -144,7 +144,7 @@ vertex_set attr_default_generic(const StructureGraph& G, vertex_set A, std::size
     // N.B. Use a breadth first search, to minimize counter examples
     auto u = todo.pop_front();
 
-    if (G.decoration(u) == alpha || includes_successors(G, u, A))
+    if (G.decoration(u) == static_cast<structure_graph::decoration_type>(alpha) || includes_successors(G, u, A))
     {
       tau.set_strategy(u, find_successor_in(G, u, A));
       A.insert(u);

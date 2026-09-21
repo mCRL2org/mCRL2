@@ -118,8 +118,8 @@ class pbes_eqelm_algorithm
     /// \brief Prints the todo list
     void log_todo_list(const std::set<core::identifier_string>& todo, const std::string& msg = "") const
     {
-      mCRL2log(log::debug) << msg;
-      mCRL2log(log::debug) << core::detail::print_set(todo) << "\n";
+      mCRL2log(log::log_level_t::debug) << msg;
+      mCRL2log(log::log_level_t::debug) << core::detail::print_set(todo) << "\n";
     }
 
     /// \brief Returns true if the vertex X should propagate its values to Y
@@ -273,23 +273,23 @@ class pbes_eqelm_algorithm
           todo.insert(X);
           m_discovered[X] = true;
           update_equivalence_classes(kappa, vX, todo);
-          mCRL2log(log::debug) << "updated equivalence classes using initial state " << kappa << "\n" << print_equivalence_classes();
+          mCRL2log(log::log_level_t::debug) << "updated equivalence classes using initial state " << kappa << "\n" << print_equivalence_classes();
         }
       }
 
-      mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
-      mCRL2log(log::verbose) << "\n--- edges ---\n" << print_edges();
-      mCRL2log(log::debug) << "computed initial equivalence classes\n" << print_equivalence_classes();
+      mCRL2log(log::log_level_t::verbose) << "--- vertices ---\n" << print_vertices();
+      mCRL2log(log::log_level_t::verbose) << "\n--- edges ---\n" << print_edges();
+      mCRL2log(log::log_level_t::debug) << "computed initial equivalence classes\n" << print_equivalence_classes();
 
       // propagate constraints over the edges until the todo list is empty
       while (!todo.empty())
       {
-        mCRL2log(log::debug) << "todo list = " << core::detail::print_set(todo) << "\n";
-        mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
+        mCRL2log(log::log_level_t::debug) << "todo list = " << core::detail::print_set(todo) << "\n";
+        mCRL2log(log::log_level_t::verbose) << "--- vertices ---\n" << print_vertices();
 
         core::identifier_string X = *todo.begin();
         todo.erase(X);
-        mCRL2log(log::debug) << "choose todo element " << X << "\n";
+        mCRL2log(log::log_level_t::debug) << "choose todo element " << X << "\n";
 
         // create a substitution function that corresponds to cX
         data::mutable_map_substitution<> vX = compute_substitution(X);
@@ -300,12 +300,12 @@ class pbes_eqelm_algorithm
           if (evaluate_guard(X, Ye))
           {
             update_equivalence_classes(Ye, vX, todo);
-            mCRL2log(log::debug) << "updated equivalence classes using edge " << Ye << "\n" << print_equivalence_classes();
+            mCRL2log(log::log_level_t::debug) << "updated equivalence classes using edge " << Ye << "\n" << print_equivalence_classes();
           }
         }
       }
       apply_equivalence_relations(p);
-      mCRL2log(log::verbose) << "\n--- result ---\n" << print_vertices();
+      mCRL2log(log::log_level_t::verbose) << "\n--- result ---\n" << print_vertices();
     }
 };
 
@@ -339,8 +339,8 @@ void eqelm(pbes& p,
     case pbes_rewriter_type::quantifier_finite:
     {
       const enumerate_quantifiers_mode enum_mode = (rewriter_type == pbes_rewriter_type::quantifier_all?
-                                                         expand_infinite_sorts_and_use_data_rewriter:
-                                                         expand_finite_sorts);
+                                                         enumerate_quantifiers_mode::expand_infinite_sorts_and_use_data_rewriter:
+                                                         enumerate_quantifiers_mode::expand_finite_sorts);
       enumerate_quantifiers_rewriter pbesr(datar, p.data(), enum_mode);
       pbes_eqelm_algorithm<pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
       algorithm.run(p, ignore_initial_state);

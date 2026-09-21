@@ -194,10 +194,10 @@ inline void allowblockcomposition(
   // Only keep statistics when these are relevant.
   lps_statistics_t lps_statistics_before = get_statistics(action_summands, deadlock_summands);
 
-  mCRL2log(mcrl2::log::trace) << "Calculating " << ((is_allow) ? "allow" : "block") << " composition using a set of "
+  mCRL2log(mcrl2::log::log_level_t::trace) << "Calculating " << ((is_allow) ? "allow" : "block") << " composition using a set of "
                               << ((is_allow) ? allowlist1.size() : allowlist1.front().size())
                               << ((is_allow) ? " allowed multiactions" : " blocked actions") << std::endl;
-  mCRL2log(mcrl2::log::trace) << ((is_allow) ? "Allowed multiactions: " : "Blocked actions: ") << std::endl
+  mCRL2log(mcrl2::log::log_level_t::trace) << ((is_allow) ? "Allowed multiactions: " : "Blocked actions: ") << std::endl
                               << ((is_allow) ? core::detail::print_set(allowlist1)
                                              : core::detail::print_set(allowlist1.front()))
                               << std::endl;
@@ -220,7 +220,7 @@ inline void allowblockcomposition(
   // is essential for all processes. In these cases a
   // message about the block operator is very confusing.
   {
-    mCRL2log(mcrl2::log::verbose) << "- calculating the " << (is_allow ? "allow" : "block") << " operator on "
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "- calculating the " << (is_allow ? "allow" : "block") << " operator on "
                                   << sourcesumlist.size() << " action summands and " << resultdeltasumlist.size()
                                   << " delta summands";
   }
@@ -292,9 +292,9 @@ inline void allowblockcomposition(
         ignore_time);
   }
 
-  if (mCRL2logEnabled(mcrl2::log::verbose) && (sourcesumlist_length > 2 || is_allow))
+  if (mCRL2logEnabled(mcrl2::log::log_level_t::verbose) && (sourcesumlist_length > 2 || is_allow))
   {
-    mCRL2log(mcrl2::log::verbose) << ", resulting in " << action_summands.size() << " action summands and "
+    mCRL2log(mcrl2::log::log_level_t::verbose) << ", resulting in " << action_summands.size() << " action summands and "
                                   << deadlock_summands.size() << " delta summands\n";
   }
 

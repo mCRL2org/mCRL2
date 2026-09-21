@@ -204,16 +204,16 @@ class pbesinst_alternative_lazy_algorithm
       if (time(&new_log_time) > last_log_time)
       {
         last_log_time = new_log_time;
-        mCRL2log(mcrl2::log::status) << "Processed " << nr_of_processed_variables <<
+        mCRL2log(mcrl2::log::log_level_t::status) << "Processed " << nr_of_processed_variables <<
                        " and generated " << nr_of_generated_variables <<
                        " boolean variables";
         if (m_maximum_todo_size != std::numeric_limits<std::size_t>::max())
         {
-          mCRL2log(mcrl2::log::status) << " with a todo buffer of size " << todo_size << ".    \n";
+          mCRL2log(mcrl2::log::log_level_t::status) << " with a todo buffer of size " << todo_size << ".    \n";
         }
         else
         {
-          mCRL2log(mcrl2::log::status) << ".   \n"; // Extra spaces, as the log messages are shown repeatedly on top of each other and can shorten, leaving residual letter on the output. 
+          mCRL2log(mcrl2::log::log_level_t::status) << ".   \n"; // Extra spaces, as the log messages are shown repeatedly on top of each other and can shorten, leaving residual letter on the output. 
         }
       }
     }
@@ -233,9 +233,9 @@ class pbesinst_alternative_lazy_algorithm
     ///                         these variables are set to true.
     pbesinst_alternative_lazy_algorithm(const data::data_specification& data_spec,
         const data::rewriter& datar,
-        search_strategy search_strategy = breadth_first,
-        transformation_strategy transformation_strategy = lazy,
-        const mcrl2::pbes_system::remove_level erase_unused_bes_variables = mcrl2::pbes_system::none,
+        search_strategy search_strategy = search_strategy::breadth_first,
+        transformation_strategy transformation_strategy = transformation_strategy::lazy,
+        const mcrl2::pbes_system::remove_level erase_unused_bes_variables = mcrl2::pbes_system::remove_level::none,
         const std::size_t maximum_todo_size = std::numeric_limits<std::size_t>::max(),
         const bool approximate_true = true)
         : m_data_spec(data_spec),
@@ -256,20 +256,20 @@ class pbesinst_alternative_lazy_algorithm
       }
       srand((unsigned)time(nullptr));
 
-      if (m_search_strategy == breadth_first_short)
+      if (m_search_strategy == search_strategy::breadth_first_short)
       {
-        m_search_strategy = breadth_first;
+        m_search_strategy = search_strategy::breadth_first;
       }
-      else if (m_search_strategy == depth_first_short)
+      else if (m_search_strategy == search_strategy::depth_first_short)
       {
-        m_search_strategy = depth_first;
+        m_search_strategy = search_strategy::depth_first;
       }
     }
 
     inline propositional_variable_instantiation next_todo()
     {
       assert(todo.size()==todo_set.size());
-      if (m_search_strategy == breadth_first)
+      if (m_search_strategy == search_strategy::breadth_first)
       {
         const propositional_variable_instantiation X_e = todo.front();
         todo.pop_front();
@@ -399,7 +399,7 @@ class pbesinst_alternative_lazy_algorithm
 
     void regenerate_states()
     {
-      if (m_erase_unused_bes_variables==pbes_system::none)
+      if (m_erase_unused_bes_variables==pbes_system::remove_level::none)
       {
         // Nothing will be thrown away. Therefore, it makes no sense to rebuild
         // the data structures on the basis of reachable bes variables.
@@ -463,7 +463,7 @@ class pbesinst_alternative_lazy_algorithm
       {
         // Insert the new equation if it is reachable, or if it equal to true or false and m_erase_unused_bes_variables is set to some.
         if (reachable.count(i.first) > 0
-            || (m_erase_unused_bes_variables == pbes_system::some && (is_true(i.second) || is_false(i.second))))
+            || (m_erase_unused_bes_variables == pbes_system::remove_level::some && (is_true(i.second) || is_false(i.second))))
         {
           new_equations.insert(i);
           std::size_t index = equation_index[i.first.name()];
@@ -615,7 +615,7 @@ class pbesinst_alternative_lazy_algorithm
         }
         pbes_expression rewritten_psi_e;
 
-        if (m_transformation_strategy >= optimize)
+        if (m_transformation_strategy >= transformation_strategy::optimize)
         {
           // Substitute all trivial variable instantiations by their values
           pbes_expression_pair p=simplify_pbes_expression(psi_e,trivial);
@@ -629,7 +629,7 @@ class pbesinst_alternative_lazy_algorithm
         // Store the result
         equation[X_e] = psi_e;
 
-        if (m_transformation_strategy >= on_the_fly_with_fixed_points)
+        if (m_transformation_strategy >= transformation_strategy::on_the_fly_with_fixed_points)
         {
           // Find mu or nu loop
           if (eqn.symbol() == fixpoint_symbol::mu())
@@ -661,10 +661,10 @@ class pbesinst_alternative_lazy_algorithm
           occurrence[v].insert(X_e);
         }
 
-        if (m_transformation_strategy >= optimize && (is_true(rewritten_psi_e) || is_false(rewritten_psi_e)))
+        if (m_transformation_strategy >= transformation_strategy::optimize && (is_true(rewritten_psi_e) || is_false(rewritten_psi_e)))
         {
           trivial[X_e] = rewritten_psi_e;
-          if (m_transformation_strategy >= on_the_fly)
+          if (m_transformation_strategy >= transformation_strategy::on_the_fly)
           {
             // Substitute X_e to its value in all its occurrences, and
             // substitute all other variables to their values that are found
@@ -695,7 +695,7 @@ class pbesinst_alternative_lazy_algorithm
           }
         }
 
-        if (m_transformation_strategy >= on_the_fly)
+        if (m_transformation_strategy >= transformation_strategy::on_the_fly)
         {
           if (--regeneration_count == 0 || trivial.count(init)>0 )
           {
@@ -715,7 +715,7 @@ class pbesinst_alternative_lazy_algorithm
     /// \return The computed bes in pbes format
     pbes get_result(bool short_rename_scheme=true)
     {
-      mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, generating BES" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "Generated " << equation.size() << " BES equations in total, generating BES" << std::endl;
       pbes result;
       std::size_t index = 0;
       const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>
@@ -729,7 +729,7 @@ class pbesinst_alternative_lazy_algorithm
           const propositional_variable lhs = propositional_variable(renamer(X_e).name(), data::variable_list());
           const pbes_expression rhs = replace_propositional_variables(equation[X_e], renamer);
           result.equations().emplace_back(symbol, lhs, rhs);
-          mCRL2log(log::debug) << "BESEquation: " << atermpp::aterm(symbol) << " " << lhs << " = " << rhs << std::endl;
+          mCRL2log(log::log_level_t::debug) << "BESEquation: " << atermpp::aterm(symbol) << " " << lhs << " = " << rhs << std::endl;
 
         }
       }

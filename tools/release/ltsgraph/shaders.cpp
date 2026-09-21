@@ -46,32 +46,32 @@ bool GlobalShader::link()
   // Here we compile the vertex and fragment shaders and combine the results.
   if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShader))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShader))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!QOpenGLShaderProgram::link())
   {
-    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << "Could not link shader program:" << log().toStdString();
     std::abort();
   }
 
   m_worldViewProjMatrix_location = uniformLocation("g_worldViewProjMatrix");
   if (m_worldViewProjMatrix_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The global shader has no uniform named g_worldViewProjMatrix.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The global shader has no uniform named g_worldViewProjMatrix.\n";
   }
 
   m_color_location = uniformLocation("g_color");
   if (m_color_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The global shader has no uniform named g_color.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The global shader has no uniform named g_color.\n";
   }
 
   return true;
@@ -122,41 +122,41 @@ namespace{
 bool NodeShaderInstanced::link(){
   if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShaderInstanced))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShaderInstanced))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!QOpenGLShaderProgram::link())
   {
-    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << "Could not link shader program:" << log().toStdString();
     std::abort();
   }
 
   u_eye_loc = uniformLocation("eye");
   if (u_eye_loc == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The instanced node shader has no uniform named \"eye\".\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The instanced node shader has no uniform named \"eye\".\n";
   }
 
   u_VP_loc = uniformLocation("VP");
   if (u_VP_loc == -1){
-    mCRL2log(mcrl2::log::warning) << "The instanced node shader has no uniform named \"VP\".\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The instanced node shader has no uniform named \"VP\".\n";
   }
 
   u_V_loc = uniformLocation("V");
   if (u_V_loc == -1){
-    mCRL2log(mcrl2::log::warning) << "The instanced node shader has no uniform named \"V\".\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The instanced node shader has no uniform named \"V\".\n";
   }
 
   u_scale_loc = uniformLocation("scale");
   if (u_scale_loc == -1){
-    mCRL2log(mcrl2::log::warning) << "The instanced node shader has no uniform named \"scale\".\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The instanced node shader has no uniform named \"scale\".\n";
   }
 
   return true;
@@ -198,30 +198,30 @@ namespace{
 bool ArrowShaderInstanced::link(){
   if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_vertexShaderInstancedArrow))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_fragmentShaderInstancedArrow))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!QOpenGLShaderProgram::link())
   {
-    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << "Could not link shader program:" << log().toStdString();
     std::abort();
   }
 
   u_VP_loc = uniformLocation("VP");
   if (u_VP_loc == -1){
-    mCRL2log(mcrl2::log::warning) << "The instanced arrow shader has no uniform named \"VP\".\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The instanced arrow shader has no uniform named \"VP\".\n";
   }
 
   u_scale_loc = uniformLocation("scale");
   if (u_scale_loc == -1){
-    mCRL2log(mcrl2::log::warning) << "The instanced arrow shader has no uniform named \"scale\".\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The instanced arrow shader has no uniform named \"scale\".\n";
   }
 
   return true;
@@ -290,50 +290,50 @@ bool ArcShader::link()
   // Here we compile the vertex and fragment shaders and combine the results.
   if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_arcVertexShader))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_arcFragmentShader))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!QOpenGLShaderProgram::link())
   {
-    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << "Could not link shader program:" << log().toStdString();
     std::abort();
   }
 
   m_viewProjMatrix_location = uniformLocation("g_viewProjMatrix");
   if (m_viewProjMatrix_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_viewProjMatrix.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The arc shader has no uniform named g_viewProjMatrix.\n";
   }
 
   m_viewMatrix_location = uniformLocation("g_viewMatrix");
   if (m_viewMatrix_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_viewMatrix.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The arc shader has no uniform named g_viewMatrix.\n";
   }
 
   m_controlPoints_location = uniformLocation("g_controlPoint");
   if (m_controlPoints_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_controlPoint.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The arc shader has no uniform named g_controlPoint.\n";
   }
 
   m_color_location = uniformLocation("g_color");
   if (m_color_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_color.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The arc shader has no uniform named g_color.\n";
   }
 
   m_fogdensity_location = uniformLocation("g_density");
   if (m_fogdensity_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_density.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The arc shader has no uniform named g_density.\n";
   }
 
   return true;
@@ -403,38 +403,38 @@ bool ArcShaderInstanced::link()
   // Here we compile the vertex and fragment shaders and combine the results.
   if (!addShaderFromSourceCode(QOpenGLShader::Vertex, g_arcVertexShaderInstanced))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!addShaderFromSourceCode(QOpenGLShader::Fragment, g_arcFragmentShaderInstanced))
   {
-    mCRL2log(mcrl2::log::error) << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << log().toStdString();
     std::abort();
   }
 
   if (!QOpenGLShaderProgram::link())
   {
-    mCRL2log(mcrl2::log::error) << "Could not link shader program:" << log().toStdString();
+    mCRL2log(mcrl2::log::log_level_t::error) << "Could not link shader program:" << log().toStdString();
     std::abort();
   }
 
   m_viewProjMatrix_location = uniformLocation("g_viewProjMatrix");
   if (m_viewProjMatrix_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_viewProjMatrix.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The arc shader has no uniform named g_viewProjMatrix.\n";
   }
 
   m_viewMatrix_location = uniformLocation("g_viewMatrix");
   if (m_viewMatrix_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_viewMatrix.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The arc shader has no uniform named g_viewMatrix.\n";
   }
 
   m_fogdensity_location = uniformLocation("g_density");
   if (m_fogdensity_location == -1)
   {
-    mCRL2log(mcrl2::log::warning) << "The arc shader has no uniform named g_density.\n";
+    mCRL2log(mcrl2::log::log_level_t::warning) << "The arc shader has no uniform named g_density.\n";
   }
 
   return true;

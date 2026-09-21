@@ -137,18 +137,18 @@ void Graph::load(const QString& filename, const QVector3D& min,
   {
     switch (m_type)
     {
-    case mcrl2::lts::lts_aut:
+    case mcrl2::lts::lts_type::lts_aut:
       templatedLoad<mcrl2::lts::probabilistic_lts_aut_t>(filename, min, max);
       break;
-    case mcrl2::lts::lts_dot:
+    case mcrl2::lts::lts_type::lts_dot:
       throw mcrl2::runtime_error("Cannot read a .dot file anymore.");
       break;
-    case mcrl2::lts::lts_fsm:
+    case mcrl2::lts::lts_type::lts_fsm:
       templatedLoad<mcrl2::lts::probabilistic_lts_fsm_t>(filename, min, max);
       break;
-    case mcrl2::lts::lts_lts:
+    case mcrl2::lts::lts_type::lts_lts:
     default:
-      m_type = mcrl2::lts::lts_lts;
+      m_type = mcrl2::lts::lts_type::lts_lts;
       templatedLoad<mcrl2::lts::probabilistic_lts_lts_t>(filename, min, max);
       break;
     }
@@ -312,7 +312,7 @@ void Graph::loadXML(const QString& filename)
   QFile file(filename);
   if (!file.open(QFile::ReadOnly))
   {
-    mCRL2log(mcrl2::log::error)
+    mCRL2log(mcrl2::log::log_level_t::error)
         << "Could not open XML file: " << filename.toStdString() << std::endl;
     return;
   }
@@ -320,7 +320,7 @@ void Graph::loadXML(const QString& filename)
   if (!xml.setContent(&file, false, &errorMsg))
   {
     file.close();
-    mCRL2log(mcrl2::log::error)
+    mCRL2log(mcrl2::log::log_level_t::error)
         << "Could not parse XML file: " << errorMsg.toStdString() << std::endl;
     return;
   }
@@ -329,7 +329,7 @@ void Graph::loadXML(const QString& filename)
   QDomElement root = xml.documentElement();
   if (root.tagName() != "Graph")
   {
-    mCRL2log(mcrl2::log::error) << "XML contains no valid graph" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << "XML contains no valid graph" << std::endl;
     return;
   }
 
@@ -915,7 +915,7 @@ void GraphView::draw(QPainter& painter)
 void GraphView::addToPlot(int row, int col, PlotEntry entry){
   if (row >= m_rows || col >= m_cols)
   {
-    mCRL2log(mcrl2::log::warning)
+    mCRL2log(mcrl2::log::log_level_t::warning)
         << "Adding entry to graph of size (" << m_rows << ", " << m_cols
         << ") at position (" << row << ", " << col
         << "). Expanding number of plots to facilitate." << std::endl;
@@ -944,7 +944,7 @@ void GraphView::logVar(std::string name, double value)
   }
   catch (int)
   {
-    mCRL2log(mcrl2::log::error)
+    mCRL2log(mcrl2::log::log_level_t::error)
         << "Failed to log variable: " << name << std::endl;
     std::abort();
   }

@@ -53,7 +53,7 @@ data::mutable_map_substitution<> instantiate_global_variables(pres& p)
     to_be_removed.insert(v);
   }
 
-  mCRL2log(log::debug) << "instantiating global PRES variables " << sigma << std::endl;
+  mCRL2log(log::log_level_t::debug) << "instantiating global PRES variables " << sigma << std::endl;
   replace_global_variables(p, sigma);
 
   return sigma;

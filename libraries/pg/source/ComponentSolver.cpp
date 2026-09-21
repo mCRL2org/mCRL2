@@ -65,7 +65,7 @@ int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
             unsolved.push_back(vertices[n]);
         }
     }
-    mCRL2log(mcrl2::log::verbose) << "SCC of size " << num_vertices << " with "
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "SCC of size " << num_vertices << " with "
                                                      << unsolved.size() << " unsolved vertices..." << std::endl;
 
     if (unsolved.empty())
@@ -80,7 +80,7 @@ int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
     ParityGame::Strategy substrat;
     if (max_depth_ > 0 && unsolved.size() < num_vertices)
     {
-        mCRL2log(mcrl2::log::verbose) << "Recursing on subgame of size "
+        mCRL2log(mcrl2::log::log_level_t::verbose) << "Recursing on subgame of size "
                                                          << unsolved.size() << "..." << std::endl;
         ComponentSolver(subgame, pgsf_, max_depth_ - 1).solve().swap(substrat);
     }
@@ -93,14 +93,14 @@ int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
             std::size_t new_d = subgame.d();
             if (old_d != new_d)
             {
-                mCRL2log(mcrl2::log::verbose) << "Priority compression removed "
+                mCRL2log(mcrl2::log::log_level_t::verbose) << "Priority compression removed "
                                                                  << old_d - new_d << " of "
                                                                  << old_d << " priorities" << std::endl;
             }
         }
 
         // Solve the subgame
-        mCRL2log(mcrl2::log::verbose)  << "Solving subgame of size "
+        mCRL2log(mcrl2::log::log_level_t::verbose)  << "Solving subgame of size "
                                                           << unsolved.size() << "..." << std::endl;
         std::vector<verti> submap;  // declared here so it survives subsolver
         std::unique_ptr<ParityGameSolver> subsolver;
@@ -123,10 +123,10 @@ int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
       return -1; // solving failed
     }
 
-    mCRL2log(mcrl2::log::verbose) << "Merging strategies..." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Merging strategies..." << std::endl;
     merge_strategies(strategy_, substrat, unsolved);
 
-    mCRL2log(mcrl2::log::verbose) << "Building attractor sets for winning regions..." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Building attractor sets for winning regions..." << std::endl;
 
     // Extract winning sets from subgame:
     std::array<std::deque<verti>, 2> todo;
@@ -134,8 +134,8 @@ int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
     {
         ParityGame::Player pl = subgame.winner(substrat, n);
         verti v = unsolved[n];
-        winning_[pl]->insert(v);
-        todo[pl].push_back(v);
+        winning_[static_cast<std::size_t>(pl)]->insert(v);
+        todo[static_cast<std::size_t>(pl)].push_back(v);
     }
 
     // Extend winning sets to attractor sets:
@@ -145,7 +145,7 @@ int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
                             *winning_[player], todo[player], strategy_ );
     }
 
-    mCRL2log(mcrl2::log::verbose) << "Leaving." << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::verbose) << "Leaving." << std::endl;
     return 0;
 }
 

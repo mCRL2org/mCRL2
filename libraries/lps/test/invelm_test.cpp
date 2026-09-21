@@ -27,10 +27,10 @@ lps::specification invelm(const lps::specification& spec,
                          )
 {
   lps::specification specification = spec;
-  data::rewriter::strategy rewrite_strategy = data::jitty;
+  data::rewriter::strategy rewrite_strategy = data::rewrite_strategy::jitty;
   int time_limit = 0;
   bool path_eliminator = false;
-  data::detail::smt_solver_type solver_type = mcrl2::data::detail::solver_type_cvc;
+  data::detail::smt_solver_type solver_type = mcrl2::data::detail::smt_solver_type::solver_type_cvc;
   bool apply_induction = false;
 
   lps::detail::Invariant_Checker<lps::specification> v_invariant_checker(specification,

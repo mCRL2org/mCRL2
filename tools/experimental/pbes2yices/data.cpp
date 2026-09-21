@@ -539,7 +539,7 @@ static std::string match_pattern(
   if (rules.empty()) {
     representative_generator generator(specification);
     data_expression expression = generator(sort);
-    mCRL2log(log::warning) << "Completing function definition with rule " << data::pp(data_equation(variable_list(), condition, pattern, expression)) << "\n";
+    mCRL2log(log::log_level_t::warning) << "Completing function definition with rule " << data::pp(data_equation(variable_list(), condition, pattern, expression)) << "\n";
     return translate_expression(expression, std::map<variable, std::string>(), translation);
   }
   

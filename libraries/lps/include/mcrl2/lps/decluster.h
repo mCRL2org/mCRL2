@@ -32,10 +32,10 @@ class decluster_algorithm: public detail::lps_algorithm<Specification>
     template <typename SummandType, typename OutIter>
     void decluster_summand(const SummandType& summand, OutIter& out)
     {
-      mCRL2log(log::debug) << "Splitting summand condition " << summand.condition() << " into:\n";
+      mCRL2log(log::log_level_t::debug) << "Splitting summand condition " << summand.condition() << " into:\n";
       for(const data::data_expression& disjunct: data::split_or_aggressive(summand.condition()))
       {
-        mCRL2log(log::debug) << "- " << disjunct << "\n";
+        mCRL2log(log::log_level_t::debug) << "- " << disjunct << "\n";
         SummandType s(summand);
         s.condition() = disjunct;
         *out++ = s;

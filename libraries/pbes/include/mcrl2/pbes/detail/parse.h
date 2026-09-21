@@ -141,7 +141,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
   }
   catch (const std::runtime_error& e)
   {
-    mCRL2log(log::error) << "parse_pbes_expression: parse error detected in the generated specification\n"
+    mCRL2log(log::log_level_t::error) << "parse_pbes_expression: parse error detected in the generated specification\n"
                          << pbesspec
                          << std::endl;
     throw e;
@@ -224,7 +224,7 @@ pbes_expression parse_pbes_expression(const std::string& expr, const std::string
   }
   catch (const std::runtime_error& e)
   {
-    mCRL2log(log::error) << "parse_pbes_expression: parse error detected in the generated specification\n"
+    mCRL2log(log::log_level_t::error) << "parse_pbes_expression: parse error detected in the generated specification\n"
                          << pbesspec
                          << std::endl;
     throw e;

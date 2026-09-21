@@ -45,9 +45,9 @@ protected:
     detail::comparison_t comp = l.comparison();
     switch(comp)
     {
-      case detail::less: return less(sort_real::real_());
-      case detail::less_eq:return less_equal(sort_real::real_());
-      case detail::equal:return equal_to(sort_real::real_());
+      case detail::comparison_t::less: return less(sort_real::real_());
+      case detail::comparison_t::less_eq:return less_equal(sort_real::real_());
+      case detail::comparison_t::equal:return equal_to(sort_real::real_());
     }
     assert(0);
     return equal_to(sort_real::real_()); //supress compiler warning

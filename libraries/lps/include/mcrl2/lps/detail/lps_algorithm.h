@@ -78,7 +78,7 @@ class lps_algorithm
     /// \brief Flag for verbose output
     bool verbose() const
     {
-      return mCRL2logEnabled(log::verbose);
+      return mCRL2logEnabled(log::log_level_t::verbose);
     }
 
     /// \brief Applies the next state substitution to the variable v.

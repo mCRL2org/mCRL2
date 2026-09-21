@@ -49,8 +49,8 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     derived().apply(body, forall(x).body());
 
     std::map<data::variable, std::set<data::data_expression> > inequalities = find_inequalities(body);
-    mCRL2log(log::debug) << "x = " << x << std::endl;
-    mCRL2log(log::debug) << "\ninequalities(body) = " << data::print_inequalities(inequalities) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "x = " << x << std::endl;
+    mCRL2log(log::log_level_t::debug) << "\ninequalities(body) = " << data::print_inequalities(inequalities) << std::endl;
     if (!inequalities.empty())
     {
       auto p = data::make_one_point_rule_substitution(inequalities, x.variables());
@@ -58,17 +58,17 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       const std::vector<data::variable>& remaining_variables = p.second;
       if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
       {
-        mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
         body = pbes_system::replace_variables_capture_avoiding(body, sigma);
-        mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
+        mCRL2log(log::log_level_t::debug) << "sigma(x) = " << body << std::endl;
         if (remaining_variables.empty())
         {
-          mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Replaced " << x << "\nwith " << body << std::endl;
           result = body;
           return;
         }
         data::variable_list v(remaining_variables.begin(), remaining_variables.end());
-        mCRL2log(log::debug) << "Replaced " << x << "\nwith " << forall(v, body) << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Replaced " << x << "\nwith " << forall(v, body) << std::endl;
         pbes_system::make_forall(result, v, body);
         return;
       }
@@ -83,7 +83,7 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
     derived().apply(body, exists(x).body());
 
     std::map<data::variable, std::set<data::data_expression> > equalities = find_equalities(body);
-    mCRL2log(log::debug) << "x = " << body << "\nequalities(x) = " << data::print_inequalities(equalities) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "x = " << body << "\nequalities(x) = " << data::print_inequalities(equalities) << std::endl;
     if (!equalities.empty())
     {
       auto p = data::make_one_point_rule_substitution(equalities, x.variables());
@@ -91,17 +91,17 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
       const std::vector<data::variable>& remaining_variables = p.second;
       if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
       {
-        mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
         body = pbes_system::replace_variables_capture_avoiding(body, sigma);
-        mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
+        mCRL2log(log::log_level_t::debug) << "sigma(x) = " << body << std::endl;
         if (remaining_variables.empty())
         {
-          mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
+          mCRL2log(log::log_level_t::debug) << "Replaced " << x << "\nwith " << body << std::endl;
           result = body;
           return;
         }
         data::variable_list v(remaining_variables.begin(), remaining_variables.end());
-        mCRL2log(log::debug) << "Replaced " << x << "\nwith " << exists(v, body) << std::endl;
+        mCRL2log(log::log_level_t::debug) << "Replaced " << x << "\nwith " << exists(v, body) << std::endl;
         pbes_system::make_exists(result, v, body);
         return;
       }

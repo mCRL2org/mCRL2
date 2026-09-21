@@ -9,7 +9,6 @@
 
 #ifndef MCRL2_UTILITIES_UNORDERED_MAP_IMPLEMENTATION_H
 #define MCRL2_UTILITIES_UNORDERED_MAP_IMPLEMENTATION_H
-#pragma once
 
 #include "mcrl2/utilities/unordered_map.h"
 

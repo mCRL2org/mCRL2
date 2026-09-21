@@ -154,7 +154,7 @@ class pbesreach_algorithm
     /// \brief Updates R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, pbes_summand_group& R, const ldd& X)
     {
-      mCRL2log(log::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
       std::pair<pbesreach_algorithm&, pbes_summand_group&> context{*this, R};
@@ -183,7 +183,7 @@ class pbesreach_algorithm
       data::data_specification propvar_dataspec = construct_propositional_variable_data_specification(srf_pbes, "PropositionalVariable");
       srf_pbes.data() = data::merge_data_specifications(srf_pbes.data(), propvar_dataspec);
 
-      mCRL2log(log::trace) << "--- srf pbes ---\n" << srf_pbes.to_pbes() << std::endl;
+      mCRL2log(log::log_level_t::trace) << "--- srf pbes ---\n" << srf_pbes.to_pbes() << std::endl;
       return srf_pbes;
     }
 
@@ -224,24 +224,24 @@ class pbesreach_algorithm
       m_initial_state = data::data_expression_list(initial_values.begin(), initial_values.end());
 
       m_summand_patterns = compute_read_write_patterns(m_pbes, m_process_parameters);
-      mCRL2log(log::debug) << "Original read/write matrix:" << std::endl;
-      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
+      mCRL2log(log::log_level_t::debug) << "Original read/write matrix:" << std::endl;
+      mCRL2log(log::log_level_t::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
 
       symbolic::adjust_read_write_patterns(m_summand_patterns, m_options);
 
       m_variable_order = symbolic::compute_variable_order(m_options.variable_order, m_process_parameters.size(), m_summand_patterns, true);
       assert(m_variable_order[0] == 0); // It is required that the propositional variable name stays up front
-      mCRL2log(log::debug) << "variable order = " << core::detail::print_list(m_variable_order) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "variable order = " << core::detail::print_list(m_variable_order) << std::endl;
       m_summand_patterns = symbolic::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
 
       m_process_parameters = symbolic::permute_copy(m_process_parameters, m_variable_order);
       m_initial_state = symbolic::permute_copy(m_initial_state, m_variable_order);
-      mCRL2log(log::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "process parameters = " << core::detail::print_list(m_process_parameters) << std::endl;
 
       std::vector<std::set<std::size_t>> groups = symbolic::compute_summand_groups(m_options.summand_groups, m_summand_patterns);
       for (const auto& group: groups)
       {
-        mCRL2log(log::debug) << "group " << core::detail::print_set(group) << std::endl;
+        mCRL2log(log::log_level_t::debug) << "group " << core::detail::print_set(group) << std::endl;
       }
       m_group_patterns = symbolic::compute_summand_group_patterns(m_summand_patterns, groups);
       for (std::size_t j = 0; j < m_group_patterns.size(); j++)
@@ -251,7 +251,7 @@ class pbesreach_algorithm
 
       for (std::size_t i = 0; i < m_summand_groups.size(); i++)
       {
-        mCRL2log(log::debug) << "=== summand group " << i << " ===\n" << m_summand_groups[i] << std::endl;
+        mCRL2log(log::log_level_t::debug) << "=== summand group " << i << " ===\n" << m_summand_groups[i] << std::endl;
       }
 
       for (const data::variable& param: m_process_parameters)
@@ -259,8 +259,8 @@ class pbesreach_algorithm
         m_data_index.emplace_back(param.sort());
       }
 
-      mCRL2log(log::debug) << "Final read/write matrix:" << std::endl;
-      mCRL2log(log::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
+      mCRL2log(log::log_level_t::debug) << "Final read/write matrix:" << std::endl;
+      mCRL2log(log::log_level_t::debug) << symbolic::print_read_write_patterns(m_summand_patterns);
     }
 
     virtual ~pbesreach_algorithm() = default;
@@ -282,13 +282,13 @@ class pbesreach_algorithm
       if (m_options.no_relprod)
       {
         ldd z = symbolic::alternative_relprod(U, group);
-        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
         return z;
       }
       else
       {
         ldd z = relprod(U, group.L, group.Ir);
-        mCRL2log(log::trace) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "relprod(" << i << ", todo) = " << print_states(m_data_index, z) << std::endl;
         return z;
       }
     }
@@ -315,7 +315,7 @@ class pbesreach_algorithm
             ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
@@ -339,7 +339,7 @@ class pbesreach_algorithm
             ldd proj = project(todo1, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
-            mCRL2log(log::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
           // Apply one transition relation repeatedly.
@@ -382,7 +382,7 @@ class pbesreach_algorithm
       auto& R = m_summand_groups;
       std::size_t iteration_count = 0;
 
-      mCRL2log(log::trace) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
+      mCRL2log(log::log_level_t::trace) << "initial state = " << core::detail::print_list(m_initial_state) << std::endl;
 
       stopwatch timer;
       m_initial_vertex = initial_state();
@@ -394,8 +394,8 @@ class pbesreach_algorithm
       {
         stopwatch loop_start;
         iteration_count++;
-        mCRL2log(log::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
-        mCRL2log(log::trace) << "todo = " << print_states(m_data_index, m_todo) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "--- iteration " << iteration_count << " ---" << std::endl;
+        mCRL2log(log::log_level_t::trace) << "todo = " << print_states(m_data_index, m_todo) << std::endl;
         ldd deadlocks = empty_set();
 
         std::tie(m_visited, m_todo, deadlocks) = step(m_visited, m_todo, true, m_options.detect_deadlocks);
@@ -405,13 +405,13 @@ class pbesreach_algorithm
           m_deadlocks = union_(m_deadlocks, deadlocks);
         }
 
-        mCRL2log(log::verbose) << "generated " << std::setw(12) << print_size(union_(m_visited, m_todo)) << " BES equations after "
+        mCRL2log(log::log_level_t::verbose) << "generated " << std::setw(12) << print_size(union_(m_visited, m_todo)) << " BES equations after "
                                << std::setw(3) << iteration_count << " iterations (time = " << std::setprecision(2)
                                << std::fixed << loop_start.seconds() << "s)" << std::endl;
 
         if (m_options.detect_deadlocks)
         {
-          mCRL2log(log::verbose) << "found " << std::setw(12) << print_size(m_deadlocks) << " deadlocks" << std::endl;
+          mCRL2log(log::log_level_t::verbose) << "found " << std::setw(12) << print_size(m_deadlocks) << " deadlocks" << std::endl;
         }
 
         on_end_while_loop();
@@ -424,32 +424,32 @@ class pbesreach_algorithm
       }
       else
       {
-        mCRL2log(log::verbose) << "number of BES equations = " << print_size(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
+        mCRL2log(log::log_level_t::verbose) << "number of BES equations = " << print_size(m_visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
       }
 
-      mCRL2log(log::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "used variable order = " << core::detail::print_list(m_variable_order) << std::endl;
 
       double total_time = 0.0;
       for (std::size_t i = 0; i < R.size(); i++)
       {
-        mCRL2log(log::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << print_size(R[i].L) << " transitions (learn time = "
+        mCRL2log(log::log_level_t::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(7) << print_size(R[i].L) << " transitions (learn time = "
                                << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls
                                << " calls, cached " << print_size(R[i].Ldomain) << " values"
                                << std::endl;
 
         total_time += R[i].learn_time;
       }
-      mCRL2log(log::verbose) << "learning transitions took " << total_time << "s" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "learning transitions took " << total_time << "s" << std::endl;
 
       std::size_t i = 0;
       for (const auto& param : m_process_parameters)
       {
         auto& table = m_data_index[i];
 
-        mCRL2log(log::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values"<< std::endl;
+        mCRL2log(log::log_level_t::verbose) << "Parameter " << i << " (" << param << ")" << " has " << table.size() << " values"<< std::endl;
         for (const auto& data : table)
         {
-          mCRL2log(log::debug) << table.index(data) << ": " << data << std::endl;
+          mCRL2log(log::log_level_t::debug) << table.index(data) << ": " << data << std::endl;
         }
 
         ++i;

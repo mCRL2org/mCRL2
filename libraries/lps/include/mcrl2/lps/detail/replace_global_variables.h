@@ -71,7 +71,7 @@ void replace_global_variables(Specification& lpsspec)
         throw mcrl2::runtime_error("replace_global_variables is not defined for stochastic LPS specifications.");
     }
 
-    mCRL2log(log::verbose) << "Replacing global variables assignments in LPS specification." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Replacing global variables assignments in LPS specification." << std::endl;
 
     assignment_builder builder(lpsspec.global_variables());
     builder.update(lpsspec.process());       

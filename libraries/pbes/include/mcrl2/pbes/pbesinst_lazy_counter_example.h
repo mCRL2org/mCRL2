@@ -86,14 +86,14 @@ struct rewrite_star_substitution
     // the rewrite_star substitution is only applicable to closed PVIs.
     if(!find_free_variables(Y).empty())
     {
-      mCRL2log(log::trace) << "rewrite_star " << Y << " contains free variables, not applying substitution\n";
+      mCRL2log(log::log_level_t::trace) << "rewrite_star " << Y << " contains free variables, not applying substitution\n";
       return Y;
     }
 
     std::smatch match;
 
     // Now we need to find all reachable X --> Y, following vertices that are not ranked.
-    mCRL2log(log::debug) << "X = " << X << std::endl;
+    mCRL2log(log::log_level_t::debug) << "X = " << X << std::endl;
 
     std::unordered_set<pbes_expression> Ys;
 
@@ -116,16 +116,16 @@ struct rewrite_star_substitution
           // If this vertex is won by player even and is decorated with `true`,
           // then it stems from an equation (\nu X = true), which originally was (\nu X = X) before the default simplification (analogous for player odd).
           if (G.strategy(u) == undefined_vertex() &&
-              ((!alpha && utilities::is_even(G.rank(u)) && G.decoration(u) == structure_graph::d_true)
-              || (alpha && utilities::is_odd(G.rank(u)) && G.decoration(u) == structure_graph::d_false)))
+              ((!alpha && utilities::is_even(G.rank(u)) && G.decoration(u) == structure_graph::decoration_type::d_true)
+              || (alpha && utilities::is_odd(G.rank(u)) && G.decoration(u) == structure_graph::decoration_type::d_false)))
           {
             // We act as if the self-dependency is still there.
             Ys.insert(G.find_vertex(u).formula());
           }
           // This vertex is won by alpha
           if (G.strategy(u) != undefined_vertex()
-              && ((!alpha && G.decoration(u) == structure_graph::d_disjunction)
-                  || (alpha && G.decoration(u) == structure_graph::d_conjunction)))
+              && ((!alpha && G.decoration(u) == structure_graph::decoration_type::d_disjunction)
+                  || (alpha && G.decoration(u) == structure_graph::decoration_type::d_conjunction)))
           {
             // The strategy is defined so only explore the strategy edge.
             auto v = G.strategy(u);
@@ -187,21 +187,21 @@ struct rewrite_star_substitution
       }
     }
 
-    mCRL2log(log::debug) << "Ys := " << core::detail::print_set(Ys) << std::endl;
+    mCRL2log(log::log_level_t::debug) << "Ys := " << core::detail::print_set(Ys) << std::endl;
 
     if (std::regex_match(static_cast<const std::string&>(Y.name()),
           match,
           mcrl2::pbes_system::detail::positive_or_negative))
     {
       // If Y in L return Y
-      mCRL2log(log::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "rewrite_star " << Y << " is counter example equation (in L)" << std::endl;
       return Y;
     }
     else
     {
       if (mcrl2::utilities::detail::contains(Ys, rewrite_PVI(Y, R)))
       {
-        mCRL2log(log::debug) << "rewrite_star " << Y << " ( " << rewrite_PVI(Y, R) << ") is reachable"
+        mCRL2log(log::log_level_t::debug) << "rewrite_star " << Y << " ( " << rewrite_PVI(Y, R) << ") is reachable"
                               << std::endl;
         return Y;
       }
@@ -210,14 +210,14 @@ struct rewrite_star_substitution
         if (alpha == 0)
         {
           // If Y is not reachable, replace it by false
-          mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y, R)
+          mCRL2log(log::log_level_t::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y, R)
                                 << " is not reachable, becomes false" << std::endl;
           return false_();
         }
         else
         {
           // If Y is not reachable, replace it by true
-          mCRL2log(log::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y, R)
+          mCRL2log(log::log_level_t::debug) << "rewrite_star " << Y << " " << rewrite_PVI(Y, R)
                                 << " is not reachable, becomes true" << std::endl;
           return true_();
         }

@@ -63,14 +63,14 @@ class stategraph_influence_graph_algorithm
 
     void print_influence_graph() const
     {
-      mCRL2log(log::verbose) << "--- influence graph ---\n";
+      mCRL2log(log::log_level_t::verbose) << "--- influence graph ---\n";
       for (const auto& v: m_influence_vertices)
       {
-        mCRL2log(log::verbose) << v.print() << std::endl;
+        mCRL2log(log::log_level_t::verbose) << v.print() << std::endl;
       }
       for (const auto& e: m_influence_edges)
       {
-        mCRL2log(log::verbose) << e.print() << std::endl;
+        mCRL2log(log::log_level_t::verbose) << e.print() << std::endl;
       }
     }
 

@@ -99,9 +99,9 @@ public:
   /// applies real time abstraction to it and writes the result to output_file.
   bool run() override
   {
-    mCRL2log(verbose) << "Parameters of pbessymbolicbisim:" << std::endl;
-    mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-    mCRL2log(verbose) << "  data rewriter       " << m_rewrite_strategy << std::endl;
+    mCRL2log(log_level_t::verbose) << "Parameters of pbessymbolicbisim:" << std::endl;
+    mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+    mCRL2log(log_level_t::verbose) << "  data rewriter       " << m_rewrite_strategy << std::endl;
 
     mcrl2::pbes_system::pbes spec = mcrl2::pbes_system::detail::load_pbes(m_input_filename);
 

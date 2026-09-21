@@ -388,7 +388,7 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
     else
     {
-      mCRL2log(log::trace) << "ignoring " << x << std::endl;
+      mCRL2log(log::log_level_t::trace) << "ignoring " << x << std::endl;
       push(find_equalities_expression());
     }
   }

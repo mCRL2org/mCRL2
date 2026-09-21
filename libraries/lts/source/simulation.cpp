@@ -24,7 +24,7 @@ std::vector<simulation::transition_type> simulation::transitions(const state& so
   }
   catch (mcrl2::runtime_error& e)
   {
-    mCRL2log(mcrl2::log::error) << "an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << "an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
     return std::vector<simulation::transition_type>();
   }
 }
@@ -34,7 +34,7 @@ simulation::simulation(const stochastic_specification& specification, data::rewr
     m_specification(specification),
     m_rewriter(construct_rewriter(specification, strategy, false)),
     m_explorer(specification, explorer_options(strategy), m_rewriter),
-    m_gen(),
+    
     m_distrib(0,std::numeric_limits<std::size_t>::max())
 {
   stochastic_state initial_state;

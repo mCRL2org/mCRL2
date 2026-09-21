@@ -32,7 +32,7 @@ inline void check_formula_actions(const state_formula& formula,
   std::set<process::action_label> diff = utilities::detail::set_difference(used_state_formula_actions, spec_actions);
   if (!diff.empty())
   {
-    mCRL2log(log::warning) << "Warning: the modal formula contains actions " << core::detail::print_list(diff)
+    mCRL2log(log::log_level_t::warning) << "Warning: the modal formula contains actions " << core::detail::print_list(diff)
                            << " that are in the data specification, but do not appear in the " << spec_name << "!"
                            << std::endl;
   }

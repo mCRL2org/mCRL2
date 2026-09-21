@@ -50,16 +50,16 @@ void ToolCatalog::load()
     file.setFileName(":/share/mcrl2/tool_catalog.xml");
     if (!file.open(QFile::ReadOnly))
     {
-      mCRL2log(mcrl2::log::error) << "Could not open XML file: " << catalogFilename.toStdString() << std::endl;
+      mCRL2log(mcrl2::log::log_level_t::error) << "Could not open XML file: " << catalogFilename.toStdString() << std::endl;
       return;
     }
-    mCRL2log(mcrl2::log::warning) << "Could not open XML file: " << catalogFilename.toStdString() << ", using embedded copy instead." << std::endl;;
+    mCRL2log(mcrl2::log::log_level_t::warning) << "Could not open XML file: " << catalogFilename.toStdString() << ", using embedded copy instead." << std::endl;;
   }
   QString errorMsg;
   if(!m_xml.setContent(&file, false, &errorMsg))
   {
     file.close();
-    mCRL2log(mcrl2::log::error) << "Could not parse XML file: " << errorMsg.toStdString() << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << "Could not parse XML file: " << errorMsg.toStdString() << std::endl;
     return;
   }
   file.close();
@@ -67,7 +67,7 @@ void ToolCatalog::load()
   QDomElement root = m_xml.documentElement();
   if(root.tagName() != "tool-catalog")
   {
-    mCRL2log(mcrl2::log::error) << catalogFilename.toStdString() << " contains no valid tool catalog" << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::error) << catalogFilename.toStdString() << " contains no valid tool catalog" << std::endl;
     return;
   }
 

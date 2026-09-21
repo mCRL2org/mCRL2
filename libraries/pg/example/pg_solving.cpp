@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
   }
 
   // Print winner:
-  if (pg.winner(solution, goal_v) == PLAYER_EVEN)
+  if (pg.winner(solution, goal_v) == player_t::PLAYER_EVEN)
   {
     std::cout << "Property holds.\n";
   }

@@ -160,28 +160,28 @@ class pressolve_tool
 
     pres_system::normalize(presspec);
     
-    mCRL2log(log::verbose) << "Generating RES..." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Generating RES..." << std::endl;
     timer().start("instantiation");
     pres2res_algorithm pres2res(options,presspec,m_R);
     pres resulting_res = pres2res.run();
     timer().finish("instantiation");
 
-    mCRL2log(log::verbose) << "Solving RES..." << std::endl;
+    mCRL2log(log::log_level_t::verbose) << "Solving RES..." << std::endl;
     timer().start("solving");
 
-    if (options.algorithm==gauss_elimination)
+    if (options.algorithm==solution_algorithm::gauss_elimination)
     {
       ressolve_by_gauss_elimination_algorithm solver(options, resulting_res);
       pres_expression result = solver.run();
       std::cout << result << std::endl;
     }
-    else if (options.algorithm==numerical)
-    { 
+    else if (options.algorithm==solution_algorithm::numerical)
+    {
       ressolve_by_numerical_iteration solver(options, resulting_res);
       double result = solver.run();
       std::cout << std::setprecision(static_cast<int>(options.precision)) << result << std::endl;
-    }  
-    else if (options.algorithm==numerical_directed)
+    }
+    else if (options.algorithm==solution_algorithm::numerical_directed)
     { 
       ressolve_by_numerical_iteration_directed solver(options, resulting_res);
       double result = solver.run();

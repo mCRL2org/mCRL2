@@ -16,7 +16,7 @@
 namespace mcrl2::smt
 {
 
-enum answer
+enum class answer
 {
   UNSAT = 0,
   UNKNOWN = 1,

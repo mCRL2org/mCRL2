@@ -22,7 +22,7 @@ namespace mcrl2::lps
 
 struct explorer_options
 {
-  data::rewrite_strategy rewrite_strategy = data::jitty;
+  data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   exploration_strategy search_strategy;
   bool one_point_rule_rewrite = false;
   bool replace_constants_by_variables = false;

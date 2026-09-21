@@ -37,7 +37,7 @@ public:
 
     if (time_solving * 10 < (time_solving + time_exploring) || m_options.aggressive)
     {
-      mCRL2log(log::verbose) << "start partial solving\n";
+      mCRL2log(log::log_level_t::verbose) << "start partial solving\n";
       stopwatch timer;
 
       ldd V = union_(m_visited, m_todo);
@@ -115,9 +115,9 @@ public:
           = solver.partial_solve(m_initial_vertex, V, m_todo, m_deadlocks, m_partial_solution);
       }
 
-      mCRL2log(log::verbose) << "found solution for" << std::setw(12) << satcount(m_partial_solution.winning[0]) + satcount(m_partial_solution.winning[1])
+      mCRL2log(log::log_level_t::verbose) << "found solution for" << std::setw(12) << satcount(m_partial_solution.winning[0]) + satcount(m_partial_solution.winning[1])
                              << " BES equations" << std::endl;
-      mCRL2log(log::verbose) << "finished partial solving (time = " << std::setprecision(2) << std::fixed
+      mCRL2log(log::log_level_t::verbose) << "finished partial solving (time = " << std::setprecision(2) << std::fixed
                              << timer.seconds() << "s)\n";
 
       time_solving += timer.seconds();

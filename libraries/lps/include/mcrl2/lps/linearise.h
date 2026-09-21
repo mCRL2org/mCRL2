@@ -23,7 +23,7 @@ namespace mcrl2::lps
 /// \brief Options for linearisation
 struct t_lin_options
 {
-  t_lin_method lin_method = lmRegular;
+  t_lin_method lin_method = t_lin_method::lmRegular;
   bool no_intermediate_cluster = false;
   bool final_cluster = false;
   bool newstate = false;
@@ -38,7 +38,7 @@ struct t_lin_options
   bool apply_alphabet_axioms = false;
   bool balance_summands = false; // Used to balance long expressions of the shape p1 + p2 + ... + pn. By default the
                                  // parser delivers such expressions in a skewed form, causing stack overflow.
-  mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::jitty;
+  mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::rewrite_strategy::jitty;
 };
 
 /// \brief Linearises a process specification

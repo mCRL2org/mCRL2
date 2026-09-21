@@ -115,10 +115,10 @@ class invelm_algorithm: public detail::lps_algorithm<Specification>
     /// to 0, no time limit will be enforced
     invelm_algorithm(
       Specification& a_lps,
-      const data::rewriter::strategy a_rewrite_strategy = data::jitty,
+      const data::rewriter::strategy a_rewrite_strategy = data::rewrite_strategy::jitty,
       const int a_time_limit = 0,
       const bool a_path_eliminator = false,
-      const data::detail::smt_solver_type a_solver_type = data::detail::solver_type_cvc,
+      const data::detail::smt_solver_type a_solver_type = data::detail::smt_solver_type::solver_type_cvc,
       const bool a_apply_induction = false,
       const bool a_simplify_all = false
     )

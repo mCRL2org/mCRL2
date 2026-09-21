@@ -30,7 +30,7 @@ namespace mcrl2::lts
 /// \brief Type for data files that contain extra information for an lts in .aut or .fsm
 ///         format. Typically this is a data_specification (data_e), a linear process (lps_e) or
 ///         an .mcrl2 file. The value none_e indicates that no information is available.
-using data_file_type_t = enum
+enum class data_file_type_t
 {
   none_e,
   data_e,
@@ -91,7 +91,7 @@ const std::set<lts_type>& supported_lts_formats();
  * \return                   A string containing lines of the form
  *                           "  'name' for the ... format". Every line
  *                           except the last is terminated with '\\n'. */
-std::string supported_lts_formats_text(lts_type default_format = lts_none, const std::set<lts_type>& supported = supported_lts_formats());
+std::string supported_lts_formats_text(lts_type default_format = lts_type::lts_none, const std::set<lts_type>& supported = supported_lts_formats());
 
 /** \brief Gives a textual list describing supported LTS formats.
  * \param[in] supported      The formats that should be considered
@@ -166,17 +166,17 @@ inline void convert_to_lts_lts(LTS_TYPE_IN& src,
   bool extra_data_is_defined=true;
   switch (extra_data_file_type)
   {
-    case data_e:
+    case data_file_type_t::data_e:
     {
       read_data_context(extra_data_file_name,data,action_labels);
       break;
     }
-    case lps_e:
+    case data_file_type_t::lps_e:
     {
       read_lps_context(extra_data_file_name,data,action_labels,process_parameters);
       break;
     }
-    case mcrl2_e:
+    case data_file_type_t::mcrl2_e:
     {
       read_mcrl2_context(extra_data_file_name,data,action_labels);
       break;
@@ -184,7 +184,7 @@ inline void convert_to_lts_lts(LTS_TYPE_IN& src,
     default:
     {
       extra_data_is_defined = false;
-      mCRL2log(log::info) << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl; break;
+      mCRL2log(log::log_level_t::info) << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl; break;
     }
   }
   lts_convert(src, dest, data, action_labels, process_parameters, extra_data_is_defined);
@@ -206,41 +206,41 @@ template <class LTS_TYPE>
 inline void load_lts(LTS_TYPE& result,
                      const std::string& infilename,
                      lts_type type,
-                     const data_file_type_t extra_data_file_type=none_e,
+                     const data_file_type_t extra_data_file_type=data_file_type_t::none_e,
                      const std::string& extra_data_file_name="")
 {
   switch (type)
   {
-    case lts_lts:
-    case lts_lts_probabilistic:
+    case lts_type::lts_lts:
+    case lts_type::lts_lts_probabilistic:
     {
-      if (extra_data_file_type != none_e)
+      if (extra_data_file_type != data_file_type_t::none_e)
       {
-        mCRL2log(log::warning) << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
+        mCRL2log(log::log_level_t::warning) << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
       }
       result.load(infilename);
       break;
     }
-    case lts_none:
-      mCRL2log(log::warning) << "Cannot determine type of input. Assuming .aut.\n";
+    case lts_type::lts_none:
+      mCRL2log(log::log_level_t::warning) << "Cannot determine type of input. Assuming .aut.\n";
       [[fallthrough]]; // For the default (lts_none) load as aut file.
-    case lts_aut:
-    case lts_aut_probabilistic:
+    case lts_type::lts_aut:
+    case lts_type::lts_aut_probabilistic:
     {
       probabilistic_lts_aut_t l;
       l.load(infilename);
       convert_to_lts_lts(l, result,extra_data_file_type,extra_data_file_name);
       break;
     }
-    case lts_fsm:
-    case lts_fsm_probabilistic:
+    case lts_type::lts_fsm:
+    case lts_type::lts_fsm_probabilistic:
     {
       probabilistic_lts_fsm_t l;
       l.load(infilename);
       convert_to_lts_lts(l, result,extra_data_file_type,extra_data_file_name);
       break;
     }
-    case lts_dot:
+    case lts_type::lts_dot:
     {
       throw mcrl2::runtime_error("Reading of .dot files is not supported anymore.");
     }
@@ -259,32 +259,32 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
   const lts_type intype = mcrl2::lts::detail::guess_format(path);
   switch (intype)
   {
-    case lts_lts:
-    case lts_lts_probabilistic:
+    case lts_type::lts_lts:
+    case lts_type::lts_lts_probabilistic:
     {
       lts_lts_t l1;
       l1.load(path);
       detail::lts_convert(l1,l);
       return;
     }
-    case lts_none:
-      mCRL2log(log::warning) << "Cannot determine type of input. Assuming .aut.\n";
+    case lts_type::lts_none:
+      mCRL2log(log::log_level_t::warning) << "Cannot determine type of input. Assuming .aut.\n";
       [[fallthrough]]; // For the default (lts_none) load as aut file.
-    case lts_aut:
-    case lts_aut_probabilistic:
+    case lts_type::lts_aut:
+    case lts_type::lts_aut_probabilistic:
     {
       lts_aut_t l1;
       l1.load(path);
       detail::lts_convert(l1,l);
       return;
     }
-    case lts_fsm:
-    case lts_fsm_probabilistic:
+    case lts_type::lts_fsm:
+    case lts_type::lts_fsm_probabilistic:
     {
       l.load(path);
       return;
     }
-    case lts_dot:
+    case lts_type::lts_dot:
     {
       throw mcrl2::runtime_error("Reading of dot files is not supported.");
     }

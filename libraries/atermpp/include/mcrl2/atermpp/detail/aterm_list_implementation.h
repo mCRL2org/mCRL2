@@ -9,7 +9,6 @@
 
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_LIST_IMPLEMENTATION_H
-#pragma once
 
 #include <type_traits>
 #include "mcrl2/atermpp/aterm.h"

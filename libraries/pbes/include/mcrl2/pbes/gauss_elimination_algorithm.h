@@ -55,7 +55,7 @@ class gauss_elimination_algorithm
     template <typename Iter, typename FixpointEquationSolver>
     void run(Iter first, Iter last, FixpointEquationSolver solve)
     {
-      mCRL2log(log::debug) << "equations before solving\n" << print_equations(first, last);
+      mCRL2log(log::log_level_t::debug) << "equations before solving\n" << print_equations(first, last);
       if (first == last)
       {
         return;
@@ -65,16 +65,16 @@ class gauss_elimination_algorithm
       while (i != first)
       {
         --i;
-        mCRL2log(log::verbose) << "solving equation\n  before: " << print_equation(*i);
+        mCRL2log(log::log_level_t::verbose) << "solving equation\n  before: " << print_equation(*i);
         solve(*i);
-        mCRL2log(log::verbose) << "   after: " << print_equation(*i) << "\n";
+        mCRL2log(log::log_level_t::verbose) << "   after: " << print_equation(*i) << "\n";
         for (Iter j = first; j != i; ++j)
         {
           j->formula() = ExpressionTraits::substitute(j->formula(), i->variable(), i->formula());
         }
-        mCRL2log(log::trace) << "equations after substitution\n" << print_equations(first, last);
+        mCRL2log(log::log_level_t::trace) << "equations after substitution\n" << print_equations(first, last);
       }
-      mCRL2log(log::debug) << "equations after solving\n" << print_equations(first, last);
+      mCRL2log(log::log_level_t::debug) << "equations after solving\n" << print_equations(first, last);
     }
 };
 

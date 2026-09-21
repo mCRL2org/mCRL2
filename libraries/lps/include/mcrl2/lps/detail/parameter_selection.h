@@ -72,7 +72,7 @@ std::vector<data::variable> parse_lps_parameter_selection(const data::variable_l
     std::match_results<std::string::const_iterator> what;
     if (!std::regex_match(var_sort, what, sre))
     {
-      mCRL2log(log::warning) << "Ignoring " << var_sort << " since it does not follow the necessary format (NAME:SORT)." << std::endl;
+      mCRL2log(log::log_level_t::warning) << "Ignoring " << var_sort << " since it does not follow the necessary format (NAME:SORT)." << std::endl;
       continue;
     }
 

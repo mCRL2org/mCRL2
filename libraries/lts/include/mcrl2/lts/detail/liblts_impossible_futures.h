@@ -82,26 +82,26 @@ std::pair<bool, trace> check_trace_inclusion(LTS_TYPE& l1,
                          // explicit check below.
 
 
-    mCRL2log(log::trace) << "check_trace_inclusion(): Checking impl: " << impl_spec.state() << ", spec: {";
+    mCRL2log(log::log_level_t::trace) << "check_trace_inclusion(): Checking impl: " << impl_spec.state() << ", spec: {";
     for (const auto& state : impl_spec.states())
     {
-      mCRL2log(log::trace) << ", " << state;
+      mCRL2log(log::log_level_t::trace) << ", " << state;
     }
-    mCRL2log(log::trace)  << "}\n";
-    mCRL2log(log::trace) << "check_trace_inclusion(): inner_antichain = " << anti_chain << std::endl;
-    mCRL2log(log::trace) << "check_trace_inclusion(): positive_antichain = " << anti_chain_positive << std::endl;
-    mCRL2log(log::trace) << "check_trace_inclusion(): negative_antichain = " << anti_chain_negative << std::endl;
+    mCRL2log(log::log_level_t::trace)  << "}\n";
+    mCRL2log(log::log_level_t::trace) << "check_trace_inclusion(): inner_antichain = " << anti_chain << std::endl;
+    mCRL2log(log::log_level_t::trace) << "check_trace_inclusion(): positive_antichain = " << anti_chain_positive << std::endl;
+    mCRL2log(log::log_level_t::trace) << "check_trace_inclusion(): negative_antichain = " << anti_chain_negative << std::endl;
 
     if (!enable_counter_example && detail::antichain_include_inverse(anti_chain_negative, impl_spec.state(), impl_spec.states()))
     {
-      mCRL2log(log::trace) << "check_trace_inclusion(): Found in negative antichain\n";
+      mCRL2log(log::log_level_t::trace) << "check_trace_inclusion(): Found in negative antichain\n";
       return std::make_pair(false,
           generate_counter_example.get_trace(l1, impl_spec.counter_example_index())); //    return false;
     }
 
     for (const transition& t : weak_property_cache.transitions(impl_spec.state()))
     {
-      mCRL2log(log::debug) << "check_trace_inclusion(): Taking transition: " << l1.action_label(t.label()) << " from " << impl_spec.state() << " to " << t.to() << std::endl;
+      mCRL2log(log::log_level_t::debug) << "check_trace_inclusion(): Taking transition: " << l1.action_label(t.label()) << " from " << impl_spec.state() << " to " << t.to() << std::endl;
       const typename detail::counter_example_constructor::index_type new_counterexample_index
           = generate_counter_example.add_transition(t.label(), impl_spec.counter_example_index());
 
@@ -128,17 +128,17 @@ std::pair<bool, trace> check_trace_inclusion(LTS_TYPE& l1,
         detail::antichain_insert(anti_chain_negative,
             init_l1,
             detail::collect_reachable_states_via_taus(init_l2, weak_property_cache, weak_reduction));
-        mCRL2log(log::debug) << "check_trace_inclusion(): spec_prime is empty\n";
+        mCRL2log(log::log_level_t::debug) << "check_trace_inclusion(): spec_prime is empty\n";
         return std::make_pair(false,
             generate_counter_example.get_trace(l1, new_counterexample_index)); //    return false;
       }
 
-      mCRL2log(log::trace) << "check_trace_inclusion(): spec_prime = {";
+      mCRL2log(log::log_level_t::trace) << "check_trace_inclusion(): spec_prime = {";
       for (const auto& state : spec_prime)
       {
-        mCRL2log(log::trace) << ", " << state;
+        mCRL2log(log::log_level_t::trace) << ", " << state;
       }
-      mCRL2log(log::trace)  << "}\n";
+      mCRL2log(log::log_level_t::trace)  << "}\n";
 
 
       // if (impl',spec') in antichain is not true then
@@ -147,7 +147,7 @@ std::pair<bool, trace> check_trace_inclusion(LTS_TYPE& l1,
       if (!detail::antichain_include(anti_chain_positive, t.to(), spec_prime)
           && detail::antichain_insert(anti_chain, t.to(), spec_prime))
       {
-        mCRL2log(log::trace) << "check_trace_inclusion(): Added to working\n";
+        mCRL2log(log::log_level_t::trace) << "check_trace_inclusion(): Added to working\n";
         ++stats.antichain_misses;
         if (strategy == lps::exploration_strategy::es_breadth)
         {
@@ -160,7 +160,7 @@ std::pair<bool, trace> check_trace_inclusion(LTS_TYPE& l1,
       }
       else
       {
-        mCRL2log(log::trace) << "check_trace_inclusion(): Not added to working\n";
+        mCRL2log(log::log_level_t::trace) << "check_trace_inclusion(): Not added to working\n";
       }
     }
   }
@@ -371,14 +371,14 @@ bool destructive_impossible_futures(LTS& l1,
     const detail::set_of_states& spec = front.states();
 
     inner_counter_examples.clear();
-    mCRL2log(log::trace) << "Checking impl: " << impl << ", spec: {";
+    mCRL2log(log::log_level_t::trace) << "Checking impl: " << impl << ", spec: {";
     for (const auto& state : spec)
     {
-      mCRL2log(log::trace) << ", " << state;
+      mCRL2log(log::log_level_t::trace) << ", " << state;
     }
-    mCRL2log(log::trace)  << "}\n";
+    mCRL2log(log::log_level_t::trace)  << "}\n";
 
-    mCRL2log(log::trace) << "antichain = " << anti_chain << std::endl;
+    mCRL2log(log::log_level_t::trace) << "antichain = " << anti_chain << std::endl;
 
     if (weak_property_cache.stable(impl)
         && !std::any_of(spec.begin(),
@@ -439,7 +439,7 @@ bool destructive_impossible_futures(LTS& l1,
       const typename counter_example_constructor::index_type new_counterexample_index
           = ce_constructor.add_transition(t.label(), front.counter_example_index());
 
-      mCRL2log(log::trace) << "Taking transition: " << l1.action_label(t.label()) << " from " << impl << " to " << t.to() << std::endl;
+      mCRL2log(log::log_level_t::trace) << "Taking transition: " << l1.action_label(t.label()) << " from " << impl << " to " << t.to() << std::endl;
 
       detail::set_of_states spec_prime;
       if (l1.is_tau(l1.apply_hidden_label_map(t.label())))
@@ -489,12 +489,12 @@ bool destructive_impossible_futures(LTS& l1,
         return false;
       }
 
-      mCRL2log(log::trace) << "spec_prime = {";
+      mCRL2log(log::log_level_t::trace) << "spec_prime = {";
       for (const auto& state : spec_prime)
       {
-        mCRL2log(log::trace) << ", " << state;
+        mCRL2log(log::log_level_t::trace) << ", " << state;
       }
-      mCRL2log(log::trace)  << "}\n";
+      mCRL2log(log::log_level_t::trace)  << "}\n";
 
       state_states_counter_example_index_triple<counter_example_constructor> impl_spec_counterex
           = detail::state_states_counter_example_index_triple<detail::counter_example_constructor>(t.to(),
@@ -504,7 +504,7 @@ bool destructive_impossible_futures(LTS& l1,
       ++stats.antichain_inserts;
       if (detail::antichain_insert(anti_chain, t.to(), spec_prime))
       {
-        mCRL2log(log::trace) << "Added to working\n";
+        mCRL2log(log::log_level_t::trace) << "Added to working\n";
         ++stats.antichain_misses;
         if (strategy == lps::exploration_strategy::es_breadth)
         {
@@ -517,7 +517,7 @@ bool destructive_impossible_futures(LTS& l1,
       }
       else
       {
-        mCRL2log(log::trace) << "Not added to working\n";
+        mCRL2log(log::log_level_t::trace) << "Not added to working\n";
       }
     }
   }

@@ -308,7 +308,7 @@ class bisimulation_algorithm
         sigma = compute_summand_variable_name_clashes(model, spec);
         lps::replace_summand_variables(spec, sigma);
       }
-      mCRL2log(log::debug) << "bisimulation spec after resolving name clashes:\n" << lps::pp(spec) << std::endl;
+      mCRL2log(log::log_level_t::debug) << "bisimulation spec after resolving name clashes:\n" << lps::pp(spec) << std::endl;
     }
 
     /// \brief Initializes the name lookup table.

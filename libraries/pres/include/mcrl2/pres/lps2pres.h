@@ -161,7 +161,7 @@ pres lps2pres(const lps::stochastic_specification& lpsspec,
 {
   if ((formula.has_time() || lpsspec.process().has_time()) && !timed)
   {
-    mCRL2log(log::warning) << "Switch to timed translation because formula has "
+    mCRL2log(log::log_level_t::warning) << "Switch to timed translation because formula has "
                            << (formula.has_time()?"":"no ") << "time, and process has "
                            << (lpsspec.process().has_time()?"":"no ") << "time" << std::endl;
     timed = true;

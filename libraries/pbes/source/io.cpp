@@ -55,7 +55,7 @@ void save_pbes(const pbes& pbes,
   {
     format = pbes_format_internal();
   }
-  mCRL2log(log::verbose) << "Saving result in " << format.shortname() << " format..." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "Saving result in " << format.shortname() << " format..." << std::endl;
   if (format == pbes_format_internal() || (format == pbes_format_internal_bes() && pbes_system::algorithms::is_bes(pbes)))
   {
     atermpp::binary_aterm_ostream(stream) << pbes;
@@ -86,7 +86,7 @@ void load_pbes(pbes& pbes, std::istream& stream, utilities::file_format format, 
   {
     format = pbes_format_internal();
   }
-  mCRL2log(log::verbose) << "Loading PBES in " << format.shortname() << " format..." << std::endl;
+  mCRL2log(log::log_level_t::verbose) << "Loading PBES in " << format.shortname() << " format..." << std::endl;
   if (format == pbes_format_internal() || format == pbes_format_internal_bes())
   {
     atermpp::binary_aterm_istream(stream) >> pbes;
@@ -266,7 +266,7 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, pbes& pbes)
   }
   catch (std::exception& ex)
   {
-    mCRL2log(log::error) << ex.what() << "\n";
+    mCRL2log(log::log_level_t::error) << ex.what() << "\n";
     throw mcrl2::runtime_error(std::string("Error reading parameterised boolean equation system (PBES)."));
   }
 

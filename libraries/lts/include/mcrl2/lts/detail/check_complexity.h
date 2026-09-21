@@ -682,14 +682,14 @@ class check_complexity
 #else
             if (FirstCounter > ctr || ctr > LastCounter)
             {
-                mCRL2log(log::error) << "Error 20: counter \""
+                mCRL2log(log::log_level_t::error) << "Error 20: counter \""
                    << work_names[ctr - BLOCK_MIN] << "\" is not available in ";
                 return complexity_error;
             }
             assert(max_value <= (ctr < FirstTempCounter ? log_n : 1U));
             if (counters[ctr - FirstCounter] >= max_value)
             {
-                mCRL2log(log::error) << "Error 1: counter \""
+                mCRL2log(log::log_level_t::error) << "Error 1: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
                 return complexity_error;
@@ -734,7 +734,7 @@ class check_complexity
             }
             if (counters[to - FirstCounter] >= max_value)
             {
-                mCRL2log(log::error) << "Error 2: counter \""
+                mCRL2log(log::log_level_t::error) << "Error 2: counter \""
                         << work_names[to - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
                 return complexity_error;
@@ -849,7 +849,7 @@ class check_complexity
             {
                 if (counters[ctr - B_TO_C_MIN] > 0)
                 {
-                    mCRL2log(log::error) << "Error 3: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 3: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
                     return complexity_error;
@@ -949,7 +949,7 @@ class check_complexity
             {
                 if (counters[ctr - STATE_MIN] > 0)
                 {
-                    mCRL2log(log::error) << "Error 4: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 4: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
                     return complexity_error;
@@ -963,7 +963,7 @@ class check_complexity
             {
                 if (counters[ctr - STATE_MIN] > (unsigned) bottom)
                 {
-                    mCRL2log(log::error) << "Error 5: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 5: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                             "maximum value (" << (unsigned) bottom << ") for ";
                     return complexity_error;
@@ -1048,7 +1048,7 @@ class check_complexity
             {
                 if (counters[ctr - TRANS_MIN] > 0)
                 {
-                    mCRL2log(log::error) << "Error 6: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 6: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
                     return complexity_error;
@@ -1062,7 +1062,7 @@ class check_complexity
             {
                 if (counters[ctr - TRANS_MIN] > (unsigned) source_bottom)
                 {
-                    mCRL2log(log::error) << "Error 7: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 7: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                      "maximum value (" << (unsigned) source_bottom << ") for ";
                     return complexity_error;
@@ -1112,7 +1112,7 @@ class check_complexity
                 return complexity_ok;
             }
 
-            mCRL2log(log::error) << "Error 8: counter \""
+            mCRL2log(log::log_level_t::error) << "Error 8: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
             return complexity_error;
@@ -1151,7 +1151,7 @@ class check_complexity
             assert((log_n + 1U) / 2U <= max_block);
             if (max_block > log_n)
             {
-                    mCRL2log(log::error) << "Error 14: max_block == "
+                    mCRL2log(log::log_level_t::error) << "Error 14: max_block == "
                                          << max_block << " exceeded log_n == "
                                          << (unsigned) log_n << " for ";
                     return complexity_error;
@@ -1295,7 +1295,7 @@ class check_complexity
             {
                 if (counters[ctr - BLOCK_BUNCH_dnj_MIN] > max_bunch)
                 {
-                    mCRL2log(log::error) << "Error 12: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 12: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                         "maximum value (" << (unsigned) max_bunch << ") for ";
                     return complexity_error;
@@ -1308,7 +1308,7 @@ class check_complexity
             {
                 if (counters[ctr - BLOCK_BUNCH_dnj_MIN] > 0)
                 {
-                    mCRL2log(log::error) << "Error 13: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 13: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                         "maximum value (" << (unsigned) 0 << ") for ";
                     return complexity_error;
@@ -1389,7 +1389,7 @@ class check_complexity
             {
                 if (counters[ctr - TRANS_dnj_MIN] > (unsigned) bottom)
                 {
-                    mCRL2log(log::error) << "Error 11: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 11: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                             "maximum value (" << (unsigned) bottom << ") for ";
                     return complexity_error;
@@ -1438,7 +1438,7 @@ class check_complexity
                 return complexity_ok;
             }
 
-            mCRL2log(log::error) << "Error 9: counter \""
+            mCRL2log(log::log_level_t::error) << "Error 9: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
             return complexity_error;
@@ -1580,7 +1580,7 @@ class check_complexity
             {
                 if (counters[ctr - STATE_gj_MIN] > max_B)
                 {
-                    mCRL2log(log::error) << "Error 21: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 21: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                         "maximum value (" << max_B << ") for ";
                     return complexity_error;
@@ -1594,7 +1594,7 @@ class check_complexity
             {
                 if (counters[ctr - STATE_gj_MIN] > 0)
                 {
-                    mCRL2log(log::error) << "Error 15: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 15: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
                     return complexity_error;
@@ -1609,7 +1609,7 @@ class check_complexity
             {
                 if (counters[ctr - STATE_gj_MIN] > (unsigned) bottom)
                 {
-                    mCRL2log(log::error) << "Error 16: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 16: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                             "maximum value (" << (unsigned) bottom << ") for ";
                     return complexity_error;
@@ -1706,7 +1706,7 @@ class check_complexity
             {
                 if (counters[ctr - TRANS_gj_MIN] > 0)
                 {
-                    mCRL2log(log::error) << "Error 17: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 17: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                             "maximum value (" << 0 << ") for ";
                     return complexity_error;
@@ -1719,7 +1719,7 @@ class check_complexity
             {
                 if (counters[ctr - TRANS_gj_MIN] > (unsigned) source_bottom)
                 {
-                    mCRL2log(log::error) << "Error 18: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 18: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                      "maximum value (" << (unsigned) source_bottom << ") for ";
                     return complexity_error;
@@ -1732,7 +1732,7 @@ class check_complexity
             {
                 if (counters[ctr - TRANS_gj_MIN] > 1)
                 {
-                    mCRL2log(log::error) << "Error 19: counter \""
+                    mCRL2log(log::log_level_t::error) << "Error 19: counter \""
                              << work_names[ctr - BLOCK_MIN]
                              << "\" exceeded maximum value (" << 1 << ") for ";
                     return complexity_error;
@@ -1781,7 +1781,7 @@ class check_complexity
                 return complexity_ok;
             }
 
-            mCRL2log(log::error) << "Error 8: counter \""
+            mCRL2log(log::log_level_t::error) << "Error 8: counter \""
                         << work_names[ctr - BLOCK_MIN] << "\" exceeded "
                                     "maximum value (" << max_value << ") for ";
             return complexity_error;
@@ -1837,26 +1837,26 @@ class check_complexity
              ((steps)*(trans_type)200+(total))/(total)/2)
         if (0 != overall_total)
         {
-            mCRL2log(log::verbose) << "In the coroutines, "
+            mCRL2log(log::log_level_t::verbose) << "In the coroutines, "
                 << (sensible_work_grand_total + cancelled_work_grand_total)
                 << " states and transitions were inspected.  ";
             if (0 != no_of_waiting_cycles_grand_total)
             {
-                mCRL2log(log::verbose) << "Additionally, there were "
+                mCRL2log(log::log_level_t::verbose) << "Additionally, there were "
                   << no_of_waiting_cycles_grand_total << " waiting cycles ("
                   << percentage(no_of_waiting_cycles_grand_total,overall_total)
                   << "% of all steps and cycles).\n";
             }
-            mCRL2log(log::verbose) << "Of these, "
+            mCRL2log(log::log_level_t::verbose) << "Of these, "
                 << cancelled_work_grand_total << " steps were cancelled ("
                 << percentage(cancelled_work_grand_total, overall_total)
                 << "% of all steps";
             if (0 != no_of_waiting_cycles_grand_total)
             {
-                mCRL2log(log::verbose) << " and cycles).\n";
+                mCRL2log(log::log_level_t::verbose) << " and cycles).\n";
                 if (0 != cancelled_work_grand_total)
                 {
-                    mCRL2log(log::verbose) << "If we exclude the waiting "
+                    mCRL2log(log::log_level_t::verbose) << "If we exclude the waiting "
                       "cycles, then " << percentage(cancelled_work_grand_total,
                         sensible_work_grand_total + cancelled_work_grand_total)
                     << "% of the steps have been cancelled.\n";
@@ -1864,7 +1864,7 @@ class check_complexity
             }
             else
             {
-                mCRL2log(log::verbose) << ").\n";
+                mCRL2log(log::log_level_t::verbose) << ").\n";
             }
             sensible_work_grand_total=0;
             cancelled_work_grand_total=0;
@@ -1897,12 +1897,12 @@ class check_complexity
                 {                                                             \
                     case check_complexity::complexity_ok:  break;             \
                     default:                                                  \
-                        mCRL2log(log::error) << "Unexpected return value "    \
+                        mCRL2log(log::log_level_t::error) << "Unexpected return value "    \
                             << (int)GG00OCOC0GQQ0COG00GQQQQOCOGQCO << " for ";\
                             [[fallthrough]];                                  \
                     case check_complexity::complexity_error:                  \
                     case check_complexity::complexity_print:                  \
-                        mCRL2log(log::error)                                  \
+                        mCRL2log(log::log_level_t::error)                                  \
                                  << (unit)->debug_id(info_for_debug) << '\n'; \
                         if (check_complexity::complexity_print !=             \
                                               GG00OCOC0GQQ0COG00GQQQQOCOGQCO) \
@@ -1918,7 +1918,7 @@ class check_complexity
                 if (check_complexity::complexity_ok !=                        \
                                                ((unit)->work_counter. call )) \
                 {                                                             \
-                    mCRL2log(log::error) << __FILE__ << ':' << __LINE__       \
+                    mCRL2log(log::log_level_t::error) << __FILE__ << ':' << __LINE__       \
                                           << " Error in mCRL2complexity()\n"; \
                     exit(EXIT_FAILURE);                                       \
                 }                                                             \
@@ -1928,6 +1928,7 @@ class check_complexity
 
 #else // ifndef NDEBUG
 
+    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
     #define mCRL2complexity(unit, call, info_for_debug)  do {} while (0)
 
 #endif // ifndef NDEBUG

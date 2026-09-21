@@ -288,7 +288,7 @@ inline
 allow_set rename_inverse(const rename_expression_list& R, const allow_set& x)
 {
   allow_set result(alphabet_operations::rename_inverse(R, x.A, x.A_includes_subsets), x.A_includes_subsets, rename_inverse(R, x.I));
-  mCRL2log(log::trace) << "rename_inverse(" << R << ", " << x << ") = " << result << std::endl;
+  mCRL2log(log::log_level_t::trace) << "rename_inverse(" << R << ", " << x << ") = " << result << std::endl;
   return result;
 }
 
@@ -298,7 +298,7 @@ inline allow_set comm_inverse(
   const allow_set& x)
 {
   allow_set result(comm_inverse1(C, action_names, x.A, x.A_includes_subsets), x.A_includes_subsets, comm_inverse(C, action_names, x.I));
-  mCRL2log(log::trace) << "comm_inverse(" << C << ", " << core::pp(action_names) << ", " << x << ") = " << result << std::endl;
+  mCRL2log(log::log_level_t::trace) << "comm_inverse(" << C << ", " << core::pp(action_names) << ", " << x << ") = " << result << std::endl;
   return result;
 }
 
@@ -311,7 +311,7 @@ allow_set left_arrow(const allow_set& x, const multi_action_name_set& A)
     result.A = left_arrow2(x.A, x.I, A);
   }
   result.establish_invariant();
-  mCRL2log(log::trace) << "left_arrow(" << x << ", " << process::pp(A) << ") = " << result << std::endl;
+  mCRL2log(log::log_level_t::trace) << "left_arrow(" << x << ", " << process::pp(A) << ") = " << result << std::endl;
   return result;
 }
 
@@ -326,7 +326,7 @@ allow_set subsets(const allow_set& x)
   }
   else
   {
-    mCRL2log(log::debug) << "allow_set::subsets: skipped remove_subsets on a set of " << result.A.size() << " elements." << std::endl;
+    mCRL2log(log::log_level_t::debug) << "allow_set::subsets: skipped remove_subsets on a set of " << result.A.size() << " elements." << std::endl;
   }
   result.establish_invariant();
   return result;

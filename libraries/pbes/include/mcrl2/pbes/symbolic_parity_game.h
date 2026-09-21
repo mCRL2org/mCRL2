@@ -363,13 +363,13 @@ class symbolic_parity_game
     /// \returns Prints basic parity game information such as number of vertices per priority and per owners.
     void print_information()
     {
-      mCRL2log(log::verbose) << "--- parity game information ---" << std::endl;
+      mCRL2log(log::log_level_t::verbose) << "--- parity game information ---" << std::endl;
       for (const auto&[rank, Vrank] : m_rank_map)
       {
-        mCRL2log(log::verbose) << "priority " << rank << ": there are " << satcount(Vrank) << " vertices\n";
+        mCRL2log(log::log_level_t::verbose) << "priority " << rank << ": there are " << satcount(Vrank) << " vertices\n";
       }
 
-      mCRL2log(log::verbose) << "there are " << satcount(m_V[0]) << " even vertices and " << satcount(m_V[1]) << " odd vertices\n";
+      mCRL2log(log::log_level_t::verbose) << "there are " << satcount(m_V[0]) << " even vertices and " << satcount(m_V[1]) << " odd vertices\n";
     }
 
     /// \returns A string representing the given vertex set in human readable form.
@@ -404,8 +404,8 @@ class symbolic_parity_game
       const ldd& T = sylvan::ldds::empty_set()) const
     {
       stopwatch attractor_watch;
-      mCRL2log(log::debug) << "safe_attractor: start attractor set computation\n";
-      mCRL2log(log::trace) << "  player = " << alpha << "\n"
+      mCRL2log(log::log_level_t::debug) << "safe_attractor: start attractor set computation\n";
+      mCRL2log(log::log_level_t::trace) << "  player = " << alpha << "\n"
                            << "  U = " << print_nodes(U) << "\n"
                            << "  I = " << print_nodes(I) << "\n"
                            << "  T = " << print_nodes(T) << "\n";
@@ -420,8 +420,8 @@ class symbolic_parity_game
 
       while (todo != empty_set())
       {
-        mCRL2log(log::trace) << "safe_attractor: start iteration " << iter << "\n";
-        mCRL2log(log::trace) << "  Z = " << print_nodes(Z) << "\n"
+        mCRL2log(log::log_level_t::trace) << "safe_attractor: start iteration " << iter << "\n";
+        mCRL2log(log::log_level_t::trace) << "  Z = " << print_nodes(Z) << "\n"
                              << "  todo = " << print_nodes(todo) << "\n"
                              << "  Zoutside = " << print_nodes(Zoutside) << "\n"
                              << (strategy.has_value() ? "  strategy = " + print_strategy(strategy.value()) + "\n" : "");
@@ -435,7 +435,7 @@ class symbolic_parity_game
         stopwatch iter_start;
 
         const auto& [pred, pred_strategy] = safe_control_predecessors_impl(alpha, todo, Zoutside, Zoutside, V, Vplayer, I);
-        mCRL2log(log::trace) << "safe_attractor: computed safe_control_predecessors\n"
+        mCRL2log(log::log_level_t::trace) << "safe_attractor: computed safe_control_predecessors\n"
           << "  pred = " << print_nodes(pred) << "\n"
           << (pred_strategy.has_value() ? "  pred_strategy = " + print_strategy(pred_strategy.value()) + "\n" : "");
 
@@ -447,18 +447,18 @@ class symbolic_parity_game
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
-        mCRL2log(log::debug) << "safe_attractor: attractor set iteration " << iter
+        mCRL2log(log::log_level_t::debug) << "safe_attractor: attractor set iteration " << iter
                              << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)"
                              << std::endl;
 
         ++iter;
       }
       
-      mCRL2log(log::debug) << "safe_attractor: finished attractor set computation (time = " << std::setprecision(2)
+      mCRL2log(log::log_level_t::debug) << "safe_attractor: finished attractor set computation (time = " << std::setprecision(2)
                            << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
 
-      mCRL2log(log::trace) << "safe_attractor: start iteration " << iter << "\n";
-      mCRL2log(log::trace) << "  Z = " << print_nodes(Z) << "\n"
+      mCRL2log(log::log_level_t::trace) << "safe_attractor: start iteration " << iter << "\n";
+      mCRL2log(log::log_level_t::trace) << "  Z = " << print_nodes(Z) << "\n"
                            << "  todo = " << print_nodes(todo) << "\n"
                            << "  Zoutside = " << print_nodes(Zoutside) << "\n"
                            << (strategy.has_value() ? "  strategy = " + print_strategy(strategy.value()) + "\n" : "");
@@ -481,7 +481,7 @@ class symbolic_parity_game
       using namespace sylvan::ldds;
 
       stopwatch attractor_watch;
-      mCRL2log(log::debug) << "safe_monotone_attractor: start monotone attractor set computation\n";
+      mCRL2log(log::log_level_t::debug) << "safe_monotone_attractor: start monotone attractor set computation\n";
 
       using namespace sylvan::ldds;
 
@@ -509,22 +509,22 @@ class symbolic_parity_game
           return Z;
         }
 
-        mCRL2log(log::trace) << "safe_monotone_attractor: todo = " << print_nodes(todo) << std::endl;
-        mCRL2log(log::trace) << "safe_monotone_attractor: Zoutside = " << print_nodes(Zoutside) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "safe_monotone_attractor: todo = " << print_nodes(todo) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "safe_monotone_attractor: Zoutside = " << print_nodes(Zoutside) << std::endl;
         stopwatch iter_start;
 
         todo = intersect(Vc, minus(safe_control_predecessors_impl(alpha, union_(todo, U), V, minus(Zoutside, U), Vc, Vplayer, I).first, Z));
         Z = union_(Z, todo);
         Zoutside = minus(Zoutside, todo);
 
-        mCRL2log(log::debug) << "safe_monotone_attractor: monotone attractor set iteration " << iter
+        mCRL2log(log::log_level_t::debug) << "safe_monotone_attractor: monotone attractor set iteration " << iter
                              << " (time = " << std::setprecision(2) << std::fixed << iter_start.seconds() << "s)"
                              << std::endl;
 
         ++iter;
       }
 
-      mCRL2log(log::debug) << "safe_monotone_attractor: finished monotone attractor set computation (time = "
+      mCRL2log(log::log_level_t::debug) << "safe_monotone_attractor: finished monotone attractor set computation (time = "
                            << std::setprecision(2) << std::fixed << attractor_watch.seconds() << "s)" << std::endl;
       return Z;
     }
@@ -589,23 +589,23 @@ class symbolic_parity_game
       std::array<const ldd, 2> Vplayer = players(V);
 
       // After removing the deadlock (winning) states the resulting set of states is a total graph.
-      mCRL2log(log::debug) << "compute_total_graph: removing winning regions" << std::endl;
+      mCRL2log(log::log_level_t::debug) << "compute_total_graph: removing winning regions" << std::endl;
       if (Vsinks != empty_set())
       {
-        mCRL2log(log::trace) << "compute_total_graph: adding sinks to winning sets.\n"
+        mCRL2log(log::log_level_t::trace) << "compute_total_graph: adding sinks to winning sets.\n"
         << "  Vsinks = " << print_nodes(Vsinks) << std::endl;
         winning[0] = union_(winning[0], intersect(Vsinks, m_V[1]));
         winning[1] = union_(winning[1], intersect(Vsinks, m_V[0]));
-        mCRL2log(log::trace) << "compute_total_graph: new winning sets are:\n"
+        mCRL2log(log::log_level_t::trace) << "compute_total_graph: new winning sets are:\n"
                             << "  W[0] = " << print_nodes(winning[0]) << "\n"
                             << "  W[1] = " << print_nodes(winning[1]) << "\n";
       }
       else
       {
-        mCRL2log(log::trace) << "compute_total_graph: there are no sinks.\n";
+        mCRL2log(log::log_level_t::trace) << "compute_total_graph: there are no sinks.\n";
       }
 
-      mCRL2log(log::trace)
+      mCRL2log(log::log_level_t::trace)
         << "compute_total_graph: extending winning sets using attractor set computations. Initial winning sets are:\n"
         << "  W[0] = " << print_nodes(winning[0]) << "\n"
         << "  W[1] = " << print_nodes(winning[1]) << "\n"
@@ -613,13 +613,13 @@ class symbolic_parity_game
         << (strategy[1].has_value() ? "  S[1] = " + print_strategy(strategy[1].value()) + "\n" : ""); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
 
       std::array<std::optional<ldd>, 2> attr_strategy;
-      mCRL2log(log::trace) << "compute_total_graph: compute safe attractor into W[0]\n";
+      mCRL2log(log::log_level_t::trace) << "compute_total_graph: compute safe attractor into W[0]\n";
       std::tie(winning[0], attr_strategy[0]) = safe_attractor(winning[0], 0, V, Vplayer, I);
 
-      mCRL2log(log::trace) << "compute_total_graph: compute safe attractor into W[1]\n";
+      mCRL2log(log::log_level_t::trace) << "compute_total_graph: compute safe attractor into W[1]\n";
       std::tie(winning[1], attr_strategy[1]) = safe_attractor(winning[1], 1, V, Vplayer, I);
 
-      mCRL2log(log::trace) << "compute_total_graph: extended winning sets to:\n"
+      mCRL2log(log::log_level_t::trace) << "compute_total_graph: extended winning sets to:\n"
                            << "  W[0] = " << print_nodes(winning[0]) << "\n"
                            << "  W[1] = " << print_nodes(winning[1]) << "\n"
                            << "with attractor strategy:\n"
@@ -633,7 +633,7 @@ class symbolic_parity_game
           strategy[1] = union_(strategy[1].value_or(empty_set()), attr_strategy[1].value()); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
       }
 
-      mCRL2log(log::trace) << "compute_total_graph: combined strategies are:\n"
+      mCRL2log(log::log_level_t::trace) << "compute_total_graph: combined strategies are:\n"
                            << (strategy[0].has_value() ? "  S[0] = " + print_strategy(strategy[0].value()) + "\n" : "") // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
                            << (strategy[1].has_value() ? "  S[1] = " + print_strategy(strategy[1].value()) + "\n" : ""); // NOLINT(bugprone-unchecked-optional-access) optional is known to be engaged here
 
@@ -670,7 +670,7 @@ class symbolic_parity_game
 
         stopwatch watch;
         result = union_(result, predecessors(U, V, group));
-        mCRL2log(log::trace) << "predecessors: added predecessors for group " << i << " out of " << m_summand_groups.size()
+        mCRL2log(log::log_level_t::trace) << "predecessors: added predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
       }
 
@@ -714,17 +714,17 @@ class symbolic_parity_game
           read_projection[idx] = 1;
         }
 
-        mCRL2log(log::trace) << "L = " << print_relation(m_data_index, group.L, group.read, group.write) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "L = " << print_relation(m_data_index, group.L, group.read, group.write) << std::endl;
 
         // Figure out if the group belongs to player alpha.
         bool is_odd = (sylvan::ldds::intersect(sylvan::ldds::project(group.L, sylvan::ldds::cube(read_projection)), sylvan::ldds::project(m_V[0], group.Ip)) == sylvan::ldds::empty_set());
         if (is_odd)
         {
-          mCRL2log(log::trace) << "apply_strategy: summand group " << summand_groups.size() << " belongs to player odd" << std::endl;
+          mCRL2log(log::log_level_t::trace) << "apply_strategy: summand group " << summand_groups.size() << " belongs to player odd" << std::endl;
         }
         else
         {
-          mCRL2log(log::trace) << "apply_strategy: summand group " << summand_groups.size() << " belongs to player even"
+          mCRL2log(log::log_level_t::trace) << "apply_strategy: summand group " << summand_groups.size() << " belongs to player even"
                                << std::endl;
         }
 
@@ -755,7 +755,7 @@ class symbolic_parity_game
             group.L = sylvan::ldds::empty_set();
           }
         }
-        mCRL2log(log::trace) << "L = " << print_relation(m_data_index, group.L, group.read, group.write) << std::endl;
+        mCRL2log(log::log_level_t::trace) << "L = " << print_relation(m_data_index, group.L, group.read, group.write) << std::endl;
 
         summand_groups.push_back(group);
       }
@@ -813,7 +813,7 @@ private:
 
         stopwatch watch;
         ldd todo1 = predecessors(U, todo, group);
-        mCRL2log(log::trace) << "predecessors_chaining: added predecessors for group " << i << " out of "
+        mCRL2log(log::log_level_t::trace) << "predecessors_chaining: added predecessors for group " << i << " out of "
                              << m_summand_groups.size() << " (time = " << std::setprecision(2) << std::fixed
                              << watch.seconds() << "s)\n";
 
@@ -840,7 +840,7 @@ private:
     {
       using namespace sylvan::ldds;
 
-      mCRL2log(log::trace) << "safe_control_predecessors_impl: computing safe control predecessors\n"
+      mCRL2log(log::log_level_t::trace) << "safe_control_predecessors_impl: computing safe control predecessors\n"
         << "  alpha = " << alpha << "\n"
         << "  U = " << print_nodes(U) << "\n"
         << "  outside = " << print_nodes(outside) << "\n"
@@ -868,7 +868,7 @@ private:
         strategy = merge(minus(Palpha, U), U);
       }
 
-      mCRL2log(log::trace) << "safe_control_predecessors_impl: initialized to\n"
+      mCRL2log(log::log_level_t::trace) << "safe_control_predecessors_impl: initialized to\n"
         << "  P = " << print_nodes(P) << "\n"
         << "  Palpha = " << print_nodes(Palpha) << "\n"
         << "  Pforced = " << print_nodes(Pforced) << "\n"
@@ -881,7 +881,7 @@ private:
         stopwatch watch;
         Pforced = minus(Pforced, predecessors(Pforced, outside, group));
 
-        mCRL2log(log::trace) << "safe_control_predecessors_impl: removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
+        mCRL2log(log::log_level_t::trace) << "safe_control_predecessors_impl: removed 1 - alpha predecessors for group " << i << " out of " << m_summand_groups.size()
                                << " (time = " << std::setprecision(2) << std::fixed << watch.seconds() << "s)\n";
       }
 

@@ -262,7 +262,7 @@ void aterm_pool::collect_impl(mcrl2::utilities::shared_mutex& shared_mutex)
       auto sweep_duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
 
       // Print the relevant information.
-      mCRL2log(mcrl2::log::info) << "g_term_pool(): Garbage collected " << old_size - size() << " terms, " << size() << " terms remaining in "
+      mCRL2log(mcrl2::log::log_level_t::info) << "g_term_pool(): Garbage collected " << old_size - size() << " terms, " << size() << " terms remaining in "
         << mark_duration + sweep_duration << " ms (marking " << mark_duration << " ms + sweep " << sweep_duration << " ms).\n";
     }
 
@@ -431,7 +431,7 @@ void aterm_pool::resize_if_needed(mcrl2::utilities::shared_mutex& mutex)
     // Only print if a resize actually took place.
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - timestamp).count();
 
-    mCRL2log(mcrl2::log::info) << "aterm_pool: Resized hash tables from " << old_capacity << " to " << capacity() << " capacity in "
+    mCRL2log(mcrl2::log::log_level_t::info) << "aterm_pool: Resized hash tables from " << old_capacity << " to " << capacity() << " capacity in "
                                << duration << " ms.\n";
   }
 }

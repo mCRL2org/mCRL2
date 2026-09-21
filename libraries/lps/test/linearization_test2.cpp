@@ -51,11 +51,11 @@ void run_linearisation_test_case(const std::string& spec, const bool expect_succ
     run_linearisation_instance(spec, options, expect_success);
 
     std::clog << "  Linearisation method regular2" << std::endl;
-    options.lin_method=lmRegular2;
+    options.lin_method=t_lin_method::lmRegular2;
     run_linearisation_instance(spec, options, expect_success);
 
     std::clog << "  Linearisation method stack" << std::endl;
-    options.lin_method=lmStack;
+    options.lin_method=t_lin_method::lmStack;
     run_linearisation_instance(spec, options, expect_success);
 
     std::clog << "  Linearisation method stack; binary enabled" << std::endl;
@@ -63,7 +63,7 @@ void run_linearisation_test_case(const std::string& spec, const bool expect_succ
     run_linearisation_instance(spec, options, expect_success);
 
     std::clog << "  Linearisation method regular; binary enabled" << std::endl;
-    options.lin_method=lmRegular;
+    options.lin_method=t_lin_method::lmRegular;
     run_linearisation_instance(spec, options, expect_success);
 
     std::clog << "  Linearisation method regular; no intermediate clustering" << std::endl;

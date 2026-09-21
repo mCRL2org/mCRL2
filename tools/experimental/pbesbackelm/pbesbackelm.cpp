@@ -33,12 +33,12 @@ class pbesbackelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_to
 
     pbesbackelm_options m_options;
 
-    void parse_options(const command_line_parser& parser) override
+    void parse_options(const command_line_parser&  parser) override
     {
       super::parse_options(parser);
     }
 
-    void add_options(interface_description& desc) override
+    void add_options(interface_description&  desc) override
     {
       super::add_options(desc);
     }
@@ -56,9 +56,9 @@ class pbesbackelm_tool: public pbes_input_tool<pbes_output_tool<pbes_rewriter_to
 
     bool run() override
     {
-      mCRL2log(verbose) << "pbesbackelm parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "pbesbackelm parameters:" << std::endl;
+      mCRL2log(log_level_t::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log_level_t::verbose) << "  output file:        " << m_output_filename << std::endl;
 
       m_options.rewrite_strategy = rewrite_strategy();
 
