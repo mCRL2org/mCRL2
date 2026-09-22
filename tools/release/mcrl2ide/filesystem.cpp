@@ -806,9 +806,9 @@ void FileSystem::newProperty(const Property& property)
 
   /* make sure that no duplicates can be added to the project file */
   QDomNodeList propertyNodes = propertiesNode.childNodes();
-  for (auto && propertyNode : propertyNodes)
+  for (int i = 0; i < propertyNodes.length(); i++)
   {
-    if (propertyNode.toElement().text() == property.name)
+    if (propertyNodes.at(i).toElement().text() == property.name)
     {
       return;
     }
