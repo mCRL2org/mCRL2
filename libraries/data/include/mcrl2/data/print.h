@@ -2331,11 +2331,22 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       print_binary_data_operation(x, " . ");
     }
 
+    else
+    {
+      print_container_or_other_application(x);
+    }
+    derived().leave(x);
+  }
+
+  // Split off from apply(const data::application&), since MSVC cannot handle the
+  // nesting depth of a single if-else chain containing all cases (error C1061).
+  void print_container_or_other_application(const data::application& x)
+  {
     //-------------------------------------------------------------------//
     //                            set
     //-------------------------------------------------------------------//
 
-    else if (sort_set::is_constructor_application(x))
+    if (sort_set::is_constructor_application(x))
     {
       if (is_fset_true(x))
       {
@@ -2603,7 +2614,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_function_application(x);
     }
-    derived().leave(x);
   }
 
   void apply(const machine_number& x)
