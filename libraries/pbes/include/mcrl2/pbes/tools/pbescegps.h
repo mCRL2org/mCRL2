@@ -29,6 +29,7 @@
 #include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/detail/pbescegps_refine_strategies.h"
 #include "mcrl2/pbes/detail/pbescegps_utilities.h"
 #include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
@@ -53,6 +54,7 @@
 #include "mcrl2/pbes/pbessolve_options.h"
 #include "mcrl2/pbes/rewriters/abstraction_rewriter.h"
 #include "mcrl2/pbes/solve_structure_graph.h"
+#include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/structure_graph_io.h"
 #include "mcrl2/utilities/boost_process.h"
 #include "mcrl2/utilities/exception.h"
@@ -63,7 +65,6 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/read_until.hpp>
 #include <boost/container/flat_map.hpp>
-#include <boost/filesystem.hpp>
 #include <chrono>
 #include <cstddef>
 #include <filesystem>

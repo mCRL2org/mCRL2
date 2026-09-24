@@ -13,6 +13,12 @@
 #ifndef MCRL2_UTILITIES_BOOST_PROCESS_H
 #define MCRL2_UTILITIES_BOOST_PROCESS_H
 
+// Use std::filesystem instead of boost::filesystem, since the latter is not
+// header-only and we do not link against the compiled Boost libraries.
+#ifndef BOOST_PROCESS_USE_STD_FS
+#define BOOST_PROCESS_USE_STD_FS
+#endif
+
 #include <boost/version.hpp>
 // Boost 1.88
 #if BOOST_VERSION >= 108800
