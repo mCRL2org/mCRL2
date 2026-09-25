@@ -2331,7 +2331,8 @@ namespace mcrl2::data::sort_nat
         result.emplace_back(variable_list({vn}), plus(vn, c0()), vn);
         result.emplace_back(variable_list({vp, vq}), plus(cnat(vp), cnat(vq)), cnat(sort_pos::add_with_carry(sort_bool::false_(), vp, vq)));
         result.emplace_back(variable_list({vp}), gte_subtract_with_borrow(sort_bool::false_(), vp, sort_pos::c1()), pred(vp));
-        result.emplace_back(variable_list({vp}), gte_subtract_with_borrow(sort_bool::true_(), vp, sort_pos::c1()), pred(nat2pos(pred(vp))));
+        result.emplace_back(variable_list(), gte_subtract_with_borrow(sort_bool::true_(), sort_pos::c1(), sort_pos::c1()), c0());
+        result.emplace_back(variable_list({vc, vp}), gte_subtract_with_borrow(sort_bool::true_(), sort_pos::cdub(vc, vp), sort_pos::c1()), pred(nat2pos(pred(sort_pos::cdub(vc, vp)))));
         result.emplace_back(variable_list({vb, vc, vp}), gte_subtract_with_borrow(vb, sort_pos::c1(), sort_pos::cdub(vc, vp)), c0());
         result.emplace_back(variable_list({vb, vc, vp, vq}), gte_subtract_with_borrow(vb, sort_pos::cdub(vc, vp), sort_pos::cdub(vc, vq)), dub(vb, gte_subtract_with_borrow(vb, vp, vq)));
         result.emplace_back(variable_list({vb, vp, vq}), gte_subtract_with_borrow(vb, sort_pos::cdub(sort_bool::false_(), vp), sort_pos::cdub(sort_bool::true_(), vq)), dub(sort_bool::not_(vb), gte_subtract_with_borrow(sort_bool::true_(), vp, vq)));
