@@ -29,6 +29,7 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat                                    
     min <"minimum">:Nat <"left"> #Nat <"right">->Nat                                                          external defined_by_rewrite_rules;
     succ <"succ">:Nat <"arg">->Pos                                                                            external defined_by_rewrite_rules;
     pred <"pred">:Pos <"arg">->Nat                                                                            external defined_by_rewrite_rules;
+    @natpred <"natpred">: Nat <"arg">-> Nat                                                                   internal defined_by_rewrite_rules;
 % Double and conditionally add 1
     @dub <"dub">:Bool <"left"> # Nat <"right"> -> Nat                                                         internal defined_by_rewrite_rules;
 % Double and add 1
@@ -36,7 +37,7 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat                                    
     + <"plus">:Pos <"left"> #Nat <"right">->Pos                                                               external defined_by_rewrite_rules;
     + <"plus">:Nat <"left"> #Pos <"right">->Pos                                                               external defined_by_rewrite_rules;
     + <"plus">:Nat <"left"> #Nat <"right">->Nat                                                               external defined_by_rewrite_rules;
-    @gtesubtb <"gte_subtract_with_borrow">: Bool <"arg1"> # Pos <"arg2"> # Pos <"arg3"> -> Nat                internal defined_by_rewrite_rules;
+    @monuspos <"monus_on_pos">: Pos <"left"> # Pos <"right"> -> Nat                                    internal defined_by_rewrite_rules;
     * <"times">:Nat <"left"> #Nat <"right">->Nat                                                              external defined_by_rewrite_rules;
     div <"div">: Nat <"left"> # Pos <"right"> -> Nat                                                          external defined_by_rewrite_rules;
     mod <"mod">:Nat <"left"> # Pos <"right"> -> Nat                                                           external defined_by_rewrite_rules;
@@ -93,6 +94,11 @@ eqn ==(@c0, @cNat(p)) = false;
 % Pulling the @cNat outside of the if, instead of using pattern matching,
 % helps the enumerator
     pred(@cDub(b,p)) = @cNat(if(b,@cDub(false,p),@dubsucc(pred(p))));
+    @natpred(@c0) = @c0;
+    @natpred(@cNat(@c1)) = @c0;
+    @natpred(@cNat(@cDub(false,@c1))) = @c1;
+    @natpred(@cNat(@cDub(false,@cDub(b,p)))) = @dub(true,@pospred(@cDub(b,p)));
+    @natpred(@cNat(@cDub(true,p))) = @dub(false,p);
     @dubsucc(@c0) = @c1;
     @dubsucc(@cNat(p)) = @cDub(true,p);
     @dub(false,@c0) = @c0;
@@ -105,13 +111,11 @@ eqn ==(@c0, @cNat(p)) = false;
     +(@c0,n) = n;
     +(n,@c0) = n;
     +(@cNat(p),@cNat(q)) = @cNat(@addc(false,p,q));
-    @gtesubtb(false,p,@c1) = pred(p);
-    @gtesubtb(true,@c1,@c1) = @c0;
-    @gtesubtb(true,@cDub(c,p),@c1) = pred(Nat2Pos(pred(@cDub(c,p))));
-    @gtesubtb(b,@c1,@cDub(c,p)) = @c0;
-    @gtesubtb(b,@cDub(c,p),@cDub(c,q)) = @dub(b, @gtesubtb(b,p,q));
-    @gtesubtb(b,@cDub(false,p),@cDub(true,q)) = @dub(!(b),@gtesubtb(true,p,q));
-    @gtesubtb(b,@cDub(true,p),@cDub(false,q)) = @dub(!(b),@gtesubtb(false,p,q));
+    @monuspos(p,@c1) = pred(p);
+    @monuspos(@c1,@cDub(b,p)) = @c0;
+    @monuspos(@cDub(b,p),@cDub(b,q)) = @dub(false, @monuspos(p,q));
+    @monuspos(@cDub(false,p),@cDub(true,q)) = @natpred(@dub(false,@monuspos(p,q)));
+    @monuspos(@cDub(true,p),@cDub(false,q)) = @natpred(@dub(false,@monuspos(succ(p),q)));
     *(@c0,n) = @c0;
     *(n,@c0) = @c0;
     *(@cNat(p),@cNat(q)) = @cNat(*(p,q));
@@ -131,7 +135,7 @@ eqn ==(@c0, @cNat(p)) = false;
     mod(@cNat(p),q) = @last(@divmod(p,q));
     @monus(@c0,n) = @c0;
     @monus(n,@c0) = n;
-    @monus(@cNat(p),@cNat(q)) = @gtesubtb(false,p,q);
+    @monus(@cNat(p),@cNat(q)) = @monuspos(p,q);
     @swap_zero(m,@c0) = m;
     @swap_zero(@c0,n) = n;
     @swap_zero(@cNat(p),@cNat(p)) = @c0;
@@ -174,4 +178,4 @@ eqn ==(@c0, @cNat(p)) = false;
     @gdivmod(@cPair(m,n),b,p) = @ggdivmod(@dub(b,n),m,p);
     @ggdivmod(@c0,n,p) = @cPair(@dub(false,n),@c0);
     <(p,q) -> @ggdivmod(@cNat(p),n,q) = @cPair(@dub(false,n),@cNat(p));
-    <=(q,p) -> @ggdivmod(@cNat(p),n,q) = @cPair(@dub(true,n),@gtesubtb(false,p,q));
+    <=(q,p) -> @ggdivmod(@cNat(p),n,q) = @cPair(@dub(true,n),@monuspos(p,q));

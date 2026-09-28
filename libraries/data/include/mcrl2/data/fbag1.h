@@ -1011,7 +1011,7 @@ namespace mcrl2::data::sort_fbag
         result.emplace_back(variable_list({vc}), difference(s, empty(s), vc), empty(s));
         result.emplace_back(variable_list({vb, vc, vd, vp}), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vp, vc)), difference(s, vb, vc));
         result.emplace_back(variable_list({vb, vc, vd, vp, vq}), less_total(vp, vq), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), difference(s, vb, vc));
-        result.emplace_back(variable_list({vb, vc, vd, vp, vq}), less_total(vq, vp), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_nat::nat2pos(sort_nat::gte_subtract_with_borrow(sort_bool::false_(), vp, vq)), difference(s, vb, vc)));
+        result.emplace_back(variable_list({vb, vc, vd, vp, vq}), less_total(vq, vp), difference(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_nat::nat2pos(sort_nat::monus_on_pos(vp, vq)), difference(s, vb, vc)));
         result.emplace_back(variable_list({vb, vc, vd, ve, vp, vq}), less_total(vd, ve), difference(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, vd, vp, difference(s, vb, cons_(s, ve, vq, vc))));
         result.emplace_back(variable_list({vb, vc, vd, ve, vp, vq}), less_total(ve, vd), difference(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), difference(s, cons_(s, vd, vp, vb), vc));
         result.emplace_back(variable_list({vb}), union_(s, vb, empty(s)), vb);

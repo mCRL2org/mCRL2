@@ -1574,8 +1574,8 @@ namespace mcrl2::data::sort_int
         result.emplace_back(variable_list({vn, vp}), plus(cint(vn), cneg(vp)), minus(vn, sort_nat::cnat(vp)));
         result.emplace_back(variable_list({vn, vp}), plus(cneg(vp), cint(vn)), minus(vn, sort_nat::cnat(vp)));
         result.emplace_back(variable_list({vp, vq}), plus(cneg(vp), cneg(vq)), cneg(sort_pos::add_with_carry(sort_bool::false_(), vp, vq)));
-        result.emplace_back(variable_list({vp, vq}), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::gte_subtract_with_borrow(sort_bool::false_(), vp, vq)));
-        result.emplace_back(variable_list({vp, vq}), less(vp, vq), minus(vp, vq), negate(sort_nat::gte_subtract_with_borrow(sort_bool::false_(), vq, vp)));
+        result.emplace_back(variable_list({vp, vq}), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::monus_on_pos(vp, vq)));
+        result.emplace_back(variable_list({vp, vq}), less(vp, vq), minus(vp, vq), negate(sort_nat::monus_on_pos(vq, vp)));
         result.emplace_back(variable_list({vm, vn}), less_equal(vn, vm), minus(vm, vn), cint(sort_nat::monus(vm, vn)));
         result.emplace_back(variable_list({vm, vn}), less(vm, vn), minus(vm, vn), negate(sort_nat::monus(vn, vm)));
         result.emplace_back(variable_list({vx, vy}), minus(vx, vy), plus(vx, negate(vy)));

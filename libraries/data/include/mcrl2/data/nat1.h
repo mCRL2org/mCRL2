@@ -691,6 +691,68 @@ namespace mcrl2::data::sort_nat
         return is_application(e) && is_pred_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
+      /// \brief Generate identifier \@natpred.
+      /// \return Identifier \@natpred.
+      inline
+      const core::identifier_string& natpred_name()
+      {
+        static core::identifier_string natpred_name = core::identifier_string("@natpred");
+        return natpred_name;
+      }
+
+      /// \brief Constructor for function symbol \@natpred.
+      
+      /// \return Function symbol natpred.
+      inline
+      const function_symbol& natpred()
+      {
+        static function_symbol natpred(natpred_name(), make_function_sort_(nat(), nat()));
+        return natpred;
+      }
+
+      /// \brief Recogniser for function \@natpred.
+      /// \param e A data expression.
+      /// \return true iff e is the function symbol matching \@natpred.
+      inline
+      bool is_natpred_function_symbol(const atermpp::aterm& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return atermpp::down_cast<function_symbol>(e) == natpred();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@natpred.
+      
+      /// \param[in] arg0 A data expression.
+      /// \return Application of \@natpred to a number of arguments.
+      inline
+      application natpred(const data_expression& arg0)
+      {
+        return sort_nat::natpred()(arg0);
+      }
+
+      /// \brief Make an application of function symbol \@natpred.
+      /// \param[out] result The data expression where the \@natpred expression is put.
+      
+      /// \param[in] arg0 A data expression.
+      inline
+      void make_natpred(data_expression& result, const data_expression& arg0)
+      {
+        make_application(result, sort_nat::natpred(),arg0);
+      }
+
+      /// \brief Recogniser for application of \@natpred.
+      /// \param e A data expression.
+      /// \return true iff e is an application of function symbol natpred to a
+      ///     number of arguments.
+      inline
+      bool is_natpred_application(const atermpp::aterm& e)
+      {
+        return is_application(e) && is_natpred_function_symbol(atermpp::down_cast<application>(e).head());
+      }
+
       /// \brief Generate identifier \@dub.
       /// \return Identifier \@dub.
       inline
@@ -902,70 +964,68 @@ namespace mcrl2::data::sort_nat
         return is_application(e) && is_plus_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
-      /// \brief Generate identifier \@gtesubtb.
-      /// \return Identifier \@gtesubtb.
+      /// \brief Generate identifier \@monuspos.
+      /// \return Identifier \@monuspos.
       inline
-      const core::identifier_string& gte_subtract_with_borrow_name()
+      const core::identifier_string& monus_on_pos_name()
       {
-        static core::identifier_string gte_subtract_with_borrow_name = core::identifier_string("@gtesubtb");
-        return gte_subtract_with_borrow_name;
+        static core::identifier_string monus_on_pos_name = core::identifier_string("@monuspos");
+        return monus_on_pos_name;
       }
 
-      /// \brief Constructor for function symbol \@gtesubtb.
+      /// \brief Constructor for function symbol \@monuspos.
       
-      /// \return Function symbol gte_subtract_with_borrow.
+      /// \return Function symbol monus_on_pos.
       inline
-      const function_symbol& gte_subtract_with_borrow()
+      const function_symbol& monus_on_pos()
       {
-        static function_symbol gte_subtract_with_borrow(gte_subtract_with_borrow_name(), make_function_sort_(sort_bool::bool_(), sort_pos::pos(), sort_pos::pos(), nat()));
-        return gte_subtract_with_borrow;
+        static function_symbol monus_on_pos(monus_on_pos_name(), make_function_sort_(sort_pos::pos(), sort_pos::pos(), nat()));
+        return monus_on_pos;
       }
 
-      /// \brief Recogniser for function \@gtesubtb.
+      /// \brief Recogniser for function \@monuspos.
       /// \param e A data expression.
-      /// \return true iff e is the function symbol matching \@gtesubtb.
+      /// \return true iff e is the function symbol matching \@monuspos.
       inline
-      bool is_gte_subtract_with_borrow_function_symbol(const atermpp::aterm& e)
+      bool is_monus_on_pos_function_symbol(const atermpp::aterm& e)
       {
         if (is_function_symbol(e))
         {
-          return atermpp::down_cast<function_symbol>(e) == gte_subtract_with_borrow();
+          return atermpp::down_cast<function_symbol>(e) == monus_on_pos();
         }
         return false;
       }
 
-      /// \brief Application of function symbol \@gtesubtb.
+      /// \brief Application of function symbol \@monuspos.
       
       /// \param[in] arg0 A data expression.
       /// \param[in] arg1 A data expression.
-      /// \param[in] arg2 A data expression.
-      /// \return Application of \@gtesubtb to a number of arguments.
+      /// \return Application of \@monuspos to a number of arguments.
       inline
-      application gte_subtract_with_borrow(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      application monus_on_pos(const data_expression& arg0, const data_expression& arg1)
       {
-        return sort_nat::gte_subtract_with_borrow()(arg0, arg1, arg2);
+        return sort_nat::monus_on_pos()(arg0, arg1);
       }
 
-      /// \brief Make an application of function symbol \@gtesubtb.
-      /// \param[out] result The data expression where the \@gtesubtb expression is put.
+      /// \brief Make an application of function symbol \@monuspos.
+      /// \param[out] result The data expression where the \@monuspos expression is put.
       
       /// \param[in] arg0 A data expression.
       /// \param[in] arg1 A data expression.
-      /// \param[in] arg2 A data expression.
       inline
-      void make_gte_subtract_with_borrow(data_expression& result, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      void make_monus_on_pos(data_expression& result, const data_expression& arg0, const data_expression& arg1)
       {
-        make_application(result, sort_nat::gte_subtract_with_borrow(),arg0, arg1, arg2);
+        make_application(result, sort_nat::monus_on_pos(),arg0, arg1);
       }
 
-      /// \brief Recogniser for application of \@gtesubtb.
+      /// \brief Recogniser for application of \@monuspos.
       /// \param e A data expression.
-      /// \return true iff e is an application of function symbol gte_subtract_with_borrow to a
+      /// \return true iff e is an application of function symbol monus_on_pos to a
       ///     number of arguments.
       inline
-      bool is_gte_subtract_with_borrow_application(const atermpp::aterm& e)
+      bool is_monus_on_pos_application(const atermpp::aterm& e)
       {
-        return is_application(e) && is_gte_subtract_with_borrow_function_symbol(atermpp::down_cast<application>(e).head());
+        return is_application(e) && is_monus_on_pos_function_symbol(atermpp::down_cast<application>(e).head());
       }
 
       /// \brief Generate identifier *.
@@ -2105,12 +2165,13 @@ namespace mcrl2::data::sort_nat
         result.push_back(sort_nat::minimum(nat(), nat()));
         result.push_back(sort_nat::succ(nat()));
         result.push_back(sort_nat::pred());
+        result.push_back(sort_nat::natpred());
         result.push_back(sort_nat::dub());
         result.push_back(sort_nat::dubsucc());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
-        result.push_back(sort_nat::gte_subtract_with_borrow());
+        result.push_back(sort_nat::monus_on_pos());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::div());
         result.push_back(sort_nat::mod());
@@ -2159,12 +2220,13 @@ namespace mcrl2::data::sort_nat
         result.push_back(sort_nat::minimum(nat(), nat()));
         result.push_back(sort_nat::succ(nat()));
         result.push_back(sort_nat::pred());
+        result.push_back(sort_nat::natpred());
         result.push_back(sort_nat::dub());
         result.push_back(sort_nat::dubsucc());
         result.push_back(sort_nat::plus(sort_pos::pos(), nat()));
         result.push_back(sort_nat::plus(nat(), sort_pos::pos()));
         result.push_back(sort_nat::plus(nat(), nat()));
-        result.push_back(sort_nat::gte_subtract_with_borrow());
+        result.push_back(sort_nat::monus_on_pos());
         result.push_back(sort_nat::times(nat(), nat()));
         result.push_back(sort_nat::div());
         result.push_back(sort_nat::mod());
@@ -2205,7 +2267,7 @@ namespace mcrl2::data::sort_nat
       inline
       const data_expression& arg(const data_expression& e)
       {
-        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_dubsucc_application(e) || is_even_application(e) || is_sqrt_application(e) || is_first_application(e) || is_last_application(e));
+        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_succ_application(e) || is_pred_application(e) || is_natpred_application(e) || is_dubsucc_application(e) || is_even_application(e) || is_sqrt_application(e) || is_first_application(e) || is_last_application(e));
         return atermpp::down_cast<application>(e)[0];
       }
 
@@ -2217,7 +2279,7 @@ namespace mcrl2::data::sort_nat
       inline
       const data_expression& arg1(const data_expression& e)
       {
-        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_cpair_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return atermpp::down_cast<application>(e)[0];
       }
 
@@ -2229,7 +2291,7 @@ namespace mcrl2::data::sort_nat
       inline
       const data_expression& arg2(const data_expression& e)
       {
-        assert(is_cpair_application(e) || is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_cpair_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return atermpp::down_cast<application>(e)[1];
       }
 
@@ -2241,7 +2303,7 @@ namespace mcrl2::data::sort_nat
       inline
       const data_expression& left(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_monus_on_pos_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
         return atermpp::down_cast<application>(e)[0];
       }
 
@@ -2253,7 +2315,7 @@ namespace mcrl2::data::sort_nat
       inline
       const data_expression& right(const data_expression& e)
       {
-        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
+        assert(is_maximum_application(e) || is_minimum_application(e) || is_dub_application(e) || is_plus_application(e) || is_monus_on_pos_application(e) || is_times_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_monus_application(e) || is_swap_zero_application(e) || is_divmod_application(e));
         return atermpp::down_cast<application>(e)[1];
       }
 
@@ -2265,7 +2327,7 @@ namespace mcrl2::data::sort_nat
       inline
       const data_expression& arg3(const data_expression& e)
       {
-        assert(is_gte_subtract_with_borrow_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
+        assert(is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_sqrt_nat_aux_func_application(e) || is_generalised_divmod_application(e) || is_doubly_generalised_divmod_application(e));
         return atermpp::down_cast<application>(e)[2];
       }
 
@@ -2318,6 +2380,11 @@ namespace mcrl2::data::sort_nat
         result.emplace_back(variable_list({vp}), succ(cnat(vp)), succ(vp));
         result.emplace_back(variable_list(), pred(sort_pos::c1()), c0());
         result.emplace_back(variable_list({vb, vp}), pred(sort_pos::cdub(vb, vp)), cnat(if_(vb, sort_pos::cdub(sort_bool::false_(), vp), dubsucc(pred(vp)))));
+        result.emplace_back(variable_list(), natpred(c0()), c0());
+        result.emplace_back(variable_list(), natpred(cnat(sort_pos::c1())), c0());
+        result.emplace_back(variable_list(), natpred(cnat(sort_pos::cdub(sort_bool::false_(), sort_pos::c1()))), sort_pos::c1());
+        result.emplace_back(variable_list({vb, vp}), natpred(cnat(sort_pos::cdub(sort_bool::false_(), sort_pos::cdub(vb, vp)))), dub(sort_bool::true_(), sort_pos::pos_predecessor(sort_pos::cdub(vb, vp))));
+        result.emplace_back(variable_list({vp}), natpred(cnat(sort_pos::cdub(sort_bool::true_(), vp))), dub(sort_bool::false_(), vp));
         result.emplace_back(variable_list(), dubsucc(c0()), sort_pos::c1());
         result.emplace_back(variable_list({vp}), dubsucc(cnat(vp)), sort_pos::cdub(sort_bool::true_(), vp));
         result.emplace_back(variable_list(), dub(sort_bool::false_(), c0()), c0());
@@ -2330,13 +2397,11 @@ namespace mcrl2::data::sort_nat
         result.emplace_back(variable_list({vn}), plus(c0(), vn), vn);
         result.emplace_back(variable_list({vn}), plus(vn, c0()), vn);
         result.emplace_back(variable_list({vp, vq}), plus(cnat(vp), cnat(vq)), cnat(sort_pos::add_with_carry(sort_bool::false_(), vp, vq)));
-        result.emplace_back(variable_list({vp}), gte_subtract_with_borrow(sort_bool::false_(), vp, sort_pos::c1()), pred(vp));
-        result.emplace_back(variable_list(), gte_subtract_with_borrow(sort_bool::true_(), sort_pos::c1(), sort_pos::c1()), c0());
-        result.emplace_back(variable_list({vc, vp}), gte_subtract_with_borrow(sort_bool::true_(), sort_pos::cdub(vc, vp), sort_pos::c1()), pred(nat2pos(pred(sort_pos::cdub(vc, vp)))));
-        result.emplace_back(variable_list({vb, vc, vp}), gte_subtract_with_borrow(vb, sort_pos::c1(), sort_pos::cdub(vc, vp)), c0());
-        result.emplace_back(variable_list({vb, vc, vp, vq}), gte_subtract_with_borrow(vb, sort_pos::cdub(vc, vp), sort_pos::cdub(vc, vq)), dub(vb, gte_subtract_with_borrow(vb, vp, vq)));
-        result.emplace_back(variable_list({vb, vp, vq}), gte_subtract_with_borrow(vb, sort_pos::cdub(sort_bool::false_(), vp), sort_pos::cdub(sort_bool::true_(), vq)), dub(sort_bool::not_(vb), gte_subtract_with_borrow(sort_bool::true_(), vp, vq)));
-        result.emplace_back(variable_list({vb, vp, vq}), gte_subtract_with_borrow(vb, sort_pos::cdub(sort_bool::true_(), vp), sort_pos::cdub(sort_bool::false_(), vq)), dub(sort_bool::not_(vb), gte_subtract_with_borrow(sort_bool::false_(), vp, vq)));
+        result.emplace_back(variable_list({vp}), monus_on_pos(vp, sort_pos::c1()), pred(vp));
+        result.emplace_back(variable_list({vb, vp}), monus_on_pos(sort_pos::c1(), sort_pos::cdub(vb, vp)), c0());
+        result.emplace_back(variable_list({vb, vp, vq}), monus_on_pos(sort_pos::cdub(vb, vp), sort_pos::cdub(vb, vq)), dub(sort_bool::false_(), monus_on_pos(vp, vq)));
+        result.emplace_back(variable_list({vp, vq}), monus_on_pos(sort_pos::cdub(sort_bool::false_(), vp), sort_pos::cdub(sort_bool::true_(), vq)), natpred(dub(sort_bool::false_(), monus_on_pos(vp, vq))));
+        result.emplace_back(variable_list({vp, vq}), monus_on_pos(sort_pos::cdub(sort_bool::true_(), vp), sort_pos::cdub(sort_bool::false_(), vq)), natpred(dub(sort_bool::false_(), monus_on_pos(succ(vp), vq))));
         result.emplace_back(variable_list({vn}), times(c0(), vn), c0());
         result.emplace_back(variable_list({vn}), times(vn, c0()), c0());
         result.emplace_back(variable_list({vp, vq}), times(cnat(vp), cnat(vq)), cnat(times(vp, vq)));
@@ -2356,7 +2421,7 @@ namespace mcrl2::data::sort_nat
         result.emplace_back(variable_list({vp, vq}), mod(cnat(vp), vq), last(divmod(vp, vq)));
         result.emplace_back(variable_list({vn}), monus(c0(), vn), c0());
         result.emplace_back(variable_list({vn}), monus(vn, c0()), vn);
-        result.emplace_back(variable_list({vp, vq}), monus(cnat(vp), cnat(vq)), gte_subtract_with_borrow(sort_bool::false_(), vp, vq));
+        result.emplace_back(variable_list({vp, vq}), monus(cnat(vp), cnat(vq)), monus_on_pos(vp, vq));
         result.emplace_back(variable_list({vm}), swap_zero(vm, c0()), vm);
         result.emplace_back(variable_list({vn}), swap_zero(c0(), vn), vn);
         result.emplace_back(variable_list({vp}), swap_zero(cnat(vp), cnat(vp)), c0());
@@ -2394,7 +2459,7 @@ namespace mcrl2::data::sort_nat
         result.emplace_back(variable_list({vb, vm, vn, vp}), generalised_divmod(cpair(vm, vn), vb, vp), doubly_generalised_divmod(dub(vb, vn), vm, vp));
         result.emplace_back(variable_list({vn, vp}), doubly_generalised_divmod(c0(), vn, vp), cpair(dub(sort_bool::false_(), vn), c0()));
         result.emplace_back(variable_list({vn, vp, vq}), less(vp, vq), doubly_generalised_divmod(cnat(vp), vn, vq), cpair(dub(sort_bool::false_(), vn), cnat(vp)));
-        result.emplace_back(variable_list({vn, vp, vq}), less_equal(vq, vp), doubly_generalised_divmod(cnat(vp), vn, vq), cpair(dub(sort_bool::true_(), vn), gte_subtract_with_borrow(sort_bool::false_(), vp, vq)));
+        result.emplace_back(variable_list({vn, vp, vq}), less_equal(vq, vp), doubly_generalised_divmod(cnat(vp), vn, vq), cpair(dub(sort_bool::true_(), vn), monus_on_pos(vp, vq)));
         return result;
       }
 

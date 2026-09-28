@@ -82,7 +82,7 @@ eqn ==(@fbag_cons(d, p, b), {:})  =  false;
     -({:},c) = {:};
     -(@fbag_cons(d,p,b),@fbag_cons(d,p,c)) = -(b,c);
     less_total(p,q) -> -(@fbag_cons(d,p,b),@fbag_cons(d,q,c)) = -(b,c);
-    less_total(q,p) -> -(@fbag_cons(d,p,b),@fbag_cons(d,q,c)) = @fbag_cons(d,Nat2Pos(@gtesubtb(false,p,q)),-(b,c));
+    less_total(q,p) -> -(@fbag_cons(d,p,b),@fbag_cons(d,q,c)) = @fbag_cons(d,Nat2Pos(@monuspos(p,q)),-(b,c));
     less_total(d,e) -> -(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = @fbag_cons(d,p,-(b,@fbag_cons(e,q,c)));
     less_total(e,d) -> -(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = -(@fbag_cons(d,p,b),c);
     +(b,{:}) = b;
