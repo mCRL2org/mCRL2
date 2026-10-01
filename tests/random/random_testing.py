@@ -451,11 +451,11 @@ class Pbes2bool_evidence_ltsTest(ProcessTest):
     def __init__(self, name, optimization, settings):
         super().__init__(name, ymlfile('pbessolve-evidence-lts'), settings)
         if optimization in [4, 5]:
-            self.add_command_line_options('t3', [f'-l{optimization}', '--aggressive'])
-            self.add_command_line_options('t4', [f'-l{optimization}', '--aggressive'])
+            self.add_command_line_options('t3', [f'-l{optimization}', '--aggressive', '--prune-todo-list'])
+            self.add_command_line_options('t4', [f'-l{optimization}', '--aggressive', '--prune-todo-list'])
         else:
-            self.add_command_line_options('t3', [f'-l{optimization}'])
-            self.add_command_line_options('t4', [f'-l{optimization}'])
+            self.add_command_line_options('t3', [f'-l{optimization}', '--prune-todo-list'])
+            self.add_command_line_options('t4', [f'-l{optimization}', '--prune-todo-list'])
 
     def create_inputfiles(self, runpath = '.'):
         super().create_inputfiles(runpath)

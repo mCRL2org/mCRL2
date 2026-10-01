@@ -1,5 +1,6 @@
 # Checks that pbessolve's direct evidence-LTS output (--file=*.lps --evidence-file=*.lts) is
-# bisimilar to the evidence obtained via the existing round trip through an evidence LPS.
+# simulated by the original LTS. The evidence LTS can be nondeterministic, hence it is not
+# necessarily bisimilar to the evidence obtained via an evidence LPS.
 
 nodes:
   l1:
@@ -39,14 +40,14 @@ tools:
     args: ['-v']
     name: pbessolve
   t5:
-    input: [l6]
+    input: [l3]
     output: [l7]
     args: []
     name: lps2lts
   t6:
-    input: [l7, l5]
+    input: [l5, l7]
     output: []
-    args: [--equivalence=bisim]
+    args: [--equivalence=none, --preorder=sim]
     name: ltscompare
 
 result: |
