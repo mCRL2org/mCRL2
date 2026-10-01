@@ -1,6 +1,7 @@
 ##### Python library requirements for generating sphinx documentation
 
 lxml==6.1.0
+packaging==26.3.0
 parsing==2.0.4
 psutil==7.0.0
 PyYAML==6.0.2
