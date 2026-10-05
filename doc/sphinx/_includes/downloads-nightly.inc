@@ -32,13 +32,6 @@
 
     _x86_64.rpm">Fedora RPM (64-bit)</a>
 
-
-.. |bin_osx64n| replace:: |download_nightly_pre|\ |version|\ |bin_osx64n_post|
-
-.. |bin_osx64n_post| raw:: html
-
-    _x86_64.dmg">macOS DMG (x86_64)</a>
-
 .. |bin_osx_arm64n| replace:: |download_nightly_pre|\ |version|\ |bin_osx_arm64n_post|
 
 .. |bin_osx_arm64n_post| raw:: html
