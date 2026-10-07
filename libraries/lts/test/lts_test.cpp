@@ -16,6 +16,36 @@
 
 using namespace mcrl2;
 
+BOOST_AUTO_TEST_CASE(coupled_simulation_tau_cycles)
+{
+  const std::string matching_aut = "des (0,1,2)\n(0,\"a\",1)\n";
+  const std::string different_aut = "des (0,1,2)\n(0,\"b\",1)\n";
+  const std::vector<std::string> cyclic_auts = {
+    "des (0,2,2)\n(0,\"tau\",0)\n(0,\"a\",1)\n",
+    "des (0,2,2)\n(0,\"a\",1)\n(1,\"tau\",1)\n",
+    "des (0,3,3)\n(0,\"tau\",1)\n(1,\"tau\",0)\n(1,\"a\",2)\n"
+  };
+  const auto compare_aut = [](const std::string& left_aut, const std::string& right_aut)
+  {
+    std::istringstream left_stream(left_aut);
+    std::istringstream right_stream(right_aut);
+    lts::lts_aut_t left;
+    lts::lts_aut_t right;
+    left.load(left_stream);
+    right.load(right_stream);
+    return lts::compare(left, right, lts::lts_equivalence::lts_eq_coupled_sim);
+  };
+
+  for (const std::string& cyclic_aut : cyclic_auts)
+  {
+    BOOST_CHECK(compare_aut(cyclic_aut, cyclic_aut));
+    BOOST_CHECK(compare_aut(cyclic_aut, matching_aut));
+    BOOST_CHECK(compare_aut(matching_aut, cyclic_aut));
+    BOOST_CHECK(!compare_aut(cyclic_aut, different_aut));
+    BOOST_CHECK(!compare_aut(different_aut, cyclic_aut));
+  }
+}
+
 BOOST_AUTO_TEST_CASE(reduce_simple_loop)
 {
   std::string SIMPLE_AUT =

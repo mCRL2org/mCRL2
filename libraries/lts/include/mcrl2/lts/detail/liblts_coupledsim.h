@@ -189,6 +189,7 @@ template <class LTS_TYPE>
       << std::endl;
 
     { // restructure l1 => get meta data and chain weak transitions.
+      std::set<transition> explored_weak_transitions;
       for (const transition& t1 : l1.get_transitions())
       {
         l1_tran_from_node[t1.from()][t1] = true;  // outgoing
@@ -212,6 +213,10 @@ template <class LTS_TYPE>
         // finish if next is second not tau.
         transition weak = todo_weak.top();
         todo_weak.pop();
+        if (!explored_weak_transitions.insert(weak).second)
+        {
+          continue;
+        }
         std::size_t f = weak.from();
         std::size_t l = weak.label();
         std::size_t t = weak.to();
@@ -257,6 +262,7 @@ template <class LTS_TYPE>
     }
 
     { // ANALOG for l2
+      std::set<transition> explored_weak_transitions;
       for (const transition& t2 : l2.get_transitions())
       {
         l2_tran_from_node[t2.from()][t2] = true;  // outgoing
@@ -279,6 +285,10 @@ template <class LTS_TYPE>
         // finish if next is second not tau.
         transition weak = todo_weak.top();
         todo_weak.pop();
+        if (!explored_weak_transitions.insert(weak).second)
+        {
+          continue;
+        }
         std::size_t f = weak.from();
         std::size_t l = weak.label();
         std::size_t t = weak.to();
