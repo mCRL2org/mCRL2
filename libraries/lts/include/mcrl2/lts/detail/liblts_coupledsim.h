@@ -171,18 +171,12 @@ template <class LTS_TYPE>
 
     /* Get Weak transitions. */
     std::stack<transition> todo_weak;
-    std::set<transition> l1_weak_transitions;
-    std::set<transition> l2_weak_transitions; // do I need to save them?
 
     /* filter transitions of t2. */
     std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
         l2_tran_from_node;
     std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
-        l2_tran_into_node;
-    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
         l1_tran_from_node;
-    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
-        l1_tran_into_node;
 
     mCRL2log(log::log_level_t::debug)
       << "Find weak transitions."
@@ -193,16 +187,9 @@ template <class LTS_TYPE>
       for (const transition& t1 : l1.get_transitions())
       {
         l1_tran_from_node[t1.from()][t1] = true;  // outgoing
-        l1_tran_into_node[t1.to()][t1] = true;  // incoming
 
         /* Every transition is a weak transition, append to todo. */
         todo_weak.push(t1);
-
-        l1_weak_transitions.insert(t1);
-
-        // add tau loop for everyone.
-        l1_weak_transitions.insert(transition(t1.from(), 0, t1.from()));
-        l1_weak_transitions.insert(transition(t1.to(), 0, t1.to()));
       }
 
       /* Add weak transititions. */
@@ -227,8 +214,6 @@ template <class LTS_TYPE>
 
         // XXX if (already_good) The current todo weak transition is already valid.
         // if it was strong before, it stays strong, else added as weak.
-        l1_weak_transitions.insert(weak);
-        l1_tran_into_node[t][weak] |= false;
         l1_tran_from_node[f][weak] |= false;
 
         if (len < 1)  // no further steps.
@@ -266,15 +251,9 @@ template <class LTS_TYPE>
       for (const transition& t2 : l2.get_transitions())
       {
         l2_tran_from_node[t2.from()][t2] = true;  // outgoing
-        l2_tran_into_node[t2.to()][t2] = true;  // incoming
 
         /* Every transition is a weak transition, append to todo. */
         todo_weak.push(t2);
-        l2_weak_transitions.insert(t2);
-
-        // add tau loop for everyone.
-        l2_weak_transitions.insert(transition(t2.from(), 0, t2.from()));
-        l2_weak_transitions.insert(transition(t2.to(), 0, t2.to()));
       }
 
       /* Add weak transititions. */
@@ -299,8 +278,6 @@ template <class LTS_TYPE>
 
         // TODO: if (already_good) The current todo weak transition is already valid.
         // if it was strong before, it stays strong, else added as weak.
-        l2_weak_transitions.insert(weak);
-        l2_tran_into_node[t][weak] |= false;
         l2_tran_from_node[f][weak] |= false;
 
         if (len < 1)  // no further steps.
@@ -359,8 +336,6 @@ template <class LTS_TYPE>
         moves.emplace(cplp0q0, q0p0, 0, "bisim");
         moves.emplace(cplq0p0, p0q0, 0, "bisim");
 
-        std::map<cs_game_move, bool> todo_if;
-
         // TODO This includes also weak, as challenge giver invalid, and that is unnecessary!
         /* CREATED:
          * challenge: p0 a -> p1
@@ -414,7 +389,6 @@ template <class LTS_TYPE>
               cs_game_node qp1 = {.flag = NODE_ATK, .act = 0, .p = q1, .q = p1, .swapped = true};  /// (q,p1)a
               defender_nodes.insert(bqp0);
               attacker_nodes.insert(qp1);
-              // todo_if.insert();  // waiting list for this move on condition.
               moves.emplace(bqp0, qp1, a, move_label);
             }
           }
@@ -482,7 +456,6 @@ template <class LTS_TYPE>
               cs_game_node pq1 = {.flag = NODE_ATK, .act = 0, .p = p1, .q = q1, .swapped = false};  // (p?,q1)a
               defender_nodes.insert(apq0);
               attacker_nodes.insert(pq1);
-              // todo_if.insert();  // waiting list for this move on condition.
               moves.emplace(apq0, pq1, b, move_label);
             }
           }
@@ -571,7 +544,6 @@ template <class LTS_TYPE>
     mCRL2log(log::log_level_t::verbose) << "R = {";
 
     /* Filter R, where its elemens are coupled similar. */
-    std::set<cs_game_node> cs_relation;
     for (const auto &n : attacker_nodes)
     {
 #ifndef NDEBUG
@@ -585,7 +557,6 @@ template <class LTS_TYPE>
 
       if (node_winner[n] == WIN_DEFENDER)
       {
-        cs_relation.insert(n);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay) seperator is streamed as a null-terminated C-string
         mCRL2log(log::log_level_t::verbose) << seperator << to_string(n);
         seperator[0] = ',';
