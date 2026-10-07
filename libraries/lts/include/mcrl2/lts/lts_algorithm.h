@@ -906,6 +906,10 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
 {
   switch (pre)
   {
+    case lts_preorder::lts_pre_coupled_sim:
+    {
+      return detail::coupled_simulation_compare(l1, l2, false);
+    }
     case lts_preorder::lts_pre_sim:
     {
       // Merge this LTS and l and store the result in this LTS.

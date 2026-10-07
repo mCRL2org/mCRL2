@@ -132,7 +132,7 @@ namespace mcrl2::lts::detail
   }
 
 template <class LTS_TYPE>
-  bool coupled_simulation_compare(LTS_TYPE& l1, LTS_TYPE& l2)
+  bool coupled_simulation_compare(LTS_TYPE& l1, LTS_TYPE& l2, const bool equivalence = true)
   {
     bool preserve_divergences = true;
     weak_bisimulation_reduce(l1,preserve_divergences);
@@ -542,7 +542,7 @@ template <class LTS_TYPE>
 
     bool similar  // root is in R
       = node_winner[roots[0]] == WIN_DEFENDER
-      && node_winner[roots[1]] == WIN_DEFENDER;
+      && (!equivalence || node_winner[roots[1]] == WIN_DEFENDER);
 
     return similar;
   }
