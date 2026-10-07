@@ -27,6 +27,7 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <sstream>
 #include <stack>
 #include <string>
 #include <vector>
@@ -40,6 +41,9 @@ namespace mcrl2::lts::detail
   const unsigned char NODE_ATK = 0;  // placeholder indicating node is an attacker node
   const unsigned char NODE_DEF = 1;  // placeholder indicating a node, which is alwas reachable as coupling.
   const unsigned char NODE_CPL = 2;  // placeholder indicating a node, which is alwas reachable as coupling.
+
+  const int WIN_DEFENDER = 0;
+  const int WIN_ATTACKER = 1;
 
   // coupled simulation game node
   struct cs_game_node
@@ -118,6 +122,26 @@ namespace mcrl2::lts::detail
     }
   }
 
+  inline std::string print_relation(
+      const std::set<cs_game_node>& attacker_nodes,
+      const std::map<cs_game_node, int>& node_winner)
+  {
+    std::ostringstream result;
+    result << "{";
+    const char* separator = "";
+    for (const cs_game_node& node : attacker_nodes)
+    {
+      const auto winner = node_winner.find(node);
+      if (winner != node_winner.end() && winner->second == WIN_DEFENDER)
+      {
+        result << separator << to_string(node);
+        separator = ", ";
+      }
+    }
+    result << "}";
+    return result.str();
+  }
+
   inline bool equals(
       const cs_game_move &m0,
       const cs_game_move &m1,
@@ -150,8 +174,6 @@ template <class LTS_TYPE>
     std::map<cs_game_node,std::set<cs_game_node>> predecessors;
     std::map<cs_game_node,int> successor_count;
     std::map<cs_game_node,int> node_winner;
-    const int WIN_DEFENDER = 0;
-    const int WIN_ATTACKER = 1;
 
     std::set<cs_game_move> moves;  // moves (node,node)
     std::string move_label; // label as string representation.
@@ -506,34 +528,9 @@ template <class LTS_TYPE>
       }
     }
 
-    mCRL2log(log::log_level_t::verbose)
-      << "Get coupled simulation from defender's winning area."
+    mCRL2log(log::log_level_t::debug)
+      << "Coupled simulation relation: " << print_relation(attacker_nodes, node_winner)
       << std::endl;
-
-    char seperator[3] = {'\0', ' ', '\0'}; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays) null-terminated buffer streamed as a C-string
-    mCRL2log(log::log_level_t::verbose) << "R = {";
-
-    /* Filter R, where its elemens are coupled similar. */
-    for (const auto &n : attacker_nodes)
-    {
-#ifndef NDEBUG
-      if (node_winner.find(n) == node_winner.end())
-      {
-        std::cerr
-          << "I am requested, but never listed."
-          << " Set to default. (" << to_string(n) << std::endl;
-      }
-#endif // NDEBUG
-
-      if (node_winner[n] == WIN_DEFENDER)
-      {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay) seperator is streamed as a null-terminated C-string
-        mCRL2log(log::log_level_t::verbose) << seperator << to_string(n);
-        seperator[0] = ',';
-      }
-    }
-
-    mCRL2log(log::log_level_t::verbose) << "}" << std::endl;
 
     /* Return true iff root nodes are in R / won by defender. */
     cs_game_node roots[] // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
@@ -541,8 +538,8 @@ template <class LTS_TYPE>
         , {NODE_ATK, 0, l2.initial_state(), l1.initial_state(), true}};
 
     bool similar  // root is in R
-      = node_winner[roots[0]] == WIN_DEFENDER
-      && (!equivalence || node_winner[roots[1]] == WIN_DEFENDER);
+      = node_winner.at(roots[0]) == WIN_DEFENDER
+      && (!equivalence || node_winner.at(roots[1]) == WIN_DEFENDER);
 
     return similar;
   }
