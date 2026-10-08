@@ -79,10 +79,20 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 MainWindow::~MainWindow()
 {
+  if (m_newSimulation && m_newSimulation != m_simulation)
+  {
+    m_newSimulation->deleteLater();
+  }
+
   if (m_simulation)
   {
     m_simulation->deleteLater();
   }
+
+  // Stop the aterm worker thread before the program exits.
+  m_atermThread->quit();
+  m_atermThread->wait();
+  delete m_atermThread;
 }
 
 static
