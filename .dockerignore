@@ -5,3 +5,4 @@ benchmarks/
 scripts/docker/
 !scripts/docker/ltsmin/ltsmin.patch
 build/
+.venv/
