@@ -1021,12 +1021,19 @@ class pbes_constelm_algorithm
       // print the parameters and equation that are removed
       if (mCRL2logEnabled(log::log_level_t::verbose))
       {
-        mCRL2log(log::log_level_t::verbose) << "\nremoved the following constant parameters:" << std::endl;
-        for (const std::pair<const propositional_variable, std::vector<data::variable>>& i: redundant_parameters())
+        if (redundant_parameters().empty())
         {
-          for (const data::variable& var: i.second)
+          mCRL2log(log::log_level_t::verbose) << "No constant parameters have been removed." << std::endl;
+        }
+        else
+        {
+          mCRL2log(log::log_level_t::verbose) << "Removed the following constant parameters:" << std::endl;
+          for (const std::pair<const propositional_variable, std::vector<data::variable>>& i: redundant_parameters())
           {
-            mCRL2log(log::log_level_t::verbose) << "  (" << mcrl2::core::pp(i.first.name()) << ", " << data::pp(var) << ")" << std::endl;
+            for (const data::variable& var: i.second)
+            {
+              mCRL2log(log::log_level_t::verbose) << "  (" << mcrl2::core::pp(i.first.name()) << ", " << data::pp(var) << ")" << std::endl;
+            }
           }
         }
       }

@@ -279,14 +279,21 @@ class pbes_parelm_algorithm
                                   const std::map<core::identifier_string, std::size_t>& propvar_offsets,
                                   const std::map<core::identifier_string, std::vector<std::size_t>>& removals) const
     {
-      mCRL2log(log::log_level_t::verbose) << "\nremoving the following parameters:" << std::endl;
-      for (auto& removal: removals)
+      if (removals.empty())
       {
-        core::identifier_string X1 = removal.first;
-        for (std::size_t j: removal.second)
+        mCRL2log(log::log_level_t::verbose) << "No redundant parameters have been removed." << std::endl;
+      }
+      else
+      {
+        mCRL2log(log::log_level_t::verbose) << "Removing the following redundant parameters:" << std::endl;
+        for (auto& removal: removals)
         {
-          data::variable v1 = predicate_variables[j + propvar_offsets.at(X1)];
-          mCRL2log(log::log_level_t::verbose) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
+          core::identifier_string X1 = removal.first;
+          for (std::size_t j: removal.second)
+          {
+            data::variable v1 = predicate_variables[j + propvar_offsets.at(X1)];
+            mCRL2log(log::log_level_t::verbose) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
+          }
         }
       }
     }
