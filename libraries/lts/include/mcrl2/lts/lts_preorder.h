@@ -39,8 +39,9 @@ enum class lts_preorder
   lts_pre_weak_failures_refinement, /**< Weak failures refinement based on anti chains */
   lts_pre_failures_divergence_refinement, /**< Failures divergence refinement based on anti chains, which is automatically weak */
   lts_pre_impossible_futures, /**< Impossible futures */
+  lts_pre_coupled_sim, /**< Coupled simulation preorder */
   lts_preorder_min = lts_preorder::lts_pre_none,
-  lts_preorder_max = lts_preorder::lts_pre_impossible_futures
+  lts_preorder_max = lts_preorder::lts_pre_coupled_sim
 };
 
 /** \brief Determines the preorder from a string.
@@ -48,6 +49,7 @@ enum class lts_preorder
  * \li "sim" for strong simulation preorder;
  * \li "trace" for strong trace preorder;
  * \li "weak-trace" for weak trace preorder.
+ * \li "coupled-sim" for coupled simulation preorder.
  *
  * \param[in] s The string specifying the preorder.
  * \return The preorder type specified by \a s.
@@ -98,6 +100,10 @@ lts_preorder parse_preorder(std::string const& s)
   else if (s == "impossible-futures")
   {
     return lts_preorder::lts_pre_impossible_futures;
+  }
+  else if (s == "coupled-sim")
+  {
+    return lts_preorder::lts_pre_coupled_sim;
   }
   else
   {
@@ -154,6 +160,8 @@ std::string print_preorder(const lts_preorder pre)
       return "failures-divergence";
     case lts_preorder::lts_pre_impossible_futures:
       return "impossible-futures";
+    case lts_preorder::lts_pre_coupled_sim:
+      return "coupled-sim";
     default:
       throw mcrl2::runtime_error("unknown preorder");
   }
@@ -197,6 +205,8 @@ std::string description(const lts_preorder pre)
       return "failures divergence refinement (automatically weak)";
     case lts_preorder::lts_pre_impossible_futures:
       return "impossible futures";
+    case lts_preorder::lts_pre_coupled_sim:
+      return "coupled simulation preorder";
     default:
       throw mcrl2::runtime_error("unknown preorder");
   }
