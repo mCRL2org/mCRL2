@@ -18,3 +18,8 @@ if(MCRL2_ENABLE_TESTS AND NOT MCRL2_ENABLE_DEVELOPER)
   add_subdirectory(developer/pbestransform)
   add_subdirectory(developer/ltsconvertsymbolic)
 endif()
+
+if(MCRL2_ENABLE_TESTS AND NOT MCRL2_ENABLE_DEPRECATED)
+  # The pbessolve tests use pbespgsolve as a reference solver
+  add_subdirectory(deprecated/pbespgsolve)
+endif()

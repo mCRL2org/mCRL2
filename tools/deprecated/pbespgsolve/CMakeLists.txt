@@ -1,3 +1,5 @@
+add_subdirectory(pg)
+
 mcrl2_add_tool(pbespgsolve
   SOURCES
     pbespgsolve.cpp

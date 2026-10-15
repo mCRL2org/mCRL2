@@ -1,3 +1,4 @@
 add_subdirectory(formulacheck)
 add_subdirectory(lpsrealzone)
 add_subdirectory(pbesabstract)
+add_subdirectory(pbespgsolve)
