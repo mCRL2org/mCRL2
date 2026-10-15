@@ -1513,6 +1513,39 @@ BOOST_AUTO_TEST_CASE(Check_normal_forms_in_function_update)   // In the jitty re
   }
 }
 
+BOOST_AUTO_TEST_CASE(nested_lambda_application_of_curried_function)  // The compiling rewriter crashed on terms of the shape
+                                                                      // (lambda x:X. lambda y:X. u)(t1)(t2), which arise when
+                                                                      // a curried function obtained by a function update is applied.
+{
+  std::string s(
+  "sort X = struct x1 | x2;\n"
+  "map hasEmpty: (X -> X -> Bool) -> Bool;\n"
+  "    upd: (X -> X -> Bool) # X # X # Bool -> (X -> X -> Bool);\n"
+  "var b: X -> X -> Bool;\n"
+  "    x, y: X;\n"
+  "    v: Bool;\n"
+  "eqn hasEmpty(b) = exists ex, ey: X. !b(ex)(ey);\n"
+  "    upd(b, x, y, v) = b[x -> b(x)[y -> v]];\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy nested lambda application: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("hasEmpty(upd(lambda x: X. lambda y: X. false, x1, x1, true))", specification));
+    data::data_expression f(parse_data_expression("true", specification));
+    data_rewrite_test(R, e, f);
+
+    e = parse_data_expression("hasEmpty(upd(upd(upd(upd(lambda x: X. lambda y: X. false, x1, x1, true), x1, x2, true), x2, x1, true), x2, x2, true))", specification);
+    f = parse_data_expression("false", specification);
+    data_rewrite_test(R, e, f);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(Problem_with_recursive_templates_in_jittyc)   // This rewrite system cannot stand the compiling rewriter
                                                                    // if it uses templates freely. The templates will be
                                                                    // used recursively, causing infinite template nesting, which
