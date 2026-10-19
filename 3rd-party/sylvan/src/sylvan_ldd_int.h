@@ -30,9 +30,11 @@
  * RmRR RRRR RRRR VVVV | VVVV DcDD DDDD DDDD (little endian - in memory)
  * VVVV RRRR RRRR RRRm | DDDD DDDD DDDc VVVV (big endian)
  */
-typedef struct __attribute__((packed)) mddnode {
+typedef struct mddnode {
     uint64_t a, b;
 } * mddnode_t; // 16 bytes
+
+static_assert(sizeof(struct mddnode) == 16, "mddnode should be a 16 byte struct");
 
 static inline mddnode_t
 LDD_GETNODE(MDD mdd)
@@ -40,61 +42,61 @@ LDD_GETNODE(MDD mdd)
     return ((mddnode_t)llmsset_index_to_ptr(nodes, mdd));
 }
 
-static inline uint32_t __attribute__((unused))
+static inline uint32_t SYLVAN_UNUSED
 mddnode_getvalue(mddnode_t n)
 {
     return *(uint32_t*)((uint8_t*)n+6);
 }
 
-static inline uint8_t __attribute__((unused))
+static inline uint8_t SYLVAN_UNUSED
 mddnode_getmark(mddnode_t n)
 {
     return n->a & 1;
 }
 
-static inline uint8_t __attribute__((unused))
+static inline uint8_t SYLVAN_UNUSED
 mddnode_getcopy(mddnode_t n)
 {
     return n->b & 0x10000 ? 1 : 0;
 }
 
-static inline uint64_t __attribute__((unused))
+static inline uint64_t SYLVAN_UNUSED
 mddnode_getright(mddnode_t n)
 {
     return (n->a & 0x0000ffffffffffff) >> 1;
 }
 
-static inline uint64_t __attribute__((unused))
+static inline uint64_t SYLVAN_UNUSED
 mddnode_getdown(mddnode_t n)
 {
     return n->b >> 17;
 }
 
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 mddnode_setvalue(mddnode_t n, uint32_t value)
 {
     *(uint32_t*)((uint8_t*)n+6) = value;
 }
 
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 mddnode_setmark(mddnode_t n, uint8_t mark)
 {
     n->a = (n->a & 0xfffffffffffffffe) | (mark ? 1 : 0);
 }
 
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 mddnode_setright(mddnode_t n, uint64_t right)
 {
     n->a = (n->a & 0xffff000000000001) | (right << 1);
 }
 
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 mddnode_setdown(mddnode_t n, uint64_t down)
 {
     n->b = (n->b & 0x000000000001ffff) | (down << 17);
 }
 
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 mddnode_make(mddnode_t n, uint32_t value, uint64_t right, uint64_t down)
 {
     n->a = right << 1;
@@ -102,7 +104,7 @@ mddnode_make(mddnode_t n, uint32_t value, uint64_t right, uint64_t down)
     *(uint32_t*)((uint8_t*)n+6) = value;
 }
 
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 mddnode_makecopy(mddnode_t n, uint64_t right, uint64_t down)
 {
     n->a = right << 1;
