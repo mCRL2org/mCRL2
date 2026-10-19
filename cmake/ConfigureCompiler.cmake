@@ -3,8 +3,8 @@ add_library(mcrl2_compiler_definitions INTERFACE)
 
 # Perform compiler-specific compiler configuration
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19.31)
-    message(FATAL_ERROR "MSVC version 19.31 (aka MSVC 2022 v17.1) is required.")
+  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 19.35)
+    message(FATAL_ERROR "MSVC version 19.35 (aka MSVC 2022 v17.5) is required.")
   endif()
   include(ConfigureMSVC)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

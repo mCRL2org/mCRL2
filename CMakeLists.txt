@@ -55,7 +55,7 @@ option(MCRL2_ENABLE_DOC_DOXYGEN     "Enable generation of code reference using D
 option(MCRL2_ENABLE_DOC_PDFLATEX    "Enable generation of reference pdfs using pdflatex, which requires tikz and amsmath packages." ON)
 
 option(MCRL2_ENABLE_BOOST_JSON_SUPPORT "Enable compilation of tools and libraries that require boost::json. This raises the minimal boost version requirement to 1.71.0." OFF)
-option(MCRL2_ENABLE_SYLVAN          "Enable the Sylvan library required by the following symbolic tools: lpsreach, pbessolvesymbolic and ltsconvertsymbolic" ${UNIX})
+option(MCRL2_ENABLE_SYLVAN          "Enable the Sylvan library required by the following symbolic tools: lpsreach, pbessolvesymbolic and ltsconvertsymbolic" ON)
 option(MCRL2_ENABLE_BENCHMARKS      "Enable benchmarks. Build the 'benchmarks' target to generate the necessary files and tools. Run the benchmarks using ctest." OFF)
 
 option(MCRL2_ENABLE_TESTS           "Enable generation of library and random test targets." OFF)
