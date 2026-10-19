@@ -51,9 +51,11 @@
  * ZDD node structure
  */
 
-typedef struct __attribute__((packed)) zddnode {
+typedef struct zddnode {
     uint64_t a, b;
 } * zddnode_t; // 16 bytes
+
+static_assert(sizeof(struct zddnode) == 16, "zddnode should be a 16 byte struct");
 
 /**
  * Some inlines to work with the ZDD type and the complement marks
@@ -113,7 +115,7 @@ ZDD_EQUALM(ZDD a, ZDD b)
 /**
  * Whether a node is a leaf node
  */
-static inline int __attribute__((unused))
+static inline int SYLVAN_UNUSED
 zddnode_isleaf(zddnode_t n)
 {
     return n->a & 0x4000000000000000 ? 1 : 0;
@@ -122,7 +124,7 @@ zddnode_isleaf(zddnode_t n)
 /**
  * For leaf nodes, get the type of the leaf
  */
-static inline uint16_t __attribute__((unused))
+static inline uint16_t SYLVAN_UNUSED
 zddnode_gettype(zddnode_t n)
 {
     return (uint16_t)(n->a);
@@ -131,7 +133,7 @@ zddnode_gettype(zddnode_t n)
 /**
  * For leaf nodes, get the value of the leaf
  */
-static inline uint64_t __attribute__((unused))
+static inline uint64_t SYLVAN_UNUSED
 zddnode_getvalue(zddnode_t n)
 {
     return n->b;
@@ -140,7 +142,7 @@ zddnode_getvalue(zddnode_t n)
 /**
  * For internal nodes, get the complement on the high edge
  */
-static inline int __attribute__((unused))
+static inline int SYLVAN_UNUSED
 zddnode_getcomp(zddnode_t n)
 {
     return n->a & 0x8000000000000800 ? 1 : 0;
@@ -149,7 +151,7 @@ zddnode_getcomp(zddnode_t n)
 /**
  * For internal nodes, get the low edge
  */
-static inline uint64_t __attribute__((unused))
+static inline uint64_t SYLVAN_UNUSED
 zddnode_getlow(zddnode_t n)
 {
     return n->b & 0x000000ffffffffff;
@@ -158,7 +160,7 @@ zddnode_getlow(zddnode_t n)
 /**
  * For internal nodes, get the high edge
  */
-static inline uint64_t __attribute__((unused))
+static inline uint64_t SYLVAN_UNUSED
 zddnode_gethigh(zddnode_t n)
 {
     return n->a & 0x800000ffffffffff;
@@ -167,7 +169,7 @@ zddnode_gethigh(zddnode_t n)
 /**
  * For internal nodes, get the DD variable
  */
-static inline uint32_t __attribute__((unused))
+static inline uint32_t SYLVAN_UNUSED
 zddnode_getvariable(zddnode_t n)
 {
     return (uint32_t)(n->b >> 40);
@@ -176,7 +178,7 @@ zddnode_getvariable(zddnode_t n)
 /**
  * Get whether the node is currently marked
  */
-static inline int __attribute__((unused))
+static inline int SYLVAN_UNUSED
 zddnode_getmark(zddnode_t n)
 {
     return n->a & 0x1000000000000000 ? 1 : 0;
@@ -185,7 +187,7 @@ zddnode_getmark(zddnode_t n)
 /**
  * Set or reset the mark on the node
  */
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 zddnode_setmark(zddnode_t n, int mark)
 {
     if (mark) n->a |= 0x1000000000000000;
@@ -195,7 +197,7 @@ zddnode_setmark(zddnode_t n, int mark)
 /**
  * Initialize a zddnode_t struct as a leaf node
  */
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 zddnode_makeleaf(zddnode_t n, uint16_t type, uint64_t value)
 {
     n->a = 0x4000000000000000 | (uint64_t)type;
@@ -205,7 +207,7 @@ zddnode_makeleaf(zddnode_t n, uint16_t type, uint64_t value)
 /**
  * Initialize a zddnode_t struct as an internal ZDD node
  */
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 zddnode_makenode(zddnode_t n, uint32_t var, uint64_t low, uint64_t high)
 {
     n->a = high;
@@ -215,7 +217,7 @@ zddnode_makenode(zddnode_t n, uint32_t var, uint64_t low, uint64_t high)
 /**
  * Initialize a zddnode_t struct as a "map" node
  */
-static inline void __attribute__((unused))
+static inline void SYLVAN_UNUSED
 zddnode_makemapnode(zddnode_t n, uint32_t var, uint64_t low, uint64_t high)
 {
     n->a = high | 0x2000000000000000;
@@ -225,7 +227,7 @@ zddnode_makemapnode(zddnode_t n, uint32_t var, uint64_t low, uint64_t high)
 /**
  * Whether a node is a "map" node
  */
-static inline int __attribute__((unused))
+static inline int SYLVAN_UNUSED
 zddnode_ismapnode(zddnode_t n)
 {
     return n->a & 0x2000000000000000 ? 1 : 0;
@@ -234,7 +236,7 @@ zddnode_ismapnode(zddnode_t n)
 /**
  * Return the low edge of a ZDD, taking into account the complement on the ZDD
  */
-static ZDD __attribute__((unused))
+static ZDD SYLVAN_UNUSED
 zddnode_low(ZDD zdd, zddnode_t node)
 {
     return ZDD_TRANSFERMARK(zdd, zddnode_getlow(node));
@@ -243,7 +245,7 @@ zddnode_low(ZDD zdd, zddnode_t node)
 /**
  * Return the high edge of a ZDD, taking into account the complement on the ZDD
  */
-static ZDD __attribute__((unused))
+static ZDD SYLVAN_UNUSED
 zddnode_high(ZDD zdd, zddnode_t node)
 {
     return zddnode_gethigh(node);

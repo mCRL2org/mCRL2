@@ -63,7 +63,7 @@ namespace sylvan::ldds
 namespace detail
 {
 
-typedef struct __attribute__((packed)) mddnode
+typedef struct mddnode
 {
   uint64_t a, b;
 } * mddnode_t; // 16 bytes

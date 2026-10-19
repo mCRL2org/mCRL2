@@ -20,11 +20,6 @@
 #ifndef SYLVAN_COMMON_H
 #define SYLVAN_COMMON_H
 
-// Sylvan version
-#define SYLVAN_VERSION_MAJOR 1
-#define SYLVAN_VERSION_MINOR 10
-#define SYLVAN_VERSION_PATCH 0
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

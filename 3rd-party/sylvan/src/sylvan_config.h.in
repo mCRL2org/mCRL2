@@ -1,3 +1,8 @@
+/* Sylvan version */
+#define SYLVAN_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define SYLVAN_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define SYLVAN_VERSION_PATCH @PROJECT_VERSION_PATCH@
+
 /* Operation cache: use bitmasks for module (size must be power of 2!) */
 #ifndef CACHE_MASK
 #define CACHE_MASK 1
@@ -20,14 +25,13 @@
 #endif
 
 /* Enable/disable counters and timers */
-#ifndef SYLVAN_STATS
-#define SYLVAN_STATS 0
-#endif
+#cmakedefine01 SYLVAN_STATS
 
 /* Enable/disable using mmap to allocate large amounts of memory */
-#ifndef SYLVAN_USE_MMAP
-#define SYLVAN_USE_MMAP 0
-#endif
+#cmakedefine01 SYLVAN_USE_MMAP
+
+/* Size of a cache line on this system */
+#cmakedefine SYLVAN_CACHE_LINE_SIZE @SYLVAN_CACHE_LINE_SIZE@
 
 /* Aggressive or conservative resizing strategy */
 #ifndef SYLVAN_AGGRESSIVE_RESIZE

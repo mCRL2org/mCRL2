@@ -80,43 +80,43 @@ typedef struct avl_node
 } avl_node_t;
 
 /* Retrieve the height of a tree */
-static inline int
+static inline unsigned int
 avl_get_height(avl_node_t *node)
 {
-    return node == NULL ? 0 : node->height;
+    return node == NULL ? 0u : node->height;
 }
 
 /* Helper for rotations to update the heights of trees */
 static inline void
 avl_update_height(avl_node_t *node)
 {
-    int h1 = avl_get_height(node->left);
-    int h2 = avl_get_height(node->right);
-    node->height = 1 + (h1 > h2 ? h1 : h2);
+    unsigned int h1 = avl_get_height(node->left);
+    unsigned int h2 = avl_get_height(node->right);
+    node->height = 1u + (h1 > h2 ? h1 : h2);
 }
 
 /* Helper for avl_balance_tree */
 static inline int
 avl_update_height_get_balance(avl_node_t *node)
 {
-    int h1 = avl_get_height(node->left);
-    int h2 = avl_get_height(node->right);
-    node->height = 1 + (h1 > h2 ? h1 : h2);
-    return h1 - h2;
+    unsigned int h1 = avl_get_height(node->left);
+    unsigned int h2 = avl_get_height(node->right);
+    node->height = 1u + (h1 > h2 ? h1 : h2);
+    return (int)h1 - (int)h2;
 }
 
 /* Helper for avl_check_consistent */
 static inline int
 avl_verify_height(avl_node_t *node)
 {
-    int h1 = avl_get_height(node->left);
-    int h2 = avl_get_height(node->right);
-    int expected_height = 1 + (h1 > h2 ? h1 : h2);
+    unsigned int h1 = avl_get_height(node->left);
+    unsigned int h2 = avl_get_height(node->right);
+    unsigned int expected_height = 1u + (h1 > h2 ? h1 : h2);
     return expected_height == avl_get_height(node);
 }
 
 /* Optional consistency check */
-static inline int __attribute__((unused))
+static inline int SYLVAN_UNUSED
 avl_check_consistent(avl_node_t *root)
 {
     if (root == NULL) return 1;
@@ -173,7 +173,7 @@ static inline int
 avl_get_balance(avl_node_t *node)
 {
     if (node == NULL) return 0;
-    return avl_get_height(node->left) - avl_get_height(node->right);
+    return (int)avl_get_height(node->left) - (int)avl_get_height(node->right);
 }
 
 /* Balance the tree */
@@ -258,7 +258,7 @@ avl_iter_next(avl_iter_t *iter)
 #define AVL(NAME, TYPE)                                                                     \
 static inline int                                                                           \
 NAME##_AVL_compare(TYPE *left, TYPE *right);                                                \
-static __attribute__((unused)) TYPE*                                                        \
+static SYLVAN_UNUSED TYPE*                                                                  \
 NAME##_put(avl_node_t **root, TYPE *data, int *inserted)                                    \
 {                                                                                           \
     if (inserted && *inserted) *inserted = 0; /* reset inserted once */                     \
@@ -280,7 +280,7 @@ NAME##_put(avl_node_t **root, TYPE *data, int *inserted)                        
     }                                                                                       \
     return result;                                                                          \
 }                                                                                           \
-static __attribute__((unused)) int                                                          \
+static SYLVAN_UNUSED int                                                                    \
 NAME##_insert(avl_node_t **root, TYPE *data)                                                \
 {                                                                                           \
     int inserted = 0;                                                                       \
@@ -300,7 +300,7 @@ NAME##_exchange_and_balance(avl_node_t *target, avl_node_t **node)              
     }                                                                                       \
     avl_balance_tree(node);                                                                 \
 }                                                                                           \
-static __attribute__((unused)) int                                                          \
+static SYLVAN_UNUSED int                                                                    \
 NAME##_delete(avl_node_t **node, TYPE *data)                                                \
 {                                                                                           \
     avl_node_t *it = *node;                                                                 \
@@ -309,8 +309,8 @@ NAME##_delete(avl_node_t **node, TYPE *data)                                    
     if (cmp < 0) res = NAME##_delete(&it->left, data);                                      \
     else if (cmp > 0) res = NAME##_delete(&it->right, data);                                \
     else {                                                                                  \
-        int h_left = avl_get_height(it->left);                                              \
-        int h_right = avl_get_height(it->right);                                            \
+        unsigned int h_left = avl_get_height(it->left);                                     \
+        unsigned int h_right = avl_get_height(it->right);                                   \
         if (h_left == 0) {                                                                  \
             if (h_right == 0) { /* Leaf */                                                  \
                 *node = NULL;                                                               \
@@ -333,7 +333,7 @@ NAME##_delete(avl_node_t **node, TYPE *data)                                    
     if (res) avl_balance_tree(node);                                                        \
     return res;                                                                             \
 }                                                                                           \
-static __attribute__((unused)) TYPE*                                                        \
+static SYLVAN_UNUSED TYPE*                                                                  \
 NAME##_search(avl_node_t *node, TYPE *data)                                                 \
 {                                                                                           \
     while (node != NULL) {                                                                  \
@@ -344,7 +344,7 @@ NAME##_search(avl_node_t *node, TYPE *data)                                     
     }                                                                                       \
     return NULL;                                                                            \
 }                                                                                           \
-static __attribute__((unused)) void                                                         \
+static SYLVAN_UNUSED void                                                                   \
 NAME##_free(avl_node_t **node)                                                              \
 {                                                                                           \
     avl_node_t *it = *node;                                                                 \
@@ -363,7 +363,7 @@ NAME##_toarray_rec(avl_node_t *node, TYPE **ptr)                                
     (*ptr)++;                                                                               \
     if (node->right != NULL) NAME##_toarray_rec(node->right, ptr);                          \
 }                                                                                           \
-static __attribute__((unused)) TYPE*                                                        \
+static SYLVAN_UNUSED TYPE*                                                                  \
 NAME##_toarray(avl_node_t *node)                                                            \
 {                                                                                           \
     size_t count = avl_count(node);                                                         \
@@ -372,19 +372,19 @@ NAME##_toarray(avl_node_t *node)                                                
     NAME##_toarray_rec(node, &ptr);                                                         \
     return arr;                                                                             \
 }                                                                                           \
-static __attribute__((unused)) avl_iter_t*                                                  \
+static SYLVAN_UNUSED avl_iter_t*                                                            \
 NAME##_iter(avl_node_t *node)                                                               \
 {                                                                                           \
     return avl_iter(node);                                                                  \
 }                                                                                           \
-static __attribute__((unused)) TYPE*                                                        \
+static SYLVAN_UNUSED TYPE*                                                                  \
 NAME##_iter_next(avl_iter_t *iter)                                                          \
 {                                                                                           \
     avl_node_t *result = avl_iter_next(iter);                                               \
     if (result == NULL) return NULL;                                                        \
     return (TYPE*)(result->data);                                                           \
 }                                                                                           \
-static __attribute__((unused)) void                                                         \
+static SYLVAN_UNUSED void                                                                   \
 NAME##_iter_free(avl_iter_t *iter)                                                          \
 {                                                                                           \
     free(iter);                                                                             \

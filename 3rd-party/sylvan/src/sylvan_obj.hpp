@@ -440,8 +440,8 @@ public:
      */
     static BddSet fromVector(const std::vector<Bdd> variables) {
         BddSet set;
-        for (int i=variables.size()-1; i>=0; i--) {
-            set.set *= variables[i];
+        for (size_t i=variables.size(); i>0; i--) {
+            set.set *= variables[i-1];
         }
         return set;
     }
@@ -452,8 +452,8 @@ public:
      */
     static BddSet fromVector(const std::vector<uint32_t> variables) {
         BddSet set;
-        for (int i=variables.size()-1; i>=0; i--) {
-            set.add(variables[i]);
+        for (size_t i=variables.size(); i>0; i--) {
+            set.add(variables[i-1]);
         }
         return set;
     }

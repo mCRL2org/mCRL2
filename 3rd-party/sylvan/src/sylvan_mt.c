@@ -49,7 +49,7 @@ static size_t cl_registry_size;
 static inline customleaf_t*
 sylvan_mt_from_node(uint64_t a, uint64_t b)
 {
-    uint32_t type = a & 0xffffffff;
+    uint32_t type = (uint32_t)a;
     assert(type < cl_registry_count);
     return cl_registry + type;
     (void)b;
@@ -88,15 +88,19 @@ _sylvan_equals_cb(uint64_t a, uint64_t b, uint64_t aa, uint64_t bb)
 }
 
 uint32_t
-sylvan_mt_create_type()
+sylvan_mt_create_type(void)
 {
+    if (cl_registry_count > UINT32_MAX) {
+        fprintf(stderr, "sylvan: Too many custom terminal types\n");
+        exit(1);
+    }
     if (cl_registry_count == cl_registry_size) {
         // resize registry array
         cl_registry_size += 8;
         cl_registry = (customleaf_t *)realloc(cl_registry, sizeof(customleaf_t) * (cl_registry_size));
         memset(cl_registry + cl_registry_count, 0, sizeof(customleaf_t) * (cl_registry_size-cl_registry_count));
     }
-    return cl_registry_count++;
+    return (uint32_t)cl_registry_count++;
 }
 
 void sylvan_mt_set_hash(uint32_t type, sylvan_mt_hash_cb hash_cb)
@@ -173,7 +177,7 @@ sylvan_init_mt(void)
 
     // Initialize data structures
     cl_registry_size = 8;
-    cl_registry = (customleaf_t *)calloc(sizeof(customleaf_t), cl_registry_size);
+    cl_registry = (customleaf_t *)calloc(cl_registry_size, sizeof(customleaf_t));
     cl_registry_count = 3; // 0, 1, 2 are taken
 }
 
