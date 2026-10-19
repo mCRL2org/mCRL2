@@ -375,6 +375,21 @@ void lace_set_stacksize(size_t stacksize);
  * If this returns 0, it uses the default.
  */
 size_t lace_get_stacksize(void);
+
+/**
+ * Set the per-worker scratch arena reservation size in bytes.
+ * Call before lace_start(). The default is 1 GiB on 64-bit systems
+ * and 16 MiB on 32-bit systems. Pass 0 to disable the scratch arena.
+ */
+void lace_set_scratch_size(size_t size);
+
+/**
+ * Set the per-worker scratch committed band in bytes (default 1 MiB).
+ * Call before lace_start(). The band is the hysteresis margin above
+ * the current top that absorbs push/pop oscillation without
+ * commit/decommit syscalls.
+ */
+void lace_set_scratch_band(size_t size);
  
 /**
  * Get the number of available PUs (hardware threads)
@@ -890,10 +905,20 @@ typedef struct _WorkerP {
     Task *split;                // same as dq+ts.ts.split
     Task *end;                  // dq+dq_size
     Worker *_public;            // pointer to public Worker struct
+
+    /* Scratch arena fast-path fields: hot, kept adjacent to deque fields. */
+    char *scratch_top;          // current top of scratch arena (next byte)
+    char *scratch_committed_end; // one past end of committed scratch (fast-path bound)
+
     lace_rng_state rng;         // my random seed (for lace_rng)
     uint32_t seed;              // my random seed (for lace_steal_random)
     uint16_t worker;            // what is my worker id?
     uint8_t allstolen;          // my allstolen
+
+    /* Scratch arena slow-path fields: only touched on grow/trim/teardown. */
+    char *scratch_base;          // base of scratch VM reservation (NULL if disabled)
+    char *scratch_reserve_end;   // one past end of VM reservation
+    int scratch_leak_reported;   // 1 if a leak warning has been emitted for this worker
 
 #if LACE_COUNT_EVENTS
     uint64_t ctr[CTR_MAX];      // counters
@@ -901,6 +926,65 @@ typedef struct _WorkerP {
     int level;
 #endif
 } WorkerP;
+
+/**
+ * Scratch arena public API.
+ *
+ * Use the save/alloc/restore pattern: lace_scratch_mark to record
+ * the current top, lace_scratch_alloc to obtain bytes, and
+ * lace_scratch_reset to release them before the enclosing task body
+ * returns. The arena follows a strict LIFO discipline.
+ *
+ * Inside a TASK body, the convenience macros LACE_SCRATCH_ALLOC etc.
+ * use the implicit __lace_worker pointer; the underlying functions
+ * take an explicit WorkerP* for use outside task bodies.
+ *
+ * If a task forgets to reset, Lace detects the leak when the worker
+ * next enters deep backoff, prints a one-line warning, and resets
+ * the arena automatically.
+ */
+
+/** Slow-path commit-and-allocate; called by lace_scratch_alloc on grow. */
+void *lace_scratch_grow(WorkerP *lw, size_t aligned_size);
+
+/** Allocate size bytes from the scratch arena. Aligned to 16 bytes. */
+static inline void *lace_scratch_alloc(WorkerP *lw, size_t size)
+{
+    size = (size + 15) & ~(size_t)15;
+    char *result = lw->scratch_top;
+    char *new_top = result + size;
+    if (LACE_UNLIKELY(new_top > lw->scratch_committed_end)) {
+        return lace_scratch_grow(lw, size);
+    }
+    lw->scratch_top = new_top;
+    return result;
+}
+
+/** Save current arena top. Pair with lace_scratch_reset before return. */
+static inline void *lace_scratch_mark(WorkerP *lw)
+{
+    return lw->scratch_top;
+}
+
+/** Restore arena top to a previously saved mark. */
+static inline void lace_scratch_reset(WorkerP *lw, void *mark)
+{
+    lw->scratch_top = (char *)mark;
+}
+
+/* Convenience macros for use inside TASK bodies. */
+#define LACE_SCRATCH_ALLOC(size)    lace_scratch_alloc(__lace_worker, (size))
+#define LACE_SCRATCH_MARK()         lace_scratch_mark(__lace_worker)
+#define LACE_SCRATCH_RESET(mark)    lace_scratch_reset(__lace_worker, (mark))
+
+/**
+ * Allocate an array of `count` elements of `type` from the scratch arena
+ * and return a properly-typed pointer (no manual cast needed).
+ * Equivalent to (type *)LACE_SCRATCH_ALLOC((count) * sizeof(type)).
+ * `count` is evaluated exactly once.
+ */
+#define LACE_SCRATCH_ARRAY(type, count) \
+    ((type *)lace_scratch_alloc(__lace_worker, (size_t)(count) * sizeof(type)))
 
 #define LACE_STOLEN      ((Worker*)0)
 #define LACE_BUSY        ((Worker*)1)
