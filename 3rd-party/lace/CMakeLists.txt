@@ -2,7 +2,7 @@
 cmake_policy(SET CMP0092 NEW) # do not automatically add /W3 for MSVC
 
 project(lace
-    VERSION 1.6.3
+    VERSION 1.7.0
     DESCRIPTION "Lace, a work-stealing framework for multi-core fork-join parallelism"
     HOMEPAGE_URL "https://github.com/trolando/lace"
     LANGUAGES C
@@ -25,7 +25,7 @@ list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static"                  OFF)
 option(LACE_ENABLE_PIC   "Build Lace with -fPIC (e.g. for linking into shared libs)" OFF)
-option(LACE_NATIVE_OPT   "Enable -march=native for compiler optimizations"           ON)
+option(LACE_NATIVE_OPT   "Enable -march=native for compiler optimizations"           OFF)
 option(LACE_BACKOFF      "Let idle threads sleep if there is no work"                ON)
 option(LACE_USE_HWLOC    "Let Lace pin threads/memory using libhwloc"                OFF)
 option(LACE_PIE_TIMES    "Let Lace record Pie times"                                 OFF)
