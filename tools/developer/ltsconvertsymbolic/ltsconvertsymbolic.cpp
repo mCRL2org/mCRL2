@@ -45,7 +45,6 @@ struct arguments
   std::string output_filename;
   symbolic_lts_equivalence equivalence;
   mcrl2::lts::lts_type outtype;
-  lps::symbolic_lts input;
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
@@ -227,8 +226,6 @@ public:
   private:
     lts_type outtype = lts_type::lts_none;
     symbolic_lts_equivalence m_equivalence = symbolic_lts_equivalence::none;
-
-    lps::symbolic_lts m_input;
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
@@ -238,9 +235,12 @@ TASK_IMPL_1(bool, ltsconvertsymbolic_task, arguments*, args)
   // execute()'s try/catch, so they must be caught locally to avoid an uncaught-exception abort.
   try
   {
+    // ATerm protection belongs to the thread that constructs the objects.
+    // Keep the LTS on the Lace worker that reads, uses and destroys it.
+    lps::symbolic_lts input;
     if (args->input_filename.empty() || args->input_filename == "-")
     {
-      std::cin >> args->input;
+      std::cin >> input;
     }
     else
     {
@@ -249,7 +249,7 @@ TASK_IMPL_1(bool, ltsconvertsymbolic_task, arguments*, args)
       {
         throw mcrl2::runtime_error("Could not open file " + args->input_filename + ".");
       }
-      ifs >> args->input;
+      ifs >> input;
     }
 
     if (args->equivalence == symbolic_lts_equivalence::none)
@@ -268,13 +268,13 @@ TASK_IMPL_1(bool, ltsconvertsymbolic_task, arguments*, args)
 
       std::unique_ptr<lts_builder> builder = create_lts_builder(lpsspec, options, args->outtype, args->output_filename);
 
-      convert_concrete_lts algorithm(args->input, std::move(builder));
+      convert_concrete_lts algorithm(input, std::move(builder));
       algorithm.run();
       algorithm.save(args->output_filename);
     }
     else
     {
-      bisim(args->input);
+      bisim(input);
     }
   }
   catch (std::exception& e)

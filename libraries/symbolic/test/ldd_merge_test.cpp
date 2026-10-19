@@ -24,10 +24,15 @@ BOOST_AUTO_TEST_CASE(dummy_test)
 
 using namespace mcrl2::symbolic;
 
-BOOST_AUTO_TEST_CASE(test_ldd_merge)
-{
-  initialise_sylvan();
+// Sylvan operations must be executed by a Lace worker, so the test body runs as a Lace task.
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+TASK_DECL_0(bool, test_ldd_merge_task);
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define test_ldd_merge_task(a) RUN(test_ldd_merge_task, a)
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+TASK_IMPL_0(bool, test_ldd_merge_task)
+{
   auto v0 = random_vector_set(3, 5, 10);
   auto v1 = random_vector_set(3, 5, 10);
 
@@ -60,6 +65,15 @@ BOOST_AUTO_TEST_CASE(test_ldd_merge)
   }
 
   // TODO: Check the other way around?
+
+  return true;
+}
+
+BOOST_AUTO_TEST_CASE(test_ldd_merge)
+{
+  initialise_sylvan();
+
+  test_ldd_merge_task();
 
   quit_sylvan();
 }
