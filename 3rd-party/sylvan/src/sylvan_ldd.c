@@ -19,6 +19,7 @@
 
 #include <inttypes.h>
 #include <math.h>
+#include <stddef.h>
 #include <string.h>
 
 #include <avl.h>
@@ -66,7 +67,7 @@ lddmc_deref(MDD a)
 }
 
 size_t
-lddmc_count_refs()
+lddmc_count_refs(void)
 {
     return refs_count(&lddmc_refs);
 }
@@ -138,7 +139,7 @@ typedef struct lddmc_refs_internal
     lddmc_refs_task_t sbegin, send, scur;
 } *lddmc_refs_internal_t;
 
-DECLARE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
+SYLVAN_TLS lddmc_refs_internal_t lddmc_refs_key;
 
 VOID_TASK_2(lddmc_refs_mark_p_par, const MDD**, begin, size_t, count)
 {
@@ -190,10 +191,9 @@ VOID_TASK_2(lddmc_refs_mark_s_par, lddmc_refs_task_t, begin, size_t, count)
 
 VOID_TASK_0(lddmc_refs_mark_task)
 {
-    LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
-    SPAWN(lddmc_refs_mark_p_par, lddmc_refs_key->pbegin, lddmc_refs_key->pcur-lddmc_refs_key->pbegin);
-    SPAWN(lddmc_refs_mark_r_par, lddmc_refs_key->rbegin, lddmc_refs_key->rcur-lddmc_refs_key->rbegin);
-    CALL(lddmc_refs_mark_s_par, lddmc_refs_key->sbegin, lddmc_refs_key->scur-lddmc_refs_key->sbegin);
+    SPAWN(lddmc_refs_mark_p_par, lddmc_refs_key->pbegin, (size_t)(lddmc_refs_key->pcur-lddmc_refs_key->pbegin));
+    SPAWN(lddmc_refs_mark_r_par, lddmc_refs_key->rbegin, (size_t)(lddmc_refs_key->rcur-lddmc_refs_key->rbegin));
+    CALL(lddmc_refs_mark_s_par, lddmc_refs_key->sbegin, (size_t)(lddmc_refs_key->scur-lddmc_refs_key->sbegin));
     SYNC(lddmc_refs_mark_r_par);
     SYNC(lddmc_refs_mark_p_par);
 }
@@ -214,19 +214,15 @@ lddmc_refs_init_key(void)
     s->rend = s->rbegin + 1024;
     s->scur = s->sbegin = (lddmc_refs_task_t)malloc(sizeof(struct lddmc_refs_task) * 1024);
     s->send = s->sbegin + 1024;
-    SET_THREAD_LOCAL(lddmc_refs_key, s);
+    lddmc_refs_key = s;
 }
 
 VOID_TASK_0(lddmc_refs_free)
 {
-    LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
-    if (lddmc_refs_key != NULL) {
-        free(lddmc_refs_key->pbegin);
-        free(lddmc_refs_key->rbegin);
-        free(lddmc_refs_key->sbegin);
-        free(lddmc_refs_key);
-        SET_THREAD_LOCAL(lddmc_refs_key, NULL);
-    }
+    free(lddmc_refs_key->pbegin);
+    free(lddmc_refs_key->rbegin);
+    free(lddmc_refs_key->sbegin);
+    free(lddmc_refs_key);
 }
 
 VOID_TASK_0(lddmc_refs_init_task)
@@ -236,86 +232,79 @@ VOID_TASK_0(lddmc_refs_init_task)
 
 VOID_TASK_0(lddmc_refs_init)
 {
-    INIT_THREAD_LOCAL(lddmc_refs_key);
     TOGETHER(lddmc_refs_init_task);
     sylvan_gc_add_mark(lddmc_refs_mark_CALL);
 }
 
 void
-lddmc_refs_ptrs_up(lddmc_refs_internal_t lddmc_refs_key)
+lddmc_refs_ptrs_up(lddmc_refs_internal_t refs)
 {
-    size_t size = lddmc_refs_key->pend - lddmc_refs_key->pbegin;
-    lddmc_refs_key->pbegin = (const MDD**)realloc(lddmc_refs_key->pbegin, sizeof(MDD*) * size * 2);
-    lddmc_refs_key->pcur = lddmc_refs_key->pbegin + size;
-    lddmc_refs_key->pend = lddmc_refs_key->pbegin + (size * 2);
+    size_t size = (size_t)(refs->pend - refs->pbegin);
+    refs->pbegin = (const MDD**)realloc(refs->pbegin, sizeof(MDD*) * size * 2);
+    refs->pcur = refs->pbegin + size;
+    refs->pend = refs->pbegin + (size * 2);
 }
 
-MDD __attribute__((noinline))
-lddmc_refs_refs_up(lddmc_refs_internal_t lddmc_refs_key, MDD res)
+MDD SYLVAN_NOINLINE
+lddmc_refs_refs_up(lddmc_refs_internal_t refs, MDD res)
 {
-    long size = lddmc_refs_key->rend - lddmc_refs_key->rbegin;
-    lddmc_refs_key->rbegin = (MDD*)realloc(lddmc_refs_key->rbegin, sizeof(MDD) * size * 2);
-    lddmc_refs_key->rcur = lddmc_refs_key->rbegin + size;
-    lddmc_refs_key->rend = lddmc_refs_key->rbegin + (size * 2);
+    size_t size = (size_t)(refs->rend - refs->rbegin);
+    refs->rbegin = (MDD*)realloc(refs->rbegin, sizeof(MDD) * size * 2);
+    refs->rcur = refs->rbegin + size;
+    refs->rend = refs->rbegin + (size * 2);
     return res;
 }
 
-void __attribute__((noinline))
-lddmc_refs_tasks_up(lddmc_refs_internal_t lddmc_refs_key)
+void SYLVAN_NOINLINE
+lddmc_refs_tasks_up(lddmc_refs_internal_t refs)
 {
-    long size = lddmc_refs_key->send - lddmc_refs_key->sbegin;
-    lddmc_refs_key->sbegin = (lddmc_refs_task_t)realloc(lddmc_refs_key->sbegin, sizeof(struct lddmc_refs_task) * size * 2);
-    lddmc_refs_key->scur = lddmc_refs_key->sbegin + size;
-    lddmc_refs_key->send = lddmc_refs_key->sbegin + (size * 2);
+    size_t size = (size_t)(refs->send - refs->sbegin);
+    refs->sbegin = (lddmc_refs_task_t)realloc(refs->sbegin, sizeof(struct lddmc_refs_task) * size * 2);
+    refs->scur = refs->sbegin + size;
+    refs->send = refs->sbegin + (size * 2);
 }
 
-void __attribute__((unused))
+void
 lddmc_refs_pushptr(const MDD *ptr)
 {
-    LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
     // If you get a segfault here (null dereference) then you're running this from outside Lace threads
     *lddmc_refs_key->pcur++ = ptr;
     if (lddmc_refs_key->pcur == lddmc_refs_key->pend) lddmc_refs_ptrs_up(lddmc_refs_key);
 }
 
-void __attribute__((unused))
+void
 lddmc_refs_popptr(size_t amount)
 {
-    LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
     lddmc_refs_key->pcur -= amount;
 }
 
-MDD __attribute__((unused))
+MDD
 lddmc_refs_push(MDD lddmc)
 {
-    LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
     // If you get a segfault here (null dereference) then you're running this from outside Lace threads
     *(lddmc_refs_key->rcur++) = lddmc;
     if (lddmc_refs_key->rcur == lddmc_refs_key->rend) return lddmc_refs_refs_up(lddmc_refs_key, lddmc);
     else return lddmc;
 }
 
-void __attribute__((unused))
+void
 lddmc_refs_pop(long amount)
 {
-    LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
     lddmc_refs_key->rcur -= amount;
 }
 
-void __attribute__((unused))
+void
 lddmc_refs_spawn(Task *t)
 {
-    LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
     lddmc_refs_key->scur->t = t;
     lddmc_refs_key->scur->f = t->f;
     lddmc_refs_key->scur += 1;
     if (lddmc_refs_key->scur == lddmc_refs_key->send) lddmc_refs_tasks_up(lddmc_refs_key);
 }
 
-MDD __attribute__((unused))
+MDD 
 lddmc_refs_sync(MDD result)
 {
-    LOCALIZE_THREAD_LOCAL(lddmc_refs_key, lddmc_refs_internal_t);
     lddmc_refs_key->scur -= 1;
     return result;
 }
@@ -2049,10 +2038,12 @@ TASK_IMPL_5(MDD, lddmc_collect, MDD, mdd, lddmc_collect_cb, cb, void*, context, 
 
     lddmc_refs_spawn(SPAWN(lddmc_collect, mddnode_getright(n), cb, context, values, count));
 
-    uint32_t newvalues[count+1];
+    void *scratch = LACE_SCRATCH_MARK();
+    uint32_t *newvalues = LACE_SCRATCH_ARRAY(uint32_t, count+1);
     if (count > 0) memcpy(newvalues, values, sizeof(uint32_t)*count);
     newvalues[count] = mddnode_getvalue(n);
     MDD down = CALL(lddmc_collect, mddnode_getdown(n), cb, context, newvalues, count+1);
+    LACE_SCRATCH_RESET(scratch);
 
     if (down == lddmc_false) {
         MDD result = lddmc_refs_sync(SYNC(lddmc_collect));
@@ -2098,8 +2089,10 @@ VOID_TASK_IMPL_3(lddmc_sat_all_nopar, MDD, mdd, lddmc_enum_cb, cb, void*, contex
         count++;
     }
 
-    uint32_t values[count];
+    void *scratch = LACE_SCRATCH_MARK();
+    uint32_t *values = count == 0 ? NULL : LACE_SCRATCH_ARRAY(uint32_t, count);
     CALL(_lddmc_sat_all_nopar, mdd, cb, context, values, 0);
+    LACE_SCRATCH_RESET(scratch);
 }
 
 VOID_TASK_IMPL_5(lddmc_sat_all_par, MDD, mdd, lddmc_enum_cb, cb, void*, context, uint32_t*, values, size_t, count)
@@ -2114,10 +2107,12 @@ VOID_TASK_IMPL_5(lddmc_sat_all_par, MDD, mdd, lddmc_enum_cb, cb, void*, context,
 
     SPAWN(lddmc_sat_all_par, mddnode_getright(n), cb, context, values, count);
 
-    uint32_t newvalues[count+1];
+    void *scratch = LACE_SCRATCH_MARK();
+    uint32_t *newvalues = LACE_SCRATCH_ARRAY(uint32_t, count+1);
     if (count > 0) memcpy(newvalues, values, sizeof(uint32_t)*count);
     newvalues[count] = mddnode_getvalue(n);
     CALL(lddmc_sat_all_par, mddnode_getdown(n), cb, context, newvalues, count+1);
+    LACE_SCRATCH_RESET(scratch);
 
     SYNC(lddmc_sat_all_par);
 }
@@ -2128,7 +2123,7 @@ struct lddmc_match_sat_info
     MDD match;
     MDD proj;
     size_t count;
-    uint32_t values[0];
+    uint32_t *values;
 };
 
 // proj: -1 (rest 0), 0 (no match), 1 (match)
@@ -2176,24 +2171,29 @@ VOID_TASK_3(lddmc_match_sat, struct lddmc_match_sat_info *, info, lddmc_enum_cb,
         }
     }
 
-    struct lddmc_match_sat_info *ri = (struct lddmc_match_sat_info*)alloca(sizeof(struct lddmc_match_sat_info)+sizeof(uint32_t[info->count]));
-    struct lddmc_match_sat_info *di = (struct lddmc_match_sat_info*)alloca(sizeof(struct lddmc_match_sat_info)+sizeof(uint32_t[info->count+1]));
+    void *scratch = LACE_SCRATCH_MARK();
+    struct lddmc_match_sat_info ri, di;
+    uint32_t *ri_values = info->count == 0 ? NULL : LACE_SCRATCH_ARRAY(uint32_t, info->count);
+    uint32_t *di_values = LACE_SCRATCH_ARRAY(uint32_t, info->count+1);
 
-    ri->mdd = mddnode_getright(na);
-    di->mdd = mddnode_getdown(na);
-    ri->match = b;
-    di->match = p_val == 1 ? mddnode_getdown(nb) : b;
-    ri->proj = proj;
-    di->proj = mddnode_getdown(p_node);
-    ri->count = info->count;
-    di->count = info->count+1;
-    if (ri->count > 0) memcpy(ri->values, info->values, sizeof(uint32_t[info->count]));
-    if (di->count > 0) memcpy(di->values, info->values, sizeof(uint32_t[info->count]));
-    di->values[info->count] = na_value;
+    ri.mdd = mddnode_getright(na);
+    di.mdd = mddnode_getdown(na);
+    ri.match = b;
+    di.match = p_val == 1 ? mddnode_getdown(nb) : b;
+    ri.proj = proj;
+    di.proj = mddnode_getdown(p_node);
+    ri.count = info->count;
+    di.count = info->count+1;
+    ri.values = ri_values;
+    di.values = di_values;
+    if (ri.count > 0) memcpy(ri.values, info->values, sizeof(uint32_t)*info->count);
+    if (di.count > 0) memcpy(di.values, info->values, sizeof(uint32_t)*info->count);
+    di.values[info->count] = na_value;
 
-    SPAWN(lddmc_match_sat, ri, cb, context);
-    CALL(lddmc_match_sat, di, cb, context);
+    SPAWN(lddmc_match_sat, &ri, cb, context);
+    CALL(lddmc_match_sat, &di, cb, context);
     SYNC(lddmc_match_sat);
+    LACE_SCRATCH_RESET(scratch);
 }
 
 VOID_TASK_IMPL_5(lddmc_match_sat_par, MDD, mdd, MDD, match, MDD, proj, lddmc_enum_cb, cb, void*, context)
@@ -2203,6 +2203,7 @@ VOID_TASK_IMPL_5(lddmc_match_sat_par, MDD, mdd, MDD, match, MDD, proj, lddmc_enu
     i.match = match;
     i.proj = proj;
     i.count = 0;
+    i.values = NULL;
     CALL(lddmc_match_sat, &i, cb, context);
 }
 
@@ -2246,13 +2247,15 @@ VOID_TASK_IMPL_4(lddmc_visit_seq, MDD, mdd, lddmc_visit_callbacks_t*, cbs, size_
 {
     if (WRAP(cbs->lddmc_visit_pre, mdd, context) == 0) return;
 
-    void* context_down = alloca(ctx_size);
-    void* context_right = alloca(ctx_size);
+    void *scratch = LACE_SCRATCH_MARK();
+    void *context_down = LACE_SCRATCH_ALLOC(ctx_size);
+    void *context_right = LACE_SCRATCH_ALLOC(ctx_size);
     WRAP(cbs->lddmc_visit_init_context, context_down, context, 1);
     WRAP(cbs->lddmc_visit_init_context, context_right, context, 0);
 
     CALL(lddmc_visit_seq, mddnode_getdown(LDD_GETNODE(mdd)), cbs, ctx_size, context_down);
     CALL(lddmc_visit_seq, mddnode_getright(LDD_GETNODE(mdd)), cbs, ctx_size, context_right);
+    LACE_SCRATCH_RESET(scratch);
 
     WRAP(cbs->lddmc_visit_post, mdd, context);
 }
@@ -2261,14 +2264,16 @@ VOID_TASK_IMPL_4(lddmc_visit_par, MDD, mdd, lddmc_visit_callbacks_t*, cbs, size_
 {
     if (WRAP(cbs->lddmc_visit_pre, mdd, context) == 0) return;
 
-    void* context_down = alloca(ctx_size);
-    void* context_right = alloca(ctx_size);
+    void *scratch = LACE_SCRATCH_MARK();
+    void *context_down = LACE_SCRATCH_ALLOC(ctx_size);
+    void *context_right = LACE_SCRATCH_ALLOC(ctx_size);
     WRAP(cbs->lddmc_visit_init_context, context_down, context, 1);
     WRAP(cbs->lddmc_visit_init_context, context_right, context, 0);
 
     SPAWN(lddmc_visit_par, mddnode_getdown(LDD_GETNODE(mdd)), cbs, ctx_size, context_down);
     CALL(lddmc_visit_par, mddnode_getright(LDD_GETNODE(mdd)), cbs, ctx_size, context_right);
     SYNC(lddmc_visit_par);
+    LACE_SCRATCH_RESET(scratch);
 
     WRAP(cbs->lddmc_visit_post, mdd, context);
 }
@@ -2353,7 +2358,7 @@ lddmc_fprintdot_rec(FILE* out, MDD mdd)
                 fprintf(out, "%" PRIu64 ":%u [style=solid];\n", down, mddnode_getvalue(LDD_GETNODE(down)));
             }
         }
-        MDD right = mddnode_getright(n);
+        right = mddnode_getright(n);
         if (right == lddmc_false) break;
         n = LDD_GETNODE(right);
     }
@@ -2499,7 +2504,7 @@ lddmc_serialize_add(MDD mdd)
 }
 
 void
-lddmc_serialize_reset()
+lddmc_serialize_reset(void)
 {
     lddmc_ser_free(&lddmc_ser_set);
     lddmc_ser_free(&lddmc_ser_reversed_set);

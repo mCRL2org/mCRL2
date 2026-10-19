@@ -124,7 +124,7 @@ llmsset_set_size(llmsset_t dbs, size_t size)
         dbs->mask = dbs->table_size - 1;
 #endif
         /* Set threshold: number of cache lines to probe before giving up on node insertion */
-        dbs->threshold = 192 - 2 * __builtin_clzll(dbs->table_size);
+        dbs->threshold = (int16_t)(192 - 2 * clz_uint64((uint64_t)dbs->table_size));
     }
 }
 
