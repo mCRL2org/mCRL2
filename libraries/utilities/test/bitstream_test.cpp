@@ -220,6 +220,113 @@ std::vector<operation> random_operations(std::size_t count, std::uint64_t seed, 
   return result;
 }
 
+/// \brief A stream buffer that accepts at most a given number of bytes, after which writing fails. This mimics a full
+///        disk. The limit can be lifted, so that an obitstream can still be destroyed after a failure.
+class limited_streambuf : public std::streambuf
+{
+public:
+  explicit limited_streambuf(std::size_t limit)
+    : m_limit(limit)
+  {}
+
+  void lift_limit()
+  {
+    m_limit = std::numeric_limits<std::size_t>::max();
+  }
+
+  const std::string& data() const
+  {
+    return m_data;
+  }
+
+protected:
+  int_type overflow(int_type c) override
+  {
+    if (traits_type::eq_int_type(c, traits_type::eof()))
+    {
+      return traits_type::not_eof(c);
+    }
+    if (m_data.size() >= m_limit)
+    {
+      return traits_type::eof();
+    }
+    m_data.push_back(traits_type::to_char_type(c));
+    return c;
+  }
+
+private:
+  std::string m_data;
+  std::size_t m_limit;
+};
+
+/// \brief Appends the width least significant bits of value to bits, most significant bit first.
+void append_bits(std::vector<bool>& bits, std::size_t value, unsigned int width)
+{
+  for (unsigned int i = width; i > 0; --i)
+  {
+    bits.push_back(((value >> (i - 1)) & 1) != 0);
+  }
+}
+
+/// \brief Appends a value in the variable-width integer encoding: 7 bits per byte, least significant group first, and
+///        the most significant bit of a byte set if another byte follows.
+void append_integer(std::vector<bool>& bits, std::size_t value)
+{
+  constexpr std::size_t group_mask = 0x7f;
+  constexpr std::size_t continuation_flag = 0x80;
+  constexpr unsigned int group_bits = 7;
+  while (value > group_mask)
+  {
+    append_bits(bits, (value & group_mask) | continuation_flag, std::numeric_limits<std::uint8_t>::digits);
+    value >>= group_bits;
+  }
+  append_bits(bits, value, std::numeric_limits<std::uint8_t>::digits);
+}
+
+/// \brief An independent, bit by bit implementation of what obitstream writes for the given operations.
+std::string reference_encoding(const std::vector<operation>& operations)
+{
+  constexpr unsigned int bits_per_byte = std::numeric_limits<std::uint8_t>::digits;
+  constexpr unsigned int bits_per_word = std::numeric_limits<std::uint64_t>::digits;
+
+  std::vector<bool> bits;
+  for (const operation& op: operations)
+  {
+    if (const bits_operation* bits_op = std::get_if<bits_operation>(&op))
+    {
+      append_bits(bits, bits_op->value, bits_op->width);
+    }
+    else if (const std::size_t* integer = std::get_if<std::size_t>(&op))
+    {
+      append_integer(bits, *integer);
+    }
+    else
+    {
+      const std::string& string = std::get<std::string>(op);
+      append_integer(bits, string.size());
+      for (char c: string)
+      {
+        append_bits(bits, static_cast<unsigned char>(c), bits_per_byte);
+      }
+    }
+  }
+
+  // The final flush pads with 1 to 64 zero bits up to a whole number of 64-bit words.
+  bits.resize(bits.size() + bits_per_word - bits.size() % bits_per_word, false);
+
+  std::string result;
+  for (std::size_t i = 0; i < bits.size(); i += bits_per_byte)
+  {
+    unsigned int byte = 0;
+    for (std::size_t j = 0; j < bits_per_byte; ++j)
+    {
+      byte = (byte << 1) | (bits[i + j] ? 1U : 0U);
+    }
+    result.push_back(static_cast<char>(byte));
+  }
+  return result;
+}
+
 std::string hex(const std::string& bytes)
 {
   std::ostringstream out;
@@ -415,6 +522,62 @@ BOOST_AUTO_TEST_CASE(chunked_input_test)
     ibitstream input(stream);
     BOOST_CHECK_EQUAL(check_operations(input, operations), 0U);
   }
+}
+
+// The bytes written agree with an independent bit by bit encoder, also for output that is much larger than the block in
+// which obitstream collects bytes before writing them to the stream.
+BOOST_AUTO_TEST_CASE(reference_encoding_test)
+{
+  constexpr std::size_t output_block_size = 64 * 1024;
+  constexpr std::size_t minimal_output_blocks = 4;
+  constexpr std::size_t number_of_operations = 20000;
+  constexpr std::size_t max_string_length = 300;
+  for (std::uint64_t seed: {21, 22, 23})
+  {
+    const std::vector<operation> operations = random_operations(number_of_operations, seed, max_string_length);
+    const std::string actual = write_to_string(operations);
+    BOOST_CHECK_GT(actual.size(), minimal_output_blocks * output_block_size);
+
+    const std::string expected = reference_encoding(operations);
+    BOOST_CHECK_EQUAL(actual.size(), expected.size());
+    BOOST_CHECK(actual == expected);
+  }
+
+  // Writes of every width at every offset.
+  constexpr unsigned int bits_per_word = std::numeric_limits<std::uint64_t>::digits;
+  constexpr std::size_t bit_pattern = 0x0123456789abcdefULL;
+  std::vector<operation> operations;
+  for (unsigned int offset = 0; offset < bits_per_word; ++offset)
+  {
+    for (unsigned int width = 0; width <= bits_per_word; ++width)
+    {
+      operations.emplace_back(bits_operation{std::numeric_limits<std::size_t>::max(), offset});
+      operations.emplace_back(bits_operation{bit_pattern * (width + 1), width});
+    }
+  }
+  BOOST_CHECK(write_to_string(operations) == reference_encoding(operations));
+}
+
+// Failing to write to the underlying stream is reported with an exception.
+BOOST_AUTO_TEST_CASE(write_failure_test)
+{
+  constexpr std::size_t accepted_bytes = 1000;
+  constexpr std::size_t number_of_operations = 20000;
+  constexpr std::size_t max_string_length = 300;
+  const std::vector<operation> operations = random_operations(number_of_operations, 31, max_string_length);
+
+  limited_streambuf buffer(accepted_bytes);
+  std::ostream stream(&buffer);
+  {
+    obitstream output(stream);
+    BOOST_CHECK_THROW(write_operations(output, operations), mcrl2::runtime_error);
+    BOOST_CHECK(stream.bad());
+
+    // Lift the limit and clear the error, so that the final flush in the destructor succeeds.
+    buffer.lift_limit();
+    stream.clear();
+  }
+  BOOST_CHECK_GE(buffer.data().size(), accepted_bytes);
 }
 
 // Two bitstreams that share the same underlying std::istream (as binary_aterm_istream and binary_ldd_istream share
