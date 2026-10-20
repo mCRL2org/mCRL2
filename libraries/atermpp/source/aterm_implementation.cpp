@@ -90,6 +90,11 @@ std::size_t aterm_istream::get_integer()
 
 aterm_ostream::~aterm_ostream() = default;
 
+void aterm_ostream::put_integer(std::size_t value)
+{
+  put(aterm_int(value));
+}
+
 /// Definition of the extern global term pool.
 alignas(aterm_pool)
 std::array<std::byte, sizeof(aterm_pool)> atermpp::detail::g_aterm_pool_storage = {};     

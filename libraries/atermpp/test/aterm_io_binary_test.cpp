@@ -450,6 +450,68 @@ BOOST_AUTO_TEST_CASE(text_get_integer_test)
   BOOST_CHECK_EQUAL(input.get_integer(), large);
 }
 
+/// \brief Writes integers and terms alternately to output, using put_integer for the integers if use_put_integer holds
+///        and put of an aterm_int otherwise. A transformer is set that renames a to b.
+void write_integers_and_terms(aterm_ostream& output, const std::vector<std::size_t>& values, bool use_put_integer)
+{
+  output << rename_a_to_b;
+  for (std::size_t i = 0; i < values.size(); ++i)
+  {
+    if (use_put_integer)
+    {
+      output.put_integer(values[i]);
+    }
+    else
+    {
+      output << aterm_int(values[i]);
+    }
+    // A term with the integer as a subterm, which the transformer renames.
+    output << aterm(function_symbol("a", 1), aterm_int(values[i]));
+  }
+}
+
+// put_integer writes exactly the same bytes as writing an aterm_int, in the binary and in the text format.
+BOOST_AUTO_TEST_CASE(put_integer_test)
+{
+  const std::vector<std::size_t> values
+    = {0, 1, 127, 128, std::size_t(1) << 32, std::size_t(1) << 63, std::numeric_limits<std::size_t>::max()};
+
+  std::stringstream with_terms;
+  std::stringstream with_put_integer;
+  {
+    binary_aterm_ostream output(with_terms);
+    write_integers_and_terms(output, values, false);
+  }
+  {
+    binary_aterm_ostream output(with_put_integer);
+    write_integers_and_terms(output, values, true);
+  }
+  BOOST_CHECK(with_put_integer.str() == with_terms.str());
+
+  binary_aterm_istream input(with_put_integer);
+  for (std::size_t value: values)
+  {
+    BOOST_CHECK_EQUAL(input.get_integer(), value);
+    aterm t;
+    input.get(t);
+    BOOST_CHECK_EQUAL(t, aterm(function_symbol("b", 1), aterm_int(value)));
+  }
+
+  // The text format reads integers with atol, so values above the largest long are not written here.
+  const std::vector<std::size_t> text_values = {0, 1, 127, 128, std::size_t(1) << 32};
+  std::stringstream text_with_terms;
+  std::stringstream text_with_put_integer;
+  {
+    text_aterm_ostream output(text_with_terms, true);
+    write_integers_and_terms(output, text_values, false);
+  }
+  {
+    text_aterm_ostream output(text_with_put_integer, true);
+    write_integers_and_terms(output, text_values, true);
+  }
+  BOOST_CHECK_EQUAL(text_with_put_integer.str(), text_with_terms.str());
+}
+
 // More than 2^k function symbols for several k, so that the width of function symbol indices grows repeatedly. Also
 // symbols with the same name and different arities, and names with unusual characters.
 BOOST_AUTO_TEST_CASE(many_function_symbols_test)

@@ -44,6 +44,9 @@ public:
   ///        written itself is not shared whenever it occurs as the argument of another term.
   void put(const aterm &term) override;
 
+  /// \brief Writes an integer as an aterm_int, without creating the aterm_int.
+  void put_integer(std::size_t value) override;
+
 private:
   /// \brief Write a function symbol to the output stream.
   std::size_t write_function_symbol(const function_symbol& symbol);

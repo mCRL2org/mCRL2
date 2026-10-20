@@ -171,6 +171,13 @@ void binary_aterm_ostream::put(const aterm& term)
   while (!m_todo.empty());
 }
 
+void binary_aterm_ostream::put_integer(std::size_t value)
+{
+  // The same packet as put writes for an aterm_int that is output.
+  m_stream->write_bits(static_cast<std::size_t>(packet_type::aterm_int_output), packet_bits);
+  m_stream->write_integer(value);
+}
+
 unsigned int binary_aterm_ostream::term_index_width()
 {
   assert(m_term_index_width == index_width(m_terms.size()));
