@@ -7,7 +7,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-"""Generate benchmark inputs for ltsloadbench.
+"""Generate benchmark inputs for ltsiobench.
 
 Every shape is a torus of N x N states with three outgoing transitions per state, so it has N^2 states and 3 N^2
 transitions. The shapes differ in what the file contains besides the transitions:

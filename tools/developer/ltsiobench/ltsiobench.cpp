@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file ltsloadbench.cpp
-/// \brief Measures the separate layers involved in loading an LTS from disk, and saving it.
+/// \file ltsiobench.cpp
+/// \brief Measures the separate layers involved in loading an LTS from disk, and the time to save it.
 
 #include <chrono>
 #include <cstddef>
@@ -113,7 +113,7 @@ std::chrono::steady_clock::time_point run_save(const std::string& filename, cons
 
 } // namespace
 
-class ltsloadbench_tool : public utilities::tools::input_tool
+class ltsiobench_tool : public utilities::tools::input_tool
 {
 protected:
   using super = utilities::tools::input_tool;
@@ -158,10 +158,10 @@ protected:
   }
 
 public:
-  ltsloadbench_tool()
-    : super("ltsloadbench",
+  ltsiobench_tool()
+    : super("ltsiobench",
         "Jeroen Keiren",
-        "benchmark the loading of labelled transition systems",
+        "benchmark the loading and saving of labelled transition systems",
         "Loads INFILE in the way selected by --mode, and prints the elapsed time, the peak resident set size, and "
         "statistics about what was read. In the modes 'save' and 'psave', only the time to save the LTS is "
         "reported.")
@@ -171,7 +171,7 @@ public:
   {
     if (input_filename().empty())
     {
-      throw mcrl2::runtime_error("ltsloadbench requires an input file.");
+      throw mcrl2::runtime_error("ltsiobench requires an input file.");
     }
 
     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
@@ -214,5 +214,5 @@ public:
 
 int main(int argc, char* argv[])
 {
-  return ltsloadbench_tool().execute(argc, argv);
+  return ltsiobench_tool().execute(argc, argv);
 }
