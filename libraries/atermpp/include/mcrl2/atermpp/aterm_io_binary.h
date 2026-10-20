@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote
+// Author(s): Jan Friso Groote, Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -87,6 +87,14 @@ private:
 
   atermpp::deque<aterm> m_terms; ///< An index of read terms.
   std::deque<function_symbol> m_function_symbols; ///< An index of read function symbols.
+
+  /// \brief The arguments of the term that is being read. They are protected by m_terms, so they need not be
+  ///        protected here. Reusing this buffer avoids an allocation per term.
+  std::vector<unprotected_aterm_core> m_arguments;
+
+  /// \brief The term that is being read. Constructing terms in this protected member avoids registering a temporary
+  ///        term per term that is read.
+  aterm m_term;
 };
 
 } // namespace atermpp
