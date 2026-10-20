@@ -29,6 +29,16 @@ constexpr std::size_t integer_encoding_size()
 /// \details Internally uses bitpacking and buffering for compact and efficient IO.
 class obitstream
 {
+  /// \brief The type of the bit buffer.
+  using word_t = std::uint64_t;
+
+  static constexpr unsigned int bits_per_byte = std::numeric_limits<std::uint8_t>::digits;
+  static constexpr unsigned int bytes_per_word = sizeof(word_t);
+  static constexpr unsigned int bits_per_word = std::numeric_limits<word_t>::digits;
+
+  /// \brief The number of bytes that is written to the stream at once.
+  static constexpr std::size_t output_buffer_size = 64 * 1024;
+
 public:
   /// \brief Provides the stream on which the write function operate.
   obitstream(std::ostream& stream);
@@ -37,7 +47,18 @@ public:
   /// \brief Write the num_of_bits least significant bits in descending order from value.
   /// @param value Variable that contains the bits.
   /// @param num_of_bits Number of bits to write to the output stream.
-  void write_bits(std::size_t value, unsigned int num_of_bits);
+  void write_bits(std::size_t value, unsigned int num_of_bits)
+  {
+    // The common case: the bits fit in the bit buffer without filling it.
+    if (0 < num_of_bits && num_of_bits < bits_per_word - m_bits_in_buffer)
+    {
+      const word_t mask = (static_cast<word_t>(1) << num_of_bits) - 1;
+      m_bits_in_buffer += num_of_bits;
+      m_bit_buffer |= (static_cast<word_t>(value) & mask) << (bits_per_word - m_bits_in_buffer);
+      return;
+    }
+    write_bits_slow(value, num_of_bits);
+  }
 
   /// \brief Write the given string to the output stream.
   /// \details Encoded in bits using <length, string>
@@ -55,12 +76,26 @@ private:
   /// \brief Writes size bytes from the given buffer.
   void write(const std::uint8_t* buffer, std::size_t size);
 
+  /// \brief write_bits for the case that the bit buffer becomes full, and for 0 and bits_per_word bits.
+  void write_bits_slow(std::size_t value, unsigned int num_of_bits);
+
+  /// \brief Moves the full bit buffer into the output buffer, and empties the bit buffer.
+  void empty_bit_buffer();
+
+  /// \brief Writes the output buffer to the stream, and empties the output buffer.
+  void empty_output_buffer();
+
   std::ostream& stream;
 
-  /// \brief Buffer that is filled starting from bit 127 when writing
-  std::bitset<128> write_buffer = 0;
+  /// \brief Bytes that have not been written to the stream yet. The stream is written in blocks through its stream
+  ///        buffer, so nothing should be written to the stream directly while this bitstream exists.
+  std::vector<std::uint8_t> m_output_buffer;
+  std::size_t m_output_size = 0; ///< The number of valid bytes in m_output_buffer.
 
-  unsigned int bits_in_buffer = 0; ///< how many bits in are used in the buffer.
+  /// \brief The last m_bits_in_buffer bits written, stored in the most significant bits; the other bits are zero.
+  ///        Always contains fewer than bits_per_word bits after a write.
+  word_t m_bit_buffer = 0;
+  unsigned int m_bits_in_buffer = 0;
 
   std::uint8_t integer_buffer[integer_encoding_size<std::size_t>()]{}; ///< Reserved space to store an n byte integer. // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 };
