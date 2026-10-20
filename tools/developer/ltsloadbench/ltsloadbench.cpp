@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ltsloadbench.cpp
-/// \brief Measures the separate layers involved in loading an LTS from disk.
+/// \brief Measures the separate layers involved in loading an LTS from disk, and saving it.
 
 #include <chrono>
 #include <cstddef>
@@ -97,6 +97,20 @@ void run_load(const std::string& filename)
             << "state labels: " << lts.num_state_labels() << "\n";
 }
 
+/// \brief Loads the LTS and saves it to output_filename; only the saving is timed.
+/// \returns The moment the saving started.
+template<typename LTS>
+std::chrono::steady_clock::time_point run_save(const std::string& filename, const std::string& output_filename)
+{
+  LTS lts;
+  lts.load(filename);
+  const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+  lts.save(output_filename);
+  std::cout << "transitions: " << lts.num_transitions() << "\n"
+            << "state labels: " << lts.num_state_labels() << "\n";
+  return start;
+}
+
 } // namespace
 
 class ltsloadbench_tool : public utilities::tools::input_tool
@@ -104,6 +118,7 @@ class ltsloadbench_tool : public utilities::tools::input_tool
 protected:
   using super = utilities::tools::input_tool;
   std::string m_mode = "load";
+  std::string m_output_filename = "/dev/null";
 
   void parse_options(const utilities::command_line_parser& parser) override
   {
@@ -112,7 +127,12 @@ protected:
     {
       m_mode = parser.option_argument("mode");
     }
-    if (m_mode != "raw" && m_mode != "decode" && m_mode != "load" && m_mode != "pload" && m_mode != "aut")
+    if (parser.has_option("output"))
+    {
+      m_output_filename = parser.option_argument("output");
+    }
+    if (m_mode != "raw" && m_mode != "decode" && m_mode != "load" && m_mode != "pload" && m_mode != "aut"
+        && m_mode != "save" && m_mode != "psave")
     {
       parser.error("unknown mode '" + m_mode + "'");
     }
@@ -127,8 +147,14 @@ protected:
       "'decode' decodes all aterms without building an LTS, "
       "'load' loads the file as an lts_lts_t (default), "
       "'pload' loads it as a probabilistic_lts_lts_t, "
-      "'aut' loads an .aut file as an lts_aut_t",
+      "'aut' loads an .aut file as an lts_aut_t, "
+      "'save' loads the file as an lts_lts_t and measures saving it to the file given by --output, "
+      "'psave' does the same with a probabilistic_lts_lts_t",
       'm');
+    desc.add_option("output",
+      utilities::make_optional_argument("FILE", "/dev/null"),
+      "the file to which the modes 'save' and 'psave' write (default /dev/null)",
+      'o');
   }
 
 public:
@@ -137,7 +163,8 @@ public:
         "Jeroen Keiren",
         "benchmark the loading of labelled transition systems",
         "Loads INFILE in the way selected by --mode, and prints the elapsed time, the peak resident set size, and "
-        "statistics about what was read.")
+        "statistics about what was read. In the modes 'save' and 'psave', only the time to save the LTS is "
+        "reported.")
   {}
 
   bool run() override
@@ -147,7 +174,7 @@ public:
       throw mcrl2::runtime_error("ltsloadbench requires an input file.");
     }
 
-    const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
     if (m_mode == "raw")
     {
       run_raw(input_filename());
@@ -164,9 +191,17 @@ public:
     {
       run_load<lts::probabilistic_lts_lts_t>(input_filename());
     }
-    else
+    else if (m_mode == "aut")
     {
       run_load<lts::lts_aut_t>(input_filename());
+    }
+    else if (m_mode == "save")
+    {
+      start = run_save<lts::lts_lts_t>(input_filename(), m_output_filename);
+    }
+    else
+    {
+      start = run_save<lts::probabilistic_lts_lts_t>(input_filename(), m_output_filename);
     }
     const std::chrono::duration<double, std::milli> elapsed = std::chrono::steady_clock::now() - start;
 

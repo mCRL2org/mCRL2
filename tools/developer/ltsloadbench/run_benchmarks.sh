@@ -7,7 +7,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 #
-# Runs ltsloadbench through hyperfine on every .lts file in INPUTDIR, in the modes raw, decode and load, and on
+# Runs ltsloadbench through hyperfine on every .lts file in INPUTDIR, in the modes raw, decode, load and save, and on
 # the matching .aut file (if present) in mode aut. Writes one hyperfine JSON and Markdown file per input, the
 # single-run statistics printed by ltsloadbench, and a description of the environment into RESULTDIR.
 #
@@ -44,7 +44,7 @@ script_dir=$(cd "$(dirname "$0")" && pwd)
 for lts in "$inputdir"/*.lts; do
   name=$(basename "$lts" .lts)
   commands=()
-  for mode in raw decode load; do
+  for mode in raw decode load save; do
     commands+=(--command-name "$mode" "$bench --mode=$mode $lts")
   done
   if [[ -f "$inputdir/$name.aut" ]]; then
@@ -59,7 +59,7 @@ for lts in "$inputdir"/*.lts; do
 
   # One extra run per mode to record what was read and the peak resident set size.
   {
-    for mode in raw decode load; do
+    for mode in raw decode load save; do
       "$bench" --mode=$mode "$lts"
     done
     if [[ -f "$inputdir/$name.aut" ]]; then
