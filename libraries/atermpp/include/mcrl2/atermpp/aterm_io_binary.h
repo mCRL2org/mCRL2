@@ -54,7 +54,31 @@ private:
   /// \returns The number of bits needed to index function symbols.
   unsigned int function_symbol_index_width();
 
+  /// \brief A term that put still has to write, after its arguments if write is false.
+  struct write_todo
+  {
+    detail::markable_aterm<aterm> term;
+    bool write = false;
+
+    write_todo(const aterm& term)
+      : term(term)
+    {}
+
+    void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
+    {
+      term.mark(todo);
+    }
+  };
+
   std::shared_ptr<mcrl2::utilities::obitstream> m_stream;
+
+  /// \brief The terms that put still has to write; the last one is written first. It is only used within put, but
+  ///        reusing it avoids an allocation for every term written.
+  atermpp::deque<write_todo> m_todo;
+
+  /// \brief The transformed version of the term that put is writing. Assigning to this protected member avoids
+  ///        registering a temporary term for every term written.
+  aterm m_transformed;
 
   unsigned int m_term_index_width = 0U;       ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width = 0U; ///< caches the result of function_symbol_index_width().

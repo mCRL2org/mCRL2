@@ -11,6 +11,7 @@
 #include "mcrl2/atermpp/aterm_io_binary.h"
 #include "mcrl2/atermpp/aterm_io_text.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/detail/global_aterm_pool.h"
 #include "mcrl2/utilities/exception.h"
 
 #define BOOST_AUTO_TEST_MAIN
@@ -198,6 +199,29 @@ aterm rename_b_to_c(const aterm& x)
   if (x.function() == function_symbol("b", 1))
   {
     return aterm(function_symbol("c", 1), x[0]);
+  }
+  return x;
+}
+
+/// \brief Replaces leaf(x) by wrapped(box(x), crate(x)), where box(x) and crate(x) are new terms that only the result
+///        refers to, and collects garbage on every call. While put writes crate(x) and its argument, box(x) is only
+///        referred to by the terms that put still has to write, so put itself must protect those.
+/// \brief The number of deleted box terms, counted by a deletion hook.
+std::size_t deleted_boxes = 0;
+
+void on_delete_box(const aterm&)
+{
+  ++deleted_boxes;
+}
+
+aterm wrap_and_collect(const aterm& x)
+{
+  detail::g_thread_term_pool().collect();
+  if (x.function() == function_symbol("leaf", 1))
+  {
+    return aterm(function_symbol("wrapped", 2),
+      aterm(function_symbol("box", 1), x[0]),
+      aterm(function_symbol("crate", 1), x[0]));
   }
   return x;
 }
@@ -555,6 +579,51 @@ BOOST_AUTO_TEST_CASE(transformer_test)
     const aterm c(function_symbol("c", 1), aterm_int(3));
     check_terms(input, {c, aterm(function_symbol("pair", 2), c, aterm(function_symbol("c", 1), c))});
   }
+}
+
+// Garbage collection while writing must not remove the terms that a transformer created and that still have to be
+// written.
+BOOST_AUTO_TEST_CASE(collect_during_put_test)
+{
+  constexpr std::size_t number_of_leaves = 10;
+  const function_symbol leaf("leaf", 1);
+  const function_symbol wrapped("wrapped", 2);
+  const function_symbol box("box", 1);
+  const function_symbol crate("crate", 1);
+  add_deletion_hook(box, on_delete_box);
+  const function_symbol pair("pair", 2);
+
+  std::vector<aterm> written;
+  for (std::size_t i = 0; i < number_of_leaves; ++i)
+  {
+    // The leaf occurs twice, so its second occurrence is shared.
+    const aterm l(leaf, aterm_int(i));
+    written.emplace_back(pair, l, l);
+  }
+
+  std::stringstream stream;
+  {
+    binary_aterm_ostream output(stream);
+    output << wrap_and_collect;
+    for (const aterm& term: written)
+    {
+      output << term;
+    }
+
+    // The stream keeps every term it has written, so no box may have been deleted, also not before it was written.
+    detail::g_thread_term_pool().collect();
+    BOOST_CHECK_EQUAL(deleted_boxes, 0U);
+  }
+
+  // The expected terms are only created now, as they would otherwise protect the boxes while writing.
+  std::vector<aterm> expected;
+  for (std::size_t i = 0; i < number_of_leaves; ++i)
+  {
+    const aterm w(wrapped, aterm(box, aterm_int(i)), aterm(crate, aterm_int(i)));
+    expected.emplace_back(pair, w, w);
+  }
+  binary_aterm_istream input(stream);
+  check_terms(input, expected);
 }
 
 BOOST_AUTO_TEST_CASE(random_round_trip_test)
