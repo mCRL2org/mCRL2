@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux
+// Author(s): Jeroen Keiren, Maurice Laveaux
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -207,30 +207,28 @@ void MCRL2_UNORDERED_SET_CLASS::rehash(std::size_t number_of_buckets)
     m_bucket_mutexes = std::vector<std::mutex>(std::max(number_of_buckets / BucketsPerMutex, 1ul));
   }
 
-  // Create one bucket list for all elements in the hashtable.
-  bucket_type old_keys;
-  for (auto&& bucket : m_buckets)
+  // Move the nodes of every old bucket directly into their new buckets, without moving or copying the elements.
+  // Walking the old buckets in order keeps the loads from different buckets independent, so that the processor can
+  // overlap their cache misses. Collecting all nodes in one list first would make every node of a large table a
+  // dependent cache miss. Both bucket vectors exist at the same time, but they only store one pointer per bucket.
+  std::vector<bucket_type> new_buckets(number_of_buckets);
+  const std::size_t new_buckets_mask = number_of_buckets - 1;
+
+  [[maybe_unused]] std::size_t number_of_moved_elements = 0;
+  for (bucket_type& bucket: m_buckets)
   {
-    old_keys.splice_after(old_keys.before_begin(), bucket);
+    while (!bucket.empty())
+    {
+      bucket_type& new_bucket = new_buckets[m_hash(bucket.front()) & new_buckets_mask];
+      new_bucket.splice_front(new_bucket.before_begin(), bucket);
+      ++number_of_moved_elements;
+    }
   }
 
-  assert(std::distance(old_keys.begin(), old_keys.end()) == static_cast<long>(m_number_of_elements));
+  assert(number_of_moved_elements == m_number_of_elements);
 
-  // Recreate the hash table, but don't move or copy the old elements.
-  {
-    // clear() doesn't actually free the memory used and still results in an 3n peak.
-    std::vector<bucket_type>().swap(m_buckets);
-  }
-  m_buckets.resize(number_of_buckets);
-  m_buckets_mask = m_buckets.size() - 1;
-
-  // Fill the set with all elements that are stored in old_keys.
-  while (!old_keys.empty())
-  {
-    // Move the current element to this bucket.
-    bucket_type& bucket = m_buckets[find_bucket_index(old_keys.front())];
-    bucket.splice_front(bucket.before_begin(), old_keys);
-  }
+  m_buckets.swap(new_buckets);
+  m_buckets_mask = new_buckets_mask;
 }
 
 template<typename T>
