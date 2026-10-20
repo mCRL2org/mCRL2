@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote
+// Author(s): Jan Friso Groote, Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -65,6 +65,11 @@ public:
 
   /// \brief Reads an aterm from this stream.
   virtual void get(aterm& t) = 0;
+
+  /// \brief Reads an integer that was written as an aterm_int.
+  /// \details Equivalent to reading an aterm_int and taking its value, but a stream can avoid creating the term.
+  /// \throws mcrl2::runtime_error when the next term in the stream is not an aterm_int.
+  virtual std::size_t get_integer();
 };
 
 // These free functions provide input/output operators for these streams.

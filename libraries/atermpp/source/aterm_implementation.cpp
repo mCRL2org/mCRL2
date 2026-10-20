@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux
+// Author(s): Jeroen Keiren, Maurice Laveaux
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -9,6 +9,7 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/shared_mutex.h"
 
 #include <array>
@@ -65,6 +66,17 @@ mcrl2::utilities::shared_guard lock_shared_aterm_pool()
 aterm_stream::~aterm_stream() = default;
 
 aterm_istream::~aterm_istream() = default;
+
+std::size_t aterm_istream::get_integer()
+{
+  aterm term;
+  get(term);
+  if (!term.defined() || !term.type_is_int())
+  {
+    throw mcrl2::runtime_error("Expected an integer in the aterm stream.");
+  }
+  return static_cast<const aterm_int&>(term).value();
+}
 
 aterm_ostream::~aterm_ostream() = default;
 

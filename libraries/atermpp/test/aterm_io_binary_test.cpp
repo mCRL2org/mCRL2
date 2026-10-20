@@ -9,6 +9,7 @@
 
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_io_binary.h"
+#include "mcrl2/atermpp/aterm_io_text.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -357,6 +358,72 @@ BOOST_AUTO_TEST_CASE(integers_test)
     sequence.push_back(aterm_int(value));
   }
   check_round_trip(sequence);
+}
+
+// Integers written as aterm_int can be read with get_integer, interleaved with terms that introduce new function
+// symbols and shared subterms, also when the same integer occurs as a subterm.
+BOOST_AUTO_TEST_CASE(get_integer_test)
+{
+  const std::vector<std::size_t> values
+    = {0, 1, 127, 128, std::size_t(1) << 32, std::size_t(1) << 63, std::numeric_limits<std::size_t>::max()};
+
+  std::vector<aterm> sequence;
+  for (std::size_t i = 0; i < values.size(); ++i)
+  {
+    // Every term uses a new function symbol and the integer as a subterm.
+    sequence.push_back(aterm_int(values[i]));
+    sequence.emplace_back(function_symbol("f" + std::to_string(i), 2), aterm_int(values[i]), aterm_int(values[i]));
+    sequence.push_back(aterm_int(values[i]));
+  }
+
+  std::stringstream stream(write_terms(sequence));
+  binary_aterm_istream input(stream);
+  for (std::size_t i = 0; i < values.size(); ++i)
+  {
+    BOOST_CHECK_EQUAL(input.get_integer(), values[i]);
+    aterm t;
+    input.get(t);
+    BOOST_CHECK_EQUAL(t, sequence[3 * i + 1]);
+    BOOST_CHECK_EQUAL(input.get_integer(), values[i]);
+  }
+
+  aterm end;
+  input.get(end);
+  BOOST_CHECK(!end.defined());
+}
+
+// get_integer reports an error when the next term is not an integer, or at the end of the stream.
+BOOST_AUTO_TEST_CASE(get_integer_error_test)
+{
+  const aterm a(function_symbol("a", 1), aterm_int(3));
+  std::stringstream stream(write_terms({a, aterm_int(3)}));
+  binary_aterm_istream input(stream);
+
+  BOOST_CHECK_THROW(input.get_integer(), mcrl2::runtime_error);
+  BOOST_CHECK_EQUAL(input.get_integer(), 3u);
+  BOOST_CHECK_THROW(input.get_integer(), mcrl2::runtime_error);
+}
+
+// The default get_integer of aterm_istream, used by the text format, reads an aterm_int and takes its value. The text
+// format reads integers with atol, so values above the largest long cannot be used here.
+BOOST_AUTO_TEST_CASE(text_get_integer_test)
+{
+  const std::size_t large = std::size_t(1) << 32;
+  const aterm a(function_symbol("a", 1), aterm_int(3));
+
+  std::stringstream stream;
+  {
+    text_aterm_ostream output(stream, true);
+    output << aterm_int(0);
+    output << a;
+    output << aterm_int(large);
+  }
+
+  text_aterm_istream text_input(stream);
+  aterm_istream& input = text_input;
+  BOOST_CHECK_EQUAL(input.get_integer(), 0u);
+  BOOST_CHECK_THROW(input.get_integer(), mcrl2::runtime_error);
+  BOOST_CHECK_EQUAL(input.get_integer(), large);
 }
 
 // More than 2^k function symbols for several k, so that the width of function symbol indices grows repeatedly. Also

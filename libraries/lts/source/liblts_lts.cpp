@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg; completely rewritten by Jan Friso Groote
+// Author(s): Jeroen Keiren, Muck van Weerdenburg; completely rewritten by Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -54,15 +54,11 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabi
 
 atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, probabilistic_lts_lts_t::probabilistic_state_t& state)
 {
-  atermpp::aterm_int index;
-  stream >> index;  // Read the number of states.
-
-  const std::size_t value=index.value();
+  const std::size_t value = stream.get_integer(); // Read the number of states.
   assert(value>0);
   if (value==1)
   {
-    stream >> index;
-    state.set(index.value());
+    state.set(stream.get_integer());
   }
   else
   {
@@ -71,10 +67,10 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, probabilistic
 
     for (std::size_t i = 0; i < value; ++i)
     {
-      stream >> index;
+      const std::size_t index = stream.get_integer();
       stream >> probability;
 
-      state.add(index.value(), probability);
+      state.add(index, probability);
     }
 
     state.shrink_to_fit();
@@ -175,9 +171,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   std::size_t number_of_states = 1;
 
   aterm term;
-  aterm_int from;
   action_label_lts action;
-  aterm_int to;
 
   while (true)
   {
@@ -190,16 +184,17 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
     if (term == transition_mark())
     {
-      stream >> from;
+      // The states are read as plain integers, which avoids creating an aterm_int for each of them.
+      const std::size_t from = stream.get_integer();
       stream >> action;
-      stream >> to;
+      const std::size_t to = stream.get_integer();
 
       const auto [index, inserted] = multi_actions.insert(action);
 
-      std::size_t target_index = to.value();
+      std::size_t target_index = to;
       if constexpr (std::is_same_v<LTS, probabilistic_lts_lts_t>)
       {
-        probabilistic_lts_lts_t::probabilistic_state_t lts_state(to.value());
+        probabilistic_lts_lts_t::probabilistic_state_t lts_state(to);
 
         // For probabilistic lts it is necessary to add the state first (and use the returned index).
         bool state_inserted;
@@ -214,8 +209,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       }
 
       // Add the transition and update the number of states.
-      lts.add_transition(transition(from.value(), index, target_index));
-      number_of_states = std::max({number_of_states, from.value() + 1, to.value() + 1});
+      lts.add_transition(transition(from, index, target_index));
+      number_of_states = std::max({number_of_states, from + 1, to + 1});
 
       if (inserted)
       {
@@ -231,7 +226,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       {
         probabilistic_lts_lts_t::probabilistic_state_t to;
 
-        stream >> from;
+        const std::size_t from = stream.get_integer();
         stream >> action;
         stream >> to;
 
@@ -247,10 +242,10 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
           assert(actual_index == to_index);
         }
 
-        lts.add_transition(transition(from.value(), index, to_index));
+        lts.add_transition(transition(from, index, to_index));
 
         // Update the number of states
-        number_of_states = std::max({number_of_states, from.value() + 1, to.maximal_state() + 1});
+        number_of_states = std::max({number_of_states, from + 1, to.maximal_state() + 1});
 
         if (inserted)
         {
