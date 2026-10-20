@@ -57,10 +57,12 @@ private:
   /// \returns The number of bits needed to index function symbols.
   unsigned int function_symbol_index_width();
 
-  /// \brief A term that put still has to write, after its arguments if write is false.
+  /// \brief A term that put still has to write. When write is true, the term has been transformed, and the arguments
+  ///        of the transformed term that had not been written yet have been added to the terms to write before it.
   struct write_todo
   {
     detail::markable_aterm<aterm> term;
+    detail::markable_aterm<aterm> transformed;
     bool write = false;
 
     write_todo(const aterm& term)
@@ -70,8 +72,13 @@ private:
     void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
     {
       term.mark(todo);
+      transformed.mark(todo);
     }
   };
+
+  /// \brief Writes the term of current, whose arguments have all been written and have the indices in
+  ///        m_argument_indices.
+  void write_term(const write_todo& current, bool is_output);
 
   std::shared_ptr<mcrl2::utilities::obitstream> m_stream;
 
@@ -79,9 +86,9 @@ private:
   ///        reusing it avoids an allocation for every term written.
   atermpp::deque<write_todo> m_todo;
 
-  /// \brief The transformed version of the term that put is writing. Assigning to this protected member avoids
-  ///        registering a temporary term for every term written.
-  aterm m_transformed;
+  /// \brief The indices of the arguments of the term that put is writing. Reusing this buffer avoids an allocation per
+  ///        term written.
+  std::vector<std::size_t> m_argument_indices;
 
   unsigned int m_term_index_width = 0U;       ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width = 0U; ///< caches the result of function_symbol_index_width().

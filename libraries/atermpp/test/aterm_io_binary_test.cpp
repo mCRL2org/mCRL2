@@ -214,6 +214,14 @@ void on_delete_box(const aterm&)
   ++deleted_boxes;
 }
 
+/// \brief The number of deleted wrapped terms, counted by a deletion hook.
+std::size_t deleted_wrapped = 0;
+
+void on_delete_wrapped(const aterm&)
+{
+  ++deleted_wrapped;
+}
+
 aterm wrap_and_collect(const aterm& x)
 {
   detail::g_thread_term_pool().collect();
@@ -653,6 +661,7 @@ BOOST_AUTO_TEST_CASE(collect_during_put_test)
   const function_symbol box("box", 1);
   const function_symbol crate("crate", 1);
   add_deletion_hook(box, on_delete_box);
+  add_deletion_hook(wrapped, on_delete_wrapped);
   const function_symbol pair("pair", 2);
 
   std::vector<aterm> written;
@@ -669,7 +678,12 @@ BOOST_AUTO_TEST_CASE(collect_during_put_test)
     output << wrap_and_collect;
     for (const aterm& term: written)
     {
+      // The transformed term wrapped(...) is not written itself, but it must be kept while its subterms are written.
+      // After this collection, the only wrapped term that can be deleted during put is the one that put creates.
+      detail::g_thread_term_pool().collect();
+      const std::size_t deleted_wrapped_before = deleted_wrapped;
       output << term;
+      BOOST_CHECK_EQUAL(deleted_wrapped, deleted_wrapped_before);
     }
 
     // The stream keeps every term it has written, so no box may have been deleted, also not before it was written.
