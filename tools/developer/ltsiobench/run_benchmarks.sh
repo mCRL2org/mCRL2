@@ -7,16 +7,16 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 #
-# Runs ltsloadbench through hyperfine on every .lts file in INPUTDIR, in the modes raw, decode, load and save, and on
+# Runs ltsiobench through hyperfine on every .lts file in INPUTDIR, in the modes raw, decode, load and save, and on
 # the matching .aut file (if present) in mode aut. Writes one hyperfine JSON and Markdown file per input, the
-# single-run statistics printed by ltsloadbench, and a description of the environment into RESULTDIR.
+# single-run statistics printed by ltsiobench, and a description of the environment into RESULTDIR.
 #
-# Usage: run_benchmarks.sh LTSLOADBENCH INPUTDIR RESULTDIR [hyperfine options...]
+# Usage: run_benchmarks.sh LTSIOBENCH INPUTDIR RESULTDIR [hyperfine options...]
 
 set -euo pipefail
 
 if [[ $# -lt 3 ]]; then
-  echo "Usage: $0 LTSLOADBENCH INPUTDIR RESULTDIR [hyperfine options...]" >&2
+  echo "Usage: $0 LTSIOBENCH INPUTDIR RESULTDIR [hyperfine options...]" >&2
   exit 2
 fi
 

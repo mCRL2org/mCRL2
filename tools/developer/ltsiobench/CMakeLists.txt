@@ -1,6 +1,6 @@
-mcrl2_add_tool(ltsloadbench
+mcrl2_add_tool(ltsiobench
   SOURCES
-    ltsloadbench.cpp
+    ltsiobench.cpp
   DEPENDS
     mcrl2_lps
     mcrl2_lts
