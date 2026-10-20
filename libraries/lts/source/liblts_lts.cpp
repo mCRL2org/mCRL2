@@ -27,24 +27,24 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabi
   if (state.size()==0)
   {
     // The probabilistic state is represented as a singular state and is stored without probability;
-    stream << atermpp::aterm_int(1);
-    stream << atermpp::aterm_int(state.get());
+    stream.put_integer(1);
+    stream.put_integer(state.get());
   }
   else if (state.size()<=1)
   {
     // The probabilistic state is the single element in a vector and is stored without probability;
-    stream << atermpp::aterm_int(1);
-    stream << atermpp::aterm_int(state.get());
+    stream.put_integer(1);
+    stream.put_integer(state.get());
   }
   else
   {
     // The probabilistic state is stored as a sequence of state probability pairs. 
-    stream << atermpp::aterm_int(state.size());
+    stream.put_integer(state.size());
 
     for(const auto& p : state)
     {
       // Push a (index, probability) pair into the list.
-      stream << atermpp::aterm_int(p.state());
+      stream.put_integer(p.state());
       stream << p.probability();
     }
   }
@@ -465,9 +465,9 @@ void write_lts_header(atermpp::aterm_ostream& stream,
 void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lps::multi_action& label, std::size_t to)
 {
   stream << detail::transition_mark();
-  stream << atermpp::aterm_int(from);
+  stream.put_integer(from);
   stream << label;
-  stream << atermpp::aterm_int(to);
+  stream.put_integer(to);
 }
 
 void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lps::multi_action& label, const probabilistic_lts_lts_t::probabilistic_state_t& to)
@@ -480,7 +480,7 @@ void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lp
   else
   {
     stream << detail::probabilistic_transition_mark();
-    stream << atermpp::aterm_int(from);
+    stream.put_integer(from);
     stream << label;
     stream << to;
   }

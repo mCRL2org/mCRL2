@@ -54,6 +54,11 @@ public:
 
   /// \brief Write the given term to the stream.
   virtual void put(const aterm& term) = 0;
+
+  /// \brief Writes an integer that can be read as an aterm_int.
+  /// \details Equivalent to writing an aterm_int with the given value, but a stream can avoid creating the term. The
+  ///          transformer is not applied, just like it is not applied to integers when they are read.
+  virtual void put_integer(std::size_t value);
 };
 
 /// \brief The interface for a class that reads aterm from a stream.
