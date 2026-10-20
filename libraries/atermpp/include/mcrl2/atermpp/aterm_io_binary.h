@@ -73,7 +73,16 @@ public:
 
   void get(aterm& t) override;
 
+  /// \brief Reads an integer that was written as an aterm_int, without creating the aterm_int.
+  std::size_t get_integer() override;
+
 private:
+  /// \brief Reads packets up to and including the header of the next output, which is an integer, a term, or the
+  ///        end of the stream.
+  /// \returns True iff the output is an integer, of which the value still has to be read from m_stream. Otherwise,
+  ///          the term, or aterm() at the end of the stream, has been assigned to t.
+  bool read_until_output(aterm& t);
+
   /// \returns The number of bits needed to index terms.
   unsigned int term_index_width();
 

@@ -251,6 +251,29 @@ std::size_t binary_aterm_ostream::write_function_symbol(const function_symbol& s
 
 void binary_aterm_istream::get(aterm& t)
 {
+  if (read_until_output(t))
+  {
+    // Read the integer from the stream and construct an aterm_int.
+    make_aterm_int(static_cast<aterm_int&>(t), m_stream->read_integer());
+  }
+}
+
+std::size_t binary_aterm_istream::get_integer()
+{
+  if (read_until_output(m_term))
+  {
+    return m_stream->read_integer();
+  }
+
+  if (!m_term.defined() || !m_term.type_is_int())
+  {
+    throw mcrl2::runtime_error("Expected an integer in the binary aterm stream.");
+  }
+  return static_cast<const aterm_int&>(m_term).value();
+}
+
+bool binary_aterm_istream::read_until_output(aterm& t)
+{
   while(true)
   {
     // Determine the type of the next packet.
@@ -267,10 +290,8 @@ void binary_aterm_istream::get(aterm& t)
     }
     else if (packet == packet_type::aterm_int_output)
     {
-      // Read the integer from the stream and construct an aterm_int.
-      std::size_t value = m_stream->read_integer();
-      make_aterm_int(static_cast<aterm_int&>(t), value);
-      return;
+      // The caller reads the value of the integer.
+      return true;
     }
     else if (packet == packet_type::aterm || packet == packet_type::aterm_output)
     {
@@ -281,7 +302,7 @@ void binary_aterm_istream::get(aterm& t)
       {
         // The term with function symbol zero marks the end of the stream.
         t=aterm();
-        return;
+        return false;
       }
       else if (symbol == detail::g_as_int)
       {
@@ -306,7 +327,7 @@ void binary_aterm_istream::get(aterm& t)
         {
           // This aterm was marked as output in the file so return it.
           t = m_transformer(m_term);
-          return;
+          return false;
         }
         else
         {
