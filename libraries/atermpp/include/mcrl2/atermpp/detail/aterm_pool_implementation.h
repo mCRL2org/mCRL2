@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux.
+// Author(s): Jeroen Keiren, Maurice Laveaux.
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -174,8 +174,10 @@ void aterm_pool::created_term(mcrl2::utilities::shared_mutex& shared_mutex, long
     {
       if (count_until_check>=10000)
       {
-        // Regularly perform garbage collection in accordance with the growing size of the data structures
-        if (m_count_until_collection.fetch_sub(count_until_check, std::memory_order_relaxed)<=0)
+        // Regularly perform garbage collection in accordance with the growing size of the data structures. Terms
+        // created while garbage collection is paused do not count towards the next collection.
+        if (m_garbage_collection_pauses.load(std::memory_order_relaxed) == 0
+            && m_count_until_collection.fetch_sub(count_until_check, std::memory_order_relaxed) <= 0)
         {
           collect_impl(shared_mutex);
         }

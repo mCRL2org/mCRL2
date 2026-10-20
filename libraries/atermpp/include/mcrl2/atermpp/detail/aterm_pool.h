@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux.
+// Author(s): Jeroen Keiren, Maurice Laveaux.
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -16,6 +16,7 @@
 #include "mcrl2/utilities/shared_mutex.h"
 
 #include <atomic>
+#include <cassert>
 
 
 namespace atermpp::detail
@@ -132,6 +133,22 @@ public:
   /// \brief Enable garbage collection when passing true and disable otherwise.
   inline void enable_garbage_collection(bool enable) { m_enable_garbage_collection = enable; };
 
+  /// \brief Postpones automatic garbage collection until resume_garbage_collection has been called as often as this
+  ///        function. Explicitly requested garbage collection still takes place.
+  /// \details threadsafe
+  inline void pause_garbage_collection()
+  {
+    m_garbage_collection_pauses.fetch_add(1, std::memory_order_relaxed);
+  }
+
+  /// \brief Ends one pause_garbage_collection.
+  /// \details threadsafe
+  inline void resume_garbage_collection()
+  {
+    [[maybe_unused]] const std::size_t pauses = m_garbage_collection_pauses.fetch_sub(1, std::memory_order_relaxed);
+    assert(pauses > 0);
+  }
+
   /// \brief Enable automatic hash table resizing when passing true and disable otherwise.
   inline void enable_resize(bool enable) { m_enable_resize = enable; };
 
@@ -223,6 +240,9 @@ private:
   std::atomic<long> m_count_until_collection = 0;
 
   std::atomic<bool> m_enable_garbage_collection = EnableGarbageCollection; /// Garbage collection is enabled.
+
+  /// The number of active pause_garbage_collection calls; automatic garbage collection only takes place when it is 0.
+  std::atomic<std::size_t> m_garbage_collection_pauses = 0;
 
   std::atomic<bool> m_enable_resize = true; /// Automatic hash table resizing is enabled.
 

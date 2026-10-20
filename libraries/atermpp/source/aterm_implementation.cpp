@@ -28,6 +28,16 @@ void atermpp::add_deletion_hook(const function_symbol& function, term_callback c
   g_term_pool().add_deletion_hook(function, callback);
 }
 
+atermpp::garbage_collection_pause::garbage_collection_pause()
+{
+  g_term_pool().pause_garbage_collection();
+}
+
+atermpp::garbage_collection_pause::~garbage_collection_pause()
+{
+  g_term_pool().resume_garbage_collection();
+}
+
 namespace atermpp::detail
 {
 
