@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen Keiren, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -165,6 +165,21 @@ public:
 using term_callback = void (*)(const aterm&);
 
 extern void add_deletion_hook(const function_symbol&, term_callback);
+
+/// \brief Postpones automatic garbage collection while an object of this class exists, for instance while reading
+///        many terms that all remain in use. Objects may be nested and exist in several threads at once; automatic
+///        garbage collection resumes when the last one is destroyed.
+class garbage_collection_pause
+{
+public:
+  garbage_collection_pause();
+  ~garbage_collection_pause();
+
+  garbage_collection_pause(const garbage_collection_pause&) = delete;
+  garbage_collection_pause(garbage_collection_pause&&) = delete;
+  garbage_collection_pause& operator=(const garbage_collection_pause&) = delete;
+  garbage_collection_pause& operator=(garbage_collection_pause&&) = delete;
+};
 
 /// \brief Constructor an aterm in a variable based on a function symbol and an forward iterator providing the
 /// arguments. \details The iterator range is traversed more than once. If only one traversal is required

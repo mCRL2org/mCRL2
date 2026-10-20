@@ -135,6 +135,10 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   atermpp::aterm_stream_state state(stream);
   stream >> data::detail::add_index_impl;
 
+  // The stream keeps every term that it reads in use, so garbage collection while reading would find almost nothing
+  // to free, but would still mark all terms read so far every time.
+  atermpp::garbage_collection_pause pause;
+
   atermpp::aterm marker;
   stream >> marker;
 
