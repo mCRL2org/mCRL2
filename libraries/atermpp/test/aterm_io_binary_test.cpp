@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE(get_integer_error_test)
 }
 
 // The default get_integer of aterm_istream, used by the text format, reads an aterm_int and takes its value. The text
-// format reads integers with atol, so values above the largest long cannot be used here.
+// format reads integers as std::size_t, so values that do not fit in 32 bits can also be used here.
 BOOST_AUTO_TEST_CASE(text_get_integer_test)
 {
   const std::size_t large = std::size_t(1) << 32;
