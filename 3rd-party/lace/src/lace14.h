@@ -735,8 +735,8 @@ static inline uint64_t lace_gethrtime(void)
 {
 #if (defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64))
     #if defined(_MSC_VER) && !defined(__clang__)
-        unsigned aux;
-        return (uint64_t)__rdtscp(&aux);   // if supported by CPU; MSVC emits rdtscp
+        // mCRL2: use rdtsc instead of rdtscp, since rdtscp is not available on all (virtual) CPUs.
+        return (uint64_t)__rdtsc();
     #elif defined(__clang__) || defined(__GNUC__)
         #if defined(__RDTSCP__)
             unsigned lo, hi, aux;
