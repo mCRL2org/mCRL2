@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_ACTION_LABEL_H
 #define MCRL2_PROCESS_ACTION_LABEL_H
 
+#include "mcrl2/atermpp/aterm_structural_order.h"
 #include "mcrl2/data/data_specification.h"
 
 namespace mcrl2::process
@@ -112,22 +113,22 @@ action_label_list normalize_sorts(const action_label_list& x, const data::sort_s
 std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x);
 
 /// Compare two actions names.
-/// This is implemented using string comparison, such that the comparison is
-/// stable across different runs.
+/// Names are compared structurally, which amounts to string comparison, such
+/// that the comparison is stable across different runs.
 struct action_name_compare
 {
   bool operator()(const core::identifier_string& s1, const core::identifier_string& s2) const
   {
-    return std::string(s1) < std::string(s2);
+    return atermpp::structural_less()(s1, s2);
   }
 };
 
 /// Total ordering on action labels: name first (string order), then sorts.
+/// The structural order on terms coincides with this order, and does not
+/// depend on the addresses of terms, such that it is the same in every run.
 inline bool operator<(const action_label& a1, const action_label& a2)
 {
-  const std::string& s1 = a1.name();
-  const std::string& s2 = a2.name();
-  return s1 < s2 || (s1 == s2 && a1.sorts() < a2.sorts());
+  return atermpp::structural_less()(a1, a2);
 }
 
 } // namespace mcrl2::process
