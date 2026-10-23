@@ -96,6 +96,7 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
   using super::print_assignments;
   using super::print_list;
   using super::print_variables;
+  using super::print_global_variables;
   using super::print_expression;
   using super::print_unary_operand;
   using super::print_binary_operation;
@@ -229,7 +230,7 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     derived().enter(x);
     derived().apply(x.data());
     print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
-    print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
+    print_global_variables(x.global_variables());
     print_list(x.equations(), "proc ", "\n\n", "\n     ");
     print_initial_state(x.init());
     derived().leave(x);

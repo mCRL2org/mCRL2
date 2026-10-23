@@ -13,6 +13,7 @@
 #define MCRL2_DATA_EQUALITY_ONE_POINT_SUBSTITUTION_H
 
 
+#include "mcrl2/atermpp/aterm_structural_order.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
@@ -21,9 +22,13 @@ namespace mcrl2::data
 namespace detail
 {
 
+/// \brief Computes a substitution from (in)equalities.
+/// \details All choices are deterministic: variables are considered in the order of the quantifier variables (or in
+///          structural order if no quantifier variables are given), and right hand sides in structural order. In
+///          particular for an equality x == y between two quantifier variables, the first of them is eliminated.
 struct one_point_rule_substitution_algorithm
 {
-  std::map<data::variable, std::vector<data::data_expression> > equalities;
+  std::vector<std::pair<data::variable, std::vector<data::data_expression> > > equalities;
   data::mutable_map_substitution<> sigma;
   std::set<data::variable> sigma_lhs_variables;
   data::set_identifier_generator id_generator;
@@ -40,29 +45,32 @@ struct one_point_rule_substitution_algorithm
     }
   }
 
-  // finds all assignments to a constant, and adds them to sigma
+  // removes the entries for the variables in V
+  void remove_equalities(const std::set<data::variable>& V)
+  {
+    using utilities::detail::contains;
+    std::erase_if(equalities, [&](const auto& p) { return contains(V, p.first); });
+  }
+
+  // finds all assignments to a constant, and adds them to sigma; if a variable is equal to several constants,
+  // the first one in structural order is chosen
   // returns true if any assignment was found
   bool find_constant_assignments()
   {
-    std::vector<data::variable> to_be_removed;
+    std::set<data::variable> to_be_removed;
     for (const auto& [lhs, exprs]: equalities)
     {
-      for (const data::data_expression& e: exprs)
+      auto i = std::find_if(exprs.begin(), exprs.end(), [](const data::data_expression& e) { return data::is_constant(e); });
+      if (i != exprs.end())
       {
-        if (data::is_constant(e))
-        {
-          sigma[lhs] = e;
-          sigma_lhs_variables.insert(lhs);
-          to_be_removed.push_back(lhs);
-        }
+        sigma[lhs] = *i;
+        sigma_lhs_variables.insert(lhs);
+        to_be_removed.insert(lhs);
       }
     }
 
     // remove entries for the assignments
-    for (const data::variable& v: to_be_removed)
-    {
-      equalities.erase(v);
-    }
+    remove_equalities(to_be_removed);
 
     // apply sigma to the right hand sides
     apply_sigma();
@@ -100,10 +108,7 @@ struct one_point_rule_substitution_algorithm
     }
 
     // remove entries for the assignments
-    for (const data::variable& v: to_be_removed)
-    {
-      equalities.erase(v);
-    }
+    remove_equalities(to_be_removed);
 
     // apply sigma to the right hand sides
     apply_sigma();
@@ -111,38 +116,45 @@ struct one_point_rule_substitution_algorithm
     return !to_be_removed.empty();
   }
 
-  void build_equality_map(const std::map<data::variable, std::set<data::data_expression> >& equalities_, bool check_vars, const data::variable_list& vars = data::variable_list())
+  // adds the equalities lhs == e for the e in exprs in which lhs does not occur, in structural order
+  void add_equalities(const data::variable& lhs, const std::set<data::data_expression>& exprs)
   {
     using utilities::detail::contains;
-    for (const auto& [lhs,exprs]: equalities_)
+    std::vector<data::data_expression> E;
+    for (const data::data_expression& e: exprs)
     {
-      if (check_vars && !contains(vars, lhs))
+      if (!contains(data::find_free_variables(e), lhs))
       {
-        continue;
+        E.push_back(e);
       }
-      std::vector<data::data_expression> E;
-      for (const data::data_expression& e: exprs)
-      {
-        if (!contains(data::find_free_variables(e), lhs))
-        {
-          E.push_back(e);
-        }
-      }
-      if (!E.empty())
-      {
-        equalities[lhs] = E;
-      }
+    }
+    if (!E.empty())
+    {
+      std::sort(E.begin(), E.end(), atermpp::structural_less());
+      equalities.emplace_back(lhs, E);
     }
   }
 
   one_point_rule_substitution_algorithm(const std::map<data::variable, std::set<data::data_expression> >& equalities_)
   {
-    build_equality_map(equalities_, false);
+    for (const auto& [lhs, exprs]: equalities_)
+    {
+      add_equalities(lhs, exprs);
+    }
+    std::sort(equalities.begin(), equalities.end(), [](const auto& p, const auto& q) { return atermpp::structural_less()(p.first, q.first); });
   }
 
+  // only equalities for the quantifier variables are considered, in the order of the quantifier variables
   one_point_rule_substitution_algorithm(const std::map<data::variable, std::set<data::data_expression> >& equalities_, const data::variable_list& quantifier_variables)
   {
-    build_equality_map(equalities_, true, quantifier_variables);
+    for (const data::variable& v: quantifier_variables)
+    {
+      auto i = equalities_.find(v);
+      if (i != equalities_.end())
+      {
+        add_equalities(v, i->second);
+      }
+    }
   }
 
   data::mutable_map_substitution<> run(bool find_all_assignments = true)
