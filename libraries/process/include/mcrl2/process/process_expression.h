@@ -13,6 +13,7 @@
 #define MCRL2_PROCESS_PROCESS_EXPRESSION_H
 
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_structural_order.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/untyped_data_parameter.h"
 #include "mcrl2/process/action_label.h"
@@ -1824,16 +1825,16 @@ bool equal_signatures(const action& a, const action& b)
 
 /// Total ordering on actions: label first, then arguments.
 /// Consistent with the ordering on action labels (name, then sorts).
-/// Including arguments makes this a proper total order.
+/// Including arguments makes this a proper total order. The structural order
+/// on terms coincides with this order, and does not depend on the addresses
+/// of terms, such that it is the same in every run.
 ///
 /// Note that the sort order must be consistent with that on
 /// action labels, e.g. for efficient application of process
 /// operators such as allow and comm.
 inline bool operator<(const action& a1, const action& a2)
 {
-  const action_label& l1 = a1.label();
-  const action_label& l2 = a2.label();
-  return l1 < l2 || (l1 == l2 && a1.arguments() < a2.arguments());
+  return atermpp::structural_less()(a1, a2);
 }
 
 } // namespace mcrl2::process
