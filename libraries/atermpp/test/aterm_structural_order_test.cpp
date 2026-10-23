@@ -134,7 +134,13 @@ BOOST_AUTO_TEST_CASE(test_lists)
 // The last argument is compared iteratively, so long lists do not exhaust the stack.
 BOOST_AUTO_TEST_CASE(test_long_lists)
 {
+#ifdef NDEBUG
   const std::size_t n = 1000000;
+#else
+  // In debug builds the term pool is checked regularly by the recursive function verify_term, which exhausts the
+  // stack on lists of this length itself. The absence of deep recursion is only checked in optimised builds.
+  const std::size_t n = 10000;
+#endif
   term_list<aterm_int> l1({aterm_int(1)});
   term_list<aterm_int> l2({aterm_int(2)});
   term_list<aterm_int> l3({aterm_int(1)});
