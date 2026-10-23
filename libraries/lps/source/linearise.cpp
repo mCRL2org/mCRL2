@@ -77,6 +77,37 @@ using process_identifier_set = std::set<process_identifier, atermpp::structural_
 template <typename T>
 using process_identifier_map = std::map<process_identifier, T, atermpp::structural_less>;
 
+// Collects the variables that are bound by a sum or a stochastic operator in a process expression.
+struct sum_bound_variables_traverser : public process::process_expression_traverser<sum_bound_variables_traverser>
+{
+  using super = process::process_expression_traverser<sum_bound_variables_traverser>;
+  using super::apply;
+  using super::enter;
+  using super::leave;
+
+  std::set<variable> result;
+
+  void enter(const process::sum& x)
+  {
+    result.insert(x.variables().begin(), x.variables().end());
+  }
+
+  void enter(const process::stochastic_operator& x)
+  {
+    result.insert(x.variables().begin(), x.variables().end());
+  }
+};
+
+// The free variables of p, together with the variables that are bound by a sum or a stochastic operator in p.
+static std::set<variable> free_and_sum_bound_variables(const process_expression& p)
+{
+  std::set<variable> result = process::find_free_variables(p);
+  sum_bound_variables_traverser f;
+  f.apply(p);
+  result.insert(f.result.begin(), f.result.end());
+  return result;
+}
+
 /*  Preamble */
 
 using processstatustype = enum
@@ -1209,214 +1240,6 @@ class specification_basic_type
       collectPcrlProcesses(procDecl, pcrlprocesses, visited);
     }
 
-    /****************  occursinterm *** occursintermlist ***********/
-
-    void filter_vars_by_term(
-      const data_expression& t,
-      const std::set < variable >& vars_set,
-      std::set < variable >& vars_result_set)
-    {
-      if (is_variable(t))
-      {
-        const variable& v = atermpp::down_cast<variable>(t);
-        if (vars_set.find(v)!=vars_set.end())
-        {
-          vars_result_set.insert(v);
-        }
-        return;
-      }
-
-      if (is_function_symbol(t))
-      {
-        return;
-      }
-
-      if (is_machine_number(t))
-      {
-        return;
-      }
-
-      if (is_abstraction(t))
-      {
-        return;
-      }
-
-      if (is_where_clause(t))
-      {
-        return;
-      }
-
-      if (!is_application(t))
-      {
-        mCRL2log(mcrl2::log::log_level_t::error) << "term of unexpected type " << t << std::endl;
-      }
-
-      assert(is_application(t));
-
-      const application& a=atermpp::down_cast<const application>(t);
-      filter_vars_by_term(a.head(),vars_set,vars_result_set);
-      filter_vars_by_termlist(a.begin(),a.end(),vars_set,vars_result_set);
-    }
-
-    static
-    bool occursintermlist(const variable& var, const data_expression_list& r)
-    {
-      for (const data_expression& d: r)
-      {
-        if (occursinterm(d, var))
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    bool occursintermlist(const variable& var, const assignment_list& r, const process_identifier& proc_name) const
-    {
-      std::set<variable> assigned_variables;
-      for (const assignment& l: r)
-      {
-        if (occursinterm(l.rhs(), var))
-        {
-          return true;
-        }
-       assigned_variables.insert(l.lhs());
-      }
-      // Check whether x does not occur in the assignment list. Then variable x is assigned to
-      // itself, and it occurs in the process.
-      for (const variable& v: objectIndex(proc_name).parameters)
-      {
-        if (var==v)
-        {
-          if (assigned_variables.count(var)==0) // This variable is not assigned, so it does occur!
-          {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
-    template <typename Iterator>
-    void filter_vars_by_termlist(
-      Iterator begin,
-      const Iterator& end,
-      const std::set < variable >& vars_set,
-      std::set < variable >& vars_result_set)
-    {
-      for (; begin != end; ++begin)
-      {
-        filter_vars_by_term(*begin,vars_set,vars_result_set);
-      }
-    }
-
-    void filter_vars_by_multiaction(
-      const action_list& multiaction,
-      const std::set < variable >& vars_set,
-      std::set < variable >& vars_result_set)
-    {
-      for (const action& ma: multiaction)
-      {
-        filter_vars_by_termlist(ma.arguments().begin(), ma.arguments().end(),vars_set,vars_result_set);
-      }
-      return;
-    }
-
-    void filter_vars_by_assignmentlist(
-      const assignment_list& assignments,
-      const variable_list& parameters,
-      const std::set < variable >& vars_set,
-      std::set < variable >& vars_result_set)
-    {
-      const auto& l= parameters | std::views::transform([](const variable& v) { return atermpp::down_cast<data_expression>(v); });
-      filter_vars_by_termlist(l.begin(),l.end(),vars_set,vars_result_set);
-      for (const assignment& a: assignments)
-      {
-        filter_vars_by_term(a.rhs(),vars_set,vars_result_set);
-      }
-    }
-
-    bool occursinpCRLterm(const variable& var,
-                          const process_expression& p,
-                          const bool strict)
-    {
-      if (is_choice(p))
-      {
-        return occursinpCRLterm(var,choice(p).left(),strict)||
-               occursinpCRLterm(var,choice(p).right(),strict);
-      }
-      if (is_seq(p))
-      {
-        return occursinpCRLterm(var,seq(p).left(),strict)||
-               occursinpCRLterm(var,seq(p).right(),strict);
-      }
-      if (is_if_then(p))
-      {
-        return occursinterm(if_then(p).condition(), var) ||
-               occursinpCRLterm(var,if_then(p).then_case(),strict);
-      }
-
-      if (is_sum(p))
-      {
-        if (strict)
-        {
-          return occursintermlist(var,variable_list_to_data_expression_list(sum(p).variables())) ||
-                 occursinpCRLterm(var,sum(p).operand(),strict);
-        /* below appears better? , but leads
-           to errors. Should be investigated. */
-        }
-        else
-        {
-          return (!occursintermlist(var, variable_list_to_data_expression_list(sum(p).variables())))
-                 && occursinpCRLterm(var, sum(p).operand(), strict);
-        }
-      }
-      if (is_stochastic_operator(p))
-      {
-        const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(p);
-        if (strict)
-        {
-          return occursintermlist(var,variable_list_to_data_expression_list(sto.variables())) ||
-                      occursinterm(sto.distribution(), var) ||
-                      occursinpCRLterm(var,sto.operand(),strict);
-        }
-        else
-        {
-          return (!occursintermlist(var,variable_list_to_data_expression_list(sto.variables()))) &&
-                      (occursinterm(sto.distribution(), var) ||
-                       occursinpCRLterm(var,sto.operand(),strict));
-        }
-      }
-      if (is_process_instance_assignment(p))
-      {
-        return occursintermlist(var,process_instance_assignment(p).assignments(),process_instance_assignment(p).identifier());
-      }
-      if (is_action(p))
-      {
-        return occursintermlist(var,action(p).arguments());
-      }
-      if (is_sync(p))
-      {
-        return occursinpCRLterm(var,process::sync(p).left(),strict)||
-               occursinpCRLterm(var,process::sync(p).right(),strict);
-      }
-      if (is_at(p))
-      {
-        return occursinterm(at(p).time_stamp(), var) ||
-               occursinpCRLterm(var,at(p).operand(),strict);
-      }
-      if (is_delta(p))
-      {
-        return false;
-      }
-      if (is_tau(p))
-      {
-        return false;
-      }
-      throw mcrl2::runtime_error("unexpected process format in occursinCRLterm " + process::pp(p));
-      return false;
-    }
-
     template <IsSubstitution MutableSubstitution>
     void alphaconvertprocess(
       variable_list& sumvars,
@@ -1427,10 +1250,11 @@ class specification_basic_type
          by unique ones if these variables occur in the process expression p.
          The substitution sigma contains the renaming. */
       variable_vector newsumvars;
+      const std::set<variable> occurring_variables = free_and_sum_bound_variables(p);
 
       for (const variable& var: sumvars)
       {
-        if (occursinpCRLterm(var,p,true))
+        if (mcrl2::utilities::detail::contains(occurring_variables, var))
         {
           const variable newvar=get_fresh_variable(var.name(),var.sort());
           newsumvars.push_back(newvar);
@@ -1459,8 +1283,7 @@ class specification_basic_type
 
       for (const variable& var: sumvars)
       {
-        if (occursintermlist(var,variable_list_to_data_expression_list(occurvars)) ||
-            occursintermlist(var,occurterms))
+        if (mcrl2::utilities::detail::contains(occurvars, var) || data::search_free_variable(occurterms, var))
         {
           const variable newvar=get_fresh_variable(var.name(),var.sort());
           newsumvars.push_front(newvar);
@@ -1472,13 +1295,6 @@ class specification_basic_type
         }
       }
       sumvars=reverse(newsumvars);
-    }
-
-    std::set< variable > find_free_variables_process(const process_expression& p)
-    {
-      std::set<variable> free_variables_in_p_new;
-      free_variables_in_p_new=process::find_free_variables(p);
-      return free_variables_in_p_new;
     }
 
     /* Remove assignments that do not appear in the parameter list. */
@@ -1876,9 +1692,10 @@ class specification_basic_type
       const process_expression& body)
     {
       variable_vector result;
+      const std::set<variable> free_variables = process::find_free_variables(body);
       for(const variable& p: parameters)
       {
-        if (occursinpCRLterm(p,body,false))
+        if (mcrl2::utilities::detail::contains(free_variables, p))
         {
           result.push_back(p);
         }
@@ -3029,9 +2846,11 @@ class specification_basic_type
                          const std::set<variable>& variables_bound_in_sum)
     {
       assignment_vector result;
+      const std::set<variable> free_variables = process::find_free_variables(t);
       for(const variable& v: vl)
       {
-        if (variables_bound_in_sum.count(v)>0 && occursinpCRLterm(v,t,false))
+        if (mcrl2::utilities::detail::contains(variables_bound_in_sum, v)
+            && mcrl2::utilities::detail::contains(free_variables, v))
         {
           result.emplace_back(v, v); // Here an identity assignment is used, as it is possible
                                      // that the *i at the lhs is not the same variable as *i at the rhs.
@@ -7192,7 +7011,7 @@ class specification_basic_type
       if (is_variable(actiontime))
       {
         const variable& t = atermpp::down_cast<variable>(actiontime);
-        if (occursintermlist(t, variable_list_to_data_expression_list(sumvars)) && !occursinterm(condition, t))
+        if (mcrl2::utilities::detail::contains(sumvars, t) && !occursinterm(condition, t))
         {
           return true;
         }
@@ -9948,76 +9767,6 @@ class specification_basic_type
       }
     }
 
-  public:
-    /********************** SieveProcDataVars ***********************/
-
-    variable_list SieveProcDataVarsSummands(
-      const std::set <variable>& vars,
-      const stochastic_action_summand_vector& action_summands,
-      const deadlock_summand_vector& deadlock_summands,
-      const variable_list& parameters)
-    {
-      /* In this routine it is checked which free variables
-         in vars occur in the summands. Those variables
-         that occur in the summands are returned. The
-         parameters are needed to check occurrences of vars
-         in the assignment list */
-
-      std::set < variable > vars_set(vars.begin(),vars.end());
-      std::set < variable > vars_result_set;
-
-      for (const deadlock_summand& smd: deadlock_summands)
-      {
-        if (smd.deadlock().has_time())
-        {
-          filter_vars_by_term(smd.deadlock().time(),vars_set,vars_result_set);
-        }
-        filter_vars_by_term(smd.condition(),vars_set,vars_result_set);
-      }
-      for (const stochastic_action_summand& smd: action_summands)
-      {
-        filter_vars_by_multiaction(smd.multi_action().actions(),vars_set,vars_result_set);
-        filter_vars_by_assignmentlist(smd.assignments(),parameters,vars_set,vars_result_set);
-
-        if (smd.multi_action().has_time())
-        {
-          filter_vars_by_term(smd.multi_action().time(),vars_set,vars_result_set);
-        }
-        filter_vars_by_term(smd.condition(),vars_set,vars_result_set);
-        filter_vars_by_term(smd.distribution().distribution(),vars_set,vars_result_set);
-      }
-      variable_list result;
-      for (const mcrl2::data::variable& i: std::ranges::reverse_view(vars_result_set))
-      {
-        result.push_front(i);
-      }
-
-      return result;
-    }
-
-  public:
-    variable_list SieveProcDataVarsAssignments(
-      const std::set <variable>& vars,
-      const data_expression_list& initial_state_expressions)
-    {
-      const std::set < variable > vars_set(vars.begin(),vars.end());
-      std::set < variable > vars_result_set;
-
-
-      filter_vars_by_termlist(initial_state_expressions.begin(),
-                              initial_state_expressions.end(),
-                              vars_set,
-                              vars_result_set);
-
-      variable_list result;
-      for (const mcrl2::data::variable& i: std::ranges::reverse_view(vars_result_set))
-      {
-        result.push_front(i);
-      }
-
-      return result;
-    }
-
     /**************** transform **************************************/
   public:
     void transform(
@@ -10122,21 +9871,21 @@ mcrl2::lps::stochastic_specification mcrl2::lps::linearise(
                               sort_real::real_one());
   spec.transform(init,action_summands,deadlock_summands,parameters,initial_state,initial_distribution);
 
-  // compute global variables
-  data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,action_summands,deadlock_summands,parameters);
-  data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state);
-  std::set<data::variable> global_variables;
-  global_variables.insert(globals1.begin(), globals1.end());
-  global_variables.insert(globals2.begin(), globals2.end());
   stochastic_linear_process lps(parameters,
                                 deadlock_summands,
                                 action_summands);
-  lps::stochastic_specification spec1(
-      spec.data,
-      spec.acts,
-      global_variables,
-      lps,
-      stochastic_process_initializer(initial_state,initial_distribution));
+  const stochastic_process_initializer initial_process(initial_state, initial_distribution);
+
+  // The global variables are the free variables of the linear process and its initial state that are declared as
+  // global variables; this includes global variables inside lambdas, quantifiers and where clauses.
+  std::set<data::variable> free_variables = lps::find_free_variables(lps);
+  lps::find_free_variables(initial_process, std::inserter(free_variables, free_variables.end()));
+  std::set<data::variable> global_variables;
+  std::ranges::copy_if(free_variables,
+    std::inserter(global_variables, global_variables.end()),
+    [&](const data::variable& v) { return spec.global_variables.contains(v); });
+
+  lps::stochastic_specification spec1(spec.data, spec.acts, global_variables, lps, initial_process);
 
   // add missing sorts to the data specification
   lps::complete_data_specification(spec1);
