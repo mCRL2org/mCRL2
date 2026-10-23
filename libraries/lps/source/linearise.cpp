@@ -5411,8 +5411,17 @@ class specification_basic_type
 
             //store new declarations in return value w
             sortId = sort_id;
-            const function_symbol_vector& constructors=spec.data.constructors(sort_id);
+            // The constructors are taken in the order of the structured sort, and not from
+            // spec.data.constructors(sort_id): the order in which the data specification returns them can
+            // differ between runs, as it collects them in a std::set ordered on the addresses of terms.
+            function_symbol_vector constructors;
+            for (const structured_sort_constructor& c: sort_struct.constructors())
+            {
+              constructors.push_back(c.constructor_function(sort_id));
+            }
             assert(constructors.size()==n);
+            assert(std::is_permutation(constructors.begin(), constructors.end(),
+                                       spec.data.constructors(sort_id).begin(), spec.data.constructors(sort_id).end()));
             elementnames = data::data_expression_list(constructors.begin(),constructors.end());
           }
         }
