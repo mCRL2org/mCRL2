@@ -36,6 +36,7 @@
 #include <ranges>
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_structural_order.h"
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/enumerator.h"
@@ -69,6 +70,12 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::process;
+
+// Sets and maps of process identifiers that are iterated use the structural order on terms. The default order on
+// terms compares addresses, which differ between runs, and would make the result of linearisation nondeterministic.
+using process_identifier_set = std::set<process_identifier, atermpp::structural_less>;
+template <typename T>
+using process_identifier_map = std::map<process_identifier, T, atermpp::structural_less>;
 
 /*  Preamble */
 
@@ -735,6 +742,9 @@ class specification_basic_type
       const bool containstime,
       process_identifier& p) const
     {
+      // If several declarations match, the one with the structurally least name is chosen; objectdata is ordered
+      // on the addresses of terms, so taking the first match would be nondeterministic.
+      bool found=false;
       for(const std::pair<const aterm,objectdatatype>& d: objectdata)
       {
         if (d.second.object==proc &&
@@ -742,13 +752,14 @@ class specification_basic_type
             d.second.processbody==body &&
             d.second.canterminate==canterminate &&
             d.second.containstime==containstime &&
-            d.second.processstatus==s)
+            d.second.processstatus==s &&
+            (!found || atermpp::structural_less()(d.second.objectname, p.name())))
         {
           p=process_identifier(d.second.objectname,d.second.parameters);
-          return true;
+          found=true;
         }
       }
-      return false;
+      return found;
     }
 
 
@@ -1066,7 +1077,7 @@ class specification_basic_type
 
     void collectPcrlProcesses_term(const process_expression& body,  // Intentionally not a reference.
                                    std::vector <process_identifier>& pcrlprocesses,
-                                   std::set <process_identifier>& visited)
+                                   process_identifier_set& visited)
     {
       if (is_if_then(body))
       {
@@ -1176,7 +1187,7 @@ class specification_basic_type
     void collectPcrlProcesses(
       const process_identifier& procDecl,
       std::vector <process_identifier>& pcrlprocesses,
-      std::set <process_identifier>& visited)
+      process_identifier_set& visited)
     {
       if (visited.count(procDecl)==0)
       {
@@ -1194,7 +1205,7 @@ class specification_basic_type
       const process_identifier& procDecl,
       std::vector <process_identifier>& pcrlprocesses)
     {
-      std::set <process_identifier> visited;
+      process_identifier_set visited;
       collectPcrlProcesses(procDecl, pcrlprocesses, visited);
     }
 
@@ -3637,7 +3648,7 @@ class specification_basic_type
     /* make_pCRL_procs searches for all process identifiers reachable from id in pCRL equations. */
 
     void make_pCRL_procs(const process_identifier& id,
-                         std::set<process_identifier>& reachable_process_identifiers)
+                         process_identifier_set& reachable_process_identifiers)
     {
       if (reachable_process_identifiers.count(id)==0)  // not found
       {
@@ -3648,7 +3659,7 @@ class specification_basic_type
     }
 
     void make_pCRL_procs(const process_expression& t,
-                         std::set<process_identifier>& reachable_process_identifiers)
+                         process_identifier_set& reachable_process_identifiers)
     {
       if (is_choice(t))
       {
@@ -3713,13 +3724,13 @@ class specification_basic_type
     */
 
     static
-    process_identifier get_last(const process_identifier& id, const std::map< process_identifier, process_identifier >& identifier_identifier_map)
+    process_identifier get_last(const process_identifier& id, const process_identifier_map<process_identifier>& identifier_identifier_map)
     {
       process_identifier target_id=id;
       bool ready=false;
       do
       {
-        const std::map< process_identifier, process_identifier >::const_iterator i=identifier_identifier_map.find(target_id);
+        const process_identifier_map<process_identifier>::const_iterator i=identifier_identifier_map.find(target_id);
         if (i==identifier_identifier_map.end())
         {
           ready=true;
@@ -3736,7 +3747,7 @@ class specification_basic_type
 
     static
     void set_proc_identifier_map(
-            std::map< process_identifier, process_identifier >& identifier_identifier_map,
+            process_identifier_map<process_identifier>& identifier_identifier_map,
             const process_identifier& id1_,
             const process_identifier& id2_,
             const process_identifier& initial_process)
@@ -3758,9 +3769,9 @@ class specification_basic_type
     }
 
     static
-    void complete_proc_identifier_map(std::map< process_identifier, process_identifier >& identifier_identifier_map)
+    void complete_proc_identifier_map(process_identifier_map<process_identifier>& identifier_identifier_map)
     {
-      std::map< process_identifier, process_identifier > new_identifier_identifier_map;
+      process_identifier_map<process_identifier> new_identifier_identifier_map;
       for(const std::pair<const process_identifier, process_identifier >& p: identifier_identifier_map)
       {
         new_identifier_identifier_map[p.first]=get_last(p.second,identifier_identifier_map);
@@ -3780,15 +3791,15 @@ class specification_basic_type
     {
       using result_type = process_identifier;
       using argument_type = process_identifier;
-      const std::map< process_identifier, process_identifier >& m_map;
+      const process_identifier_map<process_identifier>& m_map;
 
-      make_substitution(const std::map< process_identifier, process_identifier >& map)
+      make_substitution(const process_identifier_map<process_identifier>& map)
         : m_map(map)
       {}
 
       process_identifier operator()(const process_identifier& id) const
       {
-        const std::map< process_identifier, process_identifier >::const_iterator i=m_map.find(id);
+        const process_identifier_map<process_identifier>::const_iterator i=m_map.find(id);
         if (i==m_map.end()) // Not found
         {
           return id;
@@ -3797,18 +3808,20 @@ class specification_basic_type
       }
     };
 
-    std::set< process_identifier >
-          minimize_set_of_reachable_process_identifiers(const std::set<process_identifier>& reachable_process_identifiers,
+    process_identifier_set
+          minimize_set_of_reachable_process_identifiers(const process_identifier_set& reachable_process_identifiers,
                                                         const process_identifier& initial_process)
     {
       assert(reachable_process_identifiers.count(initial_process)>0);
       using parameters_process_pair = std::pair<variable_list, process_expression>;
       using mapping_type = std::map<std::pair<variable_list, process_expression>, process_identifier>;
-      using mapping_type_pair = std::pair<const std::pair<variable_list, process_expression>, process_identifier>;
 
-      /* First put the identifiers in reachable_process_identifiers in the process mapping */
+      /* First put the identifiers in reachable_process_identifiers in the process mapping. The keys of
+         process_mapping are also stored in process_mapping_keys, in the order of insertion. The mapping is iterated
+         in that order, because the order of the map itself depends on the addresses of the terms. */
       mapping_type process_mapping;
-      std::map< process_identifier, process_identifier > identifier_identifier_map;
+      std::vector<parameters_process_pair> process_mapping_keys;
+      process_identifier_map<process_identifier> identifier_identifier_map;
       for(const process_identifier& id: reachable_process_identifiers)
       {
         objectdatatype& object=objectIndex(id);
@@ -3817,6 +3830,7 @@ class specification_basic_type
         if (i==process_mapping.end())   // Not found.
         {
           process_mapping[p]=id;
+          process_mapping_keys.push_back(p);
         }
         else
         {
@@ -3831,34 +3845,39 @@ class specification_basic_type
          * of the identifier_identifier_map. If this yields new process_identifiers to be identified store
          * these in new_proc_identifier_map. Do this until no process_identifiers are mapped onto
          * each other anymore. */
-        std::map< process_identifier, process_identifier > new_identifier_identifier_map;
+        process_identifier_map<process_identifier> new_identifier_identifier_map;
         mapping_type new_process_mapping;
-        for(const mapping_type_pair& p: process_mapping)
+        std::vector<parameters_process_pair> new_process_mapping_keys;
+        for(const parameters_process_pair& p: process_mapping_keys)
         {
+          const process_identifier& id=process_mapping.at(p);
           const make_substitution sigma(identifier_identifier_map);
-          const parameters_process_pair p_new(p.first.first, replace_process_identifiers( p.first.second, sigma));
+          const parameters_process_pair p_new(p.first, replace_process_identifiers(p.second, sigma));
           mapping_type::const_iterator i=new_process_mapping.find(p_new);
           if (i==new_process_mapping.end())   // Not found.
           {
-            new_process_mapping[p_new]=sigma(p.second);
+            new_process_mapping[p_new]=sigma(id);
+            new_process_mapping_keys.push_back(p_new);
           }
           else
           {
-            set_proc_identifier_map(new_identifier_identifier_map,sigma(p.second),sigma(i->second),initial_process);
+            set_proc_identifier_map(new_identifier_identifier_map,sigma(id),sigma(i->second),initial_process);
           }
         }
         complete_proc_identifier_map(new_identifier_identifier_map);
         identifier_identifier_map.swap(new_identifier_identifier_map);
         process_mapping.swap(new_process_mapping);
+        process_mapping_keys.swap(new_process_mapping_keys);
       }
 
       /* Store the pairs from process mapping into result */
-      std::set< process_identifier > result;
-      for(const mapping_type_pair& p: process_mapping)
+      process_identifier_set result;
+      for(const parameters_process_pair& p: process_mapping_keys)
       {
-        result.insert(p.second);
-        objectdatatype& object=objectIndex(p.second);
-        object.processbody=p.first.second;
+        const process_identifier& id=process_mapping.at(p);
+        result.insert(id);
+        objectdatatype& object=objectIndex(id);
+        object.processbody=p.second;
       }
       assert(result.count(initial_process)>0);
       return result;
@@ -3900,15 +3919,15 @@ class specification_basic_type
        The initial distribution of the initial process is reported back in
        initial_stochastic_distribution, including if necessary adapted sets of arguments. */
 
-    std::set< process_identifier >
+    process_identifier_set
               remove_stochastic_operators_from_front(
-                   const std::set< process_identifier >& reachable_process_identifiers,
+                   const process_identifier_set& reachable_process_identifiers,
                    process_identifier& initial_process_id, // If parameters change, another initial_process_id will be substituted.
                    stochastic_distribution& initial_stochastic_distribution)
     {
       /* First obtain the stochastic distribution for each process variable. */
-      std::map< process_identifier, process_pid_pair > processes_with_stochastic_distribution_first;
-      std::set< process_identifier > result;
+      process_identifier_map<process_pid_pair> processes_with_stochastic_distribution_first;
+      process_identifier_set result;
       for(const process_identifier& p: reachable_process_identifiers)
       {
         objectdatatype& object = objectIndex(p);
@@ -4039,7 +4058,7 @@ class specification_basic_type
 
     // While collecting the parameter list the process parameters that are part of the process identifiers may change.
     // This means the list pCRLprocs may change.
-    variable_list collectparameterlist(std::set<process_identifier>& pCRLprocs)
+    variable_list collectparameterlist(process_identifier_set& pCRLprocs)
                                        // mutable_indexed_substitution<>& parameter_renaming)
     {
       mutable_indexed_substitution<> parameter_renaming;  // Used to rename variables with the same name but different sorts.
@@ -4050,7 +4069,7 @@ class specification_basic_type
         parameters=joinparameters(parameters,object.parameters, parameter_renaming);
       }
       // Apply the parameter renaming.
-      std::set<process_identifier> new_pCRLprocs;
+      process_identifier_set new_pCRLprocs;
       for (const process_identifier& p: pCRLprocs)
       {
         objectdatatype object=objectIndex(p);
@@ -4067,7 +4086,7 @@ class specification_basic_type
     /****************  Declare local datatypes  ******************************/
 
     void declare_control_state(
-      const std::set < process_identifier >& pCRLprocs)
+      const process_identifier_set& pCRLprocs)
     {
       create_enumeratedtype(pCRLprocs.size());
     }
@@ -4173,7 +4192,7 @@ class specification_basic_type
         stacklisttype(const variable_list& parlist,
                       specification_basic_type& spec,
                       const bool regular,
-                      const std::set < process_identifier >& pCRLprocs,
+                      const process_identifier_set& pCRLprocs,
                       const bool singlecontrolstate)
         {
           assert(pCRLprocs.size()>0);
@@ -4385,7 +4404,7 @@ class specification_basic_type
 
     data_expression correctstatecond(
       const process_identifier& procId,
-      const std::set < process_identifier >& pCRLproc,
+      const process_identifier_set& pCRLproc,
       const stacklisttype& stack,
       int regular)
     {
@@ -4678,7 +4697,7 @@ class specification_basic_type
       const process_identifier& procId,
       const assignment_list& args,
       const stacklisttype& stack,
-      const std::set < process_identifier >& pCRLprocs,
+      const process_identifier_set& pCRLprocs,
       bool singlestate,
       const variable_list& stochastic_variables)
     {
@@ -4706,7 +4725,7 @@ class specification_basic_type
     assignment_list make_procargs_regular(
       const process_expression& t,
       const stacklisttype& stack,
-      const std::set < process_identifier >& pcrlprcs,
+      const process_identifier_set& pcrlprcs,
       const bool singlestate,
       const variable_list& stochastic_variables)
     {
@@ -4737,7 +4756,7 @@ class specification_basic_type
       const assignment_list& args,
       const data_expression_list& t2,
       const stacklisttype& stack,
-      const std::set < process_identifier >& pCRLprocs,
+      const process_identifier_set& pCRLprocs,
       const variable_list& vars,
       const variable_list& stochastic_variables)
     {
@@ -4765,7 +4784,7 @@ class specification_basic_type
     data_expression make_procargs_stack(
       const process_expression& t,
       const stacklisttype& stack,
-      const std::set < process_identifier >& pcrlprcs,
+      const process_identifier_set& pcrlprcs,
       const variable_list& vars,
       const variable_list& stochastic_variables)
     {
@@ -4818,7 +4837,7 @@ class specification_basic_type
     assignment_list make_procargs(
       const process_expression& t,
       const stacklisttype& stack,
-      const std::set < process_identifier >& pcrlprcs,
+      const process_identifier_set& pcrlprcs,
       const variable_list& vars,
       const bool regular,
       const bool singlestate,
@@ -4963,7 +4982,7 @@ class specification_basic_type
     data_expression_list make_initialstate(
       const process_identifier& initialProcId,
       const stacklisttype& stack,
-      const std::set < process_identifier >& pcrlprcs,
+      const process_identifier_set& pcrlprcs,
       const bool regular,
       const bool singlecontrolstate,
       const stochastic_distribution& initial_stochastic_distribution)
@@ -5061,7 +5080,7 @@ class specification_basic_type
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       process_expression summandterm,
-      const std::set < process_identifier >& pCRLprocs,
+      const process_identifier_set& pCRLprocs,
       const stacklisttype& stack,
       const bool regular,
       const bool singlestate,
@@ -5288,7 +5307,7 @@ class specification_basic_type
       const stacklisttype& stack,
       const bool regular,
       const bool singlestate,
-      const std::set < process_identifier >& pCRLprocs)
+      const process_identifier_set& pCRLprocs)
     {
       if (is_choice(body))
       {
@@ -5326,7 +5345,7 @@ class specification_basic_type
     void collectsumlist(
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
-      const std::set < process_identifier >& pCRLprocs,
+      const process_identifier_set& pCRLprocs,
       const variable_list& pars,
       const stacklisttype& stack,
       bool regular,
@@ -6965,7 +6984,7 @@ class specification_basic_type
       assert(deadlock_summands.empty());
 
       bool singlecontrolstate=false;
-      std::set< process_identifier > reachable_process_identifiers;
+      process_identifier_set reachable_process_identifiers;
       make_pCRL_procs(procId, reachable_process_identifiers);
 
       /* now reachable process identifiers contains a list of all process id's in this pCRL process.
@@ -6975,7 +6994,7 @@ class specification_basic_type
          appropriate substitution in the right hand side.
          The result is a map from process_identifiers to adapted process bodies.
       */
-      const std::set< process_identifier > reduced_set_of_process_identifiers =
+      const process_identifier_set reduced_set_of_process_identifiers =
           minimize_set_of_reachable_process_identifiers(reachable_process_identifiers,procId);
 
       /* The equations can still contain stochastic operators that occur before the first action.
@@ -6985,7 +7004,7 @@ class specification_basic_type
          ids of processes occur in stochastic_normalized_process_identifiers. */
 
       process_identifier initial_proc_id=procId;  // the initial process id may be renamed.
-      std::set< process_identifier > stochastic_normalized_process_identifiers =
+      process_identifier_set stochastic_normalized_process_identifiers =
                   remove_stochastic_operators_from_front(reduced_set_of_process_identifiers, initial_proc_id, initial_stochastic_distribution);
 
       /* collect the parameters, but assume that variables
@@ -8727,7 +8746,7 @@ class specification_basic_type
     bool containstimebody(
       const process_expression& t,
       bool* stable,
-      std::set < process_identifier >& visited,
+      process_identifier_set& visited,
       bool allowrecursion,
       bool& contains_if_then)
     {
@@ -8847,7 +8866,7 @@ class specification_basic_type
     bool containstime_rec(
       const process_identifier& procId,
       bool* stable,
-      std::set < process_identifier >& visited,
+      process_identifier_set& visited,
       bool& contains_if_then)
     {
       objectdatatype& object=objectIndex(procId);
@@ -8878,7 +8897,7 @@ class specification_basic_type
 
     bool containstimebody(const process_expression& t)
     {
-      std::set < process_identifier > visited;
+      process_identifier_set visited;
       bool stable;
       bool contains_if_then;
       return containstimebody(t,&stable,visited,false,contains_if_then);
@@ -8897,7 +8916,7 @@ class specification_basic_type
 
       while (!stable)
       {
-        std::set < process_identifier > visited;
+        process_identifier_set visited;
         stable=true;
         containstime_rec(procId,&stable,visited,contains_if_then);
       }
@@ -8907,7 +8926,7 @@ class specification_basic_type
 
     process_expression transform_initial_distribution_term(
                             const process_expression& t,
-                            const std::map < process_identifier, process_pid_pair >& processes_with_initial_distribution)
+                            const process_identifier_map<process_pid_pair>& processes_with_initial_distribution)
     {
       if (is_process_instance_assignment(t))
       {
@@ -9367,7 +9386,7 @@ class specification_basic_type
     bool canterminatebody(
       const process_expression& t,
       bool& stable,
-      std::set < process_identifier >& visited,
+      process_identifier_set& visited,
       const bool allowrecursion)
     {
       if (is_merge(t))
@@ -9484,7 +9503,7 @@ class specification_basic_type
     bool canterminate_rec(
       const process_identifier& procId,
       bool& stable,
-      std::set < process_identifier >& visited)
+      process_identifier_set& visited)
     {
       objectdatatype& object=objectIndex(procId);
 
@@ -9503,7 +9522,7 @@ class specification_basic_type
 
     bool canterminatebody(const process_expression& t)
     {
-      std::set < process_identifier > visited;
+      process_identifier_set visited;
       bool stable=false;
       return canterminatebody(t,stable,visited,false);
     }
@@ -9513,7 +9532,7 @@ class specification_basic_type
       bool stable=false;
       while (!stable)
       {
-        std::set < process_identifier > visited;
+        process_identifier_set visited;
         stable=true;
         canterminate_rec(procId,stable,visited);
       }
@@ -9522,7 +9541,7 @@ class specification_basic_type
     /*****  distinguishmCRLandpCRLprocsAndAddTerminatedAction  ******/
 
     process_identifier split_process(const process_identifier& procId,
-                                     std::map < process_identifier,process_identifier >& visited_id,
+                                     process_identifier_map<process_identifier>& visited_id,
                                      std::map < process_expression,process_expression >& visited_proc)
     {
       if (visited_id.count(procId)>0)
@@ -9573,7 +9592,7 @@ class specification_basic_type
 
     process_instance_assignment expand_process_instance_assignment(
                                  const process_instance_assignment& t,
-                                 std::set<process_identifier>& visited_processes)
+                                 process_identifier_set& visited_processes)
     {
       if (visited_processes.count(t.identifier())>0)
       {
@@ -9602,7 +9621,7 @@ class specification_basic_type
 
     process_instance_assignment expand_process_instance_assignment(const process_instance_assignment& t)
     {
-      std::set<process_identifier> visited_processes;
+      process_identifier_set visited_processes;
       return expand_process_instance_assignment(t,visited_processes);
     }
 
@@ -9626,7 +9645,7 @@ class specification_basic_type
        Nested stochastic operators are merged into one. */
     void transform_process_arguments(
             const process_identifier& procId,
-            std::set<process_identifier>& visited_processes)
+            process_identifier_set& visited_processes)
     {
       if (visited_processes.count(procId)==0)
       {
@@ -9644,7 +9663,7 @@ class specification_basic_type
        merges nested stochastic operators into one.  */
     void transform_process_arguments(const process_identifier& procId)
     {
-      std::set<process_identifier> visited_processes;
+      process_identifier_set visited_processes;
       transform_process_arguments(procId,visited_processes);
     }
 
@@ -9653,7 +9672,7 @@ class specification_basic_type
     process_expression transform_process_arguments_body(
       const process_expression& t,
       const std::set<variable>& bound_variables,
-      std::set<process_identifier>& visited_processes)
+      process_identifier_set& visited_processes)
     {
       if (is_process_instance(t))
       {
@@ -9788,7 +9807,7 @@ class specification_basic_type
 
     process_expression split_body(
       const process_expression& t,
-      std::map < process_identifier,process_identifier >& visited_id,
+      process_identifier_map<process_identifier>& visited_id,
       std::map < process_expression,process_expression>& visited_proc,
       const variable_list& parameters)
     {
@@ -9898,7 +9917,7 @@ class specification_basic_type
     process_identifier splitmCRLandpCRLprocsAndAddTerminatedAction(
                              const process_identifier& procId)
     {
-      std::map < process_identifier,process_identifier> visited_id;
+      process_identifier_map<process_identifier> visited_id;
       std::map < process_expression,process_expression> visited_proc;
       return split_process(procId,visited_id,visited_proc);
     }
