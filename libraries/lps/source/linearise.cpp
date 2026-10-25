@@ -1484,156 +1484,189 @@ class specification_basic_type
       return true;
     }
 
+    // Applies a substitution to a pCRL process and simplifies the result: conditions are rewritten, and delta@0 is
+    // removed from choices and sequences. The substitution is capture avoiding. A variable that is bound by a sum or
+    // a stochastic operator is renamed if it occurs in the substitution, either as a variable that is replaced or in
+    // a right hand side.
+    template<typename Substitution>
+    struct substitute_pcrl_builder
+      : public process::detail::add_capture_avoiding_replacement_with_an_identifier_generator<
+          process::data_expression_builder,
+          substitute_pcrl_builder<Substitution>,
+          Substitution,
+          set_identifier_generator>
+    {
+      using super = process::detail::add_capture_avoiding_replacement_with_an_identifier_generator<
+        process::data_expression_builder,
+        substitute_pcrl_builder<Substitution>,
+        Substitution,
+        set_identifier_generator>;
+      using super::apply;
+      using super::enter;
+      using super::leave;
+      using super::update;
+      using super::update_sigma;
+
+      specification_basic_type& spec;
+
+      substitute_pcrl_builder(Substitution& sigma, specification_basic_type& spec_)
+        : super(sigma, spec_.fresh_identifier_generator),
+          spec(spec_)
+      {}
+
+      // Renames the variables that occur in the substitution, and saves the replaced assignments in undo. Whether a
+      // variable is renamed is decided before the substitution is changed.
+      variable_list bind(const variable_list& variables, std::vector<std::pair<variable, data_expression>>& undo)
+      {
+        Substitution& sigma = update_sigma.substitution();
+        std::vector<bool> rename;
+        std::transform(variables.begin(),
+          variables.end(),
+          std::back_inserter(rename),
+          [&](const variable& v) { return sigma(v) != v || sigma.variable_occurs_in_a_rhs(v); });
+        variable_vector result;
+        std::size_t i = 0;
+        for (const variable& v: variables)
+        {
+          if (rename[i++])
+          {
+            const variable w = spec.get_fresh_variable(v.name(), v.sort());
+            undo.emplace_back(v, sigma(v));
+            sigma[v] = w;
+            result.push_back(w);
+          }
+          else
+          {
+            result.push_back(v);
+          }
+        }
+        return variable_list(result.begin(), result.end());
+      }
+
+      void unbind(const std::vector<std::pair<variable, data_expression>>& undo)
+      {
+        Substitution& sigma = update_sigma.substitution();
+        for (const std::pair<variable, data_expression>& assignment: undo)
+        {
+          sigma[assignment.first] = assignment.second;
+        }
+      }
+
+      template<class T>
+      void apply(T& result, const process::choice& x)
+      {
+        process_expression left;
+        apply(left, x.left());
+        if (left == spec.delta_at_zero())
+        {
+          apply(result, x.right());
+          return;
+        }
+        process_expression right;
+        apply(right, x.right());
+        if (right == spec.delta_at_zero())
+        {
+          result = left;
+          return;
+        }
+        process::make_choice(result, left, right);
+      }
+
+      template<class T>
+      void apply(T& result, const process::seq& x)
+      {
+        process_expression left;
+        apply(left, x.left());
+        if (left == spec.delta_at_zero())
+        {
+          result = left;
+          return;
+        }
+        process_expression right;
+        apply(right, x.right());
+        process::make_seq(result, left, right);
+      }
+
+      template<class T>
+      void apply(T& result, const process::if_then& x)
+      {
+        data_expression condition;
+        apply(condition, x.condition());
+        condition = spec.RewriteTerm(condition);
+        if (condition == sort_bool::false_())
+        {
+          result = spec.delta_at_zero();
+          return;
+        }
+        if (condition == sort_bool::true_())
+        {
+          apply(result, x.then_case());
+          return;
+        }
+        process_expression then_case;
+        apply(then_case, x.then_case());
+        process::make_if_then(result, condition, then_case);
+      }
+
+      template<class T>
+      void apply(T& result, const process::if_then_else& x)
+      {
+        data_expression condition;
+        apply(condition, x.condition());
+        condition = spec.RewriteTerm(condition);
+        if (condition == sort_bool::false_())
+        {
+          apply(result, x.else_case());
+          return;
+        }
+        if (condition == sort_bool::true_())
+        {
+          apply(result, x.then_case());
+          return;
+        }
+        process_expression then_case;
+        apply(then_case, x.then_case());
+        process_expression else_case;
+        apply(else_case, x.else_case());
+        process::make_if_then_else(result, condition, then_case, else_case);
+      }
+
+      template<class T>
+      void apply(T& result, const process::sum& x)
+      {
+        std::vector<std::pair<variable, data_expression>> undo;
+        const variable_list variables = bind(x.variables(), undo);
+        process_expression operand;
+        apply(operand, x.operand());
+        unbind(undo);
+        process::make_sum(result, variables, operand);
+      }
+
+      template<class T>
+      void apply(T& result, const process::stochastic_operator& x)
+      {
+        std::vector<std::pair<variable, data_expression>> undo;
+        const variable_list variables = bind(x.variables(), undo);
+        data_expression distribution;
+        apply(distribution, x.distribution());
+        process_expression operand;
+        apply(operand, x.operand());
+        unbind(undo);
+        process::make_stochastic_operator(result, variables, distribution, operand);
+      }
+    };
+
     /* The function below calculates sigma(p) and replaces
        all variables that are bound by a sum in p by unique
        variables */
-
-
-    /* The function below cannot be replace by replace_variables_capture_avoiding although
-     * the interfaces are the same. As yet it is unclear why, but the difference shows itself
-     * for instance when linearising lift3-final.mcrl2 and lift3_init.mcrl2 */
-    template <IsSubstitution Substitution>
-    process_expression substitute_pCRLproc(
-      const process_expression& p,
-      Substitution& sigma)
+    template<IsSubstitution Substitution>
+    process_expression substitute_pCRLproc(const process_expression& p, Substitution& sigma)
     {
-      if (is_choice(p))
-      {
-        process_expression left=substitute_pCRLproc(choice(p).left(),sigma);
-        if (left==delta_at_zero())
-        {
-          return substitute_pCRLproc(choice(p).right(),sigma);
-        }
-        process_expression right=substitute_pCRLproc(choice(p).right(),sigma);
-        if (right==delta_at_zero())
-        {
-          return left;
-        }
-        return choice(left,right);
-      }
-      if (is_seq(p))
-      {
-        process_expression q=substitute_pCRLproc(seq(p).left(),sigma);
-        if (q==delta_at_zero())
-        {
-          return q;
-        }
-        return seq(q, substitute_pCRLproc(seq(p).right(),sigma));
-      }
-      if (is_if_then(p))
-      {
-        data_expression condition=RewriteTerm(replace_variables_capture_avoiding_alt(if_then(p).condition(), sigma));
-        if (condition==sort_bool::false_())
-        {
-          return delta_at_zero();
-        }
-        if (condition==sort_bool::true_())
-        {
-          return substitute_pCRLproc(if_then(p).then_case(),sigma);
-        }
-        return if_then(condition,substitute_pCRLproc(if_then(p).then_case(),sigma));
-      }
-      if (is_if_then_else(p))
-      {
-        data_expression condition=RewriteTerm(replace_variables_capture_avoiding_alt(if_then_else(p).condition(), sigma));
-        if (condition==sort_bool::false_())
-        {
-          return substitute_pCRLproc(if_then_else(p).else_case(),sigma);
-        }
-        if (condition==sort_bool::true_())
-        {
-          return substitute_pCRLproc(if_then_else(p).then_case(),sigma);
-        }
-        return if_then_else(
-                 condition,
-                 substitute_pCRLproc(if_then_else(p).then_case(),sigma),
-                 substitute_pCRLproc(if_then_else(p).else_case(),sigma));
-      }
-
-      if (is_sum(p))
-      {
-        variable_list sumargs=sum(p).variables();
-        variable_list vars;
-        data_expression_list terms;
-
-        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-        {
-          vars=push_back(vars,i->first);
-          terms=push_back(terms,i->second);
-        }
-
-        maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma=sigma;
-        alphaconvert(sumargs,local_sigma,vars,terms);
-
-        return sum(sumargs,
-                   substitute_pCRLproc(sum(p).operand(),local_sigma));
-      }
-
-      if (is_stochastic_operator(p))
-      {
-        const stochastic_operator& sto=down_cast<const stochastic_operator>(p);
-        variable_list sumargs=sto.variables();
-        variable_list vars;
-        data_expression_list terms;
-
-        for( std::map < variable, data_expression >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-        {
-          vars=push_back(vars,i->first);
-          terms=push_back(terms,i->second);
-        }
-
-        maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma=sigma;
-        alphaconvert(sumargs,local_sigma,vars,terms);
-
-        return stochastic_operator(
-                            sumargs,
-                            replace_variables_capture_avoiding_alt(sto.distribution(),local_sigma),
-                            substitute_pCRLproc(sto.operand(),local_sigma));
-      }
-
-      if (is_process_instance_assignment(p))
-      {
-        const process_instance_assignment q(p);
-        objectdatatype& object=objectIndex(q.identifier());
-        const variable_list parameters=object.parameters;
-        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma);
-        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
-        return process_instance_assignment(q.identifier(),new_assignments);
-      }
-
-      if (is_action(p))
-      {
-        return action(action(p).label(),
-                      replace_variables_capture_avoiding_alt(action(p).arguments(), sigma));
-      }
-
-      if (is_at(p))
-      {
-        return at(substitute_pCRLproc(at(p).operand(),sigma),
-                      replace_variables_capture_avoiding_alt(at(p).time_stamp(),sigma));
-      }
-
-      if (is_delta(p))
-      {
-        return p;
-      }
-
-      if (is_tau(p))
-      {
-        return p;
-      }
-
-      if (is_sync(p))
-      {
-        return process::sync(
-                 substitute_pCRLproc(process::sync(p).left(),sigma),
-                 substitute_pCRLproc(process::sync(p).right(),sigma));
-      }
-
-      throw mcrl2::runtime_error("Internal error: expect a pCRL process (2) " + process::pp(p));
-      return process_expression();
+      substitute_pcrl_builder<Substitution> f(sigma, *this);
+      process_expression result;
+      f.apply(result, p);
+      return result;
     }
-
 
     // The function below transforms a ProcessAssignment to a Process, provided
     // that the process is defined in objectnames.
