@@ -50,6 +50,7 @@
 #include "mcrl2/lps/linearise_hide.h"
 #include "mcrl2/lps/linearise_rename.h"
 #include "mcrl2/lps/linearise_utility.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/replace_capture_avoiding_with_an_identifier_generator.h"
 #include "mcrl2/lps/sumelm.h"
 
@@ -1247,130 +1248,6 @@ class specification_basic_type
         }
       }
       return assignment_list(result.begin(),result.end());
-    }
-
-    /* Check whether the assignments occur in the same order in the list of parameters */
-    static bool check_assignment_list(
-              const assignment_list& assignments,
-              const variable_list& parameters)
-    {
-      assignment_list::iterator i=assignments.begin();
-      for(const variable& v: parameters)
-      {
-        if (i!=assignments.end() && v==i->lhs())
-        {
-          ++i;
-        }
-      }
-      return i==assignments.end();
-
-    }
-
-    /******************* substitute *****************************************/
-
-
-    template <IsSubstitution Substitution>
-    assignment_list substitute_assignmentlist(
-      const assignment_list& assignments,
-      const variable_list& parameters,
-      const bool replacelhs,
-      const bool replacerhs,
-      Substitution& sigma)
-    {
-      assert(check_assignment_list(assignments, parameters));
-      /* precondition: the variables in the assignment occur in
-         the same sequence as in the parameters, which stands for the
-         total list of parameters.
-
-         This function replaces the variables in vars by the terms in terms
-         in the right hand side of the assignments if replacerhs holds, and
-         in the lefthandside of an assignment if replacelhs holds. If for some variable
-         occuring in the parameterlist no assignment is present, whereas
-         this variable occurs in vars, an assignment for it is added.
-
-         It is not possible to use standard substitution functions to replace substitute_assignmentlis
-         because they do not take the parameters of processes into account.
-         For instance consider a process P(b:D)=... of which an instance P() exists.
-         If the substitution sigma(b)=t is applied to P() the result should be P(b=t).
-         The standard substitutions do not take this parameterlist into account, as it stands.
-      */
-
-      assert(replacelhs || replacerhs);
-      if (parameters.empty())
-      {
-        assert(assignments.empty());
-        return assignments;
-      }
-
-      const variable& parameter=parameters.front();
-
-      if (!assignments.empty())
-      {
-        const assignment& ass=assignments.front();
-        variable lhs=ass.lhs();
-        if (parameter==lhs)
-        {
-          /* The assignment refers to parameter par. Substitute its
-             left and righthandside */
-          data_expression rhs=ass.rhs();
-
-          if (replacelhs)
-          {
-            lhs = atermpp::down_cast<variable>(sigma(lhs));
-          }
-          if (replacerhs)
-          {
-            rhs=replace_variables_capture_avoiding_alt(rhs,sigma);
-          }
-
-          assignment_list result=
-                   substitute_assignmentlist(
-                     assignments.tail(),
-                     parameters.tail(),
-                     replacelhs,
-                     replacerhs,
-                     sigma);
-          result.push_front(assignment(lhs,rhs));
-          return result;
-        }
-      }
-
-      /* Here the first parameter is not equal to the first
-         assignment. So, we must find out whether a value
-         for this variable is substituted, that is different
-         from the variable, in which case an assignment must
-         be added. */
-
-      variable lhs=parameter;
-      data_expression rhs=parameter;
-
-      if (replacelhs)
-      {
-        lhs = atermpp::down_cast<data::variable>(sigma(lhs));
-      }
-      if (replacerhs)
-      {
-        rhs=replace_variables_capture_avoiding_alt(rhs,sigma);
-      }
-
-      if (lhs==rhs)
-      {
-        return substitute_assignmentlist(
-                 assignments,
-                 parameters.tail(),
-                 replacelhs,
-                 replacerhs,
-                 sigma);
-      }
-      assignment_list result=
-               substitute_assignmentlist(
-                 assignments,
-                 parameters.tail(),
-                 replacelhs,
-                 replacerhs,
-                 sigma);
-      result.push_front(assignment(lhs,rhs));
-      return result;
     }
 
     // Sort the assignments, such that they have the same order as the parameters
@@ -7116,27 +6993,18 @@ class specification_basic_type
         data_expression actiontime=smmnd.multi_action().time();
         assignment_list nextstate=smmnd.assignments();
 
-        condition=replace_variables_capture_avoiding_alt(condition, sigma_sumvars);
-        condition=replace_variables_capture_avoiding_alt(condition, sigma);
-
-        actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars);
-        actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma);
-        multiaction=lps::replace_variables_capture_avoiding_with_an_identifier_generator(multiaction, sigma_sumvars, fresh_identifier_generator);
-        multiaction=lps::replace_variables_capture_avoiding_with_an_identifier_generator(multiaction, sigma, fresh_identifier_generator);
-
-        distribution=stochastic_distribution(
-                       unique_stochastic_vars,
-                       replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_sumvars));
-        distribution=stochastic_distribution(
-                       unique_stochastic_vars,
-                       replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_stochastic_vars));
-        distribution=stochastic_distribution(
-                       distribution.variables(),
-                       replace_variables_capture_avoiding_alt(distribution.distribution(), sigma));
-
-        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_sumvars);
-        nextstate=substitute_assignmentlist(nextstate,pars,false,true,sigma_stochastic_vars);
-        nextstate=substitute_assignmentlist(nextstate,pars,true,true,sigma);
+        // First the summation and stochastic variables are renamed, then the parameters, below.
+        condition = replace_variables_capture_avoiding_alt(condition, sigma_sumvars);
+        actiontime = replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars);
+        multiaction = lps::replace_variables_capture_avoiding_with_an_identifier_generator(multiaction,
+          sigma_sumvars,
+          fresh_identifier_generator);
+        distribution = stochastic_distribution(unique_stochastic_vars,
+          replace_variables_capture_avoiding_alt(
+            replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_sumvars),
+            sigma_stochastic_vars));
+        nextstate = replace_variables_capture_avoiding_alt(nextstate, sigma_sumvars);
+        nextstate = replace_variables_capture_avoiding_alt(nextstate, sigma_stochastic_vars);
 
         result_action_summands.emplace_back(unique_sumvars,
             condition,
@@ -7144,13 +7012,8 @@ class specification_basic_type
             nextstate,
             distribution);
       }
-      pars=unique_pars;
-      action_summands.swap(result_action_summands);
 
       deadlock_summand_vector result_deadlock_summands;
-
-      assert(unique_pars.size()==pars.size());
-
       for (const deadlock_summand& smmnd: deadlock_summands)
       {
         const variable_list& sumvars=smmnd.summation_variables();
@@ -7158,21 +7021,21 @@ class specification_basic_type
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
         assert(unique_sumvars.size()==sumvars.size());
-        data_expression condition=smmnd.condition();
-        data_expression actiontime=smmnd.deadlock().time();
-
-        condition=replace_variables_capture_avoiding_alt(condition, sigma_sumvars);
-        condition=replace_variables_capture_avoiding_alt(condition, sigma);
-
-        actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars);
-        actiontime=replace_variables_capture_avoiding_alt(actiontime, sigma);
+        const data_expression condition = replace_variables_capture_avoiding_alt(smmnd.condition(), sigma_sumvars);
+        const data_expression actiontime
+          = replace_variables_capture_avoiding_alt(smmnd.deadlock().time(), sigma_sumvars);
 
         result_deadlock_summands.emplace_back(unique_sumvars,
             condition,
             smmnd.deadlock().has_time() ? deadlock(actiontime) : deadlock());
       }
-      pars=unique_pars;
-      result_deadlock_summands.swap(deadlock_summands);
+
+      stochastic_linear_process process(pars, result_deadlock_summands, result_action_summands);
+      lps::replace_process_parameters(process, sigma);
+      assert(process.process_parameters() == unique_pars);
+      pars = process.process_parameters();
+      action_summands = std::move(process.action_summands());
+      deadlock_summands = std::move(process.deadlock_summands());
     }
 
 

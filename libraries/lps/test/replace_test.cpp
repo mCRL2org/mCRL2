@@ -118,6 +118,42 @@ void test_replace_process_parameters()
   BOOST_CHECK(variables.find(b) == variables.end());
 }
 
+// The left hand sides of the assignments are renamed, also in a stochastic summand, and implicit assignments stay
+// implicit. The summation variable m and the stochastic variable c are not affected.
+void test_replace_process_parameters_stochastic()
+{
+  const std::string text = "act  a: Nat;\n"
+                           "proc P(n: Nat, b: Bool) =\n"
+                           "       sum m: Nat. (n < m) -> a(n) . dist c: Bool[if(c == b, 1, 0)] . P(n = m, b = c)\n"
+                           "     + (n == 0) -> a(n) . P(n = n + 1)\n"
+                           "     + delta;\n"
+                           "init P(0, true);\n";
+  const std::string expected_text
+    = "act  a: Nat;\n"
+      "proc P(n0: Nat, b0: Bool) =\n"
+      "       sum m: Nat. (n0 < m) -> a(n0) . dist c: Bool[if(c == b0, 1, 0)] . P(n0 = m, b0 = c)\n"
+      "     + (n0 == 0) -> a(n0) . P(n0 = n0 + 1)\n"
+      "     + delta;\n"
+      "init P(0, true);\n";
+  stochastic_specification spec;
+  parse_lps(text, spec);
+  stochastic_specification expected;
+  parse_lps(expected_text, expected);
+
+  data::mutable_map_substitution<> sigma;
+  sigma[variable("n", sort_nat::nat())] = variable("n0", sort_nat::nat());
+  sigma[variable("b", data::bool_())] = variable("b0", data::bool_());
+  lps::replace_process_parameters(spec, sigma);
+  BOOST_CHECK_EQUAL(lps::pp(spec), lps::pp(expected));
+
+  // The same for a stochastic linear process on its own.
+  stochastic_specification spec2;
+  parse_lps(text, spec2);
+  stochastic_linear_process process = spec2.process();
+  lps::replace_process_parameters(process, sigma);
+  BOOST_CHECK_EQUAL(lps::pp(process), lps::pp(expected.process()));
+}
+
 void test_replace_summand_variables()
 {
   std::string SPEC =
@@ -173,6 +209,7 @@ BOOST_AUTO_TEST_CASE(test_main)
   test_lps_substituter();
   test_lps_substitute();
   test_replace_process_parameters();
+  test_replace_process_parameters_stochastic();
   test_replace_summand_variables();
   test_action_list();
 }

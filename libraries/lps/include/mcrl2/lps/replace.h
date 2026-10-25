@@ -240,7 +240,22 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
     x.assignments() = assignments;
   }
 
+  void update(lps::stochastic_action_summand& x)
+  {
+    count = 1;
+    super::update(x);
+  }
+
   void update(lps::linear_process& x)
+  {
+    super::update(x);
+    count = 0;
+    data::variable_list process_parameters;
+    super::apply(process_parameters, x.process_parameters());
+    x.process_parameters() = process_parameters;
+  }
+
+  void update(lps::stochastic_linear_process& x)
   {
     super::update(x);
     count = 0;
@@ -265,6 +280,37 @@ template <data::IsSubstitution Substitution>
 void replace_process_parameters(specification& spec, Substitution sigma)
 {
   lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder, lps::add_data_variable_builder_binding>(sigma).update(spec);
+}
+
+/// \brief Applies a substitution to the process parameters of the stochastic specification spec.
+template<data::IsSubstitution Substitution>
+void replace_process_parameters(stochastic_specification& spec, Substitution sigma)
+{
+  lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder,
+    lps::add_data_variable_builder_binding>(sigma)
+    .update(spec);
+}
+
+/// \brief Applies a substitution to the process parameters of the linear process x.
+/// \details The substitution must map process parameters to variables. It is applied to the list of process
+///          parameters, to the left hand sides of the assignments and to the occurrences of the process parameters
+///          that are not bound by a summation variable or a variable of a stochastic distribution.
+template<data::IsSubstitution Substitution>
+void replace_process_parameters(linear_process& x, Substitution sigma)
+{
+  lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder,
+    lps::add_data_variable_builder_binding>(sigma)
+    .update(x);
+}
+
+/// \brief Applies a substitution to the process parameters of the stochastic linear process x.
+/// \details See replace_process_parameters for a linear process.
+template<data::IsSubstitution Substitution>
+void replace_process_parameters(stochastic_linear_process& x, Substitution sigma)
+{
+  lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder,
+    lps::add_data_variable_builder_binding>(sigma)
+    .update(x);
 }
 
 /// \brief Applies a substitution to the process parameters of the specification spec.
