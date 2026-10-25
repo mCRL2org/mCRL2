@@ -15,12 +15,17 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/real.h"
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/deadlock_summand.h"
 #include "mcrl2/lps/detail/configuration.h"
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/process/replace_capture_avoiding_with_an_identifier_generator.h"
 
+#include <algorithm>
+#include <iterator>
 #include <optional>
 
 namespace mcrl2::lps
@@ -219,6 +224,79 @@ inline
 bool occursinterm(const data::data_expression& t, const data::variable& var)
 {
   return data::search_free_variable(t, var);
+}
+
+/// \brief Renames the variables that satisfy avoid to fresh variables.
+/// \details This is used when a context in which the variables that satisfy avoid may occur free is moved into the
+///          scope of variables. The order of the variables is preserved.
+/// \param variables The variables that are renamed where needed.
+/// \param avoid A predicate on variables that holds for the variables that must be renamed. It must not depend on
+///              sigma.
+/// \param sigma A substitution, to which the assignment v := v' is added for every variable v that is renamed to v'.
+/// \param fresh_variable A function that returns a fresh variable with the name and sort of its argument.
+/// \return The variables, in which every variable that satisfies avoid is replaced by its fresh counterpart.
+template<typename Predicate, typename Substitution, typename FreshVariable>
+data::variable_list rename_variables_away(const data::variable_list& variables,
+  Predicate avoid,
+  Substitution& sigma,
+  FreshVariable fresh_variable)
+{
+  std::vector<data::variable> result;
+  std::transform(variables.begin(),
+    variables.end(),
+    std::back_inserter(result),
+    [&](const data::variable& v)
+    {
+      if (!avoid(v))
+      {
+        return v;
+      }
+      const data::variable w = fresh_variable(v);
+      sigma[v] = w;
+      return w;
+    });
+  return data::variable_list(result.begin(), result.end());
+}
+
+/// \brief Renames the variables bound by a sum that satisfy avoid, so that the sum can be put in a context in which
+///        these variables occur free.
+/// \param x A sum.
+/// \param avoid A predicate on variables that holds for the variables that must be renamed.
+/// \param id_generator The generator of fresh names, which must not have been used for other variables.
+/// \return A sum that is equal to x up to the names of the bound variables, of which no bound variable satisfies
+///         avoid.
+template<typename Predicate, typename IdentifierGenerator>
+process::sum rename_bound_variables_away(const process::sum& x, Predicate avoid, IdentifierGenerator& id_generator)
+{
+  data::maintain_variables_in_rhs<data::mutable_map_substitution<>> sigma;
+  const data::variable_list variables = rename_variables_away(x.variables(),
+    avoid,
+    sigma,
+    [&](const data::variable& v) { return data::variable(id_generator(v.name()), v.sort()); });
+  return process::sum(variables,
+    process::replace_variables_capture_avoiding_with_an_identifier_generator(x.operand(), sigma, id_generator));
+}
+
+/// \brief Renames the variables bound by a stochastic operator that satisfy avoid, so that the stochastic operator can
+///        be put in a context in which these variables occur free. The variables are renamed consistently in the
+///        distribution and in the operand.
+/// \param x A stochastic operator.
+/// \param avoid A predicate on variables that holds for the variables that must be renamed.
+/// \param id_generator The generator of fresh names, which must not have been used for other variables.
+/// \return A stochastic operator that is equal to x up to the names of the bound variables, of which no bound
+///         variable satisfies avoid.
+template<typename Predicate, typename IdentifierGenerator>
+process::stochastic_operator
+rename_bound_variables_away(const process::stochastic_operator& x, Predicate avoid, IdentifierGenerator& id_generator)
+{
+  data::maintain_variables_in_rhs<data::mutable_map_substitution<>> sigma;
+  const data::variable_list variables = rename_variables_away(x.variables(),
+    avoid,
+    sigma,
+    [&](const data::variable& v) { return data::variable(id_generator(v.name()), v.sort()); });
+  return process::stochastic_operator(variables,
+    process::replace_variables_capture_avoiding_with_an_identifier_generator(x.distribution(), sigma, id_generator),
+    process::replace_variables_capture_avoiding_with_an_identifier_generator(x.operand(), sigma, id_generator));
 }
 
 /// \brief The process delta@0, which the lineariser uses for a process that cannot do anything.

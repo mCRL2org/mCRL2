@@ -12,6 +12,8 @@
 #define BOOST_TEST_MODULE linearise_utility_test
 #include <boost/test/included/unit_test.hpp>
 
+#include <functional>
+
 #include "mcrl2/lps/linearise_utility.h"
 #include "mcrl2/process/print.h"
 
@@ -103,4 +105,113 @@ BOOST_AUTO_TEST_CASE(test_only_conditions_are_rewritten)
   // The rewriter is applied to conditions only, not to action arguments.
   check(c_b, c_b, b_is_true);
   check(if_then(b, c_b), c_b, b_is_true);
+}
+
+namespace
+{
+
+const data::variable x("x", data::sort_nat::nat());
+const data::variable y("y", data::sort_nat::nat());
+const data::variable z("z", data::sort_nat::nat());
+const action_label d_label(core::identifier_string("d"), {data::sort_nat::nat(), data::sort_nat::nat()});
+
+action d(const data::data_expression& e1, const data::data_expression& e2)
+{
+  return action(d_label, {e1, e2});
+}
+
+// Generates fresh names for the variables x, y and z, which do not clash with the names in these tests.
+data::set_identifier_generator make_generator()
+{
+  data::set_identifier_generator result;
+  result.add_identifiers({core::identifier_string("x"), core::identifier_string("y"), core::identifier_string("z")});
+  return result;
+}
+
+} // namespace
+
+BOOST_AUTO_TEST_CASE(test_rename_variables_away)
+{
+  data::mutable_map_substitution<> sigma;
+  data::set_identifier_generator generator = make_generator();
+  const std::function<data::variable(const data::variable&)> fresh = [&](const data::variable& v)
+  {
+    return data::variable(generator(v.name()), v.sort());
+  };
+
+  // Only the variables that satisfy the predicate are renamed, and the order is preserved.
+  const data::variable_list result = lps::rename_variables_away(
+    data::variable_list({x, y, z}),
+    [](const data::variable& v) { return v == y; },
+    sigma,
+    fresh);
+  const data::variable y1 = atermpp::down_cast<data::variable>(sigma(y));
+  BOOST_CHECK(y1 != y);
+  BOOST_CHECK(y1.sort() == y.sort());
+  BOOST_CHECK(result == data::variable_list({x, y1, z}));
+  BOOST_CHECK(sigma(x) == x);
+  BOOST_CHECK(sigma(z) == z);
+
+  // Nothing is renamed if no variable satisfies the predicate.
+  data::mutable_map_substitution<> sigma2;
+  const data::variable_list result2 = lps::rename_variables_away(
+    data::variable_list({x, z}),
+    [](const data::variable&) { return false; },
+    sigma2,
+    fresh);
+  BOOST_CHECK(result2 == data::variable_list({x, z}));
+  BOOST_CHECK(sigma2.empty());
+}
+
+BOOST_AUTO_TEST_CASE(test_rename_bound_variables_away_sum)
+{
+  data::set_identifier_generator generator = make_generator();
+
+  // sum x, y. d(x, y): x must be renamed away, y not.
+  const sum s({x, y}, d(x, y));
+  const sum result = lps::rename_bound_variables_away(s, [](const data::variable& v) { return v == x; }, generator);
+  BOOST_REQUIRE_EQUAL(result.variables().size(), 2u);
+  const data::variable x1 = result.variables().front();
+  BOOST_CHECK(x1 != x);
+  BOOST_CHECK(result.variables().tail().front() == y);
+  BOOST_CHECK(result.operand() == process_expression(d(x1, y)));
+
+  // The free variable z in the operand is not affected, even when it is avoided.
+  const sum s2({x}, d(x, z));
+  const sum result2
+    = lps::rename_bound_variables_away(s2, [](const data::variable& v) { return v == x || v == z; }, generator);
+  const data::variable x2 = result2.variables().front();
+  BOOST_CHECK(x2 != x);
+  BOOST_CHECK(result2.operand() == process_expression(d(x2, z)));
+}
+
+BOOST_AUTO_TEST_CASE(test_rename_bound_variables_away_sum_nested)
+{
+  data::set_identifier_generator generator = make_generator();
+
+  // sum x. sum x. d(x, x): only the outer x is renamed; the inner sum still binds the occurrences of x.
+  const sum s({x}, sum({x}, d(x, x)));
+  const sum result = lps::rename_bound_variables_away(s, [](const data::variable& v) { return v == x; }, generator);
+  const data::variable x1 = result.variables().front();
+  BOOST_CHECK(x1 != x);
+  BOOST_CHECK(result.operand() == process_expression(sum({x}, d(x, x))));
+}
+
+// The stochastic operator dist x[f(x)]. p: renaming x must also rename x in the distribution f(x). Before step 2b-3
+// of the refactoring, putbehind renamed the variables of a stochastic operator but not its distribution.
+BOOST_AUTO_TEST_CASE(test_rename_bound_variables_away_stochastic_operator)
+{
+  data::set_identifier_generator generator = make_generator();
+
+  const data::data_expression distribution
+    = data::if_(data::equal_to(x, data::sort_nat::nat(0)), data::sort_real::real_(1), data::sort_real::real_(0));
+  const stochastic_operator s({x}, distribution, d(x, y));
+  const stochastic_operator result
+    = lps::rename_bound_variables_away(s, [](const data::variable& v) { return v == x; }, generator);
+  const data::variable x1 = result.variables().front();
+  BOOST_CHECK(x1 != x);
+  BOOST_CHECK(
+    result.distribution()
+    == data::if_(data::equal_to(x1, data::sort_nat::nat(0)), data::sort_real::real_(1), data::sort_real::real_(0)));
+  BOOST_CHECK(result.operand() == process_expression(d(x1, y)));
 }
