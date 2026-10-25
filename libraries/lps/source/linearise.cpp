@@ -286,12 +286,6 @@ class specification_basic_type
       return sort_real::times(r1,r2);
     }
 
-    static
-    process_expression delta_at_zero()
-    {
-      return at(delta(), sort_real::real_(0));
-    }
-
     bool isDeltaAtZero(const process_expression& t)
     {
       if (!is_at(t))
@@ -1484,10 +1478,9 @@ class specification_basic_type
       return true;
     }
 
-    // Applies a substitution to a pCRL process and simplifies the result: conditions are rewritten, and delta@0 is
-    // removed from choices and sequences. The substitution is capture avoiding. A variable that is bound by a sum or
-    // a stochastic operator is renamed if it occurs in the substitution, either as a variable that is replaced or in
-    // a right hand side.
+    // Applies a substitution to a pCRL process. The substitution is capture avoiding. A variable that is bound by a
+    // sum or a stochastic operator is renamed if it occurs in the substitution, either as a variable that is replaced
+    // or in a right hand side.
     template<typename Substitution>
     struct substitute_pcrl_builder
       : public process::detail::add_capture_avoiding_replacement_with_an_identifier_generator<
@@ -1553,85 +1546,6 @@ class specification_basic_type
       }
 
       template<class T>
-      void apply(T& result, const process::choice& x)
-      {
-        process_expression left;
-        apply(left, x.left());
-        if (left == spec.delta_at_zero())
-        {
-          apply(result, x.right());
-          return;
-        }
-        process_expression right;
-        apply(right, x.right());
-        if (right == spec.delta_at_zero())
-        {
-          result = left;
-          return;
-        }
-        process::make_choice(result, left, right);
-      }
-
-      template<class T>
-      void apply(T& result, const process::seq& x)
-      {
-        process_expression left;
-        apply(left, x.left());
-        if (left == spec.delta_at_zero())
-        {
-          result = left;
-          return;
-        }
-        process_expression right;
-        apply(right, x.right());
-        process::make_seq(result, left, right);
-      }
-
-      template<class T>
-      void apply(T& result, const process::if_then& x)
-      {
-        data_expression condition;
-        apply(condition, x.condition());
-        condition = spec.RewriteTerm(condition);
-        if (condition == sort_bool::false_())
-        {
-          result = spec.delta_at_zero();
-          return;
-        }
-        if (condition == sort_bool::true_())
-        {
-          apply(result, x.then_case());
-          return;
-        }
-        process_expression then_case;
-        apply(then_case, x.then_case());
-        process::make_if_then(result, condition, then_case);
-      }
-
-      template<class T>
-      void apply(T& result, const process::if_then_else& x)
-      {
-        data_expression condition;
-        apply(condition, x.condition());
-        condition = spec.RewriteTerm(condition);
-        if (condition == sort_bool::false_())
-        {
-          apply(result, x.else_case());
-          return;
-        }
-        if (condition == sort_bool::true_())
-        {
-          apply(result, x.then_case());
-          return;
-        }
-        process_expression then_case;
-        apply(then_case, x.then_case());
-        process_expression else_case;
-        apply(else_case, x.else_case());
-        process::make_if_then_else(result, condition, then_case, else_case);
-      }
-
-      template<class T>
       void apply(T& result, const process::sum& x)
       {
         std::vector<std::pair<variable, data_expression>> undo;
@@ -1656,16 +1570,15 @@ class specification_basic_type
       }
     };
 
-    /* The function below calculates sigma(p) and replaces
-       all variables that are bound by a sum in p by unique
-       variables */
+    // Calculates sigma(p), renaming the variables bound by a sum or stochastic operator in p that occur in sigma,
+    // and simplifies the result with simplify_pcrl.
     template<IsSubstitution Substitution>
     process_expression substitute_pCRLproc(const process_expression& p, Substitution& sigma)
     {
       substitute_pcrl_builder<Substitution> f(sigma, *this);
       process_expression result;
       f.apply(result, p);
-      return result;
+      return simplify_pcrl(result, [this](const data_expression& condition) { return RewriteTerm(condition); });
     }
 
     // The function below transforms a ProcessAssignment to a Process, provided

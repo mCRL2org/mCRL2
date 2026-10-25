@@ -12,11 +12,14 @@
 #ifndef MCRL2_LPS_LINEARISE_UTILITY_H
 #define MCRL2_LPS_LINEARISE_UTILITY_H
 
+#include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/lps/detail/configuration.h"
-#include "mcrl2/process/process_expression.h"
+#include "mcrl2/data/real.h"
 #include "mcrl2/lps/deadlock_summand.h"
+#include "mcrl2/lps/detail/configuration.h"
 #include "mcrl2/lps/stochastic_action_summand.h"
+#include "mcrl2/process/builder.h"
+#include "mcrl2/process/process_expression.h"
 
 #include <optional>
 
@@ -216,6 +219,122 @@ inline
 bool occursinterm(const data::data_expression& t, const data::variable& var)
 {
   return data::search_free_variable(t, var);
+}
+
+/// \brief The process delta@0, which the lineariser uses for a process that cannot do anything.
+inline process::process_expression delta_at_zero()
+{
+  return process::at(process::delta(), data::sort_real::real_(0));
+}
+
+namespace detail
+{
+
+template<typename ConditionRewriter>
+struct simplify_pcrl_builder : public process::process_expression_builder<simplify_pcrl_builder<ConditionRewriter>>
+{
+  using super = process::process_expression_builder<simplify_pcrl_builder<ConditionRewriter>>;
+  using super::apply;
+  using super::enter;
+  using super::leave;
+  using super::update;
+
+  ConditionRewriter R;
+
+  explicit simplify_pcrl_builder(ConditionRewriter R_)
+    : R(R_)
+  {}
+
+  template<class T>
+  void apply(T& result, const process::choice& x)
+  {
+    process::process_expression left;
+    apply(left, x.left());
+    if (left == delta_at_zero())
+    {
+      apply(result, x.right());
+      return;
+    }
+    process::process_expression right;
+    apply(right, x.right());
+    if (right == delta_at_zero())
+    {
+      result = left;
+      return;
+    }
+    process::make_choice(result, left, right);
+  }
+
+  template<class T>
+  void apply(T& result, const process::seq& x)
+  {
+    process::process_expression left;
+    apply(left, x.left());
+    if (left == delta_at_zero())
+    {
+      result = left;
+      return;
+    }
+    process::process_expression right;
+    apply(right, x.right());
+    process::make_seq(result, left, right);
+  }
+
+  template<class T>
+  void apply(T& result, const process::if_then& x)
+  {
+    const data::data_expression condition = R(x.condition());
+    if (condition == data::sort_bool::false_())
+    {
+      result = delta_at_zero();
+      return;
+    }
+    if (condition == data::sort_bool::true_())
+    {
+      apply(result, x.then_case());
+      return;
+    }
+    process::process_expression then_case;
+    apply(then_case, x.then_case());
+    process::make_if_then(result, condition, then_case);
+  }
+
+  template<class T>
+  void apply(T& result, const process::if_then_else& x)
+  {
+    const data::data_expression condition = R(x.condition());
+    if (condition == data::sort_bool::false_())
+    {
+      apply(result, x.else_case());
+      return;
+    }
+    if (condition == data::sort_bool::true_())
+    {
+      apply(result, x.then_case());
+      return;
+    }
+    process::process_expression then_case;
+    apply(then_case, x.then_case());
+    process::process_expression else_case;
+    apply(else_case, x.else_case());
+    process::make_if_then_else(result, condition, then_case, else_case);
+  }
+};
+
+} // namespace detail
+
+/// \brief Simplifies a pCRL process as the lineariser does after a substitution.
+/// \details The conditions are rewritten with R. A condition that becomes true is removed, a condition that becomes
+///          false replaces the process by delta@0 (or by the else case). A delta@0 is removed from a choice, and a
+///          sequence that starts with delta@0 is replaced by delta@0. Other data expressions are not rewritten.
+/// \param p A pCRL process.
+/// \param R A function that rewrites a condition, for instance a data rewriter, or the identity.
+template<typename ConditionRewriter>
+process::process_expression simplify_pcrl(const process::process_expression& p, ConditionRewriter R)
+{
+  process::process_expression result;
+  detail::simplify_pcrl_builder<ConditionRewriter>(R).apply(result, p);
+  return result;
 }
 
 } // namespace mcrl2::lps
