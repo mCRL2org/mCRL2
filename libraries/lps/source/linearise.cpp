@@ -1478,108 +1478,16 @@ class specification_basic_type
       return true;
     }
 
-    // Applies a substitution to a pCRL process. The substitution is capture avoiding. A variable that is bound by a
-    // sum or a stochastic operator is renamed if it occurs in the substitution, either as a variable that is replaced
-    // or in a right hand side.
-    template<typename Substitution>
-    struct substitute_pcrl_builder
-      : public process::detail::add_capture_avoiding_replacement_with_an_identifier_generator<
-          process::data_expression_builder,
-          substitute_pcrl_builder<Substitution>,
-          Substitution,
-          set_identifier_generator>
+    // Calculates sigma(p) without capturing variables, and simplifies the result with simplify_pcrl.
+    template <IsSubstitution Substitution>
+    process_expression substitute_pCRLproc(
+      const process_expression& p,
+      Substitution& sigma)
     {
-      using super = process::detail::add_capture_avoiding_replacement_with_an_identifier_generator<
-        process::data_expression_builder,
-        substitute_pcrl_builder<Substitution>,
-        Substitution,
-        set_identifier_generator>;
-      using super::apply;
-      using super::enter;
-      using super::leave;
-      using super::update;
-      using super::update_sigma;
-
-      specification_basic_type& spec;
-
-      substitute_pcrl_builder(Substitution& sigma, specification_basic_type& spec_)
-        : super(sigma, spec_.fresh_identifier_generator),
-          spec(spec_)
-      {}
-
-      // Renames the variables that occur in the substitution, and saves the replaced assignments in undo. Whether a
-      // variable is renamed is decided before the substitution is changed.
-      variable_list bind(const variable_list& variables, std::vector<std::pair<variable, data_expression>>& undo)
-      {
-        Substitution& sigma = update_sigma.substitution();
-        std::vector<bool> rename;
-        std::transform(variables.begin(),
-          variables.end(),
-          std::back_inserter(rename),
-          [&](const variable& v) { return sigma(v) != v || sigma.variable_occurs_in_a_rhs(v); });
-        variable_vector result;
-        std::size_t i = 0;
-        for (const variable& v: variables)
-        {
-          if (rename[i++])
-          {
-            const variable w = spec.get_fresh_variable(v.name(), v.sort());
-            undo.emplace_back(v, sigma(v));
-            sigma[v] = w;
-            result.push_back(w);
-          }
-          else
-          {
-            result.push_back(v);
-          }
-        }
-        return variable_list(result.begin(), result.end());
-      }
-
-      void unbind(const std::vector<std::pair<variable, data_expression>>& undo)
-      {
-        Substitution& sigma = update_sigma.substitution();
-        for (const std::pair<variable, data_expression>& assignment: undo)
-        {
-          sigma[assignment.first] = assignment.second;
-        }
-      }
-
-      template<class T>
-      void apply(T& result, const process::sum& x)
-      {
-        std::vector<std::pair<variable, data_expression>> undo;
-        const variable_list variables = bind(x.variables(), undo);
-        process_expression operand;
-        apply(operand, x.operand());
-        unbind(undo);
-        process::make_sum(result, variables, operand);
-      }
-
-      template<class T>
-      void apply(T& result, const process::stochastic_operator& x)
-      {
-        std::vector<std::pair<variable, data_expression>> undo;
-        const variable_list variables = bind(x.variables(), undo);
-        data_expression distribution;
-        apply(distribution, x.distribution());
-        process_expression operand;
-        apply(operand, x.operand());
-        unbind(undo);
-        process::make_stochastic_operator(result, variables, distribution, operand);
-      }
-    };
-
-    // Calculates sigma(p), renaming the variables bound by a sum or stochastic operator in p that occur in sigma,
-    // and simplifies the result with simplify_pcrl.
-    template<IsSubstitution Substitution>
-    process_expression substitute_pCRLproc(const process_expression& p, Substitution& sigma)
-    {
-      substitute_pcrl_builder<Substitution> f(sigma, *this);
-      process_expression result;
-      f.apply(result, p);
-      return simplify_pcrl(result, [this](const data_expression& condition) { return RewriteTerm(condition); });
+      return simplify_pcrl(replace_variables_capture_avoiding_alt(p, sigma),
+        [this](const data_expression& condition) { return RewriteTerm(condition); });
     }
+
 
     // The function below transforms a ProcessAssignment to a Process, provided
     // that the process is defined in objectnames.
