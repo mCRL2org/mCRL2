@@ -1478,16 +1478,37 @@ class specification_basic_type
       return true;
     }
 
-    // Calculates sigma(p) without capturing variables, and simplifies the result with simplify_pcrl.
+    // Rewrites the conditions in p and removes delta@0 where possible; see simplify_pcrl.
+    process_expression simplify_pCRLproc(const process_expression& p)
+    {
+      return simplify_pcrl(p, [this](const data_expression& condition) { return RewriteTerm(condition); });
+    }
+
+    // Calculates sigma(p) without capturing variables, and simplifies the result.
     template <IsSubstitution Substitution>
     process_expression substitute_pCRLproc(
       const process_expression& p,
       Substitution& sigma)
     {
-      return simplify_pcrl(replace_variables_capture_avoiding_alt(p, sigma),
-        [this](const data_expression& condition) { return RewriteTerm(condition); });
+      return simplify_pCRLproc(replace_variables_capture_avoiding_alt(p, sigma));
     }
 
+    template<typename Substitution>
+    static bool is_variable_renaming(const Substitution& sigma)
+    {
+      return std::all_of(sigma.begin(),
+        sigma.end(),
+        [](const std::pair<const variable, data_expression>& assignment) { return is_variable(assignment.second); });
+    }
+
+    // Calculates sigma(p) without capturing variables, where sigma maps variables to variables. A renaming does not
+    // change whether a condition is true or false, so unlike substitute_pCRLproc the result is not simplified.
+    template<IsSubstitution Substitution>
+    process_expression rename_pCRLproc(const process_expression& p, Substitution& sigma)
+    {
+      assert(is_variable_renaming(sigma));
+      return replace_variables_capture_avoiding_alt(p, sigma);
+    }
 
     // The function below transforms a ProcessAssignment to a Process, provided
     // that the process is defined in objectnames.
@@ -1633,7 +1654,7 @@ class specification_basic_type
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list());
-        body1=substitute_pCRLproc(body1, sigma);
+        body1 = rename_pCRLproc(body1, sigma);
         maintain_variables_in_rhs< mutable_map_substitution<> >  sigma_aux(sigma);
         const data_expression time1=/*data::*/replace_variables_capture_avoiding_alt(time, sigma_aux);
         body1=wraptime(body1,time1,sumvars+freevars);
@@ -1648,7 +1669,7 @@ class specification_basic_type
 
         maintain_variables_in_rhs<mutable_map_substitution<> > sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list());
-        body1=substitute_pCRLproc(body1, sigma);
+        body1 = rename_pCRLproc(body1, sigma);
         const data_expression new_distribution=replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma_aux(sigma);
         const data_expression time1=replace_variables_capture_avoiding_alt(time, sigma_aux);
@@ -1879,7 +1900,9 @@ class specification_basic_type
 
           maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
           alphaconvert(sumvars,sigma,freevars,data_expression_list());
-          body1=substitute_pCRLproc(body1,sigma);
+          // Simplify after renaming: the body comes from a process equation of the input, whose conditions are not
+          // rewritten yet.
+          body1 = simplify_pCRLproc(rename_pCRLproc(body1, sigma));
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
           body1=bodytovarheadGNF(body1,sum_state,sumvars+freevars,first,variables_bound_in_sum1);
@@ -1913,7 +1936,9 @@ class specification_basic_type
           maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
           alphaconvert(sumvars,sigma,freevars,data_expression_list());
           distribution=/* data::*/replace_variables_capture_avoiding_alt(distribution,sigma);
-          body1=substitute_pCRLproc(body1,sigma);
+          // Simplify after renaming: the body comes from a process equation of the input, whose conditions are not
+          // rewritten yet.
+          body1 = simplify_pCRLproc(rename_pCRLproc(body1, sigma));
           std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
           variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
           body1=bodytovarheadGNF(body1,name_state,sumvars+freevars,v,variables_bound_in_sum1);
@@ -2236,9 +2261,7 @@ class specification_basic_type
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvertprocess(sumvars,sigma,body2);
-        return sum(sumvars,
-                   putbehind(substitute_pCRLproc(sum(body1).operand(), sigma),
-                             body2));
+        return sum(sumvars, putbehind(rename_pCRLproc(sum(body1).operand(), sigma), body2));
       }
 
       if (is_stochastic_operator(body1))
@@ -2249,12 +2272,9 @@ class specification_basic_type
         // See explanation at sum operator above.
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvertprocess(stochvars,sigma,body2);
-        return stochastic_operator(
-                 stochvars,
-                 sto.distribution(),
-                 putbehind(
-                       substitute_pCRLproc(sto.operand(),sigma),
-                       body2));
+        return stochastic_operator(stochvars,
+          sto.distribution(),
+          putbehind(rename_pCRLproc(sto.operand(), sigma), body2));
       }
 
 
@@ -2323,11 +2343,7 @@ class specification_basic_type
         variable_list sumvars=sum(body1).variables();
         maintain_variables_in_rhs< mutable_map_substitution<> >  sigma;
         alphaconvert(sumvars,sigma,variable_list(), data_expression_list({ condition }));
-        return sum(
-                 sumvars,
-                 distribute_condition(
-                   substitute_pCRLproc(sum(body1).operand(),sigma),
-                   condition));
+        return sum(sumvars, distribute_condition(rename_pCRLproc(sum(body1).operand(), sigma), condition));
       }
 
       if (is_stochastic_operator(body1))
@@ -2339,16 +2355,11 @@ class specification_basic_type
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvert(stochvars,sigma,variable_list(), data_expression_list({ condition }));
 
-        return stochastic_operator(
-                 stochvars,
-                 if_(condition,
-                        replace_variables_capture_avoiding_alt(
-                                               sto.distribution(),
-                                               sigma),
-                        if_(variables_are_equal_to_default_values(stochvars),real_one(),real_zero())),
-                 distribute_condition(
-                       substitute_pCRLproc(sto.operand(),sigma),
-                       condition));
+        return stochastic_operator(stochvars,
+          if_(condition,
+            replace_variables_capture_avoiding_alt(sto.distribution(), sigma),
+            if_(variables_are_equal_to_default_values(stochvars), real_one(), real_zero())),
+          distribute_condition(rename_pCRLproc(sto.operand(), sigma), condition));
       }
 
       if (is_at(body1)||
@@ -2484,7 +2495,7 @@ class specification_basic_type
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         variable_list inner_stoch_vars=sto.variables();
         alphaconvert(inner_stoch_vars,sigma,sumvars,data_expression_list());
-        const process_expression new_body=substitute_pCRLproc(sto.operand(), sigma);
+        const process_expression new_body = rename_pCRLproc(sto.operand(), sigma);
         const data_expression new_distribution=replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
         return distribute_sum_over_a_stochastic_operator(sumvars,
                                                          stochastic_variables + inner_stoch_vars,
@@ -2523,7 +2534,7 @@ class specification_basic_type
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         variable_list inner_sumvars=sum(body1).variables();
         alphaconvert(inner_sumvars,sigma,sumvars,data_expression_list());
-        const process_expression new_body1=substitute_pCRLproc(sum(body1).operand(), sigma);
+        const process_expression new_body1 = rename_pCRLproc(sum(body1).operand(), sigma);
         return sum(sumvars+inner_sumvars,new_body1);
       }
 
@@ -2533,7 +2544,7 @@ class specification_basic_type
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         variable_list inner_stoch_vars=sto.variables();
         alphaconvert(inner_stoch_vars,sigma,sumvars,data_expression_list());
-        const process_expression new_body1=substitute_pCRLproc(sto.operand(), sigma);
+        const process_expression new_body1 = rename_pCRLproc(sto.operand(), sigma);
         const data_expression new_distribution=replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
         return distribute_sum_over_a_stochastic_operator(sumvars, inner_stoch_vars, new_distribution, new_body1);
       }
@@ -2905,7 +2916,8 @@ class specification_basic_type
 
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list());
-        const process_expression body=substitute_pCRLproc(sum(t).operand(), sigma);
+        // Simplify after renaming: the conditions of the body may have been combined without rewriting.
+        const process_expression body = simplify_pCRLproc(rename_pCRLproc(sum(t).operand(), sigma));
 
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
@@ -2927,7 +2939,7 @@ class specification_basic_type
         const data_expression distribution=replace_variables_capture_avoiding_alt(
                                                sto.distribution(),
                                                sigma);
-        const process_expression body=substitute_pCRLproc(sto.operand(),sigma);
+        const process_expression body = rename_pCRLproc(sto.operand(), sigma);
 
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
@@ -2969,7 +2981,7 @@ class specification_basic_type
         process_expression body1=sum(body).operand();
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list());
-        body1=substitute_pCRLproc(body1, sigma);
+        body1 = rename_pCRLproc(body1, sigma);
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma_aux(sigma);
         const data_expression time1=replace_variables_capture_avoiding_alt(time,sigma_aux);
         body1=distributeTime(body1,time1,sumvars+freevars,timecondition);
@@ -2982,7 +2994,7 @@ class specification_basic_type
         variable_list sumvars=sto.variables();
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         alphaconvert(sumvars,sigma,freevars,data_expression_list());
-        process_expression new_body=substitute_pCRLproc(sto.operand(), sigma);
+        process_expression new_body = rename_pCRLproc(sto.operand(), sigma);
         data_expression new_distribution=/*data::*/replace_variables_capture_avoiding_alt(sto.distribution(), sigma);
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma_aux(sigma);
         const data_expression time1=/*data::*/replace_variables_capture_avoiding_alt(time,sigma_aux);
@@ -4785,8 +4797,8 @@ class specification_basic_type
       // and rename the summandterm accordingly.
       maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
       alphaconvert(sumvars,local_sigma,process_parameters,data_expression_list());
-      summandterm=substitute_pCRLproc(summandterm, local_sigma);
-
+      // Simplify after renaming: the conditions of the summand have been combined without rewriting.
+      summandterm = simplify_pCRLproc(rename_pCRLproc(summandterm, local_sigma));
 
       /* translate the condition */
 
@@ -8676,7 +8688,7 @@ class specification_basic_type
             variable_list stochvars=r2.variables();
             maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list());
-            new_body2=substitute_pCRLproc(new_body2, local_sigma);
+            new_body2 = rename_pCRLproc(new_body2, local_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
@@ -8741,7 +8753,7 @@ class specification_basic_type
             variable_list stochvars=r2.variables();
             maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list());
-            new_body2=substitute_pCRLproc(new_body2, local_sigma);
+            new_body2 = rename_pCRLproc(new_body2, local_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
@@ -8872,7 +8884,7 @@ class specification_basic_type
             variable_list stochvars=r2.variables();
             maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list());
-            new_body2=substitute_pCRLproc(new_body2, local_sigma);
+            new_body2 = rename_pCRLproc(new_body2, local_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
@@ -8935,7 +8947,7 @@ class specification_basic_type
             variable_list stochvars=r2.variables();
             maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
             alphaconvert(stochvars,local_sigma, r1.variables(),data_expression_list());
-            new_body2=substitute_pCRLproc(new_body2, local_sigma);
+            new_body2 = rename_pCRLproc(new_body2, local_sigma);
             const data_expression new_distribution=
                    process::replace_variables_capture_avoiding_with_an_identifier_generator(r2.distribution(),local_sigma,fresh_identifier_generator);
 
