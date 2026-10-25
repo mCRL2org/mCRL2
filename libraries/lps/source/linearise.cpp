@@ -8321,15 +8321,12 @@ class specification_basic_type
 
       if (is_process_instance_assignment(t))
       {
-        const process_identifier procId=process_instance_assignment(t).identifier();
-        objectdatatype& object=objectIndex(procId);
+        const process_instance_assignment& instance = atermpp::down_cast<process_instance_assignment>(t);
+        const process_identifier procId = instance.identifier();
+        alphaconversion(procId, procId.variables());
 
-        const variable_list instance_parameters=object.parameters;
-        alphaconversion(procId,instance_parameters);
-
-        const process_instance_assignment result(procId,
-                                                 substitute_assignmentlist(process_instance_assignment(t).assignments(),
-                                                                           instance_parameters,false, true,sigma));
+        // Also adds an assignment p=sigma(p) for each parameter p without an assignment for which sigma(p)!=p.
+        const process_instance_assignment result = replace_variables_capture_avoiding_alt(instance, sigma);
         assert(check_valid_process_instance_assignment(result.identifier(),result.assignments()));
         return result;
       }
