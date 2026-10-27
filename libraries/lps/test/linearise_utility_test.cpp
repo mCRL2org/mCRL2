@@ -351,6 +351,7 @@ BOOST_AUTO_TEST_CASE(test_replace_process_instance_assignments)
 // separated by another operator are not.
 BOOST_AUTO_TEST_CASE(test_join_nested_stochastic_operators)
 {
+  data::set_identifier_generator generator = make_generator();
   const data::data_expression f
     = data::if_(data::equal_to(x, data::sort_nat::nat(0)), data::sort_real::real_(1), data::sort_real::real_(0));
   const data::data_expression g = data::if_(data::equal_to(y, x), data::sort_real::real_(1), data::sort_real::real_(0));
@@ -358,9 +359,54 @@ BOOST_AUTO_TEST_CASE(test_join_nested_stochastic_operators)
   const process_expression p = stochastic_operator({x}, f, stochastic_operator({y}, g, stochastic_operator({z}, h, a)));
   const process_expression joined
     = stochastic_operator({x, y, z}, data::sort_real::times(data::sort_real::times(f, g), h), a);
-  BOOST_CHECK(lps::join_nested_stochastic_operators(p) == joined);
-  BOOST_CHECK(lps::join_nested_stochastic_operators(choice(a, p)) == choice(a, joined));
+  BOOST_CHECK(lps::join_nested_stochastic_operators(p, generator) == joined);
+  BOOST_CHECK(lps::join_nested_stochastic_operators(choice(a, p), generator) == choice(a, joined));
 
   const process_expression q = stochastic_operator({x}, f, seq(a, stochastic_operator({y}, g, d(x, y))));
-  BOOST_CHECK(lps::join_nested_stochastic_operators(q) == q);
+  BOOST_CHECK(lps::join_nested_stochastic_operators(q, generator) == q);
+}
+
+// dist x[f]. dist x[g(x)]. d(x, y): the inner x is renamed to x1, as the outer x is not visible below the inner
+// operator. Without renaming, the result bound x twice and f applied to the inner x.
+BOOST_AUTO_TEST_CASE(test_join_nested_stochastic_operators_binding_the_same_variable)
+{
+  data::set_identifier_generator generator = make_generator();
+  const data::data_expression f
+    = data::if_(data::equal_to(x, data::sort_nat::nat(0)), data::sort_real::real_(1), data::sort_real::real_(0));
+  const data::data_expression g
+    = data::if_(data::equal_to(x, data::sort_nat::nat(1)), data::sort_real::real_(1), data::sort_real::real_(0));
+  const process_expression result
+    = lps::join_nested_stochastic_operators(stochastic_operator({x}, f, stochastic_operator({x}, g, d(x, y))),
+      generator);
+  BOOST_REQUIRE(is_stochastic_operator(result));
+  const stochastic_operator& s = atermpp::down_cast<stochastic_operator>(result);
+  BOOST_REQUIRE_EQUAL(s.variables().size(), 2u);
+  const data::variable x1 = s.variables().tail().front();
+  BOOST_CHECK(s.variables().front() == x);
+  BOOST_CHECK(x1 != x);
+  BOOST_CHECK(
+    s.distribution()
+    == data::sort_real::times(f,
+      data::if_(data::equal_to(x1, data::sort_nat::nat(1)), data::sort_real::real_(1), data::sort_real::real_(0))));
+  BOOST_CHECK(s.operand() == process_expression(d(x1, y)));
+}
+
+// dist x[f(x, y)]. dist y[g]. d(x, y), where y is free in f: the inner y is renamed, so that it does not capture the y
+// in f. Without renaming, f referred to the inner y.
+BOOST_AUTO_TEST_CASE(test_join_nested_stochastic_operators_capturing_a_free_variable)
+{
+  data::set_identifier_generator generator = make_generator();
+  const data::data_expression f = data::if_(data::equal_to(x, y), data::sort_real::real_(1), data::sort_real::real_(0));
+  const data::data_expression g = data::sort_real::real_(1);
+  const process_expression result
+    = lps::join_nested_stochastic_operators(stochastic_operator({x}, f, stochastic_operator({y}, g, d(x, y))),
+      generator);
+  BOOST_REQUIRE(is_stochastic_operator(result));
+  const stochastic_operator& s = atermpp::down_cast<stochastic_operator>(result);
+  BOOST_REQUIRE_EQUAL(s.variables().size(), 2u);
+  const data::variable y1 = s.variables().tail().front();
+  BOOST_CHECK(s.variables().front() == x);
+  BOOST_CHECK(y1 != y);
+  BOOST_CHECK(s.distribution() == data::sort_real::times(f, g));
+  BOOST_CHECK(s.operand() == process_expression(d(x, y1)));
 }

@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
@@ -436,14 +437,21 @@ struct replace_process_instance_assignments_builder
   }
 };
 
+template<typename IdentifierGenerator>
 struct join_nested_stochastic_operators_builder
-  : public process::process_expression_builder<join_nested_stochastic_operators_builder>
+  : public process::process_expression_builder<join_nested_stochastic_operators_builder<IdentifierGenerator>>
 {
-  using super = process::process_expression_builder<join_nested_stochastic_operators_builder>;
+  using super = process::process_expression_builder<join_nested_stochastic_operators_builder<IdentifierGenerator>>;
   using super::apply;
   using super::enter;
   using super::leave;
   using super::update;
+
+  IdentifierGenerator& id_generator;
+
+  explicit join_nested_stochastic_operators_builder(IdentifierGenerator& id_generator_)
+    : id_generator(id_generator_)
+  {}
 
   template<class T>
   void apply(T& result, const process::stochastic_operator& x)
@@ -453,7 +461,17 @@ struct join_nested_stochastic_operators_builder
     process::process_expression operand = x.operand();
     while (process::is_stochastic_operator(operand))
     {
-      const process::stochastic_operator& y = atermpp::down_cast<process::stochastic_operator>(operand);
+      // The distribution collected so far comes into the scope of the variables of the inner operator, so these are
+      // renamed away from its free variables, and from the variables collected so far.
+      const std::set<data::variable> free_variables = data::find_free_variables(distribution);
+      const process::stochastic_operator y = rename_bound_variables_away(
+        atermpp::down_cast<process::stochastic_operator>(operand),
+        [&](const data::variable& v)
+        {
+          return std::find(variables.begin(), variables.end(), v) != variables.end()
+                 || free_variables.find(v) != free_variables.end();
+        },
+        id_generator);
       variables = variables + y.variables();
       distribution = data::sort_real::times(distribution, y.distribution());
       operand = y.operand();
@@ -478,10 +496,14 @@ process::process_expression replace_process_instance_assignments(const process::
 }
 
 /// \brief Joins directly nested stochastic operators: dist x[f]. dist y[g]. p becomes dist x, y[f * g]. p.
-inline process::process_expression join_nested_stochastic_operators(const process::process_expression& p)
+/// \details The variables y are renamed first where they occur among x or free in f, so that they capture nothing.
+/// \param id_generator The generator of fresh names, which must not have been used for other variables.
+template<typename IdentifierGenerator>
+process::process_expression join_nested_stochastic_operators(const process::process_expression& p,
+  IdentifierGenerator& id_generator)
 {
   process::process_expression result;
-  detail::join_nested_stochastic_operators_builder().apply(result, p);
+  detail::join_nested_stochastic_operators_builder<IdentifierGenerator>(id_generator).apply(result, p);
   return result;
 }
 

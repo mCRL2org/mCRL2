@@ -8736,7 +8736,8 @@ class specification_basic_type
       {
         visited_processes.insert(procId);
         objectdatatype& object=objectIndex(procId);
-        object.processbody = replace_process_instance_assignments(join_nested_stochastic_operators(object.processbody),
+        object.processbody = replace_process_instance_assignments(
+          join_nested_stochastic_operators(object.processbody, fresh_identifier_generator),
           [&](const process_instance_assignment& x)
           {
             transform_process_arguments(x.identifier(), visited_processes);
