@@ -122,7 +122,6 @@ using processstatustype = enum
   pCRL,
   multiAction,
   GNF,
-  GNFalpha,
   GNFbusy,
   error
 };
@@ -7475,9 +7474,7 @@ class specification_basic_type
 
         // Make the bound variables and parameters in this process unique.
 
-        if ((object.processstatus==GNF)||
-            (object.processstatus==pCRL)||
-            (object.processstatus==GNFalpha))
+        if ((object.processstatus == GNF) || (object.processstatus == pCRL))
         {
           make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,ultimate_delay_condition,std::string(object.objectname));
         }
@@ -7730,10 +7727,7 @@ class specification_basic_type
 
       objectdatatype& object=objectIndex(procIdDecl);
 
-      if ((object.processstatus==GNF)||
-          (object.processstatus==pCRL)||
-          (object.processstatus==GNFalpha)||
-          (object.processstatus==multiAction))
+      if ((object.processstatus == GNF) || (object.processstatus == pCRL) || (object.processstatus == multiAction))
       {
         generateLPEpCRL(action_summands,deadlock_summands,procIdDecl,
                                object.containstime,regular,pars,init,initial_stochastic_distribution);
@@ -7782,172 +7776,6 @@ class specification_basic_type
       }
 
       throw mcrl2::runtime_error("laststatus: " + std::to_string(object.processstatus));
-    }
-
-    /**************** alphaconversion ********************************/
-
-    process_expression alphaconversionterm(
-      const process_expression& t,
-      const variable_list& parameters,
-      maintain_variables_in_rhs<mutable_map_substitution<> > sigma)
-    {
-      if (is_choice(t))
-      {
-        return choice(
-                 alphaconversionterm(choice(t).left(),parameters,sigma),
-                 alphaconversionterm(choice(t).right(),parameters,sigma));
-      }
-
-      if (is_seq(t))
-      {
-        return seq(
-                 alphaconversionterm(seq(t).left(),parameters,sigma),
-                 alphaconversionterm(seq(t).right(),parameters,sigma));
-      }
-
-      if (is_sync(t))
-      {
-        return process::sync(
-                 alphaconversionterm(process::sync(t).left(),parameters,sigma),
-                 alphaconversionterm(process::sync(t).right(),parameters,sigma));
-      }
-
-      if (is_bounded_init(t))
-      {
-        return bounded_init(
-                 alphaconversionterm(bounded_init(t).left(),parameters,sigma),
-                 alphaconversionterm(bounded_init(t).right(),parameters,sigma));
-      }
-
-      if (is_merge(t))
-      {
-        return process::merge(
-                 alphaconversionterm(process::merge(t).left(),parameters,sigma),
-                 alphaconversionterm(process::merge(t).right(),parameters,sigma));
-      }
-
-      if (is_left_merge(t))
-      {
-        return left_merge(
-                 alphaconversionterm(left_merge(t).left(),parameters,sigma),
-                 alphaconversionterm(left_merge(t).right(),parameters,sigma));
-      }
-
-      if (is_at(t))
-      {
-        return at(alphaconversionterm(at(t).operand(), parameters, sigma),
-          replace_variables_capture_avoiding(at(t).time_stamp(), sigma));
-      }
-
-      if (is_if_then(t))
-      {
-        return if_then(replace_variables_capture_avoiding(if_then(t).condition(), sigma),
-          alphaconversionterm(if_then(t).then_case(), parameters, sigma));
-      }
-
-      if (is_sum(t))
-      {
-        variable_list sumvars=sum(t).variables();
-        maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
-
-        sumvars = rename_variables_away(sumvars, contained_in(parameters), local_sigma);
-        return sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters, local_sigma));
-      }
-
-      if (is_stochastic_operator(t))
-      {
-        const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
-        variable_list sumvars=sto.variables();
-        maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
-
-        sumvars = rename_variables_away(sumvars, contained_in(parameters), local_sigma);
-        return stochastic_operator(sumvars,
-          replace_variables_capture_avoiding(sto.distribution(), sigma),
-          alphaconversionterm(sto.operand(), sumvars + parameters, local_sigma));
-      }
-
-      if (is_process_instance_assignment(t))
-      {
-        const process_instance_assignment& instance = atermpp::down_cast<process_instance_assignment>(t);
-        const process_identifier procId = instance.identifier();
-        alphaconversion(procId, procId.variables());
-
-        // Also adds an assignment p=sigma(p) for each parameter p without an assignment for which sigma(p)!=p.
-        const process_instance_assignment result = replace_variables_capture_avoiding(instance, sigma);
-        assert(check_valid_process_instance_assignment(result.identifier(),result.assignments()));
-        return result;
-      }
-
-      if (is_action(t))
-      {
-        return action(action(t).label(), replace_variables_capture_avoiding(action(t).arguments(), sigma));
-      }
-
-      if (is_delta(t)||
-          is_tau(t))
-      {
-        return t;
-      }
-
-      if (is_hide(t))
-      {
-        return alphaconversionterm(hide(t).operand(),parameters,sigma);
-      }
-
-      if (is_rename(t))
-      {
-        return alphaconversionterm(process::rename(t).operand(),parameters,sigma);
-      }
-
-      if (is_comm(t))
-      {
-        return alphaconversionterm(comm(t).operand(),parameters,sigma);
-      }
-
-      if (is_allow(t))
-      {
-        return alphaconversionterm(allow(t).operand(),parameters,sigma);
-      }
-
-      if (is_block(t))
-      {
-        return alphaconversionterm(block(t).operand(),parameters,sigma);
-      }
-
-      throw mcrl2::runtime_error("unexpected process format in alphaconversionterm " + process::pp(t) +".");
-      return process_expression();
-    }
-
-    void alphaconversion(const process_identifier& procId, const variable_list& parameters)
-    {
-      objectdatatype& object=objectIndex(procId);
-
-      if ((object.processstatus==GNF)||
-          (object.processstatus==multiAction))
-      {
-        object.processstatus=GNFalpha;
-        // tempvar below is needed as objectdata may be reallocated
-        // during a call to alphaconversionterm.
-        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        const process_expression tempvar=alphaconversionterm(object.processbody,parameters,sigma);
-        object.processbody=tempvar;
-      }
-      else if (object.processstatus==mCRLdone)
-      {
-        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        alphaconversionterm(object.processbody,parameters,sigma);
-
-      }
-      else if (object.processstatus==GNFalpha)
-      {
-        return;
-      }
-      else
-      {
-        throw mcrl2::runtime_error("unknown type " + std::to_string(object.processstatus) +
-                                                " in alphaconversion of " + process::pp(procId) +".");
-      }
-      return;
     }
 
     /***** determinewhetherprocessescontaintime; **********/
