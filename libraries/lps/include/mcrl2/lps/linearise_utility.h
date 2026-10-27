@@ -369,17 +369,18 @@ void for_each_process_identifier(const process::process_expression& p, Function 
 }
 
 /// \brief Converts the process instance P(e) into the process instance assignment P(d = e), where d are the parameters
-///        of P. An assignment d_i = d_i is left out, unless keep(d_i) holds.
-/// \details This is the inverse of process::expand_assignments.
-template<typename Predicate>
-process::process_instance_assignment to_process_instance_assignment(const process::process_instance& x, Predicate keep)
+///        of P. An assignment d_i = d_i is left out.
+/// \details This is the inverse of process::expand_assignments. A left out assignment d_i = d_i refers to the
+///          variable d_i in scope, also if it is bound by a sum or a stochastic operator; the capture-avoiding
+///          substitutions add d_i = d_i' when they rename such a bound variable d_i to d_i'.
+inline process::process_instance_assignment to_process_instance_assignment(const process::process_instance& x)
 {
   std::vector<data::assignment> assignments;
   data::data_expression_list::const_iterator e = x.actual_parameters().begin();
   for (const data::variable& d: x.identifier().variables())
   {
     assert(e != x.actual_parameters().end());
-    if (*e != d || keep(d))
+    if (*e != d)
     {
       assignments.emplace_back(d, *e);
     }
@@ -404,30 +405,15 @@ struct replace_process_instance_assignments_builder
   using super::update;
 
   Function f;
-  std::multiset<data::variable> sum_variables;
 
   explicit replace_process_instance_assignments_builder(Function f_)
     : f(f_)
   {}
 
-  void enter(const process::sum& x)
-  {
-    sum_variables.insert(x.variables().begin(), x.variables().end());
-  }
-
-  void leave(const process::sum& x)
-  {
-    for (const data::variable& v: x.variables())
-    {
-      sum_variables.erase(sum_variables.find(v));
-    }
-  }
-
   template<class T>
   void apply(T& result, const process::process_instance& x)
   {
-    result = f(to_process_instance_assignment(x,
-      [&](const data::variable& v) { return sum_variables.find(v) != sum_variables.end(); }));
+    result = f(to_process_instance_assignment(x));
   }
 
   template<class T>
@@ -485,8 +471,7 @@ struct join_nested_stochastic_operators_builder
 } // namespace detail
 
 /// \brief Replaces every process instance assignment P(d = e) in p by f(P(d = e)). A process instance P(e) is first
-///        converted into a process instance assignment by to_process_instance_assignment, keeping the assignments
-///        d_i = d_i where d_i is bound by an enclosing sum.
+///        converted into a process instance assignment by to_process_instance_assignment.
 template<typename Function>
 process::process_expression replace_process_instance_assignments(const process::process_expression& p, Function f)
 {

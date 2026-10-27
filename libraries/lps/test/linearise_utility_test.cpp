@@ -302,24 +302,24 @@ const data::data_expression three = data::sort_nat::nat(3);
 
 } // namespace
 
-// P(x, 3) becomes P(y = 3): the assignment x = x is left out, unless it must be kept.
+// P(x, 3) becomes P(y = 3): the assignment x = x is left out.
 BOOST_AUTO_TEST_CASE(test_to_process_instance_assignment)
 {
-  BOOST_CHECK(lps::to_process_instance_assignment(P(x, three), [](const data::variable&) { return false; })
-              == P_assignment({data::assignment(y, three)}));
-  BOOST_CHECK(lps::to_process_instance_assignment(P(x, three), [](const data::variable& v) { return v == x; })
-              == P_assignment({data::assignment(x, x), data::assignment(y, three)}));
+  BOOST_CHECK(lps::to_process_instance_assignment(P(x, three)) == P_assignment({data::assignment(y, three)}));
   // An argument that is another parameter is not left out.
-  BOOST_CHECK(lps::to_process_instance_assignment(P(y, x), [](const data::variable&) { return false; })
-              == P_assignment({data::assignment(x, y), data::assignment(y, x)}));
+  BOOST_CHECK(
+    lps::to_process_instance_assignment(P(y, x)) == P_assignment({data::assignment(x, y), data::assignment(y, x)}));
 }
 
-// Process instances become process instance assignments, keeping x = x where x is bound by an enclosing sum, and f is
-// applied to every process instance assignment from left to right.
+// Process instances become process instance assignments, also in the scope of a sum or a stochastic operator that binds
+// a parameter, and f is applied to every process instance assignment from left to right.
 BOOST_AUTO_TEST_CASE(test_replace_process_instance_assignments)
 {
-  const process_expression p
-    = choice(P(x, three), seq(sum({x}, P(x, y)), P_assignment({data::assignment(y, three), data::assignment(x, z)})));
+  const data::data_expression distribution = data::sort_real::real_(1);
+  const process_expression p = choice(P(x, three),
+    seq(sum({x}, P(x, y)),
+      seq(stochastic_operator({x}, distribution, P(x, three)),
+        P_assignment({data::assignment(y, three), data::assignment(x, z)}))));
   std::vector<process_instance_assignment> visited;
   const process_expression result = lps::replace_process_instance_assignments(p,
     [&](const process_instance_assignment& a)
@@ -328,23 +328,11 @@ BOOST_AUTO_TEST_CASE(test_replace_process_instance_assignments)
       return a;
     });
   const process_instance_assignment a1 = P_assignment({data::assignment(y, three)});
-  const process_instance_assignment a2 = P_assignment({data::assignment(x, x)});
+  const process_instance_assignment a2 = P_assignment({});
   // f receives an existing process instance assignment as it is; the lineariser sorts its assignments.
   const process_instance_assignment a3 = P_assignment({data::assignment(y, three), data::assignment(x, z)});
-  BOOST_CHECK(result == choice(a1, seq(sum({x}, a2), a3)));
-  BOOST_CHECK(visited == std::vector<process_instance_assignment>({a1, a2, a3}));
-
-  // x = x is kept only within the scope of the sum.
-  const process_expression q = seq(sum({x}, P(x, x)), P(x, x));
-  BOOST_CHECK(lps::replace_process_instance_assignments(q, [](const process_instance_assignment& a) { return a; })
-              == seq(sum({x}, P_assignment({data::assignment(x, x), data::assignment(y, x)})),
-                P_assignment({data::assignment(y, x)})));
-
-  // A variable bound by a stochastic operator is not kept; only sum variables are.
-  const data::data_expression distribution = data::sort_real::real_(1);
-  BOOST_CHECK(lps::replace_process_instance_assignments(stochastic_operator({x}, distribution, P(x, three)),
-                [](const process_instance_assignment& a) { return a; })
-              == stochastic_operator({x}, distribution, P_assignment({data::assignment(y, three)})));
+  BOOST_CHECK(result == choice(a1, seq(sum({x}, a2), seq(stochastic_operator({x}, distribution, a1), a3))));
+  BOOST_CHECK(visited == std::vector<process_instance_assignment>({a1, a2, a1, a3}));
 }
 
 // Directly nested stochastic operators are joined into one, also below other operators; stochastic operators that are

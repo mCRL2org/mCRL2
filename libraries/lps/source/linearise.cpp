@@ -1757,8 +1757,7 @@ class specification_basic_type
           object.process_representing_action=tempvar;
         }
         return to_process_instance_assignment(
-          process_instance(object.process_representing_action, action(body).arguments()),
-          [](const variable&) { return false; });
+          process_instance(object.process_representing_action, action(body).arguments()));
       }
 
       if (is_sync(body))
@@ -1790,8 +1789,7 @@ class specification_basic_type
                                        GNF,true,false);
           object.process_representing_action=tempvar;
         }
-        return to_process_instance_assignment(process_instance(object.process_representing_action, getarguments(ma)),
-          [](const variable&) { return false; });
+        return to_process_instance_assignment(process_instance(object.process_representing_action, getarguments(ma)));
       }
 
       if (is_at(body))
@@ -8710,19 +8708,18 @@ class specification_basic_type
       return expand_process_instance_assignment(t,visited_processes);
     }
 
-/* Transform process_arguments
- *   This function replaces process_instances by process_instance_assignments.
- *   All assignments in a process_instance_assignment are ordered in the same
- *   sequence as the parameters belonging to that assignment.
- *   All assignments in a process_instance_assignment of the form x=x where
- *   x is not a bound variable are removed.
- *   Furthermore, process occurrences X where X is defined as X=X1, X1=X2...Xn-1=Xn
- *   are replaced by Xn, with the necessary substitutions for data parameters.
- *   The reason for this is that only Xn will become a process in the linear
- *   process, with its own state. Otherwise there is a risk that all process
- *   variables X, X1, X2, etc. have separate states, and worse, for all of them
- *   a copy of the summands will be added.
-*/
+    /* Transform process_arguments
+     *   This function replaces process_instances by process_instance_assignments.
+     *   All assignments in a process_instance_assignment are ordered in the same
+     *   sequence as the parameters belonging to that assignment.
+     *   An argument x for the parameter x of a process_instance is left out: x=x is implicit.
+     *   Furthermore, process occurrences X where X is defined as X=X1, X1=X2...Xn-1=Xn
+     *   are replaced by Xn, with the necessary substitutions for data parameters.
+     *   The reason for this is that only Xn will become a process in the linear
+     *   process, with its own state. Otherwise there is a risk that all process
+     *   variables X, X1, X2, etc. have separate states, and worse, for all of them
+     *   a copy of the summands will be added.
+     */
 
     /* This function replaces all process instances by a process instance assignment,
        furthermore, if a process consists of only a process instantionation, i.e., X=Y, it is removed.
