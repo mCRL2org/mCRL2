@@ -300,10 +300,13 @@ class specification_basic_type
       return RewriteTerm(at(t).time_stamp())==sort_real::real_one();
     }
 
-    /***************** temporary helper function to compare substitutions ******************/
+    /***************** substitution ******************/
 
-    template <class Expression, IsSubstitution Substitution>
-    Expression replace_variables_capture_avoiding_alt(const Expression& e, Substitution& sigma)
+    // Applies sigma to e, renaming a bound variable only when it would capture a variable of a right hand side of
+    // sigma. Fresh names come from fresh_identifier_generator. Sigma must support variable_occurs_in_a_rhs, as
+    // maintain_variables_in_rhs and mutable_indexed_substitution do.
+    template<class Expression, IsSubstitution Substitution>
+    Expression replace_variables_capture_avoiding(const Expression& e, Substitution& sigma)
     {
       return process::replace_variables_capture_avoiding_with_an_identifier_generator(e, sigma, fresh_identifier_generator);
     }
@@ -1310,7 +1313,7 @@ class specification_basic_type
       const process_expression& p,
       Substitution& sigma)
     {
-      return simplify_pCRLproc(replace_variables_capture_avoiding_alt(p, sigma));
+      return simplify_pCRLproc(replace_variables_capture_avoiding(p, sigma));
     }
 
     // A predicate that holds for the variables in a list.
@@ -1377,7 +1380,7 @@ class specification_basic_type
     process_expression rename_pCRLproc(const process_expression& p, Substitution& sigma)
     {
       assert(is_variable_renaming(sigma));
-      return replace_variables_capture_avoiding_alt(p, sigma);
+      return replace_variables_capture_avoiding(p, sigma);
     }
 
     // The function below transforms a ProcessAssignment to a Process, provided
@@ -2297,7 +2300,7 @@ class specification_basic_type
           ++i;
         }
         const process_expression d1=substitute_pCRLproc(body,sigma);
-        const data_expression new_distribution=replace_variables_capture_avoiding_alt(distribution, sigma);
+        const data_expression new_distribution = replace_variables_capture_avoiding(distribution, sigma);
 
         if (result_defined)
         {
@@ -3483,14 +3486,11 @@ class specification_basic_type
                                            containstimebody(proc.operand()));
           // calculate the substitution to be applied on proc.distribution() which is moved outside the
           // body the process.
-          processes_with_stochastic_distribution_first.insert(
-                        std::pair< process_identifier, process_pid_pair >
-                                 (p,
-                                  process_pid_pair(stochastic_operator(
-                                                        vars,
-                                                        replace_variables_capture_avoiding_alt(proc.distribution(), local_sigma),
-                                                        proc.operand()),
-                                                   newproc)));
+          processes_with_stochastic_distribution_first.insert(std::pair<process_identifier, process_pid_pair>(p,
+            process_pid_pair(stochastic_operator(vars,
+                               replace_variables_capture_avoiding(proc.distribution(), local_sigma),
+                               proc.operand()),
+              newproc)));
           result.insert(newproc);
         }
       }
@@ -5579,7 +5579,7 @@ class specification_basic_type
         }
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
 
-        const data_expression auxresult1=replace_variables_capture_avoiding_alt(condition,mutable_sigma);
+        const data_expression auxresult1 = replace_variables_capture_avoiding(condition, mutable_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -5703,7 +5703,7 @@ class specification_basic_type
             }
 
             maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1=replace_variables_capture_avoiding_alt(f,mutable_sigma);
+            const data_expression auxresult1 = replace_variables_capture_avoiding(f, mutable_sigma);
 
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
@@ -5807,7 +5807,7 @@ class specification_basic_type
             }
 
             maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1=replace_variables_capture_avoiding_alt(actiontime, mutable_sigma);
+            const data_expression auxresult1 = replace_variables_capture_avoiding(actiontime, mutable_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -5916,7 +5916,7 @@ class specification_basic_type
           }
           maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
 
-          const data_expression auxresult1=replace_variables_capture_avoiding_alt(dist,mutable_sigma);
+          const data_expression auxresult1 = replace_variables_capture_avoiding(dist, mutable_sigma);
           if (equalterm==data_expression()||is_global_variable(equalterm))
           {
             equalterm=auxresult1;
@@ -6061,7 +6061,7 @@ class specification_basic_type
           }
 
           maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-          data_expression auxresult1=replace_variables_capture_avoiding_alt(nextstateparameter, mutable_sigma);
+          data_expression auxresult1 = replace_variables_capture_avoiding(nextstateparameter, mutable_sigma);
           if (equalterm==data_expression()) // ||is_global_variable(equalterm)) Adding this last part leads to smaller case functions,
                                             // but bigger and less structured state spaces, as parameters are less often put to default
                                             // values. Constant elimination can less often be applied as constant eliminiation does not
@@ -6198,7 +6198,7 @@ class specification_basic_type
         }
 
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-        const data_expression auxresult1=replace_variables_capture_avoiding_alt(condition, mutable_sigma);
+        const data_expression auxresult1 = replace_variables_capture_avoiding(condition, mutable_sigma);
         if (equalterm==data_expression()||is_global_variable(equalterm))
         {
           equalterm=auxresult1;
@@ -6330,7 +6330,7 @@ class specification_basic_type
             }
 
             maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1=replace_variables_capture_avoiding_alt(actiontime, mutable_sigma);
+            const data_expression auxresult1 = replace_variables_capture_avoiding(actiontime, mutable_sigma);
             if (equalterm==data_expression()||is_global_variable(equalterm))
             {
               equalterm=auxresult1;
@@ -6924,7 +6924,7 @@ class specification_basic_type
         }
 
         maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-        result=lazy::or_(result,replace_variables_capture_avoiding_alt(lazy::and_(*i,*j), mutable_sigma));
+        result = lazy::or_(result, replace_variables_capture_avoiding(lazy::and_(*i, *j), mutable_sigma));
       }
       return lps::detail::ultimate_delay(time_variable, existentially_quantified_variables, RewriteTerm(result));
     }
@@ -6972,9 +6972,9 @@ class specification_basic_type
         {
           local_sigma[v]=v;
         }
-        ultimate_delay_condition.constraint()=replace_variables_capture_avoiding_alt(
-                                                       ultimate_delay_condition.constraint(),
-                                                       local_sigma);  // Only substitute the variables in the lhs.
+        ultimate_delay_condition.constraint()
+          = replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
+            local_sigma); // Only substitute the variables in the lhs.
       }
       for (const stochastic_action_summand& smmnd: action_summands)
       {
@@ -6994,17 +6994,17 @@ class specification_basic_type
         assignment_list nextstate=smmnd.assignments();
 
         // First the summation and stochastic variables are renamed, then the parameters, below.
-        condition = replace_variables_capture_avoiding_alt(condition, sigma_sumvars);
-        actiontime = replace_variables_capture_avoiding_alt(actiontime, sigma_sumvars);
+        condition = replace_variables_capture_avoiding(condition, sigma_sumvars);
+        actiontime = replace_variables_capture_avoiding(actiontime, sigma_sumvars);
         multiaction = lps::replace_variables_capture_avoiding_with_an_identifier_generator(multiaction,
           sigma_sumvars,
           fresh_identifier_generator);
         distribution = stochastic_distribution(unique_stochastic_vars,
-          replace_variables_capture_avoiding_alt(
-            replace_variables_capture_avoiding_alt(distribution.distribution(), sigma_sumvars),
+          replace_variables_capture_avoiding(
+            replace_variables_capture_avoiding(distribution.distribution(), sigma_sumvars),
             sigma_stochastic_vars));
-        nextstate = replace_variables_capture_avoiding_alt(nextstate, sigma_sumvars);
-        nextstate = replace_variables_capture_avoiding_alt(nextstate, sigma_stochastic_vars);
+        nextstate = replace_variables_capture_avoiding(nextstate, sigma_sumvars);
+        nextstate = replace_variables_capture_avoiding(nextstate, sigma_stochastic_vars);
 
         result_action_summands.emplace_back(unique_sumvars,
             condition,
@@ -7021,9 +7021,8 @@ class specification_basic_type
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
         assert(unique_sumvars.size()==sumvars.size());
-        const data_expression condition = replace_variables_capture_avoiding_alt(smmnd.condition(), sigma_sumvars);
-        const data_expression actiontime
-          = replace_variables_capture_avoiding_alt(smmnd.deadlock().time(), sigma_sumvars);
+        const data_expression condition = replace_variables_capture_avoiding(smmnd.condition(), sigma_sumvars);
+        const data_expression actiontime = replace_variables_capture_avoiding(smmnd.deadlock().time(), sigma_sumvars);
 
         result_deadlock_summands.emplace_back(unique_sumvars,
             condition,
@@ -7060,7 +7059,9 @@ class specification_basic_type
       // Additionally map the time variable of the second ultimate delay to that of the first.
       sigma[delay2.time_var()]=delay1.time_var();
       data_expression new_constraint;
-      make_optimized_and(new_constraint, delay1.constraint(), replace_variables_capture_avoiding_alt(delay2.constraint(),sigma));
+      make_optimized_and(new_constraint,
+        delay1.constraint(),
+        replace_variables_capture_avoiding(delay2.constraint(), sigma));
       variable_list new_existential_variables = delay1.variables()+renameable_variables;
 
       // TODO: The new constraint can be simplified, as two conditions sharing the timed variable have been merged.
@@ -7118,8 +7119,8 @@ class specification_basic_type
               {
                 actiontime1=ultimate_delay_condition.time_var();
                 sumvars1.push_front(ultimate_delay_condition.time_var());
-                condition1=lazy::and_(condition1,
-                                      replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(), sigma));
+                condition1 = lazy::and_(condition1,
+                  replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma));
                 has_time=true;
               }
             }
@@ -7129,8 +7130,8 @@ class specification_basic_type
                  timevar in ultimate_delay_condition, and extend the condition */
               const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
               sigma[ultimate_delay_condition.time_var()]=actiontime1;
-              const data_expression intermediateultimatedelaycondition=
-                         replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma);
+              const data_expression intermediateultimatedelaycondition
+                = replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma);
               make_optimized_and(condition1, condition1, intermediateultimatedelaycondition);
             }
 
@@ -7181,9 +7182,9 @@ class specification_basic_type
               {
                 actiontime1=ultimate_delay_condition.time_var();
                 sumvars1.push_front(ultimate_delay_condition.time_var());
-                make_optimized_and(condition1, condition1,
-                                         replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),
-                                                                                  sigma));
+                make_optimized_and(condition1,
+                  condition1,
+                  replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma));
                 has_time=true;
               }
             }
@@ -7193,8 +7194,8 @@ class specification_basic_type
                  timevar in ultimate_delay_condition, and extend the condition */
               const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
               sigma[ultimate_delay_condition.time_var()]=actiontime1;
-              const data_expression intermediateultimatedelaycondition=
-                         replace_variables_capture_avoiding_alt(ultimate_delay_condition.constraint(),sigma);
+              const data_expression intermediateultimatedelaycondition
+                = replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma);
               make_optimized_and(condition1, condition1, intermediateultimatedelaycondition);
             }
 
@@ -7781,11 +7782,9 @@ class specification_basic_type
           sigma[a.lhs()]=a.rhs();
         }
 
-        init=replace_variables_capture_avoiding_alt(init,sigma);
-        initial_stochastic_distribution =
-                   stochastic_distribution(
-                         initial_stochastic_distribution.variables(),
-                         replace_variables_capture_avoiding_alt(initial_stochastic_distribution.distribution(), sigma));
+        init = replace_variables_capture_avoiding(init, sigma);
+        initial_stochastic_distribution = stochastic_distribution(initial_stochastic_distribution.variables(),
+          replace_variables_capture_avoiding(initial_stochastic_distribution.distribution(), sigma));
 
         // Make the bound variables and parameters in this process unique.
 
@@ -8003,17 +8002,16 @@ class specification_basic_type
           contained_in(pars + initial_stochastic_distribution.variables()),
           sigma,
           fresh_variables());
-        initial_stochastic_distribution=stochastic_distribution(
-                                          stochvars+initial_stochastic_distribution.variables(),
-                                          sort_real::times(replace_variables_capture_avoiding_alt(
-                                                                                    sto.distribution(), sigma),
-                                                                 initial_stochastic_distribution.distribution()));
+        initial_stochastic_distribution
+          = stochastic_distribution(stochvars + initial_stochastic_distribution.variables(),
+            sort_real::times(replace_variables_capture_avoiding(sto.distribution(), sigma),
+              initial_stochastic_distribution.distribution()));
         /* Reset the bound variables in the initial_stochastic_distribution, to avoid erroneous renaming in the body of the process */
         for(const variable& v: initial_stochastic_distribution.variables())
         {
           sigma[v]=v;
         }
-        init=replace_variables_capture_avoiding_alt(init,sigma);
+        init = replace_variables_capture_avoiding(init, sigma);
         return;
       }
 
@@ -8149,15 +8147,14 @@ class specification_basic_type
 
       if (is_at(t))
       {
-        return at(alphaconversionterm(at(t).operand(),parameters,sigma),
-                  replace_variables_capture_avoiding_alt(at(t).time_stamp(),sigma));
+        return at(alphaconversionterm(at(t).operand(), parameters, sigma),
+          replace_variables_capture_avoiding(at(t).time_stamp(), sigma));
       }
 
       if (is_if_then(t))
       {
-        return if_then(
-                 replace_variables_capture_avoiding_alt(if_then(t).condition(), sigma),
-                 alphaconversionterm(if_then(t).then_case(),parameters,sigma));
+        return if_then(replace_variables_capture_avoiding(if_then(t).condition(), sigma),
+          alphaconversionterm(if_then(t).then_case(), parameters, sigma));
       }
 
       if (is_sum(t))
@@ -8176,10 +8173,9 @@ class specification_basic_type
         maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
 
         sumvars = rename_variables_away(sumvars, contained_in(parameters), local_sigma, fresh_variables());
-        return stochastic_operator(
-                       sumvars,
-                       replace_variables_capture_avoiding_alt(sto.distribution(), sigma),
-                       alphaconversionterm(sto.operand(), sumvars+parameters, local_sigma));
+        return stochastic_operator(sumvars,
+          replace_variables_capture_avoiding(sto.distribution(), sigma),
+          alphaconversionterm(sto.operand(), sumvars + parameters, local_sigma));
       }
 
       if (is_process_instance_assignment(t))
@@ -8189,14 +8185,14 @@ class specification_basic_type
         alphaconversion(procId, procId.variables());
 
         // Also adds an assignment p=sigma(p) for each parameter p without an assignment for which sigma(p)!=p.
-        const process_instance_assignment result = replace_variables_capture_avoiding_alt(instance, sigma);
+        const process_instance_assignment result = replace_variables_capture_avoiding(instance, sigma);
         assert(check_valid_process_instance_assignment(result.identifier(),result.assignments()));
         return result;
       }
 
       if (is_action(t))
       {
-        return action(action(t).label(), replace_variables_capture_avoiding_alt(action(t).arguments(), sigma));
+        return action(action(t).label(), replace_variables_capture_avoiding(action(t).arguments(), sigma));
       }
 
       if (is_delta(t)||
