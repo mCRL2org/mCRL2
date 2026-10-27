@@ -7991,68 +7991,59 @@ class specification_basic_type
 
     /***** determinewhetherprocessescontaintime; **********/
 
-    bool containstimebody(
-      const process_expression& t,
-      bool* stable,
-      process_identifier_set& visited,
-      bool allowrecursion,
-      bool& contains_if_then)
+    // Whether t contains time, given whether the processes in t contain time. Sets contains_if_then if t contains a
+    // condition c -> p, which is translated into c -> p <> delta@0 if time is not ignored.
+    bool containstimebody(const process_expression& t, bool& contains_if_then)
     {
       if (is_merge(t))
       {
-        /* the construction below is needed to guarantee that
-           both subterms are recursively investigated */
-        bool r1=containstimebody(process::merge(t).left(),stable,visited,allowrecursion,contains_if_then);
-        bool r2=containstimebody(process::merge(t).right(),stable,visited,allowrecursion,contains_if_then);
-        return r1||r2;
+        const bool r1 = containstimebody(process::merge(t).left(), contains_if_then);
+        const bool r2 = containstimebody(process::merge(t).right(), contains_if_then);
+        return r1 || r2;
       }
 
       if (is_process_instance_assignment(t))
       {
-        if (allowrecursion)
-        {
-          return (containstime_rec(process_instance_assignment(t).identifier(),stable,visited,contains_if_then));
-        }
         return objectIndex(process_instance_assignment(t).identifier()).containstime;
       }
 
       if (is_hide(t))
       {
-        return containstimebody(hide(t).operand(),stable,visited,allowrecursion,contains_if_then);
+        return containstimebody(hide(t).operand(), contains_if_then);
       }
 
       if (is_rename(t))
       {
-        return containstimebody(process::rename(t).operand(),stable,visited,allowrecursion,contains_if_then);
+        return containstimebody(process::rename(t).operand(), contains_if_then);
       }
 
       if (is_allow(t))
       {
-        return containstimebody(allow(t).operand(),stable,visited,allowrecursion,contains_if_then);
+        return containstimebody(allow(t).operand(), contains_if_then);
       }
 
       if (is_block(t))
       {
-        return containstimebody(block(t).operand(),stable,visited,allowrecursion,contains_if_then);
+        return containstimebody(block(t).operand(), contains_if_then);
       }
 
       if (is_comm(t))
       {
-        return containstimebody(comm(t).operand(),stable,visited,allowrecursion,contains_if_then);
+        return containstimebody(comm(t).operand(), contains_if_then);
       }
 
       if (is_choice(t))
       {
-        bool r1=containstimebody(choice(t).left(),stable,visited,allowrecursion,contains_if_then);
-        bool r2=containstimebody(choice(t).right(),stable,visited,allowrecursion,contains_if_then);
-        return r1||r2;
+        const bool r1 = containstimebody(choice(t).left(), contains_if_then);
+        const bool r2 = containstimebody(choice(t).right(), contains_if_then);
+        return r1 || r2;
       }
 
       if (is_seq(t))
       {
-        bool r1=containstimebody(seq(t).left(),stable,visited,allowrecursion,contains_if_then);
-        bool r2=containstimebody(seq(t).right(),stable,visited,allowrecursion,contains_if_then);
-        return r1||r2;
+        const bool r1 = containstimebody(seq(t).left(), contains_if_then);
+        const bool r2 = containstimebody(seq(t).right(), contains_if_then);
+        return r1 || r2;
       }
 
       if (is_if_then(t))
@@ -8060,37 +8051,32 @@ class specification_basic_type
         // If delta is added, c->p is translated into c->p<>delta,
         // otherwise into c->p<>delta@0. In this last case the process
         // contains time.
-        contains_if_then=true;
+        contains_if_then = true;
         if (options.ignore_time)
         {
-          return containstimebody(if_then(t).then_case(),stable,visited,allowrecursion,contains_if_then);
+          return containstimebody(if_then(t).then_case(), contains_if_then);
         }
-        else
-        {
-          return true;
-        }
+        return true;
       }
 
       if (is_if_then_else(t))
       {
-        bool r1=containstimebody(if_then_else(t).then_case(),stable,visited,allowrecursion,contains_if_then);
-        bool r2=containstimebody(if_then_else(t).else_case(),stable,visited,allowrecursion,contains_if_then);
-        return r1||r2;
+        const bool r1 = containstimebody(if_then_else(t).then_case(), contains_if_then);
+        const bool r2 = containstimebody(if_then_else(t).else_case(), contains_if_then);
+        return r1 || r2;
       }
 
       if (is_sum(t))
       {
-        return containstimebody(sum(t).operand(),stable,visited,allowrecursion,contains_if_then);
+        return containstimebody(sum(t).operand(), contains_if_then);
       }
 
       if (is_stochastic_operator(t))
       {
-        return containstimebody(stochastic_operator(t).operand(),stable,visited,allowrecursion,contains_if_then);
+        return containstimebody(stochastic_operator(t).operand(), contains_if_then);
       }
 
-      if (is_action(t)||
-          is_delta(t)||
-          is_tau(t))
+      if (is_action(t) || is_delta(t) || is_tau(t))
       {
         return false;
       }
@@ -8102,74 +8088,94 @@ class specification_basic_type
 
       if (is_sync(t))
       {
-        bool r1=containstimebody(process::sync(t).left(),stable,visited,allowrecursion,contains_if_then);
-        bool r2=containstimebody(process::sync(t).right(),stable,visited,allowrecursion,contains_if_then);
-        return r1||r2;
+        const bool r1 = containstimebody(process::sync(t).left(), contains_if_then);
+        const bool r2 = containstimebody(process::sync(t).right(), contains_if_then);
+        return r1 || r2;
       }
 
-      throw mcrl2::runtime_error("unexpected process format in containstime " + process::pp(t) +".");
-      return false;
+      throw mcrl2::runtime_error("unexpected process format in containstime " + process::pp(t) + ".");
     }
 
-    bool containstime_rec(
-      const process_identifier& procId,
-      bool* stable,
-      process_identifier_set& visited,
-      bool& contains_if_then)
-    {
-      objectdatatype& object=objectIndex(procId);
-
-      if (visited.count(procId)==0)
-      {
-        visited.insert(procId);
-        const bool ct=containstimebody(object.processbody,stable,visited,true,contains_if_then);
-        static bool show_only_once=true;
-        if (ct && options.ignore_time && show_only_once)
-        {
-          mCRL2log(mcrl2::log::log_level_t::warning) << "process " << procId.name() <<
-              " contains time, which is now not preserved. \n"  <<
-              "Use --timed or -T, or untick `add deadlocks' for a correct timed linearisation...\n";
-          show_only_once=false;
-        }
-        if (object.containstime!=ct)
-        {
-          object.containstime=ct;
-          if (stable!=nullptr)
-          {
-            *stable=false;
-          }
-        }
-      }
-      return (object.containstime);
-    }
-
+    // Whether t contains time, given whether the processes in t contain time.
     bool containstimebody(const process_expression& t)
     {
-      process_identifier_set visited;
-      bool stable;
-      bool contains_if_then;
-      return containstimebody(t,&stable,visited,false,contains_if_then);
+      bool contains_if_then = false;
+      return containstimebody(t, contains_if_then);
     }
 
     bool determinewhetherprocessescontaintime(const process_identifier& procId)
-
     {
       /* This function sets for all reachable processes in the array objectdata
          whether they contain time in the field containstime. In verbose mode
          it prints the process variables that contain time. Furtermore, it returns
          whether there are processes that contain an if-then that will be translated
          to an if-then-else with an delta@0 in the else branch, introducing time */
-      bool stable=false;
-      bool contains_if_then=false;
-
-      while (!stable)
+      bool contains_if_then = false;
+      compute_least_fixpoint(
+        procId,
+        [&](const objectdatatype& object) { return containstimebody(object.processbody, contains_if_then); },
+        [](objectdatatype& object) -> bool& { return object.containstime; });
+      if (options.ignore_time)
       {
-        process_identifier_set visited;
-        stable=true;
-        containstime_rec(procId,&stable,visited,contains_if_then);
+        static bool show_only_once = true;
+        for (const process_identifier& p: reachable_processes(procId))
+        {
+          if (objectIndex(p).containstime && show_only_once)
+          {
+            mCRL2log(mcrl2::log::log_level_t::warning)
+              << "process " << p.name() << " contains time, which is now not preserved. \n"
+              << "Use --timed or -T, or untick `add deadlocks' for a correct timed linearisation...\n";
+            show_only_once = false;
+          }
+        }
       }
       return contains_if_then;
     }
+
+    // The processes reachable from procId.
+    process_identifier_set reachable_processes(const process_identifier& procId)
+    {
+      process_identifier_set result;
+      make_pCRL_procs(procId, result);
+      return result;
+    }
+
+    // Computes, for the processes reachable from procId, the least fixpoint of a property of processes that is
+    // monotone in the values for the processes that occur in a body. evaluate(object) computes the property of the
+    // body of object from the current values, and value(object) is the field that holds it. The fixpoint is computed
+    // per strongly connected component, components that are used by others first.
+    template<typename Evaluate, typename Value>
+    void compute_least_fixpoint(const process_identifier& procId, Evaluate evaluate, Value value)
+    {
+      std::vector<process_equation> equations;
+      for (const process_identifier& p: reachable_processes(procId))
+      {
+        equations.emplace_back(p, p.variables(), objectIndex(p).processbody);
+      }
+      for (const std::set<process_identifier>& component:
+        process::process_variable_strongly_connected_components(equations,
+          process_instance_assignment(procId, assignment_list())))
+      {
+        // Iterate in a fixed order, so that the warnings and the results do not depend on term addresses.
+        const process_identifier_set ordered_component(component.begin(), component.end());
+        bool stable = false;
+        while (!stable)
+        {
+          stable = true;
+          for (const process_identifier& p: ordered_component)
+          {
+            objectdatatype& object = objectIndex(p);
+            const bool v = evaluate(object);
+            if (value(object) != v)
+            {
+              value(object) = v;
+              stable = false;
+            }
+          }
+        }
+      }
+    }
+
     /***** stochastic operators to the front **********/
 
     // The functions below build a process operator of which an operand may be a stochastic operator, and put that
@@ -8558,93 +8564,83 @@ class specification_basic_type
 
     /***** determinewhetherprocessescanterminate(init); **********/
 
-    bool canterminatebody(
-      const process_expression& t,
-      bool& stable,
-      process_identifier_set& visited,
-      const bool allowrecursion)
+    // Whether t can terminate, given whether the processes in t can terminate.
+    bool canterminatebody(const process_expression& t)
     {
       if (is_merge(t))
       {
-        /* the construction below is needed to guarantee that
-           both subterms are recursively investigated */
-        const bool r1=canterminatebody(process::merge(t).left(),stable,visited,allowrecursion);
-        const bool r2=canterminatebody(process::merge(t).right(),stable,visited,allowrecursion);
-        return r1&&r2;
+        const bool r1 = canterminatebody(process::merge(t).left());
+        const bool r2 = canterminatebody(process::merge(t).right());
+        return r1 && r2;
       }
 
       if (is_process_instance_assignment(t))
       {
-        const process_instance_assignment u(t);
-        if (allowrecursion)
-        {
-          return (canterminate_rec(u.identifier(),stable,visited));
-        }
-        return objectIndex(u.identifier()).canterminate;
+        return objectIndex(process_instance_assignment(t).identifier()).canterminate;
       }
 
       if (is_hide(t))
       {
-        return (canterminatebody(hide(t).operand(),stable,visited,allowrecursion));
+        return canterminatebody(hide(t).operand());
       }
 
       if (is_rename(t))
       {
-        return (canterminatebody(process::rename(t).operand(),stable,visited,allowrecursion));
+        return canterminatebody(process::rename(t).operand());
       }
 
       if (is_allow(t))
       {
-        return (canterminatebody(allow(t).operand(),stable,visited,allowrecursion));
+        return canterminatebody(allow(t).operand());
       }
 
       if (is_block(t))
       {
-        return (canterminatebody(block(t).operand(),stable,visited,allowrecursion));
+        return canterminatebody(block(t).operand());
       }
 
       if (is_comm(t))
       {
-        return (canterminatebody(comm(t).operand(),stable,visited,allowrecursion));
+        return canterminatebody(comm(t).operand());
       }
 
       if (is_choice(t))
       {
-        const bool r1=canterminatebody(choice(t).left(),stable,visited,allowrecursion);
-        const bool r2=canterminatebody(choice(t).right(),stable,visited,allowrecursion);
-        return r1||r2;
+        const bool r1 = canterminatebody(choice(t).left());
+        const bool r2 = canterminatebody(choice(t).right());
+        return r1 || r2;
       }
 
       if (is_seq(t))
       {
-        const bool r1=canterminatebody(seq(t).left(),stable,visited,allowrecursion);
-        const bool r2=canterminatebody(seq(t).right(),stable,visited,allowrecursion);
-        return r1&&r2;
+        const bool r1 = canterminatebody(seq(t).left());
+        const bool r2 = canterminatebody(seq(t).right());
+        return r1 && r2;
       }
 
       if (is_if_then(t))
       {
-        return canterminatebody(if_then(t).then_case(),stable,visited,allowrecursion);
+        return canterminatebody(if_then(t).then_case());
       }
 
       if (is_if_then_else(t))
       {
-        const bool r1=canterminatebody(if_then_else(t).then_case(),stable,visited,allowrecursion);
-        const bool r2=canterminatebody(if_then_else(t).else_case(),stable,visited,allowrecursion);
-        return r1||r2;
+        const bool r1 = canterminatebody(if_then_else(t).then_case());
+        const bool r2 = canterminatebody(if_then_else(t).else_case());
+        return r1 || r2;
       }
 
       if (is_sum(t))
       {
-        return (canterminatebody(sum(t).operand(),stable,visited,allowrecursion));
+        return canterminatebody(sum(t).operand());
       }
 
       if (is_stochastic_operator(t))
       {
-        return (canterminatebody(stochastic_operator(t).operand(),stable,visited,allowrecursion));
+        return canterminatebody(stochastic_operator(t).operand());
       }
 
-      if (is_action(t))
+      if (is_action(t) || is_tau(t))
       {
         return true;
       }
@@ -8654,63 +8650,27 @@ class specification_basic_type
         return false;
       }
 
-      if (is_tau(t))
-      {
-        return true;
-      }
-
       if (is_at(t))
       {
-        return canterminatebody(at(t).operand(),stable,visited,allowrecursion);
+        return canterminatebody(at(t).operand());
       }
 
       if (is_sync(t))
       {
-        const bool r1=canterminatebody(process::sync(t).left(),stable,visited,allowrecursion);
-        const bool r2=canterminatebody(process::sync(t).right(),stable,visited,allowrecursion);
-        return r1&&r2;
+        const bool r1 = canterminatebody(process::sync(t).left());
+        const bool r2 = canterminatebody(process::sync(t).right());
+        return r1 && r2;
       }
 
-      throw mcrl2::runtime_error("unexpected process format in canterminate " + process::pp(t) +".");
-      return false;
-    }
-
-    bool canterminate_rec(
-      const process_identifier& procId,
-      bool& stable,
-      process_identifier_set& visited)
-    {
-      objectdatatype& object=objectIndex(procId);
-
-      if (visited.count(procId)==0)
-      {
-        visited.insert(procId);
-        const bool ct=canterminatebody(object.processbody,stable,visited,true);
-        if (object.canterminate!=ct)
-        {
-          object.canterminate=ct;
-          stable=false;
-        }
-      }
-      return (object.canterminate);
-    }
-
-    bool canterminatebody(const process_expression& t)
-    {
-      process_identifier_set visited;
-      bool stable=false;
-      return canterminatebody(t,stable,visited,false);
+      throw mcrl2::runtime_error("unexpected process format in canterminate " + process::pp(t) + ".");
     }
 
     void determinewhetherprocessescanterminate(const process_identifier& procId)
     {
-      bool stable=false;
-      while (!stable)
-      {
-        process_identifier_set visited;
-        stable=true;
-        canterminate_rec(procId,stable,visited);
-      }
+      compute_least_fixpoint(
+        procId,
+        [&](const objectdatatype& object) { return canterminatebody(object.processbody); },
+        [](objectdatatype& object) -> bool& { return object.canterminate; });
     }
 
     /*****  distinguishmCRLandpCRLprocsAndAddTerminatedAction  ******/
