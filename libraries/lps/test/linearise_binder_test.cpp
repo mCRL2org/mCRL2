@@ -199,3 +199,117 @@ BOOST_AUTO_TEST_CASE(global_variable_substituted_under_a_binder)
                            "init P(k) || Q;\n";
   check_linearisation(spec, check_lambdas_have_a_free_variable);
 }
+
+// The process parameters whose value depends only on global variables: their initial value and every value assigned
+// to them refer only to global variables and to such parameters. Some linearisation methods store the value of a
+// global variable in a parameter.
+static std::set<data::variable> parameters_with_global_values(const stochastic_specification& result)
+{
+  const std::set<data::variable>& globals = result.global_variables();
+  const data::variable_list& parameters = result.process().process_parameters();
+  std::set<data::variable> candidates(parameters.begin(), parameters.end());
+  const std::function<bool(const data::data_expression&)> has_global_value = [&](const data::data_expression& e)
+  {
+    const std::set<data::variable> V = data::find_free_variables(e);
+    return std::all_of(V.begin(),
+      V.end(),
+      [&](const data::variable& v)
+      { return globals.find(v) != globals.end() || candidates.find(v) != candidates.end(); });
+  };
+  bool changed = true;
+  while (changed)
+  {
+    changed = false;
+    data::data_expression_list::const_iterator init = result.initial_process().expressions().begin();
+    for (const data::variable& p: parameters)
+    {
+      const bool global_value
+        = has_global_value(*init++)
+          && std::all_of(result.process().action_summands().begin(),
+            result.process().action_summands().end(),
+            [&](const stochastic_action_summand& s)
+            {
+              return std::all_of(s.assignments().begin(),
+                s.assignments().end(),
+                [&](const data::assignment& a) { return a.lhs() != p || has_global_value(a.rhs()); });
+            });
+      if (!global_value && candidates.erase(p) > 0)
+      {
+        changed = true;
+      }
+    }
+  }
+  return candidates;
+}
+
+// Every argument of the action b depends only on global variables, and there is at least one action b.
+static void check_b_depends_on_global_variables(const stochastic_specification& result)
+{
+  const std::set<data::variable> parameters = parameters_with_global_values(result);
+  bool found = false;
+  for (const stochastic_action_summand& s: result.process().action_summands())
+  {
+    for (const process::action& a: s.multi_action().actions())
+    {
+      if (a.label().name() != core::identifier_string("b"))
+      {
+        continue;
+      }
+      found = true;
+      for (const data::data_expression& e: a.arguments())
+      {
+        for (const data::variable& v: data::find_free_variables(e))
+        {
+          BOOST_CHECK_MESSAGE(result.global_variables().find(v) != result.global_variables().end()
+                                || parameters.find(v) != parameters.end(),
+            "the argument of b in " << lps::pp(s) << " depends on " << data::pp(v) << ", which has no global value");
+        }
+      }
+    }
+  }
+  BOOST_CHECK(found);
+}
+
+// A stochastic operator binds a variable g that is also a global variable, and the global g occurs in b(g) outside
+// the scope of the stochastic operator. When the stochastic operator is moved to the front of the process, its bound
+// variable must not capture the global g. Global variables are not among the free variables from which the
+// lineariser renames bound variables away when it brings a process into Greibach normal form, so this is reachable.
+static const std::string global_g = "glob g: Bool;\n"
+                                    "act  a, b: Bool;\n";
+static const std::string dist_g = "dist g: Bool[if(g, 1/4, 3/4)]";
+
+BOOST_AUTO_TEST_CASE(global_variable_in_a_choice_with_a_stochastic_operator)
+{
+  check_linearisation(global_g + "proc P = (" + dist_g
+                        + " . a(g) . P) + b(g) . P;\n"
+                          "init P;\n",
+    check_b_depends_on_global_variables,
+    stochastic_methods);
+  check_linearisation(global_g + "proc P = b(g) . P + (" + dist_g
+                        + " . a(g) . P);\n"
+                          "init P;\n",
+    check_b_depends_on_global_variables,
+    stochastic_methods);
+  check_linearisation(global_g
+                        + "proc P = Q + b(g) . P;\n"
+                          "     Q = "
+                        + dist_g
+                        + " . a(g) . P;\n"
+                          "init P;\n",
+    check_b_depends_on_global_variables,
+    stochastic_methods);
+}
+
+BOOST_AUTO_TEST_CASE(global_variable_in_a_sequence_or_condition_with_a_stochastic_operator)
+{
+  check_linearisation(global_g + "proc P = (" + dist_g
+                        + " . a(g)) . b(g) . P;\n"
+                          "init P;\n",
+    check_b_depends_on_global_variables,
+    stochastic_methods);
+  check_linearisation(global_g + "proc P = g -> (" + dist_g
+                        + " . a(g) . P) <> b(g) . P;\n"
+                          "init P;\n",
+    check_b_depends_on_global_variables,
+    stochastic_methods);
+}

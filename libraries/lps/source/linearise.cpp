@@ -8435,6 +8435,173 @@ class specification_basic_type
       }
       return contains_if_then;
     }
+    /***** stochastic operators to the front **********/
+
+    // The functions below build a process operator of which an operand may be a stochastic operator, and put that
+    // stochastic operator in front: (dist x[f]. p) + q becomes dist x[f]. (p + q). The variables bound by the
+    // stochastic operator are renamed away from the free variables of the other operands and of the condition, which
+    // come into their scope. Without a stochastic operand the result is the operator itself.
+
+    // The variables bound by x, renamed away from the variables in V.
+    stochastic_operator stochastic_operand(const process_expression& x, const std::set<variable>& V)
+    {
+      return rename_bound_variables_away(atermpp::down_cast<stochastic_operator>(x), contained_in(V));
+    }
+
+    // The free variables of p and of e.
+    static std::set<variable> free_variables(const process_expression& p, const data_expression& e = sort_bool::true_())
+    {
+      std::set<variable> result = process::find_free_variables(p);
+      const std::set<variable> V = data::find_free_variables(e);
+      result.insert(V.begin(), V.end());
+      return result;
+    }
+
+    // The variables bound by r2 must also differ from those bound by r1, as the result binds both.
+    stochastic_operator second_stochastic_operand(const process_expression& x,
+      const stochastic_operator& r1,
+      const data_expression& condition = sort_bool::true_())
+    {
+      std::set<variable> V = free_variables(r1, condition);
+      V.insert(r1.variables().begin(), r1.variables().end());
+      return stochastic_operand(x, V);
+    }
+
+    process_expression stochastic_choice(const process_expression& p1, const process_expression& p2)
+    {
+      if (is_stochastic_operator(p1) && is_stochastic_operator(p2))
+      {
+        const stochastic_operator r1 = stochastic_operand(p1, process::find_free_variables(p2));
+        const stochastic_operator r2 = second_stochastic_operand(p2, r1);
+        return stochastic_operator(r1.variables() + r2.variables(),
+          real_times_optimized(r1.distribution(), r2.distribution()),
+          choice(r1.operand(), r2.operand()));
+      }
+      if (is_stochastic_operator(p1))
+      {
+        const stochastic_operator r1 = stochastic_operand(p1, process::find_free_variables(p2));
+        return stochastic_operator(r1.variables(), r1.distribution(), choice(r1.operand(), p2));
+      }
+      if (is_stochastic_operator(p2))
+      {
+        const stochastic_operator r2 = stochastic_operand(p2, process::find_free_variables(p1));
+        return stochastic_operator(r2.variables(), r2.distribution(), choice(p1, r2.operand()));
+      }
+      return choice(p1, p2);
+    }
+
+    // Only a stochastic operator in p1 is put in front.
+    process_expression stochastic_seq(const process_expression& p1, const process_expression& p2)
+    {
+      if (is_stochastic_operator(p1))
+      {
+        const stochastic_operator r1 = stochastic_operand(p1, process::find_free_variables(p2));
+        return stochastic_operator(r1.variables(), r1.distribution(), seq(r1.operand(), p2));
+      }
+      return seq(p1, p2);
+    }
+
+    // If the condition does not hold, the variables of the stochastic operator get their default values.
+    data_expression
+    conditional_distribution(const data_expression& condition, const stochastic_operator& r, const bool in_then_case)
+    {
+      const data_expression default_distribution
+        = if_(variables_are_equal_to_default_values(r.variables()), sort_real::real_one(), sort_real::real_zero());
+      return in_then_case ? if_(condition, r.distribution(), default_distribution)
+                          : if_(condition, default_distribution, r.distribution());
+    }
+
+    process_expression stochastic_if_then(const data_expression& condition, const process_expression& p)
+    {
+      if (is_stochastic_operator(p))
+      {
+        const stochastic_operator r = stochastic_operand(p, data::find_free_variables(condition));
+        return stochastic_operator(r.variables(),
+          conditional_distribution(condition, r, true),
+          if_then(condition, r.operand()));
+      }
+      return if_then(condition, p);
+    }
+
+    process_expression stochastic_if_then_else(const data_expression& condition,
+      const process_expression& p1,
+      const process_expression& p2)
+    {
+      if (is_stochastic_operator(p1) && is_stochastic_operator(p2))
+      {
+        const stochastic_operator r1 = stochastic_operand(p1, free_variables(p2, condition));
+        const stochastic_operator r2 = second_stochastic_operand(p2, r1, condition);
+        return stochastic_operator(r1.variables() + r2.variables(),
+          if_(condition,
+            lazy::and_(variables_are_equal_to_default_values(r2.variables()), r1.distribution()),
+            lazy::and_(variables_are_equal_to_default_values(r1.variables()), r2.distribution())),
+          if_then_else(condition, r1.operand(), r2.operand()));
+      }
+      if (is_stochastic_operator(p1))
+      {
+        const stochastic_operator r1 = stochastic_operand(p1, free_variables(p2, condition));
+        return stochastic_operator(r1.variables(),
+          conditional_distribution(condition, r1, true),
+          if_then_else(condition, r1.operand(), p2));
+      }
+      if (is_stochastic_operator(p2))
+      {
+        const stochastic_operator r2 = stochastic_operand(p2, free_variables(p1, condition));
+        return stochastic_operator(r2.variables(),
+          conditional_distribution(condition, r2, false),
+          if_then_else(condition, p1, r2.operand()));
+      }
+      return if_then_else(condition, p1, p2);
+    }
+
+    // The distribution may not depend on the summation variables. The variables of the stochastic operator are renamed
+    // away from the summation variables, which bind the operand in the result.
+    process_expression
+    stochastic_sum(const variable_list& sumvars, const process_expression& p, const process_expression& t)
+    {
+      if (is_stochastic_operator(p))
+      {
+        const stochastic_operator r = stochastic_operand(p, std::set<variable>(sumvars.begin(), sumvars.end()));
+        const std::set<variable> variables_in_distribution = data::find_free_variables(r.distribution());
+        for (const variable& v: sumvars)
+        {
+          if (mcrl2::utilities::detail::contains(variables_in_distribution, v))
+          {
+            throw mcrl2::runtime_error("Cannot commute a sum operator over a stochastic operator in " + process::pp(t)
+                                       + ".\nThe problematic variable is " + pp(v) + ":" + pp(v.sort()) + ".");
+          }
+        }
+        return stochastic_operator(r.variables(), r.distribution(), sum(sumvars, r.operand()));
+      }
+      return sum(sumvars, p);
+    }
+
+    // dist x[f]. dist y[g]. q becomes dist x, y[f * g]. q. The variables y are renamed away from x and from the free
+    // variables of f.
+    process_expression stochastic_stochastic_operator(const stochastic_operator& sto, const process_expression& p)
+    {
+      if (is_stochastic_operator(p))
+      {
+        std::set<variable> V = data::find_free_variables(sto.distribution());
+        V.insert(sto.variables().begin(), sto.variables().end());
+        const stochastic_operator r = stochastic_operand(p, V);
+        return stochastic_operator(sto.variables() + r.variables(),
+          real_times_optimized(sto.distribution(), r.distribution()),
+          r.operand());
+      }
+      return stochastic_operator(sto.variables(), sto.distribution(), p);
+    }
+
+    process_expression stochastic_at(const process_expression& p, const data_expression& time_stamp)
+    {
+      if (is_stochastic_operator(p))
+      {
+        const stochastic_operator r = stochastic_operand(p, data::find_free_variables(time_stamp));
+        return stochastic_operator(r.variables(), r.distribution(), at(r.operand(), time_stamp));
+      }
+      return at(p, time_stamp);
+    }
+
     /***** transform_initial_distribution_term **********/
 
     process_expression transform_initial_distribution_term(
@@ -8494,180 +8661,69 @@ class specification_basic_type
 
       if (is_choice(t))
       {
-        const process_expression r1_=transform_initial_distribution_term(choice(t).left(),processes_with_initial_distribution);
-        const process_expression r2_=transform_initial_distribution_term(choice(t).right(),processes_with_initial_distribution);
-        if (is_stochastic_operator(r1_))
-        {
-          const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);
-          if (is_stochastic_operator(r2_))
-          {
-            /* both r1_ and r2_ are stochastic */
-            const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-            const process_expression& new_body1=r1.operand();
-            // The variables of r2 are renamed away from those of r1, as both are bound by the result.
-            const stochastic_operator renamed_r2 = rename_bound_variables_away(r2, contained_in(r1.variables()));
-            const variable_list& stochvars = renamed_r2.variables();
-            const process_expression& new_body2 = renamed_r2.operand();
-            const data_expression& new_distribution = renamed_r2.distribution();
-
-            return stochastic_operator(r1.variables() + stochvars,
-                                       real_times_optimized(r1.distribution(),new_distribution),
-                                       choice(new_body1,new_body2));
-          }
-          /* r1 is and r2_ is not a stochastic operator */
-          return stochastic_operator(r1.variables(),r1.distribution(),choice(r1.operand(),r2_));
-        }
-        if (is_stochastic_operator(r2_))
-        {
-          /* r1_ is not and r2_ is a stochastic operator */
-          const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-          return stochastic_operator(r2.variables(),r2.distribution(),choice(r1_,r2.operand()));
-        }
-        /* neither r1_ nor r2_ is stochastic */
-        return choice(r1_,r2_);
+        // The operands are transformed in a fixed order, as this may generate fresh names.
+        const process_expression p1
+          = transform_initial_distribution_term(choice(t).left(), processes_with_initial_distribution);
+        const process_expression p2
+          = transform_initial_distribution_term(choice(t).right(), processes_with_initial_distribution);
+        return stochastic_choice(p1, p2);
       }
 
       if (is_seq(t))
       {
-        const process_expression r1=transform_initial_distribution_term(seq(t).left(),processes_with_initial_distribution);
-        const process_expression r2=transform_initial_distribution_term(seq(t).right(),processes_with_initial_distribution);
-        if (is_stochastic_operator(r1))
-        {
-          const stochastic_operator& r=down_cast<const stochastic_operator>(r1);
-          return stochastic_operator(r.variables(),r.distribution(),seq(r.operand(),r2));
-        }
-        return seq(r1,r2);
+        const process_expression p1
+          = transform_initial_distribution_term(seq(t).left(), processes_with_initial_distribution);
+        const process_expression p2
+          = transform_initial_distribution_term(seq(t).right(), processes_with_initial_distribution);
+        return stochastic_seq(p1, p2);
       }
 
       if (is_if_then(t))
       {
-        const if_then& t_=atermpp::down_cast<if_then>(t);
-        const process_expression r=transform_initial_distribution_term(t_.then_case(),processes_with_initial_distribution);
-        if (is_stochastic_operator(r))
-        {
-          const stochastic_operator& r_=down_cast<const stochastic_operator>(r);
-          return stochastic_operator(r_.variables(),
-                                     if_(t_.condition(),r_.distribution(),if_(variables_are_equal_to_default_values(r_.variables()),sort_real::real_one(),sort_real::real_zero())),
-                                     if_then(t_.condition(),r_.operand()));
-        }
-        return if_then(t_.condition(),r);
+        const if_then& t_ = atermpp::down_cast<if_then>(t);
+        return stochastic_if_then(t_.condition(),
+          transform_initial_distribution_term(t_.then_case(), processes_with_initial_distribution));
       }
 
       if (is_if_then_else(t))
       {
-        const if_then_else& t_=atermpp::down_cast<if_then_else>(t);
-        const process_expression r1_=transform_initial_distribution_term(t_.then_case(),processes_with_initial_distribution);
-        const process_expression r2_=transform_initial_distribution_term(t_.else_case(),processes_with_initial_distribution);
-        if (is_stochastic_operator(r1_))
-        {
-          const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);
-          if (is_stochastic_operator(r2_))
-          {
-            /* both r1_ and r2_ are stochastic */
-
-            const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-            const process_expression& new_body1=r1.operand();
-            // The variables of r2 are renamed away from those of r1, as both are bound by the result.
-            const stochastic_operator renamed_r2 = rename_bound_variables_away(r2, contained_in(r1.variables()));
-            const variable_list& stochvars = renamed_r2.variables();
-            const process_expression& new_body2 = renamed_r2.operand();
-            const data_expression& new_distribution = renamed_r2.distribution();
-
-            return stochastic_operator(r1.variables() + stochvars,
-                                       if_(t_.condition(),
-                                               lazy::and_(variables_are_equal_to_default_values(stochvars),r1.distribution()),
-                                               lazy::and_(variables_are_equal_to_default_values(r1.variables()),new_distribution)),
-                                       if_then_else(t_.condition(),new_body1,new_body2));
-          }
-          /* r1 is and r2_ is not a stochastic operator */
-          return stochastic_operator(r1.variables(),
-                                     if_(t_.condition(),r1.distribution(),
-                                               if_(variables_are_equal_to_default_values(r1.variables()),sort_real::real_one(),sort_real::real_zero())),
-                                     if_then_else(if_then_else(t).condition(),r1.operand(),r2_));
-        }
-        if (is_stochastic_operator(r2_))
-        {
-          /* r1_ is not and r2_ is a stochastic operator */
-          const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-          return stochastic_operator(r2.variables(),
-                                     if_(t_.condition(),
-                                         if_(variables_are_equal_to_default_values(r2.variables()),sort_real::real_one(),sort_real::real_zero()),
-                                         r2.distribution()),
-                                     if_then_else(t_.condition(),r1_,r2.operand()));
-        }
-        /* neither r1_ nor r2_ is stochastic */
-        return if_then_else(t_.condition(),r1_,r2_);
-
+        const if_then_else& t_ = atermpp::down_cast<if_then_else>(t);
+        const process_expression p1
+          = transform_initial_distribution_term(t_.then_case(), processes_with_initial_distribution);
+        const process_expression p2
+          = transform_initial_distribution_term(t_.else_case(), processes_with_initial_distribution);
+        return stochastic_if_then_else(t_.condition(), p1, p2);
       }
 
       if (is_sum(t))
       {
-        const sum& s=down_cast<const sum>(t);
-        const process_expression r_= transform_initial_distribution_term(s.operand(),processes_with_initial_distribution);
-        if (is_stochastic_operator(r_))
-        {
-          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
-          std::set <variable> variables_in_distribution=find_all_variables(r.distribution());
-          for(const variable& v: s.variables())
-          {
-            if (variables_in_distribution.count(v)>0)
-            {
-              throw mcrl2::runtime_error("Cannot commute a sum operator over a stochastic operator in " +
-                                                   process::pp(t) + ".\n" +
-                                         "The problematic variable is " + pp(v) + ":" + pp(v.sort()) + ".");
-            }
-          }
-          return stochastic_operator(r.variables(),
-                                     r.distribution(),
-                                     sum(s.variables(),r.operand()));
-        }
-        return sum(s.variables(),r_);
+        const sum& s = atermpp::down_cast<sum>(t);
+        return stochastic_sum(s.variables(),
+          transform_initial_distribution_term(s.operand(), processes_with_initial_distribution),
+          t);
       }
 
       if (is_stochastic_operator(t))
       {
-        const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
-        const process_expression r_= transform_initial_distribution_term(sto.operand(),processes_with_initial_distribution);
-
-        if (is_stochastic_operator(r_))
-        {
-          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
-          return stochastic_operator(sto.variables()+r.variables(),
-                                     real_times_optimized(sto.distribution(),r.distribution()),
-                                     r.operand());
-        }
-        return stochastic_operator(sto.variables(),sto.distribution(),r_);
+        const stochastic_operator& sto = atermpp::down_cast<stochastic_operator>(t);
+        return stochastic_stochastic_operator(sto,
+          transform_initial_distribution_term(sto.operand(), processes_with_initial_distribution));
       }
 
-      if (is_action(t))
-      {
-        return t;
-      }
-
-      if (is_delta(t))
-      {
-        return t;
-      }
-
-      if (is_tau(t))
+      if (is_action(t) || is_delta(t) || is_tau(t) || is_sync(t))
       {
         return t;
       }
 
       if (is_at(t))
       {
-        const process_expression r_=transform_initial_distribution_term(at(t).operand(),processes_with_initial_distribution);
-        if (is_stochastic_operator(r_))
+        const process_expression r
+          = transform_initial_distribution_term(at(t).operand(), processes_with_initial_distribution);
+        if (!is_stochastic_operator(r))
         {
-          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
-          return stochastic_operator(r.variables(),r.distribution(),at(r.operand(),at(t).time_stamp()));
+          return t;
         }
-        return t;
-      }
-
-      if (is_sync(t))
-      {
-        return t;
+        return stochastic_at(r, at(t).time_stamp());
       }
 
       throw mcrl2::runtime_error("unexpected process format in transform_initial_distribution_term " + process::pp(t) +".");
@@ -8686,178 +8742,56 @@ class specification_basic_type
 
       if (is_choice(t))
       {
-        const process_expression r1_=obtain_initial_distribution_term(choice(t).left());
-        const process_expression r2_=obtain_initial_distribution_term(choice(t).right());
-        if (is_stochastic_operator(r1_))
-        {
-          const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);
-          if (is_stochastic_operator(r2_))
-          {
-            /* both r1_ and r2_ are stochastic */
-            const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-            const process_expression& new_body1=r1.operand();
-            // The variables of r2 are renamed away from those of r1, as both are bound by the result.
-            const stochastic_operator renamed_r2 = rename_bound_variables_away(r2, contained_in(r1.variables()));
-            const variable_list& stochvars = renamed_r2.variables();
-            const process_expression& new_body2 = renamed_r2.operand();
-            const data_expression& new_distribution = renamed_r2.distribution();
-
-            return stochastic_operator(r1.variables() + stochvars,
-                                       real_times_optimized(r1.distribution(),new_distribution),
-                                       choice(new_body1,new_body2));
-          }
-          /* r1 is and r2_ is not a stochastic operator */
-          return stochastic_operator(r1.variables(),r1.distribution(),choice(r1.operand(),r2_));
-        }
-        if (is_stochastic_operator(r2_))
-        {
-          /* r1_ is not and r2_ is a stochastic operator */
-          const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-          return stochastic_operator(r2.variables(),r2.distribution(),choice(r1_,r2.operand()));
-        }
-        /* neither r1_ nor r2_ is stochastic */
-        return t;
+        // The operands are transformed in a fixed order, as this may generate fresh names.
+        const process_expression p1 = obtain_initial_distribution_term(choice(t).left());
+        const process_expression p2 = obtain_initial_distribution_term(choice(t).right());
+        return stochastic_choice(p1, p2);
       }
 
       if (is_seq(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(down_cast<seq>(t).left());
-        if (is_stochastic_operator(r_))
-        {
-          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
-          return stochastic_operator(r.variables(),r.distribution(),seq(r.operand(),seq(t).right()));
-        }
-        return t;
+        return stochastic_seq(obtain_initial_distribution_term(seq(t).left()), seq(t).right());
       }
 
       if (is_if_then(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(down_cast<if_then>(t).then_case());
-        if (is_stochastic_operator(r_))
-        {
-          const if_then& t_if_then=atermpp::down_cast<if_then>(t);
-          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
-          return stochastic_operator(r.variables(),
-                                     if_(t_if_then.condition(),r.distribution(),if_(variables_are_equal_to_default_values(r.variables()),sort_real::real_one(),sort_real::real_zero())),
-                                     if_then(t_if_then.condition(),r.operand()));
-        }
-        return t;
+        const if_then& t_ = atermpp::down_cast<if_then>(t);
+        return stochastic_if_then(t_.condition(), obtain_initial_distribution_term(t_.then_case()));
       }
 
       if (is_if_then_else(t))
       {
-        const process_expression r1_=obtain_initial_distribution_term(down_cast<if_then_else>(t).then_case());
-        const process_expression r2_=obtain_initial_distribution_term(down_cast<if_then_else>(t).else_case());
-        if (is_stochastic_operator(r1_))
-        {
-          const stochastic_operator& r1=down_cast<const stochastic_operator>(r1_);
-          if (is_stochastic_operator(r2_))
-          {
-            /* both r1_ and r2_ are stochastic */
-
-            const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-            const process_expression& new_body1=r1.operand();
-            // The variables of r2 are renamed away from those of r1, as both are bound by the result.
-            const stochastic_operator renamed_r2 = rename_bound_variables_away(r2, contained_in(r1.variables()));
-            const variable_list& stochvars = renamed_r2.variables();
-            const process_expression& new_body2 = renamed_r2.operand();
-            const data_expression& new_distribution = renamed_r2.distribution();
-
-            return stochastic_operator(r1.variables() + stochvars,
-                                       if_(if_then_else(t).condition(),
-                                               lazy::and_(variables_are_equal_to_default_values(stochvars),r1.distribution()),
-                                               lazy::and_(variables_are_equal_to_default_values(r1.variables()),new_distribution)),
-                                       if_then_else(if_then_else(t).condition(),new_body1,new_body2));
-          }
-          /* r1 is and r2_ is not a stochastic operator */
-          return stochastic_operator(r1.variables(),
-                                     if_(if_then_else(t).condition(),r1.distribution(),
-                                               if_(variables_are_equal_to_default_values(r1.variables()),sort_real::real_one(),sort_real::real_zero())),
-                                     if_then_else(if_then_else(t).condition(),r1.operand(),r2_));
-        }
-        if (is_stochastic_operator(r2_))
-        {
-          /* r1_ is not and r2_ is a stochastic operator */
-          const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-          return stochastic_operator(r2.variables(),
-                                     if_(if_then_else(t).condition(),
-                                         if_(variables_are_equal_to_default_values(r2.variables()),sort_real::real_one(),sort_real::real_zero()),
-                                         r2.distribution()),
-                                     if_then_else(if_then_else(t).condition(),r1_,r2.operand()));
-        }
-        /* neither r1_ nor r2_ is stochastic */
-        return t;
-
+        const if_then_else& t_ = atermpp::down_cast<if_then_else>(t);
+        const process_expression p1 = obtain_initial_distribution_term(t_.then_case());
+        const process_expression p2 = obtain_initial_distribution_term(t_.else_case());
+        return stochastic_if_then_else(t_.condition(), p1, p2);
       }
 
       if (is_sum(t))
       {
-        const sum& s=down_cast<const sum>(t);
-        const process_expression r_= obtain_initial_distribution_term(s.operand());
-        if (is_stochastic_operator(r_))
-        {
-          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
-          std::set <variable> variables_in_distribution=find_all_variables(r.distribution());
-          for(const variable& v: s.variables())
-          {
-            if (variables_in_distribution.count(v)>0)
-            {
-              throw mcrl2::runtime_error("Cannot commute a sum operator over a stochastic operator in " +
-                                                   process::pp(t) + ".\n" +
-                                         "The problematic variable is " + pp(v) + ":" + pp(v.sort()) + ".");
-            }
-          }
-          return stochastic_operator(r.variables(),
-                                     r.distribution(),
-                                     sum(s.variables(),r.operand()));
-        }
-        return t;
+        const sum& s = atermpp::down_cast<sum>(t);
+        return stochastic_sum(s.variables(), obtain_initial_distribution_term(s.operand()), t);
       }
 
       if (is_stochastic_operator(t))
       {
-        const stochastic_operator& sto=down_cast<const stochastic_operator>(t);
-        const process_expression r_= obtain_initial_distribution_term(sto.operand());
-
-        if (is_stochastic_operator(r_))
-        {
-          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
-          return stochastic_operator(sto.variables()+r.variables(),
-                                     real_times_optimized(sto.distribution(),r.distribution()),
-                                     r.operand());
-        }
-        return stochastic_operator(sto.variables(),sto.distribution(),r_);
+        const stochastic_operator& sto = atermpp::down_cast<stochastic_operator>(t);
+        return stochastic_stochastic_operator(sto, obtain_initial_distribution_term(sto.operand()));
       }
 
-      if (is_action(t))
-      {
-        return t;
-      }
-
-      if (is_delta(t))
-      {
-        return t;
-      }
-
-      if (is_tau(t))
+      if (is_action(t) || is_delta(t) || is_tau(t) || is_sync(t))
       {
         return t;
       }
 
       if (is_at(t))
       {
-        const process_expression r_=obtain_initial_distribution_term(at(t).operand());
-        if (is_stochastic_operator(r_))
+        const process_expression r = obtain_initial_distribution_term(at(t).operand());
+        if (!is_stochastic_operator(r))
         {
-          const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
-          return stochastic_operator(r.variables(),r.distribution(),at(r.operand(),at(t).time_stamp()));
+          return t;
         }
-        return t;
-      }
-
-      if (is_sync(t))
-      {
-        return t;
+        return stochastic_at(r, at(t).time_stamp());
       }
 
       throw mcrl2::runtime_error("unexpected process format in canterminate " + process::pp(t) +".");
