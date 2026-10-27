@@ -266,3 +266,19 @@ BOOST_AUTO_TEST_CASE(test_move_into_binder_stochastic_operator)
     == data::if_(data::equal_to(x1, data::sort_nat::nat(0)), data::sort_real::real_(1), data::sort_real::real_(0)));
   BOOST_CHECK(s.operand() == process_expression(seq(d(x1, y), context)));
 }
+
+// for_each_process_identifier visits the process instances from left to right, every occurrence.
+BOOST_AUTO_TEST_CASE(test_for_each_process_identifier)
+{
+  const process_identifier P(core::identifier_string("P"), {});
+  const process_identifier Q(core::identifier_string("Q"), {});
+  const process_identifier R(core::identifier_string("R"), {n});
+  const process_expression p = choice(seq(a, process_instance_assignment(Q, {})),
+    if_then_else(b,
+      sum({x}, process_instance_assignment(R, {data::assignment(n, x)})),
+      seq(process_instance_assignment(P, {}), process_instance_assignment(Q, {}))));
+
+  std::vector<process_identifier> visited;
+  lps::for_each_process_identifier(p, [&](const process_identifier& id) { visited.push_back(id); });
+  BOOST_CHECK(visited == std::vector<process_identifier>({Q, R, P, Q}));
+}

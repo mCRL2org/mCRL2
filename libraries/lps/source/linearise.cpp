@@ -60,6 +60,7 @@
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/balance_nesting_depth.h"
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/process/process_variable_strongly_connected_components.h"
 #include "mcrl2/process/rewrite.h"
 
 // For Aterm library extension functions
@@ -994,129 +995,21 @@ class specification_basic_type
 
     /***********  collect pcrlprocessen **********************************/
 
-    void collectPcrlProcesses_term(const process_expression& body,  // Intentionally not a reference.
-                                   std::vector <process_identifier>& pcrlprocesses,
-                                   process_identifier_set& visited)
-    {
-      if (is_if_then(body))
-      {
-        collectPcrlProcesses_term(if_then(body).then_case(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_if_then_else(body))
-      {
-        collectPcrlProcesses_term(if_then_else(body).then_case(),pcrlprocesses,visited);
-        collectPcrlProcesses_term(if_then_else(body).else_case(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_choice(body))
-      {
-        collectPcrlProcesses_term(choice(body).left(),pcrlprocesses,visited);
-        collectPcrlProcesses_term(choice(body).right(),pcrlprocesses,visited);
-        return ;
-      }
-
-      if (is_seq(body))
-      {
-        collectPcrlProcesses_term(seq(body).left(),pcrlprocesses,visited);
-        collectPcrlProcesses_term(seq(body).right(),pcrlprocesses,visited);
-        return ;
-      }
-
-      if (is_merge(body))
-      {
-        collectPcrlProcesses_term(process::merge(body).left(),pcrlprocesses,visited);
-        collectPcrlProcesses_term(process::merge(body).right(),pcrlprocesses,visited);
-        return ;
-      }
-
-      if (is_sync(body))
-      {
-        collectPcrlProcesses_term(process::sync(body).left(),pcrlprocesses,visited);
-        collectPcrlProcesses_term(process::sync(body).right(),pcrlprocesses,visited);
-        return ;
-      }
-
-      if (is_sum(body))
-      {
-        collectPcrlProcesses_term(sum(body).operand(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_stochastic_operator(body))
-      {
-        collectPcrlProcesses_term(stochastic_operator(body).operand(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_at(body))
-      {
-        collectPcrlProcesses_term(at(body).operand(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_process_instance_assignment(body))
-      {
-        collectPcrlProcesses(process_instance_assignment(body).identifier(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_hide(body))
-      {
-        collectPcrlProcesses_term(hide(body).operand(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_rename(body))
-      {
-        collectPcrlProcesses_term(process::rename(body).operand(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_allow(body))
-      {
-        collectPcrlProcesses_term(allow(body).operand(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_block(body))
-      {
-        collectPcrlProcesses_term(block(body).operand(),pcrlprocesses,visited);
-        return;
-      }
-
-      if (is_comm(body))
-      {
-        collectPcrlProcesses_term(comm(body).operand(),pcrlprocesses,visited);
-        return;
-      }
-
-      if ((is_delta(body))||
-          (is_tau(body))||
-          (is_action(body)))
-      {
-        return;
-      }
-
-      throw mcrl2::runtime_error("process has unexpected format (1) " + process::pp(body) +".");
-    }
-
+    // Collects the pCRL processes reachable from procDecl in pcrlprocesses, in depth-first order.
     void collectPcrlProcesses(
       const process_identifier& procDecl,
       std::vector <process_identifier>& pcrlprocesses,
       process_identifier_set& visited)
     {
-      if (visited.count(procDecl)==0)
+      if (visited.insert(procDecl).second)
       {
-        visited.insert(procDecl);
-        objectdatatype& object=objectIndex(procDecl);
+        const objectdatatype& object = objectIndex(procDecl);
         if (object.processstatus==pCRL)
         {
           pcrlprocesses.push_back(procDecl);
         }
-        collectPcrlProcesses_term(object.processbody,pcrlprocesses,visited);
+        for_each_process_identifier(object.processbody,
+          [&](const process_identifier& q) { collectPcrlProcesses(q, pcrlprocesses, visited); });
       }
     }
 
@@ -3075,61 +2968,13 @@ class specification_basic_type
     void make_pCRL_procs(const process_identifier& id,
                          process_identifier_set& reachable_process_identifiers)
     {
-      if (reachable_process_identifiers.count(id)==0)  // not found
+      if (reachable_process_identifiers.insert(id).second)
       {
-        reachable_process_identifiers.insert(id);
-        make_pCRL_procs(objectIndex(id).processbody,reachable_process_identifiers);
+        for (const process_identifier& q: process::detail::find_process_identifiers(objectIndex(id).processbody))
+        {
+          make_pCRL_procs(q, reachable_process_identifiers);
+        }
       }
-      return;
-    }
-
-    void make_pCRL_procs(const process_expression& t,
-                         process_identifier_set& reachable_process_identifiers)
-    {
-      if (is_choice(t))
-      {
-        make_pCRL_procs(choice(t).left(),reachable_process_identifiers);
-        make_pCRL_procs(choice(t).right(),reachable_process_identifiers);
-        return;
-      }
-
-      if (is_seq(t))
-      {
-        make_pCRL_procs(seq(t).left(),reachable_process_identifiers);
-        make_pCRL_procs(seq(t).right(),reachable_process_identifiers);
-        return;
-      }
-
-      if (is_if_then(t))
-      {
-        make_pCRL_procs(if_then(t).then_case(),reachable_process_identifiers);
-        return;
-      }
-
-      if (is_sum(t))
-      {
-        make_pCRL_procs(sum(t).operand(),reachable_process_identifiers);
-        return;
-      }
-
-      if (is_stochastic_operator(t))
-      {
-        make_pCRL_procs(stochastic_operator(t).operand(),reachable_process_identifiers);
-        return;
-      }
-
-      if (is_process_instance_assignment(t))
-      {
-        make_pCRL_procs(atermpp::down_cast<process_instance_assignment>(t).identifier(), reachable_process_identifiers);
-        return;
-      }
-
-      if (is_sync(t)||is_action(t)||is_tau(t)||is_delta(t)||is_at(t))
-      {
-        return;
-      }
-
-      throw mcrl2::runtime_error("unexpected process format " + process::pp(t) + " in make_pCRL_procs");
     }
 
     /**************** minimize_set_of_reachable_process_identifiers  ******************************/

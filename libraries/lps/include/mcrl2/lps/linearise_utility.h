@@ -23,6 +23,7 @@
 #include "mcrl2/process/builder.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/replace_capture_avoiding_with_an_identifier_generator.h"
+#include "mcrl2/process/traverser.h"
 
 #include <algorithm>
 #include <iterator>
@@ -322,6 +323,46 @@ move_into_binder(const process::process_expression& x, Predicate avoid, Function
   return process::stochastic_operator(renamed.variables(),
     renamed.distribution(),
     f(renamed.variables(), renamed.operand()));
+}
+
+namespace detail
+{
+
+template<typename Function>
+struct for_each_process_identifier_traverser
+  : public process::process_expression_traverser<for_each_process_identifier_traverser<Function>>
+{
+  using super = process::process_expression_traverser<for_each_process_identifier_traverser<Function>>;
+  using super::apply;
+  using super::enter;
+  using super::leave;
+
+  Function f;
+
+  explicit for_each_process_identifier_traverser(Function f_)
+    : f(f_)
+  {}
+
+  void apply(const process::process_instance& x)
+  {
+    f(x.identifier());
+  }
+
+  void apply(const process::process_instance_assignment& x)
+  {
+    f(x.identifier());
+  }
+};
+
+} // namespace detail
+
+/// \brief Calls f for the process identifier of every process instance in p, from left to right.
+/// \details Unlike process::detail::find_process_identifiers, which returns a set, this preserves the order of the
+///          process instances in p, and calls f once for every occurrence.
+template<typename Function>
+void for_each_process_identifier(const process::process_expression& p, Function f)
+{
+  detail::for_each_process_identifier_traverser<Function>(f).apply(p);
 }
 
 /// \brief The process delta@0, which the lineariser uses for a process that cannot do anything.
