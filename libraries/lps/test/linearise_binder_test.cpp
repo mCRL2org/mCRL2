@@ -13,6 +13,7 @@
 #define BOOST_TEST_MODULE linearise_binder_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/linearise.h"
@@ -160,4 +161,41 @@ BOOST_AUTO_TEST_CASE(condition_moved_into_sum)
                            "proc P(y: Nat) = (y < 5) -> ((sum y: Nat. (y < 3) -> a(y)) . P(y + 1));\n"
                            "init P(0);\n";
   check_linearisation(spec);
+}
+
+// Every lambda in a condition has a free variable (the parameter n, or the global variable k after constelm), and
+// there is at least one lambda. A lambda without free variables has captured the variable that replaced n.
+static void check_lambdas_have_a_free_variable(const stochastic_specification& result)
+{
+  std::vector<atermpp::aterm> lambdas;
+  for (const stochastic_action_summand& s: result.process().action_summands())
+  {
+    atermpp::find_all_if(s.condition(), data::is_lambda, std::back_inserter(lambdas));
+  }
+  for (const deadlock_summand& s: result.process().deadlock_summands())
+  {
+    atermpp::find_all_if(s.condition(), data::is_lambda, std::back_inserter(lambdas));
+  }
+  BOOST_CHECK(!lambdas.empty());
+  for (const atermpp::aterm& l: lambdas)
+  {
+    BOOST_CHECK_MESSAGE(!data::find_free_variables(atermpp::down_cast<data::lambda>(l)).empty(),
+      "a variable is captured in " << data::pp(atermpp::down_cast<data::lambda>(l)));
+  }
+}
+
+// The global variable k is the initial value of the constant parameter n, so constelm substitutes n := k, also in the
+// ultimate delay condition, which ends up in the condition of the timed summand of Q. The lambda binds a variable
+// that is also called k, so this substitution must rename it. The mapping f has no equations, so the rewriter keeps
+// the lambda.
+BOOST_AUTO_TEST_CASE(global_variable_substituted_under_a_binder)
+{
+  const std::string spec = "map  f: (Pos -> Bool) -> Bool;\n"
+                           "glob k: Pos;\n"
+                           "act  a: Pos;\n"
+                           "     b;\n"
+                           "proc P(n: Pos) = f(lambda k: Pos. k == n) -> a(n) . P(n);\n"
+                           "     Q = b @ 1 . Q;\n"
+                           "init P(k) || Q;\n";
+  check_linearisation(spec, check_lambdas_have_a_free_variable);
 }
