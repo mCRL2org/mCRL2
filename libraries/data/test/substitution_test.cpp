@@ -21,6 +21,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/substitutions/mutable_substitution_composer.h"
 #include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
@@ -382,6 +383,21 @@ void test_mutable_indexed_substitution()
   BOOST_CHECK(s == "[b := true]");
 }
 
+// After clear, a maintain_variables_in_rhs is the identity and no variable occurs in a right hand side.
+void test_maintain_variables_in_rhs_clear()
+{
+  const variable x = parse_variable("x: Nat");
+  const variable y = parse_variable("y: Nat");
+  maintain_variables_in_rhs<mutable_map_substitution<>> sigma;
+  sigma[x] = sort_nat::succ(y);
+  BOOST_CHECK(sigma.variable_occurs_in_a_rhs(y));
+
+  sigma.clear();
+  BOOST_CHECK(sigma(x) == x);
+  BOOST_CHECK(!sigma.variable_occurs_in_a_rhs(y));
+  BOOST_CHECK(sigma.variables_in_rhs().empty());
+}
+
 BOOST_AUTO_TEST_CASE(test_main)
 {
   test_my_assignment_sequence_substitution();
@@ -393,4 +409,5 @@ BOOST_AUTO_TEST_CASE(test_main)
   test_indexed_substitution();
   test_enumerator_substitution();
   test_mutable_indexed_substitution();
+  test_maintain_variables_in_rhs_clear();
 }

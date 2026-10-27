@@ -110,7 +110,7 @@ class maintain_variables_in_rhs: public Substitution
     /// \brief Clear substitutions.
     void clear()
     {
-      m_variables_in_rhs().clear();
+      m_variables_in_rhs.clear();
       super::clear();
     }
   
