@@ -7824,7 +7824,10 @@ class specification_basic_type
 
           if (!options.ignore_time)
           {
-            ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma);
+            // The right hand sides of sigma may contain global variables, which must not be captured.
+            maintain_variables_in_rhs<mutable_map_substitution<>> constants(sigma);
+            ultimate_delay_condition.constraint()
+              = replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), constants);
           }
 
           // Reconstruct the variables from the temporary specification
@@ -8480,7 +8483,7 @@ class specification_basic_type
             new_assignments=push_back(new_assignments,assignment(*i,local_sigma1(v)));
             ++i;
           }
-          data_expression new_distribution = data::replace_variables_capture_avoiding(sto.distribution(),local_sigma1);
+          const data_expression new_distribution = replace_variables_capture_avoiding(sto.distribution(), local_sigma1);
 
           // Some of the variables may occur only in the distribution, which is now moved out.
           // Therefore, the assignments must be filtered.
@@ -8496,8 +8499,8 @@ class specification_basic_type
             local_sigma[a.lhs()]=a.rhs();
           }
           return stochastic_operator(renamed_sto_variables,
-                                     data::replace_variables_capture_avoiding(new_distribution, local_sigma),
-                                     process_instance_assignment(new_identifier,new_assignments));
+            replace_variables_capture_avoiding(new_distribution, local_sigma),
+            process_instance_assignment(new_identifier, new_assignments));
         }
         return t;
 
