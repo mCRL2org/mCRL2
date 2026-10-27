@@ -167,3 +167,45 @@ BOOST_AUTO_TEST_CASE(test_nested_stochastic_operators_capturing_a_free_variable)
   statespace.load(is);
   run_linearisation_test_case(spec, statespace);
 }
+
+// In the following tests a process instance P(x) occurs in the scope of a stochastic operator that binds x, the
+// parameter of P. The lineariser writes P(x) as P() where the assignment x = x is implicit, and x refers to the
+// variable of the stochastic operator. Every transformation that renames this variable must take the implicit
+// assignment into account.
+BOOST_AUTO_TEST_CASE(test_implicit_assignment_of_a_stochastic_variable)
+{
+  const std::string spec = "act a: Bool;\n"
+                           "proc P(x: Bool) = a(x) . P(x);\n"
+                           "init dist x: Bool[if(x, 1/4, 3/4)] . P(x);\n";
+
+  const std::string expected_statespace = "des (0 1/4 1,4,4)\n"
+                                          "(0,\"a(true)\",2)\n"
+                                          "(2,\"a(true)\",2)\n"
+                                          "(1,\"a(false)\",3)\n"
+                                          "(3,\"a(false)\",3)\n";
+
+  std::stringstream is(expected_statespace);
+
+  lts::probabilistic_lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}
+
+// As above, where the variable x of the stochastic operator hides the parameter x of P, and is renamed when the
+// stochastic operator is moved.
+BOOST_AUTO_TEST_CASE(test_implicit_assignment_of_a_stochastic_variable_that_hides_a_parameter)
+{
+  const std::string spec = "act a: Bool;\n"
+                           "proc P(x: Bool) = a(x) . dist x: Bool[if(x, 1/4, 3/4)] . P(x);\n"
+                           "init P(true);\n";
+
+  const std::string expected_statespace = "des (0,2,2)\n"
+                                          "(0,\"a(true)\",0 1/4 1)\n"
+                                          "(1,\"a(false)\",0 1/4 1)\n";
+
+  std::stringstream is(expected_statespace);
+
+  lts::probabilistic_lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}
