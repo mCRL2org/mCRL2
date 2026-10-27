@@ -215,3 +215,54 @@ BOOST_AUTO_TEST_CASE(test_rename_bound_variables_away_stochastic_operator)
     == data::if_(data::equal_to(x1, data::sort_nat::nat(0)), data::sort_real::real_(1), data::sort_real::real_(0)));
   BOOST_CHECK(result.operand() == process_expression(d(x1, y)));
 }
+
+// move_into_binder: the context d(x, z) with x free is moved into sum x, y. d(x, y). The bound x is renamed, the
+// bound y is not, and f receives the variables and operand after renaming.
+BOOST_AUTO_TEST_CASE(test_move_into_binder_sum)
+{
+  data::set_identifier_generator generator = make_generator();
+  const process_expression context = d(x, z);
+  data::variable_list variables_seen_by_f;
+
+  const process_expression result = lps::move_into_binder(
+    sum({x, y}, d(x, y)),
+    [](const data::variable& v) { return v == x || v == z; },
+    [&](const data::variable_list& variables, const process_expression& operand)
+    {
+      variables_seen_by_f = variables;
+      return process_expression(seq(operand, context));
+    },
+    generator);
+  BOOST_REQUIRE(is_sum(result));
+  const sum& s = atermpp::down_cast<sum>(result);
+  BOOST_REQUIRE_EQUAL(s.variables().size(), 2u);
+  const data::variable x1 = s.variables().front();
+  BOOST_CHECK(x1 != x);
+  BOOST_CHECK(s.variables().tail().front() == y);
+  BOOST_CHECK(variables_seen_by_f == s.variables());
+  BOOST_CHECK(s.operand() == process_expression(seq(d(x1, y), context)));
+}
+
+// move_into_binder: for a stochastic operator the distribution is renamed along with the operand and kept.
+BOOST_AUTO_TEST_CASE(test_move_into_binder_stochastic_operator)
+{
+  data::set_identifier_generator generator = make_generator();
+  const process_expression context = d(x, z);
+  const data::data_expression distribution
+    = data::if_(data::equal_to(x, data::sort_nat::nat(0)), data::sort_real::real_(1), data::sort_real::real_(0));
+
+  const process_expression result = lps::move_into_binder(
+    stochastic_operator({x}, distribution, d(x, y)),
+    [](const data::variable& v) { return v == x; },
+    [&](const data::variable_list&, const process_expression& operand)
+    { return process_expression(seq(operand, context)); },
+    generator);
+  BOOST_REQUIRE(is_stochastic_operator(result));
+  const stochastic_operator& s = atermpp::down_cast<stochastic_operator>(result);
+  const data::variable x1 = s.variables().front();
+  BOOST_CHECK(x1 != x);
+  BOOST_CHECK(
+    s.distribution()
+    == data::if_(data::equal_to(x1, data::sort_nat::nat(0)), data::sort_real::real_(1), data::sort_real::real_(0)));
+  BOOST_CHECK(s.operand() == process_expression(seq(d(x1, y), context)));
+}

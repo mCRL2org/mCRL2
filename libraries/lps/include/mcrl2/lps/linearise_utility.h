@@ -299,6 +299,31 @@ rename_bound_variables_away(const process::stochastic_operator& x, Predicate avo
     process::replace_variables_capture_avoiding_with_an_identifier_generator(x.operand(), sigma, id_generator));
 }
 
+/// \brief Moves a context into the scope of a sum or stochastic operator.
+/// \details The variables bound by x that satisfy avoid are renamed first, so that they do not capture the free
+///          variables of the context. The result is the same operator, with the same distribution, over the operand
+///          computed by f.
+/// \param x A sum or a stochastic operator.
+/// \param avoid A predicate on variables that holds for the variables that must be renamed.
+/// \param f A function that computes the new operand from the bound variables and the operand after renaming.
+/// \param id_generator The generator of fresh names, which must not have been used for other variables.
+template<typename Predicate, typename Function, typename IdentifierGenerator>
+process::process_expression
+move_into_binder(const process::process_expression& x, Predicate avoid, Function f, IdentifierGenerator& id_generator)
+{
+  if (process::is_sum(x))
+  {
+    const process::sum renamed = rename_bound_variables_away(atermpp::down_cast<process::sum>(x), avoid, id_generator);
+    return process::sum(renamed.variables(), f(renamed.variables(), renamed.operand()));
+  }
+  assert(process::is_stochastic_operator(x));
+  const process::stochastic_operator renamed
+    = rename_bound_variables_away(atermpp::down_cast<process::stochastic_operator>(x), avoid, id_generator);
+  return process::stochastic_operator(renamed.variables(),
+    renamed.distribution(),
+    f(renamed.variables(), renamed.operand()));
+}
+
 /// \brief The process delta@0, which the lineariser uses for a process that cannot do anything.
 inline process::process_expression delta_at_zero()
 {

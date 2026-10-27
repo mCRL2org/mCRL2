@@ -1350,6 +1350,38 @@ class specification_basic_type
       return contained_in_list_or_free_in{variables, e};
     }
 
+    // A predicate that holds for the variables in a set. The set must outlive the predicate.
+    struct contained_in_set
+    {
+      const std::set<variable>& variables;
+
+      bool operator()(const variable& v) const
+      {
+        return mcrl2::utilities::detail::contains(variables, v);
+      }
+    };
+
+    static contained_in_set contained_in(const std::set<variable>& variables)
+    {
+      return contained_in_set{variables};
+    }
+
+    // A predicate that holds for the free variables of an expression.
+    struct free_in_expression
+    {
+      data_expression e;
+
+      bool operator()(const variable& v) const
+      {
+        return occursinterm(e, v);
+      }
+    };
+
+    static free_in_expression free_in(const data_expression& e)
+    {
+      return free_in_expression{e};
+    }
+
     // A function that returns a fresh variable with the name and sort of its argument.
     struct fresh_variable_generator
     {
@@ -1364,6 +1396,27 @@ class specification_basic_type
     fresh_variable_generator fresh_variables()
     {
       return fresh_variable_generator{*this};
+    }
+
+    // Renames the variables that satisfy avoid to fresh variables, adding the renaming to sigma.
+    template<typename Predicate, typename Substitution>
+    variable_list rename_variables_away(const variable_list& variables, Predicate avoid, Substitution& sigma)
+    {
+      return lps::rename_variables_away(variables, avoid, sigma, fresh_variables());
+    }
+
+    // Renames the variables bound by the sum or stochastic operator x that satisfy avoid.
+    template<typename Binder, typename Predicate>
+    Binder rename_bound_variables_away(const Binder& x, Predicate avoid)
+    {
+      return lps::rename_bound_variables_away(x, avoid, fresh_identifier_generator);
+    }
+
+    // Moves a context into the scope of the sum or stochastic operator x; see lps::move_into_binder.
+    template<typename Predicate, typename Function>
+    process_expression move_into_binder(const process_expression& x, Predicate avoid, Function f)
+    {
+      return lps::move_into_binder(x, avoid, f, fresh_identifier_generator);
     }
 
     template<typename Substitution>
@@ -1520,24 +1573,13 @@ class specification_basic_type
                  wraptime(choice(body).right(),time,freevars));
       }
 
-      if (is_sum(body))
+      if (is_sum(body) || is_stochastic_operator(body))
       {
-        // The time stamp is moved into the sum, so the bound variables are renamed away from it.
-        const sum renamed = rename_bound_variables_away(atermpp::down_cast<sum>(body),
+        // The time stamp is moved into the sum or stochastic operator, so the bound variables are renamed away from it.
+        return move_into_binder(body,
           contained_in_or_free_in(freevars, time),
-          fresh_identifier_generator);
-        return sum(renamed.variables(), wraptime(renamed.operand(), time, renamed.variables() + freevars));
-      }
-
-      if (is_stochastic_operator(body))
-      {
-        // The time stamp is moved into the stochastic operator, so the bound variables are renamed away from it.
-        const stochastic_operator renamed = rename_bound_variables_away(down_cast<const stochastic_operator>(body),
-          contained_in_or_free_in(freevars, time),
-          fresh_identifier_generator);
-        return stochastic_operator(renamed.variables(),
-          renamed.distribution(),
-          wraptime(renamed.operand(), time, renamed.variables() + freevars));
+          [&](const variable_list& variables, const process_expression& operand)
+          { return wraptime(operand, time, variables + freevars); });
       }
 
       if (is_if_then(body))
@@ -1758,9 +1800,7 @@ class specification_basic_type
       {
         if (sum_state>=s)
         {
-          const sum renamed = rename_bound_variables_away(atermpp::down_cast<sum>(body),
-            contained_in(freevars),
-            fresh_identifier_generator);
+          const sum renamed = rename_bound_variables_away(atermpp::down_cast<sum>(body), contained_in(freevars));
           const variable_list& sumvars = renamed.variables();
           // Simplify after renaming: the body comes from a process equation of the input, whose conditions are not
           // rewritten yet.
@@ -1790,9 +1830,8 @@ class specification_basic_type
       {
         if (seq_state>=s)
         {
-          const stochastic_operator renamed = rename_bound_variables_away(down_cast<const stochastic_operator>(body),
-            contained_in(freevars),
-            fresh_identifier_generator);
+          const stochastic_operator renamed
+            = rename_bound_variables_away(down_cast<const stochastic_operator>(body), contained_in(freevars));
           const variable_list& sumvars = renamed.variables();
           const data_expression& distribution = renamed.distribution();
           // Simplify after renaming: the body comes from a process equation of the input, whose conditions are not
@@ -2112,27 +2151,14 @@ class specification_basic_type
         return if_then(if_then(body1).condition(),putbehind(if_then(body1).then_case(),body2));
       }
 
-      if (is_sum(body1))
+      if (is_sum(body1) || is_stochastic_operator(body1))
       {
-        /* we must take care that no variables in body2 are
-            inadvertently bound */
+        // We must take care that no variables in body2 are inadvertently bound. The distribution of a stochastic
+        // operator is renamed along with the variables.
         const std::set<variable> variables_in_body2 = free_and_sum_bound_variables(body2);
-        const sum renamed = rename_bound_variables_away(
-          atermpp::down_cast<sum>(body1),
-          [&](const variable& v) { return mcrl2::utilities::detail::contains(variables_in_body2, v); },
-          fresh_identifier_generator);
-        return sum(renamed.variables(), putbehind(renamed.operand(), body2));
-      }
-
-      if (is_stochastic_operator(body1))
-      {
-        // See explanation at sum operator above. The distribution is renamed along with the variables.
-        const std::set<variable> variables_in_body2 = free_and_sum_bound_variables(body2);
-        const stochastic_operator renamed = rename_bound_variables_away(
-          atermpp::down_cast<stochastic_operator>(body1),
-          [&](const variable& v) { return mcrl2::utilities::detail::contains(variables_in_body2, v); },
-          fresh_identifier_generator);
-        return stochastic_operator(renamed.variables(), renamed.distribution(), putbehind(renamed.operand(), body2));
+        return move_into_binder(body1,
+          contained_in(variables_in_body2),
+          [&](const variable_list&, const process_expression& operand) { return putbehind(operand, body2); });
       }
 
 
@@ -2198,21 +2224,18 @@ class specification_basic_type
       {
         /* we must take care that no variables in condition are
             inadvertently bound */
-        const sum renamed = rename_bound_variables_away(
-          atermpp::down_cast<sum>(body1),
-          [&](const variable& v) { return occursinterm(condition, v); },
-          fresh_identifier_generator);
-        return sum(renamed.variables(), distribute_condition(renamed.operand(), condition));
+        return move_into_binder(body1,
+          free_in(condition),
+          [&](const variable_list&, const process_expression& operand)
+          { return distribute_condition(operand, condition); });
       }
 
       if (is_stochastic_operator(body1))
       {
         /* we must take care that no variables in condition are
             inadvertently bound */
-        const stochastic_operator renamed = rename_bound_variables_away(
-          atermpp::down_cast<stochastic_operator>(body1),
-          [&](const variable& v) { return occursinterm(condition, v); },
-          fresh_identifier_generator);
+        const stochastic_operator renamed
+          = rename_bound_variables_away(atermpp::down_cast<stochastic_operator>(body1), free_in(condition));
         return stochastic_operator(renamed.variables(),
           if_(condition,
             renamed.distribution(),
@@ -2292,7 +2315,7 @@ class specification_basic_type
       {
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
         variable_list vl = stochvars;
-        vl = rename_variables_away(vl, contained_in(stochvars), sigma, fresh_variables());
+        vl = rename_variables_away(vl, contained_in(stochvars), sigma);
         data_expression_vector::const_iterator i=d.begin();
         for(const variable& v: sumvars)
         {
@@ -2349,9 +2372,8 @@ class specification_basic_type
 
       if (is_stochastic_operator(body))
       {
-        const stochastic_operator renamed = rename_bound_variables_away(atermpp::down_cast<stochastic_operator>(body),
-          contained_in(sumvars),
-          fresh_identifier_generator);
+        const stochastic_operator renamed
+          = rename_bound_variables_away(atermpp::down_cast<stochastic_operator>(body), contained_in(sumvars));
         return distribute_sum_over_a_stochastic_operator(sumvars,
           stochastic_variables + renamed.variables(),
           sort_real::times(distribution, renamed.distribution()),
@@ -2387,17 +2409,14 @@ class specification_basic_type
 
       if (is_sum(body1))
       {
-        const sum renamed = rename_bound_variables_away(atermpp::down_cast<sum>(body1),
-          contained_in(sumvars),
-          fresh_identifier_generator);
+        const sum renamed = rename_bound_variables_away(atermpp::down_cast<sum>(body1), contained_in(sumvars));
         return sum(sumvars + renamed.variables(), renamed.operand());
       }
 
       if (is_stochastic_operator(body1))
       {
-        const stochastic_operator renamed = rename_bound_variables_away(atermpp::down_cast<stochastic_operator>(body1),
-          contained_in(sumvars),
-          fresh_identifier_generator);
+        const stochastic_operator renamed
+          = rename_bound_variables_away(atermpp::down_cast<stochastic_operator>(body1), contained_in(sumvars));
         return distribute_sum_over_a_stochastic_operator(sumvars,
           renamed.variables(),
           renamed.distribution(),
@@ -2767,8 +2786,7 @@ class specification_basic_type
 
       if (is_sum(t))
       {
-        const sum renamed
-          = rename_bound_variables_away(atermpp::down_cast<sum>(t), contained_in(freevars), fresh_identifier_generator);
+        const sum renamed = rename_bound_variables_away(atermpp::down_cast<sum>(t), contained_in(freevars));
         const variable_list& sumvars = renamed.variables();
         // Simplify after renaming: the conditions of the body may have been combined without rewriting.
         const process_expression body = simplify_pCRLproc(renamed.operand());
@@ -2785,9 +2803,8 @@ class specification_basic_type
 
       if (is_stochastic_operator(t))
       {
-        const stochastic_operator renamed = rename_bound_variables_away(down_cast<const stochastic_operator>(t),
-          contained_in(freevars),
-          fresh_identifier_generator);
+        const stochastic_operator renamed
+          = rename_bound_variables_away(down_cast<const stochastic_operator>(t), contained_in(freevars));
         const variable_list& sumvars = renamed.variables();
         const data_expression& distribution = renamed.distribution();
         const process_expression& body = renamed.operand();
@@ -2826,25 +2843,13 @@ class specification_basic_type
                  distributeTime(choice(body).right(),time,freevars,timecondition));
       }
 
-      if (is_sum(body))
+      if (is_sum(body) || is_stochastic_operator(body))
       {
-        // The time stamp is moved into the sum, so the bound variables are renamed away from it.
-        const sum renamed = rename_bound_variables_away(atermpp::down_cast<sum>(body),
+        // The time stamp is moved into the sum or stochastic operator, so the bound variables are renamed away from it.
+        return move_into_binder(body,
           contained_in_or_free_in(freevars, time),
-          fresh_identifier_generator);
-        return sum(renamed.variables(),
-          distributeTime(renamed.operand(), time, renamed.variables() + freevars, timecondition));
-      }
-
-      if (is_stochastic_operator(body))
-      {
-        // The time stamp is moved into the stochastic operator, so the bound variables are renamed away from it.
-        const stochastic_operator renamed = rename_bound_variables_away(down_cast<const stochastic_operator>(body),
-          contained_in_or_free_in(freevars, time),
-          fresh_identifier_generator);
-        return stochastic_operator(renamed.variables(),
-          renamed.distribution(),
-          distributeTime(renamed.operand(), time, renamed.variables() + freevars, timecondition));
+          [&](const variable_list& variables, const process_expression& operand)
+          { return distributeTime(operand, time, variables + freevars, timecondition); });
       }
 
       if (is_if_then(body))
@@ -3474,16 +3479,13 @@ class specification_basic_type
           objectdatatype& object=objectIndex(p);
           maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
           variable_list vars=proc.variables();
-          vars = rename_variables_away(vars, contained_in(vars + object.parameters), local_sigma, fresh_variables());
+          vars = rename_variables_away(vars, contained_in(vars + object.parameters), local_sigma);
 
-          const process_identifier newproc=newprocess(
-                                           vars + object.parameters,
-                                           process::replace_variables_capture_avoiding_with_an_identifier_generator(proc.operand(),
-                                                                                       local_sigma,
-                                                                                       fresh_identifier_generator),
-                                           pCRL,
-                                           canterminatebody(proc.operand()),
-                                           containstimebody(proc.operand()));
+          const process_identifier newproc = newprocess(vars + object.parameters,
+            replace_variables_capture_avoiding(proc.operand(), local_sigma),
+            pCRL,
+            canterminatebody(proc.operand()),
+            containstimebody(proc.operand()));
           // calculate the substitution to be applied on proc.distribution() which is moved outside the
           // body the process.
           processes_with_stochastic_distribution_first.insert(std::pair<process_identifier, process_pid_pair>(p,
@@ -4638,7 +4640,7 @@ class specification_basic_type
       // Check whether the variables in sumvars clash with the parameter list,
       // and rename the summandterm accordingly.
       maintain_variables_in_rhs< mutable_map_substitution<> > local_sigma;
-      sumvars = rename_variables_away(sumvars, contained_in(process_parameters), local_sigma, fresh_variables());
+      sumvars = rename_variables_away(sumvars, contained_in(process_parameters), local_sigma);
       // Simplify after renaming: the conditions of the summand have been combined without rewriting.
       summandterm = simplify_pCRLproc(rename_pCRLproc(summandterm, local_sigma));
 
@@ -6988,29 +6990,21 @@ class specification_basic_type
                                           make_unique_variables(stochastic_vars,hint);
         const variable_list unique_stochastic_vars=data::replace_variables(stochastic_vars, sigma_stochastic_vars);
 
-        data_expression condition=smmnd.condition();
-        action_list multiaction=smmnd.multi_action().actions();
-        data_expression actiontime=smmnd.multi_action().time();
-        assignment_list nextstate=smmnd.assignments();
-
         // First the summation and stochastic variables are renamed, then the parameters, below.
-        condition = replace_variables_capture_avoiding(condition, sigma_sumvars);
-        actiontime = replace_variables_capture_avoiding(actiontime, sigma_sumvars);
-        multiaction = lps::replace_variables_capture_avoiding_with_an_identifier_generator(multiaction,
-          sigma_sumvars,
-          fresh_identifier_generator);
+        const data_expression condition = replace_variables_capture_avoiding(smmnd.condition(), sigma_sumvars);
+        const multi_action multiaction
+          = lps::replace_variables_capture_avoiding_with_an_identifier_generator(smmnd.multi_action(),
+            sigma_sumvars,
+            fresh_identifier_generator);
         distribution = stochastic_distribution(unique_stochastic_vars,
           replace_variables_capture_avoiding(
             replace_variables_capture_avoiding(distribution.distribution(), sigma_sumvars),
             sigma_stochastic_vars));
-        nextstate = replace_variables_capture_avoiding(nextstate, sigma_sumvars);
-        nextstate = replace_variables_capture_avoiding(nextstate, sigma_stochastic_vars);
+        const assignment_list nextstate
+          = replace_variables_capture_avoiding(replace_variables_capture_avoiding(smmnd.assignments(), sigma_sumvars),
+            sigma_stochastic_vars);
 
-        result_action_summands.emplace_back(unique_sumvars,
-            condition,
-            smmnd.multi_action().has_time() ? multi_action(multiaction, actiontime) : multi_action(multiaction),
-            nextstate,
-            distribution);
+        result_action_summands.emplace_back(unique_sumvars, condition, multiaction, nextstate, distribution);
       }
 
       deadlock_summand_vector result_deadlock_summands;
@@ -7054,8 +7048,7 @@ class specification_basic_type
       // Make the bound variables of the second ultimate delay different from those in the first.
       variable_list renameable_variables=delay2.variables();
       maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-      renameable_variables
-        = rename_variables_away(renameable_variables, contained_in(delay1.variables()), sigma, fresh_variables());
+      renameable_variables = rename_variables_away(renameable_variables, contained_in(delay1.variables()), sigma);
       // Additionally map the time variable of the second ultimate delay to that of the first.
       sigma[delay2.time_var()]=delay1.time_var();
       data_expression new_constraint;
@@ -7088,8 +7081,7 @@ class specification_basic_type
       {
         variable_list sumvars=ultimate_delay_condition.variables();
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        sumvars
-          = rename_variables_away(sumvars, contained_in(summand1.summation_variables()), sigma, fresh_variables());
+        sumvars = rename_variables_away(sumvars, contained_in(summand1.summation_variables()), sigma);
 
         variable_list sumvars1 = summand1.summation_variables() + sumvars;
         const action_list& multiaction1 = summand1.multi_action().actions();
@@ -7166,8 +7158,7 @@ class specification_basic_type
         {
           variable_list sumvars=ultimate_delay_condition.variables();
           maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-          sumvars
-            = rename_variables_away(sumvars, contained_in(summand1.summation_variables()), sigma, fresh_variables());
+          sumvars = rename_variables_away(sumvars, contained_in(summand1.summation_variables()), sigma);
 
           variable_list sumvars1=summand1.summation_variables() + sumvars;
           data_expression actiontime1=summand1.deadlock().time();
@@ -8001,10 +7992,8 @@ class specification_basic_type
                               regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         variable_list stochvars=sto.variables();
         maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        stochvars = rename_variables_away(stochvars,
-          contained_in(pars + initial_stochastic_distribution.variables()),
-          sigma,
-          fresh_variables());
+        stochvars
+          = rename_variables_away(stochvars, contained_in(pars + initial_stochastic_distribution.variables()), sigma);
         initial_stochastic_distribution
           = stochastic_distribution(stochvars + initial_stochastic_distribution.variables(),
             sort_real::times(replace_variables_capture_avoiding(sto.distribution(), sigma),
@@ -8165,7 +8154,7 @@ class specification_basic_type
         variable_list sumvars=sum(t).variables();
         maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
 
-        sumvars = rename_variables_away(sumvars, contained_in(parameters), local_sigma, fresh_variables());
+        sumvars = rename_variables_away(sumvars, contained_in(parameters), local_sigma);
         return sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters, local_sigma));
       }
 
@@ -8175,7 +8164,7 @@ class specification_basic_type
         variable_list sumvars=sto.variables();
         maintain_variables_in_rhs<mutable_map_substitution<> > local_sigma=sigma;
 
-        sumvars = rename_variables_away(sumvars, contained_in(parameters), local_sigma, fresh_variables());
+        sumvars = rename_variables_away(sumvars, contained_in(parameters), local_sigma);
         return stochastic_operator(sumvars,
           replace_variables_capture_avoiding(sto.distribution(), sigma),
           alphaconversionterm(sto.operand(), sumvars + parameters, local_sigma));
@@ -8471,11 +8460,8 @@ class specification_basic_type
           variable_list renamed_sto_variables=sto.variables();
           mutable_indexed_substitution<> local_sigma1;
           const std::set<variable> variables_in_t = free_and_sum_bound_variables(t);
-          renamed_sto_variables = rename_variables_away(
-            renamed_sto_variables,
-            [&](const variable& v) { return mcrl2::utilities::detail::contains(variables_in_t, v); },
-            local_sigma1,
-            fresh_variables());
+          renamed_sto_variables
+            = rename_variables_away(renamed_sto_variables, contained_in(variables_in_t), local_sigma1);
 
           variable_list::const_iterator i=new_parameters.begin();
           for(const variable& v: relevant_stochastic_variables)
@@ -8519,8 +8505,7 @@ class specification_basic_type
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
             const process_expression& new_body1=r1.operand();
             // The variables of r2 are renamed away from those of r1, as both are bound by the result.
-            const stochastic_operator renamed_r2
-              = rename_bound_variables_away(r2, contained_in(r1.variables()), fresh_identifier_generator);
+            const stochastic_operator renamed_r2 = rename_bound_variables_away(r2, contained_in(r1.variables()));
             const variable_list& stochvars = renamed_r2.variables();
             const process_expression& new_body2 = renamed_r2.operand();
             const data_expression& new_distribution = renamed_r2.distribution();
@@ -8583,8 +8568,7 @@ class specification_basic_type
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
             const process_expression& new_body1=r1.operand();
             // The variables of r2 are renamed away from those of r1, as both are bound by the result.
-            const stochastic_operator renamed_r2
-              = rename_bound_variables_away(r2, contained_in(r1.variables()), fresh_identifier_generator);
+            const stochastic_operator renamed_r2 = rename_bound_variables_away(r2, contained_in(r1.variables()));
             const variable_list& stochvars = renamed_r2.variables();
             const process_expression& new_body2 = renamed_r2.operand();
             const data_expression& new_distribution = renamed_r2.distribution();
@@ -8713,8 +8697,7 @@ class specification_basic_type
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
             const process_expression& new_body1=r1.operand();
             // The variables of r2 are renamed away from those of r1, as both are bound by the result.
-            const stochastic_operator renamed_r2
-              = rename_bound_variables_away(r2, contained_in(r1.variables()), fresh_identifier_generator);
+            const stochastic_operator renamed_r2 = rename_bound_variables_away(r2, contained_in(r1.variables()));
             const variable_list& stochvars = renamed_r2.variables();
             const process_expression& new_body2 = renamed_r2.operand();
             const data_expression& new_distribution = renamed_r2.distribution();
@@ -8775,8 +8758,7 @@ class specification_basic_type
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
             const process_expression& new_body1=r1.operand();
             // The variables of r2 are renamed away from those of r1, as both are bound by the result.
-            const stochastic_operator renamed_r2
-              = rename_bound_variables_away(r2, contained_in(r1.variables()), fresh_identifier_generator);
+            const stochastic_operator renamed_r2 = rename_bound_variables_away(r2, contained_in(r1.variables()));
             const variable_list& stochvars = renamed_r2.variables();
             const process_expression& new_body2 = renamed_r2.operand();
             const data_expression& new_distribution = renamed_r2.distribution();
