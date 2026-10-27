@@ -60,7 +60,7 @@
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/balance_nesting_depth.h"
 #include "mcrl2/process/process_expression.h"
-
+#include "mcrl2/process/rewrite.h"
 
 // For Aterm library extension functions
 using namespace atermpp;
@@ -577,116 +577,6 @@ class specification_basic_type
         }
         return rewr(t);
       }
-      return t;
-    }
-
-    data_expression_list RewriteTermList(const data_expression_list& t)
-    {
-      data_expression_vector v;
-      for(const data_expression& d: t)
-      {
-        v.push_back(RewriteTerm(d));
-      }
-      return data_expression_list(v.begin(),v.end());
-    }
-
-    assignment_list rewrite_assignments(const assignment_list& t)
-    {
-      assignment_vector v;
-      for(const assignment& a: t)
-      {
-        v.emplace_back(a.lhs(), RewriteTerm(a.rhs()));
-      }
-      return assignment_list(v.begin(),v.end());
-    }
-
-    action RewriteAction(const action& t)
-    {
-      return action(t.label(),RewriteTermList(t.arguments()));
-    }
-
-    process_instance_assignment RewriteProcess(const process_instance_assignment& t)
-    {
-      return process_instance_assignment(t.identifier(),rewrite_assignments(t.assignments()));
-    }
-
-    process_expression RewriteMultAct(const process_expression& t)
-    {
-      if (is_tau(t))
-      {
-        return t;
-      }
-
-      if (is_action(t))
-      {
-        return RewriteAction(action(t));
-      }
-
-      assert(is_sync(t));  // A multi action is a sequence of actions with a sync operator in between.
-      return process::sync(RewriteMultAct(process::sync(t).left()),RewriteMultAct(process::sync(t).right()));
-    }
-
-
-    process_expression pCRLrewrite(const process_expression& t)
-    {
-      if (options.norewrite)
-      {
-        return t;
-      }
-
-      if (is_if_then(t))
-      {
-        const data_expression new_cond=RewriteTerm(down_cast<if_then>(t).condition());
-        const process_expression new_then_case=pCRLrewrite(down_cast<if_then>(t).then_case());
-        if (new_cond==sort_bool::true_())
-        {
-          return new_then_case;
-        }
-        return if_then(new_cond,new_then_case);
-      }
-
-      if (is_seq(t))
-      {
-        /* only one summand is needed */
-        return seq(
-                 pCRLrewrite(seq(t).left()),
-                 pCRLrewrite(seq(t).right()));
-      }
-
-      if (is_at(t))
-      {
-        const data_expression& atTime=RewriteTerm(down_cast<at>(t).time_stamp());
-        const process_expression t1=pCRLrewrite(down_cast<at>(t).operand());
-        return at(t1,atTime);
-      }
-
-      if (is_stochastic_operator(t))
-      {
-        const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(t);
-        return stochastic_operator(sto.variables(),RewriteTerm(sto.distribution()),pCRLrewrite(sto.operand()));
-      }
-
-      if (is_delta(t) || is_tau(t))
-      {
-        return t;
-      }
-
-      if (is_action(t))
-      {
-        return RewriteAction(atermpp::down_cast<process::action>(t));
-      }
-
-      if (is_process_instance_assignment(t))
-      {
-        return RewriteProcess(process_instance_assignment(t));
-      }
-
-      if (is_sync(t))
-      {
-        return RewriteMultAct(t);
-      }
-
-      assert(0); // Expected a term in pCRL format, using only basic process operators.
       return t;
     }
 
@@ -2691,7 +2581,7 @@ class specification_basic_type
       }
 
       sequence=cut_off_unreachable_tail(sequence);
-      sequence=pCRLrewrite(sequence);
+      sequence = process::rewrite(sequence, [this](const data_expression& e) { return RewriteTerm(e); });
       std::vector < process_instance_assignment > process_names;
       extract_names(sequence,process_names);
       assert(!process_names.empty());
