@@ -7991,14 +7991,13 @@ class specification_basic_type
 
     /***** determinewhetherprocessescontaintime; **********/
 
-    // Whether t contains time, given whether the processes in t contain time. Sets contains_if_then if t contains a
-    // condition c -> p, which is translated into c -> p <> delta@0 if time is not ignored.
-    bool containstimebody(const process_expression& t, bool& contains_if_then)
+    // Whether t contains time, given whether the processes in t contain time.
+    bool containstimebody(const process_expression& t)
     {
       if (is_merge(t))
       {
-        const bool r1 = containstimebody(process::merge(t).left(), contains_if_then);
-        const bool r2 = containstimebody(process::merge(t).right(), contains_if_then);
+        const bool r1 = containstimebody(process::merge(t).left());
+        const bool r2 = containstimebody(process::merge(t).right());
         return r1 || r2;
       }
 
@@ -8009,40 +8008,40 @@ class specification_basic_type
 
       if (is_hide(t))
       {
-        return containstimebody(hide(t).operand(), contains_if_then);
+        return containstimebody(hide(t).operand());
       }
 
       if (is_rename(t))
       {
-        return containstimebody(process::rename(t).operand(), contains_if_then);
+        return containstimebody(process::rename(t).operand());
       }
 
       if (is_allow(t))
       {
-        return containstimebody(allow(t).operand(), contains_if_then);
+        return containstimebody(allow(t).operand());
       }
 
       if (is_block(t))
       {
-        return containstimebody(block(t).operand(), contains_if_then);
+        return containstimebody(block(t).operand());
       }
 
       if (is_comm(t))
       {
-        return containstimebody(comm(t).operand(), contains_if_then);
+        return containstimebody(comm(t).operand());
       }
 
       if (is_choice(t))
       {
-        const bool r1 = containstimebody(choice(t).left(), contains_if_then);
-        const bool r2 = containstimebody(choice(t).right(), contains_if_then);
+        const bool r1 = containstimebody(choice(t).left());
+        const bool r2 = containstimebody(choice(t).right());
         return r1 || r2;
       }
 
       if (is_seq(t))
       {
-        const bool r1 = containstimebody(seq(t).left(), contains_if_then);
-        const bool r2 = containstimebody(seq(t).right(), contains_if_then);
+        const bool r1 = containstimebody(seq(t).left());
+        const bool r2 = containstimebody(seq(t).right());
         return r1 || r2;
       }
 
@@ -8051,29 +8050,28 @@ class specification_basic_type
         // If delta is added, c->p is translated into c->p<>delta,
         // otherwise into c->p<>delta@0. In this last case the process
         // contains time.
-        contains_if_then = true;
         if (options.ignore_time)
         {
-          return containstimebody(if_then(t).then_case(), contains_if_then);
+          return containstimebody(if_then(t).then_case());
         }
         return true;
       }
 
       if (is_if_then_else(t))
       {
-        const bool r1 = containstimebody(if_then_else(t).then_case(), contains_if_then);
-        const bool r2 = containstimebody(if_then_else(t).else_case(), contains_if_then);
+        const bool r1 = containstimebody(if_then_else(t).then_case());
+        const bool r2 = containstimebody(if_then_else(t).else_case());
         return r1 || r2;
       }
 
       if (is_sum(t))
       {
-        return containstimebody(sum(t).operand(), contains_if_then);
+        return containstimebody(sum(t).operand());
       }
 
       if (is_stochastic_operator(t))
       {
-        return containstimebody(stochastic_operator(t).operand(), contains_if_then);
+        return containstimebody(stochastic_operator(t).operand());
       }
 
       if (is_action(t) || is_delta(t) || is_tau(t))
@@ -8088,32 +8086,22 @@ class specification_basic_type
 
       if (is_sync(t))
       {
-        const bool r1 = containstimebody(process::sync(t).left(), contains_if_then);
-        const bool r2 = containstimebody(process::sync(t).right(), contains_if_then);
+        const bool r1 = containstimebody(process::sync(t).left());
+        const bool r2 = containstimebody(process::sync(t).right());
         return r1 || r2;
       }
 
       throw mcrl2::runtime_error("unexpected process format in containstime " + process::pp(t) + ".");
     }
 
-    // Whether t contains time, given whether the processes in t contain time.
-    bool containstimebody(const process_expression& t)
-    {
-      bool contains_if_then = false;
-      return containstimebody(t, contains_if_then);
-    }
-
-    bool determinewhetherprocessescontaintime(const process_identifier& procId)
+    void determinewhetherprocessescontaintime(const process_identifier& procId)
     {
       /* This function sets for all reachable processes in the array objectdata
-         whether they contain time in the field containstime. In verbose mode
-         it prints the process variables that contain time. Furtermore, it returns
-         whether there are processes that contain an if-then that will be translated
-         to an if-then-else with an delta@0 in the else branch, introducing time */
-      bool contains_if_then = false;
+         whether they contain time in the field containstime. If time is ignored,
+         it warns about the first process that contains time. */
       compute_least_fixpoint(
         procId,
-        [&](const objectdatatype& object) { return containstimebody(object.processbody, contains_if_then); },
+        [this](const objectdatatype& object) { return containstimebody(object.processbody); },
         [](objectdatatype& object) -> bool& { return object.containstime; });
       if (options.ignore_time)
       {
@@ -8129,7 +8117,6 @@ class specification_basic_type
           }
         }
       }
-      return contains_if_then;
     }
 
     // The processes reachable from procId.
