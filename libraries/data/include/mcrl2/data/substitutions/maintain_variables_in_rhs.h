@@ -16,6 +16,10 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_MAINTAIN_VARIABLES_IN_RHS_H
 #define MCRL2_DATA_SUBSTITUTIONS_MAINTAIN_VARIABLES_IN_RHS_H
 
+#include <concepts>
+#include <ranges>
+#include <utility>
+
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
 
@@ -45,7 +49,20 @@ class maintain_variables_in_rhs: public Substitution
   public:
     /// \brief Default constructor
     maintain_variables_in_rhs() = default;
- 
+
+    /// \brief Constructor with the assignments of another substitution, which may be of a different type, such as a
+    ///        mutable_map_substitution. The other substitution must be a range of (variable, expression) pairs.
+    template<typename OtherSubstitution>
+      requires std::convertible_to<std::ranges::range_value_t<const OtherSubstitution>,
+        std::pair<const variable_type, expression_type>>
+    explicit maintain_variables_in_rhs(const OtherSubstitution& sigma)
+    {
+      for (const std::pair<const variable_type, expression_type>& assignment: sigma)
+      {
+        (*this)[assignment.first] = assignment.second;
+      }
+    }
+
     /// \brief Wrapper clas s for internal storage and substitution updates using operator()
     class assignment
     {
