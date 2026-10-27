@@ -65,7 +65,7 @@ uint64_t cache_next_opid(void);
 /**
  * dd must be MTBDD, d2/d3 can be anything
  */
-static inline int __attribute__((unused))
+static inline int SYLVAN_UNUSED
 cache_get3(uint64_t opid, uint64_t dd, uint64_t d2, uint64_t d3, uint64_t *res)
 {
     return cache_get(dd | opid, d2, d3, res);
@@ -74,7 +74,7 @@ cache_get3(uint64_t opid, uint64_t dd, uint64_t d2, uint64_t d3, uint64_t *res)
 /**
  * dd/dd2/dd3/dd4 must be MTBDDs
  */
-static inline int __attribute__((unused))
+static inline int SYLVAN_UNUSED
 cache_get4(uint64_t opid, uint64_t dd, uint64_t dd2, uint64_t dd3, uint64_t dd4, uint64_t *res)
 {
     uint64_t p2 = dd2 | ((dd4 & 0x00000000000fffff) << 40); // 20 bits and complement bit
@@ -87,7 +87,7 @@ cache_get4(uint64_t opid, uint64_t dd, uint64_t dd2, uint64_t dd3, uint64_t dd4,
 /**
  * dd must be MTBDD, d2/d3 can be anything
  */
-static inline int __attribute__((unused))
+static inline int SYLVAN_UNUSED
 cache_put3(uint64_t opid, uint64_t dd, uint64_t d2, uint64_t d3, uint64_t res)
 {
     return cache_put(dd | opid, d2, d3, res);
@@ -96,7 +96,7 @@ cache_put3(uint64_t opid, uint64_t dd, uint64_t d2, uint64_t d3, uint64_t res)
 /**
  * dd/dd2/dd3/dd4 must be MTBDDs
  */
-static inline int __attribute__((unused))
+static inline int SYLVAN_UNUSED
 cache_put4(uint64_t opid, uint64_t dd, uint64_t dd2, uint64_t dd3, uint64_t dd4, uint64_t res)
 {
     uint64_t p2 = dd2 | ((dd4 & 0x00000000000fffff) << 40); // 20 bits and complement bit

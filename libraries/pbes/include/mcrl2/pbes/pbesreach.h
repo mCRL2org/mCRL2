@@ -411,7 +411,7 @@ class pbesreach_algorithm
 
         if (m_options.detect_deadlocks)
         {
-          mCRL2log(log::log_level_t::verbose) << "found " << std::setw(12) << print_size(m_deadlocks) << " deadlocks" << std::endl;
+          mCRL2log(log::log_level_t::debug) << "found " << std::setw(12) << print_size(m_deadlocks) << " deadlocks" << std::endl;
         }
 
         on_end_while_loop();

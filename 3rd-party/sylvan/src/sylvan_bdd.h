@@ -277,7 +277,7 @@ void sylvan_serialize_totext(FILE *out);
 void sylvan_serialize_tofile(FILE *out);
 void sylvan_serialize_fromfile(FILE *in);
 
-static void __attribute__((unused))
+static void SYLVAN_UNUSED
 sylvan_fprint(FILE *f, BDD bdd)
 {
     sylvan_serialize_reset();
@@ -286,10 +286,10 @@ sylvan_fprint(FILE *f, BDD bdd)
     sylvan_serialize_totext(f);
 }
 
-static void __attribute__((unused))
+static void SYLVAN_UNUSED
 sylvan_print(BDD bdd)
 {
-    return sylvan_fprint(stdout, bdd);
+    sylvan_fprint(stdout, bdd);
 }
 
 #ifdef __cplusplus

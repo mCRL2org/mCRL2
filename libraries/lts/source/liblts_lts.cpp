@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg; completely rewritten by Jan Friso Groote
+// Author(s): Jeroen Keiren, Muck van Weerdenburg; completely rewritten by Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -27,24 +27,24 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabi
   if (state.size()==0)
   {
     // The probabilistic state is represented as a singular state and is stored without probability;
-    stream << atermpp::aterm_int(1);
-    stream << atermpp::aterm_int(state.get());
+    stream.put_integer(1);
+    stream.put_integer(state.get());
   }
   else if (state.size()<=1)
   {
     // The probabilistic state is the single element in a vector and is stored without probability;
-    stream << atermpp::aterm_int(1);
-    stream << atermpp::aterm_int(state.get());
+    stream.put_integer(1);
+    stream.put_integer(state.get());
   }
   else
   {
     // The probabilistic state is stored as a sequence of state probability pairs. 
-    stream << atermpp::aterm_int(state.size());
+    stream.put_integer(state.size());
 
     for(const auto& p : state)
     {
       // Push a (index, probability) pair into the list.
-      stream << atermpp::aterm_int(p.state());
+      stream.put_integer(p.state());
       stream << p.probability();
     }
   }
@@ -54,15 +54,11 @@ atermpp::aterm_ostream& operator<<(atermpp::aterm_ostream& stream, const probabi
 
 atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, probabilistic_lts_lts_t::probabilistic_state_t& state)
 {
-  atermpp::aterm_int index;
-  stream >> index;  // Read the number of states.
-
-  const std::size_t value=index.value();
+  const std::size_t value = stream.get_integer(); // Read the number of states.
   assert(value>0);
   if (value==1)
   {
-    stream >> index;
-    state.set(index.value());
+    state.set(stream.get_integer());
   }
   else
   {
@@ -71,10 +67,10 @@ atermpp::aterm_istream& operator>>(atermpp::aterm_istream& stream, probabilistic
 
     for (std::size_t i = 0; i < value; ++i)
     {
-      stream >> index;
+      const std::size_t index = stream.get_integer();
       stream >> probability;
 
-      state.add(index.value(), probability);
+      state.add(index, probability);
     }
 
     state.shrink_to_fit();
@@ -139,6 +135,10 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   atermpp::aterm_stream_state state(stream);
   stream >> data::detail::add_index_impl;
 
+  // The stream keeps every term that it reads in use, so garbage collection while reading would find almost nothing
+  // to free, but would still mark all terms read so far every time.
+  atermpp::garbage_collection_pause pause;
+
   atermpp::aterm marker;
   stream >> marker;
 
@@ -175,9 +175,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   std::size_t number_of_states = 1;
 
   aterm term;
-  aterm_int from;
   action_label_lts action;
-  aterm_int to;
 
   while (true)
   {
@@ -190,16 +188,17 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
     if (term == transition_mark())
     {
-      stream >> from;
+      // The states are read as plain integers, which avoids creating an aterm_int for each of them.
+      const std::size_t from = stream.get_integer();
       stream >> action;
-      stream >> to;
+      const std::size_t to = stream.get_integer();
 
       const auto [index, inserted] = multi_actions.insert(action);
 
-      std::size_t target_index = to.value();
+      std::size_t target_index = to;
       if constexpr (std::is_same_v<LTS, probabilistic_lts_lts_t>)
       {
-        probabilistic_lts_lts_t::probabilistic_state_t lts_state(to.value());
+        probabilistic_lts_lts_t::probabilistic_state_t lts_state(to);
 
         // For probabilistic lts it is necessary to add the state first (and use the returned index).
         bool state_inserted;
@@ -214,8 +213,8 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       }
 
       // Add the transition and update the number of states.
-      lts.add_transition(transition(from.value(), index, target_index));
-      number_of_states = std::max({number_of_states, from.value() + 1, to.value() + 1});
+      lts.add_transition(transition(from, index, target_index));
+      number_of_states = std::max({number_of_states, from + 1, to + 1});
 
       if (inserted)
       {
@@ -231,7 +230,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
       {
         probabilistic_lts_lts_t::probabilistic_state_t to;
 
-        stream >> from;
+        const std::size_t from = stream.get_integer();
         stream >> action;
         stream >> to;
 
@@ -247,10 +246,10 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
           assert(actual_index == to_index);
         }
 
-        lts.add_transition(transition(from.value(), index, to_index));
+        lts.add_transition(transition(from, index, to_index));
 
         // Update the number of states
-        number_of_states = std::max({number_of_states, from.value() + 1, to.maximal_state() + 1});
+        number_of_states = std::max({number_of_states, from + 1, to.maximal_state() + 1});
 
         if (inserted)
         {
@@ -466,9 +465,9 @@ void write_lts_header(atermpp::aterm_ostream& stream,
 void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lps::multi_action& label, std::size_t to)
 {
   stream << detail::transition_mark();
-  stream << atermpp::aterm_int(from);
+  stream.put_integer(from);
   stream << label;
-  stream << atermpp::aterm_int(to);
+  stream.put_integer(to);
 }
 
 void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lps::multi_action& label, const probabilistic_lts_lts_t::probabilistic_state_t& to)
@@ -481,7 +480,7 @@ void write_transition(atermpp::aterm_ostream& stream, std::size_t from, const lp
   else
   {
     stream << detail::probabilistic_transition_mark();
-    stream << atermpp::aterm_int(from);
+    stream.put_integer(from);
     stream << label;
     stream << to;
   }

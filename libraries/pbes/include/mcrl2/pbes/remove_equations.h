@@ -23,10 +23,17 @@ inline
 std::string print_removed_equations(const std::vector<propositional_variable>& removed)
 {
   std::ostringstream out;
-  out << "\nremoved the following equations:" << std::endl;
-  for (const propositional_variable& v: removed)
+  if (removed.empty())
   {
-    out << "  " << pbes_system::pp(v) << std::endl;
+    out << "No PBES equations have been removed." << std::endl;
+  }
+  else
+  {
+    out << "Removed the PBES equations for the following variables:" << std::endl;
+    for (const propositional_variable& v: removed)
+    {
+      out << "  " << pbes_system::pp(v) << std::endl;
+    }
   }
   return out.str();
 }

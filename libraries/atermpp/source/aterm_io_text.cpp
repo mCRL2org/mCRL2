@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote
+// Author(s): Jan Friso Groote, Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -9,7 +9,10 @@
 
 #include "mcrl2/atermpp/aterm_io_text.h"
 
+#include <charconv>
 #include <fstream>
+#include <string>
+#include <system_error>
 
 namespace atermpp
 {
@@ -200,26 +203,35 @@ aterm text_aterm_istream::parse_aterm_appl(const std::string& function_name, int
 
 aterm_int text_aterm_istream::parse_aterm_int(int& character)
 {
-  std::array<char, 32> number{};
-  auto it = number.begin();
-
+  // Integer terms hold a std::size_t, so a negative number cannot be represented.
   if (character == '-')
   {
-    *it = static_cast<char>(character);
-    ++it;
-    character = next_char(true, true);
+    throw std::runtime_error("Negative number while parsing an integer term.");
   }
 
-  // Leave room for the terminating null character written after the loop.
-  while (isdigit(character) && it != std::prev(number.end()))
+  // Whitespace ends the number, so that consecutive integer terms are not read as a single number.
+  std::string number;
+  while (isdigit(character))
   {
-    *it = static_cast<char>(character);
-    ++it;
-    character = next_char();
+    number.push_back(static_cast<char>(character));
+    character = next_char(false);
   }
 
-  *it = '\0';
-  return aterm_int(static_cast<std::size_t>(atol(number.data())));
+  // Skip the whitespace after the number, which next_char(false) returns as EOF if it is a newline. At the end of the
+  // stream this returns EOF again.
+  if (character == EOF || isspace(character))
+  {
+    character = next_char(true);
+  }
+
+  // Parse with std::from_chars rather than atol, whose range is that of long, which is only 32 bits on Windows.
+  std::size_t value = 0;
+  const std::from_chars_result result = std::from_chars(number.data(), number.data() + number.size(), value);
+  if (result.ec == std::errc::result_out_of_range)
+  {
+    throw std::runtime_error("Number " + number + " does not fit in an integer term.");
+  }
+  return aterm_int(value);
 }
 
 aterm_list text_aterm_istream::parse_aterm_list(int& character, char begin, char end)

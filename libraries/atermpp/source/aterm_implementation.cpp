@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux
+// Author(s): Jeroen Keiren, Maurice Laveaux
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -9,6 +9,7 @@
 
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/shared_mutex.h"
 
 #include <array>
@@ -25,6 +26,16 @@ static_assert(sizeof(std::size_t) >= 4,"The size of std::size_t should at least 
 void atermpp::add_deletion_hook(const function_symbol& function, term_callback callback)
 {  
   g_term_pool().add_deletion_hook(function, callback);
+}
+
+atermpp::garbage_collection_pause::garbage_collection_pause()
+{
+  g_term_pool().pause_garbage_collection();
+}
+
+atermpp::garbage_collection_pause::~garbage_collection_pause()
+{
+  g_term_pool().resume_garbage_collection();
 }
 
 namespace atermpp::detail
@@ -66,7 +77,23 @@ aterm_stream::~aterm_stream() = default;
 
 aterm_istream::~aterm_istream() = default;
 
+std::size_t aterm_istream::get_integer()
+{
+  aterm term;
+  get(term);
+  if (!term.defined() || !term.type_is_int())
+  {
+    throw mcrl2::runtime_error("Expected an integer in the aterm stream.");
+  }
+  return static_cast<const aterm_int&>(term).value();
+}
+
 aterm_ostream::~aterm_ostream() = default;
+
+void aterm_ostream::put_integer(std::size_t value)
+{
+  put(aterm_int(value));
+}
 
 /// Definition of the extern global term pool.
 alignas(aterm_pool)

@@ -1,4 +1,4 @@
-// Author(s): Maurice Laveaux
+// Author(s): Jeroen Keiren, Maurice Laveaux
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -13,6 +13,10 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/power_of_two.h"
 #include "mcrl2/utilities/platform.h"
+
+#include <algorithm>
+#include <istream>
+#include <ostream>
 
 #ifdef MCRL2_PLATFORM_WINDOWS
 #include <io.h>
@@ -97,7 +101,8 @@ static void set_stream_binary([[maybe_unused]] const std::string& name, [[maybe_
 }
 
 obitstream::obitstream(std::ostream& stream)
-  : stream(stream)
+  : stream(stream),
+    m_output_buffer(output_buffer_size)
 {
   // Ensures that the given stream is changed to binary mode.
   if (stream.rdbuf() == std::cout.rdbuf())
@@ -110,35 +115,71 @@ obitstream::obitstream(std::ostream& stream)
   }
 }
 
-void obitstream::write_bits(std::size_t value, unsigned int number_of_bits)
+void obitstream::write_bits_slow(std::size_t value, unsigned int number_of_bits)
 {
-  // Add val to the buffer by masking out additional bits and put them at left-most position free in the buffer.
+  // Write at most the number of bits of a std::size_t.
+  static_assert(std::numeric_limits<std::size_t>::digits <= bits_per_word);
   assert(number_of_bits <= std::numeric_limits<std::size_t>::digits);
-  if (number_of_bits < std::numeric_limits<std::size_t>::digits) // the check is needed to avoid undefined behavior
+  assert(m_bits_in_buffer < bits_per_word);
+
+  while (number_of_bits > 0)
   {
-    value &= (static_cast<std::size_t>(1) << number_of_bits) - 1;
-  }
-
-  write_buffer |= std::bitset<128>(value) << ((128 - bits_in_buffer) - number_of_bits);
-  bits_in_buffer += number_of_bits;
-
-  // Write 8 bytes if available
-  if (bits_in_buffer >= 64)
-  {
-    unsigned long long write_value = (write_buffer >> 64).to_ullong();
-    write_buffer <<= 64;
-    bits_in_buffer -= 64;
-
-    for (int32_t i = 7; i >= 0; --i)
+    // Move the first count of the remaining bits of value into the bit buffer. Shifting a word by bits_per_word is
+    // undefined, so the case that the bit buffer is empty and all bits_per_word bits fit is handled separately.
+    const unsigned int count = std::min(number_of_bits, bits_per_word - m_bits_in_buffer);
+    const word_t bits = static_cast<word_t>(value) >> (number_of_bits - count);
+    if (count == bits_per_word)
     {
-      // Write the 8 * i most significant bits and mask out the other values.
-      stream.put(static_cast<char>((write_value >> (8 * i)) & 255));
-
-      if (stream.fail())
-      {
-        throw mcrl2::runtime_error("Failed to write bytes to the output file/stream.");
-      }
+      m_bit_buffer = bits;
     }
+    else
+    {
+      const word_t mask = (static_cast<word_t>(1) << count) - 1;
+      m_bit_buffer |= (bits & mask) << (bits_per_word - m_bits_in_buffer - count);
+    }
+    m_bits_in_buffer += count;
+    number_of_bits -= count;
+
+    if (m_bits_in_buffer == bits_per_word)
+    {
+      empty_bit_buffer();
+    }
+  }
+}
+
+void obitstream::empty_bit_buffer()
+{
+  assert(m_bits_in_buffer == bits_per_word);
+  static_assert(output_buffer_size % bytes_per_word == 0, "A full output buffer must have room for a whole word.");
+  assert(m_output_buffer.size() - m_output_size >= bytes_per_word);
+
+  // The most significant byte is written first.
+  for (std::size_t i = 0; i < bytes_per_word; ++i)
+  {
+    m_output_buffer[m_output_size + i]
+      = static_cast<std::uint8_t>(m_bit_buffer >> (bits_per_word - bits_per_byte * (i + 1)));
+  }
+  m_output_size += bytes_per_word;
+  m_bit_buffer = 0;
+  m_bits_in_buffer = 0;
+
+  // Empty the output buffer only after the bit buffer has been emptied, so that this bitstream remains consistent
+  // when writing to the stream fails.
+  if (m_output_size == m_output_buffer.size())
+  {
+    empty_output_buffer();
+  }
+}
+
+void obitstream::empty_output_buffer()
+{
+  std::streambuf* buffer = stream.rdbuf();
+  const std::streamsize size = static_cast<std::streamsize>(m_output_size);
+  m_output_size = 0;
+  if (buffer == nullptr || buffer->sputn(reinterpret_cast<const char*>(m_output_buffer.data()), size) != size)
+  {
+    stream.setstate(std::ios_base::badbit);
+    throw mcrl2::runtime_error("Failed to write bytes to the output file/stream.");
   }
 }
 
@@ -159,7 +200,8 @@ void obitstream::write_integer(std::size_t val)
 }
 
 ibitstream::ibitstream(std::istream& stream)
-  : stream(stream)
+  : stream(stream),
+    m_input_buffer(input_buffer_size)
 {
   // Ensures that the given stream is changed to binary mode.
   if (stream.rdbuf() == std::cin.rdbuf())
@@ -188,38 +230,83 @@ const char* ibitstream::read_string()
   return m_text_buffer.data();
 }
 
-std::size_t ibitstream::read_bits(unsigned int number_of_bits)
+std::size_t ibitstream::read_bits_slow(unsigned int number_of_bits)
 {
   // Read at most the number of bits of a std::size_t.
+  static_assert(std::numeric_limits<std::size_t>::digits <= bits_per_word);
   assert(number_of_bits <= std::numeric_limits<std::size_t>::digits);
 
-  while (bits_in_buffer < number_of_bits)
+  word_t value = 0;
+  while (number_of_bits > 0)
   {
-    // Read bytes until the buffer is sufficiently full.
-    int byte = stream.get();
-
-    if (stream.eof())
+    if (m_bits_in_buffer == 0 && !refill_bit_buffer())
     {
       throw mcrl2::runtime_error("Unexpected end-of-file reached in the input file/stream.");
     }
-    else if (stream.fail())
-    {
-      throw mcrl2::runtime_error("Failed to read bytes from the input file/stream.");
-    }
 
-    // Shift the 8 bits to the first free (120 - bits_in_buffer) position in the buffer.
-    read_buffer |= std::bitset<128>(static_cast<std::size_t>(byte)) << (56 + 64 - bits_in_buffer);
-    bits_in_buffer += 8;
+    // Append the first bits of the bit buffer to value. Shifting a word by bits_per_word is undefined, so that case is
+    // handled separately; then value is still empty, and the bit buffer becomes empty.
+    const unsigned int count = std::min(number_of_bits, m_bits_in_buffer);
+    value = (count == bits_per_word ? 0 : value << count) | (m_bit_buffer >> (bits_per_word - count));
+    m_bit_buffer = (count == bits_per_word ? 0 : m_bit_buffer << count);
+    m_bits_in_buffer -= count;
+    number_of_bits -= count;
   }
 
-  // Read nr_bits from the buffer by shifting them to the least significant bits and masking out the remaining bits.
-  std::size_t value = (read_buffer >> (128 - number_of_bits)).to_ullong();
-
-  // Shift the first bit to the first position in the buffer.
-  read_buffer <<= number_of_bits;
-  bits_in_buffer -= number_of_bits;
-
   return value;
+}
+
+bool ibitstream::refill_bit_buffer()
+{
+  assert(m_bits_in_buffer == 0);
+
+  if (m_input_size - m_input_position >= bytes_per_word)
+  {
+    // The common case: take a whole word at once, the first byte becoming the most significant one.
+    word_t word = 0;
+    for (std::size_t i = 0; i < bytes_per_word; ++i)
+    {
+      word = (word << bits_per_byte) | m_input_buffer[m_input_position + i];
+    }
+    m_input_position += bytes_per_word;
+    m_bit_buffer = word;
+    m_bits_in_buffer = bits_per_word;
+    return true;
+  }
+
+  // Take the bytes one by one, as the input buffer must be refilled, or fewer than bytes_per_word bytes are left.
+  word_t word = 0;
+  unsigned int count = 0;
+  while (count < bytes_per_word && (m_input_position < m_input_size || refill_input_buffer()))
+  {
+    word = (word << bits_per_byte) | m_input_buffer[m_input_position];
+    ++m_input_position;
+    ++count;
+  }
+
+  if (count == 0)
+  {
+    return false;
+  }
+
+  m_bit_buffer = word << (bits_per_word - bits_per_byte * count);
+  m_bits_in_buffer = bits_per_byte * count;
+  return true;
+}
+
+bool ibitstream::refill_input_buffer()
+{
+  std::streambuf* buffer = stream.rdbuf();
+  if (buffer == nullptr)
+  {
+    throw mcrl2::runtime_error("Failed to read bytes from the input file/stream.");
+  }
+
+  const std::streamsize count = buffer->sgetn(reinterpret_cast<char*>(m_input_buffer.data()),
+    static_cast<std::streamsize>(m_input_buffer.size()));
+  m_input_position = 0;
+  m_input_size = count > 0 ? static_cast<std::size_t>(count) : 0;
+  return m_input_size > 0;
 }
 
 std::size_t ibitstream::read_integer()
@@ -232,9 +319,10 @@ std::size_t ibitstream::read_integer()
 void obitstream::flush()
 {
   // Writing the buffer full to 64 bits should flush it internally, this also guarantees that the unnecessary bits are zeroed out.
-  write_bits(0, 64 - bits_in_buffer);
-  assert(bits_in_buffer == 0);
+  write_bits(0, bits_per_word - m_bits_in_buffer);
+  assert(m_bits_in_buffer == 0);
 
+  empty_output_buffer();
   stream.flush();
   if (stream.fail())
   {

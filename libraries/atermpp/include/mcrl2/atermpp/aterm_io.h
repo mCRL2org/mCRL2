@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote
+// Author(s): Jan Friso Groote, Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -54,6 +54,11 @@ public:
 
   /// \brief Write the given term to the stream.
   virtual void put(const aterm& term) = 0;
+
+  /// \brief Writes an integer that can be read as an aterm_int.
+  /// \details Equivalent to writing an aterm_int with the given value, but a stream can avoid creating the term. The
+  ///          transformer is not applied, just like it is not applied to integers when they are read.
+  virtual void put_integer(std::size_t value);
 };
 
 /// \brief The interface for a class that reads aterm from a stream.
@@ -65,6 +70,11 @@ public:
 
   /// \brief Reads an aterm from this stream.
   virtual void get(aterm& t) = 0;
+
+  /// \brief Reads an integer that was written as an aterm_int.
+  /// \details Equivalent to reading an aterm_int and taking its value, but a stream can avoid creating the term.
+  /// \throws mcrl2::runtime_error when the next term in the stream is not an aterm_int.
+  virtual std::size_t get_integer();
 };
 
 // These free functions provide input/output operators for these streams.

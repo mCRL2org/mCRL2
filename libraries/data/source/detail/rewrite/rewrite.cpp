@@ -216,9 +216,30 @@ void Rewriter::rewrite_lambda_application(
   }
 
   const application ta(t);
-  assert(is_lambda(ta.head()));
-  rewrite_lambda_application(result,atermpp::down_cast<abstraction>(ta.head()),ta,sigma, arguments_are_in_normal_form);
-  return;
+  if (is_lambda(ta.head()))
+  {
+    rewrite_lambda_application(result,atermpp::down_cast<abstraction>(ta.head()),ta,sigma, arguments_are_in_normal_form);
+    return;
+  }
+
+  // The lambda term is nested deeper, e.g. t=(lambda x:D. lambda y:E. u)(t1)(t2). First reduce
+  // the head ta.head() to a normal form, and the arguments of ta when needed.
+  data_expression head;
+  rewrite_lambda_application(head, ta.head(), sigma, arguments_are_in_normal_form);
+  data_expression t1;
+  make_application(t1,
+                   head,
+                   ta.begin(),
+                   ta.end(),
+                   [this, arguments_are_in_normal_form, &sigma](data_expression& result, const data_expression& t) -> void
+                   {
+                     if (arguments_are_in_normal_form){ result=t;} else { result=rewrite(t, sigma); }
+                   },
+                   false // This false indicates that the function is not applied to head.
+                  );
+  // All subterms of t1 are in normal form, so sigma must not be applied to them again.
+  substitution_type identity;
+  rewrite(result, t1, identity);
 }
 
 // The function rewrite_lambda_application rewrites a lambda term to a set of

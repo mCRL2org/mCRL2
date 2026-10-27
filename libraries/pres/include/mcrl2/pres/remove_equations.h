@@ -24,10 +24,17 @@ inline
 std::string print_removed_equations(const std::vector<propositional_variable>& removed)
 {
   std::ostringstream out;
-  out << "\nremoved the following equations:" << std::endl;
-  for (const propositional_variable& v: removed)
+  if (removed.empty())
   {
-    out << "  " << pres_system::pp(v) << std::endl;
+    out << "No PRES equations have been removed." << std::endl;
+  }
+  else
+  {
+    out << "Removed the PRES equations for the following variables:" << std::endl;
+    for (const propositional_variable& v: removed)
+    {
+      out << "  " << pres_system::pp(v) << std::endl;
+    }
   }
   return out.str();
 }

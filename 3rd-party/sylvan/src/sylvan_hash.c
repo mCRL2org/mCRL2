@@ -17,37 +17,6 @@
 #include <sylvan_hash.h>
 
 /**
- * This tricks the compiler into generating the bit-wise rotation instruction
- */
-static uint64_t __attribute__((unused))
-rotr64(uint64_t n, unsigned int c)
-{
-    return (n >> c) | (n << (64-c));
-}
-
-/**
- * Pseudo-RNG for initializing the hashtab tables.
- * Implementation of xorshift128+ by Vigna 2016, which is
- * based on "Xorshift RNGs", Marsaglia 2003
- */
-static uint64_t __attribute__((unused))
-xor64(void)
-{
-    // For the initial state of s, we select two numbers:
-    // - the initializer of Marsaglia's original xorshift
-    // - the FNV-1a 64-bit offset basis
-    static uint64_t s[2] = {88172645463325252LLU, 14695981039346656037LLU};
-
-    uint64_t s1 = s[0];
-    const uint64_t s0 = s[1];
-    const uint64_t result = s0 + s1;
-    s[0] = s0;
-    s1 ^= s1 << 23; // a
-    s[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5); // b, c
-    return result;
-}
-
-/**
  * The table for tabulation hashing
  */
 uint64_t sylvan_tabhash_table[256*16];
@@ -153,5 +122,5 @@ void
 sylvan_init_hash(void)
 {
     // initialize sylvan_tabhash_table
-    for (int i=0; i<256*16; i++) sylvan_tabhash_table[i] = CWhash(i);
+    for (int i=0; i<256*16; i++) sylvan_tabhash_table[i] = CWhash((uint64_t)i);
 }

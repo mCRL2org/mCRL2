@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote
+// Author(s): Jan Friso Groote, Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://github.com/mCRL2org/mCRL2/blob/master/COPYING
 //
@@ -44,6 +44,9 @@ public:
   ///        written itself is not shared whenever it occurs as the argument of another term.
   void put(const aterm &term) override;
 
+  /// \brief Writes an integer as an aterm_int, without creating the aterm_int.
+  void put_integer(std::size_t value) override;
+
 private:
   /// \brief Write a function symbol to the output stream.
   std::size_t write_function_symbol(const function_symbol& symbol);
@@ -54,7 +57,38 @@ private:
   /// \returns The number of bits needed to index function symbols.
   unsigned int function_symbol_index_width();
 
+  /// \brief A term that put still has to write. When write is true, the term has been transformed, and the arguments
+  ///        of the transformed term that had not been written yet have been added to the terms to write before it.
+  struct write_todo
+  {
+    detail::markable_aterm<aterm> term;
+    detail::markable_aterm<aterm> transformed;
+    bool write = false;
+
+    write_todo(const aterm& term)
+      : term(term)
+    {}
+
+    void mark(std::stack<std::reference_wrapper<detail::_aterm>>& todo) const
+    {
+      term.mark(todo);
+      transformed.mark(todo);
+    }
+  };
+
+  /// \brief Writes the term of current, whose arguments have all been written and have the indices in
+  ///        m_argument_indices.
+  void write_term(const write_todo& current, bool is_output);
+
   std::shared_ptr<mcrl2::utilities::obitstream> m_stream;
+
+  /// \brief The terms that put still has to write; the last one is written first. It is only used within put, but
+  ///        reusing it avoids an allocation for every term written.
+  atermpp::deque<write_todo> m_todo;
+
+  /// \brief The indices of the arguments of the term that put is writing. Reusing this buffer avoids an allocation per
+  ///        term written.
+  std::vector<std::size_t> m_argument_indices;
 
   unsigned int m_term_index_width = 0U;       ///< caches the result of term_index_width().
   unsigned int m_function_symbol_index_width = 0U; ///< caches the result of function_symbol_index_width().
@@ -73,7 +107,16 @@ public:
 
   void get(aterm& t) override;
 
+  /// \brief Reads an integer that was written as an aterm_int, without creating the aterm_int.
+  std::size_t get_integer() override;
+
 private:
+  /// \brief Reads packets up to and including the header of the next output, which is an integer, a term, or the
+  ///        end of the stream.
+  /// \returns True iff the output is an integer, of which the value still has to be read from m_stream. Otherwise,
+  ///          the term, or aterm() at the end of the stream, has been assigned to t.
+  bool read_until_output(aterm& t);
+
   /// \returns The number of bits needed to index terms.
   unsigned int term_index_width();
 
@@ -87,6 +130,14 @@ private:
 
   atermpp::deque<aterm> m_terms; ///< An index of read terms.
   std::deque<function_symbol> m_function_symbols; ///< An index of read function symbols.
+
+  /// \brief The arguments of the term that is being read. They are protected by m_terms, so they need not be
+  ///        protected here. Reusing this buffer avoids an allocation per term.
+  std::vector<unprotected_aterm_core> m_arguments;
+
+  /// \brief The term that is being read. Constructing terms in this protected member avoids registering a temporary
+  ///        term per term that is read.
+  aterm m_term;
 };
 
 } // namespace atermpp

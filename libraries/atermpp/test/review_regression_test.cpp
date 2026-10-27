@@ -117,11 +117,11 @@ BOOST_AUTO_TEST_CASE(test_aterm_int_from_undefined_aterm)
 
 // Regression: parse_aterm_int wrote the terminating '\0' one past the end of a
 // fixed 32-byte buffer when the digit sequence filled the buffer, corrupting
-// the stack. Parsing an overly long integer must no longer crash.
+// the stack. Parsing an overly long integer must no longer crash, but report that the number does not fit.
 BOOST_AUTO_TEST_CASE(test_parse_long_integer_does_not_overflow)
 {
   const std::string many_digits(40, '9');
-  BOOST_CHECK_NO_THROW(read_int_from_string(many_digits));
+  BOOST_CHECK_THROW(read_int_from_string(many_digits), std::runtime_error);
 }
 
 // Regression sanity check: list parsing must continue to work after tightening
