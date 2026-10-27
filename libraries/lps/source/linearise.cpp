@@ -1219,41 +1219,6 @@ class specification_basic_type
       return replace_variables_capture_avoiding(p, sigma);
     }
 
-    // The function below transforms a ProcessAssignment to a Process, provided
-    // that the process is defined in objectnames.
-
-    process_instance_assignment transform_process_instance_to_process_instance_assignment(
-              const process_instance& procId,
-              const std::set<variable>& bound_variables=std::set<variable>())
-    {
-      objectdatatype& object=objectIndex(procId.identifier());
-      const variable_list process_parameters=object.parameters;
-      const data_expression_list& rhss=procId.actual_parameters();
-
-      assignment_vector new_assignments;
-      data_expression_list::const_iterator j=rhss.begin();
-      for(variable_list::const_iterator i=process_parameters.begin(); i!=process_parameters.end(); ++i, ++j)
-      {
-        assert(j!=rhss.end());
-        if (*i==*j)
-        {
-          if (bound_variables.count(*i)>0) // Now *j is a different variable than *i
-          {
-            new_assignments.emplace_back(*i, *j);
-          }
-        }
-        else
-        {
-          new_assignments.emplace_back(*i, *j);
-        }
-      }
-      assert(j==rhss.end());
-
-      assert(check_valid_process_instance_assignment(procId.identifier(),assignment_list(new_assignments.begin(),new_assignments.end())));
-      process_instance_assignment p(procId.identifier(), assignment_list(new_assignments.begin(),new_assignments.end()));
-      return p;
-    }
-
     /********************************************************************/
     /*                                                                  */
     /*   BELOW THE PROCEDURES ARE GIVEN TO TRANSFORM PROCESSES TO       */
@@ -1791,9 +1756,9 @@ class specification_basic_type
                                              GNF,true,false);
           object.process_representing_action=tempvar;
         }
-        return transform_process_instance_to_process_instance_assignment(
-                          process_instance(object.process_representing_action,
-                          action(body).arguments()));
+        return to_process_instance_assignment(
+          process_instance(object.process_representing_action, action(body).arguments()),
+          [](const variable&) { return false; });
       }
 
       if (is_sync(body))
@@ -1825,10 +1790,8 @@ class specification_basic_type
                                        GNF,true,false);
           object.process_representing_action=tempvar;
         }
-        return transform_process_instance_to_process_instance_assignment(
-                      process_instance(
-                           process_identifier(object.process_representing_action),
-                           getarguments(ma)));
+        return to_process_instance_assignment(process_instance(object.process_representing_action, getarguments(ma)),
+          [](const variable&) { return false; });
       }
 
       if (is_at(body))
@@ -8761,23 +8724,27 @@ class specification_basic_type
  *   a copy of the summands will be added.
 */
 
-
     /* This function replaces all process instances by a process instance assignment,
        furthermore, if a process consists of only a process instantionation, i.e., X=Y, it is removed.
-       Nested stochastic operators are merged into one. */
+       Nested stochastic operators are merged into one. The processes that are used are transformed
+       first, depth first. */
     void transform_process_arguments(
             const process_identifier& procId,
             process_identifier_set& visited_processes)
     {
-      if (visited_processes.count(procId)==0)
+      if (visited_processes.find(procId) == visited_processes.end())
       {
         visited_processes.insert(procId);
         objectdatatype& object=objectIndex(procId);
-        const std::set<variable> bound_variables;
-        object.processbody=transform_process_arguments_body(
-                                         object.processbody,
-                                         bound_variables,
-                                         visited_processes);
+        object.processbody = replace_process_instance_assignments(join_nested_stochastic_operators(object.processbody),
+          [&](const process_instance_assignment& x)
+          {
+            transform_process_arguments(x.identifier(), visited_processes);
+            assert(objectIndex(x.identifier()).parameters == x.identifier().variables());
+            const assignment_list assignments = sort_assignments(x.assignments(), x.identifier().variables());
+            assert(check_valid_process_instance_assignment(x.identifier(), assignments));
+            return expand_process_instance_assignment(process_instance_assignment(x.identifier(), assignments));
+          });
       }
     }
 
@@ -8787,142 +8754,6 @@ class specification_basic_type
     {
       process_identifier_set visited_processes;
       transform_process_arguments(procId,visited_processes);
-    }
-
-    /* This function replaces all process instances by a process instance assignment
-       and merges nested stochastic operators into one. */
-    process_expression transform_process_arguments_body(
-      const process_expression& t,
-      const std::set<variable>& bound_variables,
-      process_identifier_set& visited_processes)
-    {
-      if (is_process_instance(t))
-      {
-        transform_process_arguments(process_instance(t).identifier(),visited_processes);
-        process_instance_assignment t1=transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(t),bound_variables);
-        return expand_process_instance_assignment(t1);
-      }
-      if (is_process_instance_assignment(t))
-      {
-        transform_process_arguments(process_instance_assignment(t).identifier(),visited_processes);
-        const process_instance_assignment u(t);
-        objectdatatype& object=objectIndex(u.identifier());
-        assert(check_valid_process_instance_assignment(u.identifier(),
-                 sort_assignments(u.assignments(),object.parameters)));
-        process_instance_assignment t1(u.identifier(),
-                                       sort_assignments(u.assignments(),object.parameters));
-        return expand_process_instance_assignment(t1);
-      }
-      if (is_hide(t))
-      {
-        return hide(hide(t).hide_set(),
-                    transform_process_arguments_body(hide(t).operand(),bound_variables,visited_processes));
-      }
-      if (is_rename(t))
-      {
-        return process::rename(
-                 process::rename(t).rename_set(),
-                 transform_process_arguments_body(process::rename(t).operand(),bound_variables,visited_processes));
-      }
-      if (is_allow(t))
-      {
-        return allow(allow(t).allow_set(),
-                     transform_process_arguments_body(allow(t).operand(),bound_variables,visited_processes));
-      }
-      if (is_block(t))
-      {
-        return block(block(t).block_set(),
-                     transform_process_arguments_body(block(t).operand(),bound_variables,visited_processes));
-      }
-      if (is_comm(t))
-      {
-        return comm(comm(t).comm_set(),
-                    transform_process_arguments_body(comm(t).operand(),bound_variables,visited_processes));
-      }
-      if (is_merge(t))
-      {
-        return merge(
-                 transform_process_arguments_body(merge(t).left(),bound_variables,visited_processes),
-                 transform_process_arguments_body(merge(t).right(),bound_variables,visited_processes));
-      }
-      if (is_choice(t))
-      {
-        return choice(
-                 transform_process_arguments_body(choice(t).left(),bound_variables,visited_processes),
-                 transform_process_arguments_body(choice(t).right(),bound_variables,visited_processes));
-      }
-      if (is_seq(t))
-      {
-        return seq(
-                 transform_process_arguments_body(seq(t).left(),bound_variables,visited_processes),
-                 transform_process_arguments_body(seq(t).right(),bound_variables,visited_processes));
-      }
-      if (is_if_then_else(t))
-      {
-        return if_then_else(
-                 if_then_else(t).condition(),
-                 transform_process_arguments_body(if_then_else(t).then_case(),bound_variables,visited_processes),
-                 transform_process_arguments_body(if_then_else(t).else_case(),bound_variables,visited_processes));
-      }
-      if (is_if_then(t))
-      {
-        return if_then(
-                 if_then(t).condition(),
-                 transform_process_arguments_body(if_then(t).then_case(),bound_variables,visited_processes));
-      }
-      if (is_sum(t))
-      {
-        std::set<variable> bound_variables1=bound_variables;
-        const variable_list sum_vars=sum(t).variables();
-        bound_variables1.insert(sum_vars.begin(),sum_vars.end());
-        return sum(
-                 sum_vars,
-                 transform_process_arguments_body(sum(t).operand(),bound_variables1,visited_processes));
-      }
-      if (is_action(t))
-      {
-        return t;
-      }
-      if (is_delta(t))
-      {
-        return t;
-      }
-      if (is_tau(t))
-      {
-        return t;
-      }
-      if (is_at(t))
-      {
-        return at(
-                 transform_process_arguments_body(at(t).operand(),bound_variables,visited_processes),
-                 at(t).time_stamp());
-      }
-      if (is_sync(t))
-      {
-        return process::sync(
-                 transform_process_arguments_body(process::sync(t).left(),bound_variables,visited_processes),
-                 transform_process_arguments_body(process::sync(t).right(),bound_variables,visited_processes));
-      }
-      if (is_stochastic_operator(t))
-      {
-        const stochastic_operator& tso=down_cast<const stochastic_operator>(t);
-        // Join nested stochastic operators into one.
-        variable_list vars = tso.variables();
-        data_expression dist = tso.distribution();
-        process_expression body = tso.operand();
-        while (is_stochastic_operator(body))
-        {
-          const stochastic_operator& tso1 = down_cast<const stochastic_operator>(body);
-          vars = vars + tso1.variables();
-          dist = sort_real::times(dist, tso1.distribution());
-          body = tso1.operand();
-        }
-        return stochastic_operator(
-                 vars,
-                 dist,
-                 transform_process_arguments_body(body,bound_variables,visited_processes));
-      }
-      throw mcrl2::runtime_error("unexpected process format in transform_process_arguments_body " + process::pp(t) +".");
     }
 
 /* -----------------------------   split body  --------------------------- */

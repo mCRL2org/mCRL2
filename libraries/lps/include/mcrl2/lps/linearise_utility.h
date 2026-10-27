@@ -28,6 +28,8 @@
 #include <algorithm>
 #include <iterator>
 #include <optional>
+#include <set>
+#include <vector>
 
 namespace mcrl2::lps
 {
@@ -363,6 +365,124 @@ template<typename Function>
 void for_each_process_identifier(const process::process_expression& p, Function f)
 {
   detail::for_each_process_identifier_traverser<Function>(f).apply(p);
+}
+
+/// \brief Converts the process instance P(e) into the process instance assignment P(d = e), where d are the parameters
+///        of P. An assignment d_i = d_i is left out, unless keep(d_i) holds.
+/// \details This is the inverse of process::expand_assignments.
+template<typename Predicate>
+process::process_instance_assignment to_process_instance_assignment(const process::process_instance& x, Predicate keep)
+{
+  std::vector<data::assignment> assignments;
+  data::data_expression_list::const_iterator e = x.actual_parameters().begin();
+  for (const data::variable& d: x.identifier().variables())
+  {
+    assert(e != x.actual_parameters().end());
+    if (*e != d || keep(d))
+    {
+      assignments.emplace_back(d, *e);
+    }
+    ++e;
+  }
+  assert(e == x.actual_parameters().end());
+  return process::process_instance_assignment(x.identifier(),
+    data::assignment_list(assignments.begin(), assignments.end()));
+}
+
+namespace detail
+{
+
+template<typename Function>
+struct replace_process_instance_assignments_builder
+  : public process::process_expression_builder<replace_process_instance_assignments_builder<Function>>
+{
+  using super = process::process_expression_builder<replace_process_instance_assignments_builder<Function>>;
+  using super::apply;
+  using super::enter;
+  using super::leave;
+  using super::update;
+
+  Function f;
+  std::multiset<data::variable> sum_variables;
+
+  explicit replace_process_instance_assignments_builder(Function f_)
+    : f(f_)
+  {}
+
+  void enter(const process::sum& x)
+  {
+    sum_variables.insert(x.variables().begin(), x.variables().end());
+  }
+
+  void leave(const process::sum& x)
+  {
+    for (const data::variable& v: x.variables())
+    {
+      sum_variables.erase(sum_variables.find(v));
+    }
+  }
+
+  template<class T>
+  void apply(T& result, const process::process_instance& x)
+  {
+    result = f(to_process_instance_assignment(x,
+      [&](const data::variable& v) { return sum_variables.find(v) != sum_variables.end(); }));
+  }
+
+  template<class T>
+  void apply(T& result, const process::process_instance_assignment& x)
+  {
+    result = f(x);
+  }
+};
+
+struct join_nested_stochastic_operators_builder
+  : public process::process_expression_builder<join_nested_stochastic_operators_builder>
+{
+  using super = process::process_expression_builder<join_nested_stochastic_operators_builder>;
+  using super::apply;
+  using super::enter;
+  using super::leave;
+  using super::update;
+
+  template<class T>
+  void apply(T& result, const process::stochastic_operator& x)
+  {
+    data::variable_list variables = x.variables();
+    data::data_expression distribution = x.distribution();
+    process::process_expression operand = x.operand();
+    while (process::is_stochastic_operator(operand))
+    {
+      const process::stochastic_operator& y = atermpp::down_cast<process::stochastic_operator>(operand);
+      variables = variables + y.variables();
+      distribution = data::sort_real::times(distribution, y.distribution());
+      operand = y.operand();
+    }
+    process::process_expression new_operand;
+    apply(new_operand, operand);
+    process::make_stochastic_operator(result, variables, distribution, new_operand);
+  }
+};
+
+} // namespace detail
+
+/// \brief Replaces every process instance assignment P(d = e) in p by f(P(d = e)). A process instance P(e) is first
+///        converted into a process instance assignment by to_process_instance_assignment, keeping the assignments
+///        d_i = d_i where d_i is bound by an enclosing sum.
+template<typename Function>
+process::process_expression replace_process_instance_assignments(const process::process_expression& p, Function f)
+{
+  process::process_expression result;
+  detail::replace_process_instance_assignments_builder<Function>(f).apply(result, p);
+  return result;
+}
+
+/// \brief Joins directly nested stochastic operators: dist x[f]. dist y[g]. p becomes dist x, y[f * g]. p.
+inline process::process_expression join_nested_stochastic_operators(const process::process_expression& p)
+{
+  process::process_expression result;
+  detail::join_nested_stochastic_operators_builder().apply(result, p);
+  return result;
 }
 
 /// \brief The process delta@0, which the lineariser uses for a process that cannot do anything.

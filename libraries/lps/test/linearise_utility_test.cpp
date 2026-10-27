@@ -282,3 +282,85 @@ BOOST_AUTO_TEST_CASE(test_for_each_process_identifier)
   lps::for_each_process_identifier(p, [&](const process_identifier& id) { visited.push_back(id); });
   BOOST_CHECK(visited == std::vector<process_identifier>({Q, R, P, Q}));
 }
+
+namespace
+{
+
+const process_identifier P_xy(core::identifier_string("P"), {x, y});
+
+process_instance P(const data::data_expression& e1, const data::data_expression& e2)
+{
+  return process_instance(P_xy, {e1, e2});
+}
+
+process_instance_assignment P_assignment(const data::assignment_list& assignments)
+{
+  return process_instance_assignment(P_xy, assignments);
+}
+
+const data::data_expression three = data::sort_nat::nat(3);
+
+} // namespace
+
+// P(x, 3) becomes P(y = 3): the assignment x = x is left out, unless it must be kept.
+BOOST_AUTO_TEST_CASE(test_to_process_instance_assignment)
+{
+  BOOST_CHECK(lps::to_process_instance_assignment(P(x, three), [](const data::variable&) { return false; })
+              == P_assignment({data::assignment(y, three)}));
+  BOOST_CHECK(lps::to_process_instance_assignment(P(x, three), [](const data::variable& v) { return v == x; })
+              == P_assignment({data::assignment(x, x), data::assignment(y, three)}));
+  // An argument that is another parameter is not left out.
+  BOOST_CHECK(lps::to_process_instance_assignment(P(y, x), [](const data::variable&) { return false; })
+              == P_assignment({data::assignment(x, y), data::assignment(y, x)}));
+}
+
+// Process instances become process instance assignments, keeping x = x where x is bound by an enclosing sum, and f is
+// applied to every process instance assignment from left to right.
+BOOST_AUTO_TEST_CASE(test_replace_process_instance_assignments)
+{
+  const process_expression p
+    = choice(P(x, three), seq(sum({x}, P(x, y)), P_assignment({data::assignment(y, three), data::assignment(x, z)})));
+  std::vector<process_instance_assignment> visited;
+  const process_expression result = lps::replace_process_instance_assignments(p,
+    [&](const process_instance_assignment& a)
+    {
+      visited.push_back(a);
+      return a;
+    });
+  const process_instance_assignment a1 = P_assignment({data::assignment(y, three)});
+  const process_instance_assignment a2 = P_assignment({data::assignment(x, x)});
+  // f receives an existing process instance assignment as it is; the lineariser sorts its assignments.
+  const process_instance_assignment a3 = P_assignment({data::assignment(y, three), data::assignment(x, z)});
+  BOOST_CHECK(result == choice(a1, seq(sum({x}, a2), a3)));
+  BOOST_CHECK(visited == std::vector<process_instance_assignment>({a1, a2, a3}));
+
+  // x = x is kept only within the scope of the sum.
+  const process_expression q = seq(sum({x}, P(x, x)), P(x, x));
+  BOOST_CHECK(lps::replace_process_instance_assignments(q, [](const process_instance_assignment& a) { return a; })
+              == seq(sum({x}, P_assignment({data::assignment(x, x), data::assignment(y, x)})),
+                P_assignment({data::assignment(y, x)})));
+
+  // A variable bound by a stochastic operator is not kept; only sum variables are.
+  const data::data_expression distribution = data::sort_real::real_(1);
+  BOOST_CHECK(lps::replace_process_instance_assignments(stochastic_operator({x}, distribution, P(x, three)),
+                [](const process_instance_assignment& a) { return a; })
+              == stochastic_operator({x}, distribution, P_assignment({data::assignment(y, three)})));
+}
+
+// Directly nested stochastic operators are joined into one, also below other operators; stochastic operators that are
+// separated by another operator are not.
+BOOST_AUTO_TEST_CASE(test_join_nested_stochastic_operators)
+{
+  const data::data_expression f
+    = data::if_(data::equal_to(x, data::sort_nat::nat(0)), data::sort_real::real_(1), data::sort_real::real_(0));
+  const data::data_expression g = data::if_(data::equal_to(y, x), data::sort_real::real_(1), data::sort_real::real_(0));
+  const data::data_expression h = data::sort_real::real_(1);
+  const process_expression p = stochastic_operator({x}, f, stochastic_operator({y}, g, stochastic_operator({z}, h, a)));
+  const process_expression joined
+    = stochastic_operator({x, y, z}, data::sort_real::times(data::sort_real::times(f, g), h), a);
+  BOOST_CHECK(lps::join_nested_stochastic_operators(p) == joined);
+  BOOST_CHECK(lps::join_nested_stochastic_operators(choice(a, p)) == choice(a, joined));
+
+  const process_expression q = stochastic_operator({x}, f, seq(a, stochastic_operator({y}, g, d(x, y))));
+  BOOST_CHECK(lps::join_nested_stochastic_operators(q) == q);
+}
