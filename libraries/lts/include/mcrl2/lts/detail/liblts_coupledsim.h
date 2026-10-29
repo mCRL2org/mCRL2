@@ -7,16 +7,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-// \file lts/detail/liblts_coupledsim.h
-//
-// \brief algorithm for coupled simulation equivalence
-//
-// \details This file implements a computation of coupled simulation equivalence
-// introduced by Parrow and Sjoedin in 1992 [PS92].  The algorithm creates a
-// game arena from the given input and returns the solution based on solving the
-// game with Graedel's algorithm on game graphs.
-//
-// \author Huong Ngoc Le
+/// \file lts/detail/liblts_coupledsim.h
+///
+/// \brief algorithm for coupled simulation preorder / equivalence
+///
+/// \details This file implements a computation of coupled simulation preorder
+/// algorithm by Bisping & Nestmann 2019. It creates a game arena for the
+/// coupled simulation reachability games and determines the winner.
+///
+/// \author Huong Ngoc Le, Benjamin Bisping
 
 
 #ifndef MCRL2_LTS_DETAIL_LIBLTS_COUPLED_SIM_H
@@ -28,6 +27,7 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <sstream>
 #include <stack>
 #include <string>
 #include <vector>
@@ -41,6 +41,9 @@ namespace mcrl2::lts::detail
   const unsigned char NODE_ATK = 0;  // placeholder indicating node is an attacker node
   const unsigned char NODE_DEF = 1;  // placeholder indicating a node, which is alwas reachable as coupling.
   const unsigned char NODE_CPL = 2;  // placeholder indicating a node, which is alwas reachable as coupling.
+
+  const int WIN_DEFENDER = 0;
+  const int WIN_ATTACKER = 1;
 
   // coupled simulation game node
   struct cs_game_node
@@ -69,7 +72,6 @@ namespace mcrl2::lts::detail
     bool weak;
   };
 
-  // support
   inline bool operator==(const cs_game_node &n0, const cs_game_node &n1)
   {
     return n0.flag == n1.flag
@@ -79,13 +81,11 @@ namespace mcrl2::lts::detail
       && n0.q == n1.q;
   }
 
-  // support
   inline bool operator!=(const cs_game_node &n0, const cs_game_node &n1)
   {
     return !(n0 == n1);
   }
 
-  // support
   inline bool operator<(const cs_game_node &n0, const cs_game_node &n1)
   {
     return n0.flag != n1.flag ? n0.flag < n1.flag
@@ -95,7 +95,6 @@ namespace mcrl2::lts::detail
       : n0.q < n1.q;
   }
 
-  // support / debug (display struct cs_game_node;
   inline std::string to_string(const cs_game_node &n)
   {
     std::string fst = !n.swapped ? "p" : "q";
@@ -123,7 +122,26 @@ namespace mcrl2::lts::detail
     }
   }
 
-  // support
+  inline std::string print_relation(
+      const std::set<cs_game_node>& attacker_nodes,
+      const std::map<cs_game_node, int>& node_winner)
+  {
+    std::ostringstream result;
+    result << "{";
+    const char* separator = "";
+    for (const cs_game_node& node : attacker_nodes)
+    {
+      const auto winner = node_winner.find(node);
+      if (winner != node_winner.end() && winner->second == WIN_DEFENDER)
+      {
+        result << separator << to_string(node);
+        separator = ", ";
+      }
+    }
+    result << "}";
+    return result.str();
+  }
+
   inline bool equals(
       const cs_game_move &m0,
       const cs_game_move &m1,
@@ -132,18 +150,14 @@ namespace mcrl2::lts::detail
     return m0.act == m1.act && (!weak_transition && !(m0.weak || m1.weak));
   }
 
-  // support
   inline bool operator<(const cs_game_move &m0, const cs_game_move &m1)
   {
     return m0.from != m1.from ? m0.from < m1.from : m0.to < m1.to;
   }
 
-// --
-
 template <class LTS_TYPE>
-  bool coupled_simulation_compare(LTS_TYPE& l1, LTS_TYPE& l2)
+  bool coupled_simulation_compare(LTS_TYPE& l1, LTS_TYPE& l2, const bool equivalence = true)
   {
-    // ./liblts_weak_bisim.h:70
     bool preserve_divergences = true;
     weak_bisimulation_reduce(l1,preserve_divergences);
     weak_bisimulation_reduce(l2,preserve_divergences);
@@ -160,58 +174,42 @@ template <class LTS_TYPE>
     std::map<cs_game_node,std::set<cs_game_node>> predecessors;
     std::map<cs_game_node,int> successor_count;
     std::map<cs_game_node,int> node_winner;
-    const int WIN_DEFENDER = 0;
-    const int WIN_ATTACKER = 1;
 
     std::set<cs_game_move> moves;  // moves (node,node)
     std::string move_label; // label as string representation.
     std::ostringstream stream; // bypassing behavior (workaround for DEBUG)
 
-    /* Define game nodes here. */
-
     /* Get Weak transitions. */
     std::stack<transition> todo_weak;
-    std::set<transition> l1_weak_transitions;
-    std::set<transition> l2_weak_transitions; // do I need to save them?
 
-    /* filter transitions of t2. */
     std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
         l2_tran_from_node;
     std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
-        l2_tran_into_node;
-    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
         l1_tran_from_node;
-    std::map<std::size_t, std::map<transition, bool>> // if strong transition on true
-        l1_tran_into_node;
 
     mCRL2log(log::log_level_t::debug)
       << "Find weak transitions."
       << std::endl;
 
     { // restructure l1 => get meta data and chain weak transitions.
+      std::set<transition> explored_weak_transitions;
       for (const transition& t1 : l1.get_transitions())
       {
         l1_tran_from_node[t1.from()][t1] = true;  // outgoing
-        l1_tran_into_node[t1.to()][t1] = true;  // incoming
 
         /* Every transition is a weak transition, append to todo. */
         todo_weak.push(t1);
-
-        l1_weak_transitions.insert(t1);
-
-        // add tau loop for everyone.
-        l1_weak_transitions.insert(transition(t1.from(), 0, t1.from()));
-        l1_weak_transitions.insert(transition(t1.to(), 0, t1.to()));
       }
 
       /* Add weak transititions. */
-      // on branching copy path and add all branches fins as fins.
       while (!todo_weak.empty())
       {
-        // pop and keep just start and extension.
-        // finish if next is second not tau.
         transition weak = todo_weak.top();
         todo_weak.pop();
+        if (!explored_weak_transitions.insert(weak).second)
+        {
+          continue;
+        }
         std::size_t f = weak.from();
         std::size_t l = weak.label();
         std::size_t t = weak.to();
@@ -222,8 +220,6 @@ template <class LTS_TYPE>
 
         // XXX if (already_good) The current todo weak transition is already valid.
         // if it was strong before, it stays strong, else added as weak.
-        l1_weak_transitions.insert(weak);
-        l1_tran_into_node[t][weak] |= false;
         l1_tran_from_node[f][weak] |= false;
 
         if (len < 1)  // no further steps.
@@ -247,38 +243,32 @@ template <class LTS_TYPE>
                 = transition(f,
                     !already_good ? next_label : l, ntrans.first.to());
 
-              // re-add new branches.
               todo_weak.push(new_extended_weak);
             }
           }
         }
-        // current weak transition is done now.
-      } // done l1 tau forest (all tau pathes).
+      }
     }
 
     { // ANALOG for l2
+      std::set<transition> explored_weak_transitions;
       for (const transition& t2 : l2.get_transitions())
       {
         l2_tran_from_node[t2.from()][t2] = true;  // outgoing
-        l2_tran_into_node[t2.to()][t2] = true;  // incoming
 
         /* Every transition is a weak transition, append to todo. */
         todo_weak.push(t2);
-        l2_weak_transitions.insert(t2);
-
-        // add tau loop for everyone.
-        l2_weak_transitions.insert(transition(t2.from(), 0, t2.from()));
-        l2_weak_transitions.insert(transition(t2.to(), 0, t2.to()));
       }
 
       /* Add weak transititions. */
-      // on branching copy path and add all branches fins as fins.
       while (!todo_weak.empty())
       {
-        // pop and keep just start and extension.
-        // finish if next is second not tau.
         transition weak = todo_weak.top();
         todo_weak.pop();
+        if (!explored_weak_transitions.insert(weak).second)
+        {
+          continue;
+        }
         std::size_t f = weak.from();
         std::size_t l = weak.label();
         std::size_t t = weak.to();
@@ -289,8 +279,6 @@ template <class LTS_TYPE>
 
         // TODO: if (already_good) The current todo weak transition is already valid.
         // if it was strong before, it stays strong, else added as weak.
-        l2_weak_transitions.insert(weak);
-        l2_tran_into_node[t][weak] |= false;
         l2_tran_from_node[f][weak] |= false;
 
         if (len < 1)  // no further steps.
@@ -318,8 +306,7 @@ template <class LTS_TYPE>
             }
           }
         }
-        // current weak transition is done now.
-      } // done l2 tau forest (all tau pathes).
+      }
     }
 
     mCRL2log(log::log_level_t::verbose)
@@ -349,8 +336,6 @@ template <class LTS_TYPE>
         moves.emplace(cplp0q0, q0p0, 0, "bisim");
         moves.emplace(cplq0p0, p0q0, 0, "bisim");
 
-        std::map<cs_game_move, bool> todo_if;
-
         // TODO This includes also weak, as challenge giver invalid, and that is unnecessary!
         /* CREATED:
          * challenge: p0 a -> p1
@@ -369,9 +354,6 @@ template <class LTS_TYPE>
           stream.str("");
           stream.clear();
 
-          // --
-
-          // only strong
           if (strong)
           {
             /* (p0,q0) -> (a,p1,q0),  if [p0] a -> [p1] */
@@ -404,7 +386,6 @@ template <class LTS_TYPE>
               cs_game_node qp1 = {.flag = NODE_ATK, .act = 0, .p = q1, .q = p1, .swapped = true};  /// (q,p1)a
               defender_nodes.insert(bqp0);
               attacker_nodes.insert(qp1);
-              // todo_if.insert();  // waiting list for this move on condition.
               moves.emplace(bqp0, qp1, a, move_label);
             }
           }
@@ -436,10 +417,7 @@ template <class LTS_TYPE>
           stream.str("");
           stream.clear();
 
-          // --
-
-          // only strong
-          if (strong)  // only strong
+          if (strong)
           {
             /* swapped.
              * (q0,p0) -> (a,q1,p0),  if [q0] a -> [q1] */
@@ -472,7 +450,6 @@ template <class LTS_TYPE>
               cs_game_node pq1 = {.flag = NODE_ATK, .act = 0, .p = p1, .q = q1, .swapped = false};  // (p?,q1)a
               defender_nodes.insert(apq0);
               attacker_nodes.insert(pq1);
-              // todo_if.insert();  // waiting list for this move on condition.
               moves.emplace(apq0, pq1, b, move_label);
             }
           }
@@ -517,9 +494,8 @@ template <class LTS_TYPE>
     std::stack<cs_game_node> todo;
     for (const cs_game_node& d: defender_nodes)
     {
-      todo.push(d); // XXX make me better
+      todo.push(d);
     }
-    // todo.assign(defender_nodes.begin(), defender_nodes.end());
 
     mCRL2log(log::log_level_t::verbose)
       << "Compute the winning area of the defender." << std::endl;
@@ -527,7 +503,6 @@ template <class LTS_TYPE>
     /* Calculate winning region. */
     while (!todo.empty())
     {
-      /* Pop from queue. */
       cs_game_node n = todo.top();
       todo.pop();
 
@@ -553,36 +528,9 @@ template <class LTS_TYPE>
       }
     }
 
-    mCRL2log(log::log_level_t::verbose)
-      << "Get coupled simulation from defender's winning area."
+    mCRL2log(log::log_level_t::debug)
+      << "Coupled simulation relation: " << print_relation(attacker_nodes, node_winner)
       << std::endl;
-
-    char seperator[3] = {'\0', ' ', '\0'}; // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays) null-terminated buffer streamed as a C-string
-    mCRL2log(log::log_level_t::verbose) << "R = {";
-
-    /* Filter R, where its elemens are coupled similar. */
-    std::set<cs_game_node> cs_relation;
-    for (const auto &n : attacker_nodes)
-    {
-#ifndef NDEBUG
-      if (node_winner.find(n) == node_winner.end())
-      {
-        std::cerr
-          << "I am requested, but never listed."
-          << " Set to default. (" << to_string(n) << std::endl;
-      }
-#endif // NDEBUG
-
-      if (node_winner[n] == WIN_DEFENDER)
-      {
-        cs_relation.insert(n);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay) seperator is streamed as a null-terminated C-string
-        mCRL2log(log::log_level_t::verbose) << seperator << to_string(n);
-        seperator[0] = ',';
-      }
-    }
-
-    mCRL2log(log::log_level_t::verbose) << "}" << std::endl;
 
     /* Return true iff root nodes are in R / won by defender. */
     cs_game_node roots[] // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
@@ -590,12 +538,10 @@ template <class LTS_TYPE>
         , {NODE_ATK, 0, l2.initial_state(), l1.initial_state(), true}};
 
     bool similar  // root is in R
-      = node_winner[roots[0]] == WIN_DEFENDER
-      && node_winner[roots[1]] == WIN_DEFENDER;
+      = node_winner.at(roots[0]) == WIN_DEFENDER
+      && (!equivalence || node_winner.at(roots[1]) == WIN_DEFENDER);
 
     return similar;
   }
   } // namespace mcrl2::lts::detail
-    // end namespace lts
-    // end namespace mclr
 #endif  // MCRL2_LTS_DETAIL_LIBLTS_COUPLED_SIM_H
