@@ -40,6 +40,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
   using super::print_expression;
   using super::print_list;
   using super::print_variables;
+  using super::print_global_variables;
 
   bool m_print_summand_numbers = false;
   std::string m_process_name;
@@ -295,7 +296,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
     derived().enter(x);
     derived().apply(x.data());
     print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
-    print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
+    print_global_variables(x.global_variables());
     derived().apply(x.process());
     derived().print("\n");
     derived().apply(x.initial_process());

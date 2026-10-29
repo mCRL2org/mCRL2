@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_PRINT_H
 #define MCRL2_DATA_PRINT_H
 
+#include "mcrl2/atermpp/aterm_structural_order.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/is_untyped.h"
 #include "mcrl2/data/detail/print_utility.h"
@@ -700,6 +701,17 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                       )
   {
     print_sorted_declarations(container, print_sorts, join_sorts, maximally_shared, opener, closer, separator, get_sort_default());
+  }
+
+  /// \brief Prints the declaration of global variables.
+  /// \details The variables are printed in structural order: they are stored in a set ordered on the addresses of
+  ///          terms, so printing them in the order of the set gives different results in different runs.
+  template <typename Container>
+  void print_global_variables(const Container& container)
+  {
+    std::vector<variable> variables(container.begin(), container.end());
+    std::sort(variables.begin(), variables.end(), atermpp::structural_less());
+    print_variables(variables, true, true, true, "glob ", ";\n\n", ";\n     ");
   }
 
   template <typename Container>
