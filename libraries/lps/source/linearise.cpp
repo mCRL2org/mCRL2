@@ -33,6 +33,7 @@
 //#define MCRL2_LOG_LPS_LINEARISE_STATISTICS 1
 
 //mCRL2 data
+#include <bit>
 #include <ranges>
 
 #include "mcrl2/atermpp/aterm.h"
@@ -59,6 +60,7 @@
 // Process libraries.
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/balance_nesting_depth.h"
+#include "mcrl2/process/is_multi_action.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/process_variable_strongly_connected_components.h"
 #include "mcrl2/process/rewrite.h"
@@ -131,12 +133,9 @@ using processstatustype = enum
 using objecttype = enum
 {
   none,
-  _map,
-  func,
   act,
   proc,
   variable_,
-  sorttype,
   multiact
 };
 
@@ -269,24 +268,6 @@ class specification_basic_type
 
   private:
 
-    static
-    data_expression real_times_optimized(const data_expression& r1, const data_expression& r2)
-    {
-      if (r1==sort_real::real_zero() || r2==sort_real::real_zero())
-      {
-        return sort_real::real_zero();
-      }
-      if (r1==sort_real::real_one())
-      {
-        return r2;
-      }
-      if (r2==sort_real::real_one())
-      {
-        return r1;
-      }
-      return sort_real::times(r1,r2);
-    }
-
     bool isDeltaAtZero(const process_expression& t)
     {
       if (!is_at(t))
@@ -352,59 +333,11 @@ class specification_basic_type
       fresh_identifier_generator.add_identifier(str);
     }
 
-    static
-    process_expression action_list_to_process(const action_list& ma)
-    {
-      if (ma.size()==0)
-      {
-        return tau();
-      }
-      if (ma.size()==1)
-      {
-        return ma.front();
-      }
-      return process::sync(ma.front(),action_list_to_process(ma.tail()));
-    }
-
-    /// Convert the process expression to an action list.
-    /// Note: The resulting actions are not sorted.
-    static
-    action_list to_action_list(const process_expression& p)
-    {
-      if (is_tau(p))
-      {
-        return action_list();
-      }
-
-      if (is_action(p))
-      {
-        return action_list({ action(p) });
-      }
-
-      if (is_sync(p))
-      {
-        return to_action_list(process::sync(p).left())+to_action_list(process::sync(p).right());
-      }
-      assert(0);
-      return action_list();
-    }
-
     /// Convert the process expression to a sorted action list.
     static
     action_list to_sorted_action_list(const process_expression& p)
     {
       return sort_actions(to_action_list(p));
-    }
-
-    static
-    action_label_list getnames(const process_expression& multiAction)
-    {
-      if (is_action(multiAction))
-      {
-        return action_label_list({ action(multiAction).label() });
-      }
-      assert(is_sync(multiAction));
-      return getnames(process::sync(multiAction).left())+getnames(process::sync(multiAction).right());
     }
 
     // Returns a list of variables with the same sort as the expressions in the list.
@@ -487,9 +420,14 @@ class specification_basic_type
 
     objectdatatype& addMultiAction(const process_expression& multiAction, bool& isnew)
     {
-      const process::action_label_list actionnames=getnames(multiAction);
+      assert(!is_tau(multiAction));
+      const action_list actions = to_action_list(multiAction);
+      // The labels are the key of the multi-action in objectdata, so equal multi-actions must have their actions in
+      // the same order.
+      assert(std::is_sorted(actions.begin(), actions.end()));
+      const process::action_label_list actionnames = process::labels(actions);
 
-      isnew=(objectdata.count(actionnames)==0);
+      isnew = objectdata.find(actionnames) == objectdata.end();
 
       if (isnew)
       {
@@ -504,7 +442,7 @@ class specification_basic_type
         // objectdata may change as a side effect of make
         // multiaction.
         const action_list tempvar=makemultiaction(actionnames, variable_list_to_data_expression_list(object.parameters));
-        object.processbody=action_list_to_process(tempvar);
+        object.processbody = to_process_expression(tempvar);
 
         objectdata[actionnames]=object;
       }
@@ -547,23 +485,11 @@ class specification_basic_type
       return result;
     }
 
-
-    /************ upperpowerof2 *********************************************/
-
-    static
-    std::size_t upperpowerof2(std::size_t i)
-    /* function yields n for the smallest value n such that
-       2^n>=i. This constitutes the number of bits necessary
-       to represent a number smaller than i. i is assumed to
-       be at least 1. */
+    // The number of booleans needed to represent the numbers 0, ..., n - 1, i.e., ceil(log2(n)). n is at least 1.
+    static std::size_t number_of_bits(const std::size_t n)
     {
-      std::size_t n=0;
-      std::size_t powerof2=1;
-      for (; powerof2< i ; n++)
-      {
-        powerof2=2*powerof2;
-      }
-      return n;
+      assert(n > 0);
+      return std::bit_width(n - 1);
     }
 
     data_expression RewriteTerm(const data_expression& t)
@@ -714,7 +640,7 @@ class specification_basic_type
 
     action_list linMergeMultiActionListProcess(const process_expression& ma1, const process_expression& ma2)
     {
-      return linMergeMultiActionList(to_action_list(ma1),to_action_list(ma2));
+      return linMergeMultiActionList(to_action_list(ma1), to_action_list(ma2));
     }
 
     /************** determine_process_status ********************************/
@@ -1768,7 +1694,7 @@ class specification_basic_type
                                bodytovarheadGNF(body1,multiaction_state,freevars,v,variables_bound_in_sum),
                                bodytovarheadGNF(body2,multiaction_state,freevars,v,variables_bound_in_sum));
 
-        const process_expression mp=action_list_to_process(ma);
+        const process_expression mp = to_process_expression(ma);
         if ((s==multiaction_state)||(v==first))
         {
           return mp;
@@ -3427,7 +3353,7 @@ class specification_basic_type
           const std::string s3((spec.options.statenames)?std::string(last.name()):std::string("s"));
           if ((spec.options.binary) && (spec.options.newstate))
           {
-            std::size_t i=spec.upperpowerof2(no_of_states);
+            std::size_t i = spec.number_of_bits(no_of_states);
             for (; i>0 ; i--)
             {
               variable name(spec.fresh_identifier_generator("bst"),sort_bool::bool_());
@@ -3557,7 +3483,7 @@ class specification_basic_type
       /* else a sequence of boolean values needs to be generated,
          representing the value i, when there are l->n elements */
       {
-        std::size_t k=upperpowerof2(stack.no_of_states);
+        std::size_t k = number_of_bits(stack.no_of_states);
         variable_list::const_iterator boolean_state_variables=stack.booleanStateVariables.begin();
         for (; k>0 ; k--, ++boolean_state_variables)
         {
@@ -3607,7 +3533,7 @@ class specification_basic_type
       /* else a sequence of boolean values needs to be generated,
          representing the value i, when there are l->n elements */
       {
-        std::size_t k=upperpowerof2(stack.no_of_states);
+        std::size_t k = number_of_bits(stack.no_of_states);
         variable_list::const_iterator boolean_state_variables=stack.booleanStateVariables.begin();
         for (; k>0 ; k--, ++boolean_state_variables)
         {
@@ -4380,10 +4306,8 @@ class specification_basic_type
         else
         {
           const stochastic_operator& sto=atermpp::down_cast<const stochastic_operator>(summandterm);
-          cumulative_distribution=stochastic_distribution(
-                                    cumulative_distribution.variables()+sto.variables(),
-                                    real_times_optimized(cumulative_distribution.distribution(),
-                                                         sto.distribution()));
+          cumulative_distribution = stochastic_distribution(cumulative_distribution.variables() + sto.variables(),
+            sort_real::optimized_times(cumulative_distribution.distribution(), sto.distribution()));
           summandterm=sto.operand();
         }
       }
@@ -5648,22 +5572,21 @@ class specification_basic_type
               }
               else
               {
-                resulting_distribution=real_times_optimized(
-                                                  if_(stochastic_conditionlist.front(),sort_real::real_one(),sort_real::real_zero()),
-                                                  equalterm);
+                resulting_distribution = sort_real::optimized_times(
+                  if_(stochastic_conditionlist.front(), sort_real::real_one(), sort_real::real_zero()),
+                  equalterm);
               }
             }
             else
             {
               data_expression_list temp_stochastic_conditionlist=stochastic_conditionlist;
               temp_stochastic_conditionlist.push_front(data_expression(e.var));
-              resulting_distribution=real_times_optimized(
-                                if_(application(
-                                      find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                                      temp_stochastic_conditionlist),
-                                      sort_real::real_one(),
-                                      sort_real::real_zero()),
-                                equalterm);
+              resulting_distribution = sort_real::optimized_times(
+                if_(application(find_case_function(e.enumeratedtype_index, sort_bool::bool_()),
+                      temp_stochastic_conditionlist),
+                  sort_real::real_one(),
+                  sort_real::real_zero()),
+                equalterm);
             }
           }
           else
@@ -5677,28 +5600,27 @@ class specification_basic_type
             {
               if (stochastic_conditionlist.front()==sort_bool::true_())
               {
-               resulting_distribution=real_times_optimized(
-                                                 if_(stochastic_conditionlist.front(),sort_real::real_one(),sort_real::real_zero()),
-                                                 resulting_distribution);
+                resulting_distribution = sort_real::optimized_times(
+                  if_(stochastic_conditionlist.front(), sort_real::real_one(), sort_real::real_zero()),
+                  resulting_distribution);
               }
               else
               {
-               resulting_distribution=real_times_optimized(
-                                                 if_(stochastic_conditionlist.front(),sort_real::real_one(),sort_real::real_zero()),
-                                                 resulting_distribution);
+                resulting_distribution = sort_real::optimized_times(
+                  if_(stochastic_conditionlist.front(), sort_real::real_one(), sort_real::real_zero()),
+                  resulting_distribution);
               }
             }
             else
             {
              data_expression_list temp_stochastic_conditionlist=stochastic_conditionlist;
              temp_stochastic_conditionlist.push_front(data_expression(e.var));
-             resulting_distribution=real_times_optimized(
-                              if_(application(
-                                     find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                                     temp_stochastic_conditionlist),
-                                  sort_real::real_one(),
-                                  sort_real::real_zero()),
-                              resulting_distribution);
+             resulting_distribution = sort_real::optimized_times(
+               if_(application(find_case_function(e.enumeratedtype_index, sort_bool::bool_()),
+                     temp_stochastic_conditionlist),
+                 sort_real::real_one(),
+                 sort_real::real_zero()),
+               resulting_distribution);
             }
           }
         }
@@ -7055,9 +6977,8 @@ class specification_basic_type
             }
 
             const assignment_list nextstate3=nextstate1+nextstate2;
-            const stochastic_distribution distribution3(
-                                              distribution1.variables()+distribution2.variables(),
-                                              real_times_optimized(distribution1.distribution(),distribution2.distribution()));
+            const stochastic_distribution distribution3(distribution1.variables() + distribution2.variables(),
+              sort_real::optimized_times(distribution1.distribution(), distribution2.distribution()));
 
             condition3=RewriteTerm(condition3);
             if (condition3!=sort_bool::false_())
@@ -7991,7 +7912,7 @@ class specification_basic_type
         const stochastic_operator r1 = stochastic_operand(p1, process::find_free_variables(p2));
         const stochastic_operator r2 = second_stochastic_operand(p2, r1);
         return stochastic_operator(r1.variables() + r2.variables(),
-          real_times_optimized(r1.distribution(), r2.distribution()),
+          sort_real::optimized_times(r1.distribution(), r2.distribution()),
           choice(r1.operand(), r2.operand()));
       }
       if (is_stochastic_operator(p1))
@@ -8103,7 +8024,7 @@ class specification_basic_type
         V.insert(sto.variables().begin(), sto.variables().end());
         const stochastic_operator r = stochastic_operand(p, V);
         return stochastic_operator(sto.variables() + r.variables(),
-          real_times_optimized(sto.distribution(), r.distribution()),
+          sort_real::optimized_times(sto.distribution(), r.distribution()),
           r.operand());
       }
       return stochastic_operator(sto.variables(), sto.distribution(), p);
