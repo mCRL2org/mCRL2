@@ -15,6 +15,7 @@
 #include "mcrl2/process/balance_nesting_depth.h"
 #include "mcrl2/process/is_guarded.h"
 #include "mcrl2/process/is_linear.h"
+#include "mcrl2/process/is_multi_action.h"
 #include "mcrl2/process/parse.h"
 
 using namespace mcrl2;
@@ -313,4 +314,38 @@ BOOST_AUTO_TEST_CASE(test_main)
   test_linear(CASE13b);
   test_linear(CASE14, false);
   test_linear(CASE15);
+}
+
+// to_action_list and to_process_expression convert between a multi-action as a process expression and its actions.
+BOOST_AUTO_TEST_CASE(test_to_action_list_and_to_process_expression)
+{
+  const action a(action_label(core::identifier_string("a"), {}), {});
+  const action b(action_label(core::identifier_string("b"), {}), {});
+  const action c(action_label(core::identifier_string("c"), {}), {});
+
+  BOOST_CHECK(process::to_action_list(tau()) == action_list());
+  BOOST_CHECK(process::to_action_list(a) == action_list({a}));
+  // The actions are listed from left to right, unsorted, regardless of the nesting of the syncs.
+  BOOST_CHECK(process::to_action_list(process::sync(process::sync(c, a), b)) == action_list({c, a, b}));
+  BOOST_CHECK(process::to_action_list(process::sync(c, process::sync(a, b))) == action_list({c, a, b}));
+
+  BOOST_CHECK(process::to_process_expression(action_list()) == tau());
+  BOOST_CHECK(process::to_process_expression(action_list({a})) == a);
+  BOOST_CHECK(process::to_process_expression(action_list({c, a, b})) == process::sync(c, process::sync(a, b)));
+}
+
+// labels distinguishes overloaded actions with the same name, names does not.
+BOOST_AUTO_TEST_CASE(test_labels)
+{
+  const action a_nat(action_label(core::identifier_string("a"), {data::sort_nat::nat()}), {data::sort_nat::nat(1)});
+  const action a_bool(action_label(core::identifier_string("a"), {data::sort_bool::bool_()}),
+    {data::sort_bool::true_()});
+  const action b(action_label(core::identifier_string("b"), {}), {});
+  const action_list multi_action({a_nat, b, a_bool});
+
+  BOOST_CHECK(process::labels(multi_action) == process::action_label_list({a_nat.label(), b.label(), a_bool.label()}));
+  BOOST_CHECK(a_nat.label() != a_bool.label());
+  BOOST_CHECK(process::names(multi_action)
+              == core::identifier_string_list(
+                {core::identifier_string("a"), core::identifier_string("b"), core::identifier_string("a")}));
 }

@@ -83,19 +83,6 @@ allow_list_cache make_allow_list_cache(const process::action_name_multiset_list&
   }
   return result;
 }
-
-/// Calculate the list of action names that appear in a multi-action.
-inline
-core::identifier_string_list names(const process::action_list& multi_action)
-{
-  return core::identifier_string_list(
-    multi_action.begin(),
-    multi_action.end(),
-    [](const process::action& a)
-    {
-      return a.label().name();
-    });
-}
 }
 
 /// \brief Determine if multi_action is allowed by an allow expression in allow_list
@@ -114,7 +101,7 @@ inline bool allow_(const detail::allow_list_cache& allow_cache,
     return true;
   }
 
-  const core::identifier_string_list multi_action_names = detail::names(multi_action);
+  const core::identifier_string_list multi_action_names = process::names(multi_action);
   return allow_cache.find(multi_action_names) != allow_cache.end();
 }
 

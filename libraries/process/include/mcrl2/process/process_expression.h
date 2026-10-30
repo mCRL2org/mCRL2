@@ -1823,6 +1823,21 @@ bool equal_signatures(const action& a, const action& b)
   return std::equal(a_args.begin(), a_args.end(), b_args.begin(), [](const data::data_expression& x, const data::data_expression& y) { return x.sort() == y.sort(); });
 }
 
+/// \brief The names of the actions in a multi-action.
+inline core::identifier_string_list names(const action_list& multi_action)
+{
+  return core::identifier_string_list(multi_action.begin(),
+    multi_action.end(),
+    [](const action& a) { return a.label().name(); });
+}
+
+/// \brief The labels of the actions in a multi-action. Unlike the names, the labels distinguish overloaded actions
+///        with the same name.
+inline action_label_list labels(const action_list& multi_action)
+{
+  return action_label_list(multi_action.begin(), multi_action.end(), [](const action& a) { return a.label(); });
+}
+
 /// Total ordering on actions: label first, then arguments.
 /// Consistent with the ordering on action labels (name, then sorts).
 /// Including arguments makes this a proper total order. The structural order

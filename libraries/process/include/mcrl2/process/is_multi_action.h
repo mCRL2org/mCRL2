@@ -62,6 +62,38 @@ multi_action_name sync_multi_action_name(const sync& x)
   return f.result;
 }
 
+/// \brief The actions of the multi-action x, from left to right, unsorted.
+/// \pre x is tau, which has no actions, an action, or a sync of these.
+inline action_list to_action_list(const process_expression& x)
+{
+  if (is_tau(x))
+  {
+    return action_list();
+  }
+  if (is_action(x))
+  {
+    return action_list({atermpp::down_cast<action>(x)});
+  }
+  assert(is_sync(x));
+  const sync& y = atermpp::down_cast<sync>(x);
+  return to_action_list(y.left()) + to_action_list(y.right());
+}
+
+/// \brief The multi-action with the given actions as a process expression: tau if there are none, and
+///        a1 | (a2 | ... | an) otherwise.
+inline process_expression to_process_expression(const action_list& actions)
+{
+  if (actions.empty())
+  {
+    return tau();
+  }
+  if (actions.tail().empty())
+  {
+    return actions.front();
+  }
+  return sync(actions.front(), to_process_expression(actions.tail()));
+}
+
 } // namespace mcrl2::process
 
 #endif // MCRL2_PROCESS_IS_MULTI_ACTION_H
