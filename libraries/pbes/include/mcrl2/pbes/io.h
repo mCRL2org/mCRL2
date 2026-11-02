@@ -18,8 +18,6 @@
 namespace mcrl2::pbes_system
 {
 
-void save_bes_pgsolver(const pbes& bes, std::ostream& stream, bool maxpg = true);
-
 const std::vector<utilities::file_format>& pbes_file_formats();
 
 inline

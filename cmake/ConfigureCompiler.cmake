@@ -106,7 +106,6 @@ target_compile_definitions(mcrl2_compiler_definitions INTERFACE MCRL2_EXTENDED_T
 #add_compile_definitions(MCRL2_PRINT_REWRITE_STEPS)
 #add_compile_definitions(MCRL2_EQUAL_MULTI_ACTIONS_DEBUG)
 #add_compile_definitions(MCRL2_LOG_LPS_LINEARISE_STATISTICS)
-#add_compile_definitions(MCRL2_BES2PGSOLVER_PRINT_VARIABLE_NAMES)
 
 # TODO: These belong the the dnj algorithm.
 #add_compile_definitions(TEST_WORK_COUNTER_NAMES)

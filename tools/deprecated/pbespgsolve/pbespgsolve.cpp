@@ -11,7 +11,6 @@
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/pbes_input_tool.h"
-#include "mcrl2/pbes/pg_parse.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pg/pbespgsolve.h"
 

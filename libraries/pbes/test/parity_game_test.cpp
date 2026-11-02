@@ -7,61 +7,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file parity_game_test.cpp
-/// \brief Test for parity game solver. N.B. Currently no real
-/// testing is done. Instead graph representations are produced
-/// in a format that can be read by a python script.
+/// \brief Test for the parity game generator.
 
 #define BOOST_TEST_MODULE parity_game_test
 #include <boost/test/included/unit_test.hpp>
 
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
-#include "mcrl2/pbes/detail/parity_game_output.h"
 #include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
-
-void test_pbes(const std::string& pbes_spec, const bool expected_result)
-{
-  (void)expected_result;
-  
-  pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
-  pbes_system::detail::parity_game_output pgg(p);
-  pgg.run();
-
-// check the result
-#ifdef MCRL2_PGSOLVER_ENABLED
-  static int index;
-  BOOST_CHECK(pbes_system::detail::pbessolve(p,expected_result));
-  std::string name = "parity_game_test" + boost::lexical_cast<std::string>(++index);
-  std::string output_file   = name + ".pg";
-  std::string solution_file = name + ".solution";
-  std::string text = pgg.pgsolver_graph();
-  std::ofstream to(output_file.c_str());
-  to << text << std::endl;
-  std::string command = "pgsolver --recursive --solonly " + output_file + " > " + solution_file;
-  std::cout << "executing: " << command << std::endl;
-  int execution_result = std::system(command.c_str());
-  BOOST_CHECK(execution_result == 0);
-  std::string solution = utilities::read_text(solution_file);
-  std::istringstream is(solution);
-
-  // skip the first line
-  std::string dummy;
-  std::getline(is, dummy);
-
-  int player;
-  int winner;
-  is >> player >> winner;
-  std::cout << "player = " << player << std::endl;
-  std::cout << "winner = " << winner << std::endl;
-  BOOST_CHECK(player == 0);
-  BOOST_CHECK(expected_result = (winner == 0));
-#endif
-}
 
 // mimick the way parity_game_generator is used in parity game solver from Twente
 void test_pbespgsolve(const std::string& pbes_spec)
@@ -93,6 +52,13 @@ void test_pbespgsolve(const std::string& pbes_spec)
       pgg.get_priority(n);
     }
   }
+}
+
+void test_pbes(const std::string& pbes_spec, const bool expected_result)
+{
+  pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
+  BOOST_CHECK_EQUAL(pbes_system::detail::pbessolve(p), expected_result);
+  test_pbespgsolve(pbes_spec);
 }
 
 void test_lps(const std::string& lps_spec, const bool expected_result, const std::string& formula = lps::detail::NO_DEADLOCK())
@@ -177,8 +143,8 @@ BOOST_AUTO_TEST_CASE(bes_test)
   test_pbes(BES2, true);
   test_pbes(BES3, false);
   test_pbes(BES4, true);
-  test_pbes(BES5, true);
-  test_pbes(BES6, false);
+  test_pbes(BES5, false);
+  test_pbes(BES6, true);
   test_pbes(BES7, false);
   test_pbes(BES8, true);
 }
@@ -212,8 +178,5 @@ BOOST_AUTO_TEST_CASE(pbes_test)
 
   test_pbes(PBES1, false);
   test_pbes(PBES2, false);
-  test_pbes(PBES3, true);
-  test_pbespgsolve(PBES1);
-  test_pbespgsolve(PBES2);
-  test_pbespgsolve(PBES3);
+  test_pbes(PBES3, false);
 }

@@ -292,11 +292,6 @@ class pbessolve_tool
     }
   }
 
-  std::set<utilities::file_format> available_input_formats() const override
-  {
-    return {pbes_system::pbes_format_internal()};
-  }
-
   public:
   pbessolve_tool(const std::string& toolname)
       : super(toolname, "Wieger Wesselink",
@@ -486,8 +481,8 @@ class pbessolve_tool
 
   bool run() override
   {
-    pbes_system::pbes pbesspec =
-        pbes_system::detail::load_pbes(input_filename());
+    pbes_system::pbes pbesspec;
+    pbes_system::load_pbes(pbesspec, input_filename(), pbes_input_format());
     pbes_system::algorithms::normalize(pbesspec);
     data::mutable_map_substitution<> sigma;
 
