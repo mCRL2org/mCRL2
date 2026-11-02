@@ -16,10 +16,9 @@
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/normal_forms.h"
-
-
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/pgsolver_io.h"
 
 namespace mcrl2::pbes_system
 {
@@ -95,6 +94,10 @@ void load_pbes(pbes& pbes, std::istream& stream, utilities::file_format format, 
   if (format == pbes_format_text())
   {
     stream >> pbes;
+  }
+  else if (format == pbes_format_pgsolver())
+  {
+    load_bes_pgsolver(pbes, stream);
   }
   else
   {
