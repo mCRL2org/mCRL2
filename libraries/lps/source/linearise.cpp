@@ -4771,203 +4771,6 @@ class specification_basic_type
       return sort_expression_list(l.begin(), l.end(), [](const typename List::value_type& d) -> sort_expression {return d.sort();});
     }
 
-    static
-    bool check_real_variable_occurrence(
-      const variable_list& sumvars,
-      const data_expression& actiontime,
-      const data_expression& condition)
-    {
-      /* Check whether actiontime is an expression
-         of the form t1 +...+ tn, where one of the
-         ti is a variable in sumvars that does not occur in condition */
-
-      if (is_variable(actiontime))
-      {
-        const variable& t = atermpp::down_cast<variable>(actiontime);
-        if (mcrl2::utilities::detail::contains(sumvars, t) && !occursinterm(condition, t))
-        {
-          return true;
-        }
-      }
-
-      if (sort_real::is_plus_application(actiontime))
-      {
-        return (check_real_variable_occurrence(sumvars,data::binary_left(application(actiontime)),condition) ||
-                check_real_variable_occurrence(sumvars,data::binary_right(application(actiontime)),condition));
-      }
-
-      return false;
-    }
-
-    data_expression makesingleultimatedelaycondition(
-      const variable_list& sumvars,
-      const variable_list& freevars,
-      const data_expression& condition,
-      const bool has_time,
-      const variable& timevariable,
-      const data_expression& actiontime,
-      variable_list& used_sumvars)
-    {
-      /* Generate a condition of the form:
-
-           exists sumvars. condition && timevariable<actiontime
-
-         where the sumvars are added to the existentially quantified
-         variables, and the resulting expression is
-
-           condition && timevariable<actiontime
-
-         The comments below refer to old code, where an explicit
-         existential quantor was generated.
-
-         OLD:
-         Currently, the existential quantifier must use an equation,
-         which represents a higher order function. The existential
-         quantifier is namely of type exists:sorts1->Bool, where sorts1
-         are the sorts of the quantified variables.
-
-         If the sum variables do not occur in the expression, they
-         are not quantified.
-
-         If the actiontime is of the form t1+t2+...+tn where one
-         of the ti is a quantified real variable in sumvars, and this
-         variable does not occur in the condition, then the expression
-         of the form timevariable < actiontime is omitted.
-      */
-
-      assert(used_sumvars.empty());
-      data_expression result;
-      variable_list variables;
-      if (!has_time || (check_real_variable_occurrence(sumvars,actiontime,condition)))
-      {
-        result=condition;
-      }
-      else
-      {
-        result=RewriteTerm(
-                 lazy::and_(
-                   condition,
-                   data::less(timevariable,actiontime)));
-        variables.push_front(timevariable);
-      }
-      for (const variable& v: freevars)
-      {
-        if (occursinterm(result, v))
-        {
-          variables.push_front(v);
-        }
-      }
-
-      for (const variable& v: global_variables)
-      {
-        if (occursinterm(result, v))
-        {
-          variables.push_front(v);
-        }
-      }
-
-      for (const variable& v: sumvars)
-      {
-        if (occursinterm(result, v))
-        {
-          used_sumvars.push_front(v);
-        }
-      }
-      used_sumvars = reverse(used_sumvars);
-
-      return result;
-    }
-
-    lps::detail::ultimate_delay getUltimateDelayCondition(
-      const stochastic_action_summand_vector& action_summands,
-      const deadlock_summand_vector& deadlock_summands,
-      const variable_list& freevars)
-    {
-      /* First walk through the summands to see whether
-         a summand with condition true that does not refer
-         to time exists. In that case the ultimate delay
-         condition is true */
-
-      variable time_variable=get_fresh_variable("timevar",sort_real::real_());
-      for (const deadlock_summand& summand: deadlock_summands)
-      {
-        if ((!summand.deadlock().has_time()) && (summand.condition()==sort_bool::true_()))
-        {
-          return lps::detail::ultimate_delay(time_variable);
-        }
-      }
-
-      for (const stochastic_action_summand& summand: action_summands)
-      {
-        if ((!summand.multi_action().has_time()) && (summand.condition()==sort_bool::true_()))
-        {
-          return lps::detail::ultimate_delay(time_variable);
-        }
-      }
-
-      /* Unfortunately, no ultimate delay condition true can
-         be generated. So, we must now traverse all conditions
-         to generate a non trivial ultimate delay condition */
-
-      data_expression_list results;
-      data_expression_list condition_list;
-      std::vector<lps::detail::variable_renaming> renamings;
-      variable_list existentially_quantified_variables;
-      for (const deadlock_summand& s: deadlock_summands)
-      {
-        variable_list new_existentially_quantified_variables;
-        const data_expression ult_del_condition=
-             makesingleultimatedelaycondition(
-                             s.summation_variables(),
-                             freevars,
-                             s.condition(),
-                             s.deadlock().has_time(),
-                             time_variable,
-                             s.deadlock().time(),
-                             new_existentially_quantified_variables);
-        renamings.push_back(merge_variables_by_sort(new_existentially_quantified_variables,
-          existentially_quantified_variables,
-          condition_list,
-          variable_list()));
-        results.push_front(ult_del_condition);
-      }
-
-      for (const stochastic_action_summand& s: action_summands)
-      {
-        variable_list new_existentially_quantified_variables;
-        const data_expression ult_del_condition=
-             makesingleultimatedelaycondition(
-                             s.summation_variables(),
-                             freevars,
-                             s.condition(),
-                             s.multi_action().has_time(),
-                             time_variable,
-                             s.multi_action().time(),
-                             new_existentially_quantified_variables);
-        renamings.push_back(merge_variables_by_sort(new_existentially_quantified_variables,
-          existentially_quantified_variables,
-          condition_list,
-          variable_list()));
-        results.push_front(ult_del_condition);
-      }
-
-      data_expression result=sort_bool::false_();
-
-      assert(results.size()==condition_list.size());
-      assert(results.size() == renamings.size());
-
-      std::vector<lps::detail::variable_renaming>::iterator renaming = renamings.begin();
-      condition_list=reverse(condition_list);
-      results=reverse(results);
-      data_expression_list::const_iterator j=condition_list.begin();
-      for (data_expression_list::const_iterator i = results.begin(); i != results.end(); ++i, ++j, ++renaming)
-      {
-        result = lazy::or_(result, replace_variables_capture_avoiding(lazy::and_(*i, *j), *renaming));
-      }
-      return lps::detail::ultimate_delay(time_variable, existentially_quantified_variables, RewriteTerm(result));
-    }
-
-
     /******** make_unique_variables **********************/
 
     data::maintain_variables_in_rhs< data::mutable_map_substitution<> >  make_unique_variables(
@@ -5072,33 +4875,6 @@ class specification_basic_type
 
 
     /**************** parallel composition ******************************/
-
-
-
-    /// \brief Returns the conjunction of the two delay conditions and the join of the variables, where
-    ///        the variables in delay2 are renamed to avoid conflict with those in delay1.
-    lps::detail::ultimate_delay combine_ultimate_delays(
-                           const lps::detail::ultimate_delay& delay1,
-                           const lps::detail::ultimate_delay& delay2)
-    {
-      // Make the bound variables of the second ultimate delay different from those in the first.
-      variable_list renameable_variables=delay2.variables();
-      maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-      renameable_variables = rename_variables_away(renameable_variables, contained_in(delay1.variables()), sigma);
-      // Additionally map the time variable of the second ultimate delay to that of the first.
-      sigma[delay2.time_var()]=delay1.time_var();
-      data_expression new_constraint;
-      make_optimized_and(new_constraint,
-        delay1.constraint(),
-        replace_variables_capture_avoiding(delay2.constraint(), sigma));
-      variable_list new_existential_variables = delay1.variables()+renameable_variables;
-
-      // TODO: The new constraint can be simplified, as two conditions sharing the timed variable have been merged.
-      return lps::detail::ultimate_delay(
-                            delay1.time_var(),
-                            new_existential_variables,
-                            new_constraint);
-    }
 
     void calculate_left_merge_action(
       const lps::detail::ultimate_delay& ultimate_delay_condition,
@@ -5766,7 +5542,9 @@ class specification_basic_type
                                                                  initial_stochastic_distribution2.distribution()));
       if (!options.ignore_time)
       {
-        ultimate_delay_condition=combine_ultimate_delays(ultimate_delay_condition1, ultimate_delay_condition2);
+        ultimate_delay_condition = lps::detail::combine_ultimate_delays(ultimate_delay_condition1,
+          ultimate_delay_condition2,
+          fresh_identifier_generator);
       }
 
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
@@ -6077,7 +5855,11 @@ class specification_basic_type
         }
         else
         {
-          ultimate_delay_condition=getUltimateDelayCondition(action_summands,deadlock_summands,pars);
+          ultimate_delay_condition = lps::detail::compute_ultimate_delay(action_summands,
+            deadlock_summands,
+            std::as_const(data),
+            fresh_identifier_generator,
+            [this](const data_expression& t) { return RewriteTerm(t); });
 
           try
           {
