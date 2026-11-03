@@ -151,3 +151,48 @@ BOOST_AUTO_TEST_CASE(where_clauses_in_conditions_of_rewrite_rules)
   run_linearisation_test_case(spec,statespace);
 }
 
+// In the following tests a process instance P(x) occurs in the scope of a sum that binds x, the parameter of P. The
+// lineariser writes P(x) as P() where the assignment x = x is implicit, and x refers to the sum variable. Every
+// transformation that renames the sum variable or that removes unused sum variables must take the implicit assignment
+// into account.
+BOOST_AUTO_TEST_CASE(implicit_assignment_of_a_sum_variable)
+{
+  const std::string spec = "act a: Bool;\n"
+                           "proc P(x: Bool) = a(x) . P(x);\n"
+                           "init sum x: Bool . P(x);\n";
+
+  const std::string expected_statespace = "des (0,4,3)\n"
+                                          "(0,\"a(false)\",1)\n"
+                                          "(0,\"a(true)\",2)\n"
+                                          "(1,\"a(false)\",1)\n"
+                                          "(2,\"a(true)\",2)\n";
+  std::stringstream is(expected_statespace);
+
+  lts::lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}
+
+// As above, where the sum variable x hides the parameter x of P, so that it must be renamed. The action a(x) is not the
+// first action after the sum, so the lineariser replaces it by an instance of a new process with parameter x, in which
+// the assignment x = x is implicit too.
+BOOST_AUTO_TEST_CASE(implicit_assignment_of_a_sum_variable_that_hides_a_parameter)
+{
+  const std::string spec = "act a, c: Bool;\n"
+                           "    b;\n"
+                           "proc P(x: Bool) = c(x) . sum x: Bool . b . a(x) . P(x);\n"
+                           "init P(true);\n";
+
+  const std::string expected_statespace = "des (0,6,5)\n"
+                                          "(0,\"c(true)\",1)\n"
+                                          "(1,\"b\",2)\n"
+                                          "(1,\"b\",3)\n"
+                                          "(2,\"a(true)\",0)\n"
+                                          "(3,\"a(false)\",4)\n"
+                                          "(4,\"c(false)\",1)\n";
+  std::stringstream is(expected_statespace);
+
+  lts::lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}

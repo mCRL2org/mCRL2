@@ -43,19 +43,17 @@ process::action make_action(const std::string& name, const data::data_expression
   return process::action(label, arguments);
 }
 
-inline
-detail::allow_list_cache allow_ab()
+inline lps::detail::allow_list_cache allow_ab()
 {
   core::identifier_string_list result;
   result.push_front(core::identifier_string("b"));
   result.push_front(core::identifier_string("a"));
   process::action_name_multiset_list multiset_list;
   multiset_list.push_front(process::action_name_multiset(result));
-  return detail::make_allow_list_cache(multiset_list);
+  return lps::detail::make_allow_list_cache(multiset_list);
 }
 
-inline
-detail::allow_list_cache allow_abb()
+inline lps::detail::allow_list_cache allow_abb()
 {
   core::identifier_string_list result;
   result.push_front(core::identifier_string("b"));
@@ -63,22 +61,20 @@ detail::allow_list_cache allow_abb()
   result.push_front(core::identifier_string("a"));
   process::action_name_multiset_list multiset_list;
   multiset_list.push_front(process::action_name_multiset(result));
-  return detail::make_allow_list_cache(multiset_list);
+  return lps::detail::make_allow_list_cache(multiset_list);
 }
 
-inline
-detail::allow_list_cache allow_cd()
+inline lps::detail::allow_list_cache allow_cd()
 {
   core::identifier_string_list result;
   result.push_front(core::identifier_string("d"));
   result.push_front(core::identifier_string("c"));
   process::action_name_multiset_list multiset_list;
   multiset_list.push_front(process::action_name_multiset(result));
-  return detail::make_allow_list_cache(multiset_list);
+  return lps::detail::make_allow_list_cache(multiset_list);
 }
 
-inline
-detail::allow_list_cache allow_ab_abb_cd()
+inline lps::detail::allow_list_cache allow_ab_abb_cd()
 {
   process::action_name_multiset_list result;
 
@@ -100,7 +96,7 @@ detail::allow_list_cache allow_ab_abb_cd()
   result.push_front(process::action_name_multiset(abb));
   result.push_front(process::action_name_multiset(ab));
 
-  return detail::make_allow_list_cache(result);
+  return lps::detail::make_allow_list_cache(result);
 }
 
 BOOST_AUTO_TEST_CASE(test_single_allow)

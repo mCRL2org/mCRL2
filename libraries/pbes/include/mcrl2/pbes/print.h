@@ -71,6 +71,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   using super::print_abstraction;
   using super::print_list;
   using super::print_variables;
+  using super::print_global_variables;
 
   // N.B. We need a special version due to the "val" operator that needs to be
   // put around data expressions.
@@ -176,7 +177,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   {
     derived().enter(x);
     derived().apply(x.data());
-    print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
+    print_global_variables(x.global_variables());
     print_list(x.equations(), "pbes ", "\n\n", "\n     ");
     derived().print("init ");
     print_pbes_expression(x.initial_state());

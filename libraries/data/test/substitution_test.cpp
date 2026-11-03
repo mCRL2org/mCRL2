@@ -21,6 +21,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/substitutions/mutable_substitution_composer.h"
 #include "mcrl2/data/substitutions/sort_expression_assignment.h"
 
@@ -382,6 +383,42 @@ void test_mutable_indexed_substitution()
   BOOST_CHECK(s == "[b := true]");
 }
 
+// After clear, a maintain_variables_in_rhs is the identity and no variable occurs in a right hand side.
+void test_maintain_variables_in_rhs_clear()
+{
+  const variable x = parse_variable("x: Nat");
+  const variable y = parse_variable("y: Nat");
+  maintain_variables_in_rhs<mutable_map_substitution<>> sigma;
+  sigma[x] = sort_nat::succ(y);
+  BOOST_CHECK(sigma.variable_occurs_in_a_rhs(y));
+
+  sigma.clear();
+  BOOST_CHECK(sigma(x) == x);
+  BOOST_CHECK(!sigma.variable_occurs_in_a_rhs(y));
+  BOOST_CHECK(sigma.variables_in_rhs().empty());
+}
+
+// A maintain_variables_in_rhs constructed from a substitution of another type has the same assignments and knows the
+// variables in their right hand sides.
+template<typename Substitution>
+void test_maintain_variables_in_rhs_conversion()
+{
+  const variable x = parse_variable("x: Nat");
+  const variable y = parse_variable("y: Nat");
+  const variable z = parse_variable("z: Nat");
+  mutable_map_substitution<> sigma;
+  sigma[x] = sort_nat::plus(y, z);
+  sigma[y] = sort_nat::nat(1);
+
+  maintain_variables_in_rhs<Substitution> tau(sigma);
+  BOOST_CHECK(tau(x) == sigma(x));
+  BOOST_CHECK(tau(y) == sigma(y));
+  BOOST_CHECK(tau(z) == z);
+  BOOST_CHECK(tau.variable_occurs_in_a_rhs(y));
+  BOOST_CHECK(tau.variable_occurs_in_a_rhs(z));
+  BOOST_CHECK(!tau.variable_occurs_in_a_rhs(x));
+}
+
 BOOST_AUTO_TEST_CASE(test_main)
 {
   test_my_assignment_sequence_substitution();
@@ -393,4 +430,7 @@ BOOST_AUTO_TEST_CASE(test_main)
   test_indexed_substitution();
   test_enumerator_substitution();
   test_mutable_indexed_substitution();
+  test_maintain_variables_in_rhs_clear();
+  test_maintain_variables_in_rhs_conversion<mutable_map_substitution<>>();
+  test_maintain_variables_in_rhs_conversion<mutable_indexed_substitution<>>();
 }

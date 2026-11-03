@@ -15,6 +15,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/rewrite.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2::lps::detail
 {
@@ -61,10 +62,11 @@ class lps_algorithm
       std::set<data::variable> occurring_vars;
       sumelm_find_variables(summand_, occurring_vars);
 
-      std::set<data::variable> summation_variables(summand_.summation_variables().begin(),summand_.summation_variables().end());
-      std::set_intersection(summation_variables.begin(), summation_variables.end(),
-                            occurring_vars.begin(), occurring_vars.end(),
-                            std::inserter(new_summation_variables, new_summation_variables.end()));
+      // Keep the original order of the summation variables; the order of a std::set of variables depends on the
+      // addresses of the terms, and therefore differs between runs.
+      std::copy_if(summand_.summation_variables().begin(), summand_.summation_variables().end(),
+                   std::back_inserter(new_summation_variables),
+                   [&](const data::variable& v) { return utilities::detail::contains(occurring_vars, v); });
 
       summand_.summation_variables() = data::variable_list(new_summation_variables.begin(),new_summation_variables.end());
     }

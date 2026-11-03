@@ -12,7 +12,9 @@
 #define BOOST_TEST_MODULE utility_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/data/linear_inequalities.h" // Declares data::is_zero, which optimized_times must not use.
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/real_utilities.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard_container_utility.h"
 
@@ -149,3 +151,14 @@ BOOST_AUTO_TEST_CASE(test_main)
   convert_test();
 }
 
+// optimized_times simplifies a product with 0 or 1, and otherwise gives the product.
+BOOST_AUTO_TEST_CASE(test_optimized_times)
+{
+  const data::variable r("r", sort_real::real_());
+  const data::variable q("q", sort_real::real_());
+  BOOST_CHECK(sort_real::optimized_times(sort_real::real_zero(), r) == sort_real::real_zero());
+  BOOST_CHECK(sort_real::optimized_times(r, sort_real::real_zero()) == sort_real::real_zero());
+  BOOST_CHECK(sort_real::optimized_times(sort_real::real_one(), r) == r);
+  BOOST_CHECK(sort_real::optimized_times(r, sort_real::real_one()) == r);
+  BOOST_CHECK(sort_real::optimized_times(r, q) == sort_real::times(r, q));
+}

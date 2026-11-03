@@ -12,9 +12,12 @@
 #define BOOST_TEST_MODULE replace_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/replace.h"
+#include "mcrl2/process/replace_capture_avoiding_with_an_identifier_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -146,6 +149,40 @@ BOOST_AUTO_TEST_CASE(process_instance_assignment_test)
   process_expression x2 = process::replace_variables_capture_avoiding(x, sigma);
   std::cerr << process::pp(x2) << std::endl;
   BOOST_CHECK(process::pp(x2) == "P(b = false, c = true)");
+}
+
+// The substitution with an identifier generator, as used by the lineariser, also completes the implicit parameters of
+// a process instance: applying sigma(b) = t to P() for a process P(b: D) gives P(b = t). The lineariser used to have
+// its own substitution on assignments because this was thought not to be the case.
+BOOST_AUTO_TEST_CASE(process_instance_assignment_with_an_identifier_generator_test)
+{
+  std::string text = "proc P(b: Bool, c: Bool) = P() + P(c = true) + P(c = b); \n"
+                     "init P(true, true);                                      \n";
+
+  process_specification p = parse_process_specification(text);
+  data::variable b("b", data::sort_bool::bool_());
+  data::variable c("c", data::sort_bool::bool_());
+  data::variable d("d", data::sort_bool::bool_());
+  data::set_identifier_generator id_generator;
+  id_generator.add_identifiers(
+    {core::identifier_string("b"), core::identifier_string("c"), core::identifier_string("d")});
+  const process_expression x = p.equations().front().expression();
+
+  // An assignment is added for an implicit parameter b, in the order of the parameters; the explicit assignment of c
+  // is kept and its right hand side is substituted.
+  data::maintain_variables_in_rhs<data::mutable_map_substitution<>> sigma;
+  sigma[b] = data::sort_bool::false_();
+  BOOST_CHECK_EQUAL(
+    process::pp(process::replace_variables_capture_avoiding_with_an_identifier_generator(x, sigma, id_generator)),
+    "P(b = false) + P(b = false, c = true) + P(b = false, c = false)");
+
+  // A parameter that is renamed gets an assignment as well, but a parameter that sigma maps to itself does not.
+  data::maintain_variables_in_rhs<data::mutable_map_substitution<>> tau;
+  tau[b] = d;
+  tau[c] = c;
+  BOOST_CHECK_EQUAL(
+    process::pp(process::replace_variables_capture_avoiding_with_an_identifier_generator(x, tau, id_generator)),
+    "P(b = d) + P(b = d, c = true) + P(b = d, c = d)");
 }
 
 BOOST_AUTO_TEST_CASE(replace_process_identifiers_test)

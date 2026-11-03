@@ -125,3 +125,110 @@ BOOST_AUTO_TEST_CASE(test_where_renaming_of_variables_goes_astray)
   run_linearisation_test_case(spec,statespace);
 }
 
+// The lineariser joins directly nested stochastic operators dist x[f]. dist y[g]. p into dist x, y[f * g]. p. This must
+// not capture variables. Here the inner operator binds the same variable as the outer one; x in P(x) is the inner x,
+// so a(true) and a(false) each happen with probability 1/2. Without renaming, the outer distribution if(x, 1, 0)
+// applied to the inner x, and only a(true) was possible.
+BOOST_AUTO_TEST_CASE(test_nested_stochastic_operators_binding_the_same_variable)
+{
+  const std::string spec = "act a: Bool;\n"
+                           "proc P(z: Bool) = a(z) . P(z);\n"
+                           "init dist x: Bool[if(x, 1, 0)] . dist x: Bool[1/2] . P(x);\n";
+
+  const std::string expected_statespace = "des (0 1/2 1,4,4)\n"
+                                          "(0,\"a(true)\",2)\n"
+                                          "(2,\"a(true)\",2)\n"
+                                          "(1,\"a(false)\",3)\n"
+                                          "(3,\"a(false)\",3)\n";
+
+  std::stringstream is(expected_statespace);
+
+  lts::probabilistic_lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}
+
+// As above, but the inner operator binds y, which occurs free in the distribution of the outer operator, where it is
+// the parameter of P. So x is true, and y is true or false with probability 1/2. Without renaming, the outer
+// distribution referred to the inner y, and a(false, false) was possible instead of a(true, false).
+BOOST_AUTO_TEST_CASE(test_nested_stochastic_operators_capturing_a_free_variable)
+{
+  const std::string spec = "act a: Bool # Bool;\n"
+                           "proc P(y: Bool) = dist x: Bool[if(x == y, 1, 0)] . dist y: Bool[1/2] . a(x, y) . delta;\n"
+                           "init P(true);\n";
+
+  const std::string expected_statespace = "des (0 1/2 1,2,3)\n"
+                                          "(0,\"a(true, true)\",2)\n"
+                                          "(1,\"a(true, false)\",2)\n";
+
+  std::stringstream is(expected_statespace);
+
+  lts::probabilistic_lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}
+
+// In the following tests a process instance P(x) occurs in the scope of a stochastic operator that binds x, the
+// parameter of P. The lineariser writes P(x) as P() where the assignment x = x is implicit, and x refers to the
+// variable of the stochastic operator. Every transformation that renames this variable must take the implicit
+// assignment into account.
+BOOST_AUTO_TEST_CASE(test_implicit_assignment_of_a_stochastic_variable)
+{
+  const std::string spec = "act a: Bool;\n"
+                           "proc P(x: Bool) = a(x) . P(x);\n"
+                           "init dist x: Bool[if(x, 1/4, 3/4)] . P(x);\n";
+
+  const std::string expected_statespace = "des (0 1/4 1,4,4)\n"
+                                          "(0,\"a(true)\",2)\n"
+                                          "(2,\"a(true)\",2)\n"
+                                          "(1,\"a(false)\",3)\n"
+                                          "(3,\"a(false)\",3)\n";
+
+  std::stringstream is(expected_statespace);
+
+  lts::probabilistic_lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}
+
+// As above, where the variable x of the stochastic operator hides the parameter x of P, and is renamed when the
+// stochastic operator is moved.
+BOOST_AUTO_TEST_CASE(test_implicit_assignment_of_a_stochastic_variable_that_hides_a_parameter)
+{
+  const std::string spec = "act a: Bool;\n"
+                           "proc P(x: Bool) = a(x) . dist x: Bool[if(x, 1/4, 3/4)] . P(x);\n"
+                           "init P(true);\n";
+
+  const std::string expected_statespace = "des (0,2,2)\n"
+                                          "(0,\"a(true)\",0 1/4 1)\n"
+                                          "(1,\"a(false)\",0 1/4 1)\n";
+
+  std::stringstream is(expected_statespace);
+
+  lts::probabilistic_lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}
+
+// Clustering merges the two summands, which have different stochastic variables. Each stochastic variable that does
+// not occur in the selected summand is fixed to a default value, by a condition that is a factor of the distribution.
+// With --binary this condition was combined with the distribution by a conjunction, which is not well typed.
+BOOST_AUTO_TEST_CASE(test_clustering_summands_with_different_stochastic_variables)
+{
+  const std::string spec = "act a: Bool;\n"
+                           "proc P(b: Bool) = a(b) . dist x: Bool[if(x, 1/4, 3/4)] . P(x)\n"
+                           "                + a(b) . dist y: Nat[if(y < 2, 1/2, 0)] . P(y == 0);\n"
+                           "init P(true);\n";
+
+  const std::string expected_statespace = "des (0,4,2)\n"
+                                          "(0,\"a(true)\",0 1/4 1)\n"
+                                          "(0,\"a(true)\",0 1/2 1)\n"
+                                          "(1,\"a(false)\",0 1/4 1)\n"
+                                          "(1,\"a(false)\",0 1/2 1)\n";
+
+  std::stringstream is(expected_statespace);
+
+  lts::probabilistic_lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}

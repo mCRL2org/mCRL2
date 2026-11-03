@@ -15,6 +15,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/builder.h"
+#include "mcrl2/process/print.h"
 
 namespace mcrl2::process
 {
@@ -156,12 +157,11 @@ void process_instance_replace(process_specification& procspec, const std::map<pr
 }
 
 // Removes trivial equations of the form P1() = P2().
-// Precondition: there are no loops P1() = P2() = ... = P1().
+// Throws an exception if trivial equations form a loop P1() = P2() = ... = P1().
 struct eliminate_trivial_equations_algorithm
 {
   process_specification& procspec;
   std::map<process_identifier, process_identifier> edges;
-  std::vector<std::vector<process_identifier> > chains;
   std::map<process_identifier, process_instance> substitutions;
 
   explicit eliminate_trivial_equations_algorithm(process_specification& procspec_)
@@ -182,15 +182,6 @@ struct eliminate_trivial_equations_algorithm
     else
     {
       return atermpp::down_cast<process_instance_assignment>(x).identifier();
-    }
-  }
-
-  void print_chains() const
-  {
-    mCRL2log(log::log_level_t::verbose) << "--- chains ---" << std::endl;
-    for (const std::vector<process_identifier>& chain: chains)
-    {
-      mCRL2log(log::log_level_t::verbose) << core::detail::print_list(chain) << std::endl;
     }
   }
 
@@ -217,59 +208,42 @@ struct eliminate_trivial_equations_algorithm
     }
   }
 
-  void compute_chains()
+  // Replaces the instance in the trivial equation of P by the instance at the end of its chain of trivial equations,
+  // in terms of the parameters of P. The processes in visited are on the chain from which P is reached.
+  void
+  resolve(const process_identifier& P, std::set<process_identifier>& resolved, std::set<process_identifier>& visited)
   {
-    // compute sources of chains
-    std::set<process_identifier> sources;
-    for (const auto& p: edges)
+    if (resolved.find(P) != resolved.end())
     {
-      sources.insert(p.first);
+      return;
     }
-    for (const auto& p: edges)
+    if (!visited.insert(P).second)
     {
-      sources.erase(p.second);
+      throw mcrl2::runtime_error("The trivial equations of " + process::pp(P) + " form a loop.");
     }
-
-
-    // compute chains
-    for (const process_identifier& source: sources)
+    const std::map<process_identifier, process_identifier>::const_iterator i = edges.find(P);
+    if (substitutions.find(i->second) != substitutions.end())
     {
-      std::vector<process_identifier> chain;
-      chain.push_back(source);
-      auto i = edges.find(source);
-      while (i != edges.end())
-      {
-        const process_identifier& target = i->second;
-        chain.push_back(target);
-        i = edges.find(target);
-      }
-      chains.push_back(chain);
+      resolve(i->second, resolved, visited);
+      data::mutable_map_substitution<> sigma = detail::make_process_instance_substitution(substitutions[P]);
+      substitutions[P] = detail::apply_substitution(substitutions[i->second], sigma);
     }
+    resolved.insert(P);
   }
 
   void compute_substitutions()
   {
-    for (const std::vector<process_identifier>& chain: chains)
+    std::set<process_identifier> resolved;
+    for (const std::pair<const process_identifier, process_identifier>& edge: edges)
     {
-      auto last_end = --chain.end();
-      for (auto last = ++chain.begin(); last != last_end; ++last)
-      {
-        const process_instance& Plast = substitutions[*last];
-        for (auto first = chain.begin(); first != last; ++first)
-        {
-          process_instance& Pfirst = substitutions[*first];
-          auto sigma = detail::make_process_instance_substitution(Pfirst);
-          Pfirst = detail::apply_substitution(Plast, sigma);
-        }
-      }
+      std::set<process_identifier> visited;
+      resolve(edge.first, resolved, visited);
     }
   }
 
   void run()
   {
     compute_edges();
-    compute_chains();
-    print_chains();
     compute_substitutions();
     print_substitutions();
     process_instance_replace(procspec, substitutions);

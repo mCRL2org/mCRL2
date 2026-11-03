@@ -105,6 +105,39 @@ BOOST_AUTO_TEST_CASE(test_free_variables)
   BOOST_CHECK(check_well_typedness(specification));
 }
 
+// The lineariser determines which global variables occur in the resulting linear process using
+// lps::find_free_variables. Global variables that only occur inside a binder (lambda, quantifier, where clause)
+// must be found as well.
+BOOST_AUTO_TEST_CASE(test_free_variables_in_binders)
+{
+  const lps::specification specification
+    = parse_linear_process_specification("act a: Nat;\n"
+                                         "    b;\n"
+                                         "glob dc1, dc2, dc3: Nat;\n"
+                                         "proc X(n: Nat) = (exists x: Nat. x < dc1) -> b . X(n)\n"
+                                         "               + a((lambda y: Nat. y + dc2)(n)) . X(n)\n"
+                                         "               + a(y whr y = dc3 end) . X(n);\n"
+                                         "init X(0);\n");
+
+  const data::variable dc1("dc1", data::sort_nat::nat());
+  const data::variable dc2("dc2", data::sort_nat::nat());
+  const data::variable dc3("dc3", data::sort_nat::nat());
+
+  // The bound variables x and y and the process parameter n are not free in the process.
+  const std::set<data::variable> free_variables = find_free_variables(specification.process());
+  BOOST_CHECK(free_variables == std::set<data::variable>({dc1, dc2, dc3}));
+
+  // Each summand contains one of the global variables, inside a binder.
+  const std::vector<data::variable> globals = {dc1, dc2, dc3};
+  for (const action_summand& summand: specification.process().action_summands())
+  {
+    const std::set<data::variable> V = find_free_variables(summand);
+    BOOST_CHECK(
+      std::count_if(globals.begin(), globals.end(), [&](const data::variable& v) { return V.find(v) != V.end(); })
+      == 1);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(test_search)
 {
   lps::specification spec(parse_linear_process_specification(
