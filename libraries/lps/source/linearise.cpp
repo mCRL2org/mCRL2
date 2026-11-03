@@ -34,6 +34,7 @@
 
 //mCRL2 data
 #include <bit>
+#include <optional>
 #include <ranges>
 
 #include "mcrl2/atermpp/aterm.h"
@@ -5088,6 +5089,11 @@ class specification_basic_type
       return i2 == multiactionlist2.end();
     }
 
+    static bool summandsCanBeClustered(const deadlock_summand& summand1, const deadlock_summand& summand2)
+    {
+      return summand1.has_time() == summand2.has_time();
+    }
+
     static
     data_expression getRHSassignment(const variable& var, const assignment_list& as)
     {
@@ -5123,631 +5129,97 @@ class specification_basic_type
                                           std::find(stoch_vars.begin(),stoch_vars.end(),p.rhs())!=stoch_vars.end(); });
 
     }
-    
 
-    stochastic_action_summand collect_sum_arg_arg_cond(
-      const enumtype& e,
-      const stochastic_action_summand_vector& action_summands,
-      const variable_list& parameters)
+    using renaming_type = maintain_variables_in_rhs<mutable_map_substitution<>>;
+
+    /* Adds the renaming of pars into args to sigma. The first assignment to a variable counts. */
+    static void add_renaming(renaming_type& sigma, const variable_list& pars, const data_expression_list& args)
     {
-      /* This function gets a list of summands, with
-         the same multiaction and time
-         status. It yields a single clustered summand
-         by introducing an auxiliary sum operator, with
-         a variable of enumtype. In case binary is used,
-         a sequence of variables are introduced of sort Bool */
-
-      std::size_t n=action_summands.size();
-      variable_list resultsum;
-      data_expression resultcondition;
-      action_list resultmultiaction;
-      data_expression resulttime;
-
-      std::vector < variable_list > rename_list_pars;
-      std::vector < data_expression_list > rename_list_args;
-      /* rename list is a list of pairs of variable and term lists */
-      data_expression_list conditionlist;
-      data_expression binarysumcondition;
-      int equaluptillnow=1;
-
-      std::set<variable> all_sum_variables;
-      for (const stochastic_action_summand& smmnd: action_summands)
+      assert(pars.size() == args.size());
+      data_expression_list::const_iterator arg = args.begin();
+      for (const variable& par: pars)
       {
-        const variable_list sumvars=smmnd.summation_variables();
-        resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist,parameters);
-        all_sum_variables.insert(sumvars.begin(),sumvars.end());
+        if (sigma(par) == par) // sigma is not defined for par.
+        {
+          sigma[par] = *arg;
+        }
+        ++arg;
       }
-
-      if (options.binary)
-      {
-        resultsum=make_binary_sums(
-                    n,
-                    enumeratedtypes[e.enumeratedtype_index].sortId,
-                    binarysumcondition,
-                    resultsum);
-      }
-      else
-      {
-        resultsum.push_front(e.var);
-      }
-
-      /* we construct the resulting condition */
-      data_expression_list auxresult;
-      std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
-      std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-
-      data_expression equalterm;
-      equaluptillnow=1;
-      for (const stochastic_action_summand& smmnd: action_summands)
-      {
-        const data_expression& condition=smmnd.condition();
-        assert(auxrename_list_pars!=rename_list_pars.end());
-        assert(auxrename_list_args!=rename_list_args.end());
-        const variable_list auxpars= *auxrename_list_pars;
-        ++auxrename_list_pars;
-        const data_expression_list auxargs= *auxrename_list_args;
-        ++auxrename_list_args;
-        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        data_expression_list::const_iterator j=auxargs.begin();
-        for (variable_list::const_iterator i=auxpars.begin();
-             i!=auxpars.end(); ++i, ++j)
-        {
-          /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          if (sigma(*i)==*i)  // sigma *i is undefined.
-          {
-            sigma[*i]=*j;
-          }
-        }
-        maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-
-        const data_expression auxresult1 = replace_variables_capture_avoiding(condition, mutable_sigma);
-        if (equalterm==data_expression()||is_global_variable(equalterm))
-        {
-          equalterm=auxresult1;
-        }
-        else
-        {
-          if (equaluptillnow)
-          {
-            equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
-          }
-        }
-        auxresult.push_front(auxresult1);
-      }
-      if (options.binary)
-      {
-        resultcondition=construct_binary_case_tree(n,
-                        resultsum,auxresult,sort_bool::bool_(),e);
-        resultcondition=lazy::and_(binarysumcondition,resultcondition);
-        resultcondition=lazy::and_(
-                          construct_binary_case_tree(n,
-                              resultsum,conditionlist,sort_bool::bool_(),e),
-                          resultcondition);
-      }
-      else
-      {
-        if (equaluptillnow)
-        {
-          if (all_equal(conditionlist))
-          {
-            resultcondition=lazy::and_(conditionlist.front(), equalterm);
-          }
-          else
-          {
-            data_expression_list tempconditionlist=conditionlist;
-            tempconditionlist.push_front(data_expression(e.var));
-            resultcondition=lazy::and_(
-                              application(
-                                find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                                tempconditionlist),
-                              equalterm);
-          }
-        }
-        else
-        {
-          data_expression_list tempauxresult=auxresult;
-          tempauxresult.push_front(data_expression(e.var));
-          resultcondition=application(
-                            find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                            tempauxresult);
-          if (all_equal(conditionlist))
-          {
-           resultcondition=lazy::and_(conditionlist.front(),resultcondition);
-          }
-          else
-          {
-           data_expression_list tempconditionlist=conditionlist;
-           tempconditionlist.push_front(data_expression(e.var));
-           resultcondition=lazy::and_(
-                            application(
-                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              tempconditionlist),
-                            resultcondition);
-          }
-        }
-      }
-
-      /* now we construct the arguments of the action */
-      /* First we collect all multi-actions in a separate vector
-         of multiactions */
-      std::vector < action_list > multiActionList;
-
-      for (const stochastic_action_summand& smmnd: action_summands)
-      {
-        multiActionList.push_back(smmnd.multi_action().actions());
-      }
-
-      action_list resultmultiactionlist;
-      std::size_t multiactioncount= multiActionList[0].size(); // The number of multi actions.
-      for (; multiactioncount>0 ; multiactioncount--)
-      {
-        data_expression_list resultf;
-        // fcnt is the arity of the action with index multiactioncount-1;
-        action_list::const_iterator a=multiActionList[0].begin();
-        for (std::size_t i=1 ; i<multiactioncount ; ++i,++a) {}
-        std::size_t fcnt=(a->arguments()).size();
-        data_expression f;
-
-        for (; fcnt>0 ; fcnt--)
-        {
-          data_expression_list auxresult;
-          data_expression equalterm;
-          bool equaluptillnow=true;
-          std::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
-          std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-          std::vector<action_list>::const_iterator  multiactionwalker=multiActionList.begin();
-          for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end();
-               ++walker,++multiactionwalker)
-          {
-            assert(auxrename_list_pars!=rename_list_pars.end());
-            assert(auxrename_list_args!=rename_list_args.end());
-            const variable_list auxpars= *auxrename_list_pars;
-            ++auxrename_list_pars;
-            const data_expression_list auxargs= *auxrename_list_args;
-            ++auxrename_list_args;
-            // f is the fcnt-th argument of the multiactioncount-th action in the list
-            action_list::const_iterator a1=multiactionwalker->begin();
-            for (std::size_t i=1; i<multiactioncount; ++i, ++a1) {};
-            data_expression_list::const_iterator d1=(a1->arguments()).begin();
-            for (std::size_t i=1; i<fcnt; ++i, ++d1) {};
-            f= *d1;
-            maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-            data_expression_list::const_iterator j=auxargs.begin();
-            for (variable_list::const_iterator i=auxpars.begin();
-                 i!=auxpars.end(); ++i, ++j)
-            {
-              /* Substitutions are carried out from left to right. The first applicable substitution counts */
-              if (sigma(*i)==*i)  // *i is not assigned in sigma.
-              {
-                sigma[*i]=*j;
-              }
-            }
-
-            maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1 = replace_variables_capture_avoiding(f, mutable_sigma);
-
-            if (equalterm==data_expression()||is_global_variable(equalterm))
-            {
-              equalterm=auxresult1;
-            }
-            else
-            {
-              if (equaluptillnow)
-              {
-                equaluptillnow=((equalterm==auxresult1)||is_global_variable(auxresult1));
-              }
-            }
-            auxresult.push_front(auxresult1);
-          }
-          if (equaluptillnow)
-          {
-            resultf.push_front(equalterm);
-          }
-          else
-          {
-            if (!options.binary)
-            {
-              data_expression_list tempauxresult=auxresult;
-              tempauxresult.push_front(data_expression(e.var));
-              resultf.push_front(data_expression(application(
-                                                   find_case_function(e.enumeratedtype_index,f.sort()),
-                                                   tempauxresult)));
-            }
-            else
-            {
-              data_expression temp=construct_binary_case_tree(
-                                     n,
-                                     resultsum,
-                                     auxresult,
-                                     f.sort(),
-                                     e);
-              resultf.push_front(temp);
-            }
-          }
-        }
-        a=multiActionList[0].begin();
-        for (std::size_t i=1 ; i<multiactioncount ; ++i,++a) {}
-        resultmultiactionlist.push_front(action(a->label(),resultf));
-      }
-
-      /* Construct resulttime, the time of the action ... */
-
-      equaluptillnow=true;
-      equalterm=data_expression();
-      bool some_summand_has_time=false;
-      bool all_summands_have_time=true;
-
-      // first find out whether there is a summand with explicit time.
-      for (const stochastic_action_summand& smmnd: action_summands)
-      {
-        if (smmnd.has_time())
-        {
-          some_summand_has_time=true;
-        }
-        else
-        {
-          all_summands_have_time=false;
-        }
-      }
-
-      if (some_summand_has_time)
-      {
-        variable dummy_time_variable;
-        if (!all_summands_have_time)
-        {
-          // Generate a fresh dummy variable, and add it to the summand variables
-          dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
-          resultsum.push_front(dummy_time_variable);
-        }
-        std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
-        std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-        data_expression_list auxresult;
-        for (const stochastic_action_summand& smmnd: action_summands)
-        {
-          if (smmnd.has_time())
-          {
-            const data_expression& actiontime=smmnd.multi_action().time();
-
-            assert(auxrename_list_pars!=rename_list_pars.end());
-            assert(auxrename_list_args!=rename_list_args.end());
-            const variable_list auxpars= *auxrename_list_pars;
-            ++auxrename_list_pars;
-            const data_expression_list auxargs= *auxrename_list_args;
-            ++auxrename_list_args;
-
-            maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-            data_expression_list::const_iterator j=auxargs.begin();
-            for (variable_list::const_iterator i=auxpars.begin();
-                 i!=auxpars.end(); ++i, ++j)
-            {
-              /* Substitutions are carried out from left to right. The first applicable substitution counts */
-              if (sigma(*i)==*i)   // sigma is not defined for *i.
-              {
-                sigma[*i]=*j;
-              }
-            }
-
-            maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1 = replace_variables_capture_avoiding(actiontime, mutable_sigma);
-            if (equalterm==data_expression()||is_global_variable(equalterm))
-            {
-              equalterm=auxresult1;
-            }
-            else
-            {
-              if (equaluptillnow)
-              {
-                equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
-              }
-            }
-            auxresult.push_front(auxresult1);
-          }
-          else
-          {
-            // this summand does not have time. But some summands have.
-            auxresult.push_front(data_expression(dummy_time_variable));
-            equaluptillnow=false;
-          }
-        }
-        if (options.binary==1)
-        {
-          resulttime=construct_binary_case_tree(n,
-                                                resultsum,auxresult,sort_real::real_(),e);
-        }
-        else
-        {
-          if (equaluptillnow)
-          {
-            resulttime=equalterm;
-          }
-          else
-          {
-            data_expression_list tempauxresult=auxresult;
-            tempauxresult.push_front(data_expression(e.var));
-            resulttime=application(
-                         find_case_function(e.enumeratedtype_index,sort_real::real_()),
-                         tempauxresult);
-          }
-        }
-      }
-
-      /* we construct the resulting distribution --------------------------------------------------------- */
-
-
-      variable_list resulting_stochastic_variables;
-      std::vector < variable_list > stochastic_rename_list_pars;
-      std::vector < data_expression_list > stochastic_rename_list_args;
-      data_expression resulting_distribution=sort_real::real_one();
-      {
-        data_expression_list stochastic_conditionlist;
-        for (const stochastic_action_summand& smmnd: action_summands)
-        {
-          const variable_list stochastic_vars=smmnd.distribution().variables();
-          resulting_stochastic_variables=merge_var(stochastic_vars,resulting_stochastic_variables,
-                              stochastic_rename_list_pars,stochastic_rename_list_args,stochastic_conditionlist,
-                              parameters + variable_list(all_sum_variables.begin(),all_sum_variables.end()));
-        }
-
-        std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
-        std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-
-        std::vector < variable_list >::const_iterator stochastic_auxrename_list_pars=stochastic_rename_list_pars.begin();
-        std::vector < data_expression_list >::const_iterator stochastic_auxrename_list_args=stochastic_rename_list_args.begin();
-
-        data_expression_list aux_result;
-        data_expression equalterm;
-        equaluptillnow=1;
-        for (const stochastic_action_summand& smmnd: action_summands)
-        {
-          const data_expression& dist=smmnd.distribution().distribution();
-          const variable_list stochastic_variables=smmnd.distribution().variables();
-          assert(auxrename_list_pars!=rename_list_pars.end());
-          assert(auxrename_list_args!=rename_list_args.end());
-          assert(stochastic_auxrename_list_pars!=stochastic_rename_list_pars.end());
-          assert(stochastic_auxrename_list_args!=stochastic_rename_list_args.end());
-
-          const variable_list auxpars= *auxrename_list_pars;
-          ++auxrename_list_pars;
-          const data_expression_list auxargs= *auxrename_list_args;
-          ++auxrename_list_args;
-          const variable_list stochastic_auxpars= *stochastic_auxrename_list_pars;
-          ++stochastic_auxrename_list_pars;
-          const data_expression_list stochastic_auxargs= *stochastic_auxrename_list_args;
-          ++stochastic_auxrename_list_args;
-          maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-          data_expression_list::const_iterator j=stochastic_auxargs.begin();
-          for (variable_list::const_iterator i=stochastic_auxpars.begin();
-               i!=stochastic_auxpars.end(); ++i, ++j)
-          {
-            /* Substitutions are carried out from left to right. The first applicable substitution counts */
-            if (sigma(*i)==*i)  // sigma is not defined for *i.
-            {
-              sigma[*i]=*j;
-            }
-          }
-          j=auxargs.begin();
-          for (variable_list::const_iterator i=auxpars.begin();
-               i!=auxpars.end(); ++i, ++j)
-          {
-            /* Substitutions are carried out from left to right. The first applicable substitution counts */
-            if (sigma(*i)==*i) // sigma is not defined for *i.
-            {
-              sigma[*i]=*j;
-            }
-          }
-          maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-
-          const data_expression auxresult1 = replace_variables_capture_avoiding(dist, mutable_sigma);
-          if (equalterm==data_expression()||is_global_variable(equalterm))
-          {
-            equalterm=auxresult1;
-          }
-          else
-          {
-            if (equaluptillnow)
-            {
-              equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
-            }
-          }
-          aux_result.push_front(auxresult1);
-        }
-        if (options.binary)
-        {
-          resulting_distribution=construct_binary_case_tree(n,
-                          resultsum,aux_result,sort_real::real_(),e);
-          resulting_distribution=lazy::and_(
-                            construct_binary_case_tree(n,
-                                resultsum,stochastic_conditionlist,sort_bool::bool_(),e),
-                            resulting_distribution);
-        }
-        else
-        {
-          if (equaluptillnow)
-          {
-            if (all_equal(stochastic_conditionlist))
-            {
-              if (stochastic_conditionlist.front()==sort_bool::true_())
-              {
-                resulting_distribution=equalterm;
-              }
-              else
-              {
-                resulting_distribution = sort_real::optimized_times(
-                  if_(stochastic_conditionlist.front(), sort_real::real_one(), sort_real::real_zero()),
-                  equalterm);
-              }
-            }
-            else
-            {
-              data_expression_list temp_stochastic_conditionlist=stochastic_conditionlist;
-              temp_stochastic_conditionlist.push_front(data_expression(e.var));
-              resulting_distribution = sort_real::optimized_times(
-                if_(application(find_case_function(e.enumeratedtype_index, sort_bool::bool_()),
-                      temp_stochastic_conditionlist),
-                  sort_real::real_one(),
-                  sort_real::real_zero()),
-                equalterm);
-            }
-          }
-          else
-          {
-            data_expression_list tempauxresult=aux_result;
-            tempauxresult.push_front(data_expression(e.var));
-            resulting_distribution=application(
-                              find_case_function(e.enumeratedtype_index,sort_real::real_()),
-                              tempauxresult);
-            if (all_equal(stochastic_conditionlist))
-            {
-              if (stochastic_conditionlist.front()==sort_bool::true_())
-              {
-                resulting_distribution = sort_real::optimized_times(
-                  if_(stochastic_conditionlist.front(), sort_real::real_one(), sort_real::real_zero()),
-                  resulting_distribution);
-              }
-              else
-              {
-                resulting_distribution = sort_real::optimized_times(
-                  if_(stochastic_conditionlist.front(), sort_real::real_one(), sort_real::real_zero()),
-                  resulting_distribution);
-              }
-            }
-            else
-            {
-             data_expression_list temp_stochastic_conditionlist=stochastic_conditionlist;
-             temp_stochastic_conditionlist.push_front(data_expression(e.var));
-             resulting_distribution = sort_real::optimized_times(
-               if_(application(find_case_function(e.enumeratedtype_index, sort_bool::bool_()),
-                     temp_stochastic_conditionlist),
-                 sort_real::real_one(),
-                 sort_real::real_zero()),
-               resulting_distribution);
-            }
-          }
-        }
-      }
-      /* now we construct the arguments of the invoked -----------------------------------------------------
-         process, i.e. the new function g */
-      data_expression_list resultnextstate;
-
-      for (const variable& var: parameters)
-      {
-        equalterm=data_expression();
-        equaluptillnow=1;
-        std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
-        std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-        std::vector < variable_list >::const_iterator stochastic_auxrename_list_pars=stochastic_rename_list_pars.begin();
-        std::vector < data_expression_list >::const_iterator stochastic_auxrename_list_args=stochastic_rename_list_args.begin();
-        data_expression_list auxresult;
-        for (const stochastic_action_summand& smmnd: action_summands)
-        {
-          const assignment_list nextstate=smmnd.assignments();
-          assert(auxrename_list_pars!=rename_list_pars.end());
-          assert(auxrename_list_args!=rename_list_args.end());
-          assert(stochastic_auxrename_list_pars!=stochastic_rename_list_pars.end());
-          assert(stochastic_auxrename_list_args!=stochastic_rename_list_args.end());
-          const variable_list auxpars= *auxrename_list_pars;
-          ++auxrename_list_pars;
-          const data_expression_list auxargs= *auxrename_list_args;
-          ++auxrename_list_args;
-          const variable_list stochastic_auxpars= *stochastic_auxrename_list_pars;
-          ++stochastic_auxrename_list_pars;
-          const data_expression_list stochastic_auxargs= *stochastic_auxrename_list_args;
-          ++stochastic_auxrename_list_args;
-
-          data_expression nextstateparameter;
-          nextstateparameter=getRHSassignment(var,nextstate);
-
-          maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-          data_expression_list::const_iterator j=stochastic_auxargs.begin();
-          for (variable_list::const_iterator i=stochastic_auxpars.begin();
-                 i!=stochastic_auxpars.end(); ++i, ++j)
-          {
-            /* Substitutions are carried out from left to right. The first applicable substitution counts */
-            if (sigma(*i)==*i)  // sigma is not defined for *i.
-            {
-              sigma[*i]=*j;
-            }
-          }
-          j=auxargs.begin();
-          for (variable_list::const_iterator i=auxpars.begin();
-                 i!=auxpars.end(); ++i, ++j)
-          {
-            /* Substitutions are carried out from left to right. The first applicable substitution counts */
-            if (sigma(*i)==*i)  // sigma is not defined for *i.
-            {
-              sigma[*i]=*j;
-            }
-          }
-
-          maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-          data_expression auxresult1 = replace_variables_capture_avoiding(nextstateparameter, mutable_sigma);
-          if (equalterm==data_expression()) // ||is_global_variable(equalterm)) Adding this last part leads to smaller case functions,
-                                            // but bigger and less structured state spaces, as parameters are less often put to default
-                                            // values. Constant elimination can less often be applied as constant eliminiation does not
-                                            // have subtle knowledge of case functions.
-          {
-            equalterm=auxresult1;
-          }
-          else if (equaluptillnow)
-          {
-            // set equaluptillnow if the arguments of this case function are all equal,
-            // or are all equal to global variables. Setting a case function
-            // C(e,v,dc1) to the value v, where dc1 is a global variable can result in
-            // the growth of the state space, as dc1 is not set to a default value, but
-            // keeps the value v.
-            equaluptillnow=((equalterm==auxresult1)||
-                               ((equalterm==data_expression()||is_global_variable(equalterm)) &&
-                                                    is_global_variable(auxresult1)));
-          }
-
-          auxresult.push_front(auxresult1);
-        }
-        if (equaluptillnow)
-        {
-          resultnextstate.push_front(equalterm);
-        }
-        else
-        {
-          if (!options.binary)
-          {
-            data_expression_list tempauxresult=auxresult;
-            tempauxresult.push_front(data_expression(e.var));
-            resultnextstate.push_front(
-                         data_expression(application(
-                                           find_case_function(
-                                             e.enumeratedtype_index,
-                                             var.sort()),
-                                           tempauxresult)));
-          }
-          else
-          {
-            data_expression temp=construct_binary_case_tree(
-                                   n,
-                                   resultsum,
-                                   auxresult,
-                                   var.sort(),
-                                   e);
-            resultnextstate.push_front(temp);
-          }
-        }
-      }
-      /* Now turn *resultg around */
-      resultnextstate=reverse(resultnextstate);
-      /* The list of arguments in nextstate are now in a sequential form, and
-           must be transformed back to a list of assignments */
-      const assignment_list final_resultnextstate=make_optimised_assignment_list(parameters,resultnextstate,resultsum,resulting_stochastic_variables);
-      return stochastic_action_summand(
-                            resultsum,
-                            resultcondition,
-                            some_summand_has_time?multi_action(resultmultiactionlist,resulttime):multi_action(resultmultiactionlist),
-                            final_resultnextstate,
-                            stochastic_distribution(resulting_stochastic_variables,resulting_distribution));
     }
 
-    deadlock_summand collect_sum_arg_arg_cond(
-      const enumtype& e,
-      const deadlock_summand_vector& deadlock_summands,
-      const variable_list& parameters)
+    static const data_expression& summand_time(const stochastic_action_summand& summand)
+    {
+      return summand.multi_action().time();
+    }
+
+    static const data_expression& summand_time(const deadlock_summand& summand)
+    {
+      return summand.deadlock().time();
+    }
+
+    /* The terms of the summands in a cluster can be represented by a single term if all terms that are not global
+       variables are equal. This is the first term that is not a global variable, or the last term if all terms are
+       global variables. */
+    std::optional<data_expression> equal_up_to_global_variables(const data_expression_vector& terms) const
+    {
+      const data_expression_vector::const_iterator first
+        = std::find_if(terms.begin(), terms.end(), [this](const data_expression& t) { return !is_global_variable(t); });
+      if (first == terms.end())
+      {
+        return terms.back();
+      }
+      if (std::all_of(first,
+            terms.end(),
+            [this, &first](const data_expression& t) { return t == *first || is_global_variable(t); }))
+      {
+        return *first;
+      }
+      return std::nullopt;
+    }
+
+    /* The values of a parameter in the next states of the summands in a cluster can be represented by a single term if
+       they are all equal, or if they are all global variables. A global variable is not replaced by a different term:
+       this leads to smaller case functions, but bigger and less structured state spaces, as parameters are less often
+       set to default values. Constant elimination can less often be applied, as it does not have subtle knowledge of
+       case functions. */
+    std::optional<data_expression> equal_next_state_values(const data_expression_vector& terms) const
+    {
+      if (std::all_of(terms.begin(), terms.end(), [&terms](const data_expression& t) { return t == terms.front(); })
+          || std::all_of(terms.begin(),
+            terms.end(),
+            [this](const data_expression& t) { return is_global_variable(t); }))
+      {
+        return terms.front();
+      }
+      return std::nullopt;
+    }
+
+    /* Selects one of the terms, which are given in the reverse order of the summands, with the case function of e on
+       sort, or with --binary with a case tree over the boolean sum variables at the front of sums. */
+    data_expression case_term(const enumtype& e,
+      const std::size_t n,
+      const variable_list& sums,
+      const data_expression_list& terms,
+      const sort_expression& sort)
+    {
+      if (options.binary)
+      {
+        return construct_binary_case_tree(n, sums, terms, sort, e);
+      }
+      data_expression_list arguments = terms;
+      arguments.push_front(e.var);
+      return application(find_case_function(e.enumeratedtype_index, sort), arguments);
+    }
+
+    /* The terms of the summands, in reverse order, as arguments of a case function. */
+    static data_expression_list case_arguments(const data_expression_vector& terms)
+    {
+      return data_expression_list(terms.rbegin(), terms.rend());
+    }
+
+    template<typename Summand>
+    Summand
+    collect_sum_arg_arg_cond(const enumtype& e, const std::vector<Summand>& summands, const variable_list& parameters)
     {
       /* This function gets a list of summands, with
          the same multiaction and time
@@ -5755,33 +5227,33 @@ class specification_basic_type
          by introducing an auxiliary sum operator, with
          a variable of enumtype. In case binary is used,
          a sequence of variables are introduced of sort Bool */
+      constexpr bool is_action_summand = std::is_same_v<Summand, stochastic_action_summand>;
 
-      std::size_t n=deadlock_summands.size();
+      const std::size_t n = summands.size();
+
+      /* The sum variables of the summands are merged. The renamings of the sum variables of each summand are
+         in sum_renamings; conditionlist restricts the variables that do not occur in a summand. */
       variable_list resultsum;
-      data_expression resultcondition;
-      action_list resultmultiaction;
-      data_expression resulttime;
-
-      std::vector < variable_list > rename_list_pars;
-      std::vector < data_expression_list > rename_list_args;
-      /* rename list is a list of pairs of variable and term lists */
+      std::vector<variable_list> rename_list_pars;
+      std::vector<data_expression_list> rename_list_args;
       data_expression_list conditionlist;
-      data_expression binarysumcondition;
-      int equaluptillnow=1;
-
-      for (const deadlock_summand& smmnd: deadlock_summands)
+      std::set<variable> all_sum_variables;
+      for (const Summand& summand: summands)
       {
-        const variable_list sumvars=smmnd.summation_variables();
-        resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist,parameters);
+        const variable_list& sumvars = summand.summation_variables();
+        resultsum = merge_var(sumvars, resultsum, rename_list_pars, rename_list_args, conditionlist, parameters);
+        all_sum_variables.insert(sumvars.begin(), sumvars.end());
+      }
+      std::vector<renaming_type> sum_renamings(n);
+      for (std::size_t i = 0; i < n; ++i)
+      {
+        add_renaming(sum_renamings[i], rename_list_pars[i], rename_list_args[i]);
       }
 
+      data_expression binarysumcondition;
       if (options.binary)
       {
-        resultsum=make_binary_sums(
-                    n,
-                    enumeratedtypes[e.enumeratedtype_index].sortId,
-                    binarysumcondition,
-                    resultsum);
+        resultsum = make_binary_sums(n, enumeratedtypes[e.enumeratedtype_index].sortId, binarysumcondition, resultsum);
       }
       else
       {
@@ -5789,212 +5261,171 @@ class specification_basic_type
       }
 
       /* we construct the resulting condition */
-      data_expression_list auxresult;
-      std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
-      std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-
-      data_expression equalterm;
-      equaluptillnow=1;
-      for (const deadlock_summand& smmnd: deadlock_summands)
+      data_expression_vector conditions;
+      for (std::size_t i = 0; i < n; ++i)
       {
-        const data_expression& condition=smmnd.condition();
-        assert(auxrename_list_pars!=rename_list_pars.end());
-        assert(auxrename_list_args!=rename_list_args.end());
-        const variable_list auxpars= *auxrename_list_pars;
-        ++auxrename_list_pars;
-        const data_expression_list auxargs= *auxrename_list_args;
-        ++auxrename_list_args;
-        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        data_expression_list::const_iterator j=auxargs.begin();
-        for (variable_list::const_iterator i=auxpars.begin();
-             i!=auxpars.end(); ++i, ++j)
-        {
-          /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          if (sigma(*i)== *i) // sigma is not defined for *i.
-          {
-            sigma[*i]=*j;
-          }
-        }
-
-        maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-        const data_expression auxresult1 = replace_variables_capture_avoiding(condition, mutable_sigma);
-        if (equalterm==data_expression()||is_global_variable(equalterm))
-        {
-          equalterm=auxresult1;
-        }
-        else
-        {
-          if (equaluptillnow)
-          {
-            equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
-          }
-        }
-        auxresult.push_front(auxresult1);
+        conditions.push_back(replace_variables_capture_avoiding(summands[i].condition(), sum_renamings[i]));
       }
+      data_expression resultcondition;
       if (options.binary)
       {
-        resultcondition=construct_binary_case_tree(n,
-                        resultsum,auxresult,sort_bool::bool_(),e);
-        resultcondition=lazy::and_(binarysumcondition,resultcondition);
-        resultcondition=lazy::and_(
-                          construct_binary_case_tree(n,
-                              resultsum,conditionlist,sort_bool::bool_(),e),
-                          resultcondition);
+        resultcondition = lazy::and_(case_term(e, n, resultsum, conditionlist, sort_bool::bool_()),
+          lazy::and_(binarysumcondition, case_term(e, n, resultsum, case_arguments(conditions), sort_bool::bool_())));
       }
       else
       {
-        if (equaluptillnow)
-        {
-          if (all_equal(conditionlist))
-          {
-            resultcondition=lazy::and_(conditionlist.front(),equalterm);
-          }
-          else
-          {
-            data_expression_list tempconditionlist=conditionlist;
-            tempconditionlist.push_front(data_expression(e.var));
-            resultcondition=lazy::and_(
-                            application(
-                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              tempconditionlist),
-                            equalterm);
-          }
-        }
-        else
-        {
-          data_expression_list tempauxresult=auxresult;
-          tempauxresult.push_front(data_expression(e.var));
-          resultcondition=application(
-                            find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                            tempauxresult);
-          if (all_equal(conditionlist))
-          {
-            resultcondition=lazy::and_(conditionlist.front(),resultcondition);
-          }
-          else
-          {
-            data_expression_list tempconditionlist=conditionlist;
-            tempconditionlist.push_front(data_expression(e.var));
-            resultcondition=lazy::and_(
-                            application(
-                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
-                              tempconditionlist),
-                            resultcondition);
-          }
-        }
+        const std::optional<data_expression> equal_condition = equal_up_to_global_variables(conditions);
+        resultcondition
+          = lazy::and_(all_equal(conditionlist) ? conditionlist.front()
+                                                : case_term(e, n, resultsum, conditionlist, sort_bool::bool_()),
+            equal_condition ? *equal_condition
+                            : case_term(e, n, resultsum, case_arguments(conditions), sort_bool::bool_()));
       }
 
-      /* now we construct the arguments of the action */
-      /* First we collect all multi-actions in a separate vector
-         of multiactions */
-      std::vector < action_list > multiActionList;
-
-      action_list resultmultiactionlist;
-
-      /* Construct resulttime, the time of the action ... */
-
-      equaluptillnow=true;
-      equalterm=data_expression();
-      bool some_summand_has_time=false;
-      bool all_summands_have_time=true;
-
-      // first find out whether there is a summand with explicit time.
-      for (const deadlock_summand& smmnd: deadlock_summands)
+      /* now we construct the arguments of the action. All summands have the same action labels. */
+      std::vector<action> resultactions;
+      if constexpr (is_action_summand)
       {
-        if (smmnd.deadlock().has_time())
+        std::vector<data_expression_vector> arguments(n);
+        for (std::size_t i = 0; i < n; ++i)
         {
-          some_summand_has_time=true;
+          for (const action& a: summands[i].multi_action().actions())
+          {
+            for (const data_expression& argument: a.arguments())
+            {
+              arguments[i].push_back(replace_variables_capture_avoiding(argument, sum_renamings[i]));
+            }
+          }
         }
-        else
+        std::size_t argument_index = 0;
+        for (const action& a: summands.front().multi_action().actions())
         {
-          all_summands_have_time=false;
+          data_expression_vector resultarguments;
+          for (const data_expression& argument: a.arguments())
+          {
+            data_expression_vector terms;
+            for (const data_expression_vector& summand_arguments: arguments)
+            {
+              terms.push_back(summand_arguments[argument_index]);
+            }
+            const std::optional<data_expression> equal_term = equal_up_to_global_variables(terms);
+            resultarguments.push_back(
+              equal_term ? *equal_term : case_term(e, n, resultsum, case_arguments(terms), argument.sort()));
+            ++argument_index;
+          }
+          resultactions.emplace_back(a.label(), data_expression_list(resultarguments.begin(), resultarguments.end()));
         }
       }
 
-      if ((some_summand_has_time))
+      /* Construct resulttime, the time of the action. The summands in a cluster either all have a time, or none
+         has (summandsCanBeClustered). */
+      const bool has_time = summands.front().has_time();
+      assert(std::all_of(summands.begin(),
+        summands.end(),
+        [has_time](const Summand& summand) { return summand.has_time() == has_time; }));
+      data_expression resulttime;
+      if (has_time)
       {
-        variable dummy_time_variable;
-        if (!all_summands_have_time)
+        data_expression_vector times;
+        for (std::size_t i = 0; i < n; ++i)
         {
-          // Generate a fresh dummy variable, and add it to the summand variables
-          dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
-          resultsum.push_front(dummy_time_variable);
+          times.push_back(replace_variables_capture_avoiding(summand_time(summands[i]), sum_renamings[i]));
         }
-        std::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
-        std::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
-        data_expression_list auxresult;
-        for (const deadlock_summand& smmnd: deadlock_summands)
+        const std::optional<data_expression> equal_time
+          = options.binary ? std::nullopt : equal_up_to_global_variables(times);
+        resulttime = equal_time ? *equal_time : case_term(e, n, resultsum, case_arguments(times), sort_real::real_());
+      }
+
+      if constexpr (is_action_summand)
+      {
+        /* we construct the resulting distribution. The stochastic variables of the summands are merged; they are
+           renamed away from the parameters and the sum variables. The next states are also subject to the renaming of
+           the stochastic variables, which takes precedence over the renaming of the sum variables. */
+        variable_list resulting_stochastic_variables;
+        std::vector<variable_list> stochastic_rename_list_pars;
+        std::vector<data_expression_list> stochastic_rename_list_args;
+        data_expression_list stochastic_conditionlist;
+        for (const stochastic_action_summand& summand: summands)
         {
-          if (smmnd.deadlock().has_time())
-          {
-            const data_expression& actiontime=smmnd.deadlock().time();
-
-            assert(auxrename_list_pars!=rename_list_pars.end());
-            assert(auxrename_list_args!=rename_list_args.end());
-            const variable_list auxpars= *auxrename_list_pars;
-            ++auxrename_list_pars;
-            const data_expression_list auxargs= *auxrename_list_args;
-            ++auxrename_list_args;
-
-            maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-            data_expression_list::const_iterator j=auxargs.begin();
-            for (variable_list::const_iterator i=auxpars.begin();
-                 i!=auxpars.end(); ++i, ++j)
-            {
-              /* Substitutions are carried out from left to right. The first applicable substitution counts */
-              if (sigma(*i)==*i)  // sigma is not defined for *i.
-              {
-                sigma[*i]=*j;
-              }
-            }
-
-            maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-            const data_expression auxresult1 = replace_variables_capture_avoiding(actiontime, mutable_sigma);
-            if (equalterm==data_expression()||is_global_variable(equalterm))
-            {
-              equalterm=auxresult1;
-            }
-            else
-            {
-              if (equaluptillnow)
-              {
-                equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
-              }
-            }
-            auxresult.push_front(auxresult1);
-          }
-          else
-          {
-            // this summand does not have time. But some summands have.
-            auxresult.push_front(data_expression(dummy_time_variable));
-            equaluptillnow=false;
-          }
+          resulting_stochastic_variables = merge_var(summand.distribution().variables(),
+            resulting_stochastic_variables,
+            stochastic_rename_list_pars,
+            stochastic_rename_list_args,
+            stochastic_conditionlist,
+            parameters + variable_list(all_sum_variables.begin(), all_sum_variables.end()));
         }
-        if (options.binary==1)
+        std::vector<renaming_type> renamings(n);
+        for (std::size_t i = 0; i < n; ++i)
         {
-          resulttime=construct_binary_case_tree(n,
-                                                resultsum,auxresult,sort_real::real_(),e);
+          add_renaming(renamings[i], stochastic_rename_list_pars[i], stochastic_rename_list_args[i]);
+          add_renaming(renamings[i], rename_list_pars[i], rename_list_args[i]);
+        }
+
+        data_expression_vector distributions;
+        for (std::size_t i = 0; i < n; ++i)
+        {
+          distributions.push_back(
+            replace_variables_capture_avoiding(summands[i].distribution().distribution(), renamings[i]));
+        }
+        data_expression resulting_distribution;
+        if (options.binary)
+        {
+          resulting_distribution = lazy::and_(case_term(e, n, resultsum, stochastic_conditionlist, sort_bool::bool_()),
+            case_term(e, n, resultsum, case_arguments(distributions), sort_real::real_()));
         }
         else
         {
-          if (equaluptillnow)
+          const std::optional<data_expression> equal_distribution = equal_up_to_global_variables(distributions);
+          resulting_distribution = equal_distribution
+                                     ? *equal_distribution
+                                     : case_term(e, n, resultsum, case_arguments(distributions), sort_real::real_());
+          // The distribution is multiplied by the condition on the stochastic variables that do not occur in a
+          // summand. This factor is only left out if the distributions are equal and the condition is true.
+          if (!(equal_distribution && all_equal(stochastic_conditionlist)
+                && stochastic_conditionlist.front() == sort_bool::true_()))
           {
-            resulttime=equalterm;
-          }
-          else
-          {
-            data_expression_list tempauxresult=auxresult;
-            tempauxresult.push_front(data_expression(e.var));
-            resulttime=application(
-                         find_case_function(e.enumeratedtype_index,sort_real::real_()),
-                         tempauxresult);
+            const data_expression stochastic_condition
+              = all_equal(stochastic_conditionlist)
+                  ? stochastic_conditionlist.front()
+                  : case_term(e, n, resultsum, stochastic_conditionlist, sort_bool::bool_());
+            resulting_distribution
+              = sort_real::optimized_times(if_(stochastic_condition, sort_real::real_one(), sort_real::real_zero()),
+                resulting_distribution);
           }
         }
-      }
 
-      return deadlock_summand(resultsum,
-                              resultcondition,
-                              some_summand_has_time?deadlock(resulttime):deadlock());
+        /* now we construct the arguments of the invoked process, i.e. the new function g */
+        data_expression_vector resultnextstate;
+        for (const variable& var: parameters)
+        {
+          data_expression_vector values;
+          for (std::size_t i = 0; i < n; ++i)
+          {
+            values.push_back(
+              replace_variables_capture_avoiding(getRHSassignment(var, summands[i].assignments()), renamings[i]));
+          }
+          const std::optional<data_expression> equal_value = equal_next_state_values(values);
+          resultnextstate.push_back(
+            equal_value ? *equal_value : case_term(e, n, resultsum, case_arguments(values), var.sort()));
+        }
+
+        /* The list of arguments in nextstate are now in a sequential form, and
+             must be transformed back to a list of assignments */
+        const assignment_list final_resultnextstate = make_optimised_assignment_list(parameters,
+          data_expression_list(resultnextstate.begin(), resultnextstate.end()),
+          resultsum,
+          resulting_stochastic_variables);
+        const action_list resultmultiactionlist(resultactions.begin(), resultactions.end());
+        return stochastic_action_summand(resultsum,
+          resultcondition,
+          has_time ? multi_action(resultmultiactionlist, resulttime) : multi_action(resultmultiactionlist),
+          final_resultnextstate,
+          stochastic_distribution(resulting_stochastic_variables, resulting_distribution));
+      }
+      else
+      {
+        return deadlock_summand(resultsum, resultcondition, has_time ? deadlock(resulttime) : deadlock());
+      }
     }
 
     static
@@ -6009,77 +5440,25 @@ class specification_basic_type
       return resultsorts;
     }
 
-    void cluster_actions(
-      stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands,
-      const variable_list& pars)
+    /* Clusters the summands that can be clustered with each other into one summand. */
+    template<typename Summand>
+    std::vector<Summand> cluster_summands(const std::vector<Summand>& summands, const variable_list& pars)
     {
+      constexpr bool is_action_summand = std::is_same_v<Summand, stochastic_action_summand>;
+
+      /* We cluster first the summands that can be clustered with
+          the first summand of sums.
+          These summands are first stored in w1. */
+      std::vector<Summand> result;
+      std::vector<Summand> reducible_sumlist = summands;
+
+      for (const Summand& summand1: summands)
       {
-        /* We cluster first the action summands with the action
-            occurring in the first summand of sums.
-            These summands are first stored in w1. */
-
-        stochastic_action_summand_vector result;
-        stochastic_action_summand_vector reducible_sumlist=action_summands;
-
-        for (const stochastic_action_summand& summand1: action_summands)
+        std::vector<Summand> w1;
+        std::vector<Summand> w2;
+        for (const Summand& summand2: reducible_sumlist)
         {
-          stochastic_action_summand_vector w1;
-          stochastic_action_summand_vector w2;
-          for (const stochastic_action_summand& summand2: reducible_sumlist)
-          {
-            if (summandsCanBeClustered(summand1,summand2))
-            {
-              w1.push_back(summand2);
-            }
-            else
-            {
-              w2.push_back(summand2);
-            }
-          }
-          reducible_sumlist.swap(w2);
-
-          /* In w1 we now find all the summands labelled with
-             similar multiactions, actiontime and terminationstatus.
-             We must now construct its clustered form. */
-          std::size_t n=w1.size();
-
-          if (n>0)
-          {
-            if (n>1)
-            {
-              const action_list multiaction=w1.front().multi_action().actions();
-              sort_expression_list actionsorts;
-              actionsorts=getActionSorts(multiaction);
-
-              const enumtype enumeratedtype_(options.binary?2:n,actionsorts,get_sorts(pars),*this);
-
-              result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,w1,pars));
-            }
-            else
-            {
-              for(const stochastic_action_summand& summand: result)
-              {
-                w1.push_back(summand);
-              }
-              w1.swap(result);
-            }
-          }
-        }
-        action_summands=result;
-      }
-
-      // Now the delta summands are clustered.
-      deadlock_summand_vector result;
-      deadlock_summand_vector reducible_sumlist=deadlock_summands;
-
-      for (const deadlock_summand& summand1: deadlock_summands)
-      {
-        deadlock_summand_vector w1;
-        deadlock_summand_vector w2;
-        for (const deadlock_summand& summand2: reducible_sumlist)
-        {
-          if (summand1.deadlock().has_time()==summand2.deadlock().has_time())
+          if (summandsCanBeClustered(summand1, summand2))
           {
             w1.push_back(summand2);
           }
@@ -6091,31 +5470,35 @@ class specification_basic_type
         reducible_sumlist.swap(w2);
 
         /* In w1 we now find all the summands labelled with
-           either no or an action time.
+           similar multiactions, actiontime and terminationstatus.
            We must now construct its clustered form. */
-        const std::size_t n=w1.size();
-
-        if (n>0)
+        if (w1.size() > 1)
         {
-          if (n>1)
+          sort_expression_list actionsorts;
+          if constexpr (is_action_summand)
           {
-            sort_expression_list actionsorts;
-
-            const enumtype enumeratedtype_(options.binary?2:n,actionsorts,get_sorts(pars),*this);
-
-            result.push_back(collect_sum_arg_arg_cond(enumeratedtype_,w1,pars));
+            actionsorts = getActionSorts(w1.front().multi_action().actions());
           }
-          else
-          {
-            assert(w1.size()==1);
-            result.push_back(w1.front());
-          }
+          const enumtype enumeratedtype_(options.binary ? 2 : w1.size(), actionsorts, get_sorts(pars), *this);
+          result.push_back(collect_sum_arg_arg_cond(enumeratedtype_, w1, pars));
+        }
+        else if (w1.size() == 1)
+        {
+          // A single action summand is put in front, a single deadlock summand at the end.
+          result.insert(is_action_summand ? result.begin() : result.end(), w1.front());
         }
       }
       assert(reducible_sumlist.empty());
-      deadlock_summands.swap(result);
+      return result;
     }
 
+    void cluster_actions(stochastic_action_summand_vector& action_summands,
+      deadlock_summand_vector& deadlock_summands,
+      const variable_list& pars)
+    {
+      action_summands = cluster_summands(action_summands, pars);
+      deadlock_summands = cluster_summands(deadlock_summands, pars);
+    }
 
     /**************** GENERaTE LPEpCRL **********************************/
 
