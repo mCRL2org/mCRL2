@@ -22,12 +22,16 @@
 #include "mcrl2/process/communication_expression.h"
 #include "mcrl2/process/merge_action_specifications.h"
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/utilities/hash_utility.h"
 
 #include <condition_variable>
 #include <cstddef>
+#include <limits>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <queue>
+#include <unordered_map>
 
 using state_t = std::size_t;
 
@@ -268,27 +272,39 @@ struct thread_context_t
   bool& stop;
 };
 
+/// \brief The label index of a component that does not move in a combined transition.
+constexpr std::size_t no_transition = std::numeric_limits<std::size_t>::max();
+
+/// \brief Maps the label indices of the transitions taken by the components (no_transition for a component that does
+/// not move) to the resulting label after communication, block, allow and hide, or to std::nullopt if it is blocked or not
+/// allowed. The result only depends on these indices, so it is computed once instead of for every transition.
+/// Elements of an unordered_map are not moved on insertion, so references to the labels remain valid.
+using label_cache_t = std::unordered_map<std::vector<std::size_t>, std::optional<lps::multi_action>>;
+
 /// \brief A worker that computes states of the combined LTS.
 class state_thread_worker
 {
 public:
   state_thread_worker(const combine_lts_static_context& input,
     const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions,
+    const std::vector<std::vector<bool>>& allowed_labels,
     thread_context_t& context)
     : input(input),
       outgoing_transitions(outgoing_transitions),
+      allowed_labels(allowed_labels),
       context(context)
   {}
 
   void operator()()
   {
-    // The termination action is a local so that it is constructed and destroyed on this worker
+    // The termination action and the label cache are locals so that they are constructed and destroyed on this worker
     // thread. An aterm member of this functor would be copy-constructed on the main thread
     // (registering it in the main thread's protection set) but destroyed on the worker thread,
     // because std::thread destroys its copy of the functor on the thread it runs.
     const process::action termination_action(
         process::action_label(core::identifier_string("Terminate"), data::sort_expression_list()),
         data::data_expression_list());
+    label_cache_t label_cache;
 
     while (true)
     {
@@ -311,7 +327,7 @@ public:
       queue_lock.unlock();
 
       // Process the state
-      visit_state(state_index, termination_action);
+      visit_state(state_index, termination_action, label_cache);
 
       queue_lock.lock();
       --context.active_workers;
@@ -335,6 +351,7 @@ public:
 private:
   const combine_lts_static_context& input;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
+  const std::vector<std::vector<bool>>& allowed_labels; ///< Whether a label of a component can occur in an allowed multi-action.
   thread_context_t& context;
 
   std::vector<state_t> get_state(std::size_t state_index)
@@ -397,20 +414,18 @@ private:
 
   /// \brief Compute the outgoing transitions for the combined state and report them via callback.
   /// \details Generates all combinations of transitions (including stutters) across components
-  /// without explicitly generating the full set. Each candidate (label, target_state) pair is reported
+  /// without explicitly generating the full set. Each candidate (labels, target_state) pair is reported
   /// via callback for early filtering, so we only store the transitions that pass the filter.
   template <typename ReportCandidate>
   void emit_outgoing_transitions(const std::vector<state_t>& state, ReportCandidate report_candidate)
   {
     // Generate all combinations recursively by expanding one component at a time.
-    std::vector<state_t> target_state;
-    target_state.reserve(state.size());
-    lps::multi_action current_label;
+    std::vector<state_t> target_state(state.size());
+    std::vector<std::size_t> labels(state.size(), no_transition);
 
-    generate_outgoing_transition_combinations(state, 0, false, target_state, current_label, report_candidate);
+    generate_outgoing_transition_combinations(state, 0, false, target_state, labels, report_candidate);
   }
 
-private:
   /// \brief Recursively generate all combinations of transitions across components.
   /// \details For each component, either take no transition (stutter) or one of the available
   /// outgoing transitions. Generates combinations in depth-first order, reporting each complete
@@ -420,7 +435,7 @@ private:
                            std::size_t component_index,
                            bool has_taken_transition,
                            std::vector<state_t>& target_state,
-                           lps::multi_action& current_label,
+                           std::vector<std::size_t>& labels,
                            ReportCandidate& report_candidate)
   {
     // Base case: all components have been processed, report only if at least one
@@ -429,7 +444,7 @@ private:
     {
       if (has_taken_transition)
       {
-        report_candidate(current_label, target_state);
+        report_candidate(labels, target_state);
       }
       return;
     }
@@ -437,9 +452,9 @@ private:
     const state_t& state_component_index = state[component_index];
 
     // Option 1: stutter on this component (no transition)
-    target_state.push_back(state_component_index);
-    generate_outgoing_transition_combinations(state, component_index + 1, has_taken_transition, target_state, current_label, report_candidate);
-    target_state.pop_back();
+    target_state[component_index] = state_component_index;
+    labels[component_index] = no_transition;
+    generate_outgoing_transition_combinations(state, component_index + 1, has_taken_transition, target_state, labels, report_candidate);
 
     // Option 2: take each available outgoing transition from this component
     for (state_t t = outgoing_transitions[component_index].lowerbound(state_component_index);
@@ -447,32 +462,59 @@ private:
          ++t)
     {
       const lts::outgoing_pair_t& transition = outgoing_transitions[component_index].get_transitions()[t];
-      const lts::action_label_lts& label = input.ltss[component_index].action_label(lts::label(transition));
 
       // Optimization: if the names in the label of the transition does not occur
       // in the inner allow set, we can skip generating this transition
       // since it will be filtered out by the allow operator later anyway.
-      const process::action_list& actions = label.actions();
-      bool all_allowed = std::all_of(actions.begin(), actions.end(), [this](const process::action& action)
+      if (allowed_labels[component_index][lts::label(transition)])
       {
-        return input.inner_allowed_action_names.find(action.label().name()) != input.inner_allowed_action_names.end();
-      });
-
-      if (all_allowed)
-      {
-        // Extend the label and target state, then recurse to next component
-        target_state.push_back(lts::to(transition));
-        const lps::multi_action saved_label = current_label;
-        current_label = current_label + label;
-
-      generate_outgoing_transition_combinations(state, component_index + 1, true, target_state, current_label, report_candidate);
-
-        current_label = saved_label;
-        target_state.pop_back();
+        // Extend the labels and target state, then recurse to next component
+        target_state[component_index] = lts::to(transition);
+        labels[component_index] = lts::label(transition);
+        generate_outgoing_transition_combinations(state, component_index + 1, true, target_state, labels, report_candidate);
       }
     }
   }
 
+  /// \returns The label of the combined transition in which component i takes a transition labelled labels[i], or
+  ///          std::nullopt if it is blocked or not allowed.
+  const std::optional<lps::multi_action>& combined_label(const std::vector<std::size_t>& labels,
+    const process::action& termination_action,
+    label_cache_t& label_cache)
+  {
+    if (const auto it = label_cache.find(labels); it != label_cache.end())
+    {
+      return it->second;
+    }
+
+    // Only insert the result once it is computed, so that an exception does not leave a blocked entry behind.
+    lps::multi_action label;
+    for (std::size_t i = 0; i < labels.size(); ++i)
+    {
+      if (labels[i] != no_transition)
+      {
+        label = label + input.ltss[i].action_label(labels[i]);
+      }
+    }
+
+    mCRL2log(log::log_level_t::debug) << lps::pp(label) << std::endl;
+
+    // Apply communication rules
+    label = mcrl2::apply_communication(label, input.comm_set);
+
+    // Check if new transition is blocked or not allowed
+    std::optional<lps::multi_action> result;
+    if (!lps::encap(input.block_set, label.actions()) && lps::allow_(input.allow_cache, label.actions(), termination_action))
+    {
+      mCRL2log(log::log_level_t::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
+      result = lps::hide_(input.hide_set, label);
+    }
+    else
+    {
+      mCRL2log(log::log_level_t::trace) << "Multi-action is blocked or not allowed: " << lps::pp(label) << std::endl;
+    }
+    return label_cache.emplace(labels, std::move(result)).first->second;
+  }
 
   std::size_t report_state(const std::vector<state_t>& state)
   {
@@ -490,49 +532,23 @@ private:
     add_transition(from_state, label, to_state);
   }
 
-  lps::multi_action apply_communication(const lps::multi_action& label)
-  {
-    return mcrl2::apply_communication(label, input.comm_set);
-  }
-
   /// \brief Process one state from the combined state space.
-  /// \details Emits outgoing transitions via callback, applying communication and filter operators
-  /// (allow/block/hide) to each candidate immediately. Rejected candidates are not reported.
-  void visit_state(std::size_t state_index, const process::action& termination_action)
+  /// \details Emits outgoing transitions via callback, using the label cache to determine whether each candidate is
+  /// blocked or allowed and its resulting label. Rejected candidates are not reported.
+  void visit_state(std::size_t state_index, const process::action& termination_action, label_cache_t& label_cache)
   {
     const std::vector<state_t> state = get_state(state_index);
 
-    // Callback that filters and reports each candidate transition.
-    auto filter_and_report = [this, state_index, &termination_action](const lps::multi_action& candidate_label,
-                                                   const std::vector<state_t>& target_state)
+    emit_outgoing_transitions(state, [&](const std::vector<std::size_t>& labels, const std::vector<state_t>& target_state)
     {
-      // candidate_label is a multi_action, so its actions are already sorted.
-      lps::multi_action label = candidate_label;
-
-      mCRL2log(log::log_level_t::debug) << lps::pp(label) << std::endl;
-
-      // Apply communication rules
-      label = apply_communication(label);
-
-      // Check if new transition is blocked or not allowed
-      if (!lps::encap(input.block_set, label.actions()) && lps::allow_(input.allow_cache, label.actions(), termination_action))
+      const std::optional<lps::multi_action>& label = combined_label(labels, termination_action, label_cache);
+      if (label)
       {
-        mCRL2log(log::log_level_t::trace) << "Multi-action is not blocked and allowed:" << lps::pp(label) << std::endl;
-
-        // Hide returns a new label; assign it back.
-        label = lps::hide_(input.hide_set, label);
-
         const std::size_t new_state = report_state(target_state);
-        report_transition(state_index, label, new_state);
+        report_transition(state_index, *label, new_state);
       }
-      else
-      {
-        mCRL2log(log::log_level_t::trace) << "Multi-action is blocked or not allowed: " << lps::pp(label) << std::endl;
-      }
-    };
+    });
 
-    // Emit transitions via callback; filtering happens inside the lambda above.
-    emit_outgoing_transitions(state, filter_and_report);
     finish_state();
   }
 };
@@ -561,6 +577,21 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
     proc_params = proc_params + lts.process_parameters();
   }
   const auto [initial, found] = states.insert(initial_states);
+
+  // Determine for every label of every component whether all its action names occur in the inner allow set.
+  std::vector<std::vector<bool>> allowed_labels;
+  for (const lts::lts_lts_t& lts: input.ltss)
+  {
+    std::vector<bool>& allowed = allowed_labels.emplace_back(lts.num_action_labels());
+    for (std::size_t i = 0; i < lts.num_action_labels(); ++i)
+    {
+      const process::action_list& actions = lts.action_label(i).actions();
+      allowed[i] = std::all_of(actions.begin(), actions.end(), [&input](const process::action& action)
+      {
+        return input.inner_allowed_action_names.contains(action.label().name());
+      });
+    }
+  }
 
   // The todo queue containing new found states.
   std::queue<std::size_t> queue;
@@ -614,7 +645,7 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
 
   for (size_t i = 0; i < input.nr_of_threads; i++)
   {
-    threads.emplace_back(state_thread_worker(input, outgoing_transitions, context));
+    threads.emplace_back(state_thread_worker(input, outgoing_transitions, allowed_labels, context));
   }
 
   for (size_t i = 0; i < input.nr_of_threads; i++)
