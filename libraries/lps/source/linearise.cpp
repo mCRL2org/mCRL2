@@ -36,13 +36,15 @@
 #include <bit>
 #include <optional>
 #include <ranges>
+#include <utility>
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_structural_order.h"
-#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
-#include "mcrl2/data/fourier_motzkin.h"
+#include "mcrl2/data/enumerated_sort_generator.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/real_utilities.h"
+#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 
 // linear process libraries.
 #include "mcrl2/lps/constelm.h"
@@ -184,7 +186,6 @@ class specification_basic_type
     class stackoperations;
     class stacklisttype;
     class enumtype;
-    class enumeratedtype;
 
     std::vector < process_equation > procs;
     /* storage place for processes,
@@ -204,28 +205,30 @@ class specification_basic_type
     t_lin_options options;
     bool timeIsBeingUsed = false;
     bool stochastic_operator_is_being_used = false;
-    bool fresh_equation_added = false;
+    std::size_t number_of_equations_in_rewriter; /* The number of user defined equations when rewr was made */
     std::map < aterm, objectdatatype > objectdata; // It is important to guarantee that the objects will not
                                                    // be moved to another place when the object data structure grows. This
                                                    // is because objects in this datatype  are passed around by reference.
 
     set_identifier_generator fresh_identifier_generator;
-    std::vector < enumeratedtype > enumeratedtypes;
+    enumerated_sort_generator enumerated_sorts;
     stackoperations* stack_operations_list;
 
   public:
     specification_basic_type(const process::action_label_list& as,
-                             const std::vector< process_equation >& ps,
-                             const variable_list& idvs,
-                             const data_specification& ds,
-                             const std::set < data::variable >& glob_vars,
-                             const t_lin_options& opt,
-                             const process_specification& procspec):
-      acts(),
-      global_variables(glob_vars),
-      data(ds),
-      rewr(data,opt.rewrite_strategy),
-      options(opt)
+      const std::vector<process_equation>& ps,
+      const variable_list& idvs,
+      const data_specification& ds,
+      const std::set<data::variable>& glob_vars,
+      const t_lin_options& opt,
+      const process_specification& procspec)
+      : acts(),
+        global_variables(glob_vars),
+        data(ds),
+        rewr(data, opt.rewrite_strategy),
+        options(opt),
+        number_of_equations_in_rewriter(std::as_const(data).user_defined_equations().size()),
+        enumerated_sorts(data, fresh_identifier_generator)
     {
       // find_identifiers does not find the identifiers in the enclosed data specification.
       fresh_identifier_generator.add_identifiers(process::find_identifiers(procspec));
@@ -497,10 +500,11 @@ class specification_basic_type
     {
       if (!options.norewrite)
       {
-        if (fresh_equation_added)
+        // The rewriter is made again when equations have been added, e.g. for case functions.
+        if (std::as_const(data).user_defined_equations().size() != number_of_equations_in_rewriter)
         {
           rewr=rewriter(data,options.rewrite_strategy);
-          fresh_equation_added=false;
+          number_of_equations_in_rewriter = std::as_const(data).user_defined_equations().size();
         }
         return rewr(t);
       }
@@ -3239,7 +3243,7 @@ class specification_basic_type
     void declare_control_state(
       const process_identifier_set& pCRLprocs)
     {
-      create_enumeratedtype(pCRLprocs.size());
+      enumerated_sorts(pCRLprocs.size());
     }
 
     class stackoperations
@@ -3372,8 +3376,8 @@ class specification_basic_type
               {
                 if (!singlecontrolstate)
                 {
-                  const std::size_t e=spec.create_enumeratedtype(no_of_states);
-                  stackvar=variable(spec.fresh_identifier_generator(s3), spec.enumeratedtypes[e].sortId);
+                  const sort_expression& enumerated_sort = spec.enumerated_sorts(no_of_states);
+                  stackvar = variable(spec.fresh_identifier_generator(s3), enumerated_sort);
                 }
                 else
                 {
@@ -3469,8 +3473,7 @@ class specification_basic_type
 
       if (!options.binary)
       {
-        const std::size_t e=create_enumeratedtype(stack.no_of_states);
-        data_expression_list l=enumeratedtypes[e].elementnames;
+        data_expression_list l = enumerated_sorts.elements(stack.no_of_states);
         for (; i>0 ; i--)
         {
           assert(l.size()>0);
@@ -3521,8 +3524,7 @@ class specification_basic_type
 
       if (!options.binary)
       {
-        const std::size_t e=create_enumeratedtype(stack.no_of_states);
-        data_expression_list l(enumeratedtypes[e].elementnames);
+        data_expression_list l(enumerated_sorts.elements(stack.no_of_states));
         for (; i>0 ; i--)
         {
           l.pop_front();
@@ -3584,7 +3586,7 @@ class specification_basic_type
       if (!options.binary) /* Here a state encoding using enumerated types
                               must be declared */
       {
-        create_enumeratedtype(stack.no_of_states);
+        enumerated_sorts(stack.no_of_states);
         if (regular)
         {
           return equal_to(stack.stackvar,
@@ -4517,206 +4519,10 @@ class specification_basic_type
       }
     }
 
+    /**************** Enumtype **********************************/
 
-    /**************** Enumtype and enumeratedtype **********************************/
-
-    class enumeratedtype
-    {
-      public:
-        std::size_t size;
-        sort_expression sortId;
-        data_expression_list elementnames;
-        function_symbol_list functions;
-
-        enumeratedtype(const std::size_t n,
-                       specification_basic_type& spec)
-        {
-          size=n;
-          if (n==2)
-          {
-            sortId = sort_bool::bool_();
-            elementnames = data_expression_list({ sort_bool::false_(), sort_bool::true_()});
-          }
-          else
-          {
-            //create new sort identifier
-            basic_sort sort_id(spec.fresh_identifier_generator("Enum" + std::to_string(n)));
-            sortId=sort_id;
-            //create structured sort
-            //  Enumi = struct en_i | ... | e0_i;
-            structured_sort_constructor_list struct_conss;
-            for (std::size_t j=0 ; (j<n) ; j++)
-            {
-              //create constructor declaration of the structured sort
-              const identifier_string s=spec.fresh_identifier_generator("e" + std::to_string(j) + "_" + std::to_string(n));
-              const structured_sort_constructor struct_cons(s,"");
-
-              struct_conss.push_front(struct_cons);
-            }
-            structured_sort sort_struct(struct_conss);
-
-            //add declaration of standard functions
-            spec.data.add_alias(alias(sort_id, sort_struct));
-
-            //store new declarations in return value w
-            sortId = sort_id;
-            // The constructors are taken in the order of the structured sort, and not from
-            // spec.data.constructors(sort_id): the order in which the data specification returns them can
-            // differ between runs, as it collects them in a std::set ordered on the addresses of terms.
-            function_symbol_vector constructors;
-            for (const structured_sort_constructor& c: sort_struct.constructors())
-            {
-              constructors.push_back(c.constructor_function(sort_id));
-            }
-            assert(constructors.size()==n);
-            assert(std::is_permutation(constructors.begin(), constructors.end(),
-                                       spec.data.constructors(sort_id).begin(), spec.data.constructors(sort_id).end()));
-            elementnames = data::data_expression_list(constructors.begin(),constructors.end());
-          }
-        }
-
-        enumeratedtype(const enumeratedtype& e)
-        {
-          size=e.size;
-          sortId=e.sortId;
-          elementnames=e.elementnames;
-          functions=e.functions;
-        }
-
-        enumeratedtype& operator=(const enumeratedtype& e)
-        = default;
-
-        ~enumeratedtype() = default;
-    };
-
-    std::size_t create_enumeratedtype(const std::size_t n)
-    {
-      std::size_t w;
-
-      for (w=0; ((w<enumeratedtypes.size()) && (enumeratedtypes[w].size!=n)); ++w) {};
-
-      if (w==enumeratedtypes.size()) // There is no enumeratedtype of arity n.
-      {
-        enumeratedtypes.emplace_back(n, *this);
-      }
-      return w;
-    }
-
-    data::function_symbol find_case_function(std::size_t index, const sort_expression& sort) const
-    {
-      for (const data::function_symbol& f: enumeratedtypes[index].functions)
-      {
-        sort_expression_list domain = function_sort(f.sort()).domain();
-        assert(domain.size() >= 2);
-        if (*(++domain.begin())==sort)
-        {
-          return f;
-        }
-      };
-
-      throw mcrl2::runtime_error("searching for a nonexisting case function on sort " + data::pp(sort) +".");
-      return data::function_symbol();
-    }
-
-    void define_equations_for_case_function(
-      const std::size_t index,
-      const data::function_symbol& functionname,
-      const sort_expression& sort)
-    {
-      variable_list vars;
-      data_expression_list args;
-      data_expression_list xxxterm;
-
-      const variable v1=get_fresh_variable("x",sort);
-      const std::size_t n=enumeratedtypes[index].size;
-      for (std::size_t j=0; (j<n); j++)
-      {
-        const variable v=get_fresh_variable("y",sort);
-        vars.push_front(v);
-        args.push_front(v);
-        xxxterm.push_front(v1);
-      }
-
-      /* I generate here an equation of the form
-         C(e,x,x,x,...x)=x for a variable x. */
-      const sort_expression& s=enumeratedtypes[index].sortId;
-      const variable v=get_fresh_variable("e",s);
-
-      // we add e in front of xxxterm; note that xxxterm is not used afterwards
-      // anymore, so we don't need to create a temporary copy for it here.
-      xxxterm.push_front(data_expression(v));
-      data.add_equation(
-        data_equation(
-          variable_list({ v1, v }),
-          application(functionname,xxxterm),
-          v1));
-      fresh_equation_added=true;
-
-      variable_list auxvars=vars;
-
-      const data_expression_list& elementnames=enumeratedtypes[index].elementnames;
-      for (const data_expression& w: elementnames)
-      {
-        assert(auxvars.size()>0);
-        args.push_front(w);
-        data.add_equation(data_equation(
-                          vars,
-                          application(functionname,args),
-                          auxvars.front()));
-        //fresh_equation_added=true; already set before the loop, omitting here
-        args.pop_front();
-        auxvars.pop_front();
-      }
-    }
-
-    void create_case_function_on_enumeratedtype(
-      const sort_expression& sort,
-      const std::size_t enumeratedtype_index)
-    {
-      assert(enumeratedtype_index<enumeratedtypes.size());
-      /* first find out whether the function exists already, in which
-         case nothing needs to be done */
-
-      const function_symbol_list& functions=enumeratedtypes[enumeratedtype_index].functions;
-      const function_symbol_list::const_iterator i = std::find_if(functions.begin(), functions.end(), [&sort](const data::function_symbol& w){
-        const function_sort& w1sort(down_cast<function_sort>(w.sort()));
-        assert(function_sort(w1sort).domain().size()>1);
-        // w matches if the second sort of the case function equals sort
-        return *(++(w1sort.domain().begin())) == sort;
-      });
-      if(i != functions.end()) {
-        return;
-      }
-      /* The function does not exist;
-         Create a new function of enumeratedtype e, on sort */
-
-      if (enumeratedtypes[enumeratedtype_index].sortId==sort_bool::bool_())
-      {
-        /* take the if function on sort 'sort' */
-        enumeratedtypes[enumeratedtype_index].functions.push_front(if_(sort));
-        return;
-      }
-      // else
-      sort_expression_list newsortlist;
-      const std::size_t n=enumeratedtypes[enumeratedtype_index].size;
-      for (std::size_t j=0; j<n ; ++j)
-      {
-        newsortlist.push_front(sort);
-      }
-      const sort_expression& sid=enumeratedtypes[enumeratedtype_index].sortId;
-      newsortlist.push_front(sid);
-
-      const function_sort newsort(newsortlist,sort);
-      const data::function_symbol casefunction(
-        fresh_identifier_generator("C" + std::to_string(n) + "_" +
-                         (!is_basic_sort(newsort)?"":std::string(basic_sort(sort).name()))), newsort);
-      data.add_mapping(casefunction);
-      enumeratedtypes[enumeratedtype_index].functions.push_front(casefunction);
-
-      define_equations_for_case_function(enumeratedtype_index,casefunction,sort);
-      return;
-    }
-
+    /* An enumerated sort with size elements, with a variable var of that sort and case functions on the given
+       sorts, Bool, and Real if time or stochastic operators are used. */
     class enumtype
     {
       public:
@@ -4724,34 +4530,34 @@ class specification_basic_type
         enumtype(const enumtype&)=delete;
         enumtype& operator =(const enumtype& )=delete;
 
-        std::size_t enumeratedtype_index;
+        std::size_t size;
         variable var;
 
         enumtype(std::size_t n,
-                 const sort_expression_list& fsorts,
-                 const sort_expression_list& gsorts,
-                 specification_basic_type& spec)
+          const sort_expression_list& fsorts,
+          const sort_expression_list& gsorts,
+          specification_basic_type& spec)
+          : size(n)
         {
-          enumeratedtype_index=spec.create_enumeratedtype(n);
-
-          var=variable(spec.fresh_identifier_generator("e"),spec.enumeratedtypes[enumeratedtype_index].sortId);
+          const sort_expression& enumerated_sort = spec.enumerated_sorts(n);
+          var = variable(spec.fresh_identifier_generator("e"), enumerated_sort);
           spec.insertvariable(var,true);
 
           for (const sort_expression& f: fsorts)
           {
-            spec.create_case_function_on_enumeratedtype(f,enumeratedtype_index);
+            spec.enumerated_sorts.case_function(n, f);
           }
 
           for (const sort_expression& f: gsorts)
           {
-            spec.create_case_function_on_enumeratedtype(f,enumeratedtype_index);
+            spec.enumerated_sorts.case_function(n, f);
           }
 
-          spec.create_case_function_on_enumeratedtype(sort_bool::bool_(),enumeratedtype_index);
+          spec.enumerated_sorts.case_function(n, sort_bool::bool_());
 
           if (spec.timeIsBeingUsed || spec.stochastic_operator_is_being_used)
           {
-            spec.create_case_function_on_enumeratedtype(sort_real::real_(),enumeratedtype_index);
+            spec.enumerated_sorts.case_function(n, sort_real::real_());
           }
         }
 
@@ -5021,7 +4827,7 @@ class specification_basic_type
       {
         return t;
       }
-      return application(find_case_function(e.enumeratedtype_index, termsort), casevar, t, t1);
+      return application(enumerated_sorts.case_function(e.size, termsort), casevar, t, t1);
     }
 
     template <class T>
@@ -5220,8 +5026,7 @@ class specification_basic_type
 
       if (options.binary)
       {
-        c.sums
-          = make_binary_sums(c.n, enumeratedtypes[c.e.enumeratedtype_index].sortId, c.binary_sum_condition, c.sums);
+        c.sums = make_binary_sums(c.n, enumerated_sorts(c.e.size), c.binary_sum_condition, c.sums);
       }
       else
       {
@@ -5278,7 +5083,7 @@ class specification_basic_type
       }
       data_expression_list arguments = terms;
       arguments.push_front(c.e.var);
-      return application(find_case_function(c.e.enumeratedtype_index, sort), arguments);
+      return application(enumerated_sorts.case_function(c.e.size, sort), arguments);
     }
 
     /* The terms of the summands in a cluster can be represented by a single term if all terms that are not global
