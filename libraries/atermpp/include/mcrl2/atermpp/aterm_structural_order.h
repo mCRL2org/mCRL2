@@ -64,7 +64,11 @@ std::strong_ordering structural_compare(const aterm& x, const aterm& y)
   const aterm* left = &x;
   const aterm* right = &y;
 
-  // The last argument is handled iteratively, such that long lists do not lead to deep recursion.
+  // All arguments but the last are compared recursively, and the last argument iteratively by continuing the loop
+  // with it. A list is a head followed by a tail that is again a list, so recursion on the tail would make the depth
+  // of the recursion linear in the length of the list, and comparing lists of a million elements would exhaust the
+  // stack (see test_long_lists in aterm_structural_order_test.cpp). Other terms that are deeply nested in an argument
+  // other than the last one still lead to deep recursion.
   while (*left != *right)
   {
     if (!left->defined() || !right->defined())
