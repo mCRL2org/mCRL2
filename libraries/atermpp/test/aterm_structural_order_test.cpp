@@ -26,16 +26,16 @@ static aterm t(const std::string& s)
   return read_term_from_string(s);
 }
 
-static std::string to_string(std::weak_ordering c)
+static std::string to_string(std::strong_ordering c)
 {
-  return std::is_lt(c) ? "less" : std::is_gt(c) ? "greater" : "equivalent";
+  return std::is_lt(c) ? "less" : std::is_gt(c) ? "greater" : "equal";
 }
 
-// Checks that structural_compare(x, y) is expected, that structural_compare(y, x) is its inverse, and that
-// structural_less is consistent with both.
-static void check_compare(const aterm& x, const aterm& y, std::weak_ordering expected)
+// Checks that structural_compare(x, y) is expected, that structural_compare(y, x) is its inverse, that
+// structural_less is consistent with both, and that x and y are equal under the order iff they are the same term.
+static void check_compare(const aterm& x, const aterm& y, std::strong_ordering expected)
 {
-  const std::weak_ordering inverse = 0 <=> expected;
+  const std::strong_ordering inverse = 0 <=> expected;
   BOOST_CHECK_MESSAGE(structural_compare(x, y) == expected,
       "structural_compare(" << x << ", " << y << ") is " << to_string(structural_compare(x, y)) << ", expected "
       << to_string(expected));
@@ -44,21 +44,22 @@ static void check_compare(const aterm& x, const aterm& y, std::weak_ordering exp
       << to_string(inverse));
   BOOST_CHECK_EQUAL(structural_less()(x, y), std::is_lt(expected));
   BOOST_CHECK_EQUAL(structural_less()(y, x), std::is_gt(expected));
+  BOOST_CHECK_EQUAL(x == y, std::is_eq(expected));
 }
 
 static void check_precedes(const aterm& x, const aterm& y)
 {
-  check_compare(x, y, std::weak_ordering::less);
+  check_compare(x, y, std::strong_ordering::less);
 }
 
 static void check_equal(const aterm& x, const aterm& y)
 {
-  check_compare(x, y, std::weak_ordering::equivalent);
+  check_compare(x, y, std::strong_ordering::equal);
 }
 
 static void check_succeeds(const aterm& x, const aterm& y)
 {
-  check_compare(x, y, std::weak_ordering::greater);
+  check_compare(x, y, std::strong_ordering::greater);
 }
 
 BOOST_AUTO_TEST_CASE(test_undefined)
