@@ -709,8 +709,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   template <typename Container>
   void print_global_variables(const Container& container)
   {
-    std::vector<variable> variables(container.begin(), container.end());
-    std::sort(variables.begin(), variables.end(), atermpp::structural_less());
+    const std::set<variable, atermpp::structural_less> variables(container.begin(), container.end());
     print_variables(variables, true, true, true, "glob ", ";\n\n", ";\n     ");
   }
 
