@@ -86,6 +86,29 @@ BOOST_AUTO_TEST_CASE(test_function_symbols)
   check_succeeds(t("f(a,a)"), t("f(z)"));
 }
 
+// The order on function symbols on its own: the undefined function symbol first, then on the name and the arity.
+BOOST_AUTO_TEST_CASE(test_function_symbol_order)
+{
+  // In increasing order.
+  const std::vector<function_symbol> symbols = {function_symbol(),
+    function_symbol("a", 0),
+    function_symbol("f", 0),
+    function_symbol("f", 1),
+    function_symbol("f", 2),
+    function_symbol("g", 1)};
+  for (std::size_t i = 0; i < symbols.size(); ++i)
+  {
+    for (std::size_t j = 0; j < symbols.size(); ++j)
+    {
+      // The undefined function symbol cannot be printed, so the symbols are identified by their position.
+      BOOST_CHECK_MESSAGE(structural_compare(symbols[i], symbols[j]) == (i <=> j),
+        "structural_compare(symbols[" << i << "], symbols[" << j << "]) is "
+                                      << to_string(structural_compare(symbols[i], symbols[j])) << ", expected "
+                                      << to_string(i <=> j));
+    }
+  }
+}
+
 BOOST_AUTO_TEST_CASE(test_arguments)
 {
   check_equal(t("f(a,b)"), t("f(a,b)"));

@@ -19,6 +19,33 @@
 namespace atermpp
 {
 
+/// \brief Compares two function symbols structurally.
+/// \details Function symbols are ordered on their name, and then on their arity, which unlike operator< on function
+///          symbols does not depend on their addresses. The undefined function symbol precedes all other function
+///          symbols. Function symbols are unique for a name and arity, so two function symbols are only equal under
+///          this order if they are the same function symbol.
+/// \return std::strong_ordering::less if f precedes g, std::strong_ordering::equal if f and g are equal, and
+///         std::strong_ordering::greater if g precedes f.
+inline std::strong_ordering structural_compare(const function_symbol& f, const function_symbol& g)
+{
+  if (f == g)
+  {
+    return std::strong_ordering::equal;
+  }
+  if (!f.defined() || !g.defined())
+  {
+    return f.defined() ? std::strong_ordering::greater : std::strong_ordering::less;
+  }
+  const std::strong_ordering c = f.name() <=> g.name();
+  if (c != 0)
+  {
+    return c;
+  }
+  // Function symbols with the same name and arity are equal.
+  assert(f.arity() != g.arity());
+  return f.arity() <=> g.arity();
+}
+
 /// \brief Compares two terms structurally.
 /// \details The order on terms given by operator< (and operator<=>) compares the addresses of terms. It is efficient,
 ///          but differs between runs, so any choice based on it, such as taking the first element of a std::set of
@@ -57,14 +84,7 @@ std::strong_ordering structural_compare(const aterm& x, const aterm& y)
     const function_symbol& g = right->function();
     if (f != g)
     {
-      const std::strong_ordering c = f.name() <=> g.name();
-      if (c != 0)
-      {
-        return c;
-      }
-      // Function symbols with the same name and arity are equal.
-      assert(f.arity() != g.arity());
-      return f.arity() <=> g.arity();
+      return structural_compare(f, g);
     }
 
     const std::size_t arity = f.arity();
