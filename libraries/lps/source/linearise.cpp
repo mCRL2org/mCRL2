@@ -4532,25 +4532,21 @@ class specification_basic_type
       return result;
     }
 
-    /* Merges the variables v1 into v2, see lps::detail::merge_variables. */
-    variable_list merge_var(const variable_list& v1,
-      const variable_list& v2,
-      std::vector<variable_list>& renamings_pars,
-      std::vector<data_expression_list>& renamings_args,
-      data_expression_list& conditionlist,
-      const variable_list& process_parameters)
+    /* Merges the variables of a summand into merged_variables, see lps::detail::merge_variables_by_sort. */
+    lps::detail::variable_renaming merge_variables_by_sort(const variable_list& summand_variables,
+      variable_list& merged_variables,
+      data_expression_list& conditions,
+      const variable_list& avoid)
     {
       const fresh_variable_generator fresh = fresh_variables();
       const auto representative = [this](const sort_expression& s)
       {
         return representative_generator_internal(s, false);
       };
-      return lps::detail::merge_variables(v1,
-        v2,
-        renamings_pars,
-        renamings_args,
-        conditionlist,
-        process_parameters,
+      return lps::detail::merge_variables_by_sort(summand_variables,
+        merged_variables,
+        conditions,
+        avoid,
         fresh,
         representative);
     }
@@ -4915,8 +4911,7 @@ class specification_basic_type
 
       data_expression_list results;
       data_expression_list condition_list;
-      std::vector < variable_list> renamings_pars;
-      std::vector < data_expression_list> renamings_args;
+      std::vector<lps::detail::variable_renaming> renamings;
       variable_list existentially_quantified_variables;
       for (const deadlock_summand& s: deadlock_summands)
       {
@@ -4930,13 +4925,10 @@ class specification_basic_type
                              time_variable,
                              s.deadlock().time(),
                              new_existentially_quantified_variables);
-        existentially_quantified_variables=merge_var(
-                                             new_existentially_quantified_variables,
-                                             existentially_quantified_variables,
-                                             renamings_pars,
-                                             renamings_args,
-                                             condition_list,
-                                             variable_list());
+        renamings.push_back(merge_variables_by_sort(new_existentially_quantified_variables,
+          existentially_quantified_variables,
+          condition_list,
+          variable_list()));
         results.push_front(ult_del_condition);
       }
 
@@ -4952,48 +4944,25 @@ class specification_basic_type
                              time_variable,
                              s.multi_action().time(),
                              new_existentially_quantified_variables);
-        existentially_quantified_variables=merge_var(
-                                             new_existentially_quantified_variables,
-                                             existentially_quantified_variables,
-                                             renamings_pars,
-                                             renamings_args,
-                                             condition_list,
-                                             variable_list());
+        renamings.push_back(merge_variables_by_sort(new_existentially_quantified_variables,
+          existentially_quantified_variables,
+          condition_list,
+          variable_list()));
         results.push_front(ult_del_condition);
       }
 
       data_expression result=sort_bool::false_();
 
       assert(results.size()==condition_list.size());
-      assert(results.size()==renamings_pars.size());
-      assert(results.size()==renamings_args.size());
+      assert(results.size() == renamings.size());
 
-      std::vector < variable_list>::const_iterator renamings_par=renamings_pars.begin();
-      std::vector < data_expression_list>::const_iterator renamings_arg=renamings_args.begin();
+      std::vector<lps::detail::variable_renaming>::iterator renaming = renamings.begin();
       condition_list=reverse(condition_list);
       results=reverse(results);
       data_expression_list::const_iterator j=condition_list.begin();
-      for(data_expression_list::const_iterator i=results.begin();
-              i!=results.end(); ++i,++j,++renamings_par,++renamings_arg)
+      for (data_expression_list::const_iterator i = results.begin(); i != results.end(); ++i, ++j, ++renaming)
       {
-        const variable_list& auxpars=*renamings_par;
-        const data_expression_list& auxargs=*renamings_arg;
-
-        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        data_expression_list::const_iterator j1=auxargs.begin();
-        for (variable_list::const_iterator i1=auxpars.begin();
-             i1!=auxpars.end(); ++i1, ++j1)
-        {
-          /* Substitutions are carried out from left to right. The first applicable substitution counts */
-          if (sigma(*i1)==*i1)
-          {
-            sigma[*i1]=*j1;
-
-          }
-        }
-
-        maintain_variables_in_rhs< mutable_map_substitution<> > mutable_sigma(sigma);
-        result = lazy::or_(result, replace_variables_capture_avoiding(lazy::and_(*i, *j), mutable_sigma));
+        result = lazy::or_(result, replace_variables_capture_avoiding(lazy::and_(*i, *j), *renaming));
       }
       return lps::detail::ultimate_delay(time_variable, existentially_quantified_variables, RewriteTerm(result));
     }

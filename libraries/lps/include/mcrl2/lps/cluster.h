@@ -16,9 +16,7 @@
 #include "mcrl2/data/real_utilities.h"
 #include "mcrl2/data/replace_capture_avoiding_with_an_identifier_generator.h"
 #include "mcrl2/data/representative_generator.h"
-#include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/detail/merge_variables.h"
+#include "mcrl2/lps/detail/merge_variables_by_sort.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/stochastic_specification.h"
 
@@ -52,7 +50,7 @@ struct cluster_options
 class cluster_algorithm
 {
 protected:
-  using renaming_type = data::maintain_variables_in_rhs<data::mutable_map_substitution<>>;
+  using renaming_type = detail::variable_renaming;
 
   /// \brief A cluster of n summands that is turned into a single summand. Lists of terms with one term per summand are
   ///        in the reverse order of the summands, as arguments of a case function.
@@ -98,10 +96,9 @@ protected:
     return data::variable(m_identifier_generator(name_hint), sort);
   }
 
-  data::variable_list merge_variables(const data::variable_list& v1,
-    const data::variable_list& v2,
-    std::vector<data::variable_list>& renamings_pars,
-    std::vector<data::data_expression_list>& renamings_args,
+  /// \brief Merges the variables of a summand into merged_variables, see detail::merge_variables_by_sort.
+  renaming_type merge_variables_by_sort(const data::variable_list& summand_variables,
+    data::variable_list& merged_variables,
     data::data_expression_list& conditions,
     const data::variable_list& avoid)
   {
@@ -114,7 +111,12 @@ protected:
     {
       return data::representative_generator(m_data)(s);
     };
-    return detail::merge_variables(v1, v2, renamings_pars, renamings_args, conditions, avoid, fresh, representative);
+    return detail::merge_variables_by_sort(summand_variables,
+      merged_variables,
+      conditions,
+      avoid,
+      fresh,
+      representative);
   }
 
   /// \brief Applies sigma to x, renaming a bound variable only if it would capture a variable of a right hand side of
@@ -178,22 +180,6 @@ protected:
                || std::find(stochastic_variables.begin(), stochastic_variables.end(), a.rhs())
                     != stochastic_variables.end();
       });
-  }
-
-  /// \brief Adds the renaming of pars into args to sigma. The first assignment to a variable counts.
-  static void
-  add_renaming(renaming_type& sigma, const data::variable_list& pars, const data::data_expression_list& args)
-  {
-    assert(pars.size() == args.size());
-    data::data_expression_list::const_iterator arg = args.begin();
-    for (const data::variable& par: pars)
-    {
-      if (sigma(par) == par) // sigma is not defined for par.
-      {
-        sigma[par] = *arg;
-      }
-      ++arg;
-    }
   }
 
   /// \brief Adds the assignments of other to sigma for the variables that sigma does not assign yet.
@@ -290,21 +276,10 @@ protected:
   void
   merge_sum_variables(summand_cluster& c, const std::vector<Summand>& summands, const data::variable_list& parameters)
   {
-    std::vector<data::variable_list> rename_list_pars;
-    std::vector<data::data_expression_list> rename_list_args;
     for (const Summand& summand: summands)
     {
-      c.sums = merge_variables(summand.summation_variables(),
-        c.sums,
-        rename_list_pars,
-        rename_list_args,
-        c.absent_sum_variables_conditions,
-        parameters);
-    }
-    c.sum_renamings.resize(c.n);
-    for (std::size_t i = 0; i < c.n; ++i)
-    {
-      add_renaming(c.sum_renamings[i], rename_list_pars[i], rename_list_args[i]);
+      c.sum_renamings.push_back(
+        merge_variables_by_sort(summand.summation_variables(), c.sums, c.absent_sum_variables_conditions, parameters));
     }
 
     if (m_options.binary)
@@ -332,21 +307,12 @@ protected:
     const data::variable_list avoid
       = parameters + data::variable_list(all_sum_variables.begin(), all_sum_variables.end());
 
-    std::vector<data::variable_list> rename_list_pars;
-    std::vector<data::data_expression_list> rename_list_args;
-    for (const stochastic_action_summand& summand: summands)
-    {
-      c.stochastic_variables = merge_variables(summand.distribution().variables(),
-        c.stochastic_variables,
-        rename_list_pars,
-        rename_list_args,
-        c.absent_stochastic_variables_conditions,
-        avoid);
-    }
-    c.renamings.resize(c.n);
     for (std::size_t i = 0; i < c.n; ++i)
     {
-      add_renaming(c.renamings[i], rename_list_pars[i], rename_list_args[i]);
+      c.renamings.push_back(merge_variables_by_sort(summands[i].distribution().variables(),
+        c.stochastic_variables,
+        c.absent_stochastic_variables_conditions,
+        avoid));
       add_renaming(c.renamings[i], c.sum_renamings[i]);
     }
   }
