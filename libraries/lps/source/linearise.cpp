@@ -5147,6 +5147,18 @@ class specification_basic_type
       }
     }
 
+    /* Adds the assignments of other to sigma for the variables that sigma does not assign yet. */
+    static void add_renaming(renaming_type& sigma, const renaming_type& other)
+    {
+      for (const std::pair<const variable, data_expression>& assignment: other)
+      {
+        if (sigma(assignment.first) == assignment.first)
+        {
+          sigma[assignment.first] = assignment.second;
+        }
+      }
+    }
+
     static const data_expression& summand_time(const stochastic_action_summand& summand)
     {
       return summand.multi_action().time();
@@ -5155,6 +5167,118 @@ class specification_basic_type
     static const data_expression& summand_time(const deadlock_summand& summand)
     {
       return summand.deadlock().time();
+    }
+
+    /* A cluster of n summands that is turned into a single summand. Lists of terms with one term per summand are in
+       the reverse order of the summands, as arguments of a case function. */
+    struct summand_cluster
+    {
+      summand_cluster(const enumtype& e_, std::size_t n_)
+        : e(e_),
+          n(n_)
+      {}
+
+      const enumtype& e;
+      std::size_t n;
+      /* The sum variables of the clustered summand: the variable of e (with --binary the boolean variables that
+         select a summand) followed by the merged sum variables of the summands. */
+      variable_list sums;
+      /* Per summand, the condition that fixes the merged sum variables that do not occur in it to a default value. */
+      data_expression_list absent_sum_variables_conditions;
+      /* With --binary, the condition that excludes the values of the boolean variables that do not select a summand. */
+      data_expression binary_sum_condition;
+      /* Per summand, the renaming of its sum variables. */
+      std::vector<renaming_type> sum_renamings;
+      /* For action summands, the merged stochastic variables, per summand the condition that fixes those that do not
+         occur in it to a default value, and per summand the renaming of its stochastic variables followed by that of
+         its sum variables. */
+      variable_list stochastic_variables;
+      data_expression_list absent_stochastic_variables_conditions;
+      std::vector<renaming_type> renamings;
+    };
+
+    /* The sum variables of the summands are merged. They are renamed away from the parameters if needed. */
+    template<typename Summand>
+    void merge_sum_variables(summand_cluster& c, const std::vector<Summand>& summands, const variable_list& parameters)
+    {
+      std::vector<variable_list> rename_list_pars;
+      std::vector<data_expression_list> rename_list_args;
+      for (const Summand& summand: summands)
+      {
+        c.sums = merge_var(summand.summation_variables(),
+          c.sums,
+          rename_list_pars,
+          rename_list_args,
+          c.absent_sum_variables_conditions,
+          parameters);
+      }
+      c.sum_renamings.resize(c.n);
+      for (std::size_t i = 0; i < c.n; ++i)
+      {
+        add_renaming(c.sum_renamings[i], rename_list_pars[i], rename_list_args[i]);
+      }
+
+      if (options.binary)
+      {
+        c.sums
+          = make_binary_sums(c.n, enumeratedtypes[c.e.enumeratedtype_index].sortId, c.binary_sum_condition, c.sums);
+      }
+      else
+      {
+        c.sums.push_front(c.e.var);
+      }
+    }
+
+    /* The stochastic variables of the summands are merged. They are renamed away from the parameters and the sum
+       variables if needed. In the distribution and the next state, the renaming of the stochastic variables takes
+       precedence over the renaming of the sum variables. */
+    void merge_stochastic_variables(summand_cluster& c,
+      const stochastic_action_summand_vector& summands,
+      const variable_list& parameters)
+    {
+      std::set<variable> all_sum_variables;
+      for (const stochastic_action_summand& summand: summands)
+      {
+        all_sum_variables.insert(summand.summation_variables().begin(), summand.summation_variables().end());
+      }
+      const variable_list avoid = parameters + variable_list(all_sum_variables.begin(), all_sum_variables.end());
+
+      std::vector<variable_list> rename_list_pars;
+      std::vector<data_expression_list> rename_list_args;
+      for (const stochastic_action_summand& summand: summands)
+      {
+        c.stochastic_variables = merge_var(summand.distribution().variables(),
+          c.stochastic_variables,
+          rename_list_pars,
+          rename_list_args,
+          c.absent_stochastic_variables_conditions,
+          avoid);
+      }
+      c.renamings.resize(c.n);
+      for (std::size_t i = 0; i < c.n; ++i)
+      {
+        add_renaming(c.renamings[i], rename_list_pars[i], rename_list_args[i]);
+        add_renaming(c.renamings[i], c.sum_renamings[i]);
+      }
+    }
+
+    /* The terms of the summands, in reverse order, as arguments of a case function. */
+    static data_expression_list case_arguments(const data_expression_vector& terms)
+    {
+      return data_expression_list(terms.rbegin(), terms.rend());
+    }
+
+    /* Selects one of the terms, which are given in the reverse order of the summands, with the case function of
+       c.e on sort, or with --binary with a case tree over the boolean sum variables at the front of c.sums. */
+    data_expression case_term(const summand_cluster& c, const data_expression_list& terms, const sort_expression& sort)
+    {
+      if (options.binary)
+      {
+        return construct_binary_case_tree(c.n, c.sums, terms, sort, c.e);
+      }
+      data_expression_list arguments = terms;
+      arguments.push_front(c.e.var);
+      return application(find_case_function(c.e.enumeratedtype_index, sort), arguments);
     }
 
     /* The terms of the summands in a cluster can be represented by a single term if all terms that are not global
@@ -5194,237 +5318,178 @@ class specification_basic_type
       return std::nullopt;
     }
 
-    /* Selects one of the terms, which are given in the reverse order of the summands, with the case function of e on
-       sort, or with --binary with a case tree over the boolean sum variables at the front of sums. */
-    data_expression case_term(const enumtype& e,
-      const std::size_t n,
-      const variable_list& sums,
-      const data_expression_list& terms,
-      const sort_expression& sort)
+    /* The common term of the terms of the summands if they are equal up to global variables, and a case term
+       otherwise. */
+    data_expression
+    clustered_term(const summand_cluster& c, const data_expression_vector& terms, const sort_expression& sort)
     {
+      const std::optional<data_expression> equal_term = equal_up_to_global_variables(terms);
+      return equal_term ? *equal_term : case_term(c, case_arguments(terms), sort);
+    }
+
+    /* The condition that fixes the merged variables that do not occur in the selected summand to a default value,
+       given the conditions per summand. */
+    data_expression absent_variables_condition(const summand_cluster& c, const data_expression_list& conditions)
+    {
+      return all_equal(conditions) ? conditions.front() : case_term(c, conditions, sort_bool::bool_());
+    }
+
+    template<typename Summand>
+    data_expression clustered_condition(summand_cluster& c, const std::vector<Summand>& summands)
+    {
+      data_expression_vector conditions;
+      for (std::size_t i = 0; i < c.n; ++i)
+      {
+        conditions.push_back(replace_variables_capture_avoiding(summands[i].condition(), c.sum_renamings[i]));
+      }
       if (options.binary)
       {
-        return construct_binary_case_tree(n, sums, terms, sort, e);
+        return lazy::and_(case_term(c, c.absent_sum_variables_conditions, sort_bool::bool_()),
+          lazy::and_(c.binary_sum_condition, case_term(c, case_arguments(conditions), sort_bool::bool_())));
       }
-      data_expression_list arguments = terms;
-      arguments.push_front(e.var);
-      return application(find_case_function(e.enumeratedtype_index, sort), arguments);
+      return lazy::and_(absent_variables_condition(c, c.absent_sum_variables_conditions),
+        clustered_term(c, conditions, sort_bool::bool_()));
     }
 
-    /* The terms of the summands, in reverse order, as arguments of a case function. */
-    static data_expression_list case_arguments(const data_expression_vector& terms)
+    /* The actions of the clustered summand. All summands have the same action labels. */
+    action_list clustered_actions(summand_cluster& c, const stochastic_action_summand_vector& summands)
     {
-      return data_expression_list(terms.rbegin(), terms.rend());
+      // The arguments of all actions of each summand, renamed.
+      std::vector<data_expression_vector> arguments(c.n);
+      for (std::size_t i = 0; i < c.n; ++i)
+      {
+        for (const action& a: summands[i].multi_action().actions())
+        {
+          for (const data_expression& argument: a.arguments())
+          {
+            arguments[i].push_back(replace_variables_capture_avoiding(argument, c.sum_renamings[i]));
+          }
+        }
+      }
+
+      std::vector<action> result;
+      std::size_t argument_index = 0;
+      for (const action& a: summands.front().multi_action().actions())
+      {
+        data_expression_vector resultarguments;
+        for (const data_expression& argument: a.arguments())
+        {
+          data_expression_vector terms;
+          for (const data_expression_vector& summand_arguments: arguments)
+          {
+            terms.push_back(summand_arguments[argument_index]);
+          }
+          resultarguments.push_back(clustered_term(c, terms, argument.sort()));
+          ++argument_index;
+        }
+        result.emplace_back(a.label(), data_expression_list(resultarguments.begin(), resultarguments.end()));
+      }
+      return action_list(result.begin(), result.end());
     }
 
+    /* The time of the clustered summand, if all summands have a time. */
+    template<typename Summand>
+    data_expression clustered_time(summand_cluster& c, const std::vector<Summand>& summands)
+    {
+      data_expression_vector times;
+      for (std::size_t i = 0; i < c.n; ++i)
+      {
+        times.push_back(replace_variables_capture_avoiding(summand_time(summands[i]), c.sum_renamings[i]));
+      }
+      if (options.binary)
+      {
+        return case_term(c, case_arguments(times), sort_real::real_());
+      }
+      return clustered_term(c, times, sort_real::real_());
+    }
+
+    /* The distribution of the clustered summand. */
+    data_expression clustered_distribution(summand_cluster& c, const stochastic_action_summand_vector& summands)
+    {
+      data_expression_vector distributions;
+      for (std::size_t i = 0; i < c.n; ++i)
+      {
+        distributions.push_back(
+          replace_variables_capture_avoiding(summands[i].distribution().distribution(), c.renamings[i]));
+      }
+      if (options.binary)
+      {
+        return lazy::and_(case_term(c, c.absent_stochastic_variables_conditions, sort_bool::bool_()),
+          case_term(c, case_arguments(distributions), sort_real::real_()));
+      }
+
+      const std::optional<data_expression> equal_distribution = equal_up_to_global_variables(distributions);
+      const data_expression distribution
+        = equal_distribution ? *equal_distribution : case_term(c, case_arguments(distributions), sort_real::real_());
+      // The distribution is multiplied by the condition on the stochastic variables that do not occur in a
+      // summand. This factor is only left out if the distributions are equal and the condition is true.
+      if (equal_distribution && all_equal(c.absent_stochastic_variables_conditions)
+          && c.absent_stochastic_variables_conditions.front() == sort_bool::true_())
+      {
+        return distribution;
+      }
+      return sort_real::optimized_times(if_(absent_variables_condition(c, c.absent_stochastic_variables_conditions),
+                                          sort_real::real_one(),
+                                          sort_real::real_zero()),
+        distribution);
+    }
+
+    /* The next state of the clustered summand. */
+    assignment_list clustered_next_state(summand_cluster& c,
+      const stochastic_action_summand_vector& summands,
+      const variable_list& parameters)
+    {
+      data_expression_vector next_state;
+      for (const variable& parameter: parameters)
+      {
+        data_expression_vector values;
+        for (std::size_t i = 0; i < c.n; ++i)
+        {
+          values.push_back(
+            replace_variables_capture_avoiding(getRHSassignment(parameter, summands[i].assignments()), c.renamings[i]));
+        }
+        const std::optional<data_expression> equal_value = equal_next_state_values(values);
+        next_state.push_back(equal_value ? *equal_value : case_term(c, case_arguments(values), parameter.sort()));
+      }
+      return make_optimised_assignment_list(parameters,
+        data_expression_list(next_state.begin(), next_state.end()),
+        c.sums,
+        c.stochastic_variables);
+    }
+
+    /* This function gets a list of summands, with the same multiaction and time status. It yields a single clustered
+       summand by introducing an auxiliary sum operator, with a variable of enumtype. In case binary is used, a
+       sequence of variables are introduced of sort Bool. */
     template<typename Summand>
     Summand
     collect_sum_arg_arg_cond(const enumtype& e, const std::vector<Summand>& summands, const variable_list& parameters)
     {
-      /* This function gets a list of summands, with
-         the same multiaction and time
-         status. It yields a single clustered summand
-         by introducing an auxiliary sum operator, with
-         a variable of enumtype. In case binary is used,
-         a sequence of variables are introduced of sort Bool */
-      constexpr bool is_action_summand = std::is_same_v<Summand, stochastic_action_summand>;
+      summand_cluster c(e, summands.size());
+      merge_sum_variables(c, summands, parameters);
+      const data_expression condition = clustered_condition(c, summands);
 
-      const std::size_t n = summands.size();
-
-      /* The sum variables of the summands are merged. The renamings of the sum variables of each summand are
-         in sum_renamings; conditionlist restricts the variables that do not occur in a summand. */
-      variable_list resultsum;
-      std::vector<variable_list> rename_list_pars;
-      std::vector<data_expression_list> rename_list_args;
-      data_expression_list conditionlist;
-      std::set<variable> all_sum_variables;
-      for (const Summand& summand: summands)
-      {
-        const variable_list& sumvars = summand.summation_variables();
-        resultsum = merge_var(sumvars, resultsum, rename_list_pars, rename_list_args, conditionlist, parameters);
-        all_sum_variables.insert(sumvars.begin(), sumvars.end());
-      }
-      std::vector<renaming_type> sum_renamings(n);
-      for (std::size_t i = 0; i < n; ++i)
-      {
-        add_renaming(sum_renamings[i], rename_list_pars[i], rename_list_args[i]);
-      }
-
-      data_expression binarysumcondition;
-      if (options.binary)
-      {
-        resultsum = make_binary_sums(n, enumeratedtypes[e.enumeratedtype_index].sortId, binarysumcondition, resultsum);
-      }
-      else
-      {
-        resultsum.push_front(e.var);
-      }
-
-      /* we construct the resulting condition */
-      data_expression_vector conditions;
-      for (std::size_t i = 0; i < n; ++i)
-      {
-        conditions.push_back(replace_variables_capture_avoiding(summands[i].condition(), sum_renamings[i]));
-      }
-      data_expression resultcondition;
-      if (options.binary)
-      {
-        resultcondition = lazy::and_(case_term(e, n, resultsum, conditionlist, sort_bool::bool_()),
-          lazy::and_(binarysumcondition, case_term(e, n, resultsum, case_arguments(conditions), sort_bool::bool_())));
-      }
-      else
-      {
-        const std::optional<data_expression> equal_condition = equal_up_to_global_variables(conditions);
-        resultcondition
-          = lazy::and_(all_equal(conditionlist) ? conditionlist.front()
-                                                : case_term(e, n, resultsum, conditionlist, sort_bool::bool_()),
-            equal_condition ? *equal_condition
-                            : case_term(e, n, resultsum, case_arguments(conditions), sort_bool::bool_()));
-      }
-
-      /* now we construct the arguments of the action. All summands have the same action labels. */
-      std::vector<action> resultactions;
-      if constexpr (is_action_summand)
-      {
-        std::vector<data_expression_vector> arguments(n);
-        for (std::size_t i = 0; i < n; ++i)
-        {
-          for (const action& a: summands[i].multi_action().actions())
-          {
-            for (const data_expression& argument: a.arguments())
-            {
-              arguments[i].push_back(replace_variables_capture_avoiding(argument, sum_renamings[i]));
-            }
-          }
-        }
-        std::size_t argument_index = 0;
-        for (const action& a: summands.front().multi_action().actions())
-        {
-          data_expression_vector resultarguments;
-          for (const data_expression& argument: a.arguments())
-          {
-            data_expression_vector terms;
-            for (const data_expression_vector& summand_arguments: arguments)
-            {
-              terms.push_back(summand_arguments[argument_index]);
-            }
-            const std::optional<data_expression> equal_term = equal_up_to_global_variables(terms);
-            resultarguments.push_back(
-              equal_term ? *equal_term : case_term(e, n, resultsum, case_arguments(terms), argument.sort()));
-            ++argument_index;
-          }
-          resultactions.emplace_back(a.label(), data_expression_list(resultarguments.begin(), resultarguments.end()));
-        }
-      }
-
-      /* Construct resulttime, the time of the action. The summands in a cluster either all have a time, or none
-         has (summandsCanBeClustered). */
+      // The summands in a cluster either all have a time, or none has (summandsCanBeClustered).
       const bool has_time = summands.front().has_time();
       assert(std::all_of(summands.begin(),
         summands.end(),
         [has_time](const Summand& summand) { return summand.has_time() == has_time; }));
-      data_expression resulttime;
-      if (has_time)
+
+      if constexpr (std::is_same_v<Summand, stochastic_action_summand>)
       {
-        data_expression_vector times;
-        for (std::size_t i = 0; i < n; ++i)
-        {
-          times.push_back(replace_variables_capture_avoiding(summand_time(summands[i]), sum_renamings[i]));
-        }
-        const std::optional<data_expression> equal_time
-          = options.binary ? std::nullopt : equal_up_to_global_variables(times);
-        resulttime = equal_time ? *equal_time : case_term(e, n, resultsum, case_arguments(times), sort_real::real_());
-      }
-
-      if constexpr (is_action_summand)
-      {
-        /* we construct the resulting distribution. The stochastic variables of the summands are merged; they are
-           renamed away from the parameters and the sum variables. The next states are also subject to the renaming of
-           the stochastic variables, which takes precedence over the renaming of the sum variables. */
-        variable_list resulting_stochastic_variables;
-        std::vector<variable_list> stochastic_rename_list_pars;
-        std::vector<data_expression_list> stochastic_rename_list_args;
-        data_expression_list stochastic_conditionlist;
-        for (const stochastic_action_summand& summand: summands)
-        {
-          resulting_stochastic_variables = merge_var(summand.distribution().variables(),
-            resulting_stochastic_variables,
-            stochastic_rename_list_pars,
-            stochastic_rename_list_args,
-            stochastic_conditionlist,
-            parameters + variable_list(all_sum_variables.begin(), all_sum_variables.end()));
-        }
-        std::vector<renaming_type> renamings(n);
-        for (std::size_t i = 0; i < n; ++i)
-        {
-          add_renaming(renamings[i], stochastic_rename_list_pars[i], stochastic_rename_list_args[i]);
-          add_renaming(renamings[i], rename_list_pars[i], rename_list_args[i]);
-        }
-
-        data_expression_vector distributions;
-        for (std::size_t i = 0; i < n; ++i)
-        {
-          distributions.push_back(
-            replace_variables_capture_avoiding(summands[i].distribution().distribution(), renamings[i]));
-        }
-        data_expression resulting_distribution;
-        if (options.binary)
-        {
-          resulting_distribution = lazy::and_(case_term(e, n, resultsum, stochastic_conditionlist, sort_bool::bool_()),
-            case_term(e, n, resultsum, case_arguments(distributions), sort_real::real_()));
-        }
-        else
-        {
-          const std::optional<data_expression> equal_distribution = equal_up_to_global_variables(distributions);
-          resulting_distribution = equal_distribution
-                                     ? *equal_distribution
-                                     : case_term(e, n, resultsum, case_arguments(distributions), sort_real::real_());
-          // The distribution is multiplied by the condition on the stochastic variables that do not occur in a
-          // summand. This factor is only left out if the distributions are equal and the condition is true.
-          if (!(equal_distribution && all_equal(stochastic_conditionlist)
-                && stochastic_conditionlist.front() == sort_bool::true_()))
-          {
-            const data_expression stochastic_condition
-              = all_equal(stochastic_conditionlist)
-                  ? stochastic_conditionlist.front()
-                  : case_term(e, n, resultsum, stochastic_conditionlist, sort_bool::bool_());
-            resulting_distribution
-              = sort_real::optimized_times(if_(stochastic_condition, sort_real::real_one(), sort_real::real_zero()),
-                resulting_distribution);
-          }
-        }
-
-        /* now we construct the arguments of the invoked process, i.e. the new function g */
-        data_expression_vector resultnextstate;
-        for (const variable& var: parameters)
-        {
-          data_expression_vector values;
-          for (std::size_t i = 0; i < n; ++i)
-          {
-            values.push_back(
-              replace_variables_capture_avoiding(getRHSassignment(var, summands[i].assignments()), renamings[i]));
-          }
-          const std::optional<data_expression> equal_value = equal_next_state_values(values);
-          resultnextstate.push_back(
-            equal_value ? *equal_value : case_term(e, n, resultsum, case_arguments(values), var.sort()));
-        }
-
-        /* The list of arguments in nextstate are now in a sequential form, and
-             must be transformed back to a list of assignments */
-        const assignment_list final_resultnextstate = make_optimised_assignment_list(parameters,
-          data_expression_list(resultnextstate.begin(), resultnextstate.end()),
-          resultsum,
-          resulting_stochastic_variables);
-        const action_list resultmultiactionlist(resultactions.begin(), resultactions.end());
-        return stochastic_action_summand(resultsum,
-          resultcondition,
-          has_time ? multi_action(resultmultiactionlist, resulttime) : multi_action(resultmultiactionlist),
-          final_resultnextstate,
-          stochastic_distribution(resulting_stochastic_variables, resulting_distribution));
+        const action_list actions = clustered_actions(c, summands);
+        const multi_action multiaction
+          = has_time ? multi_action(actions, clustered_time(c, summands)) : multi_action(actions);
+        merge_stochastic_variables(c, summands, parameters);
+        const data_expression distribution = clustered_distribution(c, summands);
+        return stochastic_action_summand(c.sums,
+          condition,
+          multiaction,
+          clustered_next_state(c, summands, parameters),
+          stochastic_distribution(c.stochastic_variables, distribution));
       }
       else
       {
-        return deadlock_summand(resultsum, resultcondition, has_time ? deadlock(resulttime) : deadlock());
+        return deadlock_summand(c.sums, condition, has_time ? deadlock(clustered_time(c, summands)) : deadlock());
       }
     }
 
