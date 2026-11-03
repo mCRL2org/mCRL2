@@ -5414,8 +5414,13 @@ class specification_basic_type
       }
       if (options.binary)
       {
-        return lazy::and_(case_term(c, c.absent_stochastic_variables_conditions, sort_bool::bool_()),
-          case_term(c, case_arguments(distributions), sort_real::real_()));
+        const data_expression condition = case_term(c, c.absent_stochastic_variables_conditions, sort_bool::bool_());
+        const data_expression distribution = case_term(c, case_arguments(distributions), sort_real::real_());
+        if (condition == sort_bool::true_())
+        {
+          return distribution;
+        }
+        return sort_real::optimized_times(if_(condition, sort_real::real_one(), sort_real::real_zero()), distribution);
       }
 
       const std::optional<data_expression> equal_distribution = equal_up_to_global_variables(distributions);

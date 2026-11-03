@@ -209,3 +209,26 @@ BOOST_AUTO_TEST_CASE(test_implicit_assignment_of_a_stochastic_variable_that_hide
   statespace.load(is);
   run_linearisation_test_case(spec, statespace);
 }
+
+// Clustering merges the two summands, which have different stochastic variables. Each stochastic variable that does
+// not occur in the selected summand is fixed to a default value, by a condition that is a factor of the distribution.
+// With --binary this condition was combined with the distribution by a conjunction, which is not well typed.
+BOOST_AUTO_TEST_CASE(test_clustering_summands_with_different_stochastic_variables)
+{
+  const std::string spec = "act a: Bool;\n"
+                           "proc P(b: Bool) = a(b) . dist x: Bool[if(x, 1/4, 3/4)] . P(x)\n"
+                           "                + a(b) . dist y: Nat[if(y < 2, 1/2, 0)] . P(y == 0);\n"
+                           "init P(true);\n";
+
+  const std::string expected_statespace = "des (0,4,2)\n"
+                                          "(0,\"a(true)\",0 1/4 1)\n"
+                                          "(0,\"a(true)\",0 1/2 1)\n"
+                                          "(1,\"a(false)\",0 1/4 1)\n"
+                                          "(1,\"a(false)\",0 1/2 1)\n";
+
+  std::stringstream is(expected_statespace);
+
+  lts::probabilistic_lts_aut_t statespace;
+  statespace.load(is);
+  run_linearisation_test_case(spec, statespace);
+}
