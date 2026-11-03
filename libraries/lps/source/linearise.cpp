@@ -4521,8 +4521,8 @@ class specification_basic_type
 
     /**************** Enumtype **********************************/
 
-    /* An enumerated sort with size elements, with a variable var of that sort and case functions on the given
-       sorts, Bool, and Real if time or stochastic operators are used. */
+    /* An enumerated sort with size elements, with a variable var of that sort. The case functions on it are made
+       when they are needed. */
     class enumtype
     {
       public:
@@ -4533,32 +4533,12 @@ class specification_basic_type
         std::size_t size;
         variable var;
 
-        enumtype(std::size_t n,
-          const sort_expression_list& fsorts,
-          const sort_expression_list& gsorts,
-          specification_basic_type& spec)
+        enumtype(std::size_t n, specification_basic_type& spec)
           : size(n)
         {
           const sort_expression& enumerated_sort = spec.enumerated_sorts(n);
           var = variable(spec.fresh_identifier_generator("e"), enumerated_sort);
-          spec.insertvariable(var,true);
-
-          for (const sort_expression& f: fsorts)
-          {
-            spec.enumerated_sorts.case_function(n, f);
-          }
-
-          for (const sort_expression& f: gsorts)
-          {
-            spec.enumerated_sorts.case_function(n, f);
-          }
-
-          spec.enumerated_sorts.case_function(n, sort_bool::bool_());
-
-          if (spec.timeIsBeingUsed || spec.stochastic_operator_is_being_used)
-          {
-            spec.enumerated_sorts.case_function(n, sort_real::real_());
-          }
+          spec.insertvariable(var, true);
         }
 
         ~enumtype() = default;
@@ -5303,18 +5283,6 @@ class specification_basic_type
       }
     }
 
-    static
-    sort_expression_list getActionSorts(const action_list& actionlist)
-    {
-      sort_expression_list resultsorts;
-
-      for (const action& act: actionlist)
-      {
-        resultsorts=act.label().sorts()+resultsorts;
-      }
-      return resultsorts;
-    }
-
     /* Clusters the summands that can be clustered with each other into one summand. */
     template<typename Summand>
     std::vector<Summand> cluster_summands(const std::vector<Summand>& summands, const variable_list& pars)
@@ -5349,12 +5317,7 @@ class specification_basic_type
            We must now construct its clustered form. */
         if (w1.size() > 1)
         {
-          sort_expression_list actionsorts;
-          if constexpr (is_action_summand)
-          {
-            actionsorts = getActionSorts(w1.front().multi_action().actions());
-          }
-          const enumtype enumeratedtype_(options.binary ? 2 : w1.size(), actionsorts, get_sorts(pars), *this);
+          const enumtype enumeratedtype_(options.binary ? 2 : w1.size(), *this);
           result.push_back(collect_sum_arg_arg_cond(enumeratedtype_, w1, pars));
         }
         else if (w1.size() == 1)
