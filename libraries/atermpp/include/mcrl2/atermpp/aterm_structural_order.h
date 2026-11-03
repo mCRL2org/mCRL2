@@ -27,12 +27,12 @@ namespace atermpp
 ///          on its arity, and then lexicographically on the arguments. The undefined term precedes all other terms.
 ///          The comparison is linear in the size of the terms, but stops at the first difference, and identical
 ///          subterms are recognised in constant time because terms are maximally shared.
-///          The interface is that of operator<=> on terms, so the result can be used in the same way, e.g. with
-///          std::is_lt.
-/// \return std::weak_ordering::less if x precedes y, std::weak_ordering::equivalent if x and y are equal, and
-///         std::weak_ordering::greater if y precedes x.
+///          Because terms are maximally shared and function symbols are unique for a name and arity, two terms are
+///          only equal under this order if they are the same term, so the order is a std::strong_ordering.
+/// \return std::strong_ordering::less if x precedes y, std::strong_ordering::equal if x and y are equal, and
+///         std::strong_ordering::greater if y precedes x.
 inline
-std::weak_ordering structural_compare(const aterm& x, const aterm& y)
+std::strong_ordering structural_compare(const aterm& x, const aterm& y)
 {
   const aterm* left = &x;
   const aterm* right = &y;
@@ -42,7 +42,7 @@ std::weak_ordering structural_compare(const aterm& x, const aterm& y)
   {
     if (!left->defined() || !right->defined())
     {
-      return left->defined() ? std::weak_ordering::greater : std::weak_ordering::less;
+      return left->defined() ? std::strong_ordering::greater : std::strong_ordering::less;
     }
     if (left->type_is_int() || right->type_is_int())
     {
@@ -50,26 +50,27 @@ std::weak_ordering structural_compare(const aterm& x, const aterm& y)
       {
         return down_cast<aterm_int>(*left).value() <=> down_cast<aterm_int>(*right).value();
       }
-      return left->type_is_int() ? std::weak_ordering::less : std::weak_ordering::greater;
+      return left->type_is_int() ? std::strong_ordering::less : std::strong_ordering::greater;
     }
 
     const function_symbol& f = left->function();
     const function_symbol& g = right->function();
     if (f != g)
     {
-      const std::weak_ordering c = f.name() <=> g.name();
+      const std::strong_ordering c = f.name() <=> g.name();
       if (c != 0)
       {
         return c;
       }
       // Function symbols with the same name and arity are equal.
+      assert(f.arity() != g.arity());
       return f.arity() <=> g.arity();
     }
 
     const std::size_t arity = f.arity();
     for (std::size_t i = 0; i + 1 < arity; ++i)
     {
-      const std::weak_ordering c = structural_compare((*left)[i], (*right)[i]);
+      const std::strong_ordering c = structural_compare((*left)[i], (*right)[i]);
       if (c != 0)
       {
         return c;
@@ -80,7 +81,7 @@ std::weak_ordering structural_compare(const aterm& x, const aterm& y)
     left = &(*left)[arity - 1];
     right = &(*right)[arity - 1];
   }
-  return std::weak_ordering::equivalent;
+  return std::strong_ordering::equal;
 }
 
 /// \brief Function object that orders terms structurally; see structural_compare.
