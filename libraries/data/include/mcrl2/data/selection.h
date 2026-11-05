@@ -15,6 +15,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/fset.h"
+#include "mcrl2/data/normalize_sorts.h"
 
 
 
@@ -186,6 +187,44 @@ class used_data_equation_selector
       add_data_specification_symbols(specification); */
     }
 };
+
+/// \brief Removes the user defined mappings and equations that cannot be used when rewriting terms that only
+///        contain the given function symbols.
+/// \param data_spec The data specification to prune.
+/// \param function_symbols The function symbols that occur in the encompassing specification.
+/// \param global_variables The global variables of the encompassing specification.
+/// \return A data specification with the same sorts, aliases and constructors, and only the used mappings and equations.
+inline data_specification prune_data_specification(const data_specification& data_spec,
+    const std::set<function_symbol>& function_symbols,
+    const std::set<variable>& global_variables)
+{
+  used_data_equation_selector used_selector(data_spec, function_symbols, global_variables, false);
+
+  data_equation_vector equations;
+  for (const data_equation& equation: data_spec.user_defined_equations())
+  {
+    if (used_selector(equation))
+    {
+      equations.push_back(equation);
+    }
+  }
+
+  function_symbol_vector mappings;
+  for (const function_symbol& mapping: data_spec.user_defined_mappings())
+  {
+    // The user defined mappings can contain sort aliases, whereas the used symbols are normalised.
+    if (used_selector(normalize_sorts(mapping, data_spec)))
+    {
+      mappings.push_back(mapping);
+    }
+  }
+
+  return data_specification(data_spec.user_defined_sorts(),
+      data_spec.user_defined_aliases(),
+      data_spec.user_defined_constructors(),
+      mappings,
+      equations);
+}
 
 } // namespace mcrl2::data
 

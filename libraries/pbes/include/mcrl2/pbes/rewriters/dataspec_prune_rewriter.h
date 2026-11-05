@@ -1,10 +1,6 @@
 #ifndef MCRL2_PBES_REWRITERS_DATASPEC_REWRITER_H
 #define MCRL2_PBES_REWRITERS_DATASPEC_REWRITER_H
 
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -18,39 +14,14 @@ class dataspec_prune_rewriter
     /// \brief The term type
     using term_type = pbes;
 
-    /// \brief Rewrites a pres specification.
+    /// \brief Rewrites a pbes specification.
     /// \param x A term
     /// \return The rewrite result.
     pbes operator()(const pbes& p) const
     {
-        data::used_data_equation_selector used_selector(p.data(),
-            pbes_system::find_function_symbols(p),
-            p.global_variables(),
-            false);
-        data::data_equation_vector equations;
-        for (data::data_equation i: p.data().user_defined_equations())
-        {
-          if (used_selector(i))
-          {
-            equations.push_back(i);
-          }
-        }
-      
-        data::function_symbol_vector mappings;
-        for (data::function_symbol i: p.data().user_defined_mappings()) {
-            // The user defined mappings can contain sort aliases, whereas the used symbols are normalised.
-            if (used_selector(data::normalize_sorts(i, p.data()))) {
-                mappings.emplace_back(i);
-            }
-        }
-      
-        data::data_specification data_spec = data::data_specification(p.data().user_defined_sorts(),
-            p.data().user_defined_aliases(),
-            p.data().user_defined_constructors(),
-            mappings,
-            equations);
-      
-        return pbes(data_spec, p.global_variables(), p.equations(), p.initial_state());
+      pbes result(p);
+      result.data() = data::prune_data_specification(p.data(), pbes_system::find_function_symbols(p), p.global_variables());
+      return result;
     }
 };
 
