@@ -4,6 +4,7 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -37,7 +38,8 @@ class dataspec_prune_rewriter
       
         data::function_symbol_vector mappings;
         for (data::function_symbol i: p.data().user_defined_mappings()) {
-            if (used_selector(i)) {
+            // The user defined mappings can contain sort aliases, whereas the used symbols are normalised.
+            if (used_selector(data::normalize_sorts(i, p.data()))) {
                 mappings.emplace_back(i);
             }
         }
