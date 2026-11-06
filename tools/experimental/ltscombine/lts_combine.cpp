@@ -24,13 +24,16 @@
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/utilities/hash_utility.h"
 
+#include <atomic>
 #include <condition_variable>
 #include <cstddef>
+#include <deque>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <queue>
+#include <thread>
 #include <unordered_map>
 
 using state_t = std::size_t;
@@ -250,36 +253,56 @@ public:
   }
 };
 
-struct thread_context_t
+/// \brief The set of states of the combined LTS, which the workers insert into concurrently.
+using state_set_t = mcrl2::utilities::indexed_set<std::vector<state_t>, true>;
+
+/// \brief A state of the combined LTS that still has to be explored, together with its index.
+using todo_entry_t = std::pair<std::size_t, std::vector<state_t>>;
+
+/// \brief The objects shared by all worker threads.
+struct shared_context_t
 {
-  // Shared objects used by all worker threads.
-  lts::lts_builder* lts_builder;
-  std::queue<std::size_t>& queue;
+  state_set_t& states;
+  lts::lts_builder& lts_builder;
   lts::detail::progress_monitor& progress_monitor;
-  mcrl2::utilities::indexed_set<std::vector<state_t>>& states;
   std::size_t number_of_threads;
 
-  // Mutexes guard the corresponding shared objects.
-  std::mutex& lts_builder_mutex;
-  std::mutex& queue_mutex;
-  std::mutex& progress_mutex;
-  std::mutex& states_mutex;
+  /// Guards lts_builder.
+  std::mutex lts_builder_mutex;
 
-  // Condition variable and scheduler state for queue-based work distribution.
-  // Invariant: active_workers and stop are read/written while holding queue_mutex.
-  std::condition_variable& queue_cond;
-  std::size_t& active_workers;
-  bool& stop;
+  /// States that any worker can take. Workers explore the states in their own todo buffer, and only move states here
+  /// when other workers are idle, so that the shared buffer is rarely accessed.
+  std::mutex todo_mutex;
+  std::condition_variable todo_cond;
+  std::deque<todo_entry_t> todo;                ///< Guarded by todo_mutex.
+  std::atomic<std::size_t> todo_size = 0;       ///< The size of todo, written while holding todo_mutex.
+  std::atomic<std::size_t> idle_workers = 0;    ///< Written while holding todo_mutex.
+  bool stop = false;                            ///< Guarded by todo_mutex. Set once all states have been explored.
 };
 
 /// \brief The label index of a component that does not move in a combined transition.
 constexpr std::size_t no_transition = std::numeric_limits<std::size_t>::max();
+
+/// \brief A worker only moves states to the shared todo buffer when it has more than this number of states.
+constexpr std::size_t share_threshold = 64;
+
+/// \brief A worker writes its transitions to the LTS builder once it has this number of transitions.
+constexpr std::size_t flush_threshold = 1024;
 
 /// \brief Maps the label indices of the transitions taken by the components (no_transition for a component that does
 /// not move) to the resulting label after communication, block, allow and hide, or to std::nullopt if it is blocked or not
 /// allowed. The result only depends on these indices, so it is computed once instead of for every transition.
 /// Elements of an unordered_map are not moved on insertion, so references to the labels remain valid.
 using label_cache_t = std::unordered_map<std::vector<std::size_t>, std::optional<lps::multi_action>>;
+
+/// \brief A transition of the combined LTS that has not been written to the LTS builder yet. The label is owned by the
+/// label cache of the worker.
+struct buffered_transition_t
+{
+  std::size_t from;
+  const lps::multi_action* label;
+  std::size_t to;
+};
 
 /// \brief A worker that computes states of the combined LTS.
 class state_thread_worker
@@ -288,128 +311,118 @@ public:
   state_thread_worker(const combine_lts_static_context& input,
     const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions,
     const std::vector<std::vector<bool>>& allowed_labels,
-    thread_context_t& context)
+    shared_context_t& shared,
+    std::size_t thread_index)
     : input(input),
       outgoing_transitions(outgoing_transitions),
       allowed_labels(allowed_labels),
-      context(context)
+      shared(shared),
+      thread_index(thread_index)
   {}
 
   void operator()()
   {
-    // The termination action and the label cache are locals so that they are constructed and destroyed on this worker
-    // thread. An aterm member of this functor would be copy-constructed on the main thread
+    // The termination action, the label cache and the buffers are locals so that they are constructed and destroyed on
+    // this worker thread. An aterm member of this functor would be copy-constructed on the main thread
     // (registering it in the main thread's protection set) but destroyed on the worker thread,
     // because std::thread destroys its copy of the functor on the thread it runs.
     const process::action termination_action(
         process::action_label(core::identifier_string("Terminate"), data::sort_expression_list()),
         data::data_expression_list());
     label_cache_t label_cache;
+    std::deque<todo_entry_t> todo;
+    std::vector<buffered_transition_t> transitions;
 
-    while (true)
+    while (take_shared_states(todo))
     {
-      std::unique_lock<std::mutex> queue_lock(context.queue_mutex);
-
-      context.queue_cond.wait(queue_lock, [this]()
+      while (!todo.empty())
       {
-        return context.stop || !context.queue.empty();
-      });
+        const todo_entry_t entry = std::move(todo.front());
+        todo.pop_front();
 
-      if (context.stop && context.queue.empty())
-      {
-        // Global shutdown: no queued work remains and exploration has ended.
-        return;
+        visit_state(entry.first, entry.second, termination_action, label_cache, todo, transitions);
+        share_states(todo);
       }
-
-      const std::size_t state_index = context.queue.front();
-      context.queue.pop();
-      ++context.active_workers;
-      queue_lock.unlock();
-
-      // Process the state
-      visit_state(state_index, termination_action, label_cache);
-
-      queue_lock.lock();
-      --context.active_workers;
-
-      if (context.queue.empty() && context.active_workers == 0)
-      {
-        // This worker observed that no work is queued, and no other workers are
-        // processing states; this means we have explored the entire state space.
-        // The worker publishes stop and wakes all
-        // waiters so every thread can terminate without depending on new work.
-        context.stop = true;
-        queue_lock.unlock();
-        context.queue_cond.notify_all();
-        return;
-      }
-
-      queue_lock.unlock();
     }
+
+    // The labels of the buffered transitions are owned by the label cache, so they must be written before it is destroyed.
+    flush_transitions(transitions);
   }
 
 private:
   const combine_lts_static_context& input;
   const std::vector<lts::outgoing_transitions_per_state_t>& outgoing_transitions;
   const std::vector<std::vector<bool>>& allowed_labels; ///< Whether a label of a component can occur in an allowed multi-action.
-  thread_context_t& context;
+  shared_context_t& shared;
+  std::size_t thread_index; ///< The index of this worker for the states set.
 
-  std::vector<state_t> get_state(std::size_t state_index)
+  /// \brief Waits until there are shared states, and moves a fair share of them to todo.
+  /// \returns false iff all states have been explored, which is the case when all workers are idle and there are no
+  ///          shared states.
+  bool take_shared_states(std::deque<todo_entry_t>& todo)
   {
-    std::scoped_lock state_lock(context.states_mutex);
-    return context.states[state_index];
+    std::unique_lock<std::mutex> todo_lock(shared.todo_mutex);
+    ++shared.idle_workers;
+    while (shared.todo.empty() && !shared.stop)
+    {
+      if (shared.idle_workers == shared.number_of_threads)
+      {
+        shared.stop = true;
+        shared.todo_cond.notify_all();
+      }
+      else
+      {
+        shared.todo_cond.wait(todo_lock);
+      }
+    }
+
+    if (shared.stop)
+    {
+      return false;
+    }
+
+    --shared.idle_workers;
+    const std::size_t share = std::max<std::size_t>(1, shared.todo.size() / shared.number_of_threads);
+    for (std::size_t i = 0; i < share; ++i)
+    {
+      todo.push_back(std::move(shared.todo.front()));
+      shared.todo.pop_front();
+    }
+    shared.todo_size = shared.todo.size();
+    return true;
   }
 
-  std::pair<std::size_t, bool> insert_state(const std::vector<state_t>& state)
+  /// \brief Moves half of the states in todo to the shared todo buffer when other workers are idle and it is empty.
+  void share_states(std::deque<todo_entry_t>& todo)
   {
-    std::scoped_lock state_lock(context.states_mutex);
-    return context.states.insert(state);
+    if (todo.size() > share_threshold && shared.idle_workers.load(std::memory_order_relaxed) > 0
+        && shared.todo_size.load(std::memory_order_relaxed) == 0)
+    {
+      std::unique_lock<std::mutex> todo_lock(shared.todo_mutex);
+      if (shared.todo.empty())
+      {
+        // Share the most recently found states, so that this worker keeps the ones it is about to explore.
+        const std::size_t share = todo.size() / 2;
+        std::move(todo.end() - static_cast<std::ptrdiff_t>(share), todo.end(), std::back_inserter(shared.todo));
+        todo.erase(todo.end() - static_cast<std::ptrdiff_t>(share), todo.end());
+        shared.todo_size = shared.todo.size();
+        todo_lock.unlock();
+        shared.todo_cond.notify_all();
+      }
+    }
   }
 
-  void queue_state(std::size_t state_index)
+  /// \brief Writes the buffered transitions to the LTS builder.
+  void flush_transitions(std::vector<buffered_transition_t>& transitions)
   {
-    std::unique_lock<std::mutex> queue_lock(context.queue_mutex);
-    context.queue.push(state_index);
-    queue_lock.unlock();
-
-    // Wake exactly one worker: one new state was enqueued.
-    context.queue_cond.notify_one();
-  }
-
-  std::size_t states_size()
-  {
-    std::scoped_lock states_lock(context.states_mutex);
-    return context.states.size();
-  }
-
-  std::size_t queue_size()
-  {
-    std::scoped_lock queue_lock(context.queue_mutex);
-    return context.queue.size();
-  }
-
-  void examine_transition()
-  {
-    std::scoped_lock progress_lock(context.progress_mutex);
-    context.progress_monitor.examine_transition();
-  }
-
-  void finish_state()
-  {
-    // Snapshot sizes under their own locks; report with progress_mutex only.
-    // This keeps long progress operations away from queue/states critical sections.
-    const std::size_t states_size = this->states_size();
-    const std::size_t queue_size = this->queue_size();
-
-    std::scoped_lock progress_lock(context.progress_mutex);
-    context.progress_monitor.finish_state(states_size, queue_size, input.nr_of_threads);
-  }
-
-  template <typename ActionLabel>
-  void add_transition(std::size_t from_state, const ActionLabel& label, std::size_t to_state)
-  {
-    std::scoped_lock builder_lock(context.lts_builder_mutex);
-    context.lts_builder->add_transition(from_state, label, to_state, context.number_of_threads);
+    std::scoped_lock builder_lock(shared.lts_builder_mutex);
+    for (const buffered_transition_t& transition: transitions)
+    {
+      shared.progress_monitor.examine_transition();
+      // The builder lock is already held, so the builder does not have to lock itself.
+      shared.lts_builder.add_transition(transition.from, *transition.label, transition.to, 1);
+    }
+    transitions.clear();
   }
 
   /// \brief Compute the outgoing transitions for the combined state and report them via callback.
@@ -516,40 +529,37 @@ private:
     return label_cache.emplace(labels, std::move(result)).first->second;
   }
 
-  std::size_t report_state(const std::vector<state_t>& state)
-  {
-    auto [new_state, inserted] = insert_state(state);
-    if (inserted)
-    {
-      queue_state(new_state);
-    }
-    return new_state;
-  }
-
-  void report_transition(std::size_t from_state, const lps::multi_action& label, std::size_t to_state)
-  {
-    examine_transition();
-    add_transition(from_state, label, to_state);
-  }
-
   /// \brief Process one state from the combined state space.
   /// \details Emits outgoing transitions via callback, using the label cache to determine whether each candidate is
-  /// blocked or allowed and its resulting label. Rejected candidates are not reported.
-  void visit_state(std::size_t state_index, const process::action& termination_action, label_cache_t& label_cache)
+  /// blocked or allowed and its resulting label. Rejected candidates are not reported. New states are added to todo,
+  /// and the transitions to the buffer.
+  void visit_state(std::size_t state_index,
+    const std::vector<state_t>& state,
+    const process::action& termination_action,
+    label_cache_t& label_cache,
+    std::deque<todo_entry_t>& todo,
+    std::vector<buffered_transition_t>& transitions)
   {
-    const std::vector<state_t> state = get_state(state_index);
-
     emit_outgoing_transitions(state, [&](const std::vector<std::size_t>& labels, const std::vector<state_t>& target_state)
     {
       const std::optional<lps::multi_action>& label = combined_label(labels, termination_action, label_cache);
       if (label)
       {
-        const std::size_t new_state = report_state(target_state);
-        report_transition(state_index, *label, new_state);
+        const auto [new_state, inserted] = shared.states.insert(target_state, thread_index);
+        if (inserted)
+        {
+          todo.emplace_back(new_state, target_state);
+        }
+
+        transitions.push_back({state_index, &*label, new_state});
+        if (transitions.size() >= flush_threshold)
+        {
+          flush_transitions(transitions);
+        }
       }
     });
 
-    finish_state();
+    shared.progress_monitor.finish_state(shared.states.size(thread_index), todo.size(), input.nr_of_threads);
   }
 };
 
@@ -564,7 +574,7 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
   }
 
   // The parallel composition has pair of states that are stored in an indexed set (to keep track of processed states).
-  mcrl2::utilities::indexed_set<std::vector<state_t>> states;
+  state_set_t states(input.nr_of_threads);
   std::vector<state_t> initial_states;
   process::action_label_list action_decls;
   data::data_specification data_spec;
@@ -593,10 +603,6 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
     }
   }
 
-  // The todo queue containing new found states.
-  std::queue<std::size_t> queue;
-  queue.push(initial);
-
   // Progress monitor.
   lts::detail::progress_monitor progress_monitor(lps::exploration_strategy::es_breadth);
 
@@ -615,42 +621,25 @@ void mcrl2::combine_lts(const combine_lts_static_context& input)
     combined_lts_builder = std::move(lts_disk_builder);
   }
 
-  std::mutex builder_mutex;
-  std::mutex queue_mutex;
-  std::mutex progress_mutex;
-  std::mutex states_mutex;
-
-  // Shared worker scheduling state, protected by queue_mutex.
-  // active_workers counts threads that popped work but have not yet completed it.
-  // stop becomes true once all states have been processed.
-  std::condition_variable queue_cond;
-  std::size_t active_workers = 0;
-  bool stop = false;
-
-  thread_context_t context{
-      .lts_builder=lts_builder,
-      .queue=queue,
-      .progress_monitor=progress_monitor,
+  shared_context_t shared{
       .states=states,
-      .number_of_threads=input.nr_of_threads,
-      .lts_builder_mutex=builder_mutex,
-      .queue_mutex=queue_mutex,
-      .progress_mutex=progress_mutex,
-      .states_mutex=states_mutex,
-      .queue_cond=queue_cond,
-      .active_workers=active_workers,
-      .stop=stop};
+      .lts_builder=*lts_builder,
+      .progress_monitor=progress_monitor,
+      .number_of_threads=input.nr_of_threads};
+  shared.todo.emplace_back(initial, initial_states);
+  shared.todo_size = 1;
 
   std::vector<std::thread> threads;
-
-  for (size_t i = 0; i < input.nr_of_threads; i++)
+  for (std::size_t i = 0; i < input.nr_of_threads; ++i)
   {
-    threads.emplace_back(state_thread_worker(input, outgoing_transitions, allowed_labels, context));
+    // The states set has one mutex per thread in addition to the main mutex at index zero when there are several threads.
+    const std::size_t thread_index = input.nr_of_threads == 1 ? 0 : i + 1;
+    threads.emplace_back(state_thread_worker(input, outgoing_transitions, allowed_labels, shared, thread_index));
   }
 
-  for (size_t i = 0; i < input.nr_of_threads; i++)
+  for (std::thread& thread: threads)
   {
-    threads[i].join();
+    thread.join();
   }
 
   progress_monitor.finish_exploration(states.size(), input.nr_of_threads);
