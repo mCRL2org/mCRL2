@@ -12,10 +12,12 @@
 #include "../lts_combine.h"
 
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/process/parse.h"
 
 #include <cstdio>
+#include <random>
 #include <set>
 #include <sstream>
 #include <string>
@@ -122,6 +124,28 @@ std::multiset<std::tuple<std::size_t, std::string, std::size_t>> transitions(con
   return result;
 }
 
+/// \brief An LTS with labels a, b and c and the given number of states, in which every state has a random number of
+/// outgoing transitions with random labels and targets, and all states are reachable.
+lts::lts_lts_t random_lts(const process::action_label_list& declarations, std::size_t number_of_states, std::mt19937& rng)
+{
+  const std::vector<std::string> labels{"a", "b", "c"};
+  std::uniform_int_distribution<std::size_t> label(0, labels.size() - 1);
+  std::uniform_int_distribution<std::size_t> state(0, number_of_states - 1);
+  std::uniform_int_distribution<std::size_t> outgoing(0, 3);
+
+  std::vector<std::tuple<std::size_t, std::string, std::size_t>> transitions;
+  for (std::size_t from = 0; from < number_of_states; ++from)
+  {
+    // A cycle through all states keeps them reachable.
+    transitions.emplace_back(from, "c", (from + 1) % number_of_states);
+    for (std::size_t i = outgoing(rng); i > 0; --i)
+    {
+      transitions.emplace_back(from, labels[label(rng)], state(rng));
+    }
+  }
+  return make_lts(declarations, number_of_states, transitions);
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_CASE(test_communication_allow_and_hide)
@@ -203,4 +227,31 @@ BOOST_AUTO_TEST_CASE(test_cache_distinguishes_components)
     {0, "a", 1},
     {0, "a|b", 2}
   }));
+}
+
+BOOST_AUTO_TEST_CASE(test_threads_agree_on_random_compositions)
+{
+  // The compositions have thousands of states and transitions, so that the workers share states and write their
+  // transitions in several parts.
+  const process::action_label_list declarations = process::parse_action_declaration("a, b, c, d;");
+  std::mt19937 rng(42);
+  for (std::size_t run = 0; run < 5; ++run)
+  {
+    const std::vector<lts::lts_lts_t> ltss{random_lts(declarations, 15, rng),
+      random_lts(declarations, 15, rng),
+      random_lts(declarations, 15, rng)};
+
+    for (bool save_at_end: {false, true})
+    {
+      const lts::lts_lts_t expected = combine(ltss, "{a|b -> d}", "{a, c, d, c|d}", "{a}", save_at_end, 1);
+      BOOST_CHECK_GT(expected.num_states(), 1000u);
+      for (std::size_t threads: {2, 4, 8})
+      {
+        const lts::lts_lts_t result = combine(ltss, "{a|b -> d}", "{a, c, d, c|d}", "{a}", save_at_end, threads);
+        BOOST_CHECK_EQUAL(result.num_states(), expected.num_states());
+        BOOST_CHECK_EQUAL(result.num_transitions(), expected.num_transitions());
+        BOOST_CHECK(lts::compare(result, expected, lts::lts_equivalence::lts_eq_bisim));
+      }
+    }
+  }
 }
