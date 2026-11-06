@@ -4,9 +4,7 @@ mcrl2_add_library(mcrl2_pbes
     source/pbes.cpp
     source/io.cpp
     source/pbes_explorer.cpp
-    source/pgsolver.cpp
-  DPARSER_SOURCES
-    source/pg_syntax.g
+    source/pgsolver_io.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data
