@@ -20,6 +20,7 @@
 #include <sstream>
 #include <string>
 #include <tuple>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -40,10 +41,18 @@ lts::lts_lts_t make_lts(const process::action_label_list& declarations,
     lts.add_state();
   }
   lts.set_initial_state(0);
+
+  std::unordered_map<std::string, lts::labels_size_type> label_indices;
   for (const auto& [from, text, to]: transitions)
   {
-    const lts::action_label_lts label(lps::parse_multi_action(text, declarations, data::data_specification()));
-    lts.add_transition(lts::transition(from, lts.add_action(label), to));
+    const auto [it, inserted] = label_indices.emplace(text, 0);
+    if (inserted)
+    {
+      const lts::action_label_lts label(lps::parse_multi_action(text, declarations, data::data_specification()));
+      it->second = lts.add_action(label);
+    }
+
+    lts.add_transition(lts::transition(from, it->second, to));
   }
   return lts;
 }
