@@ -16,6 +16,74 @@
 
 using namespace mcrl2;
 
+BOOST_AUTO_TEST_CASE(coupled_simulation_tau_cycles)
+{
+  const std::string matching_aut = "des (0,1,2)\n(0,\"a\",1)\n";
+  const std::string different_aut = "des (0,1,2)\n(0,\"b\",1)\n";
+  const std::vector<std::string> cyclic_auts = {
+    "des (0,2,2)\n(0,\"tau\",0)\n(0,\"a\",1)\n",
+    "des (0,2,2)\n(0,\"a\",1)\n(1,\"tau\",1)\n",
+    "des (0,3,3)\n(0,\"tau\",1)\n(1,\"tau\",0)\n(1,\"a\",2)\n"
+  };
+  const auto compare_aut = [](const std::string& left_aut, const std::string& right_aut, const bool preorder = false)
+  {
+    std::istringstream left_stream(left_aut);
+    std::istringstream right_stream(right_aut);
+    lts::lts_aut_t left;
+    lts::lts_aut_t right;
+    left.load(left_stream);
+    right.load(right_stream);
+    return preorder ? lts::compare(left, right, lts::lts_preorder::lts_pre_coupled_sim, false)
+            : lts::compare(left, right, lts::lts_equivalence::lts_eq_coupled_sim);
+  };
+
+  for (const std::string& cyclic_aut : cyclic_auts)
+  {
+    BOOST_CHECK(compare_aut(cyclic_aut, cyclic_aut));
+    BOOST_CHECK(compare_aut(cyclic_aut, matching_aut));
+    BOOST_CHECK(compare_aut(matching_aut, cyclic_aut));
+    BOOST_CHECK(!compare_aut(cyclic_aut, different_aut));
+    BOOST_CHECK(!compare_aut(different_aut, cyclic_aut));
+    BOOST_CHECK(compare_aut(cyclic_aut, cyclic_aut, true));
+    BOOST_CHECK(compare_aut(cyclic_aut, matching_aut, true));
+    BOOST_CHECK(compare_aut(matching_aut, cyclic_aut, true));
+    BOOST_CHECK(!compare_aut(cyclic_aut, different_aut, true));
+    BOOST_CHECK(!compare_aut(different_aut, cyclic_aut, true));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(coupled_simulation_preorder)
+{
+  const auto preorder = lts::lts_preorder::lts_pre_coupled_sim;
+  BOOST_CHECK(lts::parse_preorder("coupled-sim") == preorder);
+  BOOST_CHECK_EQUAL(lts::print_preorder(preorder), "coupled-sim");
+  BOOST_CHECK_EQUAL(lts::description(preorder), "coupled simulation preorder");
+
+  std::istringstream left_stream("des (0,1,2)\n(0,\"a\",1)\n");
+  std::istringstream right_stream(
+    "des (0,3,3)\n(0,\"b\",2)\n(0,\"tau\",1)\n(1,\"a\",2)\n");
+  lts::lts_aut_t left;
+  lts::lts_aut_t right;
+  left.load(left_stream);
+  right.load(right_stream);
+
+  BOOST_CHECK(lts::compare(left, left, preorder, false));
+  BOOST_CHECK(lts::compare(right, right, preorder, false));
+  BOOST_CHECK(lts::compare(left, right, preorder, false));
+  BOOST_CHECK(!lts::compare(right, left, preorder, false));
+  BOOST_CHECK(!lts::compare(left, right, lts::lts_equivalence::lts_eq_coupled_sim));
+  BOOST_CHECK(!lts::compare(right, left, lts::lts_equivalence::lts_eq_coupled_sim));
+  BOOST_CHECK_EQUAL(left.num_transitions(), 1);
+  BOOST_CHECK_EQUAL(right.num_transitions(), 3);
+
+  lts::lts_aut_t left_copy(left);
+  lts::lts_aut_t right_copy(right);
+  BOOST_CHECK(lts::destructive_compare(left_copy, right_copy, preorder, false));
+  left_copy = left;
+  right_copy = right;
+  BOOST_CHECK(!lts::destructive_compare(right_copy, left_copy, preorder, false));
+}
+
 BOOST_AUTO_TEST_CASE(reduce_simple_loop)
 {
   std::string SIMPLE_AUT =
