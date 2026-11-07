@@ -1,5 +1,8 @@
 @PACKAGE_INIT@
 
+set(lace_VERSION "@PROJECT_VERSION@")
+set(LACE_VERSION "@PROJECT_VERSION@")
+
 include(CMakeFindDependencyMacro)
 
 if(NOT MSVC)

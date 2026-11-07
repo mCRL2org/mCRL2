@@ -20,8 +20,8 @@
 
 // Lace version
 #define LACE_VERSION_MAJOR 1
-#define LACE_VERSION_MINOR 7
-#define LACE_VERSION_PATCH 0
+#define LACE_VERSION_MINOR 8
+#define LACE_VERSION_PATCH 2
 
 #if defined(_MSC_VER) && !defined(__clang__)
     #define LACE_MSVC 1
@@ -78,6 +78,7 @@
 #if LACE_MSVC
     #define LACE_UNUSED
     #define LACE_NOINLINE __declspec(noinline)
+    #define LACE_COLD
     #define LACE_NORETURN __declspec(noreturn)
     #define LACE_ALIGN(N) __declspec(align(N))
     #define LACE_LIKELY(x)   (x)
@@ -86,6 +87,7 @@
 #elif defined(__GNUC__) || defined(__clang__)
     #define LACE_UNUSED __attribute__((unused))
     #define LACE_NOINLINE __attribute__((noinline))
+    #define LACE_COLD __attribute__((cold))
     #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
         #define LACE_NORETURN _Noreturn
         #define LACE_ALIGN(N) _Alignas(N)
@@ -99,6 +101,7 @@
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
     #define LACE_UNUSED
     #define LACE_NOINLINE
+    #define LACE_COLD
     #define LACE_NORETURN _Noreturn
     #define LACE_ALIGN(N) _Alignas(N)
     #define LACE_LIKELY(x)   (x)
@@ -107,6 +110,7 @@
 #else
     #define LACE_UNUSED
     #define LACE_NOINLINE
+    #define LACE_COLD
     #define LACE_NORETURN
     #define LACE_ALIGN(N)
     #define LACE_LIKELY(x)   (x)
@@ -308,10 +312,6 @@
 #define LACE_TASKSIZE (128)
 #endif
 
-#ifndef LACE_LEAP_RANDOM /* Use random leaping when leapfrogging fails */
-#define LACE_LEAP_RANDOM 1
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -348,22 +348,88 @@ typedef struct _Task Task;
  * Default level: 0
  */
 void lace_set_verbosity(int level);
+
+/**
+ * Pinning modes for lace_set_pinning().
+ */
+typedef enum lace_pin_mode {
+    LACE_PIN_OFF = 0,
+    LACE_PIN_AUTO = 1,
+    LACE_PIN_ALL = 2,
+    LACE_PIN_CPU = 3,
+    LACE_PIN_L3 = 4,
+    LACE_PIN_NUMA = 5,
+    LACE_PIN_CORE = 6,
+    LACE_PIN_L2 = 7,
+} lace_pin_mode;
+
+/**
+ * Choose what each worker may run on, within the affinity mask of the thread
+ * that calls lace_start() (as taskset, cgroups or a job scheduler set it).
+ *
+ * - LACE_PIN_AUTO (the default): LACE_PIN_CPU if the workers fill the cores
+ *   of the mask, else LACE_PIN_ALL. A program with as many workers as cores
+ *   owns them, and one CPU per worker is fastest; one that leaves cores free
+ *   may share the machine, and pinning to fixed CPUs would make two such
+ *   programs share the same cores.
+ * - LACE_PIN_CPU: one hardware thread per worker, one of every physical core
+ *   before any second hardware thread of a core.
+ * - LACE_PIN_CORE: one physical core per worker (its hardware threads).
+ * - LACE_PIN_L2, LACE_PIN_L3, LACE_PIN_NUMA: the cores that share an L2
+ *   cache, an L3 cache or a NUMA node. The workers are spread over these
+ *   groups in proportion to their number of cores.
+ * - LACE_PIN_ALL: any physical core of the mask, one hardware thread each.
+ * - LACE_PIN_OFF: no pinning.
+ *
+ * With more workers than places (hardware threads for LACE_PIN_CPU, cores
+ * otherwise) Lace does not pin. Without this call, the environment variable
+ * LACE_PIN chooses: off, auto, all, cpu, core, l2, l3, numa, or list:CPUS for
+ * worker i on the i-th CPU of a list such as list:0,2,4-7 (see
+ * lace_set_pin_cpus). Linux only (other systems do not pin), and not with
+ * LACE_USE_HWLOC, which pins in its own way. Call before lace_start().
+ *
+ * @param mode  The pinning mode (default LACE_PIN_AUTO)
+ * @see lace_set_pin_cpus
+ */
+void lace_set_pinning(lace_pin_mode mode);
+
+/**
+ * Pin worker i to cpus[i % n] (manual pinning).
+ *
+ * CPUs outside the affinity mask are left out. Overrides lace_set_pinning()
+ * and LACE_PIN; n = 0 undoes it. Call before lace_start().
+ *
+ * @param cpus  CPU numbers
+ * @param n     Number of entries in @p cpus
+ * @see lace_set_pinning
+ */
+void lace_set_pin_cpus(const int *cpus, unsigned int n);
  
 /**
- * Set the program stack size of Lace worker threads. (Not really needed, default is OK.)
+ * Set the program stack size of Lace worker threads, at least 16 MB.
+ * Call before lace_start. The default (0) is a 1 GB reservation on 64-bit
+ * systems where stack pages are committed on first touch (not with
+ * LACE_DONT_OVERCOMMIT, not on Windows except MSVC), otherwise the stack
+ * limit of the calling thread clamped to 16-64 MB. If the 1 GB stacks
+ * cannot be reserved (for example under ulimit -v), Lace falls back to
+ * the latter.
  */
 void lace_set_stacksize(size_t stacksize);
  
 /**
  * Get the program stack size of Lace worker threads.
- * If this returns 0, it uses the default.
+ * If this returns 0, it uses the default. After lace_start, this is the
+ * stack size that the workers use.
  */
 size_t lace_get_stacksize(void);
 
 /**
  * Set the per-worker scratch arena reservation size in bytes.
  * Call before lace_start(). The default is 1 GiB on 64-bit systems
- * and 16 MiB on 32-bit systems. Pass 0 to disable the scratch arena.
+ * and 16 MiB on 32-bit systems. If the 64-bit default cannot be
+ * reserved (for example under ulimit -v), Lace falls back to 16 MiB.
+ * A size set here is used as given: if it cannot be reserved,
+ * lace_start() exits with an error. Pass 0 to disable the scratch arena.
  */
 void lace_set_scratch_size(size_t size);
 
@@ -384,6 +450,10 @@ unsigned int lace_get_pu_count(void);
  * Start Lace with <n_workers> workers and a a task deque size of <dqsize> per worker.
  * If <n_workers> is set to 0, automatically detects available cores.
  * If <dqsize> is est to 0, uses a reasonable default value.
+ * With LACE_BACKOFF (the default), idle workers soon sleep, and an idle Lace
+ * uses almost no CPU. On Linux, workers are pinned as lace_set_pinning()
+ * chooses (by default LACE_PIN_AUTO); with LACE_USE_HWLOC, hwloc pins them
+ * to CPU cores.
  */
 void lace_start(unsigned int n_workers, size_t dqsize);
 
@@ -392,6 +462,22 @@ void lace_start(unsigned int n_workers, size_t dqsize);
  * Call this method from outside Lace threads.
  */
 void lace_stop(void);
+
+/**
+ * Give the memory that idle workers hold back to the operating system.
+ *
+ * A deep computation leaves physical pages behind in the worker stacks, task
+ * deques and scratch arenas, and they stay resident until lace_stop(). This
+ * makes every worker, at its next idle moment, release the pages of its stack
+ * below its idle loop, of its deque past the first page, and of its scratch
+ * arena past the first band. The reservations stay, so later work just faults
+ * pages in again. Returns when all workers are done, so it waits for running
+ * tasks to finish.
+ *
+ * Must be called from a thread that is not a Lace worker; it returns at once
+ * otherwise. On Windows only the scratch arenas are released.
+ */
+void lace_release_memory(void);
 
 /**
  * Check whether the Lace runtime is currently active.
@@ -673,8 +759,12 @@ void lace_run_together(Task *task);
 
 /**
  * Check if current tasks must be interrupted, and if so, interrupt.
+ *
+ * lace_yield is out of line and cold: YIELD_NEWFRAME checks lace_newframe
+ * inline and only calls it when there is an interruption, so its task copy
+ * and barrier stay out of the stack frames of its callers.
  */
-void lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head);
+LACE_NOINLINE LACE_COLD void lace_yield(WorkerP *__lace_worker, Task *__lace_dq_head);
 #define YIELD_NEWFRAME() { if (LACE_UNLIKELY(atomic_load_explicit(&lace_newframe.t, memory_order_relaxed) != NULL)) { atomic_thread_fence(memory_order_acquire); lace_yield(__lace_worker, __lace_dq_head); } }
 
 /**
@@ -735,8 +825,7 @@ static inline uint64_t lace_gethrtime(void)
 {
 #if (defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64))
     #if defined(_MSC_VER) && !defined(__clang__)
-        // mCRL2: use rdtsc instead of rdtscp, since rdtscp is not available on all (virtual) CPUs.
-        return (uint64_t)__rdtsc();
+        return (uint64_t)__rdtsc();   // not __rdtscp: some (virtual) CPUs lack RDTSCP
     #elif defined(__clang__) || defined(__GNUC__)
         #if defined(__RDTSCP__)
             unsigned lo, hi, aux;
@@ -807,6 +896,8 @@ typedef enum {
     CTR_leaps,       /* Number of succesful leaps */
     CTR_steal_busy,  /* Number of steal busies */
     CTR_leap_busy,   /* Number of leap busies */
+    CTR_leap_strays, /* Leaps that stole a task unrelated to the awaited one */
+    CTR_leap_trans,  /* Successful leaps from a worker that the thief waits for */
 #endif
 #if LACE_COUNT_SPLITS
     CTR_split_grow,  /* Number of split right */
@@ -875,9 +966,14 @@ static_assert(sizeof(TailSplitNA) == 8, "TailSplit size should be 8 bytes");
 typedef struct _Worker {
     Task *dq;
     TailSplit ts;
+    /* While this worker leapfrogs: the thief of the task it waits for (the
+     * innermost wait), else NULL. Written on entering and leaving a leapfrog;
+     * read by leapfrogging workers whose own thief has nothing to steal. It
+     * shares the cache line that a steal attempt reads anyway. */
+    _Atomic(struct _Worker*) waiting_on;
     uint8_t allstolen;
 
-    char pad1[PAD(P_SZ+sizeof(TailSplit)+1, LACE_PADDING_TARGET)];
+    char pad1[PAD(2*P_SZ+sizeof(TailSplit)+1, LACE_PADDING_TARGET)];
 
     uint8_t movesplit;
 } Worker;
@@ -909,7 +1005,21 @@ typedef struct _WorkerP {
     uint64_t time;
     int level;
 #endif
+#if LACE_COUNT_STEALS
+    Task *leap_task;            // awaited task during a leap attempt (for CTR_leap_strays)
+#endif
 } WorkerP;
+
+/**
+ * The public part of a worker. Lace allocates the public struct of a worker
+ * right before its private struct (worker_data in lace.c, which aligns the
+ * private struct to LACE_PADDING_TARGET), so the hot paths (SPAWN, SYNC,
+ * DROP) find it at a constant offset instead of loading w->_public first.
+ */
+static inline Worker* lace_worker_public_of(WorkerP *w)
+{
+    return (Worker*)(void*)((char*)w - ROUND(sizeof(Worker), LACE_PADDING_TARGET));
+}
 
 /**
  * Scratch arena public API.
@@ -1014,7 +1124,7 @@ void lace_make_all_shared(WorkerP *w, Task *__lace_dq_head)
     if (w->split != __lace_dq_head) {
         w->split = __lace_dq_head;
         atomic_store_explicit(&w->_public->ts.ts.split,
-            (uint32_t)(__lace_dq_head - w->dq), memory_order_relaxed);
+            (uint32_t)(__lace_dq_head - w->dq), memory_order_release);
     }
 }
 
@@ -1102,43 +1212,6 @@ static LACE_UNUSED void lace_time_event(WorkerP *w, int event)
  */
 
 LACE_NO_SANITIZE_THREAD
-static LACE_NOINLINE
-Worker* lace_steal(WorkerP *self, Task *__dq_head, Worker *victim)
-{
-    if (victim != NULL && !victim->allstolen) {
-        TailSplitNA ts;
-        ts.v = atomic_load_explicit(&victim->ts.v, memory_order_relaxed);
-        if (ts.ts.tail < ts.ts.split) {
-            TailSplitNA ts_new;
-            ts_new.v = ts.v;
-            ts_new.ts.tail++;
-            if (atomic_compare_exchange_weak(&victim->ts.v, &ts.v, ts_new.v)) {
-                // Stolen
-                Task *t = &victim->dq[ts.ts.tail];
-                atomic_store_explicit(&t->thief, self->_public, memory_order_relaxed);
-                lace_time_event(self, 1);
-                t->f(self, __dq_head, t);
-                lace_time_event(self, 2);
-                atomic_store_explicit(&t->thief, THIEF_COMPLETED, memory_order_release);
-                lace_time_event(self, 8);
-                return ts_new.ts.tail < ts_new.ts.split ? LACE_STOLEN : LACE_STOLEN_LAST;
-            }
- 
-            lace_time_event(self, 7);
-            return LACE_BUSY;
-        }
- 
-        if (victim->movesplit == 0) {
-            victim->movesplit = 1;
-            PR_COUNTSPLITS(self, CTR_split_req);
-        }
-    }
- 
-    lace_time_event(self, 7);
-    return LACE_NOWORK;
-}
-
-LACE_NO_SANITIZE_THREAD
 static int
 lace_shrink_shared(WorkerP *w)
 {
@@ -1171,51 +1244,12 @@ lace_shrink_shared(WorkerP *w)
     return 1;
 }
 
-LACE_NO_SANITIZE_THREAD
-static inline void
-lace_leapfrog(WorkerP *__lace_worker, Task *__lace_dq_head)
-{
-    lace_time_event(__lace_worker, 3);
-    Task *t = __lace_dq_head;
-    Worker *thief = atomic_load_explicit(&t->thief, memory_order_relaxed);
-    if (thief != THIEF_COMPLETED) {
-        while ((size_t)thief <= 1) thief = atomic_load_explicit(&t->thief, memory_order_relaxed);
- 
-        /* PRE-LEAP: increase head again */
-        __lace_dq_head += 1;
- 
-        /* Now leapfrog */
-        int attempts = 32;
-        while (thief != THIEF_COMPLETED) {
-            PR_COUNTSTEALS(__lace_worker, CTR_leap_tries);
-            Worker *res = lace_steal(__lace_worker, __lace_dq_head, thief);
-            if (res == LACE_NOWORK) {
-                YIELD_NEWFRAME();
-                if ((LACE_LEAP_RANDOM) && (--attempts == 0)) { lace_steal_random(); attempts = 32; }
-            } else if (res == LACE_STOLEN) {
-                PR_COUNTSTEALS(__lace_worker, CTR_leaps);
-            } else if (res == LACE_BUSY) {
-                PR_COUNTSTEALS(__lace_worker, CTR_leap_busy);
-            }
-            atomic_thread_fence(memory_order_acquire);
-            thief = atomic_load_explicit(&t->thief, memory_order_relaxed);
-        }
- 
-        /* POST-LEAP: really pop the finished task */
-        atomic_thread_fence(memory_order_acquire);
-        if (__lace_worker->allstolen == 0) {
-            /* Assume: tail = split = head (pre-pop) */
-            /* Now we do a real pop ergo either decrease tail,split,head or declare allstolen */
-            Worker *wt = __lace_worker->_public;
-            wt->allstolen = 1;
-            __lace_worker->allstolen = 1;
-        }
-    }
- 
-    atomic_thread_fence(memory_order_acquire);
-    atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);
-    lace_time_event(__lace_worker, 4);
-}
+/**
+ * Wait for the stolen task at __lace_dq_head and pop it (lace.c). While its
+ * thief works on it, steal from the thief, or from the workers that the
+ * thief waits for: they all work on parts of the awaited task.
+ */
+void lace_leapfrog(WorkerP *__lace_worker, Task *__lace_dq_head);
 
 static LACE_NOINLINE
 void lace_drop_slow(WorkerP *w, Task *__dq_head)
@@ -1226,7 +1260,7 @@ void lace_drop_slow(WorkerP *w, Task *__dq_head)
 static inline LACE_UNUSED
 void lace_drop(WorkerP *w, Task *__dq_head)
 {
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {
         if (LACE_LIKELY(w->split <= __dq_head)) {
             return;
         }
@@ -1267,15 +1301,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                 
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
                                                                                       \
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -1283,7 +1320,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                 
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -1343,7 +1380,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -1358,7 +1395,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -1425,15 +1462,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                 
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
                                                                                       \
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -1441,7 +1481,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head )                                 
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -1501,7 +1541,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -1516,7 +1556,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -1586,15 +1626,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                  
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1;                                                         \
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -1602,7 +1645,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                  
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -1662,7 +1705,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -1677,7 +1720,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -1744,15 +1787,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                  
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1;                                                         \
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -1760,7 +1806,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1)                  
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -1820,7 +1866,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -1835,7 +1881,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -1905,15 +1951,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)   
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2;                                \
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -1921,7 +1970,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)   
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -1981,7 +2030,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -1996,7 +2045,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -2063,15 +2112,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)   
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2;                                \
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -2079,7 +2131,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2)   
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -2139,7 +2191,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -2154,7 +2206,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -2224,15 +2276,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3;       \
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -2240,7 +2295,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -2300,7 +2355,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -2315,7 +2370,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -2382,15 +2437,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3;       \
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -2398,7 +2456,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -2458,7 +2516,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -2473,7 +2531,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -2543,15 +2601,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -2559,7 +2620,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -2619,7 +2680,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -2634,7 +2695,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -2701,15 +2762,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -2717,7 +2781,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -2777,7 +2841,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -2792,7 +2856,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -2862,15 +2926,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -2878,7 +2945,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -2938,7 +3005,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -2953,7 +3020,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -3020,15 +3087,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -3036,7 +3106,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -3096,7 +3166,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -3111,7 +3181,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -3181,15 +3251,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -3197,7 +3270,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -3257,7 +3330,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -3272,7 +3345,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -3339,15 +3412,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -3355,7 +3431,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -3415,7 +3491,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -3430,7 +3506,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -3500,15 +3576,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -3516,7 +3595,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -3576,7 +3655,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -3591,7 +3670,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -3658,15 +3737,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -3674,7 +3756,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -3734,7 +3816,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -3749,7 +3831,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -3819,15 +3901,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -3835,7 +3920,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -3895,7 +3980,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -3910,7 +3995,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -3977,15 +4062,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -3993,7 +4081,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -4053,7 +4141,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -4068,7 +4156,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -4138,15 +4226,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -4154,7 +4245,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -4214,7 +4305,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -4229,7 +4320,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -4296,15 +4387,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -4312,7 +4406,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -4372,7 +4466,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -4387,7 +4481,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -4457,15 +4551,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -4473,7 +4570,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -4533,7 +4630,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -4548,7 +4645,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -4615,15 +4712,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -4631,7 +4731,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -4691,7 +4791,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -4706,7 +4806,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -4776,15 +4876,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10; t->d.args.arg_11 = arg_11;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -4792,7 +4895,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -4852,7 +4955,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -4867,7 +4970,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -4934,15 +5037,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10; t->d.args.arg_11 = arg_11;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -4950,7 +5056,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -5010,7 +5116,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -5025,7 +5131,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -5095,15 +5201,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10; t->d.args.arg_11 = arg_11; t->d.args.arg_12 = arg_12;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -5111,7 +5220,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -5171,7 +5280,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -5186,7 +5295,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -5253,15 +5362,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10; t->d.args.arg_11 = arg_11; t->d.args.arg_12 = arg_12;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -5269,7 +5381,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -5329,7 +5441,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -5344,7 +5456,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -5414,15 +5526,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10; t->d.args.arg_11 = arg_11; t->d.args.arg_12 = arg_12; t->d.args.arg_13 = arg_13;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -5430,7 +5545,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -5490,7 +5605,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -5505,7 +5620,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -5572,15 +5687,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10; t->d.args.arg_11 = arg_11; t->d.args.arg_12 = arg_12; t->d.args.arg_13 = arg_13;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -5588,7 +5706,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -5648,7 +5766,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -5663,7 +5781,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -5733,15 +5851,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10; t->d.args.arg_11 = arg_11; t->d.args.arg_12 = arg_12; t->d.args.arg_13 = arg_13; t->d.args.arg_14 = arg_14;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -5749,7 +5870,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -5809,7 +5930,7 @@ RTYPE NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                             
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -5824,7 +5945,7 @@ RTYPE NAME##_SYNC(WorkerP *w, Task *__dq_head)                                  
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
@@ -5891,15 +6012,18 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
     t->f = &NAME##_WRAP;                                                              \
     atomic_store_explicit(&t->thief, THIEF_TASK, memory_order_relaxed);               \
      t->d.args.arg_1 = arg_1; t->d.args.arg_2 = arg_2; t->d.args.arg_3 = arg_3; t->d.args.arg_4 = arg_4; t->d.args.arg_5 = arg_5; t->d.args.arg_6 = arg_6; t->d.args.arg_7 = arg_7; t->d.args.arg_8 = arg_8; t->d.args.arg_9 = arg_9; t->d.args.arg_10 = arg_10; t->d.args.arg_11 = arg_11; t->d.args.arg_12 = arg_12; t->d.args.arg_13 = arg_13; t->d.args.arg_14 = arg_14;\
-    atomic_thread_fence(memory_order_release);                                        \
+    /* The task is in the private part of the deque, where thieves cannot take        \
+     * it. It becomes stealable only when the split moves above it: those             \
+     * stores (here, in lace_make_all_shared and in SYNC) are release stores,         \
+     * so a thief that steals it sees it written. No fence here. */                   \
                                                                                       \
-    Worker *wt = w->_public;                                                          \
+    Worker *wt = lace_worker_public_of(w);                                            \
     if (LACE_UNLIKELY(w->allstolen)) {                                                \
         if (wt->movesplit) wt->movesplit = 0;                                         \
         head = (uint32_t)(__dq_head - w->dq);                                         \
         ts.ts.tail = head;                                                            \
         ts.ts.split = head + 1;                                                       \
-        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_relaxed);                 \
+        atomic_store_explicit(&wt->ts.v, ts.v, memory_order_release);                 \
         wt->allstolen = 0;                                                            \
         w->split = __dq_head+1;                                                       \
         w->allstolen = 0;                                                             \
@@ -5907,7 +6031,7 @@ void NAME##_SPAWN(WorkerP *w, Task *__dq_head , ATYPE_1 arg_1, ATYPE_2 arg_2, AT
         head = (uint32_t)(__dq_head - w->dq);                                         \
         split = (uint32_t)(w->split - w->dq);                                         \
         newsplit = (split + head + 2)/2;                                              \
-        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_relaxed);      \
+        atomic_store_explicit(&wt->ts.ts.split, newsplit, memory_order_release);      \
         w->split = w->dq + newsplit;                                                  \
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
@@ -5967,7 +6091,7 @@ void NAME##_SYNC_SLOW(WorkerP *w, Task *__dq_head)                              
         diff = (diff + 1) / 2;                                                        \
         Task* newsplit = t_s + diff;                                                  \
         w->split = newsplit;                                                          \
-        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_relaxed);\
+        atomic_store_explicit(&wt->ts.ts.split, (uint32_t)(newsplit - w->dq), memory_order_release);\
         wt->movesplit = 0;                                                            \
         PR_COUNTSPLITS(w, CTR_split_grow);                                            \
     }                                                                                 \
@@ -5982,7 +6106,7 @@ void NAME##_SYNC(WorkerP *w, Task *__dq_head)                                   
 {                                                                                     \
     /* assert (__dq_head > 0); */  /* Commented out because we assume contract */     \
                                                                                       \
-    if (LACE_LIKELY(0 == w->_public->movesplit)) {                                    \
+    if (LACE_LIKELY(0 == lace_worker_public_of(w)->movesplit)) {                      \
         if (LACE_LIKELY(w->split <= __dq_head)) {                                     \
             TD_##NAME *t = (TD_##NAME *)__dq_head;                                    \
             atomic_store_explicit(&t->thief, THIEF_EMPTY, memory_order_relaxed);      \
