@@ -71,9 +71,9 @@ target_sources(sylvan
       sylvan_table.h
       sylvan_zdd.h
       sylvan_zdd_int.h
-  # mCRL2: the generated header is kept in a separate file set, since CMake
-  # requires the base directories of a single file set to be disjoint, which
-  # fails for in-source builds (see also 3rd-party/lace/CMakeLists.txt).
+  # The generated header has its own file set: the base directories of one
+  # file set may not contain each other, which fails when the build directory
+  # is inside the source directory.
   PUBLIC
     FILE_SET generated_headers
     TYPE HEADERS
@@ -222,9 +222,9 @@ endif()
 # ── pkg-config ───────────────────────────────────────────────────────────────
 
 if(SYLVAN_GMP)
-    set(PKGC_REQUIRES "lace >= 1.7.0 gmp")
+    set(PKGC_REQUIRES "lace >= ${SYLVAN_LACE_MIN_VERSION} gmp")
 else()
-    set(PKGC_REQUIRES "lace >= 1.7.0")
+    set(PKGC_REQUIRES "lace >= ${SYLVAN_LACE_MIN_VERSION}")
 endif()
 
 # -lm is needed by consumers for static linking; Threads are already pulled

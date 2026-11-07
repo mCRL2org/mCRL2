@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23...3.31)
 
 project(sylvan
-    VERSION 1.11.0
+    VERSION 1.12.1
     DESCRIPTION "Sylvan, a parallel decision diagram library"
     HOMEPAGE_URL "https://github.com/trolando/sylvan"
     LANGUAGES C
@@ -26,18 +26,21 @@ list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 option(BUILD_SHARED_LIBS          "Build shared libraries (except on Windows)"       OFF)
 option(SYLVAN_NATIVE_OPT          "Enable -march=native for compiler optimizations" OFF)
 option(SYLVAN_ENABLE_PIC          "Build with -fPIC (for embedding in shared libs)" OFF)
-option(SYLVAN_BUILD_CPP           "Build Sylvan C++ bindings"                        ON)
-option(BUILD_TESTING              "Build Sylvan tests"          ${PROJECT_IS_TOP_LEVEL})
+option(SYLVAN_BUILD_CPP           "Build Sylvan C++ bindings"   ${PROJECT_IS_TOP_LEVEL})
+option(SYLVAN_BUILD_TESTS         "Build Sylvan tests"          ${PROJECT_IS_TOP_LEVEL})
 option(SYLVAN_BUILD_EXAMPLES      "Build Sylvan examples"       ${PROJECT_IS_TOP_LEVEL})
 option(SYLVAN_BUILD_DOCS          "Build Sylvan documentation"                      OFF)
 
-# Enable C++ only for the optional bindings and their test/example
+# Enable C++ only for the optional bindings and their test/example. As a
+# subproject, Sylvan builds them only when the parent sets SYLVAN_BUILD_CPP,
+# so that a C project does not need a C++ compiler.
 if(SYLVAN_BUILD_CPP)
     enable_language(CXX)
 endif()
 
-# mCRL2: only register CTest and the Sylvan tests when Sylvan is the top-level
-# project; the test directory is not vendored into mCRL2.
+# CTest and its BUILD_TESTING option belong to the top-level project. As a
+# subproject, Sylvan adds its tests only when the parent sets SYLVAN_BUILD_TESTS
+# and has testing enabled.
 if(sylvan_IS_TOP_LEVEL)
     include(CTest)
 endif()
@@ -55,22 +58,31 @@ if((BUILD_SHARED_LIBS AND NOT WIN32) OR SYLVAN_ENABLE_PIC)
     set(_sylvan_needs_pic ON)
 endif()
 
+# Sylvan needs Lace 1.x, at least this version. Also used for the version check
+# below and for the installed CMake and pkg-config files.
+set(SYLVAN_LACE_MIN_VERSION 1.8.0)
+
 # First check if Lace is already a target (e.g. a parent project added it),
 # then try find_package, then fall back to FetchContent.
 if(NOT TARGET lace::lace AND NOT TARGET lace)
-    find_package(lace 1.7.0 QUIET)
+    find_package(lace ${SYLVAN_LACE_MIN_VERSION} QUIET)
     if(NOT TARGET lace::lace AND NOT TARGET lace)
         # Normal variables override Lace's options without modifying its cache.
         set(BUILD_SHARED_LIBS OFF)
         if(_sylvan_needs_pic)
             set(LACE_ENABLE_PIC ON)
         endif()
+        # As a subproject, Lace uses -march=native only when asked (since
+        # 1.8.2); ask for it when Sylvan uses it.
+        if(SYLVAN_NATIVE_OPT)
+            set(LACE_NATIVE_OPT ON)
+        endif()
 
         include(FetchContent)
         FetchContent_Declare(
             lace
             GIT_REPOSITORY https://github.com/trolando/lace.git
-            GIT_TAG        v1.7.0
+            GIT_TAG        v1.8.2
             GIT_SHALLOW    TRUE
         )
         FetchContent_MakeAvailable(lace)
@@ -78,6 +90,9 @@ if(NOT TARGET lace::lace AND NOT TARGET lace)
         unset(BUILD_SHARED_LIBS)
         if(_sylvan_needs_pic)
             unset(LACE_ENABLE_PIC)
+        endif()
+        if(SYLVAN_NATIVE_OPT)
+            unset(LACE_NATIVE_OPT)
         endif()
     endif()
 endif()
@@ -91,6 +106,18 @@ if(NOT TARGET lace::lace)
         message(FATAL_ERROR "Lace was found, but it did not provide a lace::lace target")
     endif()
 endif()
+
+# Check the version of Lace. find_package sets lace_VERSION, and so does Lace
+# as a subproject (since 1.8.0); an older Lace as a subproject does not.
+if(NOT DEFINED lace_VERSION)
+    message(FATAL_ERROR "Could not determine the version of Lace (lace_VERSION is not set). "
+                        "Sylvan requires Lace 1.x (>= ${SYLVAN_LACE_MIN_VERSION}).")
+elseif(lace_VERSION VERSION_LESS SYLVAN_LACE_MIN_VERSION)
+    message(FATAL_ERROR "Sylvan requires Lace >= ${SYLVAN_LACE_MIN_VERSION}, found ${lace_VERSION}")
+elseif(lace_VERSION VERSION_GREATER_EQUAL 2.0.0)
+    message(FATAL_ERROR "Sylvan requires Lace 1.x (>= ${SYLVAN_LACE_MIN_VERSION}), found ${lace_VERSION}")
+endif()
+message(STATUS "Sylvan: using Lace ${lace_VERSION}")
 
 # Verify PIC compatibility when needed
 if(_sylvan_needs_pic)
@@ -173,6 +200,7 @@ if(NOT sylvan_IS_TOP_LEVEL)
         BUILD_SHARED_LIBS
         SYLVAN_ENABLE_PIC
         SYLVAN_BUILD_CPP
+        SYLVAN_BUILD_TESTS
         SYLVAN_BUILD_EXAMPLES
         SYLVAN_BUILD_DOCS
     )
@@ -186,7 +214,7 @@ if(TARGET sylvan_sanitizers)
     target_link_libraries(sylvan PUBLIC "$<BUILD_INTERFACE:sylvan_sanitizers>")
 endif()
 
-if(BUILD_TESTING AND sylvan_IS_TOP_LEVEL)
+if(SYLVAN_BUILD_TESTS AND BUILD_TESTING)
     add_subdirectory(test)
 endif()
 
