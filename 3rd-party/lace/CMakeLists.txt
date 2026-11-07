@@ -1,7 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.23...3.31)
 
 project(lace
-    VERSION 1.8.2
+    VERSION 1.9.0
     DESCRIPTION "Lace, a work-stealing framework for multi-core fork-join parallelism"
     HOMEPAGE_URL "https://github.com/trolando/lace"
     LANGUAGES C
@@ -28,7 +28,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries instead of static"             
 option(LACE_ENABLE_PIC   "Build Lace with -fPIC (e.g. for linking into shared libs)" OFF)
 option(LACE_NATIVE_OPT   "Enable -march=native for compiler optimizations"           ${lace_IS_TOP_LEVEL})
 option(LACE_BACKOFF      "Let idle threads sleep if there is no work"                ON)
-option(LACE_USE_HWLOC    "Let Lace pin threads/memory using libhwloc"                OFF)
+option(LACE_USE_HWLOC    "Deprecated: let Lace pin threads/memory using libhwloc"    OFF)
 option(LACE_PIE_TIMES    "Let Lace record Pie times"                                 OFF)
 option(LACE_COUNT_TASKS  "Let Lace record the number of tasks"                       OFF)
 option(LACE_COUNT_STEALS "Let Lace count #steals and #leaps"                         OFF)
@@ -83,6 +83,7 @@ if(NOT MSVC)
 endif()
 
 if(LACE_USE_HWLOC)
+    message(DEPRECATION "LACE_USE_HWLOC is deprecated and will be removed: Lace pins its workers itself on Linux, FreeBSD and Windows")
     find_package(HWLOC REQUIRED)
     if(APPLE)
         message(WARNING "LACE_USE_HWLOC: macOS does not let programs pin threads, so hwloc cannot pin Lace's workers")

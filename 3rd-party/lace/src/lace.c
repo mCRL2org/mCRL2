@@ -24,6 +24,11 @@
 #endif
 #endif
 
+/* MSVC warns that getenv (LACE_PIN) may be unsafe */
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <lace.h>
 
 #include <errno.h> // for errno
@@ -91,6 +96,7 @@
 #else
 #include <sched.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <pthread.h>
 
 #if defined(_WIN32)
@@ -520,51 +526,125 @@ lace_hwloc_pins(void)
 }
 #endif
 
-#if defined(__linux__) && !LACE_USE_HWLOC
+/* Lace's own pinning: Linux, FreeBSD and Windows (not with hwloc) */
+#if (defined(__linux__) || defined(__FreeBSD__) || defined(_WIN32)) && !LACE_USE_HWLOC
+#define LACE_PIN_BUILTIN 1
+#else
+#define LACE_PIN_BUILTIN 0
+#endif
+
+#if LACE_PIN_BUILTIN
 /**
- * Pinning without hwloc (Linux), within the affinity mask of the thread that
- * calls lace_start (taskset, cgroups, SLURM). The modes are lace_pin_mode
- * (lace.h): what each worker may run on, from one hardware thread to a NUMA
- * node; lace_set_pinning() or else LACE_PIN in the environment chooses, else
- * the default is LACE_DEFAULT_PIN (CMake, LACE_PIN_AUTO unless set).
- * The CPUs come one of every physical core first (sysfs thread_siblings_list),
- * package by package, in mask order. In the group modes (L2, L3, NUMA) the
- * workers are spread over the groups in proportion to their cores, so that
- * two programs pinning this way share the groups evenly. Auto pins one CPU
- * per worker if the workers fill the cores of the mask, else every worker may
- * run on all cores: a program that leaves cores free may share the machine
- * with another (two programs that both pin worker i to the i-th core took
- * 1.95 times as long as one, against 1.14 times with all cores), and one
- * that fills its mask owns it (taskset, or the default number of workers),
- * where one CPU per worker was fastest on every machine tested.
+ * Pinning without hwloc (Linux, FreeBSD, Windows), within the affinity mask of
+ * the thread that calls lace_start (taskset, cgroups, SLURM). The modes are
+ * lace_pin_mode (lace.h): what each worker may run on, from one hardware
+ * thread to a NUMA node; lace_set_pinning() or else LACE_PIN in the
+ * environment chooses, else the default is LACE_DEFAULT_PIN (CMake,
+ * LACE_PIN_AUTO unless set).
+ * The CPUs come one of every physical core first (on Linux from sysfs, on
+ * FreeBSD from the sysctl kern.sched.topology_spec, on Windows from
+ * GetLogicalProcessorInformationEx), package by package, in mask order. In
+ * the group modes (L2, L3, NUMA) the workers are spread over the groups in
+ * proportion to their cores, so that two programs pinning this way share the
+ * groups evenly. Auto pins one CPU per worker if the workers fill the cores
+ * of the mask, else every worker may run on all cores: a program that leaves
+ * cores free may share the machine with another (two programs that both pin
+ * worker i to the i-th core took 1.95 times as long as one, against 1.14
+ * times with all cores), and one that fills its mask owns it (taskset, or the
+ * default number of workers), where one CPU per worker was fastest on every
+ * machine tested.
  * There is no pinning with more workers than places: hardware threads for
  * LACE_PIN_CPU, cores otherwise. LACE_PIN_PRINT=1 prints the CPUs of every
  * worker.
  */
+
+/*
+ * The affinity of the calling thread: its mask and pinning it. Windows pins within one processor
+ * group, that of the thread that calls lace_start, where Lace also counts the
+ * CPUs (GetProcessAffinityMask): a set of CPUs is one KAFFINITY there.
+ */
+#if defined(_WIN32)
+typedef struct { KAFFINITY bits; } cpu_set_t;
+#define CPU_SETSIZE ((int)(8 * sizeof(KAFFINITY)))
+#define CPU_SET(c, s) ((s)->bits |= (KAFFINITY)1 << (c))
+#define CPU_ISSET(c, s) ((int)(((s)->bits >> (c)) & 1))
+#define CPU_COUNT(s) lace_count_cpus((s)->bits)
+static WORD lace_pin_group = 0; // the processor group of the mask
+
+static int
+lace_count_cpus(KAFFINITY m)
+{
+    int n = 0;
+    for (; m != 0; m &= m - 1) n++;
+    return n;
+}
+
+static int
+lace_get_mask(cpu_set_t *mask)
+{
+    GROUP_AFFINITY ga;
+    if (!GetThreadGroupAffinity(GetCurrentThread(), &ga)) return -1;
+    lace_pin_group = ga.Group;
+    mask->bits = ga.Mask;
+    return 0;
+}
+
+static void
+lace_pin_thread(const cpu_set_t *set)
+{
+    GROUP_AFFINITY ga;
+    memset(&ga, 0, sizeof(ga));
+    ga.Mask = set->bits;
+    ga.Group = lace_pin_group;
+    (void)SetThreadGroupAffinity(GetCurrentThread(), &ga, NULL);
+}
+#else
+#if defined(__FreeBSD__)
+#include <pthread_np.h>
+#endif
+static int
+lace_get_mask(cpu_set_t *mask)
+{
+    return sched_getaffinity(0, sizeof(cpu_set_t), mask);
+}
+
+static void
+lace_pin_thread(const cpu_set_t *set)
+{
+    (void)pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), set);
+}
+#endif
+
 static int pin_mode = 0;
 static cpu_set_t *pin_sets = NULL; // per worker: the CPUs it may run on
+
+#if defined(__linux__)
+/* A small sysfs file into buf, NUL-terminated, without trailing whitespace:
+ * its length, or -1 (also if it does not fit). A plain open and read: fopen
+ * also allocates a buffer and calls fstat. */
+static int
+lace_sysfs_read(const char *path, char *buf, int size)
+{
+    int fd = open(path, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return -1;
+    ssize_t r = read(fd, buf, (size_t)size - 1);
+    close(fd);
+    if (r < 0 || r >= size - 1) return -1;
+    while (r > 0 && (buf[r - 1] == '\n' || buf[r - 1] == ' ')) r--;
+    buf[r] = '\0';
+    return (int)r;
+}
 
 /* The first number in a sysfs file, or dflt if unknown */
 static int
 lace_sysfs_int(const char *path, int dflt)
 {
-    FILE *f = fopen(path, "r");
-    int v = dflt;
-    if (f != NULL) {
-        if (fscanf(f, "%d", &v) != 1) v = dflt;
-        fclose(f);
-    }
-    return v;
+    char buf[64], *end;
+    if (lace_sysfs_read(path, buf, (int)sizeof(buf)) <= 0) return dflt;
+    long v = strtol(buf, &end, 10);
+    return end == buf ? dflt : (int)v;
 }
 
-/* The first number in the sysfs topology file of cpu, or dflt if unknown */
-static int
-lace_topology(int cpu, const char *file, int dflt)
-{
-    char path[128];
-    snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%d/topology/%s", cpu, file);
-    return lace_sysfs_int(path, dflt);
-}
 
 /* The lowest CPU that shares the unified cache of this level with cpu, or dflt if unknown */
 static int
@@ -576,12 +656,8 @@ lace_cache_of(int cpu, int level, int dflt)
         if (lace_sysfs_int(path, -1) == level) {
             /* not the instruction cache of that level */
             snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%d/cache/index%d/type", cpu, i);
-            FILE *f = fopen(path, "r");
-            char type[16] = "";
-            if (f != NULL) {
-                if (fscanf(f, "%15s", type) != 1) type[0] = '\0';
-                fclose(f);
-            }
+            char type[16];
+            if (lace_sysfs_read(path, type, (int)sizeof(type)) < 0) type[0] = '\0';
             if (strcmp(type, "Instruction") == 0) continue;
             snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_list", cpu, i);
             return lace_sysfs_int(path, dflt);
@@ -601,6 +677,8 @@ lace_node_of(int cpu, int dflt)
     }
     return dflt;
 }
+
+#endif /* __linux__ */
 
 /* A CPU list such as 0,2,4-7 into cpus (at most max); the count, or -1 if malformed */
 static int
@@ -624,6 +702,220 @@ lace_parse_cpulist(const char *s, int *cpus, int max)
     }
     return n;
 }
+
+/*
+ * The core and the package of every CPU, as keys: the lowest CPU of its
+ * hardware threads, and of its package. Read at most once per process, as
+ * the topology does not change while a program runs; on Linux, reading two
+ * sysfs files per CPU at every lace_start took most of its time. One sibling
+ * list covers all CPUs in it. 0 means not read yet, else the key + 1.
+ */
+static int lace_cpu_core[CPU_SETSIZE];
+static int lace_cpu_pkg[CPU_SETSIZE];
+
+#if defined(__linux__)
+/* Read the CPU list file of cpu (the first of files that exists) and set
+ * key[c] for each CPU c in it; dflt for cpu if no file is readable */
+static void
+lace_read_cpu_group(int cpu, const char *file, const char *file2, int dflt, int *key)
+{
+    char path[128], buf[4096];
+    int cpus[CPU_SETSIZE], n = -1;
+    for (int k = 0; k < 2 && n <= 0; k++) {
+        snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%d/topology/%s", cpu, k == 0 ? file : file2);
+        if (lace_sysfs_read(path, buf, (int)sizeof(buf)) > 0) n = lace_parse_cpulist(buf, cpus, CPU_SETSIZE);
+    }
+    int low = dflt;
+    if (n > 0) {
+        low = cpus[0];
+        for (int i = 1; i < n; i++) if (cpus[i] < low) low = cpus[i];
+        if (low < 0 || low > cpu) low = cpu;
+        for (int i = 0; i < n; i++) if (cpus[i] >= 0 && cpus[i] < CPU_SETSIZE) key[cpus[i]] = low + 1;
+    }
+    if (key[cpu] == 0) key[cpu] = low + 1;
+}
+
+/* The core and package keys of cpu, read once (lace_cpu_core, lace_cpu_pkg) */
+static void
+lace_cpu_topology(int cpu)
+{
+    if (lace_cpu_core[cpu] == 0) lace_read_cpu_group(cpu, "thread_siblings_list", "core_cpus_list", cpu, lace_cpu_core);
+    if (lace_cpu_pkg[cpu] == 0) lace_read_cpu_group(cpu, "package_cpus_list", "core_siblings_list", 0, lace_cpu_pkg);
+}
+
+#else /* FreeBSD, Windows: the whole topology at once */
+/* The L2, L3 and NUMA domain of every CPU, as keys + 1 (0: unknown) */
+static int lace_cpu_l2[CPU_SETSIZE], lace_cpu_l3[CPU_SETSIZE], lace_cpu_node[CPU_SETSIZE];
+
+#if defined(__FreeBSD__)
+#include <sys/sysctl.h>
+
+/* Set key[c] for every CPU c in the list [list, end) ("0, 1, 2") to its lowest CPU + 1 */
+static void
+lace_mark_cpu_list(const char *list, const char *end, int *key)
+{
+    char *buf = malloc((size_t)(end - list) + 1);
+    if (buf == NULL) return;
+    size_t j = 0;
+    for (const char *c = list; c < end; c++) {
+        if (*c != ' ' && *c != '\n' && *c != '\t') buf[j++] = *c;
+    }
+    buf[j] = '\0';
+    int cpus[CPU_SETSIZE];
+    int n = lace_parse_cpulist(buf, cpus, CPU_SETSIZE);
+    free(buf);
+    if (n <= 0) return;
+    int low = cpus[0];
+    for (int i = 1; i < n; i++) if (cpus[i] < low) low = cpus[i];
+    for (int i = 0; i < n; i++) if (cpus[i] >= 0 && cpus[i] < CPU_SETSIZE) key[cpus[i]] = low + 1;
+}
+
+/* Whether [from, to) contains needle */
+static int
+lace_has(char *from, char *to, const char *needle)
+{
+    char save = *to;
+    *to = '\0';
+    int found = strstr(from, needle) != NULL;
+    *to = save;
+    return found;
+}
+
+/*
+ * The topology on FreeBSD, from the sysctl kern.sched.topology_spec: an XML
+ * tree of CPU groups. A group lists its CPUs, the cache level they share
+ * (2 or 3) and flags: THREAD, SMT or HTT for the hardware threads of a core,
+ * NODE for a NUMA domain. The groups just below the root count as packages. Read
+ * once per process.
+ */
+static void
+lace_read_topology(void)
+{
+    static int done = 0;
+    if (done) return;
+    done = 1;
+    size_t len = 0;
+    if (sysctlbyname("kern.sched.topology_spec", NULL, &len, NULL, 0) != 0 || len == 0) return;
+    char *xml = malloc(len + 1);
+    if (xml == NULL) return;
+    if (sysctlbyname("kern.sched.topology_spec", xml, &len, NULL, 0) != 0) {
+        free(xml);
+        return;
+    }
+    xml[len] = '\0';
+    for (char *g = strstr(xml, "<group"); g != NULL; g = strstr(g + 6, "<group")) {
+        char *tag_end = strchr(g, '>');
+        if (tag_end == NULL) break;
+        int level = 0, cache = 0;
+        char *a = strstr(g, " level=\"");
+        if (a != NULL && a < tag_end) level = atoi(a + 8);
+        a = strstr(g, "cache-level=\"");
+        if (a != NULL && a < tag_end) cache = atoi(a + 13);
+        char *next = strstr(tag_end, "<group");
+        char *cpu = strstr(tag_end, "<cpu");
+        if (cpu == NULL || (next != NULL && cpu > next)) continue;
+        char *list = strchr(cpu, '>');
+        char *list_end = list != NULL ? strstr(list, "</cpu>") : NULL;
+        if (list == NULL || list_end == NULL) continue;
+        list++;
+        /* this group's flags come before its children or its end */
+        char *stop = list_end + strlen(list_end);
+        char *x = strstr(list_end, "<children>");
+        if (x != NULL && x < stop) stop = x;
+        x = strstr(list_end, "</group>");
+        if (x != NULL && x < stop) stop = x;
+        if (next != NULL && next < stop) stop = next;
+        if (lace_has(list_end, stop, "name=\"THREAD\"") || lace_has(list_end, stop, "name=\"SMT\"") ||
+            lace_has(list_end, stop, "name=\"HTT\"")) {
+            lace_mark_cpu_list(list, list_end, lace_cpu_core);
+        }
+        if (lace_has(list_end, stop, "name=\"NODE\"")) lace_mark_cpu_list(list, list_end, lace_cpu_node);
+        if (cache == 2) lace_mark_cpu_list(list, list_end, lace_cpu_l2);
+        if (cache == 3) lace_mark_cpu_list(list, list_end, lace_cpu_l3);
+        if (level == 2) lace_mark_cpu_list(list, list_end, lace_cpu_pkg);
+    }
+    free(xml);
+}
+
+#else /* Windows */
+/* Set key[c] for every CPU c of g, if in the group of the mask, to its lowest CPU + 1 */
+static void
+lace_mark_group(const GROUP_AFFINITY *g, int *key)
+{
+    if (g->Group != lace_pin_group || g->Mask == 0) return;
+    int low = 0;
+    while (!((g->Mask >> low) & 1)) low++;
+    for (int c = low; c < CPU_SETSIZE; c++) if ((g->Mask >> c) & 1) key[c] = low + 1;
+}
+
+/*
+ * The topology on Windows, from GetLogicalProcessorInformationEx: the cores,
+ * packages, L2 and L3 caches and NUMA nodes of the processor group of the
+ * mask. Read once per process (again if lace_start runs in another group).
+ */
+static void
+lace_read_topology(void)
+{
+    static int read_group = -1;
+    if (read_group == (int)lace_pin_group) return;
+    read_group = (int)lace_pin_group;
+    memset(lace_cpu_core, 0, sizeof(lace_cpu_core));
+    memset(lace_cpu_pkg, 0, sizeof(lace_cpu_pkg));
+    memset(lace_cpu_l2, 0, sizeof(lace_cpu_l2));
+    memset(lace_cpu_l3, 0, sizeof(lace_cpu_l3));
+    memset(lace_cpu_node, 0, sizeof(lace_cpu_node));
+    DWORD len = 0;
+    (void)GetLogicalProcessorInformationEx(RelationAll, NULL, &len);
+    if (len == 0) return;
+    char *buf = malloc(len);
+    if (buf == NULL) return;
+    if (GetLogicalProcessorInformationEx(RelationAll, (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)buf, &len)) {
+        for (DWORD off = 0; off < len;) {
+            const SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *r = (const SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *)(buf + off);
+            if (r->Size == 0) break;
+            if (r->Relationship == RelationProcessorCore) {
+                lace_mark_group(&r->Processor.GroupMask[0], lace_cpu_core);
+            } else if (r->Relationship == RelationProcessorPackage) {
+                for (unsigned i = 0; i < r->Processor.GroupCount; i++) lace_mark_group(&r->Processor.GroupMask[i], lace_cpu_pkg);
+            } else if (r->Relationship == RelationCache) {
+                if (r->Cache.Level == 2) lace_mark_group(&r->Cache.GroupMask, lace_cpu_l2);
+                if (r->Cache.Level == 3) lace_mark_group(&r->Cache.GroupMask, lace_cpu_l3);
+            } else if (r->Relationship == RelationNumaNode) {
+                lace_mark_group(&r->NumaNode.GroupMask, lace_cpu_node);
+            }
+            off += r->Size;
+        }
+    }
+    free(buf);
+}
+#endif
+
+/* The core and package keys of cpu (lace_cpu_core, lace_cpu_pkg) */
+static void
+lace_cpu_topology(int cpu)
+{
+    lace_read_topology();
+    if (lace_cpu_core[cpu] == 0) lace_cpu_core[cpu] = cpu + 1;
+    if (lace_cpu_pkg[cpu] == 0) lace_cpu_pkg[cpu] = 1;
+}
+
+/* The key of the cache of this level (2 or 3) that cpu shares, or dflt if unknown */
+static int
+lace_cache_of(int cpu, int level, int dflt)
+{
+    lace_read_topology();
+    const int k = level == 2 ? lace_cpu_l2[cpu] : level == 3 ? lace_cpu_l3[cpu] : 0;
+    return k != 0 ? k - 1 : dflt;
+}
+
+/* The key of the NUMA domain of cpu, or dflt if unknown */
+static int
+lace_node_of(int cpu, int dflt)
+{
+    lace_read_topology();
+    return lace_cpu_node[cpu] != 0 ? lace_cpu_node[cpu] - 1 : dflt;
+}
+#endif
 
 #define LACE_PIN_LIST_ 8 /* internal mode: worker i on the i-th CPU of a list */
 
@@ -670,7 +962,7 @@ lace_pin_setup(void)
         pin_mode = LACE_DEFAULT_PIN;
     }
     cpu_set_t mask;
-    if (pin_mode <= 0 || sched_getaffinity(0, sizeof(mask), &mask) != 0 || CPU_COUNT(&mask) == 0) goto done;
+    if (pin_mode <= 0 || lace_get_mask(&mask) != 0 || CPU_COUNT(&mask) == 0) goto done;
     const int n = CPU_COUNT(&mask);
     int *cpus = malloc(sizeof(int) * 4 * (size_t)n); // result, mask CPUs, their cores and packages
     if (cpus == NULL) goto done;
@@ -678,12 +970,22 @@ lace_pin_setup(void)
     for (unsigned c = 0; c < (unsigned)CPU_SETSIZE && m < n; c++) {
         if (CPU_ISSET(c, &mask)) {
             in[m] = (int)c;
-            core[m] = lace_topology((int)c, "thread_siblings_list", (int)c);
-            pkg[m] = lace_topology((int)c, "physical_package_id", 0);
-            if (pkg[m] < 0 || pkg[m] > 4095) pkg[m] = 0;
-            if (pkg[m] > maxpkg) maxpkg = pkg[m];
+            lace_cpu_topology((int)c);
+            core[m] = lace_cpu_core[c] - 1;
+            pkg[m] = lace_cpu_pkg[c] - 1;
             m++;
         }
+    }
+    // Number the packages 0, 1, ... in the order of their keys
+    {
+        int *rank = calloc(CPU_SETSIZE, sizeof(int));
+        if (rank == NULL) { free(cpus); goto done; }
+        for (int i = 0; i < m; i++) rank[pkg[i]] = 1;
+        int np = 0;
+        for (int k = 0; k < CPU_SETSIZE; k++) if (rank[k]) rank[k] = ++np;
+        for (int i = 0; i < m; i++) pkg[i] = rank[pkg[i]] - 1;
+        maxpkg = np - 1;
+        free(rank);
     }
     // First the first CPU of every core, then the others; both by package, then in mask order
     int ncpus = 0;
@@ -720,14 +1022,14 @@ lace_pin_setup(void)
         } else if (pin_mode == LACE_PIN_CORE) {
             // Worker w: the hardware threads (in the mask) of the w-th core
             for (unsigned w = 0; w < n_workers; w++) {
-                const int key = lace_topology(cpus[w], "thread_siblings_list", cpus[w]);
+                const int key = lace_cpu_core[cpus[w]] - 1;
                 for (int i = 0; i < m; i++) if (core[i] == key) CPU_SET((size_t)in[i], &pin_sets[w]);
             }
         } else {
             /* Groups of cores (in pin order): the L2, the L3 or the NUMA node of each */
             int *grp = in; // reuse: the group key of cpus[c]
             for (int c = 0; c < ncores; c++) {
-                const int pk = lace_topology(cpus[c], "physical_package_id", 0);
+                const int pk = lace_cpu_pkg[cpus[c]] - 1;
                 grp[c] = pin_mode == LACE_PIN_L3 ? lace_cache_of(cpus[c], 3, pk)
                        : pin_mode == LACE_PIN_L2 ? lace_cache_of(cpus[c], 2, cpus[c])
                        : lace_node_of(cpus[c], 0);
@@ -2363,18 +2665,29 @@ lace_worker_thread(void* arg)
 {
     unsigned int worker = (unsigned int)(size_t)arg;
 
+    // Pin first, as the pinning mode says: the worker then touches its memory
+    // (worker data, deque, stack, scratch arena) on its own CPU, so first
+    // touch places it on its NUMA node
+#if LACE_PIN_BUILTIN
+    if (pin_sets != NULL) lace_pin_thread(&pin_sets[worker]);
+#endif
+
     // Initialize data structures
     lace_init_worker(worker);
 
-    // Pin CPU
+    // hwloc pins after the worker data exists, and moves that data to the node
     lace_pin_worker();
-#if defined(__linux__) && !LACE_USE_HWLOC
-    if (pin_sets != NULL) (void)pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &pin_sets[worker]);
-#endif
 #if defined(__linux__)
     // A sentinel naps for microseconds; the default timer slack is 50 us
     (void)prctl(PR_SET_TIMERSLACK, 1000UL, 0UL, 0UL, 0UL);
 #endif
+
+    // Start together: no worker steals before all are set up. A thief that
+    // asked a worker still being set up to move its split wrote to that
+    // worker's memory first, which put the page on the thief's NUMA node. The
+    // barrier backs off rather than spin, as on a busy machine the threads may
+    // outnumber the CPUs.
+    lace_barrier();
 
     // Run the steal loop
     WorkerP *__lace_worker = lace_get_worker();
@@ -2749,7 +3062,7 @@ lace_start(unsigned int _n_workers, size_t dequesize)
         for (unsigned int i = 0; i < n_workers; i++) atomic_store_explicit(&idle_flags[i].idle, 1, memory_order_relaxed);
     }
 
-#if defined(__linux__) && !LACE_USE_HWLOC
+#if LACE_PIN_BUILTIN
     lace_pin_setup();
 #endif
 
@@ -3189,7 +3502,7 @@ void lace_stop(void)
     workers_p = 0;
     workers_memory = 0;
 
-#if defined(__linux__) && !LACE_USE_HWLOC
+#if LACE_PIN_BUILTIN
     free(pin_sets);
     pin_sets = NULL;
 #endif
