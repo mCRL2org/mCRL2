@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23...3.31)
 
 project(sylvan
-    VERSION 1.12.2
+    VERSION 1.12.3
     DESCRIPTION "Sylvan, a parallel decision diagram library"
     HOMEPAGE_URL "https://github.com/trolando/sylvan"
     LANGUAGES C
@@ -59,8 +59,10 @@ if((BUILD_SHARED_LIBS AND NOT WIN32) OR SYLVAN_ENABLE_PIC)
 endif()
 
 # Sylvan needs Lace 1.x, at least this version. Also used for the version check
-# below and for the installed CMake and pkg-config files.
-set(SYLVAN_LACE_MIN_VERSION 1.8.0)
+# below and for the installed CMake and pkg-config files. An installed Lace
+# accepts only requests for its own minor version (SameMinorVersion), so this
+# names the minor version that Sylvan fetches.
+set(SYLVAN_LACE_MIN_VERSION 1.9.0)
 
 # First check if Lace is already a target (e.g. a parent project added it),
 # then try find_package, then fall back to FetchContent.
@@ -82,7 +84,7 @@ if(NOT TARGET lace::lace AND NOT TARGET lace)
         FetchContent_Declare(
             lace
             GIT_REPOSITORY https://github.com/trolando/lace.git
-            GIT_TAG        v1.8.2
+            GIT_TAG        v1.9.0
             GIT_SHALLOW    TRUE
         )
         FetchContent_MakeAvailable(lace)
