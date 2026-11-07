@@ -255,9 +255,12 @@ VOID_TASK_IMPL_0(sylvan_gc)
             NEWFRAME(sylvan_gc_go);
             gc = 0;
         } else {
-            /* wait for new frame to appear */
-            while (atomic_load_explicit(&lace_newframe.t, memory_order_relaxed) == 0) {}
-            lace_yield(__lace_worker, __lace_dq_head);
+            /* Another worker is collecting garbage. Wait until it is done,
+             * and join its new frame if that has not started yet. Lace
+             * announces the frame only until all workers have joined it, so
+             * a worker that arrives after the frame has run must not wait
+             * for it to appear. */
+            while (atomic_load_explicit(&gc, memory_order_acquire) != 0) YIELD_NEWFRAME();
         }
     }
 }
