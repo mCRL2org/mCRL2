@@ -4,7 +4,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 include(CMakeFindDependencyMacro)
 find_dependency(Threads REQUIRED)
-find_dependency(lace REQUIRED)
+find_dependency(lace @SYLVAN_LACE_MIN_VERSION@ REQUIRED)
 @SYLVAN_CONFIG_FIND_GMP@
 
 if(NOT TARGET sylvan::sylvan)
