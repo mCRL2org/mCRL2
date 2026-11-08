@@ -42,6 +42,8 @@ class lpsreach_algorithm
 
     template <typename Context, bool ActionLabel>
     friend void symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
+    template <typename Context, bool ActionLabel>
+    friend sylvan::MDD symbolic::learn_successors_collect_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
     const symbolic::symbolic_reachability_options& m_options;
@@ -53,7 +55,14 @@ class lpsreach_algorithm
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
     std::vector<std::size_t> m_variable_order;
     symbolic_lts m_lts;
-    
+    ldd m_deadlocks; // with --deadlock: the reachable states without successors, after run()
+
+    // For parallel learning: the data specification for the learners of the workers (symbolic::worker_learner),
+    // the number that tells the learners of this instance apart, and a lock around the learning statistics.
+    data::data_specification m_dataspec;
+    std::size_t m_learner_generation = symbolic::new_learner_generation();
+    std::mutex m_learn_statistics_mutex;
+
     /// \brief Rewrites all arguments of the given action.
     template<typename Rewriter, data::IsSubstitution Substitution>
     lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
@@ -75,10 +84,45 @@ class lpsreach_algorithm
         );
     }
 
+    // R.L := R.L U {(x,y) in R | x in X}, with the states of X distributed over the Lace workers.
+    void learn_successors_parallel(lps_summand_group& R, const ldd& X)
+    {
+      using namespace sylvan::ldds;
+      if (X == empty_set())
+      {
+        return;
+      }
+      using context_type = symbolic::parallel_learn_context<lpsreach_algorithm, lps_summand_group>;
+      context_type context(*this, R, m_learner_generation, m_rewr, m_sigma, m_dataspec, lace_workers());
+      ldd T = collect(X, symbolic::learn_successors_collect_callback<context_type, true>, &context);
+      if (context.error)
+      {
+        std::rethrow_exception(context.error);
+      }
+      // Other workers may learn for the same group at the same time (in parallel saturation). No lock may be held
+      // during the unions (see symbolic::union_atomically), so they use compare-and-swap loops. L is updated before
+      // Ldomain, so that a worker that finds a projection in Ldomain also finds its transitions in L.
+      symbolic::union_atomically(R.L, T);
+      if (m_options.cached)
+      {
+        symbolic::union_atomically(R.Ldomain, X);
+      }
+      const auto [time, calls] = context.total_statistics(); // the sum over the workers (CPU time, not wall clock time)
+      std::scoped_lock guard(m_learn_statistics_mutex); // covers no Sylvan operation
+      R.learn_time += time;
+      R.learn_calls += calls;
+    }
+
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)
     {
       mCRL2log(log::log_level_t::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
+
+      if (m_options.parallel_learning)
+      {
+        learn_successors_parallel(static_cast<lps_summand_group&>(R), X);
+        return;
+      }
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
@@ -117,7 +161,8 @@ class lpsreach_algorithm
     lpsreach_algorithm(const lps::specification& lpsspec, const symbolic::symbolic_reachability_options& options_)
       : m_options(options_),
         m_rewr(symbolic::construct_rewriter(lpsspec.data(), m_options.rewrite_strategy, lps::find_function_symbols(lpsspec), m_options.remove_unused_rewrite_rules)),
-        m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false)
+        m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false),
+        m_dataspec(lpsspec.data())
     {
       using utilities::detail::as_vector;
 
@@ -144,9 +189,15 @@ class lpsreach_algorithm
       m_summand_patterns = symbolic::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
 
       m_lts.process_parameters = symbolic::permute_copy(m_lts.process_parameters, m_variable_order);
+      // With parallel learning, all Lace workers insert into the data and action indices at the same time.
+      const std::size_t index_threads = m_options.parallel_learning ? lace_workers() : 1;
       for (const data::variable& param : m_lts.process_parameters)
       {
-        m_lts.data_index.emplace_back(param.sort());
+        m_lts.data_index.emplace_back(param.sort(), index_threads);
+      }
+      if (index_threads > 1)
+      {
+        m_lts.action_index = atermpp::indexed_set<lps::multi_action, utilities::detail::GlobalThreadSafe>(index_threads);
       }
 
       m_lts.initial_state = symbolic::state2ldd(symbolic::permute_copy(initial_state, m_variable_order), m_lts.data_index);
@@ -344,7 +395,14 @@ class lpsreach_algorithm
       }
 
       m_lts.states = visited;
+      m_deadlocks = deadlocks;
       return visited;
+    }
+
+    /// \returns With --deadlock, the reachable states without successors (after run()).
+    const ldd& deadlocks() const
+    {
+      return m_deadlocks;
     }
 
     const std::vector<boost::dynamic_bitset<>>& read_write_patterns() const
@@ -362,7 +420,7 @@ class lpsreach_algorithm
       return m_lts.data_index;
     }
 
-    utilities::indexed_set<lps::multi_action>& action_index()
+    atermpp::indexed_set<lps::multi_action, utilities::detail::GlobalThreadSafe>& action_index()
     {
       return m_lts.action_index;
     }
