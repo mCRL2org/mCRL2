@@ -42,10 +42,16 @@ LDD_GETNODE(MDD mdd)
     return ((mddnode_t)llmsset_index_to_ptr(nodes, mdd));
 }
 
+/*
+ * The value is at byte offset 6, which is not aligned for a uint32_t, so it
+ * is read and written with memcpy: compilers emit one unaligned load or store.
+ */
 static inline uint32_t SYLVAN_UNUSED
 mddnode_getvalue(mddnode_t n)
 {
-    return *(uint32_t*)((uint8_t*)n+6);
+    uint32_t value;
+    memcpy(&value, (uint8_t*)n+6, sizeof(value));
+    return value;
 }
 
 static inline uint8_t SYLVAN_UNUSED
@@ -75,7 +81,7 @@ mddnode_getdown(mddnode_t n)
 static inline void SYLVAN_UNUSED
 mddnode_setvalue(mddnode_t n, uint32_t value)
 {
-    *(uint32_t*)((uint8_t*)n+6) = value;
+    memcpy((uint8_t*)n+6, &value, sizeof(value));
 }
 
 static inline void SYLVAN_UNUSED
@@ -101,7 +107,7 @@ mddnode_make(mddnode_t n, uint32_t value, uint64_t right, uint64_t down)
 {
     n->a = right << 1;
     n->b = down << 17;
-    *(uint32_t*)((uint8_t*)n+6) = value;
+    memcpy((uint8_t*)n+6, &value, sizeof(value));
 }
 
 static inline void SYLVAN_UNUSED
