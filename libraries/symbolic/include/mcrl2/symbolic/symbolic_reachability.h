@@ -52,6 +52,8 @@ struct symbolic_reachability_options
   bool no_relprod = false;
   bool parallel_groups = false; // apply the transition groups in parallel (only without chaining and saturation)
   bool parallel_learning = false; // learn the transitions of a group in parallel (all modes)
+  bool recursive_saturation = false; // recursive saturation with on-the-fly learning (instead of breadth-first steps)
+  bool recursive_saturation_parallel = false; // ... with the recursion in parallel
   bool info = false;
   bool replace_dont_care = false;
   std::string summand_groups = "none";
@@ -77,11 +79,26 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
   out << "parallel-groups = " << std::boolalpha << options.parallel_groups << std::endl;
   out << "parallel-learning = " << std::boolalpha << options.parallel_learning << std::endl;
+  out << "recursive-saturation = " << std::boolalpha << options.recursive_saturation << std::endl;
+  out << "parallel-saturation = " << std::boolalpha << options.recursive_saturation_parallel << std::endl;
   out << "info = " << std::boolalpha << options.info << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   out << "reorder = " << options.variable_order << std::endl;
   out << "dot = " << options.dot_file << std::endl;
   return out;
+}
+
+/// \brief The options as the reachability algorithms use them: with the recursion of --parallel-saturation on more
+/// than one Lace worker, learning runs on any worker. With the shared rewriter, substitution and enumerator, terms
+/// would then be made on one thread and destroyed on another, which the term library does not allow; so this mode
+/// learns with the learners of the workers (as --parallel-learning).
+inline symbolic_reachability_options effective_options(symbolic_reachability_options options)
+{
+  if (options.recursive_saturation_parallel && lace_workers() > 1)
+  {
+    options.parallel_learning = true;
+  }
+  return options;
 }
 
 // Add operations on reals that are needed for the exploration.

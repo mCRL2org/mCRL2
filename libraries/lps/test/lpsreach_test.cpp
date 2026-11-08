@@ -68,6 +68,9 @@ static const std::vector<std::pair<std::string, option_setter>> variants = {
   {"--parallel-groups --cached", [](symbolic::symbolic_reachability_options& o) { o.parallel_groups = true; o.cached = true; }},
   {"--parallel-groups --parallel-learning --cached", [](symbolic::symbolic_reachability_options& o) { o.parallel_groups = true; o.parallel_learning = true; o.cached = true; }},
   {"--parallel-groups --deadlock", [](symbolic::symbolic_reachability_options& o) { o.parallel_groups = true; o.detect_deadlocks = true; }},
+  {"--recursive-saturation --cached", [](symbolic::symbolic_reachability_options& o) { o.recursive_saturation = true; o.cached = true; }},
+  {"--parallel-saturation --cached", [](symbolic::symbolic_reachability_options& o) { o.recursive_saturation = true; o.recursive_saturation_parallel = true; o.cached = true; }},
+  {"--parallel-saturation --cached --deadlock", [](symbolic::symbolic_reachability_options& o) { o.recursive_saturation = true; o.recursive_saturation_parallel = true; o.cached = true; o.detect_deadlocks = true; }},
 };
 
 /// \returns The number of reachable states, and the number of deadlocks (if options.detect_deadlocks).

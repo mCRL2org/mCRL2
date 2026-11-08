@@ -33,6 +33,7 @@
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/symbolic/parallel_groups.h"
 #include "mcrl2/symbolic/print.h"
+#include "mcrl2/symbolic/saturation.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
 
 namespace mcrl2::pbes_system {
@@ -133,7 +134,7 @@ class pbesreach_algorithm
 
   protected:
     using ldd = sylvan::ldds::ldd;
-    const symbolic_reachability_options& m_options;
+    const symbolic_reachability_options m_options; // a copy: see symbolic::effective_options
     pbes_system::srf_pbes m_pbes;
     data::rewriter m_rewr;
     data::mutable_indexed_substitution<> m_sigma;
@@ -150,6 +151,12 @@ class pbesreach_algorithm
     std::vector<std::size_t> m_variable_order;
     std::size_t m_learner_generation = symbolic::new_learner_generation(); // for parallel learning, see symbolic::worker_learner
     std::mutex m_learn_statistics_mutex; // for parallel learning
+
+    // An exception during saturation must not unwind through the Lace tasks of the recursion: the first one is
+    // kept here, learning stops, and the run rethrows it after the recursion.
+    std::atomic<bool> m_saturation_failed{false};
+    std::mutex m_saturation_error_mutex;
+    std::exception_ptr m_saturation_error;
 
     ldd m_visited;
     ldd m_todo;
@@ -228,7 +235,7 @@ class pbesreach_algorithm
 
   public:
     pbesreach_algorithm(const pbes_system::srf_pbes& srf_pbes, const symbolic_reachability_options& options_)
-      : m_options(options_),
+      : m_options(symbolic::effective_options(options_)),
         m_pbes(internal_preprocess(srf_pbes, options_.make_total)),
         m_rewr(symbolic::construct_rewriter(m_pbes.data(), m_options.rewrite_strategy, pbes_system::find_function_symbols(m_pbes.to_pbes()), m_options.remove_unused_rewrite_rules)),
         m_enumerator(m_rewr, m_pbes.data(), m_rewr, m_id_generator, false)
@@ -454,6 +461,89 @@ class pbesreach_algorithm
       return std::make_tuple(union_(visited, todo), minus(todo1, visited), potential_deadlocks);
     }
 
+    /// \brief The learning (expand) callback of saturation: learns the transitions of group i for the projected states X.
+    /// \details An exception must not unwind through the Lace tasks of the recursion: the first one is kept, learning
+    ///          stops, and the run rethrows it after the recursion.
+    static void saturation_expand(void* context, std::size_t i, sylvan::MDD X_)
+    {
+      auto& algorithm = *static_cast<pbesreach_algorithm*>(context);
+      if (algorithm.m_saturation_failed.load(std::memory_order_relaxed))
+      {
+        return;
+      }
+      try
+      {
+        using namespace sylvan::ldds;
+        auto& R = algorithm.m_summand_groups[i];
+        ldd X(X_);
+        ldd domain(R.Ldomain.load()); // a protected copy: another worker may replace R.Ldomain meanwhile
+        ldd Y = minus(X, domain);
+        if (Y != empty_set())
+        {
+          // With the recursion in parallel on more than one worker, this is parallel learning (effective_options).
+          algorithm.learn_successors(i, R, Y);
+        }
+      }
+      catch (...)
+      {
+        std::scoped_lock guard(algorithm.m_saturation_error_mutex);
+        if (!algorithm.m_saturation_error)
+        {
+          algorithm.m_saturation_error = std::current_exception();
+        }
+        algorithm.m_saturation_failed.store(true);
+      }
+    }
+
+    /// \brief Learns the groups that read and write no parameter, for the reachable vertices. Recursive saturation
+    /// leaves them out, since they cannot add vertices; but their edges (self-loops) belong to the parity game. (In the
+    /// usual encoding every group reads the parameter of the propositional variable, so this is a safeguard.)
+    void learn_groups_without_parameters()
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_summand_groups;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        if (R[i].read.empty() && R[i].write.empty())
+        {
+          ldd X = project(m_visited, R[i].Ip);
+          learn_successors(i, R[i], m_options.cached ? minus(X, R[i].Ldomain) : X);
+        }
+      }
+    }
+
+    /// \brief Computes the reachable vertices with recursive saturation (symbolic::saturate), learning
+    /// the relations on the fly; then the vertices without successors (if deadlocks are detected).
+    void run_recursive_saturation()
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_summand_groups;
+      symbolic::saturation_context context;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        symbolic::saturation_relation r;
+        if (symbolic::make_saturation_relation(R[i], i, r))
+        {
+          context.rels.push_back(r);
+        }
+      }
+      context.parallel = m_options.recursive_saturation_parallel;
+      context.expand = &pbesreach_algorithm::saturation_expand;
+      context.expand_context = this;
+      std::size_t calls = 0;
+      m_initial_vertex = initial_state();
+      m_visited = symbolic::saturate(context, m_initial_vertex, calls);
+      if (m_saturation_error)
+      {
+        std::rethrow_exception(m_saturation_error);
+      }
+      m_todo = empty_set();
+      learn_groups_without_parameters();
+      // All relations are learned for all reachable vertices now, and successors of reachable vertices are reachable.
+      m_deadlocks = m_options.detect_deadlocks ? minus(m_visited, symbolic::relprev_groups_parallel(m_visited, m_visited, R)) : empty_set();
+      mCRL2log(log::log_level_t::verbose) << "saturation took " << calls << " passes" << std::endl;
+    }
+
     // post: m_visited contains the visited vertices in the parity game.
     void run(bool report_states = false)
     {
@@ -468,6 +558,12 @@ class pbesreach_algorithm
       m_visited = empty_set();
       m_todo = m_initial_vertex;
       m_deadlocks = empty_set();
+
+      if (m_options.recursive_saturation)
+      {
+        run_recursive_saturation();
+        on_end_while_loop();
+      }
 
       while (m_todo != empty_set() && !solution_found() && (m_options.max_iterations == 0 || iteration_count < m_options.max_iterations))
       {
