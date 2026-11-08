@@ -401,9 +401,8 @@ typedef enum lace_pin_mode {
  * otherwise) Lace does not pin. Without this call, the environment variable
  * LACE_PIN chooses: off, auto, all, cpu, core, l2, l3, numa, or list:CPUS for
  * worker i on the i-th CPU of a list such as list:0,2,4-7 (see
- * lace_set_pin_cpus). Linux, FreeBSD and Windows only (macOS does not pin),
- * and not with LACE_USE_HWLOC, which pins in its own way. Call before
- * lace_start().
+ * lace_set_pin_cpus). Linux, FreeBSD and Windows only (macOS does not pin).
+ * Call before lace_start().
  *
  * @param mode  The pinning mode (default LACE_PIN_AUTO)
  * @see lace_set_pin_cpus
@@ -469,8 +468,7 @@ unsigned int lace_get_pu_count(void);
  * If <dqsize> is est to 0, uses a reasonable default value.
  * With LACE_BACKOFF (the default), idle workers soon sleep, and an idle Lace
  * uses almost no CPU. On Linux, FreeBSD and Windows, workers are pinned as
- * lace_set_pinning() chooses (by default LACE_PIN_AUTO); with LACE_USE_HWLOC,
- * hwloc pins them to CPU cores.
+ * lace_set_pinning() chooses (by default LACE_PIN_AUTO).
  */
 void lace_start(unsigned int n_workers, size_t dqsize);
 
