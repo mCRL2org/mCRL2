@@ -34,12 +34,7 @@ typedef struct
     _Atomic(uint64_t) *refs_table;        // table itself
     size_t refs_size;                     // number of buckets
 
-    /* helpers during resize operation */
-    _Atomic(uint32_t) refs_control;       // control field
-    _Atomic(uint64_t) *refs_resize_table; // previous table
-    size_t refs_resize_size;              // size of previous table
-    _Atomic(size_t) refs_resize_part;     // which part is next
-    _Atomic(size_t) refs_resize_done;     // how many parts are done
+    _Atomic(uint32_t) refs_control;       // resize in progress (high bits), active operations (low bits)
 } refs_table_t;
 
 // Count number of unique entries (not number of references)
