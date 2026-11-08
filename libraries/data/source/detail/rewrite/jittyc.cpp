@@ -3072,7 +3072,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(
                           const used_data_equation_selector& equation_selector)
   : Rewriter(data_spec,equation_selector),
     jitty_rewriter(data_spec,equation_selector),
-    m_nf_cache(new normal_form_cache())
+    m_nf_cache(new normal_form_cache(), normal_form_cache_deleter())
 {
   thread_initialise();
   assert(m_nf_cache->empty());

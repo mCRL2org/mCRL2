@@ -11,8 +11,11 @@
 #ifndef MCRL2_DATA_DETAIL_REWR_JITTYC_H
 #define MCRL2_DATA_DETAIL_REWR_JITTYC_H
 
-#include <utility>
+#include <mutex>
 #include <string>
+#include <thread>
+#include <utility>
+#include <vector>
 
 #include "mcrl2/utilities/uncompiledlibrary.h"
 #include "mcrl2/utilities/toolset_version.h"
@@ -72,6 +75,46 @@ class normal_form_cache
   }
 
   ~normal_form_cache() = default;
+};
+
+/// \brief Deletes a normal_form_cache, but only on the thread that created it.
+/// \details The terms in a normal_form_cache are protected by the term pool of the thread that created the cache
+///          (they are inserted while the rewriter is compiled), and a protected term can only be destroyed on that
+///          thread. All clones of a compiling rewriter share the cache, because the generated code refers to its terms
+///          by address, so the last rewriter using it can be a clone that dies on another thread, for instance when a
+///          worker thread that owns a clone exits after the original rewriter is gone. Then the cache is kept in a
+///          list that lives until the end of the program: its terms stay protected (when the creating thread exits,
+///          the term pool moves its protected terms to the main thread) and are reclaimed at program exit.
+class normal_form_cache_deleter
+{
+  private:
+    std::thread::id m_creator = std::this_thread::get_id();
+
+    static std::vector<normal_form_cache*>& orphans()
+    {
+      static auto* caches = new std::vector<normal_form_cache*>(); // never destroyed: the caches stay reachable
+      return *caches;
+    }
+
+    static std::mutex& orphans_mutex()
+    {
+      static std::mutex mutex;
+      return mutex;
+    }
+
+  public:
+    void operator()(normal_form_cache* cache) const
+    {
+      if (std::this_thread::get_id() == m_creator)
+      {
+        delete cache;
+      }
+      else
+      {
+        std::lock_guard<std::mutex> guard(orphans_mutex());
+        orphans().push_back(cache);
+      }
+    }
 };
 
 class RewriterCompilingJitty: public Rewriter
