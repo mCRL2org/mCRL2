@@ -1,7 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.23...3.31)
 
 project(lace
-    VERSION 1.9.0
+    VERSION 1.10.0
     DESCRIPTION "Lace, a work-stealing framework for multi-core fork-join parallelism"
     HOMEPAGE_URL "https://github.com/trolando/lace"
     LANGUAGES C
@@ -28,7 +28,6 @@ option(BUILD_SHARED_LIBS "Build shared libraries instead of static"             
 option(LACE_ENABLE_PIC   "Build Lace with -fPIC (e.g. for linking into shared libs)" OFF)
 option(LACE_NATIVE_OPT   "Enable -march=native for compiler optimizations"           ${lace_IS_TOP_LEVEL})
 option(LACE_BACKOFF      "Let idle threads sleep if there is no work"                ON)
-option(LACE_USE_HWLOC    "Deprecated: let Lace pin threads/memory using libhwloc"    OFF)
 option(LACE_PIE_TIMES    "Let Lace record Pie times"                                 OFF)
 option(LACE_COUNT_TASKS  "Let Lace record the number of tasks"                       OFF)
 option(LACE_COUNT_STEALS "Let Lace count #steals and #leaps"                         OFF)
@@ -83,11 +82,7 @@ if(NOT MSVC)
 endif()
 
 if(LACE_USE_HWLOC)
-    message(DEPRECATION "LACE_USE_HWLOC is deprecated and will be removed: Lace pins its workers itself on Linux, FreeBSD and Windows")
-    find_package(HWLOC REQUIRED)
-    if(APPLE)
-        message(WARNING "LACE_USE_HWLOC: macOS does not let programs pin threads, so hwloc cannot pin Lace's workers")
-    endif()
+    message(WARNING "LACE_USE_HWLOC is no longer supported and is ignored: Lace pins its workers itself on Linux, FreeBSD and Windows")
 endif()
 
 # ── Sanitizer support (top-level builds only) ────────────────────────────────
@@ -289,10 +284,6 @@ foreach(_target lace lace14)
         target_link_libraries(${_target} PUBLIC synchronization)
     endif()
 
-    if(LACE_USE_HWLOC)
-        target_link_libraries(${_target} PUBLIC HWLOC::hwloc)
-    endif()
-
     # ── Shared library versioning ────────────────────────────────────────
     if(BUILD_SHARED_LIBS)
         set_target_properties(${_target} PROPERTIES
@@ -328,7 +319,6 @@ if(NOT lace_IS_TOP_LEVEL)
         LACE_ENABLE_PIC
         LACE_NATIVE_OPT
         LACE_BACKOFF
-        LACE_USE_HWLOC
         LACE_PIE_TIMES
         LACE_COUNT_TASKS
         LACE_COUNT_STEALS
@@ -377,7 +367,6 @@ install(
     FILES
         ${CMAKE_CURRENT_BINARY_DIR}/cmake/lace-config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/cmake/lace-config-version.cmake
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindHWLOC.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lace
 )
 
@@ -385,18 +374,6 @@ install(
 
 set(_PC_EXTRA_CFLAGS "")
 set(_PC_EXTRA_LIBS "")
-
-if(LACE_USE_HWLOC)
-    foreach(inc ${HWLOC_INCLUDE_DIRS})
-        list(APPEND _PC_EXTRA_CFLAGS "-I${inc}")
-    endforeach()
-    foreach(lib ${HWLOC_LIBRARIES})
-        get_filename_component(libdir ${lib} DIRECTORY)
-        get_filename_component(libname ${lib} NAME_WE)
-        string(REGEX REPLACE "^lib" "" libname "${libname}")
-        list(APPEND _PC_EXTRA_LIBS "-L${libdir}" "-l${libname}")
-    endforeach()
-endif()
 
 if(MINGW)
     list(APPEND _PC_EXTRA_LIBS "-lsynchronization")
@@ -426,7 +403,6 @@ if(lace_IS_TOP_LEVEL)
     message(STATUS "Lace ${PROJECT_VERSION} configuration summary:")
     message(STATUS "  Build type        : ${CMAKE_BUILD_TYPE}")
     message(STATUS "  Shared libraries  : ${BUILD_SHARED_LIBS}")
-    message(STATUS "  Use HWLOC         : ${LACE_USE_HWLOC}")
     message(STATUS "  Use -march=native : ${LACE_NATIVE_OPT}")
     message(STATUS "  Use -fPIC         : ${LACE_ENABLE_PIC}")
     message(STATUS "  Backoff when idle : ${LACE_BACKOFF}")

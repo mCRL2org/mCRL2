@@ -9,10 +9,6 @@ if(NOT MSVC)
     find_dependency(Threads)
 endif()
 
-if(@LACE_USE_HWLOC@)
-    find_dependency(HWLOC)
-endif()
-
 if(NOT TARGET lace::lace)
     include("${CMAKE_CURRENT_LIST_DIR}/lace-targets.cmake")
 endif()
