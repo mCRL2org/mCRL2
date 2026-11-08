@@ -554,6 +554,7 @@ protected:
     desc.add_hidden_option("parallel-groups", "apply the transition groups in parallel (in exploration without --chaining and --saturation, and in solving without --chaining)");
     desc.add_hidden_option("recursive-saturation", "explore with recursive saturation and on-the-fly learning (needs --cached)");
     desc.add_hidden_option("parallel-saturation", "--recursive-saturation with the recursion in parallel");
+    desc.add_hidden_option("reach", "explore with the REACH operation (in parallel) and on-the-fly learning (needs --cached)");
     desc.add_hidden_option("parallel-learning", "learn the transitions of a transition group in parallel, with a rewriter per thread");
     desc.add_hidden_option("initial-ratio",
       utilities::make_optional_argument("NUM", "16"),
@@ -610,6 +611,15 @@ protected:
     if (options.recursive_saturation && !options.cached)
     {
       throw mcrl2::runtime_error("--recursive-saturation and --parallel-saturation need --cached");
+    }
+    options.reach = parser.has_option("reach");
+    if (options.reach && !options.cached)
+    {
+      throw mcrl2::runtime_error("--reach needs --cached");
+    }
+    if (options.reach && options.recursive_saturation)
+    {
+      throw mcrl2::runtime_error("--reach cannot be combined with --recursive-saturation or --parallel-saturation");
     }
     options.info = parser.has_option("info");
     options.summand_groups = parser.option_argument("groups");

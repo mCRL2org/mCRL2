@@ -25,6 +25,7 @@
 #include "mcrl2/symbolic/ordering.h"
 #include "mcrl2/symbolic/parallel_groups.h"
 #include "mcrl2/symbolic/print.h"
+#include "mcrl2/symbolic/reach.h"
 #include "mcrl2/symbolic/saturation.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
 #include "mcrl2/utilities/stopwatch.h"
@@ -156,8 +157,8 @@ class lpsreach_algorithm
     }
 
     /// \brief Learns the groups that read and write no parameter, for the reachable states visited. Recursive
-    /// saturation leaves them out, since they cannot add states; but their transitions (self-loops) belong to the
-    /// deadlock detection and to the symbolic LTS.
+    /// saturation and REACH leave them out, since they cannot add states; but their transitions (self-loops) belong
+    /// to the deadlock detection and to the symbolic LTS.
     void learn_groups_without_parameters(const ldd& visited)
     {
       using namespace sylvan::ldds;
@@ -173,7 +174,7 @@ class lpsreach_algorithm
     }
 
     /// \brief With --deadlock, reports the states of visited without successors, after a run that has learned the
-    /// relations of all groups for all of visited (recursive saturation). Since the successors of visited are in
+    /// relations of all groups for all of visited (recursive saturation, REACH). Since the successors of visited are in
     /// visited, those are the states of visited without a successor in visited.
     void report_deadlocks_of_complete_run(const ldd& visited)
     {
@@ -231,6 +232,43 @@ class lpsreach_algorithm
       std::cout << "number of states = " << print_size(visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
       report_deadlocks_of_complete_run(visited);
       mCRL2log(log::log_level_t::verbose) << "saturation took " << calls << " passes" << std::endl;
+      report_learning(R);
+      m_lts.states = visited;
+      return visited;
+    }
+
+    /// \brief Computes the reachable states with the REACH operation (symbolic::reach), learning the relations of
+    /// the groups on the fly.
+    ldd run_reach()
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_lts.summand_groups;
+      stopwatch timer;
+
+      std::vector<symbolic::saturation_relation> rels;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        symbolic::saturation_relation r;
+        if (symbolic::make_saturation_relation(R[i], i, r))
+        {
+          rels.push_back(r);
+        }
+      }
+      symbolic::reach_context context;
+      symbolic::make_reach_context(context, m_lts.process_parameters.size(), rels);
+      context.expand = &lpsreach_algorithm::saturation_expand;
+      context.expand_context = this;
+
+      ldd visited = symbolic::reach(context, m_lts.initial_state);
+      if (m_saturation_error)
+      {
+        std::rethrow_exception(m_saturation_error);
+      }
+
+      learn_groups_without_parameters(visited);
+      std::cout << "number of states = " << print_size(visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
+      report_deadlocks_of_complete_run(visited);
+      mCRL2log(log::log_level_t::verbose) << "REACH took " << context.top_iterations << " iterations on the first level" << std::endl;
       report_learning(R);
       m_lts.states = visited;
       return visited;
@@ -494,6 +532,10 @@ class lpsreach_algorithm
     ldd run()
     {
       using namespace sylvan::ldds;
+      if (m_options.reach)
+      {
+        return run_reach();
+      }
       if (m_options.recursive_saturation)
       {
         return run_recursive_saturation();

@@ -33,6 +33,7 @@
 #include "mcrl2/pbes/unify_parameters.h"
 #include "mcrl2/symbolic/parallel_groups.h"
 #include "mcrl2/symbolic/print.h"
+#include "mcrl2/symbolic/reach.h"
 #include "mcrl2/symbolic/saturation.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
 
@@ -496,8 +497,9 @@ class pbesreach_algorithm
     }
 
     /// \brief Learns the groups that read and write no parameter, for the reachable vertices. Recursive saturation
-    /// leaves them out, since they cannot add vertices; but their edges (self-loops) belong to the parity game. (In the
-    /// usual encoding every group reads the parameter of the propositional variable, so this is a safeguard.)
+    /// and REACH leave them out, since they cannot add vertices; but their edges (self-loops) belong to the parity
+    /// game. (In the usual encoding every group reads the parameter of the propositional variable, so this is a
+    /// safeguard.)
     void learn_groups_without_parameters()
     {
       using namespace sylvan::ldds;
@@ -544,6 +546,38 @@ class pbesreach_algorithm
       mCRL2log(log::log_level_t::verbose) << "saturation took " << calls << " passes" << std::endl;
     }
 
+    /// \brief Computes the reachable vertices with the REACH operation (symbolic::reach), learning the relations on
+    /// the fly; then the vertices without successors (if deadlocks are detected).
+    void run_reach()
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_summand_groups;
+      std::vector<symbolic::saturation_relation> rels;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        symbolic::saturation_relation r;
+        if (symbolic::make_saturation_relation(R[i], i, r))
+        {
+          rels.push_back(r);
+        }
+      }
+      symbolic::reach_context context;
+      symbolic::make_reach_context(context, m_n, rels);
+      context.expand = &pbesreach_algorithm::saturation_expand;
+      context.expand_context = this;
+      m_initial_vertex = initial_state();
+      m_visited = symbolic::reach(context, m_initial_vertex);
+      if (m_saturation_error)
+      {
+        std::rethrow_exception(m_saturation_error);
+      }
+      m_todo = empty_set();
+      learn_groups_without_parameters();
+      // All relations are learned for all reachable vertices now, and successors of reachable vertices are reachable.
+      m_deadlocks = m_options.detect_deadlocks ? minus(m_visited, symbolic::relprev_groups_parallel(m_visited, m_visited, R)) : empty_set();
+      mCRL2log(log::log_level_t::verbose) << "REACH took " << context.top_iterations << " iterations on the first level" << std::endl;
+    }
+
     // post: m_visited contains the visited vertices in the parity game.
     void run(bool report_states = false)
     {
@@ -559,7 +593,12 @@ class pbesreach_algorithm
       m_todo = m_initial_vertex;
       m_deadlocks = empty_set();
 
-      if (m_options.recursive_saturation)
+      if (m_options.reach)
+      {
+        run_reach();
+        on_end_while_loop();
+      }
+      else if (m_options.recursive_saturation)
       {
         run_recursive_saturation();
         on_end_while_loop();

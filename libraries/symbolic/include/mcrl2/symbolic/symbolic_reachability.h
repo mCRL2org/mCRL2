@@ -54,6 +54,7 @@ struct symbolic_reachability_options
   bool parallel_learning = false; // learn the transitions of a group in parallel (all modes)
   bool recursive_saturation = false; // recursive saturation with on-the-fly learning (instead of breadth-first steps)
   bool recursive_saturation_parallel = false; // ... with the recursion in parallel
+  bool reach = false; // the REACH operation with on-the-fly learning (instead of breadth-first steps)
   bool info = false;
   bool replace_dont_care = false;
   std::string summand_groups = "none";
@@ -81,6 +82,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "parallel-learning = " << std::boolalpha << options.parallel_learning << std::endl;
   out << "recursive-saturation = " << std::boolalpha << options.recursive_saturation << std::endl;
   out << "parallel-saturation = " << std::boolalpha << options.recursive_saturation_parallel << std::endl;
+  out << "reach = " << std::boolalpha << options.reach << std::endl;
   out << "info = " << std::boolalpha << options.info << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   out << "reorder = " << options.variable_order << std::endl;
@@ -88,13 +90,13 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   return out;
 }
 
-/// \brief The options as the reachability algorithms use them: with the recursion of --parallel-saturation on more
-/// than one Lace worker, learning runs on any worker. With the shared rewriter, substitution and enumerator, terms
-/// would then be made on one thread and destroyed on another, which the term library does not allow; so this mode
-/// learns with the learners of the workers (as --parallel-learning).
+/// \brief The options as the reachability algorithms use them: with the recursion of --parallel-saturation or --reach
+/// on more than one Lace worker, learning runs on any worker. With the shared rewriter, substitution and enumerator,
+/// terms would then be made on one thread and destroyed on another, which the term library does not allow; so these
+/// modes learn with the learners of the workers (as --parallel-learning).
 inline symbolic_reachability_options effective_options(symbolic_reachability_options options)
 {
-  if (options.recursive_saturation_parallel && lace_workers() > 1)
+  if ((options.reach || options.recursive_saturation_parallel) && lace_workers() > 1)
   {
     options.parallel_learning = true;
   }

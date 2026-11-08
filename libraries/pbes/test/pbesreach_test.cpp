@@ -66,6 +66,8 @@ static const std::vector<std::pair<std::string, option_setter>> variants = {
   {"--recursive-saturation --cached", [](pbes_system::symbolic_reachability_options& o) { o.recursive_saturation = true; o.cached = true; }},
   {"--parallel-saturation --cached", [](pbes_system::symbolic_reachability_options& o) { o.recursive_saturation = true; o.recursive_saturation_parallel = true; o.cached = true; }},
   {"--parallel-saturation --cached --deadlock", [](pbes_system::symbolic_reachability_options& o) { o.recursive_saturation = true; o.recursive_saturation_parallel = true; o.cached = true; o.detect_deadlocks = true; }},
+  {"--reach --cached", [](pbes_system::symbolic_reachability_options& o) { o.reach = true; o.cached = true; }},
+  {"--reach --cached --deadlock", [](pbes_system::symbolic_reachability_options& o) { o.reach = true; o.cached = true; o.detect_deadlocks = true; }},
 };
 
 /// \returns The answer, and the number of reachable vertices.
