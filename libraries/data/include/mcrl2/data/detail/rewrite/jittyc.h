@@ -11,8 +11,11 @@
 #ifndef MCRL2_DATA_DETAIL_REWR_JITTYC_H
 #define MCRL2_DATA_DETAIL_REWR_JITTYC_H
 
-#include <utility>
+#include <map>
+#include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "mcrl2/utilities/uncompiledlibrary.h"
 #include "mcrl2/utilities/toolset_version.h"
@@ -31,47 +34,49 @@ using sort_list_vector = std::vector<sort_expression_list>;
 
 ///
 /// \brief The normal_form_cache class stores normal forms of data_expressions that
-///        are inserted in it. By keeping the cache on the stack, the normal forms
-///        in it will not be freed by the ATerm library, and can therefore be used
-///        in the generated jittyc code.
+///        are inserted in it. Each compiling rewriter thread keeps its own copy,
+///        so the terms remain protected by the thread that uses them.
 ///
 class normal_form_cache
 {
   private:
-    std::set<data_expression> m_lookup;
+    std::map<data_expression, std::size_t> m_indices;
+    std::vector<data_expression> m_terms;
   public:
     normal_form_cache() = default;
-
-    // Caches cannot be copied or moved. The addresses in the cache must remain available the lifetime of
-    // all rewriters using this cache. 
-    normal_form_cache(const normal_form_cache& ) = delete;
-    normal_form_cache(normal_form_cache&& ) = delete;
-    normal_form_cache& operator=(const normal_form_cache& ) = delete;
-    normal_form_cache& operator=(normal_form_cache&& ) = delete;
   
-  /// \brief insert stores the normal form of t in the cache, and returns a string
-  ///        that is a C++ representation of the stored normal form. This string can
-  ///        be used by the generated rewriter as long as the cache object is alive,
-  ///        and its clear() method has not been called.
+  /// \brief Insert stores the normal form of t in the cache and returns a C++ expression
+  ///        that accesses it through the current rewriter's thread-local data.
   /// \param t The term to normalize.
-  /// \return A C++ string that evaluates to the cached normal form of t.
+  /// \return A C++ expression that evaluates to the cached normal form of t.
   ///
   std::string insert(const data_expression& t)
   {
-    std::stringstream ss;
-    const data_expression* cached_term = &*(m_lookup.insert(t).first);
-    ss << "*reinterpret_cast<const data_expression*>(" << (void*)(cached_term) << ")";
-    return ss.str();
+    auto [it, inserted] = m_indices.emplace(t, m_terms.size());
+    if (inserted)
+    {
+      m_terms.push_back(t);
+    }
+    return "this_rewriter->m_thread_local_data->m_nf_cache.get(" + std::to_string(it->second) + ")";
   }
 
   /// \brief Checks whether the cache is empty.
   /// \return A boolean indicating whether the cache is empty. 
   bool empty() const
   {
-    return m_lookup.empty();
+    return m_terms.empty();
   }
 
+  const data_expression& get(std::size_t index) const { return m_terms[index]; }
+
   ~normal_form_cache() = default;
+};
+
+/// \brief The state that is local to a compiling rewriter instance (and its worker thread).
+struct compiling_rewriter_thread_local_data
+{
+  rewrite_stack m_rewrite_stack;
+  normal_form_cache m_nf_cache;
 };
 
 class RewriterCompilingJitty: public Rewriter
@@ -93,7 +98,8 @@ class RewriterCompilingJitty: public Rewriter
     // sigma during rewriting a single term. It is not a variable for public use.
     substitution_type* global_sigma = nullptr;
     bool rewriting_in_progress;
-    rewrite_stack m_rewrite_stack;
+    std::shared_ptr<compiling_rewriter_thread_local_data> m_thread_local_data =
+        std::make_shared<compiling_rewriter_thread_local_data>();
 
     // The data structures below are used to store the variable lists2
     // that are used in the compiling rewriter in forall, where and exists.
@@ -233,7 +239,9 @@ class RewriterCompilingJitty: public Rewriter
 
     std::shared_ptr<detail::Rewriter> clone() override
     {
-      return std::shared_ptr<Rewriter>(new RewriterCompilingJitty(*this));
+      std::shared_ptr<RewriterCompilingJitty> result(new RewriterCompilingJitty(*this));
+      result->m_thread_local_data = std::make_shared<compiling_rewriter_thread_local_data>(*m_thread_local_data);
+      return result;
     }
 
   protected:
@@ -248,8 +256,6 @@ class RewriterCompilingJitty: public Rewriter
     std::set<function_symbol> m_extra_symbols;
 
     std::shared_ptr<uncompiled_library> rewriter_so;
-    std::shared_ptr<normal_form_cache> m_nf_cache;
-
     // The rewriter maintains a copy of busy and forbidden flag,
     // to allow for faster access to them. These flags are used extensively and
     // in clang version 2021 access to them via the compiler, using tlv_get_access,
