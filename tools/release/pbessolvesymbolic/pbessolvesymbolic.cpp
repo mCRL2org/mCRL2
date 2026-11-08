@@ -17,6 +17,7 @@
 
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/symbolic/gc_statistics.h"
 #include "mcrl2/pbes/detail/pbes_io.h"
 #include "mcrl2/pbes/detail/pbes_remove_counterexample_info.h"
 #include "mcrl2/pbes/detail/pbessolve_algorithm.h"
@@ -744,6 +745,7 @@ public:
     sylvan::sylvan_init_package();
     sylvan::sylvan_init_ldd();
     sylvan::ldds::initialise();
+    symbolic::install_gc_statistics();
 
     auto args = arguments{.options = options,
       .input_filename = input_filename(),
@@ -754,6 +756,11 @@ public:
       .ltsfile = ltsfile,
       .timer = timer()};
     bool result = pbessolvesymbolic_task(&args);
+    mCRL2log(log::log_level_t::verbose) << symbolic::print_gc_statistics() << std::endl;
+    if (mCRL2logEnabled(log::log_level_t::verbose))
+    {
+      symbolic::print_sylvan_statistics(); // only with SYLVAN_STATS
+    }
 
     sylvan::sylvan_quit();
     lace_stop();

@@ -12,6 +12,7 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/symbolic_lts_io.h"
+#include "mcrl2/symbolic/gc_statistics.h"
 #include "mcrl2/symbolic/ordering.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/parallel_tool.h"
@@ -208,9 +209,15 @@ public:
     sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, static_cast<int>(std::log2(table_ratio)), static_cast<int>(std::log2(initial_ratio)));
     sylvan::sylvan_init_package();
     sylvan::sylvan_init_ldd();
+    symbolic::install_gc_statistics();
 
     auto args = arguments{.options=options, .input_filename=input_filename(), .output_filename=output_filename()};
     bool result = lpsreach_task(&args);
+    mCRL2log(log::log_level_t::verbose) << symbolic::print_gc_statistics() << std::endl;
+    if (mCRL2logEnabled(log::log_level_t::verbose))
+    {
+      symbolic::print_sylvan_statistics(); // only with SYLVAN_STATS
+    }
 
     sylvan::sylvan_quit();
     lace_stop();
