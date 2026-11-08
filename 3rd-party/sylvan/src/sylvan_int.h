@@ -21,6 +21,7 @@
  */
 
 #include <sylvan.h>
+#include <string.h> // for memcpy
 
 #ifdef __cplusplus
 namespace sylvan {
