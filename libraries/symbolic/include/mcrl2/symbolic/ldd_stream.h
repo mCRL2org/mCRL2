@@ -44,9 +44,10 @@ namespace mcrl2::symbolic
 ///
 ///          Every LDD is traversed in order and assigned a unique number.
 ///          Whenever traversal encounters an LDD of which all children have
-///          been visited it is written to the stream as 0:[value, down_index,
-///          right_index]. An output LDD (as returned by
-///          binary_ldd_istream::get()) is written as 1:index.
+///          been visited it is written to the stream as 0:[0, value, down_index,
+///          right_index], or as 0:[1, down_index, right_index] if it is a copy
+///          node. An output LDD (as returned by binary_ldd_istream::get()) is
+///          written as 1:index.
 class binary_ldd_ostream
 {
 public:
@@ -80,6 +81,7 @@ private:
   
   std::shared_ptr<mcrl2::utilities::ibitstream> m_stream;
   std::deque<sylvan::ldds::ldd> m_nodes; ///< An index of read ldds.
+  bool m_has_copy_flag = true; ///< False for the older format, which does not store whether a node is a copy node.
 };
 
 /// \brief Write the given term to the stream.
