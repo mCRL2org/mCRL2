@@ -93,6 +93,9 @@ protected:
     desc.add_option("saturation",
       "reduce the amount of breadth-first iterations required by applying the transition groups until fixed point is "
       "reached");
+    desc.add_option("recursive-saturation",
+      "explore with recursive saturation, which saturates the state space from the last parameter to the first and "
+      "learns the transitions of the transition groups on the fly (requires --cached)");
     desc.add_option("replace-dont-care",
       "replace parameters assignments to don't care variables by assignments to the parameter itself");
     desc.add_hidden_option("no-discard", "do not discard any parameters");
@@ -129,6 +132,11 @@ protected:
     options.no_discard_read = parser.has_option("no-read");
     options.no_discard_write = parser.has_option("no-write");
     options.no_relprod = parser.has_option("no-relprod");
+    options.recursive_saturation = parser.has_option("recursive-saturation");
+    if (options.recursive_saturation && !options.cached)
+    {
+      throw mcrl2::runtime_error("--recursive-saturation needs --cached");
+    }
     options.info = parser.has_option("info");
     options.summand_groups = parser.option_argument("groups");
     options.variable_order = parser.option_argument("reorder");
