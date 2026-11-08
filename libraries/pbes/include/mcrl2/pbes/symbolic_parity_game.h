@@ -12,6 +12,7 @@
 
 #ifdef MCRL2_ENABLE_SYLVAN
 
+#include "mcrl2/symbolic/parallel_groups.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/pbes_equation_index.h"
 #include "mcrl2/symbolic/alternative_relprod.h"
@@ -276,6 +277,7 @@ class symbolic_parity_game
     bool m_no_relprod = false;
     bool m_chaining = false;
     bool m_compute_strategy = false;
+    bool m_parallel_groups = false; // apply the relations of the summand groups in parallel (not with chaining)
 
     const std::vector<symbolic::data_expression_index>& m_data_index; // for debugging only
     ldd m_all_nodes; // for debugging only
@@ -658,10 +660,18 @@ class symbolic_parity_game
     /// \brief Returns the mapping from priorities (ranks) to vertex sets.
     const std::map<std::size_t, ldd>& ranks() const { return m_rank_map; }
 
+    /// \brief Apply the relations of the summand groups in parallel where they are independent.
+    void set_parallel_groups(bool parallel_groups) { m_parallel_groups = parallel_groups; }
+
     /// \returns The set { u in U | exists v in V: u -> v }
     ldd predecessors(const ldd& U, const ldd& V) const
     {
       using namespace sylvan::ldds;
+
+      if (m_parallel_groups && !m_no_relprod)
+      {
+        return symbolic::relprev_groups_parallel(U, V, m_summand_groups);
+      }
 
       ldd result;
       for (int i = static_cast<int>(m_summand_groups.size()) - 1; i >= 0; --i)
@@ -772,7 +782,7 @@ class symbolic_parity_game
         prio[p] = vertices;
       }
 
-      return symbolic_parity_game(
+      symbolic_parity_game result(
         summand_groups,
         m_data_index,
         m_all_nodes,
@@ -782,6 +792,8 @@ class symbolic_parity_game
         m_chaining,
         m_compute_strategy
       );
+      result.set_parallel_groups(m_parallel_groups);
+      return result;
     }
 
 private:
@@ -873,6 +885,14 @@ private:
         << "  Palpha = " << print_nodes(Palpha) << "\n"
         << "  Pforced = " << print_nodes(Pforced) << "\n"
         << (strategy.has_value() ? "  strategy = " + print_strategy(strategy.value()) + "\n" : "");
+
+      // Removing the predecessors group by group gives the same set as removing the predecessors
+      // of all groups at once, since predecessors(U, V, group) = predecessors(U', V, group) ∩ U for U ⊆ U'.
+      if (m_parallel_groups && !m_no_relprod)
+      {
+        Pforced = minus(Pforced, predecessors(Pforced, outside));
+        return std::make_pair(union_(Palpha, Pforced), strategy);
+      }
 
       for (std::size_t i = 0; i < m_summand_groups.size(); ++i)
       {

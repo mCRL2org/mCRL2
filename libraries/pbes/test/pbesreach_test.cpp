@@ -59,6 +59,10 @@ using option_setter = std::function<void(pbes_system::symbolic_reachability_opti
 static const std::vector<std::pair<std::string, option_setter>> variants = {
   {"--parallel-learning", [](pbes_system::symbolic_reachability_options& o) { o.parallel_learning = true; }},
   {"--parallel-learning --cached", [](pbes_system::symbolic_reachability_options& o) { o.parallel_learning = true; o.cached = true; }},
+  {"--parallel-groups", [](pbes_system::symbolic_reachability_options& o) { o.parallel_groups = true; }},
+  {"--parallel-groups --cached", [](pbes_system::symbolic_reachability_options& o) { o.parallel_groups = true; o.cached = true; }},
+  {"--parallel-groups --parallel-learning --cached", [](pbes_system::symbolic_reachability_options& o) { o.parallel_groups = true; o.parallel_learning = true; o.cached = true; }},
+  {"--parallel-groups --deadlock", [](pbes_system::symbolic_reachability_options& o) { o.parallel_groups = true; o.detect_deadlocks = true; }},
 };
 
 /// \returns The answer, and the number of reachable vertices.
