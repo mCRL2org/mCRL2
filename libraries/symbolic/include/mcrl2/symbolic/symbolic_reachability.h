@@ -183,10 +183,11 @@ void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, v
                            },
                            data::is_false
       );
-
-      ++i;
     }
     data::remove_assignments(sigma, smd.variables);
+
+    // group.actions has one entry per summand, also for summands whose condition is false.
+    ++i;
   }
   data::remove_assignments(sigma, group.read_parameters);
   group.learn_calls += 1;
