@@ -64,6 +64,10 @@ using option_setter = std::function<void(symbolic::symbolic_reachability_options
 static const std::vector<std::pair<std::string, option_setter>> variants = {
   {"--parallel-learning", [](symbolic::symbolic_reachability_options& o) { o.parallel_learning = true; }},
   {"--parallel-learning --cached", [](symbolic::symbolic_reachability_options& o) { o.parallel_learning = true; o.cached = true; }},
+  {"--parallel-groups", [](symbolic::symbolic_reachability_options& o) { o.parallel_groups = true; }},
+  {"--parallel-groups --cached", [](symbolic::symbolic_reachability_options& o) { o.parallel_groups = true; o.cached = true; }},
+  {"--parallel-groups --parallel-learning --cached", [](symbolic::symbolic_reachability_options& o) { o.parallel_groups = true; o.parallel_learning = true; o.cached = true; }},
+  {"--parallel-groups --deadlock", [](symbolic::symbolic_reachability_options& o) { o.parallel_groups = true; o.detect_deadlocks = true; }},
 };
 
 /// \returns The number of reachable states, and the number of deadlocks (if options.detect_deadlocks).

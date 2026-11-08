@@ -23,6 +23,7 @@
 #include "mcrl2/lps/symbolic_lts.h"
 #include "mcrl2/lps/detail/replace_global_variables.h"
 #include "mcrl2/symbolic/ordering.h"
+#include "mcrl2/symbolic/parallel_groups.h"
 #include "mcrl2/symbolic/print.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
 #include "mcrl2/utilities/stopwatch.h"
@@ -202,12 +203,58 @@ class lpsreach_algorithm
       }
     }
 
+    /// \brief Perform a single breadth first step, applying the transition groups in parallel.
+    /// Only for the regular mode (no chaining, no saturation): there, every group reads the same todo.
+    /// First the projections of all groups are computed in parallel, then the groups learn (one after another;
+    /// each in parallel with --parallel-learning), and then all relprods and their unions run in a parallel tree.
+    /// \returns The tuple <visited, todo, deadlocks>
+    std::tuple<ldd, ldd, ldd> step_parallel_groups(const ldd& visited, const ldd& todo, bool learn_transitions, bool detect_deadlocks)
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_lts.summand_groups;
+
+      if (learn_transitions)
+      {
+        // With --cached, the projections minus the values that have been learned before.
+        std::vector<ldd> projections = symbolic::project_groups_parallel(todo, R, m_options.cached);
+        for (std::size_t i = 0; i < R.size(); i++)
+        {
+          learn_successors(i, R[i], projections[i]);
+
+          mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+        }
+      }
+
+      // Every group removes visited from its successors before the unions, so that the unions only carry new
+      // states. Not with deadlock detection, which needs all successors.
+      ldd todo1 = symbolic::relprod_groups_parallel(todo, R, nullptr, detect_deadlocks ? empty_set() : visited);
+      ldd potential_deadlocks = empty_set();
+      if (detect_deadlocks)
+      {
+        // As in step(): the set of potential deadlocks shrinks group by group, which keeps the later relprevs
+        // cheap. Using the union of the successors of all groups gives the same result as the partial unions in
+        // step(), because todo1 contains every successor of todo.
+        potential_deadlocks = todo;
+        for (std::size_t i = 0; i < R.size(); i++)
+        {
+          potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+        }
+        todo1 = minus(todo1, visited);
+      }
+      return std::make_tuple(union_(visited, todo), todo1, potential_deadlocks);
+    }
+
     /// \brief Perform a single breadth first step.
     /// \returns The tuple <visited, todo, deadlocks>
     std::tuple<ldd, ldd, ldd> step(const ldd& visited, const ldd& todo, bool learn_transitions = true, bool detect_deadlocks = false)
     {
       using namespace sylvan::ldds;
       auto& R = m_lts.summand_groups;
+
+      if (m_options.parallel_groups && !m_options.saturation && !m_options.chaining && !m_options.no_relprod)
+      {
+        return step_parallel_groups(visited, todo, learn_transitions, detect_deadlocks);
+      }
 
       ldd todo1 = empty_set();
       ldd potential_deadlocks = detect_deadlocks ? todo : empty_set();
