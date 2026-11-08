@@ -15,7 +15,8 @@
 #include "mcrl2/lps/lps_summand_group.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/symbolic/data_index.h"
-#include "mcrl2/utilities/indexed_set.h"
+#include "mcrl2/atermpp/standard_containers/indexed_set.h"
+#include "mcrl2/utilities/configuration.h"
 
 #include <sylvan_ldd.hpp>
 
@@ -35,7 +36,7 @@ public:
   sylvan::ldds::ldd initial_state;
 
   std::vector<symbolic::data_expression_index> data_index;
-  utilities::indexed_set<lps::multi_action> action_index;
+  atermpp::indexed_set<lps::multi_action, utilities::detail::GlobalThreadSafe> action_index; // a term container, see data_expression_index
 
   std::vector<lps_summand_group> summand_groups;
   
