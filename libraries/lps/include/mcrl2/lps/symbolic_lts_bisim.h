@@ -75,7 +75,14 @@ inline sylvan::ldds::ldd project_transitions(const sylvan::ldds::ldd& x, std::si
   }
   else
   {
-    return node(x.value(), project_transitions(x.down(), height - 1, action_index), project_transitions(x.right(), height, action_index));
+    ldd down = project_transitions(x.down(), height - 1, action_index);
+    ldd right = project_transitions(x.right(), height, action_index);
+    if (sylvan::lddmc_iscopy(x.get()))
+    {
+      // Keep the copy node, unless no transition with action_index remains below it.
+      return down == false_() ? right : ldd(sylvan::lddmc_make_copynode(down.get(), right.get()));
+    }
+    return node(x.value(), down, right);
   }
 }
 

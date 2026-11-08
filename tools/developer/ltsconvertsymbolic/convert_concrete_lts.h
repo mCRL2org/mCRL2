@@ -40,10 +40,6 @@ array2state(const std::vector<symbolic::data_expression_index>& data_index, std:
   return lps::state(result.begin(), n);
 }
 
-/// \brief Explore all outgoing transitions for one state vector.
-template <typename Context>
-void explore_transitions_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void* context);
-
 /// \brief Explore all outgoing transitions per state vector.
 template <typename Context>
 void explore_state_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void* context);
@@ -59,14 +55,6 @@ class convert_concrete_lts
 
     void run()
     {
-      for (const auto& group : m_lts.summand_groups)
-      {
-        if (group.summands.size() > 1)
-        {
-          throw mcrl2::runtime_error("Cannot convert a symbolic LTS with non-trivial transition groups");
-        }
-      }
-
       // Explore all states in the LDD.
       sat_all_nopar(m_lts.states, explore_state_callback<convert_concrete_lts>, this);
 
@@ -96,22 +84,22 @@ struct callback_context
   const lps::lps_summand_group& group;
 };
 
-template <typename Context>
-void explore_transitions_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, void* context)
+/// \brief Adds the transition x of the summand group from the current state, if x applies to it.
+/// \details A copy node in x is relprod_ignore. At a read position it matches every value, and at a write position
+///          it keeps the value of the current state.
+inline void explore_transition(callback_context& p, const std::uint32_t* x, std::size_t n)
 {
-  auto pointer = reinterpret_cast<Context*>(context);
-  auto& p = *pointer;
-
   // Try to match the read parameters.
   for (std::size_t i = 0; i < p.group.read.size(); ++i)
   {
-    if (p.state[p.group.read[i]] != x[p.group.read_pos[i]])
+    const std::uint32_t value = x[p.group.read_pos[i]];
+    if (value != symbolic::relprod_ignore && p.state[p.group.read[i]] != value)
     {
       return;
     }
   }
 
-  // Apply the writes to the state vector.  
+  // Apply the writes to the state vector.
   MCRL2_DECLARE_STACK_ARRAY(target, std::uint32_t, p.state_size);
   for (std::size_t i = 0; i < p.state_size; ++i)
   {
@@ -120,15 +108,37 @@ void explore_transitions_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t
 
   for (std::size_t i = 0; i < p.group.write.size(); ++i)
   {
-    target[p.group.write[i]] = x[p.group.write_pos[i]];
+    const std::uint32_t value = x[p.group.write_pos[i]];
+    if (value != symbolic::relprod_ignore)
+    {
+      target[p.group.write[i]] = value;
+    }
   }
-  
+
   lps::multi_action action_label = p.algorithm.m_lts.action_index[x[n - 1]];
   lps::state target_state(array2state(p.algorithm.m_lts.data_index, target.data(), p.state_size));
   std::size_t target_index = p.algorithm.m_discovered.insert(target_state).first;
 
   p.algorithm.m_progress_monitor.examine_transition();
   p.algorithm.m_builder->add_transition(p.state_index, action_label, target_index);
+}
+
+/// \brief Calls explore_transition for every vector in L, where x[0 .. depth) is the prefix that leads to L.
+/// \details Unlike sat_all_nopar, this gives relprod_ignore for a copy node instead of its value, which is meaningless.
+///          It only reads nodes, so garbage collection cannot happen meanwhile; the summand group keeps L alive.
+inline void explore_transitions(callback_context& p, sylvan::MDD L, std::uint32_t* x, std::size_t depth)
+{
+  for (; L != sylvan::lddmc_false; L = sylvan::lddmc_getright(L))
+  {
+    if (L == sylvan::lddmc_true)
+    {
+      explore_transition(p, x, depth);
+      return;
+    }
+
+    x[depth] = sylvan::lddmc_iscopy(L) ? symbolic::relprod_ignore : sylvan::lddmc_getvalue(L);
+    explore_transitions(p, sylvan::lddmc_getdown(L), x, depth + 1);
+  }
 }
 
 template <typename Context>
@@ -142,9 +152,10 @@ void explore_state_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t n, vo
 
   for (const lps::lps_summand_group& group : algorithm.m_lts.summand_groups)
   {
-    // Find all outgoing transitions of this state.
+    // Find all outgoing transitions of this state. A transition consists of the read and written values and the action label.
     callback_context context { algorithm, x, n, current_index, group };
-    sat_all_nopar(group.L, explore_transitions_callback<callback_context>, &context);
+    MCRL2_DECLARE_STACK_ARRAY(transition, std::uint32_t, group.read.size() + group.write.size() + 1);
+    explore_transitions(context, group.L.get(), transition.data(), 0);
   }
 
   algorithm.m_progress_monitor.finish_state(algorithm.m_discovered.size(), algorithm.m_number_of_states - algorithm.m_discovered.size(), 1);
