@@ -90,7 +90,9 @@ endif()
 mcrl2_add_cxx_flag(-Wno-switch)
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
-  add_compile_options(-fsanitize=address,undefined,leak)
+  # No -fsanitize=leak: the AddressSanitizer runtime already contains LeakSanitizer (on Linux it detects leaks by
+  # default), and Apple clang rejects -fsanitize=leak on arm64.
+  add_compile_options(-fsanitize=address,undefined)
   mcrl2_add_cxx_flag(-fno-omit-frame-pointer)
   mcrl2_add_cxx_flag(-fsanitize-address-use-after-scope)
   mcrl2_add_cxx_flag(-fno-sanitize-recover=undefined,address)
@@ -126,7 +128,7 @@ elseif(NOT ${MCRL2_IS_CLANG})
 endif()
 
 if(MCRL2_ENABLE_ADDRESSSANITIZER)
-  add_link_options(-fsanitize=address,undefined,leak)
+  add_link_options(-fsanitize=address,undefined)
 endif()
 
 if(MCRL2_ENABLE_MEMORYSANITIZER)
