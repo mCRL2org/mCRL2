@@ -415,11 +415,24 @@ class lpsreach_algorithm
       {
         // With --cached, the projections minus the values that have been learned before.
         std::vector<ldd> projections = symbolic::project_groups_parallel(todo, R, m_options.cached);
-        for (std::size_t i = 0; i < R.size(); i++)
+        if (m_options.parallel_learning)
         {
-          learn_successors(i, R[i], projections[i]);
+          // With the per-worker learners, the groups learn at the same time (each with lddmc_collect inside),
+          // through the expand callback of saturation and REACH.
+          symbolic::expand_groups_parallel(projections, &lpsreach_algorithm::saturation_expand, this);
+          if (m_saturation_error)
+          {
+            std::rethrow_exception(m_saturation_error);
+          }
+        }
+        else
+        {
+          for (std::size_t i = 0; i < R.size(); i++)
+          {
+            learn_successors(i, R[i], projections[i]);
 
-          mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+            mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+          }
         }
       }
 

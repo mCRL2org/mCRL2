@@ -122,6 +122,31 @@ VOID_TASK_4(parallel_groups_project, const parallel_groups_context*, ctx, std::s
   SYNC(parallel_groups_project);
 }
 
+/// \brief The input of learning all groups in parallel: expand(expand_context, i, sets[i]) for every group i whose set is
+/// not empty. The caller keeps the sets alive (they are protected ldd objects) during the pass.
+struct parallel_expand_context
+{
+  void (*expand)(void*, std::size_t, MDD) = nullptr;
+  void* expand_context = nullptr;
+  std::vector<MDD> sets;
+};
+
+/// \brief Calls the expand function for the groups i in [from, from + len), in a parallel tree.
+VOID_TASK_3(parallel_groups_expand, const parallel_expand_context*, ctx, std::size_t, from, std::size_t, len)
+{
+  if (len == 1)
+  {
+    if (ctx->sets[from] != lddmc_false)
+    {
+      ctx->expand(ctx->expand_context, from, ctx->sets[from]);
+    }
+    return;
+  }
+  SPAWN(parallel_groups_expand, ctx, from, len / 2);
+  CALL(parallel_groups_expand, ctx, from + len / 2, len - len / 2);
+  SYNC(parallel_groups_expand);
+}
+
 } // namespace
 
 template <typename SummandGroup>
@@ -227,6 +252,26 @@ sylvan::ldds::ldd relprev_groups_parallel(const sylvan::ldds::ldd& U, const sylv
   context.X = V.get();
   context.U = U.get();
   return ldd(RUN(detail::parallel_groups_apply, &context, 0, groups.size(), nullptr));
+}
+
+/// \brief Learns all groups at the same time: calls expand(expand_context, i, sets[i]) for every group i with a nonempty
+/// set, in a parallel tree of Lace tasks. The expand function runs on any worker, so it must be safe to call
+/// concurrently, also for different groups (as the expand callbacks of saturation and REACH are with per-worker learners);
+/// it must not throw (the caller collects errors itself). Must be called from a Lace worker.
+inline void expand_groups_parallel(const std::vector<sylvan::ldds::ldd>& sets, void (*expand)(void*, std::size_t, sylvan::MDD), void* expand_context)
+{
+  if (sets.empty())
+  {
+    return;
+  }
+  detail::parallel_expand_context context;
+  context.expand = expand;
+  context.expand_context = expand_context;
+  for (const sylvan::ldds::ldd& X: sets)
+  {
+    context.sets.push_back(X.get());
+  }
+  RUN(detail::parallel_groups_expand, &context, 0, sets.size());
 }
 
 } // namespace mcrl2::symbolic
