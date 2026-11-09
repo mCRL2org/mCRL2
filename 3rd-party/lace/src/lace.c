@@ -75,6 +75,30 @@
 #define LACE_IDLE_STEAL_MIN_NS 500
 #endif
 
+#ifndef LACE_IDLE_SPIN_US /* The search balance of a worker that has not worked yet */
+#define LACE_IDLE_SPIN_US 250
+#endif
+
+#ifndef LACE_IDLE_BALANCE_ALPHA /* Each ns of useful work earns this many ns of search */
+#define LACE_IDLE_BALANCE_ALPHA 8
+#endif
+
+#ifndef LACE_IDLE_BALANCE_CAP_US /* The search balance stays within plus and minus this */
+#define LACE_IDLE_BALANCE_CAP_US 1000
+#endif
+
+#ifndef LACE_IDLE_ROUND_NS /* A searching worker pauses this long between its steal attempts */
+#define LACE_IDLE_ROUND_NS 500
+#endif
+
+#ifndef LACE_IDLE_SPIN_YIELD_US /* A searching worker yields the CPU this often */
+#define LACE_IDLE_SPIN_YIELD_US 5
+#endif
+
+#ifndef LACE_LOCAL_STEAL /* The percentage of random steal attempts on the thief's own package (Linux, pinned workers) */
+#define LACE_LOCAL_STEAL 75
+#endif
+
 #ifndef LACE_EXT_YIELD_US /* A caller of lace_run_task spins this long before it yields now and then */
 #define LACE_EXT_YIELD_US 5
 #endif
@@ -507,6 +531,21 @@ lace_set_pin_cpus(const int *cpus, unsigned int n)
 #else
 #define LACE_PIN_BUILTIN 0
 #endif
+
+/* Locality (Linux, pinned workers): the package (socket) of every worker,
+ * from its pin set. LACE_LOCAL_STEAL% of random steal attempts go to a worker
+ * on the thief's own package, and wake-ups spread over the packages. */
+#if LACE_PIN_BUILTIN && defined(__linux__)
+#define LACE_LOCALITY 1
+#else
+#define LACE_LOCALITY 0
+#endif
+#if LACE_LOCALITY
+static unsigned int *loc_members = NULL; // the workers, grouped by package, in worker order
+static unsigned int *loc_start = NULL;   // per worker: where its package starts in loc_members
+static unsigned int *loc_count = NULL;   // per worker: the workers on its package
+#endif
+static unsigned int wake_stride = 1;     // the wake order: workers 0, s, 2s, ... (mod n_workers)
 
 #if LACE_PIN_BUILTIN
 /**
@@ -1063,6 +1102,55 @@ lace_pin_setup(void)
 done:
     if (list != NULL && list != pin_api_cpus) free(list);
 }
+
+#if LACE_LOCALITY
+/* The package of every worker, from its pin set: loc_members, loc_start, loc_count */
+static void
+lace_setup_locality(void)
+{
+    free(loc_members); free(loc_start); free(loc_count);
+    loc_members = loc_start = loc_count = NULL;
+    wake_stride = 1;
+    const unsigned int n = n_workers;
+    if (pin_sets == NULL || n < 2) return;
+    int *pk = calloc(n, sizeof(int));
+    loc_members = calloc(n, sizeof(unsigned int));
+    loc_start = calloc(n, sizeof(unsigned int));
+    loc_count = calloc(n, sizeof(unsigned int));
+    if (pk == NULL || loc_members == NULL || loc_start == NULL || loc_count == NULL) {
+        free(pk); free(loc_members); free(loc_start); free(loc_count);
+        loc_members = loc_start = loc_count = NULL;
+        return;
+    }
+    for (unsigned int w = 0; w < n; w++) {
+        pk[w] = -1;
+        for (unsigned int c = 0; c < (unsigned int)CPU_SETSIZE; c++) {
+            if (CPU_ISSET(c, &pin_sets[w])) { pk[w] = lace_cpu_pkg[c]; break; }
+        }
+    }
+    unsigned int k = 0;
+    for (unsigned int w = 0; w < n; w++) {
+        int seen = 0;
+        for (unsigned int v = 0; v < w && !seen; v++) if (pk[v] == pk[w]) seen = 1;
+        if (seen) continue;
+        const unsigned int s = k;
+        for (unsigned int v = w; v < n; v++) if (pk[v] == pk[w]) loc_members[k++] = v;
+        for (unsigned int i = s; i < k; i++) { loc_start[loc_members[i]] = s; loc_count[loc_members[i]] = k - s; }
+    }
+    /* Workers are pinned package by package (cores first, then their other
+     * hardware threads). With w workers on the first package before another
+     * one, the stride is the smallest above w that is coprime to n, so
+     * consecutive wake-ups land on different packages; one package: 1. */
+    unsigned int w0 = 1;
+    while (w0 < n && pk[w0] == pk[0]) w0++;
+    for (unsigned int st = w0 + 1; st < n; st++) {
+        unsigned int x = n, y = st;
+        while (y != 0) { const unsigned int t = x % y; x = y; y = t; }
+        if (x == 1) { wake_stride = st; break; }
+    }
+    free(pk);
+}
+#endif
 #endif
 
 /**
@@ -1073,6 +1161,7 @@ done:
  */
 typedef struct {
     LACE_ALIGN(LACE_PADDING_TARGET) atomic_uchar idle;
+    atomic_int sleep; /* 1 while the worker sleeps on this futex word */
 } lace_idle_flag;
 
 static lace_idle_flag *idle_flags = NULL;
@@ -1166,33 +1255,73 @@ static int is_running = 0;
  * lace_release_memory: each worker compares release_gen in its idle loop and
  * counts itself in release_done once it has released its memory.
  */
-static atomic_uint release_gen = 0;
+/* Each global of the idle path on its own cache line: every nap and steal
+ * touches them */
+#define LACE_IDLE_LINE LACE_ALIGN(LACE_PADDING_TARGET)
+static LACE_IDLE_LINE atomic_uint release_gen = 0;
 static atomic_uint release_done = 0;
 static atomic_flag release_lock = ATOMIC_FLAG_INIT;
 
 /**
  * Futex-based idle system for progressive worker sleeping
  */
-/* Wake up to n waiters: one call where the kernel takes a count. */
-LACE_UNUSED static void lace_futex_wake_n(atomic_int *addr, int n)
+static LACE_IDLE_LINE atomic_int n_sleeping = 0;   /* count of workers currently in futex_wait */
+static LACE_IDLE_LINE atomic_uint n_sentinels = 0; /* idle workers that stay awake (LACE_IDLE_SENTINELS) */
+static LACE_IDLE_LINE atomic_int sentinel_futex = 0; /* napping sentinels wait on it; lace_run_task bumps it */
+static LACE_IDLE_LINE atomic_int n_napping = 0;      /* sentinels in a futex nap: lace_run_task wakes one only then */
+
+/* Each worker sleeps on its own futex word (idle_flags[i].sleep), so a waker
+ * wakes chosen sleepers and no futex hash bucket is shared by all workers.
+ * Wake up to n sleepers, the first ones in wake order (from worker 0, by
+ * wake_stride): the same few are woken first, so the others back off deeply,
+ * and consecutive wake-ups land on different packages. */
+static void
+lace_wake_sleepers(int n)
 {
-#if defined(__linux__)
-    (void)syscall(SYS_futex, addr, FUTEX_WAKE_PRIVATE, n, NULL, NULL, 0);
-#elif defined(__FreeBSD__)
-    (void)_umtx_op(addr, UMTX_OP_WAKE_PRIVATE, (unsigned long)n, NULL, NULL);
-#else
-    for (int i = 0; i < n; i++) (void)lace_futex_wake_one(addr);
-#endif
+    const unsigned int nw = n_workers;
+    if (nw == 0 || idle_flags == NULL) return;
+    for (unsigned int k = 0; k < nw && n > 0; k++) {
+        const unsigned int i = (unsigned int)(((uint64_t)k * wake_stride) % nw);
+        if (atomic_load_explicit(&idle_flags[i].sleep, memory_order_relaxed) &&
+            atomic_exchange_explicit(&idle_flags[i].sleep, 0, memory_order_seq_cst)) {
+            (void)lace_futex_wake_one(&idle_flags[i].sleep);
+            n--;
+        }
+    }
 }
 
-static atomic_int wake_futex = 0;   /* futex word: incremented to wake sleeping workers */
-static atomic_int n_sleeping = 0;   /* count of workers currently in futex_wait */
-static atomic_uint n_sentinels = 0; /* idle workers that stay awake (LACE_IDLE_SENTINELS) */
-static atomic_int sentinel_futex = 0; /* napping sentinels wait on it; lace_run_task bumps it */
-static atomic_int n_napping = 0;      /* sentinels in a futex nap: lace_run_task wakes one only then */
+/* Wake every sleeping worker (NEWFRAME, TOGETHER, lace_release_memory, lace_stop) */
+static void
+lace_wake_all_sleepers(void)
+{
+    if (idle_flags == NULL) return;
+    for (unsigned int i = 0; i < n_workers; i++) {
+        if (atomic_exchange_explicit(&idle_flags[i].sleep, 0, memory_order_seq_cst)) (void)lace_futex_wake_one(&idle_flags[i].sleep);
+    }
+}
 
-/* Progressive idle thresholds (failed steal iterations before transitioning) */
-#define LACE_IDLE_STAGE1_LIMIT  256   /* yield */
+/* Progressive idle: an idle worker searches (stage 1) while its search
+ * balance is positive, then it becomes a sentinel or sleeps on its futex word.
+ * The balance is the worker's, kept across nested steal loops, and conserved:
+ * all time in the steal loop is spent (the pauses and yields too), except
+ * running tasks, sleeping and sentinel duty. A worthwhile stolen task (see
+ * LACE_IDLE_STEAL_MIN_X) or an external task earns LACE_IDLE_BALANCE_ALPHA
+ * times its useful time: its run time minus the search in leapfrog inside it.
+ * The balance starts at LACE_IDLE_SPIN_US and stays within plus and minus
+ * LACE_IDLE_BALANCE_CAP_US; no wake-up or timeout refills it. So a worker
+ * that keeps finding work searches through longer gaps, and a worker that
+ * finds only crumbs soon sleeps. Join waiting, sentinel monitoring and one
+ * probe per futex timeout are outside the balance. */
+#define LACE_IDLE_STAGE1_LIMIT (1u << 30) /* the balance decides */
+#define LACE_BAL_CAP_NS ((int64_t)LACE_IDLE_BALANCE_CAP_US * 1000)
+static LACE_TLS uint64_t lace_leap_ns = 0; // time in lace_leapfrog, for the balance
+static LACE_TLS uint64_t lace_stolen_sum_ns = 0; // run time of all stolen tasks, nested ones too
+static LACE_TLS int64_t lace_bal_ns = 0; // the search balance
+static LACE_TLS int lace_bal_ready = 0;
+/* A thief whose previous steal was a crumb (not worthwhile) wakes no sleepers
+ * for the tasks its victim has left, unless no sentinel watches, and it does
+ * not prefer that victim for its next steals. */
+static LACE_TLS int lace_last_worth = 1;
 #define LACE_IDLE_FUTEX_TIMEOUT_MIN 100
 #ifndef LACE_IDLE_FUTEX_TIMEOUT_MAX
 /* With sentinels, a sleeping worker is woken when work appears, so the
@@ -1789,7 +1918,7 @@ typedef struct ext_lace_task {
 
 #define LACE_EXT_SLOTS 64
 static _Atomic(ExtTask*)external_tasks[LACE_EXT_SLOTS];
-static atomic_int external_task_count = 0;
+static LACE_IDLE_LINE atomic_int external_task_count = 0;
 
 /* Wake a sleeping worker to help with an external task that a worker took, if no sentinel watches */
 static inline void
@@ -1798,8 +1927,7 @@ lace_wake_helper(void)
     if (atomic_load_explicit(&n_sleeping, memory_order_relaxed) > 0
         && atomic_load_explicit(&n_sentinels, memory_order_relaxed) == 0
         ) {
-        atomic_fetch_add_explicit(&wake_futex, 1, memory_order_release);
-        lace_futex_wake_one(&wake_futex);
+        lace_wake_sleepers(1);
     }
 }
 
@@ -1840,8 +1968,7 @@ pushed:
     if (atomic_load_explicit(&n_sleeping, memory_order_seq_cst) > 0
         && atomic_load_explicit(&n_sentinels, memory_order_seq_cst) == 0
         ) {
-        atomic_fetch_add_explicit(&wake_futex, 1, memory_order_release);
-        lace_futex_wake_one(&wake_futex);
+        lace_wake_sleepers(1);
     }
     else if (atomic_load_explicit(&n_napping, memory_order_seq_cst) > 0) {
         /* End a sentinel's nap rather than waiting for it */
@@ -1974,13 +2101,13 @@ lace_steal(WorkerP *self, Task *__dq_head, Worker *victim)
                 /* A steal from the steal loop (the thief is idle): wake a
                  * sleeping worker now, rather than after the stolen task,
                  * which may be most of the work, if the victim has tasks left
-                 * or no sentinel watches for the work this task will spawn (a
-                 * region after a long idle). */
-                if ((ts_new.ts.tail < ts_new.ts.split ||
+                 * and the thief's previous steal was worthwhile, or if no
+                 * sentinel watches for the work this task will spawn (a region
+                 * after a long idle). */
+                if (((ts_new.ts.tail < ts_new.ts.split && lace_last_worth) ||
                      atomic_load_explicit(&n_sentinels, memory_order_relaxed) == 0) &&
                     atomic_load_explicit(&idle_flags[self->worker].idle, memory_order_relaxed) &&
                     atomic_load_explicit(&n_sleeping, memory_order_relaxed) > 0) {
-                    atomic_fetch_add_explicit(&wake_futex, 1, memory_order_release);
                     woke = 1;
                     /* As many as the victim has tasks left (at most the
                      * sleepers): a large region gets all workers in one round
@@ -1988,7 +2115,7 @@ lace_steal(WorkerP *self, Task *__dq_head, Worker *victim)
                     int left = (int)(ts_new.ts.split - ts_new.ts.tail);
                     if (left < 1) left = 1;
                     int sl = atomic_load_explicit(&n_sleeping, memory_order_relaxed);
-                    lace_futex_wake_n(&wake_futex, left < sl ? left : sl);
+                    lace_wake_sleepers(left < sl ? left : sl);
                 }
                 lace_set_idle(self, 0);
                 lace_time_event(self, 1);
@@ -1996,6 +2123,7 @@ lace_steal(WorkerP *self, Task *__dq_head, Worker *victim)
                 t->f(self, __dq_head, t);
                 /* After the task: steals nested in it set these too */
                 lace_last_stolen_ns = lace_now_ns() - task_t0;
+                lace_stolen_sum_ns += lace_last_stolen_ns;
                 lace_last_stolen_at = stolen_at;
                 lace_time_event(self, 2);
                 atomic_store_explicit(&t->thief, THIEF_COMPLETED, memory_order_release);
@@ -2023,8 +2151,16 @@ lace_steal(WorkerP *self, Task *__dq_head, Worker *victim)
  * thief waits for.
  */
 LACE_NO_SANITIZE_THREAD
+static void lace_leapfrog_body(WorkerP *__lace_worker, Task *__lace_dq_head);
 void
 lace_leapfrog(WorkerP *__lace_worker, Task *__lace_dq_head)
+{
+    const uint64_t t0 = lace_now_ns();
+    lace_leapfrog_body(__lace_worker, __lace_dq_head);
+    lace_leap_ns += lace_now_ns() - t0;
+}
+static void
+lace_leapfrog_body(WorkerP *__lace_worker, Task *__lace_dq_head)
 {
     lace_time_event(__lace_worker, 3);
     Task *t = __lace_dq_head;
@@ -2112,6 +2248,15 @@ lace_leapfrog(WorkerP *__lace_worker, Task *__lace_dq_head)
 static inline unsigned int lace_random_victim(WorkerP *w, unsigned int self, unsigned int n)
 {
     uint64_t r = lace_rng(w) >> 32;
+#if LACE_LOCALITY && LACE_LOCAL_STEAL
+    if (loc_count != NULL && loc_count[self] > 1 && (r & 127u) < (uint64_t)(LACE_LOCAL_STEAL * 128 / 100)) {
+        const unsigned int c = loc_count[self];
+        const uint64_t r2 = lace_rng(w) >> 32;
+        unsigned int lv = loc_members[loc_start[self] + (unsigned int)((r2 * (c - 1U)) >> 32)];
+        if (lv == self) lv = loc_members[loc_start[self] + c - 1U]; // uniform over the c-1 others
+        return lv;
+    }
+#endif
     unsigned int v = self + 1U + (unsigned int)((r * (n - 1U)) >> 32);
     return v >= n ? v - n : v;
 }
@@ -2204,8 +2349,7 @@ lace_release_memory(void)
     atomic_fetch_add_explicit(&release_gen, 1, memory_order_release);
 
     /* Wake sleeping workers, so they release now instead of at their next timeout */
-    atomic_fetch_add_explicit(&wake_futex, 1, memory_order_release);
-    lace_futex_wake_all(&wake_futex);
+    lace_wake_all_sleepers();
 
     while (atomic_load_explicit(&release_done, memory_order_acquire) < n_workers) lace_sleep_us(50);
     atomic_flag_clear_explicit(&release_lock, memory_order_release);
@@ -2343,6 +2487,13 @@ lace_steal_loop_body(WorkerP *__lace_worker, Task *__lace_dq_head, atomic_int *q
     int worked = 0; // ran a task since this worker last slept: may become a sentinel
     int sentinel_nap_first = 0; // its last sentinel episode saw work that turned out not worth it
     uint64_t last_work_us = 0; // when this worker last ran a task (lace_now_us)
+    if (!lace_bal_ready) {
+        lace_bal_ns = (int64_t)LACE_IDLE_SPIN_US * 1000; lace_bal_ready = 1;
+    }
+    uint64_t bal_clock = lace_now_ns(); // search since here is not yet spent
+#if LACE_BACKOFF
+    uint64_t last_yield_ns = bal_clock;
+#endif
     /* The scratch below this point belongs to tasks this loop interrupted:
      * NEWFRAME and TOGETHER run the steal loop on top of the task a worker
      * was running. In the worker's own loop, it is the base of the arena. */
@@ -2354,6 +2505,8 @@ lace_steal_loop_body(WorkerP *__lace_worker, Task *__lace_dq_head, atomic_int *q
     (void)last_work_us;
 
     while (1) {
+        const uint64_t bal_leap0 = lace_leap_ns, bal_sum0 = lace_stolen_sum_ns;
+        uint64_t bal_task_ns = 0; // run time of a task this round, not spent
         /* In the steal loop a worker is idle until it steals; a task that
          * returned (stolen, external or an interrupt's) left the flag 0. */
         lace_set_idle(__lace_worker, 1);
@@ -2403,12 +2556,25 @@ lace_steal_loop_body(WorkerP *__lace_worker, Task *__lace_dq_head, atomic_int *q
                 }
                 if (lace_last_stolen_ns < min_ns) {
                     idle_count++;
+                    lace_last_worth = 0;
+                    last_victim = worker_id; // no preference after a crumb
                 } else
                 {
+                    lace_last_worth = 1;
                     idle_count = 0;
                     worked = 1;
                     sentinel_nap_first = 0;
                     last_work_us = lace_now_us();
+                    {
+                        /* only the search in leapfrog is not earned: the tasks it ran
+                         * (stolen inside this task) count as work */
+                        const uint64_t nested = lace_stolen_sum_ns - bal_sum0 > lace_last_stolen_ns ? lace_stolen_sum_ns - bal_sum0 - lace_last_stolen_ns : 0;
+                        const uint64_t lt = lace_leap_ns - bal_leap0;
+                        const uint64_t lp = lt > nested ? lt - nested : 0;
+                        const int64_t earned = (int64_t)LACE_IDLE_BALANCE_ALPHA * (int64_t)(lace_last_stolen_ns > lp ? lace_last_stolen_ns - lp : 0);
+                        lace_bal_ns = lace_bal_ns + earned > LACE_BAL_CAP_NS ? LACE_BAL_CAP_NS : lace_bal_ns + earned;
+                        bal_task_ns = lace_last_stolen_ns;
+                    }
                 }
             }
             else if (res == LACE_BUSY) {
@@ -2429,6 +2595,7 @@ lace_steal_loop_body(WorkerP *__lace_worker, Task *__lace_dq_head, atomic_int *q
             atomic_thread_fence(memory_order_acquire);
             lace_yield(__lace_worker, __lace_dq_head);
             idle_count = 0;
+            bal_clock = lace_now_ns(); bal_task_ns = 0; // interrupt work, and its own loop's search, are not this loop's
         }
 
         /* Every round: the counter's cache line changes only when external
@@ -2438,7 +2605,18 @@ lace_steal_loop_body(WorkerP *__lace_worker, Task *__lace_dq_head, atomic_int *q
             /* Only the worker that ran the task is busy again: the others
              * keep backing off, or a stream of external calls (from a
              * thread outside Lace) keeps every idle worker spinning. */
+            uint64_t bal_ext_t0 = lace_now_ns();
+            { const uint64_t el = bal_ext_t0 - bal_clock; lace_bal_ns -= (int64_t)(el > bal_task_ns ? el - bal_task_ns : 0); if (lace_bal_ns < -LACE_BAL_CAP_NS) lace_bal_ns = -LACE_BAL_CAP_NS; bal_clock = bal_ext_t0; }
+            const uint64_t bal_ext_leap0 = lace_leap_ns, bal_ext_sum0 = lace_stolen_sum_ns;
             if (lace_steal_external(__lace_worker, __lace_dq_head)) {
+                {
+                    const uint64_t now = lace_now_ns(), d = now - bal_ext_t0;
+                    const uint64_t nested = lace_stolen_sum_ns - bal_ext_sum0, lt = lace_leap_ns - bal_ext_leap0;
+                    const uint64_t lp = lt > nested ? lt - nested : 0;
+                    const int64_t earned = (int64_t)LACE_IDLE_BALANCE_ALPHA * (int64_t)(d > lp ? d - lp : 0);
+                    lace_bal_ns = lace_bal_ns + earned > LACE_BAL_CAP_NS ? LACE_BAL_CAP_NS : lace_bal_ns + earned;
+                    bal_clock = now;
+                }
                 idle_count = 0;
                 worked = 1;
                 last_work_us = lace_now_us();
@@ -2448,7 +2626,16 @@ lace_steal_loop_body(WorkerP *__lace_worker, Task *__lace_dq_head, atomic_int *q
 
 #if LACE_BACKOFF
         // Progressive idle: yield → futex sleep
+        {
+            const uint64_t now = lace_now_ns(), el = now - bal_clock; // since the last debit: the pause and yields of stage 1 too
+            bal_clock = now;
+            lace_bal_ns -= (int64_t)(el > bal_task_ns ? el - bal_task_ns : 0);
+            if (lace_bal_ns < -LACE_BAL_CAP_NS) lace_bal_ns = -LACE_BAL_CAP_NS;
+            if (idle_count <= LACE_IDLE_STAGE1_LIMIT && lace_bal_ns <= 0) idle_count = LACE_IDLE_STAGE1_LIMIT + 1;
+        }
         if (idle_count > LACE_IDLE_STAGE1_LIMIT) {
+            /* without balance it skips stage 1, whose end checks quit */
+            if (atomic_load_explicit(quit, memory_order_relaxed)) break;
             /* Before sleeping: become a sentinel if fewer than
              * LACE_IDLE_SENTINELS workers are, and this worker ran a task
              * since it last slept or another one runs a task now. Not after
@@ -2457,6 +2644,7 @@ lace_steal_loop_body(WorkerP *__lace_worker, Task *__lace_dq_head, atomic_int *q
             if (n > 1 && (worked || lace_some_active(__lace_worker)) && lace_claim_sentinel()) {
                 lace_set_idle(__lace_worker, 1); // a tiny steal this round may have left it 0
                 int r = lace_sentinel(__lace_worker, quit, &last_victim, seen_release, sentinel_nap_first);
+                bal_clock = lace_now_ns(); // sentinel duty is monitoring, not this worker's search
                 /* seq_cst, as the sleeper count: a caller of lace_run_task that
                  * saw a sentinel and did not wake anyone must see it leave
                  * before this worker sleeps without seeing the caller's task. */
@@ -2522,17 +2710,35 @@ lace_steal_loop_body(WorkerP *__lace_worker, Task *__lace_dq_head, atomic_int *q
              * once more (seq_cst, paired with lace_run_task): a thread that
              * submits a task after this check sees us and wakes us. */
             atomic_fetch_add_explicit(&n_sleeping, 1, memory_order_seq_cst);
-            int val = atomic_load_explicit(&wake_futex, memory_order_acquire);
-            if (atomic_load_explicit(&external_task_count, memory_order_seq_cst) == 0) {
-                lace_futex_wait(&wake_futex, val, timeout_us);
+            /* Mark ourselves asleep, then check everything that would wake us:
+             * every waker publishes its event before it scans the marks. */
+            atomic_store_explicit(&idle_flags[worker_id].sleep, 1, memory_order_seq_cst);
+            if (atomic_load_explicit(&external_task_count, memory_order_seq_cst) == 0 &&
+                atomic_load_explicit(&lace_newframe.t, memory_order_seq_cst) == NULL &&
+                atomic_load_explicit(quit, memory_order_seq_cst) == 0 &&
+                atomic_load_explicit(&release_gen, memory_order_seq_cst) == seen_release) {
+                lace_futex_wait(&idle_flags[worker_id].sleep, 1, timeout_us);
             }
+            atomic_store_explicit(&idle_flags[worker_id].sleep, 0, memory_order_relaxed);
             atomic_fetch_sub_explicit(&n_sleeping, 1, memory_order_relaxed);
+            bal_clock = lace_now_ns(); // sleeping costs nothing
 #if LACE_PIE_TIMES
             PR_ADD(__lace_worker, CTR_backoff, lace_gethrtime() - prev);
 #endif
 
             if (atomic_load_explicit(&external_task_count, memory_order_acquire) > 0) {
+                const uint64_t bal_ext_t0 = lace_now_ns(); // after a sleep: nothing to spend (bal_clock was reset)
+                bal_clock = bal_ext_t0;
+                const uint64_t bal_ext_leap0 = lace_leap_ns, bal_ext_sum0 = lace_stolen_sum_ns;
                 if (lace_steal_external(__lace_worker, __lace_dq_head)) {
+                    {
+                        const uint64_t now = lace_now_ns(), d = now - bal_ext_t0;
+                        const uint64_t nested = lace_stolen_sum_ns - bal_ext_sum0, lt = lace_leap_ns - bal_ext_leap0;
+                        const uint64_t lp = lt > nested ? lt - nested : 0;
+                        const int64_t earned = (int64_t)LACE_IDLE_BALANCE_ALPHA * (int64_t)(d > lp ? d - lp : 0);
+                        lace_bal_ns = lace_bal_ns + earned > LACE_BAL_CAP_NS ? LACE_BAL_CAP_NS : lace_bal_ns + earned;
+                        bal_clock = now;
+                    }
                     idle_count = 0;
                     worked = 1;
                     last_work_us = lace_now_us();
@@ -2541,7 +2747,15 @@ lace_steal_loop_body(WorkerP *__lace_worker, Task *__lace_dq_head, atomic_int *q
             }
         } else {
             /* Stage 1: yield the CPU briefly */
-            lace_cpu_yield();
+            {
+                const uint64_t t0 = lace_now_ns();
+                uint64_t t = t0;
+                do { lace_cpu_pause(); t = lace_now_ns(); } while (t - t0 < (uint64_t)LACE_IDLE_ROUND_NS);
+                if (t - last_yield_ns > (uint64_t)LACE_IDLE_SPIN_YIELD_US * 1000u) {
+                    lace_cpu_yield();
+                    last_yield_ns = lace_now_ns();
+                }
+            }
         }
 #endif
 
@@ -2875,11 +3089,14 @@ lace_start(unsigned int _n_workers, size_t dequesize)
             fprintf(stderr, "Lace error: unable to allocate memory for the idle flags!\n");
             exit(1);
         }
-        for (unsigned int i = 0; i < n_workers; i++) atomic_store_explicit(&idle_flags[i].idle, 1, memory_order_relaxed);
+        for (unsigned int i = 0; i < n_workers; i++) { atomic_store_explicit(&idle_flags[i].idle, 1, memory_order_relaxed); atomic_store_explicit(&idle_flags[i].sleep, 0, memory_order_relaxed); }
     }
 
 #if LACE_PIN_BUILTIN
     lace_pin_setup();
+#endif
+#if LACE_LOCALITY
+    lace_setup_locality();
 #endif
 
     // Compute memory size for each worker
@@ -3234,8 +3451,7 @@ void lace_stop(void)
     atomic_store_explicit(&lace_quits, 1, memory_order_relaxed);
 
     /* Wake all sleeping workers so they observe the quit flag */
-    atomic_fetch_add_explicit(&wake_futex, 1, memory_order_release);
-    lace_futex_wake_all(&wake_futex);
+    lace_wake_all_sleepers();
 
     for (unsigned int i = 0; i < n_workers; i++) {
 #if !LACE_MSVC
@@ -3426,8 +3642,7 @@ TASK(void, lace_wrap_together, Task*, task)
     }
 
     /* Wake sleeping workers so they see the newframe and enter lace_yield */
-    atomic_fetch_add_explicit(&wake_futex, 1, memory_order_release);
-    lace_futex_wake_all(&wake_futex);
+    lace_wake_all_sleepers();
 
     // wait until other workers have made a local copy
     lace_barrier();
@@ -3466,8 +3681,7 @@ TASK(void, lace_wrap_newframe, Task*, task)
     }
 
     /* Wake sleeping workers so they see the newframe and enter lace_yield */
-    atomic_fetch_add_explicit(&wake_futex, 1, memory_order_release);
-    lace_futex_wake_all(&wake_futex);
+    lace_wake_all_sleepers();
 
     // wait until other workers have made a local copy
     lace_barrier();
