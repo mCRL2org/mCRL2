@@ -13,6 +13,7 @@
 
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/process/parse.h"
 
 #include <cstdio>
@@ -42,7 +43,7 @@ lts::lts_lts_t make_lts(const process::action_label_list& declarations,
   }
   lts.set_initial_state(0);
 
-  std::unordered_map<std::string, lts::labels_size_type> label_indices;
+  std::unordered_map<std::string, lts::lts_lts_t::labels_size_type> label_indices;
   for (const auto& [from, text, to]: transitions)
   {
     const auto [it, inserted] = label_indices.emplace(text, 0);
