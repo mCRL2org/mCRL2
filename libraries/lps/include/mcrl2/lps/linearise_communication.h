@@ -367,21 +367,17 @@ class apply_communication_algorithm
 {
 public:
   apply_communication_algorithm(const process::action& termination_action,
-      DataRewriter& data_rewriter,
-      const process::communication_expression_list& communications,
-      const process::action_name_multiset_list& allowlist,
-      bool is_allow,
-      bool is_block)
-      : m_terminationAction(termination_action),
-        m_data_rewriter(data_rewriter),
-        m_communications(communications),
-        m_allowlist(allowlist),
-        m_allow_cache(is_allow ? detail::make_allow_list_cache(allowlist) : detail::allow_list_cache()),
-        m_blocked_actions(is_block ? get_actions(allowlist) : std::vector<core::identifier_string>()),
-        m_allowed_actions(init_allowed_actions(is_allow, allowlist, termination_action)),
-        m_comm_table(m_communications),
-        m_is_allow(is_allow),
-        m_is_block(is_block)
+    DataRewriter& data_rewriter,
+    const process::communication_expression_list& communications,
+    const process::action_name_multiset_list& allowlist,
+    bool is_allow,
+    bool is_block)
+    : m_data_rewriter(data_rewriter),
+      m_communications(communications),
+      m_filter(allowlist, is_allow, is_block, termination_action),
+      m_blocked_actions(is_block ? get_actions(allowlist) : std::vector<core::identifier_string>()),
+      m_allowed_actions(init_allowed_actions(is_allow, allowlist, termination_action)),
+      m_comm_table(m_communications)
   {}
 
   ~apply_communication_algorithm() = default;
@@ -412,17 +408,16 @@ public:
       bool nodeltaelimination,
       bool ignore_time)
   {
-    assert(!(m_is_allow && m_is_block));
+    assert(!(m_filter.is_allow() && m_filter.is_block()));
 
     /* We follow the implementation of Muck van Weerdenburg, described in
        a note: Calculation of communication with open terms. */
 
-    mCRL2log(mcrl2::log::log_level_t::verbose) << (m_is_allow
-                                          ? "- calculating the communication operator modulo the allow operator on "
-                                      : m_is_block
-                                          ? "- calculating the communication operator modulo the block operator on "
-                                          : "- calculating the communication operator on ")
-                                  << action_summands.size() << " action summands";
+    mCRL2log(mcrl2::log::log_level_t::verbose)
+      << (m_filter.is_allow()    ? "- calculating the communication operator modulo the allow operator on "
+           : m_filter.is_block() ? "- calculating the communication operator modulo the block operator on "
+                                 : "- calculating the communication operator on ")
+      << action_summands.size() << " action summands";
 
     [[maybe_unused]]
     lps_statistics_t lps_statistics_before = get_statistics(action_summands, deadlock_summands);
@@ -439,12 +434,13 @@ public:
                                 << " communication expressions." << std::endl;
     mCRL2log(mcrl2::log::log_level_t::trace) << "Communication expressions: " << std::endl
                                 << core::detail::print_set(m_communications) << std::endl;
-    mCRL2log(mcrl2::log::log_level_t::trace) << "Allow list: " << std::endl << core::detail::print_set(m_allowlist) << std::endl;
+    mCRL2log(mcrl2::log::log_level_t::trace) << "Allow list: " << std::endl
+                                             << core::detail::print_set(m_filter.allowlist()) << std::endl;
 
     deadlock_summand_vector resulting_deadlock_summands;
     deadlock_summands.swap(resulting_deadlock_summands);
 
-    const bool inline_allow = m_is_allow || m_is_block;
+    const bool inline_allow = m_filter.is_allow() || m_filter.is_block();
     if (inline_allow)
     {
       // Inline allow is only supported for ignore_time,
@@ -516,18 +512,11 @@ public:
       {
         const process::action_list& multiaction = multiactionconditionlist.actions[i];
 
-        if (m_is_allow && !allow_(m_allow_cache, multiaction, m_terminationAction))
+        if (!m_filter.keeps(multiaction))
         {
-          if constexpr (EnableLineariseStatistics) {
-            ++disallowed_summands;
-          }
-
-          continue;
-        }
-        if (m_is_block && encap(m_allowlist, multiaction))
-        {
-          if constexpr (EnableLineariseStatistics) {
-            ++blocked_summands;
+          if constexpr (EnableLineariseStatistics)
+          {
+            ++(m_filter.is_allow() ? disallowed_summands : blocked_summands);
           }
           continue;
         }
@@ -590,17 +579,12 @@ public:
 
 protected:
 
-  const process::action& m_terminationAction;
   DataRewriter& m_data_rewriter;
   const process::communication_expression_list m_communications;
-  const process::action_name_multiset_list m_allowlist;         // This is a list of list of identifierstring.
-  const detail::allow_list_cache m_allow_cache; // This is a cache for allowlist, used to speed up lookups in allowlist. It contains the same information as allowlist, but in a different format that allows for faster lookups.
-  const std::vector<core::identifier_string> m_blocked_actions; // used only if m_is_block is set
-  const std::vector<core::identifier_string> m_allowed_actions; // used only if m_is_allow is set
+  const allow_block_filter m_filter; // Inline allow or block filtering of the resulting multi-actions, if any.
+  const std::vector<core::identifier_string> m_blocked_actions; // used only if m_filter.is_block() holds
+  const std::vector<core::identifier_string> m_allowed_actions; // used only if m_filter.is_allow() holds
   comm_entry m_comm_table;
-  const bool
-      m_is_allow; // If is_allow or is_block is set, perform inline allow/block filtering. They are mutually exclusive
-  const bool m_is_block;
 
   std::string log_comm_application(const lps_statistics_t& lps_statistics_before,
       const lps_statistics_t& lps_statistics_after,
@@ -617,11 +601,11 @@ protected:
     indent += 2;
     indent_str = std::string(indent, ' ');
     os << indent_str << "number of communication expressions: " << m_communications.size() << std::endl;
-    if (m_is_allow)
+    if (m_filter.is_allow())
     {
-      os << indent_str << "number of allow expressions: " << m_allowlist.size() << std::endl;
+      os << indent_str << "number of allow expressions: " << m_filter.allowlist().size() << std::endl;
     }
-    if (m_is_block)
+    if (m_filter.is_block())
     {
       os << indent_str << "number of block expressions: " << m_blocked_actions.size() << std::endl;
     }
@@ -632,11 +616,11 @@ protected:
 
     indent += 2;
     indent_str = std::string(indent, ' ');
-    if (m_is_allow)
+    if (m_filter.is_allow())
     {
       os << indent_str << "disallowed summands: " << disallowed_summands << std::endl;
     }
-    if (m_is_block)
+    if (m_filter.is_block())
     {
       os << indent_str << "blocked summands: " << blocked_summands << std::endl;
     }
@@ -704,20 +688,20 @@ protected:
   {
     assert(std::is_sorted(m_allowed_actions.begin(), m_allowed_actions.end(), process::action_name_compare()));
     assert(std::is_sorted(m_blocked_actions.begin(), m_blocked_actions.end(), process::action_name_compare()));
-    assert(!m_is_block || m_allowed_actions.empty());
-    assert(!m_is_allow || m_blocked_actions.empty());
+    assert(!m_filter.is_block() || m_allowed_actions.empty());
+    assert(!m_filter.is_allow() || m_blocked_actions.empty());
 
-    return !(m_is_allow || m_is_block)
-           || (m_is_allow
+    return !(m_filter.is_allow() || m_filter.is_block())
+           || (m_filter.is_allow()
                && std::binary_search(m_allowed_actions.begin(),
-                   m_allowed_actions.end(),
-                   a.name(),
-                   process::action_name_compare()))
-           || (m_is_block
+                 m_allowed_actions.end(),
+                 a.name(),
+                 process::action_name_compare()))
+           || (m_filter.is_block()
                && !std::binary_search(m_blocked_actions.begin(),
-                   m_blocked_actions.end(),
-                   a.name(),
-                   process::action_name_compare()));
+                 m_blocked_actions.end(),
+                 a.name(),
+                 process::action_name_compare()));
   }
 
   /// Calculate the communication operator applied to a multiaction.

@@ -158,6 +158,79 @@ inline bool encap(const process::action_name_multiset_list& encaplist, const pro
   return encap(blocked_actions, multiaction);
 }
 
+/// \brief Filters multi-actions by an allow or a block operator, for applying the operator while the summands are
+///        generated (inline allow and block in a parallel composition), or by neither.
+class allow_block_filter
+{
+protected:
+  process::action_name_multiset_list m_allowlist;
+  detail::allow_list_cache m_allow_cache;
+  process::action m_termination_action;
+  bool m_is_allow = false;
+  bool m_is_block = false;
+
+public:
+  /// \brief A filter that keeps every multi-action.
+  allow_block_filter() = default;
+
+  /// \brief A filter for the allow or the block operator.
+  /// \param allowlist The allowed multi-actions if is_allow holds; if is_block holds, a list with one element that
+  ///                  contains the blocked actions.
+  /// \param is_allow Whether the filter applies the allow operator.
+  /// \param is_block Whether the filter applies the block operator; is_allow and is_block exclude each other.
+  /// \param termination_action The termination action, which is always allowed.
+  allow_block_filter(const process::action_name_multiset_list& allowlist,
+    bool is_allow,
+    bool is_block,
+    const process::action& termination_action)
+    : m_allowlist(allowlist),
+      m_allow_cache(is_allow ? detail::make_allow_list_cache(allowlist) : detail::allow_list_cache()),
+      m_termination_action(termination_action),
+      m_is_allow(is_allow),
+      m_is_block(is_block)
+  {
+    assert(!(is_allow && is_block));
+  }
+
+  /// \brief Whether the filter applies the allow operator.
+  bool is_allow() const
+  {
+    return m_is_allow;
+  }
+
+  /// \brief Whether the filter applies the block operator.
+  bool is_block() const
+  {
+    return m_is_block;
+  }
+
+  /// \brief The allowed multi-actions, or a list with one element that contains the blocked actions.
+  const process::action_name_multiset_list& allowlist() const
+  {
+    return m_allowlist;
+  }
+
+  /// \brief The number of allowed multi-actions, or of blocked actions.
+  std::size_t size() const
+  {
+    return m_is_block ? m_allowlist.front().names().size() : m_allowlist.size();
+  }
+
+  /// \brief Whether the filter keeps the (sorted) multi-action.
+  bool keeps(const process::action_list& multiaction) const
+  {
+    if (m_is_allow)
+    {
+      return allow_(m_allow_cache, multiaction, m_termination_action);
+    }
+    if (m_is_block)
+    {
+      return !encap(m_allowlist, multiaction);
+    }
+    return true;
+  }
+};
+
 /// Calculate the application of the allow or block operator over the action
 /// summands.
 ///
@@ -198,8 +271,6 @@ inline void allowblockcomposition(
   deadlock_summand_vector resultsimpledeltasumlist;
   deadlock_summands.swap(resultdeltasumlist);
 
-  process::action_name_multiset_list allowlist(allowlist1);
-
   std::size_t sourcesumlist_length = sourcesumlist.size();
   if (sourcesumlist_length > 2 || is_allow) // This condition prevents this message to be printed
   // when performing data elimination. In this case the
@@ -212,12 +283,7 @@ inline void allowblockcomposition(
                                   << " delta summands";
   }
 
-  /// Cache the list of allowed actions, to avoid linear searches in the allow list.
-  detail::allow_list_cache allow_cache;
-  if (is_allow)
-  {
-    allow_cache = detail::make_allow_list_cache(allowlist);
-  }
+  const allow_block_filter filter(allowlist1, is_allow, !is_allow, termination_action);
 
   /* First add the resulting sums in two separate lists
    one for actions, and one for delta's. The delta's
@@ -232,9 +298,8 @@ inline void allowblockcomposition(
     const data::data_expression& actiontime = smmnd.multi_action().time();
     const data::data_expression& condition = smmnd.condition();
 
-    // Explicitly allow the termination action in any allow.
-    if ((is_allow && allow_(allow_cache, multiaction, termination_action))
-        || (!is_allow && !encap(allowlist, multiaction)))
+    // The filter keeps the termination action in any allow.
+    if (filter.keeps(multiaction))
     {
       action_summands.push_back(smmnd);
     }
@@ -293,12 +358,12 @@ inline void allowblockcomposition(
     lps_statistics_t lps_statistics_after = get_statistics(action_summands, deadlock_summands);
 
     std::cout << log_allow_block_application(lps_statistics_before,
-        lps_statistics_after,
-        is_allow,
-        (is_allow ? allowlist.size() : 0),
-        (is_allow ? 0 : allowlist.front().size()),
-        !nodeltaelimination,
-        ignore_time);
+      lps_statistics_after,
+      is_allow,
+      (is_allow ? allowlist1.size() : 0),
+      (is_allow ? 0 : allowlist1.front().size()),
+      !nodeltaelimination,
+      ignore_time);
   }
 }
 

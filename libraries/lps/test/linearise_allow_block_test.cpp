@@ -172,4 +172,48 @@ BOOST_AUTO_TEST_CASE(test_allow)
   BOOST_ASSERT(!allow_(allow_ab_abb_cd(), bb, termination_action));
 }
 
-// TODO: extend with tests for block.
+BOOST_AUTO_TEST_CASE(test_allow_block_filter)
+{
+  const process::action a = make_action("a");
+  const process::action b = make_action("b");
+  const process::action c = make_action("c");
+  const process::action termination_action = make_action("Terminate");
+
+  const action_list empty;
+  const action_list terminate({termination_action});
+  const action_list a_({a});
+  const action_list ab({a, b});
+  const action_list bc({b, c});
+
+  // Without allow or block every multi-action is kept.
+  const allow_block_filter keep_all;
+  BOOST_CHECK(!keep_all.is_allow() && !keep_all.is_block());
+  BOOST_CHECK(keep_all.keeps(empty));
+  BOOST_CHECK(keep_all.keeps(a_));
+  BOOST_CHECK(keep_all.keeps(ab));
+
+  // allow({a|b, c}): the empty multi-action and the termination action are always allowed.
+  const process::action_name_multiset_list allowlist({process::action_name_multiset(core::identifier_string_list(
+                                                        {core::identifier_string("a"), core::identifier_string("b")})),
+    process::action_name_multiset(core::identifier_string_list({core::identifier_string("c")}))});
+  const allow_block_filter allow(allowlist, true, false, termination_action);
+  BOOST_CHECK(allow.is_allow() && !allow.is_block());
+  BOOST_CHECK_EQUAL(allow.size(), 2U);
+  BOOST_CHECK(allow.keeps(empty));
+  BOOST_CHECK(allow.keeps(terminate));
+  BOOST_CHECK(!allow.keeps(a_));
+  BOOST_CHECK(allow.keeps(ab));
+  BOOST_CHECK(!allow.keeps(bc));
+
+  // block({b, c}): a multi-action is blocked if one of its actions is.
+  const process::action_name_multiset_list blocklist({process::action_name_multiset(
+    core::identifier_string_list({core::identifier_string("b"), core::identifier_string("c")}))});
+  const allow_block_filter block(blocklist, false, true, termination_action);
+  BOOST_CHECK(!block.is_allow() && block.is_block());
+  BOOST_CHECK_EQUAL(block.size(), 2U);
+  BOOST_CHECK(block.keeps(empty));
+  BOOST_CHECK(block.keeps(terminate));
+  BOOST_CHECK(block.keeps(a_));
+  BOOST_CHECK(!block.keeps(ab));
+  BOOST_CHECK(!block.keeps(bc));
+}

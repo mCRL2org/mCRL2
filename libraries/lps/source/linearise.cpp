@@ -4923,33 +4923,17 @@ class specification_basic_type
       condition = RewriteTerm(condition);
     }
 
-    void calculate_left_merge_action(
-      const lps::detail::ultimate_delay& ultimate_delay_condition,
+    void calculate_left_merge_action(const lps::detail::ultimate_delay& ultimate_delay_condition,
       const stochastic_action_summand_vector& action_summands1,
-      const action_name_multiset_list& allowlist,  // This is a list of list of identifierstring.
-      const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
-      const bool is_block,
+      const allow_block_filter& filter,
       stochastic_action_summand_vector& action_summands)
     {
-      lps::detail::allow_list_cache allow_cache;
-      if(is_allow)
-      {
-        allow_cache = lps::detail::make_allow_list_cache(allowlist);
-      }
       for (const stochastic_action_summand& summand1: action_summands1)
       {
         const action_list& multiaction1 = summand1.multi_action().actions();
         assert(std::is_sorted(multiaction1.begin(), multiaction1.end()));
 
-        if (multiaction1 == action_list({terminationAction}))
-        {
-          continue;
-        }
-        if (is_allow && !allow_(allow_cache, multiaction1, terminationAction))
-        {
-          continue;
-        }
-        if (is_block && encap(allowlist, multiaction1))
+        if (multiaction1 == action_list({terminationAction}) || !filter.keeps(multiaction1))
         {
           continue;
         }
@@ -5046,13 +5030,10 @@ class specification_basic_type
     }
 #endif
 
-    void calculate_left_merge(
-      const stochastic_action_summand_vector& action_summands1,
+    void calculate_left_merge(const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
       const lps::detail::ultimate_delay& ultimate_delay_condition2,
-      const action_name_multiset_list& allowlist,  // This is a list of list of identifierstring.
-      const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
-      const bool is_block,
+      const allow_block_filter& filter,
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
@@ -5064,36 +5045,26 @@ class specification_basic_type
 #endif
 
       calculate_left_merge_deadlock(ultimate_delay_condition2, deadlock_summands1, action_summands, deadlock_summands);
-      calculate_left_merge_action(ultimate_delay_condition2, action_summands1,
-                                    allowlist, is_allow, is_block, action_summands);
+      calculate_left_merge_action(ultimate_delay_condition2, action_summands1, filter, action_summands);
 
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
       lps_statistics_t lps_statistics_result_after = get_statistics(action_summands, deadlock_summands);
 
       std::cout << log_leftmerge_application(lps_statistics_before,
-          lps_statistics_result_before,
-          lps_statistics_result_after,
-          is_allow,
-          is_block,
-          (is_block ? allowlist.front().size() : allowlist.size()), 4);
+        lps_statistics_result_before,
+        lps_statistics_result_after,
+        filter.is_allow(),
+        filter.is_block(),
+        filter.size(),
+        4);
 #endif
     }
 
-
-    void calculate_communication_merge_action_summands(
-          const stochastic_action_summand_vector& action_summands1,
-          const stochastic_action_summand_vector& action_summands2,
-          const action_name_multiset_list& allowlist,   // This is a list of list of identifierstring.
-          const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
-          const bool is_block,
-          stochastic_action_summand_vector& action_summands)
+    void calculate_communication_merge_action_summands(const stochastic_action_summand_vector& action_summands1,
+      const stochastic_action_summand_vector& action_summands2,
+      const allow_block_filter& filter,
+      stochastic_action_summand_vector& action_summands)
     {
-      lps::detail::allow_list_cache allow_cache;
-      if(is_allow)
-      {
-        allow_cache = lps::detail::make_allow_list_cache(allowlist);
-      }
-
       // First combine the action summands.
       for (const stochastic_action_summand& summand1: action_summands1)
       {
@@ -5125,11 +5096,7 @@ class specification_basic_type
               multiaction3=linMergeMultiActionList(multiaction1,multiaction2);
             }
 
-            if (is_allow && !allow_(allow_cache,multiaction3,terminationAction))
-            {
-              continue;
-            }
-            if (is_block && encap(allowlist,multiaction3))
+            if (!filter.keeps(multiaction3))
             {
               continue;
             }
@@ -5338,16 +5305,13 @@ class specification_basic_type
     }
 #endif
 
-    void calculate_communication_merge(
-          const stochastic_action_summand_vector& action_summands1,
-          const deadlock_summand_vector& deadlock_summands1,
-          const stochastic_action_summand_vector& action_summands2,
-          const deadlock_summand_vector& deadlock_summands2,
-          const action_name_multiset_list& allowlist,   // This is a list of list of identifierstring.
-          const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
-          const bool is_block,
-          stochastic_action_summand_vector& action_summands,
-          deadlock_summand_vector& deadlock_summands)
+    void calculate_communication_merge(const stochastic_action_summand_vector& action_summands1,
+      const deadlock_summand_vector& deadlock_summands1,
+      const stochastic_action_summand_vector& action_summands2,
+      const deadlock_summand_vector& deadlock_summands2,
+      const allow_block_filter& filter,
+      stochastic_action_summand_vector& action_summands,
+      deadlock_summand_vector& deadlock_summands)
     {
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
       lps_statistics_t lps1_statistics_before = get_statistics(action_summands1, deadlock_summands1);
@@ -5355,7 +5319,7 @@ class specification_basic_type
       lps_statistics_t lps_result_statistics_before = get_statistics(action_summands, deadlock_summands);
 #endif
 
-      calculate_communication_merge_action_summands(action_summands1, action_summands2, allowlist, is_allow, is_block, action_summands);
+      calculate_communication_merge_action_summands(action_summands1, action_summands2, filter, action_summands);
       calculate_communication_merge_action_deadlock_summands(action_summands1, deadlock_summands2, action_summands, deadlock_summands);
       calculate_communication_merge_action_deadlock_summands(action_summands2, deadlock_summands1, action_summands, deadlock_summands);
       calculate_communication_merge_deadlock_summands(deadlock_summands1, deadlock_summands2, action_summands, deadlock_summands);
@@ -5363,31 +5327,31 @@ class specification_basic_type
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
       lps_statistics_t lps_statistics_after = get_statistics(action_summands, deadlock_summands);
 
-      std::cout << log_communicationmerge_application(lps1_statistics_before, lps2_statistics_before, lps_result_statistics_before,
-          lps_statistics_after, is_allow, is_block, (is_block ? allowlist.front().size() : allowlist.size()), 4);
+      std::cout << log_communicationmerge_application(lps1_statistics_before,
+        lps2_statistics_before,
+        lps_result_statistics_before,
+        lps_statistics_after,
+        filter.is_allow(),
+        filter.is_block(),
+        filter.size(),
+        4);
 #endif
     }
 
-
-    void combine_summand_lists(
-      const stochastic_action_summand_vector& action_summands1,
+    void combine_summand_lists(const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
       const lps::detail::ultimate_delay& ultimate_delay_condition1,
       const stochastic_action_summand_vector& action_summands2,
       const deadlock_summand_vector& deadlock_summands2,
       const lps::detail::ultimate_delay& ultimate_delay_condition2,
-      const variable_list& par1,
-      const variable_list& par3,
-      const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
-      const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
+      const action_name_multiset_list& allowlist, // This is a list of list of identifierstring.
+      const bool is_allow, // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
-
-      variable_list allpars = par1 + par3;
 
       if (is_allow || is_block)
       {
@@ -5397,22 +5361,33 @@ class specification_basic_type
         deadlock_summands.emplace_back(variable_list(), sort_bool::true_(), deadlock());
       }
 
-      /* first we enumerate the summands of t1 */
+      const allow_block_filter filter(allowlist, is_allow, is_block, terminationAction);
 
-      action_name_multiset_list allowlist(allowlist1);
-      calculate_left_merge(action_summands1, deadlock_summands1,
-                           ultimate_delay_condition2, allowlist, is_allow, is_block,
-                           action_summands, deadlock_summands);
+      /* first we enumerate the summands of t1 */
+      calculate_left_merge(action_summands1,
+        deadlock_summands1,
+        ultimate_delay_condition2,
+        filter,
+        action_summands,
+        deadlock_summands);
 
       /* second we enumerate the summands of sumlist2 */
-      calculate_left_merge(action_summands2, deadlock_summands2,
-                           ultimate_delay_condition1, allowlist, is_allow, is_block,
-                           action_summands, deadlock_summands);
+      calculate_left_merge(action_summands2,
+        deadlock_summands2,
+        ultimate_delay_condition1,
+        filter,
+        action_summands,
+        deadlock_summands);
 
       /* thirdly we enumerate all multi actions*/
 
-      calculate_communication_merge(action_summands1, deadlock_summands1, action_summands2, deadlock_summands2,
-                                    allowlist, is_allow, is_block, action_summands, deadlock_summands);
+      calculate_communication_merge(action_summands1,
+        deadlock_summands1,
+        action_summands2,
+        deadlock_summands2,
+        filter,
+        action_summands,
+        deadlock_summands);
     }
 
 
@@ -5522,9 +5497,17 @@ class specification_basic_type
       pars3=reverse(pars3);
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
-      combine_summand_lists(action_summands1,deadlock_summands1,ultimate_delay_condition1,
-                            action_summands2,deadlock_summands2,ultimate_delay_condition2,
-                            pars1,pars3,allowlist1,is_allow,is_block,action_summands,deadlock_summands);
+      combine_summand_lists(action_summands1,
+        deadlock_summands1,
+        ultimate_delay_condition1,
+        action_summands2,
+        deadlock_summands2,
+        ultimate_delay_condition2,
+        allowlist1,
+        is_allow,
+        is_block,
+        action_summands,
+        deadlock_summands);
 
       mCRL2log(mcrl2::log::log_level_t::verbose) << action_summands.size() << " actions and " << deadlock_summands.size() << " delta summands.\n";
       pars_result=pars1+pars3;
