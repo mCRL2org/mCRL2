@@ -39,6 +39,12 @@ detail::ultimate_delay delay_until_u()
   return detail::ultimate_delay(t, {u}, data::less(t, u));
 }
 
+// The distribution of a summand without stochastic operator, as the lineariser makes it.
+stochastic_distribution no_distribution()
+{
+  return stochastic_distribution(data::variable_list(), data::sort_real::real_one());
+}
+
 process::action make_action(const std::string& name)
 {
   return process::action(process::action_label(core::identifier_string(name), data::sort_expression_list()),
@@ -53,7 +59,7 @@ stochastic_action_summand make_summand(const process::action_list& actions,
     condition,
     multi_action(actions),
     data::assignment_list(),
-    stochastic_distribution());
+    no_distribution());
 }
 
 data::set_identifier_generator make_identifier_generator()
@@ -97,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_timed_action_summand)
     condition,
     multi_action(process::action_list({make_action("a")}), five),
     data::assignment_list(),
-    stochastic_distribution());
+    no_distribution());
   const stochastic_action_summand result = left_merge_summand(summand, delay_until_three(), id_generator, identity);
 
   BOOST_CHECK_EQUAL(result.multi_action().time(), five);
@@ -199,7 +205,7 @@ BOOST_AUTO_TEST_CASE(test_left_merge_with_time)
     data::sort_bool::true_(),
     multi_action(process::action_list({a}), five),
     data::assignment_list(),
-    stochastic_distribution())};
+    no_distribution())};
   deadlock_summand_vector deadlock_summands;
   left_merge(action_summands1,
     deadlock_summands1,
@@ -218,4 +224,163 @@ BOOST_AUTO_TEST_CASE(test_left_merge_with_time)
   BOOST_REQUIRE_EQUAL(action_summands.size(), 2U);
   BOOST_CHECK_EQUAL(action_summands.back().multi_action().time(), t);
   BOOST_CHECK_EQUAL(action_summands.back().condition(), data::less(t, three));
+}
+
+// The termination action only combines with the termination action; other multi-actions are joined.
+BOOST_AUTO_TEST_CASE(test_communication_merge_actions)
+{
+  const process::action a = make_action("a");
+  const process::action b = make_action("b");
+  const process::action termination = make_action("Terminate");
+  const process::action_list terminate({termination});
+
+  BOOST_CHECK(!communication_merge_actions({a}, terminate, termination));
+  BOOST_CHECK(!communication_merge_actions(terminate, {a}, termination));
+  BOOST_CHECK_EQUAL(communication_merge_actions(terminate, terminate, termination).value(), terminate);
+  const process::action_list ab = communication_merge_actions({b}, {a}, termination).value();
+  BOOST_CHECK_EQUAL(ab, process::action_list({a, b}));
+  BOOST_CHECK(std::is_sorted(ab.begin(), ab.end()));
+}
+
+// Two timed action summands must happen at the same time; the result has the time of the first, and joins the sum
+// variables, conditions, next states and distributions.
+BOOST_AUTO_TEST_CASE(test_communication_merge_action_summands)
+{
+  const process::action a = make_action("a");
+  const process::action b = make_action("b");
+  const data::variable x("x", data::sort_bool::bool_());
+  const data::data_expression condition1 = data::less(n, data::sort_nat::nat(2));
+  const stochastic_action_summand summand1({u},
+    condition1,
+    multi_action(process::action_list({a}), u),
+    data::assignment_list({data::assignment(n, data::sort_nat::nat(1))}),
+    stochastic_distribution({x}, data::sort_real::real_(1)));
+  const stochastic_action_summand summand2(data::variable_list(),
+    data::sort_bool::true_(),
+    multi_action(process::action_list({b}), five),
+    data::assignment_list(),
+    no_distribution());
+
+  const process::action_list ab({a, b});
+  const stochastic_action_summand result = communication_merge_summand(summand1, summand2, ab, identity);
+  BOOST_CHECK_EQUAL(result.summation_variables(), data::variable_list({u}));
+  BOOST_CHECK_EQUAL(result.condition(), data::sort_bool::and_(condition1, data::equal_to(u, five)));
+  BOOST_CHECK_EQUAL(result.multi_action(), multi_action(ab, u));
+  BOOST_CHECK_EQUAL(result.assignments(), summand1.assignments());
+  BOOST_CHECK_EQUAL(result.distribution().variables(), data::variable_list({x}));
+
+  // With only one timed summand the result has its time and no extra condition.
+  const stochastic_action_summand untimed = make_summand({a});
+  const stochastic_action_summand result2 = communication_merge_summand(untimed, summand2, ab, identity);
+  BOOST_CHECK_EQUAL(result2.condition(), data::sort_bool::true_());
+  BOOST_CHECK_EQUAL(result2.multi_action(), multi_action(ab, five));
+}
+
+// A combination with a deadlock summand can delay until the earliest of both times.
+BOOST_AUTO_TEST_CASE(test_communication_merge_deadlock_summands)
+{
+  const deadlock_summand timed(data::variable_list({u}), data::sort_bool::true_(), deadlock(five));
+  const deadlock_summand untimed(data::variable_list(), data::sort_bool::true_(), deadlock());
+  const stochastic_action_summand action_at_three(data::variable_list(),
+    data::sort_bool::true_(),
+    multi_action(process::action_list({make_action("a")}), three),
+    data::assignment_list(),
+    no_distribution());
+
+  const deadlock_summand both = communication_merge_summand(action_at_three, timed, identity);
+  BOOST_CHECK_EQUAL(both.summation_variables(), data::variable_list({u}));
+  BOOST_CHECK_EQUAL(both.deadlock().time(), data::sort_real::minimum(three, five));
+
+  BOOST_CHECK_EQUAL(communication_merge_summand(untimed, timed, identity).deadlock().time(), five);
+  BOOST_CHECK_EQUAL(communication_merge_summand(timed, untimed, identity).deadlock().time(), five);
+  BOOST_CHECK(!communication_merge_summand(untimed, untimed, identity).deadlock().has_time());
+
+  // With condition false the time is not computed.
+  const deadlock_summand never(data::variable_list(), data::sort_bool::false_(), deadlock(three));
+  const deadlock_summand none = communication_merge_summand(never, timed, identity);
+  BOOST_CHECK_EQUAL(none.condition(), data::sort_bool::false_());
+  BOOST_CHECK(!none.deadlock().has_time());
+}
+
+// Without time only action summands are combined, the filter is applied, and the termination action only combines
+// with the termination action.
+BOOST_AUTO_TEST_CASE(test_communication_merge_without_time)
+{
+  const process::action a = make_action("a");
+  const process::action b = make_action("b");
+  const process::action termination = make_action("Terminate");
+  const stochastic_action_summand_vector action_summands1{make_summand({a}), make_summand({termination})};
+  const stochastic_action_summand_vector action_summands2{make_summand({b}),
+    make_summand({a}),
+    make_summand({termination})};
+  const deadlock_summand_vector deadlock_summands{
+    deadlock_summand(data::variable_list(), data::sort_bool::true_(), deadlock())};
+
+  // block({a}) leaves a|b and a|a out.
+  const process::action_name_multiset_list blocklist(
+    {process::action_name_multiset(core::identifier_string_list({core::identifier_string("a")}))});
+  const allow_block_filter filter(blocklist, false, true, termination);
+
+  stochastic_action_summand_vector action_summands;
+  deadlock_summand_vector result_deadlock_summands;
+  communication_merge(action_summands1,
+    deadlock_summands,
+    action_summands2,
+    deadlock_summands,
+    filter,
+    termination,
+    true,
+    identity,
+    action_summands,
+    result_deadlock_summands);
+
+  BOOST_REQUIRE_EQUAL(action_summands.size(), 1U);
+  BOOST_CHECK_EQUAL(action_summands.front().multi_action().actions(), process::action_list({termination}));
+  BOOST_CHECK(result_deadlock_summands.empty());
+
+  // Without the filter also a|b and a|a are there.
+  action_summands.clear();
+  communication_merge(action_summands1,
+    deadlock_summands,
+    action_summands2,
+    deadlock_summands,
+    allow_block_filter(),
+    termination,
+    true,
+    identity,
+    action_summands,
+    result_deadlock_summands);
+  BOOST_CHECK_EQUAL(action_summands.size(), 3U);
+  BOOST_CHECK(result_deadlock_summands.empty());
+}
+
+// With time the combinations with deadlock summands are added as well, unless they are subsumed.
+BOOST_AUTO_TEST_CASE(test_communication_merge_with_time)
+{
+  const process::action a = make_action("a");
+  const process::action termination = make_action("Terminate");
+  const data::data_expression condition = data::less(n, data::sort_nat::nat(2));
+  const stochastic_action_summand_vector action_summands1{make_summand({a}, {}, condition)};
+  const deadlock_summand_vector deadlock_summands1;
+  const stochastic_action_summand_vector action_summands2;
+  const deadlock_summand_vector deadlock_summands2{
+    deadlock_summand(data::variable_list(), data::sort_bool::true_(), deadlock(five))};
+
+  stochastic_action_summand_vector action_summands;
+  deadlock_summand_vector deadlock_summands;
+  communication_merge(action_summands1,
+    deadlock_summands1,
+    action_summands2,
+    deadlock_summands2,
+    allow_block_filter(),
+    termination,
+    false,
+    identity,
+    action_summands,
+    deadlock_summands);
+
+  BOOST_CHECK(action_summands.empty());
+  BOOST_REQUIRE_EQUAL(deadlock_summands.size(), 1U);
+  BOOST_CHECK_EQUAL(deadlock_summands.front().condition(), condition);
+  BOOST_CHECK_EQUAL(deadlock_summands.front().deadlock().time(), five);
 }

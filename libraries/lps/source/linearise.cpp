@@ -4952,126 +4952,6 @@ class specification_basic_type
 #endif
     }
 
-    // The action summands of the communication merge: every action summand of one process combined with every
-    // action summand of the other, where the termination action only combines with the termination action.
-    void calculate_communication_merge_action_summands(const stochastic_action_summand_vector& action_summands1,
-      const stochastic_action_summand_vector& action_summands2,
-      const allow_block_filter& filter,
-      stochastic_action_summand_vector& action_summands)
-    {
-      const action_list termination({terminationAction});
-      for (const stochastic_action_summand& summand1: action_summands1)
-      {
-        const action_list& multiaction1 = summand1.multi_action().actions();
-        const bool terminates1 = multiaction1 == termination;
-        for (const stochastic_action_summand& summand2: action_summands2)
-        {
-          const action_list& multiaction2 = summand2.multi_action().actions();
-          if (terminates1 != (multiaction2 == termination))
-          {
-            continue;
-          }
-          const action_list multiaction
-            = terminates1 ? termination : linMergeMultiActionList(multiaction1, multiaction2);
-          if (!filter.keeps(multiaction))
-          {
-            continue;
-          }
-
-          // If both summands have a time, they must happen at the same time.
-          data_expression condition = lazy::and_(summand1.condition(), summand2.condition());
-          data_expression time;
-          if (summand1.has_time() && summand2.has_time())
-          {
-            time = summand1.multi_action().time();
-            condition = lazy::and_(condition, equal_to(time, summand2.multi_action().time()));
-          }
-          else if (summand1.has_time())
-          {
-            time = summand1.multi_action().time();
-          }
-          else if (summand2.has_time())
-          {
-            time = summand2.multi_action().time();
-          }
-
-          const bool has_time = summand1.has_time() || summand2.has_time();
-
-          condition = RewriteTerm(condition);
-          if (condition == sort_bool::false_())
-          {
-            continue;
-          }
-
-          assert(std::is_sorted(multiaction.begin(), multiaction.end()));
-          const stochastic_distribution& distribution1 = summand1.distribution();
-          const stochastic_distribution& distribution2 = summand2.distribution();
-          action_summands.emplace_back(summand1.summation_variables() + summand2.summation_variables(),
-            condition,
-            has_time ? multi_action(multiaction, time) : multi_action(multiaction),
-            summand1.assignments() + summand2.assignments(),
-            stochastic_distribution(distribution1.variables() + distribution2.variables(),
-              sort_real::optimized_times(distribution1.distribution(), distribution2.distribution())));
-        }
-      }
-    }
-
-    static const data_expression& summand_time(const stochastic_action_summand& summand)
-    {
-      return summand.multi_action().time();
-    }
-
-    static const data_expression& summand_time(const deadlock_summand& summand)
-    {
-      return summand.deadlock().time();
-    }
-
-    // The deadlock of the combination of two summands in the communication merge: the earliest of their times.
-    template<typename Summand1, typename Summand2>
-    deadlock communication_merge_deadlock(const Summand1& summand1, const Summand2& summand2)
-    {
-      if (summand1.has_time() && summand2.has_time())
-      {
-        return deadlock(RewriteTerm(sort_real::minimum(summand_time(summand1), summand_time(summand2))));
-      }
-      if (summand1.has_time())
-      {
-        return deadlock(summand_time(summand1));
-      }
-      if (summand2.has_time())
-      {
-        return deadlock(summand_time(summand2));
-      }
-      return deadlock();
-    }
-
-    // The deadlock summands of the communication merge of the action or deadlock summands summands1 of one process
-    // with the deadlock summands deadlock_summands2 of the other. Only used if time is not ignored.
-    template<typename Summand>
-    void calculate_communication_merge_deadlock_summands(const std::vector<Summand>& summands1,
-      const deadlock_summand_vector& deadlock_summands2,
-      const stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands)
-    {
-      assert(!options.ignore_time);
-      for (const Summand& summand1: summands1)
-      {
-        for (const deadlock_summand& summand2: deadlock_summands2)
-        {
-          const data_expression condition = lazy::and_(summand1.condition(), summand2.condition());
-          if (condition != sort_bool::false_())
-          {
-            insert_timed_delta_summand(action_summands,
-              deadlock_summands,
-              deadlock_summand(summand1.summation_variables() + summand2.summation_variables(),
-                condition,
-                communication_merge_deadlock(summand1, summand2)),
-              options.ignore_time);
-          }
-        }
-      }
-    }
-
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
     static std::string log_communicationmerge_application(const lps_statistics_t& lps1_statistics_before,
         const lps_statistics_t& lps2_statistics_before,
@@ -5123,23 +5003,17 @@ class specification_basic_type
       lps_statistics_t lps_result_statistics_before = get_statistics(action_summands, deadlock_summands);
 #endif
 
-      calculate_communication_merge_action_summands(action_summands1, action_summands2, filter, action_summands);
-      // Without time the communication merge leaves out the deadlock summands, as the left merge does.
-      if (!options.ignore_time)
-      {
-        calculate_communication_merge_deadlock_summands(action_summands1,
-          deadlock_summands2,
-          action_summands,
-          deadlock_summands);
-        calculate_communication_merge_deadlock_summands(action_summands2,
-          deadlock_summands1,
-          action_summands,
-          deadlock_summands);
-        calculate_communication_merge_deadlock_summands(deadlock_summands1,
-          deadlock_summands2,
-          action_summands,
-          deadlock_summands);
-      }
+      lps::communication_merge(
+        action_summands1,
+        deadlock_summands1,
+        action_summands2,
+        deadlock_summands2,
+        filter,
+        terminationAction,
+        options.ignore_time,
+        [this](const data_expression& t) { return RewriteTerm(t); },
+        action_summands,
+        deadlock_summands);
 
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
       lps_statistics_t lps_statistics_after = get_statistics(action_summands, deadlock_summands);
