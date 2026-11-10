@@ -66,6 +66,7 @@
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/balance_nesting_depth.h"
 #include "mcrl2/process/is_multi_action.h"
+#include "mcrl2/process/merge_identical_equations.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/process_variable_strongly_connected_components.h"
 #include "mcrl2/process/rewrite.h"
@@ -2871,177 +2872,27 @@ class specification_basic_type
 
     /**************** minimize_set_of_reachable_process_identifiers  ******************************/
 
-    /* The process identifiers in reachable_process_identifiers have bodies and parameters lists
-     * that can be the same. If that is the case, they are identified. The right hand sides are substituted to
-     * reflect the identified processes. Example: P1 = a.P2, P3=a.P4, P2=b.Q, P4=b.Q. This reduces to P1 = a.P2, P2 = b.Q.
-     * The result is a map from remaining process identifiers to their adapted process bodies.
-     * The initial process was part of the reachable_process_identifiers and must be part of the map.
-     */
-
-    /* set_proc_identifier_map is an auxiliary procedure that effectively sets identfier_identifier_map[id1]:=... or
-       identifier_identifier_map[id1]:=... in such a way that they map to the same element. In this way identifier_identifier_map
-       acts as a representation of the equivalence set induced by equations id1==id2. A constraint is that
-       initial_process may never occur as a left hand side. An invariant of identifier_identifier_map is
-       that no id1 that occurs at the right of the map can occur at the left.
-    */
-
-    static
-    process_identifier get_last(const process_identifier& id, const process_identifier_map<process_identifier>& identifier_identifier_map)
-    {
-      process_identifier target_id=id;
-      bool ready=false;
-      do
-      {
-        const process_identifier_map<process_identifier>::const_iterator i=identifier_identifier_map.find(target_id);
-        if (i==identifier_identifier_map.end())
-        {
-          ready=true;
-        }
-        else
-        {
-          target_id=i->second;
-        }
-      }
-      while (!ready);
-      return target_id;
-    }
-
-
-    static
-    void set_proc_identifier_map(
-            process_identifier_map<process_identifier>& identifier_identifier_map,
-            const process_identifier& id1_,
-            const process_identifier& id2_,
-            const process_identifier& initial_process)
-    {
-      assert(id1_!=id2_);
-
-      /* Take care that id1 is the last identifier or that id2 is arger than id1. This guarantees
-         that there will be no loops in the mapping of identifiers. */
-      process_identifier id1= get_last(id1_,identifier_identifier_map);
-      process_identifier id2= get_last(id2_,identifier_identifier_map);
-      if (id1==initial_process)
-      {
-        id1.swap(id2);
-      }
-      if (id1!=id2)
-      {
-        identifier_identifier_map[id1]=id2;
-      }
-    }
-
-    static
-    void complete_proc_identifier_map(process_identifier_map<process_identifier>& identifier_identifier_map)
-    {
-      process_identifier_map<process_identifier> new_identifier_identifier_map;
-      for(const std::pair<const process_identifier, process_identifier >& p: identifier_identifier_map)
-      {
-        new_identifier_identifier_map[p.first]=get_last(p.second,identifier_identifier_map);
-      }
-      identifier_identifier_map.swap(new_identifier_identifier_map);
-#ifndef NDEBUG
-      /* In the result no right hand side occurs as the left hand side of identifier_identifier_map */
-      using identifier_identifier_pair = std::pair<const process_identifier, process_identifier>;
-      for(const identifier_identifier_pair& p: identifier_identifier_map)
-      {
-        assert(identifier_identifier_map.count(p.second)==0);
-      }
-#endif
-    }
-
-    struct make_substitution
-    {
-      using result_type = process_identifier;
-      using argument_type = process_identifier;
-      const process_identifier_map<process_identifier>& m_map;
-
-      make_substitution(const process_identifier_map<process_identifier>& map)
-        : m_map(map)
-      {}
-
-      process_identifier operator()(const process_identifier& id) const
-      {
-        const process_identifier_map<process_identifier>::const_iterator i=m_map.find(id);
-        if (i==m_map.end()) // Not found
-        {
-          return id;
-        }
-        return i->second;
-      }
-    };
-
+    /* Merges the processes in reachable_process_identifiers with the same parameters and body, see
+       process::merge_identical_equations, and stores the adapted bodies of the remaining processes. The initial
+       process remains. */
     process_identifier_set
           minimize_set_of_reachable_process_identifiers(const process_identifier_set& reachable_process_identifiers,
                                                         const process_identifier& initial_process)
     {
-      assert(reachable_process_identifiers.count(initial_process)>0);
-      using parameters_process_pair = std::pair<variable_list, process_expression>;
-      using mapping_type = std::map<std::pair<variable_list, process_expression>, process_identifier>;
-
-      /* First put the identifiers in reachable_process_identifiers in the process mapping. The keys of
-         process_mapping are also stored in process_mapping_keys, in the order of insertion. The mapping is iterated
-         in that order, because the order of the map itself depends on the addresses of the terms. */
-      mapping_type process_mapping;
-      std::vector<parameters_process_pair> process_mapping_keys;
-      process_identifier_map<process_identifier> identifier_identifier_map;
-      for(const process_identifier& id: reachable_process_identifiers)
+      assert(reachable_process_identifiers.find(initial_process) != reachable_process_identifiers.end());
+      std::vector<process_equation> equations;
+      for (const process_identifier& id: reachable_process_identifiers)
       {
-        objectdatatype& object=objectIndex(id);
-        const parameters_process_pair p(object.parameters,object.processbody);
-        mapping_type::const_iterator i=process_mapping.find(p);
-        if (i==process_mapping.end())   // Not found.
-        {
-          process_mapping[p]=id;
-          process_mapping_keys.push_back(p);
-        }
-        else
-        {
-          set_proc_identifier_map(identifier_identifier_map,id,i->second,initial_process);
-        }
-      }
-      complete_proc_identifier_map(identifier_identifier_map);
-
-      while (!identifier_identifier_map.empty())
-      {
-        /* Move the elements of process_mapping into new_process_mapping, under application
-         * of the identifier_identifier_map. If this yields new process_identifiers to be identified store
-         * these in new_proc_identifier_map. Do this until no process_identifiers are mapped onto
-         * each other anymore. */
-        process_identifier_map<process_identifier> new_identifier_identifier_map;
-        mapping_type new_process_mapping;
-        std::vector<parameters_process_pair> new_process_mapping_keys;
-        for(const parameters_process_pair& p: process_mapping_keys)
-        {
-          const process_identifier& id=process_mapping.at(p);
-          const make_substitution sigma(identifier_identifier_map);
-          const parameters_process_pair p_new(p.first, replace_process_identifiers(p.second, sigma));
-          mapping_type::const_iterator i=new_process_mapping.find(p_new);
-          if (i==new_process_mapping.end())   // Not found.
-          {
-            new_process_mapping[p_new]=sigma(id);
-            new_process_mapping_keys.push_back(p_new);
-          }
-          else
-          {
-            set_proc_identifier_map(new_identifier_identifier_map,sigma(id),sigma(i->second),initial_process);
-          }
-        }
-        complete_proc_identifier_map(new_identifier_identifier_map);
-        identifier_identifier_map.swap(new_identifier_identifier_map);
-        process_mapping.swap(new_process_mapping);
-        process_mapping_keys.swap(new_process_mapping_keys);
+        const objectdatatype& object = objectIndex(id);
+        equations.emplace_back(id, object.parameters, object.processbody);
       }
 
-      /* Store the pairs from process mapping into result */
       process_identifier_set result;
-      for(const parameters_process_pair& p: process_mapping_keys)
+      for (const process_equation& equation: process::merge_identical_equations(equations, initial_process))
       {
-        const process_identifier& id=process_mapping.at(p);
-        result.insert(id);
-        objectdatatype& object=objectIndex(id);
-        object.processbody=p.second;
+        result.insert(equation.identifier());
+        objectIndex(equation.identifier()).processbody = equation.expression();
       }
-      assert(result.count(initial_process)>0);
       return result;
     }
 
