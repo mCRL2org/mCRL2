@@ -15,20 +15,22 @@
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
 
 #include <cctype>
+#include <cstddef>
+#include <mutex>
 
 namespace atermpp {
 
-static inline std::mutex& function_symbol_generator_mutex()
-{
-  static std::mutex m_function_symbol_generator_mutex;
-  return m_function_symbol_generator_mutex;
-}
+/// \brief The mutex that the function symbol generators of the whole process share.
+/// \details Defined in function_symbol.cpp, so that there is only one. A static inline function in this header would
+///          give every translation unit its own mutex.
+std::mutex& function_symbol_generator_mutex();
 
-static inline std::size_t& generator_sequence_number()
-{
-  static size_t n=0;
-  return n;
-}
+/// \brief The number of function symbol generators that have been created in the whole process.
+/// \details It makes the prefix of every generator unique. It is defined in function_symbol.cpp, so that there is
+///          only one: with a counter per translation unit, the first generator of every translation unit got the
+///          bare prefix, and generators in different translation units handed out the same names.
+///          It is protected by function_symbol_generator_mutex().
+std::size_t& generator_sequence_number();
 
 
 /// \brief Generates unique function symbols with a given prefix.
@@ -62,8 +64,8 @@ public:
       function_symbol_generator_mutex().lock();
     }
 
-    m_prefix=prefix + (generator_sequence_number()>0?std::to_string(generator_sequence_number()) + "_":"");
-    generator_sequence_number()++;
+    const std::size_t sequence_number = generator_sequence_number()++;
+    m_prefix=prefix + (sequence_number>0?std::to_string(sequence_number) + "_":"");
     m_string_buffer=m_prefix;
 
     // Obtain a reference to the first index possible.

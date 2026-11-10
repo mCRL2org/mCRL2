@@ -8,9 +8,24 @@
 //
 
 #include "mcrl2/atermpp/detail/global_aterm_pool.h"
+#include "mcrl2/atermpp/function_symbol_generator.h"
 
 using namespace atermpp;
 using namespace atermpp::detail;
+
+// Defined here instead of inline in function_symbol_generator.h, so that all translation units and shared libraries
+// use the same mutex and counter. Function-local statics avoid depending on the order of static initialisation.
+std::mutex& atermpp::function_symbol_generator_mutex()
+{
+  static std::mutex mutex;
+  return mutex;
+}
+
+std::size_t& atermpp::generator_sequence_number()
+{
+  static std::size_t sequence_number = 0;
+  return sequence_number;
+}
 
 function_symbol detail::g_as_int(g_term_pool<true>().as_int());
 function_symbol detail::g_as_list(g_term_pool<true>().as_list());
