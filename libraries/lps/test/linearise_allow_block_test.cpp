@@ -216,4 +216,9 @@ BOOST_AUTO_TEST_CASE(test_allow_block_filter)
   BOOST_CHECK(block.keeps(a_));
   BOOST_CHECK(!block.keeps(ab));
   BOOST_CHECK(!block.keeps(bc));
+
+  // On a multi-action only its actions count, not its time.
+  BOOST_CHECK(allow.keeps(multi_action(ab, data::sort_real::real_(1))));
+  BOOST_CHECK(!allow.keeps(multi_action(a_)));
+  BOOST_CHECK(!block.keeps(multi_action(ab, data::sort_real::real_(1))));
 }

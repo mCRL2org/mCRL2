@@ -45,8 +45,8 @@ namespace detail
 /// \param delay The ultimate delay of the other process.
 /// \param sumvars The sum variables of the summand, extended.
 /// \param condition The condition of the summand, extended.
-/// \param time The time of the summand, set if the summand had no time.
-/// \param has_time Whether the summand has a time, set if it gets one.
+/// \param time The time of the summand, data::undefined_real() if it has none (as in multi_action and
+///             deadlock); set if the summand gets a time.
 /// \param id_generator The generator of fresh names.
 /// \param rewrite A function that rewrites a data expression.
 template<typename Rewriter>
@@ -54,7 +54,6 @@ void add_ultimate_delay(const ultimate_delay& delay,
   data::variable_list& sumvars,
   data::data_expression& condition,
   data::data_expression& time,
-  bool& has_time,
   data::set_identifier_generator& id_generator,
   Rewriter rewrite)
 {
@@ -67,7 +66,7 @@ void add_ultimate_delay(const ultimate_delay& delay,
     [&](const data::variable& v) { return data::variable(id_generator(v.name()), v.sort()); });
   sumvars = summand_variables + delay_variables;
 
-  if (!has_time)
+  if (time == data::undefined_real())
   {
     if (delay.constraint() == data::sort_bool::true_())
     {
@@ -76,7 +75,6 @@ void add_ultimate_delay(const ultimate_delay& delay,
     }
     time = delay.time_var();
     sumvars.push_front(delay.time_var());
-    has_time = true;
   }
   else
   {
@@ -108,12 +106,10 @@ stochastic_action_summand left_merge_summand(const stochastic_action_summand& su
   data::variable_list sumvars = summand.summation_variables();
   data::data_expression condition = summand.condition();
   data::data_expression time = summand.multi_action().time();
-  bool has_time = summand.has_time();
-  detail::add_ultimate_delay(delay, sumvars, condition, time, has_time, id_generator, rewrite);
-  const process::action_list& actions = summand.multi_action().actions();
+  detail::add_ultimate_delay(delay, sumvars, condition, time, id_generator, rewrite);
   return stochastic_action_summand(sumvars,
     condition,
-    has_time ? multi_action(actions, time) : multi_action(actions),
+    multi_action(summand.multi_action().actions(), time),
     summand.assignments(),
     summand.distribution());
 }
@@ -134,9 +130,8 @@ deadlock_summand left_merge_summand(const deadlock_summand& summand,
   data::variable_list sumvars = summand.summation_variables();
   data::data_expression condition = summand.condition();
   data::data_expression time = summand.deadlock().time();
-  bool has_time = summand.deadlock().has_time();
-  detail::add_ultimate_delay(delay, sumvars, condition, time, has_time, id_generator, rewrite);
-  return deadlock_summand(sumvars, condition, has_time ? deadlock(time) : deadlock());
+  detail::add_ultimate_delay(delay, sumvars, condition, time, id_generator, rewrite);
+  return deadlock_summand(sumvars, condition, deadlock(time));
 }
 
 /// \brief Adds the summands of the left merge of a first process with a second process to action_summands and
@@ -188,9 +183,7 @@ void left_merge(const stochastic_action_summand_vector& action_summands1,
   const process::action_list termination({termination_action});
   for (const stochastic_action_summand& summand1: action_summands1)
   {
-    const process::action_list& actions = summand1.multi_action().actions();
-    assert(std::is_sorted(actions.begin(), actions.end()));
-    if (actions == termination || !filter.keeps(actions))
+    if (summand1.multi_action().actions() == termination || !filter.keeps(summand1.multi_action()))
     {
       continue;
     }
@@ -220,11 +213,11 @@ inline const data::data_expression& summand_time(const deadlock_summand& summand
 
 } // namespace detail
 
-/// \brief The multi-action of the combination of two multi-actions in the communication merge.
+/// \brief The actions of the combination of two multi-actions in the communication merge.
 /// \details The termination action only combines with the termination action; the result is empty if exactly one
 ///          of the multi-actions is the termination action. Otherwise it is the (sorted) union of both.
-/// \param actions1 A sorted multi-action of the first process.
-/// \param actions2 A sorted multi-action of the second process.
+/// \param actions1 The sorted actions of a multi-action of the first process.
+/// \param actions2 The sorted actions of a multi-action of the second process.
 /// \param termination_action The termination action of the lineariser.
 inline std::optional<process::action_list> communication_merge_actions(const process::action_list& actions1,
   const process::action_list& actions2,
@@ -239,46 +232,55 @@ inline std::optional<process::action_list> communication_merge_actions(const pro
   return terminates1 ? termination : atermpp::merge_lists(actions1, actions2);
 }
 
+/// \brief The combination of two multi-actions in the communication merge.
+/// \details The actions are combined by communication_merge_actions; the result is empty if they do not combine.
+///          The time is that of the first multi-action if it has one, and otherwise that of the second (if any).
+///          That both times are equal if both multi-actions have a time is a condition of the combined summand
+///          (communication_merge_summand).
+/// \param multi_action1 A multi-action of the first process.
+/// \param multi_action2 A multi-action of the second process.
+/// \param termination_action The termination action of the lineariser.
+inline std::optional<multi_action> communication_merge_multi_action(const multi_action& multi_action1,
+  const multi_action& multi_action2,
+  const process::action& termination_action)
+{
+  const std::optional<process::action_list> actions
+    = communication_merge_actions(multi_action1.actions(), multi_action2.actions(), termination_action);
+  if (!actions)
+  {
+    return std::nullopt;
+  }
+  return multi_action(*actions, multi_action1.has_time() ? multi_action1.time() : multi_action2.time());
+}
+
 /// \brief The summand of the communication merge for an action summand of each process, with the given
-///        multi-action (see communication_merge_actions).
+///        multi-action (see communication_merge_multi_action).
 /// \details Both summands happen together: the sum variables, conditions, next states and distributions are
-///          joined. If both summands have a time, the times must be equal, and the result has the time of the
-///          first; otherwise it has the time of the one that has a time, if any. The condition is rewritten and may
-///          be false. The distributions of both summands must be reals (a summand without stochastic operator has
+///          joined. If both summands have a time, the times must be equal. The condition is rewritten and may be
+///          false. The distributions of both summands must be reals (a summand without stochastic operator has
 ///          distribution 1 over no variables).
 /// \param summand1 An action summand of the first process.
 /// \param summand2 An action summand of the second process.
-/// \param actions The multi-action of the result.
+/// \param action The multi-action of the result.
 /// \param rewrite A function that rewrites a data expression.
 template<typename Rewriter>
 stochastic_action_summand communication_merge_summand(const stochastic_action_summand& summand1,
   const stochastic_action_summand& summand2,
-  const process::action_list& actions,
+  const multi_action& action,
   Rewriter rewrite)
 {
-  assert(std::is_sorted(actions.begin(), actions.end()));
   data::data_expression condition = data::lazy::and_(summand1.condition(), summand2.condition());
-  data::data_expression time;
   if (summand1.has_time() && summand2.has_time())
   {
-    time = summand1.multi_action().time();
-    condition = data::lazy::and_(condition, data::equal_to(time, summand2.multi_action().time()));
+    condition
+      = data::lazy::and_(condition, data::equal_to(summand1.multi_action().time(), summand2.multi_action().time()));
   }
-  else if (summand1.has_time())
-  {
-    time = summand1.multi_action().time();
-  }
-  else if (summand2.has_time())
-  {
-    time = summand2.multi_action().time();
-  }
-  const bool has_time = summand1.has_time() || summand2.has_time();
 
   const stochastic_distribution& distribution1 = summand1.distribution();
   const stochastic_distribution& distribution2 = summand2.distribution();
   return stochastic_action_summand(summand1.summation_variables() + summand2.summation_variables(),
     rewrite(condition),
-    has_time ? multi_action(actions, time) : multi_action(actions),
+    action,
     summand1.assignments() + summand2.assignments(),
     stochastic_distribution(distribution1.variables() + distribution2.variables(),
       data::sort_real::optimized_times(distribution1.distribution(), distribution2.distribution())));
@@ -301,21 +303,13 @@ communication_merge_summand(const Summand& summand1, const deadlock_summand& sum
   {
     return deadlock_summand(sumvars, condition, deadlock());
   }
+  const data::data_expression& time1 = detail::summand_time(summand1);
+  const data::data_expression& time2 = detail::summand_time(summand2);
   if (summand1.has_time() && summand2.has_time())
   {
-    return deadlock_summand(sumvars,
-      condition,
-      deadlock(rewrite(data::sort_real::minimum(detail::summand_time(summand1), detail::summand_time(summand2)))));
+    return deadlock_summand(sumvars, condition, deadlock(rewrite(data::sort_real::minimum(time1, time2))));
   }
-  if (summand1.has_time())
-  {
-    return deadlock_summand(sumvars, condition, deadlock(detail::summand_time(summand1)));
-  }
-  if (summand2.has_time())
-  {
-    return deadlock_summand(sumvars, condition, deadlock(detail::summand_time(summand2)));
-  }
-  return deadlock_summand(sumvars, condition, deadlock());
+  return deadlock_summand(sumvars, condition, deadlock(summand1.has_time() ? time1 : time2));
 }
 
 namespace detail
@@ -348,7 +342,7 @@ void add_communication_merge_deadlock_summands(const std::vector<Summand>& summa
 
 /// \brief Adds the summands of the communication merge of two processes to action_summands and deadlock_summands.
 /// \details Every action summand of the first process is combined with every action summand of the second
-///          (communication_merge_actions, communication_merge_summand); filter applies an inline allow or block to
+///          (communication_merge_multi_action, communication_merge_summand); filter applies an inline allow or block to
 ///          the resulting multi-actions, and summands with condition false are left out. If time is not ignored,
 ///          the deadlock summands for the combinations of an action or deadlock summand with a deadlock summand are
 ///          added after the action summands (action summands of the first with deadlock summands of the second,
@@ -383,14 +377,13 @@ void communication_merge(const stochastic_action_summand_vector& action_summands
   {
     for (const stochastic_action_summand& summand2: action_summands2)
     {
-      const std::optional<process::action_list> actions = communication_merge_actions(summand1.multi_action().actions(),
-        summand2.multi_action().actions(),
-        termination_action);
-      if (!actions || !filter.keeps(*actions))
+      const std::optional<multi_action> action
+        = communication_merge_multi_action(summand1.multi_action(), summand2.multi_action(), termination_action);
+      if (!action || !filter.keeps(*action))
       {
         continue;
       }
-      stochastic_action_summand summand = communication_merge_summand(summand1, summand2, *actions, rewrite);
+      stochastic_action_summand summand = communication_merge_summand(summand1, summand2, *action, rewrite);
       if (summand.condition() != data::sort_bool::false_())
       {
         action_summands.push_back(std::move(summand));

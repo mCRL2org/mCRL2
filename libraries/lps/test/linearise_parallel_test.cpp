@@ -261,19 +261,34 @@ BOOST_AUTO_TEST_CASE(test_communication_merge_action_summands)
     data::assignment_list(),
     no_distribution());
 
+  const process::action termination = make_action("Terminate");
   const process::action_list ab({a, b});
-  const stochastic_action_summand result = communication_merge_summand(summand1, summand2, ab, identity);
+  const multi_action action
+    = communication_merge_multi_action(summand1.multi_action(), summand2.multi_action(), termination).value();
+  BOOST_CHECK_EQUAL(action, multi_action(ab, u));
+  const stochastic_action_summand result = communication_merge_summand(summand1, summand2, action, identity);
   BOOST_CHECK_EQUAL(result.summation_variables(), data::variable_list({u}));
   BOOST_CHECK_EQUAL(result.condition(), data::sort_bool::and_(condition1, data::equal_to(u, five)));
-  BOOST_CHECK_EQUAL(result.multi_action(), multi_action(ab, u));
+  BOOST_CHECK_EQUAL(result.multi_action(), action);
   BOOST_CHECK_EQUAL(result.assignments(), summand1.assignments());
   BOOST_CHECK_EQUAL(result.distribution().variables(), data::variable_list({x}));
 
   // With only one timed summand the result has its time and no extra condition.
   const stochastic_action_summand untimed = make_summand({a});
-  const stochastic_action_summand result2 = communication_merge_summand(untimed, summand2, ab, identity);
+  const multi_action action2
+    = communication_merge_multi_action(untimed.multi_action(), summand2.multi_action(), termination).value();
+  BOOST_CHECK_EQUAL(action2, multi_action(ab, five));
+  const stochastic_action_summand result2 = communication_merge_summand(untimed, summand2, action2, identity);
   BOOST_CHECK_EQUAL(result2.condition(), data::sort_bool::true_());
-  BOOST_CHECK_EQUAL(result2.multi_action(), multi_action(ab, five));
+  BOOST_CHECK_EQUAL(result2.multi_action(), action2);
+
+  // Without times the result has no time.
+  const multi_action action3
+    = communication_merge_multi_action(untimed.multi_action(), make_summand({b}).multi_action(), termination).value();
+  BOOST_CHECK(!action3.has_time());
+  BOOST_CHECK(!communication_merge_multi_action(untimed.multi_action(),
+    multi_action(process::action_list({termination})),
+    termination));
 }
 
 // A combination with a deadlock summand can delay until the earliest of both times.

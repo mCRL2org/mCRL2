@@ -17,6 +17,7 @@
 #include "mcrl2/lps/deadlock_summand.h"
 #include "mcrl2/lps/detail/configuration.h"
 #include "mcrl2/lps/linearise_utility.h"
+#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/process/action_name_multiset.h"
 #include "mcrl2/process/process_expression.h"
@@ -228,6 +229,12 @@ public:
       return !encap(m_allowlist, multiaction);
     }
     return true;
+  }
+
+  /// \brief Whether the filter keeps the multi-action; its time does not matter.
+  bool keeps(const multi_action& action) const
+  {
+    return keeps(action.actions());
   }
 };
 
