@@ -4877,262 +4877,6 @@ class specification_basic_type
 
     /**************** parallel composition ******************************/
 
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-    static std::string log_leftmerge_application(const lps_statistics_t& lps_statistics_before,
-        const lps_statistics_t& lps_statistics_result_before,
-        const lps_statistics_t& lps_statistics_result_after,
-        const bool is_allow,
-        const bool is_block,
-        const std::size_t num_allow_block_actions,
-        size_t indent = 0)
-    {
-      std::string indent_str(indent, ' ');
-      std::ostringstream os;
-
-      os << indent_str << "- operator: leftmerge" << std::endl;
-
-      indent += 2;
-      indent_str = std::string(indent, ' ');
-      os << indent_str << "is_allow: " << std::boolalpha << is_allow << std::endl;
-      os << indent_str << "is_block: " << std::boolalpha << is_block << std::endl;
-      if (is_allow)
-      {
-        os << indent_str << "number of allow expressions: " << num_allow_block_actions << std::endl;
-      }
-      if (is_block)
-      {
-        os << indent_str << "number of block expressions: " << num_allow_block_actions << std::endl;
-      }
-
-      os << indent_str << "LPS before:" << std::endl
-         << print(lps_statistics_before, indent + 2)
-         << indent_str << "result before:" << std::endl
-         << print(lps_statistics_result_before, indent + 2)
-         << indent_str << "result after:" << std::endl
-         << print(lps_statistics_result_after, indent + 2);
-
-      return os.str();
-    }
-#endif
-
-    void calculate_left_merge(const stochastic_action_summand_vector& action_summands1,
-      const deadlock_summand_vector& deadlock_summands1,
-      const lps::detail::ultimate_delay& ultimate_delay_condition2,
-      const allow_block_filter& filter,
-      stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands)
-    {
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-      lps_statistics_t lps_statistics_before = get_statistics(action_summands1, deadlock_summands1);
-      lps_statistics_t lps_statistics_result_before = get_statistics(action_summands, deadlock_summands);
-#endif
-
-      lps::left_merge(
-        action_summands1,
-        deadlock_summands1,
-        ultimate_delay_condition2,
-        filter,
-        terminationAction,
-        options.ignore_time,
-        fresh_identifier_generator,
-        [this](const data_expression& t) { return RewriteTerm(t); },
-        action_summands,
-        deadlock_summands);
-
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-      lps_statistics_t lps_statistics_result_after = get_statistics(action_summands, deadlock_summands);
-
-      std::cout << log_leftmerge_application(lps_statistics_before,
-        lps_statistics_result_before,
-        lps_statistics_result_after,
-        filter.is_allow(),
-        filter.is_block(),
-        filter.size(),
-        4);
-#endif
-    }
-
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-    static std::string log_communicationmerge_application(const lps_statistics_t& lps1_statistics_before,
-        const lps_statistics_t& lps2_statistics_before,
-        const lps_statistics_t& lps_result_statistics_before,
-        const lps_statistics_t& lps_statistics_after,
-        const bool is_allow,
-        const bool is_block,
-        const std::size_t num_allow_block_actions,
-        size_t indent = 0)
-    {
-      std::string indent_str(indent, ' ');
-      std::ostringstream os;
-
-      os << indent_str << "- operator: communicationmerge" << std::endl;
-
-      indent += 2;
-      indent_str = std::string(indent, ' ');
-      os << indent_str << "is_allow: " << std::boolalpha << is_allow << std::endl;
-      os << indent_str << "is_block: " << std::boolalpha << is_block << std::endl;
-      if (is_allow)
-      {
-        os << indent_str << "number of allow expressions: " << num_allow_block_actions << std::endl;
-      }
-      if (is_block)
-      {
-        os << indent_str << "number of block expressions: " << num_allow_block_actions << std::endl;
-      }
-
-      os << indent_str << "first LPS before:" << std::endl << print(lps1_statistics_before, indent + 2)
-         << indent_str << "second LPS before:" << std::endl << print(lps2_statistics_before, indent + 2)
-         << indent_str << "result LPS before:" << std::endl << print(lps_result_statistics_before, indent + 2)
-         << indent_str << "result LPS after:" << std::endl << print(lps_statistics_after, indent + 2);
-
-      return os.str();
-    }
-#endif
-
-    void calculate_communication_merge(const stochastic_action_summand_vector& action_summands1,
-      const deadlock_summand_vector& deadlock_summands1,
-      const stochastic_action_summand_vector& action_summands2,
-      const deadlock_summand_vector& deadlock_summands2,
-      const allow_block_filter& filter,
-      stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands)
-    {
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-      lps_statistics_t lps1_statistics_before = get_statistics(action_summands1, deadlock_summands1);
-      lps_statistics_t lps2_statistics_before = get_statistics(action_summands2, deadlock_summands2);
-      lps_statistics_t lps_result_statistics_before = get_statistics(action_summands, deadlock_summands);
-#endif
-
-      lps::communication_merge(
-        action_summands1,
-        deadlock_summands1,
-        action_summands2,
-        deadlock_summands2,
-        filter,
-        terminationAction,
-        options.ignore_time,
-        [this](const data_expression& t) { return RewriteTerm(t); },
-        action_summands,
-        deadlock_summands);
-
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-      lps_statistics_t lps_statistics_after = get_statistics(action_summands, deadlock_summands);
-
-      std::cout << log_communicationmerge_application(lps1_statistics_before,
-        lps2_statistics_before,
-        lps_result_statistics_before,
-        lps_statistics_after,
-        filter.is_allow(),
-        filter.is_block(),
-        filter.size(),
-        4);
-#endif
-    }
-
-    void combine_summand_lists(const stochastic_action_summand_vector& action_summands1,
-      const deadlock_summand_vector& deadlock_summands1,
-      const lps::detail::ultimate_delay& ultimate_delay_condition1,
-      const stochastic_action_summand_vector& action_summands2,
-      const deadlock_summand_vector& deadlock_summands2,
-      const lps::detail::ultimate_delay& ultimate_delay_condition2,
-      const action_name_multiset_list& allowlist, // This is a list of list of identifierstring.
-      const bool is_allow, // If is_allow or is_block is set, perform inline allow/block filtering.
-      const bool is_block,
-      stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands)
-    {
-      assert(action_summands.size()==0);
-      assert(deadlock_summands.size()==0);
-
-      if (is_allow || is_block)
-      {
-        // Inline allow is only supported for ignore_time,
-        // for in other cases generation of delta summands cannot be inlined in any simple way.
-        assert(!options.nodeltaelimination && options.ignore_time);
-        deadlock_summands.emplace_back(variable_list(), sort_bool::true_(), deadlock());
-      }
-
-      const allow_block_filter filter(allowlist, is_allow, is_block, terminationAction);
-
-      /* first we enumerate the summands of t1 */
-      calculate_left_merge(action_summands1,
-        deadlock_summands1,
-        ultimate_delay_condition2,
-        filter,
-        action_summands,
-        deadlock_summands);
-
-      /* second we enumerate the summands of sumlist2 */
-      calculate_left_merge(action_summands2,
-        deadlock_summands2,
-        ultimate_delay_condition1,
-        filter,
-        action_summands,
-        deadlock_summands);
-
-      /* thirdly we enumerate all multi actions*/
-
-      calculate_communication_merge(action_summands1,
-        deadlock_summands1,
-        action_summands2,
-        deadlock_summands2,
-        filter,
-        action_summands,
-        deadlock_summands);
-    }
-
-
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-    static
-    std::string log_parallelcomposition_application_start(
-                                    const lps_statistics_t& lps1_statistics_before,
-                                    const lps_statistics_t& lps2_statistics_before,
-                                    const bool is_allow,
-                                    const bool is_block,
-                                    const std::size_t num_allow_block_actions,
-                                    size_t indent = 0)
-    {
-      std::string indent_str(indent, ' ');
-      std::ostringstream os;
-
-      os << indent_str << "- operator: parallel" << std::endl;
-
-      indent += 2;
-      indent_str = std::string(indent, ' ');
-      os << indent_str << "is_allow: " << std::boolalpha << is_allow << std::endl;
-      os << indent_str << "is_block: " << std::boolalpha << is_block << std::endl;
-      if (is_allow)
-      {
-        os << indent_str << "number of allow expressions: " << num_allow_block_actions << std::endl;
-      }
-      if (is_block)
-      {
-        os << indent_str << "number of block expressions: " << num_allow_block_actions << std::endl;
-      }
-
-      os << indent_str << "first LPS before:" << std::endl << print(lps1_statistics_before, indent+2)
-         << indent_str << "second LPS before:" << std::endl << print(lps2_statistics_before, indent+2);
-
-      os << indent_str << "subcalls:" << std::endl;
-
-      return os.str();
-    }
-
-  static
-  std::string log_parallelcomposition_application_end(
-                                      const lps_statistics_t& lps_statistics_after,
-                                      size_t indent = 0)
-    {
-      indent += 2;
-      std::string indent_str(indent, ' ');
-      std::ostringstream os;
-
-      os << indent_str << "after:" << std::endl << print(lps_statistics_after, indent+2);
-
-      return os.str();
-    }
-#endif
-
     void parallelcomposition(
       const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
@@ -5156,52 +4900,28 @@ class specification_basic_type
       stochastic_distribution& initial_stochastic_distribution,
       lps::detail::ultimate_delay& ultimate_delay_condition)
     {
-      mCRL2log(mcrl2::log::log_level_t::verbose) <<
-            (is_allow ? "- calculating the parallel composition modulo the allow operator: " :
-             is_block ? "- calculating the parallel composition modulo the block operator: " :
-                        "- calculating the parallel composition: ") <<
-            action_summands1.size() <<
-            " action summands + " << deadlock_summands1.size() <<
-            " deadlock summands || " << action_summands2.size() <<
-            " action summands + " << deadlock_summands2.size() << " deadlock summands = ";
-
-      // At this point the parameters of pars1 and pars2 are unique, except for
-      // those that are constant in both processes.
-
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-      lps_statistics_t lps1_statistics_before = get_statistics(action_summands1, deadlock_summands1);
-      lps_statistics_t lps2_statistics_before = get_statistics(action_summands2, deadlock_summands2);
-
-      std::cout << log_parallelcomposition_application_start(lps1_statistics_before, lps2_statistics_before, is_allow, is_block, (is_block?allowlist1.front().size():allowlist1.size()));
-#endif
-
-      variable_list pars3;
-      for (const variable& v: pars2)
-      {
-        if (std::find(pars1.begin(),pars1.end(),v)==pars1.end())
-        {
-          // *i does not occur in pars1.
-          pars3.push_front(v);
-        }
-      }
-
-      pars3=reverse(pars3);
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
-      combine_summand_lists(action_summands1,
+      // Inline allow and block are only supported if time is ignored and deadlock summands are eliminated.
+      assert(!(is_allow || is_block) || (!options.nodeltaelimination && options.ignore_time));
+      lps::parallel_composition(
+        action_summands1,
         deadlock_summands1,
         ultimate_delay_condition1,
         action_summands2,
         deadlock_summands2,
         ultimate_delay_condition2,
-        allowlist1,
-        is_allow,
-        is_block,
+        allow_block_filter(allowlist1, is_allow, is_block, terminationAction),
+        terminationAction,
+        options.ignore_time,
+        fresh_identifier_generator,
+        [this](const data_expression& t) { return RewriteTerm(t); },
         action_summands,
         deadlock_summands);
 
-      mCRL2log(mcrl2::log::log_level_t::verbose) << action_summands.size() << " actions and " << deadlock_summands.size() << " delta summands.\n";
-      pars_result=pars1+pars3;
+      // At this point the parameters of pars1 and pars2 are unique, except for those that are constant in both
+      // processes.
+      pars_result = parallel_composition_parameters(pars1, pars2);
       init_result=init1 + init2;
       initial_stochastic_distribution=stochastic_distribution(
                                           initial_stochastic_distribution1.variables()+initial_stochastic_distribution2.variables(),
@@ -5213,12 +4933,6 @@ class specification_basic_type
           ultimate_delay_condition2,
           fresh_identifier_generator);
       }
-
-#ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
-      lps_statistics_t lps_statistics_after = get_statistics(action_summands, deadlock_summands);
-
-      std::cout << log_parallelcomposition_application_end(lps_statistics_after);
-#endif
     }
 
     /**************** GENERaTE LPEmCRL **********************************/

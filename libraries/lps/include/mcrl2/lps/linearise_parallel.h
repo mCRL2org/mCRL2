@@ -23,14 +23,126 @@
 #include "mcrl2/data/substitutions/maintain_variables_in_rhs.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/deadlock_summand.h"
+#include "mcrl2/lps/detail/configuration.h"
 #include "mcrl2/lps/detail/ultimate_delay.h"
 #include "mcrl2/lps/linearise_allow_block.h"
 #include "mcrl2/lps/linearise_utility.h"
 #include "mcrl2/lps/stochastic_action_summand.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2::lps
 {
+
+inline std::string log_leftmerge_application(const lps_statistics_t& lps_statistics_before,
+  const lps_statistics_t& lps_statistics_result_before,
+  const lps_statistics_t& lps_statistics_result_after,
+  const allow_block_filter& filter,
+  std::size_t indent = 0)
+{
+  std::string indent_str(indent, ' ');
+  std::ostringstream os;
+
+  os << indent_str << "- operator: leftmerge" << std::endl;
+
+  indent += 2;
+  indent_str = std::string(indent, ' ');
+  os << indent_str << "is_allow: " << std::boolalpha << filter.is_allow() << std::endl;
+  os << indent_str << "is_block: " << std::boolalpha << filter.is_block() << std::endl;
+  if (filter.is_allow())
+  {
+    os << indent_str << "number of allow expressions: " << filter.size() << std::endl;
+  }
+  if (filter.is_block())
+  {
+    os << indent_str << "number of block expressions: " << filter.size() << std::endl;
+  }
+
+  os << indent_str << "LPS before:" << std::endl
+     << print(lps_statistics_before, indent + 2) << indent_str << "result before:" << std::endl
+     << print(lps_statistics_result_before, indent + 2) << indent_str << "result after:" << std::endl
+     << print(lps_statistics_result_after, indent + 2);
+
+  return os.str();
+}
+
+inline std::string log_communicationmerge_application(const lps_statistics_t& lps1_statistics_before,
+  const lps_statistics_t& lps2_statistics_before,
+  const lps_statistics_t& lps_result_statistics_before,
+  const lps_statistics_t& lps_statistics_after,
+  const allow_block_filter& filter,
+  std::size_t indent = 0)
+{
+  std::string indent_str(indent, ' ');
+  std::ostringstream os;
+
+  os << indent_str << "- operator: communicationmerge" << std::endl;
+
+  indent += 2;
+  indent_str = std::string(indent, ' ');
+  os << indent_str << "is_allow: " << std::boolalpha << filter.is_allow() << std::endl;
+  os << indent_str << "is_block: " << std::boolalpha << filter.is_block() << std::endl;
+  if (filter.is_allow())
+  {
+    os << indent_str << "number of allow expressions: " << filter.size() << std::endl;
+  }
+  if (filter.is_block())
+  {
+    os << indent_str << "number of block expressions: " << filter.size() << std::endl;
+  }
+
+  os << indent_str << "first LPS before:" << std::endl
+     << print(lps1_statistics_before, indent + 2) << indent_str << "second LPS before:" << std::endl
+     << print(lps2_statistics_before, indent + 2) << indent_str << "result LPS before:" << std::endl
+     << print(lps_result_statistics_before, indent + 2) << indent_str << "result LPS after:" << std::endl
+     << print(lps_statistics_after, indent + 2);
+
+  return os.str();
+}
+
+inline std::string log_parallelcomposition_application_start(const lps_statistics_t& lps1_statistics_before,
+  const lps_statistics_t& lps2_statistics_before,
+  const allow_block_filter& filter,
+  std::size_t indent = 0)
+{
+  std::string indent_str(indent, ' ');
+  std::ostringstream os;
+
+  os << indent_str << "- operator: parallel" << std::endl;
+
+  indent += 2;
+  indent_str = std::string(indent, ' ');
+  os << indent_str << "is_allow: " << std::boolalpha << filter.is_allow() << std::endl;
+  os << indent_str << "is_block: " << std::boolalpha << filter.is_block() << std::endl;
+  if (filter.is_allow())
+  {
+    os << indent_str << "number of allow expressions: " << filter.size() << std::endl;
+  }
+  if (filter.is_block())
+  {
+    os << indent_str << "number of block expressions: " << filter.size() << std::endl;
+  }
+
+  os << indent_str << "first LPS before:" << std::endl
+     << print(lps1_statistics_before, indent + 2) << indent_str << "second LPS before:" << std::endl
+     << print(lps2_statistics_before, indent + 2);
+
+  os << indent_str << "subcalls:" << std::endl;
+
+  return os.str();
+}
+
+inline std::string log_parallelcomposition_application_end(const lps_statistics_t& lps_statistics_after,
+  std::size_t indent = 0)
+{
+  indent += 2;
+  std::string indent_str(indent, ' ');
+  std::ostringstream os;
+
+  os << indent_str << "after:" << std::endl << print(lps_statistics_after, indent + 2);
+
+  return os.str();
+}
 
 namespace detail
 {
@@ -168,6 +280,16 @@ void left_merge(const stochastic_action_summand_vector& action_summands1,
   assert(!ignore_time || delay2.variables().empty());
   assert(ignore_time || (!filter.is_allow() && !filter.is_block()));
 
+  [[maybe_unused]]
+  lps_statistics_t lps_statistics_before;
+  [[maybe_unused]]
+  lps_statistics_t lps_statistics_result_before;
+  if constexpr (detail::EnableLineariseStatistics)
+  {
+    lps_statistics_before = get_statistics(action_summands1, deadlock_summands1);
+    lps_statistics_result_before = get_statistics(action_summands, deadlock_summands);
+  }
+
   if (!ignore_time)
   {
     for (const deadlock_summand& summand1: deadlock_summands1)
@@ -195,6 +317,15 @@ void left_merge(const stochastic_action_summand_vector& action_summands1,
     {
       action_summands.push_back(std::move(summand));
     }
+  }
+
+  if constexpr (detail::EnableLineariseStatistics)
+  {
+    std::cout << log_leftmerge_application(lps_statistics_before,
+      lps_statistics_result_before,
+      get_statistics(action_summands, deadlock_summands),
+      filter,
+      4);
   }
 }
 
@@ -373,6 +504,19 @@ void communication_merge(const stochastic_action_summand_vector& action_summands
 {
   assert(ignore_time || (!filter.is_allow() && !filter.is_block()));
 
+  [[maybe_unused]]
+  lps_statistics_t lps1_statistics_before;
+  [[maybe_unused]]
+  lps_statistics_t lps2_statistics_before;
+  [[maybe_unused]]
+  lps_statistics_t lps_result_statistics_before;
+  if constexpr (detail::EnableLineariseStatistics)
+  {
+    lps1_statistics_before = get_statistics(action_summands1, deadlock_summands1);
+    lps2_statistics_before = get_statistics(action_summands2, deadlock_summands2);
+    lps_result_statistics_before = get_statistics(action_summands, deadlock_summands);
+  }
+
   for (const stochastic_action_summand& summand1: action_summands1)
   {
     for (const stochastic_action_summand& summand2: action_summands2)
@@ -391,25 +535,142 @@ void communication_merge(const stochastic_action_summand_vector& action_summands
     }
   }
 
-  if (ignore_time)
+  if (!ignore_time)
   {
-    return;
+    detail::add_communication_merge_deadlock_summands(action_summands1,
+      deadlock_summands2,
+      rewrite,
+      action_summands,
+      deadlock_summands);
+    detail::add_communication_merge_deadlock_summands(action_summands2,
+      deadlock_summands1,
+      rewrite,
+      action_summands,
+      deadlock_summands);
+    detail::add_communication_merge_deadlock_summands(deadlock_summands1,
+      deadlock_summands2,
+      rewrite,
+      action_summands,
+      deadlock_summands);
   }
-  detail::add_communication_merge_deadlock_summands(action_summands1,
-    deadlock_summands2,
-    rewrite,
-    action_summands,
-    deadlock_summands);
-  detail::add_communication_merge_deadlock_summands(action_summands2,
+
+  if constexpr (detail::EnableLineariseStatistics)
+  {
+    std::cout << log_communicationmerge_application(lps1_statistics_before,
+      lps2_statistics_before,
+      lps_result_statistics_before,
+      get_statistics(action_summands, deadlock_summands),
+      filter,
+      4);
+  }
+}
+
+/// \brief The process parameters of the parallel composition of two processes: those of the first, followed by
+///        those of the second that are not parameters of the first.
+/// \param parameters1 The process parameters of the first process.
+/// \param parameters2 The process parameters of the second process.
+inline data::variable_list parallel_composition_parameters(const data::variable_list& parameters1,
+  const data::variable_list& parameters2)
+{
+  std::vector<data::variable> result(parameters1.begin(), parameters1.end());
+  std::copy_if(parameters2.begin(),
+    parameters2.end(),
+    std::back_inserter(result),
+    [&](const data::variable& v) { return !utilities::detail::contains(parameters1, v); });
+  return data::variable_list(result.begin(), result.end());
+}
+
+/// \brief Adds the summands of the parallel composition of two processes to action_summands and deadlock_summands:
+///        the left merge of the first with the second, the left merge of the second with the first, and their
+///        communication merge, in this order.
+/// \details With an inline allow or block (only used if time is ignored) a deadlock summand true -> delta is added
+///          first, which stands for the summands that the filter leaves out.
+/// \param action_summands1 The action summands of the first process.
+/// \param deadlock_summands1 The deadlock summands of the first process.
+/// \param delay1 The ultimate delay of the first process.
+/// \param action_summands2 The action summands of the second process.
+/// \param deadlock_summands2 The deadlock summands of the second process.
+/// \param delay2 The ultimate delay of the second process.
+/// \param filter The inline allow or block, if any.
+/// \param termination_action The termination action of the lineariser.
+/// \param ignore_time Whether time is ignored.
+/// \param id_generator The generator of fresh names, which must contain the identifiers of both processes.
+/// \param rewrite A function that rewrites a data expression.
+/// \param action_summands The action summands to which the result is added.
+/// \param deadlock_summands The deadlock summands to which the result is added.
+template<typename Rewriter>
+void parallel_composition(const stochastic_action_summand_vector& action_summands1,
+  const deadlock_summand_vector& deadlock_summands1,
+  const detail::ultimate_delay& delay1,
+  const stochastic_action_summand_vector& action_summands2,
+  const deadlock_summand_vector& deadlock_summands2,
+  const detail::ultimate_delay& delay2,
+  const allow_block_filter& filter,
+  const process::action& termination_action,
+  bool ignore_time,
+  data::set_identifier_generator& id_generator,
+  Rewriter rewrite,
+  stochastic_action_summand_vector& action_summands,
+  deadlock_summand_vector& deadlock_summands)
+{
+  mCRL2log(mcrl2::log::log_level_t::verbose)
+    << (filter.is_allow()    ? "- calculating the parallel composition modulo the allow operator: "
+         : filter.is_block() ? "- calculating the parallel composition modulo the block operator: "
+                             : "- calculating the parallel composition: ")
+    << action_summands1.size() << " action summands + " << deadlock_summands1.size() << " deadlock summands || "
+    << action_summands2.size() << " action summands + " << deadlock_summands2.size() << " deadlock summands = ";
+  if constexpr (detail::EnableLineariseStatistics)
+  {
+    std::cout << log_parallelcomposition_application_start(get_statistics(action_summands1, deadlock_summands1),
+      get_statistics(action_summands2, deadlock_summands2),
+      filter);
+  }
+
+  if (filter.is_allow() || filter.is_block())
+  {
+    // Inline allow and block are only supported if time is ignored, as otherwise the deadlock summands cannot be
+    // generated in a simple way.
+    assert(ignore_time);
+    deadlock_summands.emplace_back(data::variable_list(), data::sort_bool::true_(), deadlock());
+  }
+
+  left_merge(action_summands1,
     deadlock_summands1,
+    delay2,
+    filter,
+    termination_action,
+    ignore_time,
+    id_generator,
     rewrite,
     action_summands,
     deadlock_summands);
-  detail::add_communication_merge_deadlock_summands(deadlock_summands1,
+  left_merge(action_summands2,
     deadlock_summands2,
+    delay1,
+    filter,
+    termination_action,
+    ignore_time,
+    id_generator,
     rewrite,
     action_summands,
     deadlock_summands);
+  communication_merge(action_summands1,
+    deadlock_summands1,
+    action_summands2,
+    deadlock_summands2,
+    filter,
+    termination_action,
+    ignore_time,
+    rewrite,
+    action_summands,
+    deadlock_summands);
+
+  mCRL2log(mcrl2::log::log_level_t::verbose)
+    << action_summands.size() << " actions and " << deadlock_summands.size() << " delta summands.\n";
+  if constexpr (detail::EnableLineariseStatistics)
+  {
+    std::cout << log_parallelcomposition_application_end(get_statistics(action_summands, deadlock_summands));
+  }
 }
 
 } // namespace mcrl2::lps
