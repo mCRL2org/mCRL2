@@ -4952,92 +4952,66 @@ class specification_basic_type
 #endif
     }
 
+    // The action summands of the communication merge: every action summand of one process combined with every
+    // action summand of the other, where the termination action only combines with the termination action.
     void calculate_communication_merge_action_summands(const stochastic_action_summand_vector& action_summands1,
       const stochastic_action_summand_vector& action_summands2,
       const allow_block_filter& filter,
       stochastic_action_summand_vector& action_summands)
     {
-      // First combine the action summands.
+      const action_list termination({terminationAction});
       for (const stochastic_action_summand& summand1: action_summands1)
       {
-        const variable_list& sumvars1=summand1.summation_variables();
-        const action_list multiaction1=summand1.multi_action().actions();
-        const data_expression& actiontime1=summand1.multi_action().time();
-        const data_expression& condition1=summand1.condition();
-        const assignment_list& nextstate1=summand1.assignments();
-        const stochastic_distribution& distribution1=summand1.distribution();
-
+        const action_list& multiaction1 = summand1.multi_action().actions();
+        const bool terminates1 = multiaction1 == termination;
         for (const stochastic_action_summand& summand2: action_summands2)
         {
-          const variable_list& sumvars2=summand2.summation_variables();
-          const action_list multiaction2=summand2.multi_action().actions();
-          const data_expression& actiontime2=summand2.multi_action().time();
-          const data_expression& condition2=summand2.condition();
-          const assignment_list& nextstate2=summand2.assignments();
-          const stochastic_distribution& distribution2=summand2.distribution();
-
-          if ((multiaction1 == action_list({ terminationAction })) == (multiaction2 == action_list({ terminationAction })))
+          const action_list& multiaction2 = summand2.multi_action().actions();
+          if (terminates1 != (multiaction2 == termination))
           {
-            action_list multiaction3;
-            if ((multiaction1 == action_list({ terminationAction })) && (multiaction2 == action_list({ terminationAction })))
-            {
-              multiaction3.push_front(terminationAction);
-            }
-            else
-            {
-              multiaction3=linMergeMultiActionList(multiaction1,multiaction2);
-            }
-
-            if (!filter.keeps(multiaction3))
-            {
-              continue;
-            }
-
-            const variable_list allsums=sumvars1+sumvars2;
-            data_expression condition3= lazy::and_(condition1,condition2);
-            data_expression action_time3;
-            bool has_time3=summand1.has_time()||summand2.has_time();
-
-            if (!summand1.has_time())
-            {
-              if (summand2.has_time())
-              {
-                /* summand 2 has time*/
-                action_time3=actiontime2;
-              }
-            }
-            else
-            {
-              /* summand 1 has time */
-              if (!summand2.has_time())
-              {
-                action_time3=actiontime1;
-              }
-              else
-              {
-                /* both summand 1 and 2 have time */
-                action_time3=actiontime1;
-                condition3=lazy::and_(
-                             condition3,
-                             equal_to(actiontime1,actiontime2));
-              }
-            }
-
-            const assignment_list nextstate3=nextstate1+nextstate2;
-            const stochastic_distribution distribution3(distribution1.variables() + distribution2.variables(),
-              sort_real::optimized_times(distribution1.distribution(), distribution2.distribution()));
-
-            condition3=RewriteTerm(condition3);
-            if (condition3!=sort_bool::false_())
-            {
-              assert(std::is_sorted(multiaction3.begin(), multiaction3.end()));
-              action_summands.emplace_back(allsums,
-                  condition3,
-                  has_time3 ? multi_action(multiaction3, action_time3) : multi_action(multiaction3),
-                  nextstate3,
-                  distribution3);
-            }
+            continue;
           }
+          const action_list multiaction
+            = terminates1 ? termination : linMergeMultiActionList(multiaction1, multiaction2);
+          if (!filter.keeps(multiaction))
+          {
+            continue;
+          }
+
+          // If both summands have a time, they must happen at the same time.
+          data_expression condition = lazy::and_(summand1.condition(), summand2.condition());
+          data_expression time;
+          if (summand1.has_time() && summand2.has_time())
+          {
+            time = summand1.multi_action().time();
+            condition = lazy::and_(condition, equal_to(time, summand2.multi_action().time()));
+          }
+          else if (summand1.has_time())
+          {
+            time = summand1.multi_action().time();
+          }
+          else if (summand2.has_time())
+          {
+            time = summand2.multi_action().time();
+          }
+
+          const bool has_time = summand1.has_time() || summand2.has_time();
+
+          condition = RewriteTerm(condition);
+          if (condition == sort_bool::false_())
+          {
+            continue;
+          }
+
+          assert(std::is_sorted(multiaction.begin(), multiaction.end()));
+          const stochastic_distribution& distribution1 = summand1.distribution();
+          const stochastic_distribution& distribution2 = summand2.distribution();
+          action_summands.emplace_back(summand1.summation_variables() + summand2.summation_variables(),
+            condition,
+            has_time ? multi_action(multiaction, time) : multi_action(multiaction),
+            summand1.assignments() + summand2.assignments(),
+            stochastic_distribution(distribution1.variables() + distribution2.variables(),
+              sort_real::optimized_times(distribution1.distribution(), distribution2.distribution())));
         }
       }
     }
