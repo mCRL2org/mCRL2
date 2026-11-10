@@ -5042,120 +5042,58 @@ class specification_basic_type
       }
     }
 
-    void calculate_communication_merge_action_deadlock_summands(
-          const stochastic_action_summand_vector& action_summands1,
-          const deadlock_summand_vector& deadlock_summands1,
-          const stochastic_action_summand_vector& action_summands,
-          deadlock_summand_vector& deadlock_summands)
+    static const data_expression& summand_time(const stochastic_action_summand& summand)
     {
-      for (const stochastic_action_summand& summand1: action_summands1)
-      {
-        const variable_list& sumvars1=summand1.summation_variables();
-        const data_expression& actiontime1=summand1.multi_action().time();
-        const data_expression& condition1=summand1.condition();
-
-        for (const deadlock_summand& summand2: deadlock_summands1)
-        {
-          const variable_list& sumvars2=summand2.summation_variables();
-          const data_expression& actiontime2=summand2.deadlock().time();
-          const data_expression& condition2=summand2.condition();
-
-          const variable_list allsums=sumvars1+sumvars2;
-          const data_expression condition3= lazy::and_(condition1,condition2);
-          data_expression action_time3;
-          bool has_time3=summand1.has_time()||summand2.has_time();
-
-          if (!summand1.has_time())
-          {
-            if (summand2.has_time())
-            {
-              /* summand 2 has time*/
-              action_time3=actiontime2;
-            }
-          }
-          else
-          {
-            /* summand 1 has time */
-            if (!summand2.has_time())
-            {
-              action_time3=actiontime1;
-            }
-            else
-            {
-              /* both summand 1 and 2 have time */
-              action_time3=RewriteTerm(sort_real::minimum(actiontime1,actiontime2));
-            }
-          }
-
-          if (condition3!=sort_bool::false_() && !options.ignore_time)
-          {
-            insert_timed_delta_summand(action_summands,
-                                       deadlock_summands,
-                                       deadlock_summand(allsums,
-                                                        condition3,
-                                                        has_time3?deadlock(action_time3):deadlock()),
-                                       options.ignore_time);
-          }
-
-        }
-      }
+      return summand.multi_action().time();
     }
 
-    void calculate_communication_merge_deadlock_summands(
-          const deadlock_summand_vector& deadlock_summands1,
-          const deadlock_summand_vector& deadlock_summands2,
-          const stochastic_action_summand_vector& action_summands,
-          deadlock_summand_vector& deadlock_summands)
+    static const data_expression& summand_time(const deadlock_summand& summand)
     {
-      for (const deadlock_summand& summand1: deadlock_summands1)
-      {
-        const variable_list& sumvars1=summand1.summation_variables();
-        const data_expression& actiontime1=summand1.deadlock().time();
-        const data_expression& condition1=summand1.condition();
+      return summand.deadlock().time();
+    }
 
+    // The deadlock of the combination of two summands in the communication merge: the earliest of their times.
+    template<typename Summand1, typename Summand2>
+    deadlock communication_merge_deadlock(const Summand1& summand1, const Summand2& summand2)
+    {
+      if (summand1.has_time() && summand2.has_time())
+      {
+        return deadlock(RewriteTerm(sort_real::minimum(summand_time(summand1), summand_time(summand2))));
+      }
+      if (summand1.has_time())
+      {
+        return deadlock(summand_time(summand1));
+      }
+      if (summand2.has_time())
+      {
+        return deadlock(summand_time(summand2));
+      }
+      return deadlock();
+    }
+
+    // The deadlock summands of the communication merge of the action or deadlock summands summands1 of one process
+    // with the deadlock summands deadlock_summands2 of the other. Only used if time is not ignored.
+    template<typename Summand>
+    void calculate_communication_merge_deadlock_summands(const std::vector<Summand>& summands1,
+      const deadlock_summand_vector& deadlock_summands2,
+      const stochastic_action_summand_vector& action_summands,
+      deadlock_summand_vector& deadlock_summands)
+    {
+      assert(!options.ignore_time);
+      for (const Summand& summand1: summands1)
+      {
         for (const deadlock_summand& summand2: deadlock_summands2)
         {
-          const variable_list& sumvars2=summand2.summation_variables();
-          const data_expression& actiontime2=summand2.deadlock().time();
-          const data_expression& condition2=summand2.condition();
-
-          const variable_list allsums=sumvars1+sumvars2;
-          const data_expression condition3= lazy::and_(condition1,condition2);
-          data_expression action_time3;
-          bool has_time3=summand1.has_time()||summand2.has_time();
-
-          if (!summand1.has_time())
-          {
-            if (summand2.has_time())
-            {
-              /* summand 2 has time*/
-              action_time3=actiontime2;
-            }
-          }
-          else
-          {
-            /* summand 1 has time */
-            if (!summand2.has_time())
-            {
-              action_time3=actiontime1;
-            }
-            else
-            {
-              /* both summand 1 and 2 have time */
-              action_time3=RewriteTerm(sort_real::minimum(actiontime1,actiontime2));
-            }
-          }
-
-          if (condition3!=sort_bool::false_() && !options.ignore_time)
+          const data_expression condition = lazy::and_(summand1.condition(), summand2.condition());
+          if (condition != sort_bool::false_())
           {
             insert_timed_delta_summand(action_summands,
-                                       deadlock_summands,
-                                       deadlock_summand(allsums,
-                                                        condition3,
-                                                        has_time3?deadlock(action_time3):deadlock()),
-                                       options.ignore_time);
+              deadlock_summands,
+              deadlock_summand(summand1.summation_variables() + summand2.summation_variables(),
+                condition,
+                communication_merge_deadlock(summand1, summand2)),
+              options.ignore_time);
           }
-
         }
       }
     }
@@ -5212,9 +5150,22 @@ class specification_basic_type
 #endif
 
       calculate_communication_merge_action_summands(action_summands1, action_summands2, filter, action_summands);
-      calculate_communication_merge_action_deadlock_summands(action_summands1, deadlock_summands2, action_summands, deadlock_summands);
-      calculate_communication_merge_action_deadlock_summands(action_summands2, deadlock_summands1, action_summands, deadlock_summands);
-      calculate_communication_merge_deadlock_summands(deadlock_summands1, deadlock_summands2, action_summands, deadlock_summands);
+      // Without time the communication merge leaves out the deadlock summands, as the left merge does.
+      if (!options.ignore_time)
+      {
+        calculate_communication_merge_deadlock_summands(action_summands1,
+          deadlock_summands2,
+          action_summands,
+          deadlock_summands);
+        calculate_communication_merge_deadlock_summands(action_summands2,
+          deadlock_summands1,
+          action_summands,
+          deadlock_summands);
+        calculate_communication_merge_deadlock_summands(deadlock_summands1,
+          deadlock_summands2,
+          action_summands,
+          deadlock_summands);
+      }
 
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
       lps_statistics_t lps_statistics_after = get_statistics(action_summands, deadlock_summands);
