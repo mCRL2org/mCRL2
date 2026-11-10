@@ -4978,40 +4978,32 @@ class specification_basic_type
       }
     }
 
-    void calculate_left_merge_deadlock(
-      const lps::detail::ultimate_delay& ultimate_delay_condition,
+    // Without time the left merge leaves out the deadlock summands. This includes inline allow and block, which are
+    // only used without time (asserted in combine_summand_lists).
+    void calculate_left_merge_deadlock(const lps::detail::ultimate_delay& ultimate_delay_condition,
       const deadlock_summand_vector& deadlock_summands1,
-      const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
-      const bool is_block,
       const stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
-      bool inline_allow = is_allow || is_block;
-
-      if (!inline_allow)
+      if (options.ignore_time)
       {
-        for (const deadlock_summand& summand1: deadlock_summands1)
-        {
-          variable_list sumvars1 = summand1.summation_variables();
-          data_expression condition1 = summand1.condition();
-          data_expression actiontime1 = summand1.deadlock().time();
-          bool has_time = summand1.deadlock().has_time();
-          if (!options.ignore_time)
-          {
-            add_ultimate_delay_to_left_merge_summand(ultimate_delay_condition,
-              sumvars1,
-              condition1,
-              actiontime1,
-              has_time);
-          }
+        return;
+      }
 
-          if (condition1!=sort_bool::false_() && !options.ignore_time)
-          {
-            insert_timed_delta_summand(action_summands,
-                                       deadlock_summands,
-                                       deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()),
-                                       options.ignore_time);
-          }
+      for (const deadlock_summand& summand1: deadlock_summands1)
+      {
+        variable_list sumvars1 = summand1.summation_variables();
+        data_expression condition1 = summand1.condition();
+        data_expression time1 = summand1.deadlock().time();
+        bool has_time = summand1.deadlock().has_time();
+        add_ultimate_delay_to_left_merge_summand(ultimate_delay_condition, sumvars1, condition1, time1, has_time);
+
+        if (condition1 != sort_bool::false_())
+        {
+          insert_timed_delta_summand(action_summands,
+            deadlock_summands,
+            deadlock_summand(sumvars1, condition1, has_time ? deadlock(time1) : deadlock()),
+            options.ignore_time);
         }
       }
     }
@@ -5071,8 +5063,7 @@ class specification_basic_type
       lps_statistics_t lps_statistics_result_before = get_statistics(action_summands, deadlock_summands);
 #endif
 
-      calculate_left_merge_deadlock(ultimate_delay_condition2, deadlock_summands1,
-                                    is_allow, is_block, action_summands, deadlock_summands);
+      calculate_left_merge_deadlock(ultimate_delay_condition2, deadlock_summands1, action_summands, deadlock_summands);
       calculate_left_merge_action(ultimate_delay_condition2, action_summands1,
                                     allowlist, is_allow, is_block, action_summands);
 
