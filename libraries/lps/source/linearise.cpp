@@ -4876,6 +4876,53 @@ class specification_basic_type
 
     /**************** parallel composition ******************************/
 
+    /// \brief Restricts a summand of one process in the left merge to the times at which the other process can
+    ///        still wait, given by its ultimate delay.
+    /// \details The variables of the ultimate delay become sum variables, renamed away from the sum variables of
+    ///          the summand. A timed summand gets the ultimate delay at its time as an extra condition. An
+    ///          untimed summand gets the time variable of the ultimate delay as a new sum variable and as its time,
+    ///          and the ultimate delay as an extra condition, unless the ultimate delay is true. The resulting
+    ///          condition is rewritten.
+    /// \param ultimate_delay_condition The ultimate delay of the other process.
+    /// \param sumvars The sum variables of the summand, extended.
+    /// \param condition The condition of the summand, extended.
+    /// \param time The time of the summand, set if the summand had no time.
+    /// \param has_time Whether the summand has a time, set if it gets one.
+    void add_ultimate_delay_to_left_merge_summand(const lps::detail::ultimate_delay& ultimate_delay_condition,
+      variable_list& sumvars,
+      data_expression& condition,
+      data_expression& time,
+      bool& has_time)
+    {
+      maintain_variables_in_rhs<mutable_map_substitution<>> sigma;
+      const variable_list delay_variables
+        = rename_variables_away(ultimate_delay_condition.variables(), contained_in(sumvars), sigma);
+      sumvars = sumvars + delay_variables;
+
+      if (!has_time)
+      {
+        if (ultimate_delay_condition.constraint() != sort_bool::true_())
+        {
+          time = ultimate_delay_condition.time_var();
+          sumvars.push_front(ultimate_delay_condition.time_var());
+          make_optimized_and(condition,
+            condition,
+            replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma));
+          has_time = true;
+        }
+      }
+      else
+      {
+        // Substitute the time of the summand for the time variable of the ultimate delay.
+        sigma[ultimate_delay_condition.time_var()] = time;
+        make_optimized_and(condition,
+          condition,
+          replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma));
+      }
+
+      condition = RewriteTerm(condition);
+    }
+
     void calculate_left_merge_action(
       const lps::detail::ultimate_delay& ultimate_delay_condition,
       const stochastic_action_summand_vector& action_summands1,
@@ -4891,65 +4938,42 @@ class specification_basic_type
       }
       for (const stochastic_action_summand& summand1: action_summands1)
       {
-        variable_list sumvars=ultimate_delay_condition.variables();
-        maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-        sumvars = rename_variables_away(sumvars, contained_in(summand1.summation_variables()), sigma);
-
-        variable_list sumvars1 = summand1.summation_variables() + sumvars;
         const action_list& multiaction1 = summand1.multi_action().actions();
         assert(std::is_sorted(multiaction1.begin(), multiaction1.end()));
-        data_expression actiontime1 = summand1.multi_action().time();
-        data_expression condition1 = summand1.condition();
-        const assignment_list& nextstate1 = summand1.assignments();
-        const stochastic_distribution& distribution1=summand1.distribution();
-        bool has_time = summand1.has_time();
 
-        if (multiaction1 != action_list({ terminationAction }))
+        if (multiaction1 == action_list({terminationAction}))
         {
-          if (is_allow && !allow_(allow_cache,multiaction1,terminationAction))
-          {
-            continue;
-          }
-          if (is_block && encap(allowlist,multiaction1))
-          {
-            continue;
-          }
+          continue;
+        }
+        if (is_allow && !allow_(allow_cache, multiaction1, terminationAction))
+        {
+          continue;
+        }
+        if (is_block && encap(allowlist, multiaction1))
+        {
+          continue;
+        }
 
-          if (!options.ignore_time)
-          {
-            if (!has_time)
-            {
-              if (ultimate_delay_condition.constraint()!=sort_bool::true_())
-              {
-                actiontime1=ultimate_delay_condition.time_var();
-                sumvars1.push_front(ultimate_delay_condition.time_var());
-                condition1 = lazy::and_(condition1,
-                  replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma));
-                has_time=true;
-              }
-            }
-            else
-            {
-              /* Summand1 has time. Substitute the time expression for
-                 timevar in ultimate_delay_condition, and extend the condition */
-              const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
-              sigma[ultimate_delay_condition.time_var()]=actiontime1;
-              const data_expression intermediateultimatedelaycondition
-                = replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma);
-              make_optimized_and(condition1, condition1, intermediateultimatedelaycondition);
-            }
+        variable_list sumvars1 = summand1.summation_variables();
+        data_expression condition1 = summand1.condition();
+        data_expression actiontime1 = summand1.multi_action().time();
+        bool has_time = summand1.has_time();
+        if (!options.ignore_time)
+        {
+          add_ultimate_delay_to_left_merge_summand(ultimate_delay_condition,
+            sumvars1,
+            condition1,
+            actiontime1,
+            has_time);
+        }
 
-            condition1=RewriteTerm(condition1);
-          }
-
-          if (condition1!=sort_bool::false_())
-          {
-            action_summands.emplace_back(sumvars1,
-                condition1,
-                has_time ? multi_action(multiaction1, actiontime1) : multi_action(multiaction1),
-                nextstate1,
-                distribution1);
-          }
+        if (condition1 != sort_bool::false_())
+        {
+          action_summands.emplace_back(sumvars1,
+            condition1,
+            has_time ? multi_action(multiaction1, actiontime1) : multi_action(multiaction1),
+            summand1.assignments(),
+            summand1.distribution());
         }
       }
     }
@@ -4968,41 +4992,17 @@ class specification_basic_type
       {
         for (const deadlock_summand& summand1: deadlock_summands1)
         {
-          variable_list sumvars=ultimate_delay_condition.variables();
-          maintain_variables_in_rhs< mutable_map_substitution<> > sigma;
-          sumvars = rename_variables_away(sumvars, contained_in(summand1.summation_variables()), sigma);
-
-          variable_list sumvars1=summand1.summation_variables() + sumvars;
-          data_expression actiontime1=summand1.deadlock().time();
-          data_expression condition1=summand1.condition();
-          bool has_time=summand1.deadlock().has_time();
-
+          variable_list sumvars1 = summand1.summation_variables();
+          data_expression condition1 = summand1.condition();
+          data_expression actiontime1 = summand1.deadlock().time();
+          bool has_time = summand1.deadlock().has_time();
           if (!options.ignore_time)
           {
-            if (!has_time)
-            {
-              if (ultimate_delay_condition.constraint()!=sort_bool::true_())
-              {
-                actiontime1=ultimate_delay_condition.time_var();
-                sumvars1.push_front(ultimate_delay_condition.time_var());
-                make_optimized_and(condition1,
-                  condition1,
-                  replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma));
-                has_time=true;
-              }
-            }
-            else
-            {
-              /* Summand1 has time. Substitute the time expression for
-                 timevar in ultimate_delay_condition, and extend the condition */
-              const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
-              sigma[ultimate_delay_condition.time_var()]=actiontime1;
-              const data_expression intermediateultimatedelaycondition
-                = replace_variables_capture_avoiding(ultimate_delay_condition.constraint(), sigma);
-              make_optimized_and(condition1, condition1, intermediateultimatedelaycondition);
-            }
-
-            condition1=RewriteTerm(condition1);
+            add_ultimate_delay_to_left_merge_summand(ultimate_delay_condition,
+              sumvars1,
+              condition1,
+              actiontime1,
+              has_time);
           }
 
           if (condition1!=sort_bool::false_() && !options.ignore_time)
@@ -5064,6 +5064,8 @@ class specification_basic_type
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
+      // Without time the ultimate delay is never computed, so it has no variables to add to the summands.
+      assert(!options.ignore_time || ultimate_delay_condition2.variables().empty());
 #ifdef MCRL2_LOG_LPS_LINEARISE_STATISTICS
       lps_statistics_t lps_statistics_before = get_statistics(action_summands1, deadlock_summands1);
       lps_statistics_t lps_statistics_result_before = get_statistics(action_summands, deadlock_summands);
