@@ -12,7 +12,10 @@
 #ifndef MCRL2_PROCESS_REMOVE_EQUATIONS_H
 #define MCRL2_PROCESS_REMOVE_EQUATIONS_H
 
+#include <algorithm>
+
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/process/find.h"
 #include "mcrl2/process/replace.h"
 
 namespace mcrl2::process
@@ -38,7 +41,7 @@ struct duplicate_equation_removal
   using group = std::set<iterator>;
   using substitution = data::mutable_map_substitution<std::map<process_identifier, process_identifier>>;
 
-  process_specification& procspec;
+  const std::vector<process_equation>& equations;
   data::set_identifier_generator generator;
   std::vector<group> groups;
 
@@ -77,13 +80,14 @@ struct duplicate_equation_removal
     return out.str();
   }
 
-  duplicate_equation_removal(process_specification& procspec_)
-    : procspec(procspec_)
+  // identifiers contains the identifiers that the generated process identifiers must differ from
+  duplicate_equation_removal(const std::vector<process_equation>& equations_,
+    const std::set<core::identifier_string>& identifiers)
+    : equations(equations_)
   {
-    generator.add_identifiers(process::find_identifiers(procspec));
-    generator.add_identifiers(data::function_and_mapping_identifiers(procspec.data()));
+    generator.add_identifiers(identifiers);
     std::map<data::variable_list, group> s;
-    for (auto i = procspec.equations().begin(); i != procspec.equations().end(); ++i)
+    for (auto i = equations.begin(); i != equations.end(); ++i)
     {
       s[i->formal_parameters()].insert(i);
     }
@@ -142,7 +146,10 @@ struct duplicate_equation_removal
     return result;
   }
 
-  void run()
+  // Returns the remaining equations, in the order of equations, and puts the identifiers of the removed equations
+  // in sigma, mapped to those of the remaining ones. Of every group the equation of initial_process is kept if it
+  // is in the group, otherwise the one with the lowest index in equations.
+  std::vector<process_equation> run(const process_identifier& initial_process, substitution& sigma)
   {
     // Compute groups of equal equations
     for (;;)
@@ -154,21 +161,24 @@ struct duplicate_equation_removal
       mCRL2log(log::log_level_t::debug) << "==========================================================\n" << print_groups() << std::endl;
     }
 
-    // Choose one equation per group (the one with the lowest index in equations),
-    // and prepare a substitution sigma that removes the others
-    std::vector<process_equation> new_equations;
-    substitution sigma;
+    // Choose one equation per group, and prepare a substitution sigma that removes the others
+    std::vector<iterator> kept;
     for (auto& i : groups)
     {
       // optimization for the case of only one equation in a group
       if (i.size() == 1)
       {
-        new_equations.push_back(**(i.begin()));
+        kept.push_back(*i.begin());
         continue;
       }
 
-      group::const_iterator j = std::min_element(i.begin(), i.end());
-      new_equations.push_back(**j);
+      group::const_iterator j
+        = std::find_if(i.begin(), i.end(), [&](const iterator& k) { return k->identifier() == initial_process; });
+      if (j == i.end())
+      {
+        j = std::min_element(i.begin(), i.end());
+      }
+      kept.push_back(*j);
       for (group::const_iterator k = i.begin(); k != i.end(); ++k)
       {
         if (k != j)
@@ -178,24 +188,46 @@ struct duplicate_equation_removal
       }
     }
 
-    // Apply sigma to the new equations and the initial state
-    for (auto& new_equation : new_equations)
+    // The order of the groups depends on the addresses of terms, so keep the order of equations
+    std::sort(kept.begin(), kept.end());
+
+    // Apply sigma to the remaining equations
+    std::vector<process_equation> result;
+    for (const iterator& k: kept)
     {
-      new_equation = process_equation(new_equation.identifier(), new_equation.formal_parameters(), replace_process_identifiers(new_equation.expression(), sigma));
+      result.emplace_back(k->identifier(), k->formal_parameters(), replace_process_identifiers(k->expression(), sigma));
     }
-    procspec.init() = replace_process_identifiers(procspec.init(), sigma);
-    procspec.equations() = new_equations;
+    return result;
   }
 };
 
 } // namespace detail
 
+/// \brief Removes duplicate equations, using a bisimulation algorithm
+/// \param equations Process equations with distinct identifiers
+/// \param initial_process A process identifier; its equation (if any) is kept
+/// \return The remaining equations, in the order of equations, with the identifiers of the removed equations
+///         replaced by those of the remaining ones
+inline std::vector<process_equation> remove_duplicate_equations(const std::vector<process_equation>& equations,
+  const process_identifier& initial_process)
+{
+  detail::duplicate_equation_removal f(equations, process::find_identifiers(equations));
+  detail::duplicate_equation_removal::substitution sigma;
+  return f.run(initial_process, sigma);
+}
+
 inline
 /// \brief Removes duplicate equations from a process specification, using a bisimulation algorithm
 void remove_duplicate_equations(process_specification& procspec)
 {
-  detail::duplicate_equation_removal f(procspec);
-  f.run();
+  std::set<core::identifier_string> identifiers = process::find_identifiers(procspec);
+  const std::set<core::identifier_string> data_identifiers = data::function_and_mapping_identifiers(procspec.data());
+  identifiers.insert(data_identifiers.begin(), data_identifiers.end());
+  detail::duplicate_equation_removal f(procspec.equations(), identifiers);
+  detail::duplicate_equation_removal::substitution sigma;
+  std::vector<process_equation> new_equations = f.run(process_identifier(), sigma);
+  procspec.init() = replace_process_identifiers(procspec.init(), sigma);
+  procspec.equations() = new_equations;
 }
 
 } // namespace mcrl2::process
