@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(test_initial_process_is_kept)
   check(removed_duplicates(spec, "R"), {"P = a . R", "R = b . R"});
 }
 
-// Equations that are equal if they are identified are duplicates (this is where the algorithm differs from
-// merge_identical_equations); equations with different parameters are not.
+// Equations that are equal if they are identified are duplicates, also if their right hand sides are not
+// syntactically equal; equations with different parameters are not.
 BOOST_AUTO_TEST_CASE(test_bisimulation)
 {
   check(removed_duplicates("act a;\n"

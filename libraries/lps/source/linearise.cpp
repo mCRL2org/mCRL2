@@ -66,7 +66,6 @@
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/balance_nesting_depth.h"
 #include "mcrl2/process/is_multi_action.h"
-#include "mcrl2/process/merge_identical_equations.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/process_variable_strongly_connected_components.h"
 #include "mcrl2/process/remove_equations.h"
@@ -2887,62 +2886,14 @@ class specification_basic_type
         equations.emplace_back(id, object.parameters, object.processbody);
       }
 
-      process::detail::duplicate_equation_removal::substitution sigma;
-      const std::vector<process_equation> equations_without_duplicates
-        = process::detail::duplicate_equation_removal(equations, process::find_identifiers(equations))
-            .run(initial_process, sigma);
-#if !defined(NDEBUG) || defined(MCRL2_LINEARISE_CHECK_DUPLICATE_EQUATIONS)
-      check_remove_duplicate_equations(equations, initial_process, equations_without_duplicates, sigma);
-#endif
-
       process_identifier_set result;
-      for (const process_equation& equation: equations_without_duplicates)
+      for (const process_equation& equation: process::remove_duplicate_equations(equations, initial_process))
       {
         result.insert(equation.identifier());
         objectIndex(equation.identifier()).processbody = equation.expression();
       }
       return result;
     }
-
-#if !defined(NDEBUG) || defined(MCRL2_LINEARISE_CHECK_DUPLICATE_EQUATIONS)
-    /* Checks the result of process::remove_duplicate_equations against that of process::merge_identical_equations,
-       which the lineariser used before. The latter merges syntactically equal equations (a least fixpoint), the
-       former also equations that are only equal if they are merged (a greatest fixpoint), so the results are
-       equivalent if the classes of the latter refine those of the former:
-       - every equation kept by the former is also kept by the latter (both keep the initial process and otherwise
-         the first equation of a class, which is also the first of its subclass; the order of the kept equations
-         may differ, which does not matter here, as the result is a process_identifier_set);
-       - the body of a kept equation is the body kept by merge_identical_equations with sigma applied, i.e., sigma
-         maps the identifiers that merge_identical_equations merged to the same identifier.
-       Equal results mean that both merged the same equations. Throws an exception if the check fails. */
-    static void check_remove_duplicate_equations(const std::vector<process_equation>& equations,
-      const process_identifier& initial_process,
-      const std::vector<process_equation>& result,
-      const process::detail::duplicate_equation_removal::substitution& sigma)
-    {
-      std::map<process_identifier, process_expression> merged;
-      for (const process_equation& equation: process::merge_identical_equations(equations, initial_process))
-      {
-        merged[equation.identifier()] = equation.expression();
-      }
-      for (const process_equation& equation: result)
-      {
-        const std::map<process_identifier, process_expression>::const_iterator i = merged.find(equation.identifier());
-        if (i == merged.end())
-        {
-          throw mcrl2::runtime_error("remove_duplicate_equations keeps " + process::pp(equation.identifier())
-                                     + ", which merge_identical_equations removes.");
-        }
-        if (process::replace_process_identifiers(i->second, sigma) != equation.expression())
-        {
-          throw mcrl2::runtime_error("remove_duplicate_equations and merge_identical_equations give inequivalent "
-                                     "bodies for "
-                                     + process::pp(equation.identifier()) + ": " + process::pp(equation.expression())
-                                     + " and " + process::pp(i->second));
-        }
-      }
-    }
-#endif
 
     /****************   remove_stochastic_operators_from_front **********************/
 
