@@ -1,0 +1,29 @@
+nodes:
+  l1:
+    type: mcrl2
+  l2:
+    type: lps
+  l3:
+    type: lps
+  l4:
+    type: text
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-n]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: [--lps-rewriter=prune-dataspec]
+    name: lpsrewr
+  t3:
+    input: [l3]
+    output: [l4]
+    args: []
+    name: lpspp
+
+result: |
+  result = 'f' in l4.value

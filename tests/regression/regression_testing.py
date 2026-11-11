@@ -77,6 +77,7 @@ regression_tests = {
     'ticket-1241'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1241/1.mcrl2')], settings),
     'ticket-1249'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1249/1.mcrl2')], settings),
     'ticket-1297'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1297'),       [abspath('tickets/1297/1.mcrl2')], settings),
+    'ticket-1982'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1982'),      [abspath('tickets/1982/1.mcrl2')], settings),
     'ticket-1301'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1301'),       [abspath('tickets/1301/1.mcrl2'), abspath('tickets/1301/1.mcf')], settings),
     'ticket-1311'   : lambda name, settings: PbesstategraphTest(name,                    [abspath('tickets/1311/1.txt')], ['-g'], settings),
     'ticket-1315'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1315/1.mcrl2')], settings),

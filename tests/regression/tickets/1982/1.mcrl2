@@ -1,0 +1,12 @@
+sort S = Nat;
+
+map
+  f: S -> Bool;
+  g: Nat -> Bool;
+
+act
+  a, b;
+
+proc P(x: Nat) = f(x) -> a . P(x) + g(x) -> b . P(x);
+
+init P(0);
