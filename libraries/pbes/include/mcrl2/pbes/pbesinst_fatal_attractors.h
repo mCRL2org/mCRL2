@@ -171,13 +171,17 @@ void fatal_attractors_generic(const simple_structure_graph& G,
     vertex_set X = detail::attr_min_rank_generic(G, U, alpha, V, j, compare);
     vertex_set Y = set_minus(V, attr_default(G, set_minus(V, X), 1 - alpha));
 
+    // Invariant: Y is the complement of a (1 - alpha)-attractor in the whole
+    // graph. Note that removing Attr_{1-alpha}(Y \ X) computed in the whole
+    // graph from Y does not preserve this.
     while (X != Y)
     {
       calculation_steps++;
       mCRL2log(log::log_level_t::debug) << "  X = " << X << std::endl;
       mCRL2log(log::log_level_t::debug) << "  Y = " << Y << std::endl;
-      X = detail::attr_min_rank_generic(G, set_intersection(U, Y), alpha, V, j, compare);
-      Y = set_minus(Y, attr_default(G, set_minus(Y, X), 1 - alpha));
+      // Compute the attractor within the subgame Y, such that X is a subset of Y.
+      X = detail::attr_min_rank_generic(G, set_intersection(U, Y), alpha, Y, j, compare);
+      Y = set_minus(V, attr_default(G, set_minus(V, X), 1 - alpha));
     }
     mCRL2log(log::log_level_t::debug) << "  X (final) = " << X << std::endl;
 
