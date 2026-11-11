@@ -124,7 +124,7 @@ class used_data_equation_selector
       {
         return true;
       }
-      return m_used_symbols.count(f)>0;
+      return m_used_symbols.contains(f);
     }
 
     /// \brief Check whether data equation relates to used symbols, and therefore is important.

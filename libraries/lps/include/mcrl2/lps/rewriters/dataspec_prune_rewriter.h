@@ -49,7 +49,7 @@ class dataspec_prune_rewriter
       
         data::function_symbol_vector mappings;
         for (data::function_symbol i: p.data().user_defined_mappings()) {
-            if (used_selector(i)) {
+            if (used_selector(data::normalize_sorts(i, p.data()))) {
                 mappings.emplace_back(i);
             }
         }
