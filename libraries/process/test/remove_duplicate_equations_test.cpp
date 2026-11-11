@@ -34,12 +34,14 @@ static std::vector<std::string> print_equations(const std::vector<process_equati
 static std::vector<std::string> removed_duplicates(const std::string& spec, const std::string& initial)
 {
   const process_specification procspec = parse_process_specification(spec);
-  const std::vector<process_equation>& equations = procspec.equations();
+  std::vector<process_equation> equations = procspec.equations();
   const std::vector<process_equation>::const_iterator i = std::find_if(equations.begin(),
     equations.end(),
     [&](const process_equation& equation) { return std::string(equation.identifier().name()) == initial; });
   BOOST_REQUIRE(i != equations.end());
-  return print_equations(remove_duplicate_equations(equations, i->identifier()));
+  const process_identifier initial_process = i->identifier();
+  remove_duplicate_equations(equations, initial_process);
+  return print_equations(equations);
 }
 
 static void check(const std::vector<std::string>& result, const std::vector<std::string>& expected)

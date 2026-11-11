@@ -2886,8 +2886,9 @@ class specification_basic_type
         equations.emplace_back(id, object.parameters, object.processbody);
       }
 
+      process::remove_duplicate_equations(equations, initial_process);
       process_identifier_set result;
-      for (const process_equation& equation: process::remove_duplicate_equations(equations, initial_process))
+      for (const process_equation& equation: equations)
       {
         result.insert(equation.identifier());
         objectIndex(equation.identifier()).processbody = equation.expression();
