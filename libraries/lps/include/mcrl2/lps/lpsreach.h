@@ -23,7 +23,9 @@
 #include "mcrl2/lps/symbolic_lts.h"
 #include "mcrl2/lps/detail/replace_global_variables.h"
 #include "mcrl2/symbolic/ordering.h"
+#include "mcrl2/symbolic/parallel_groups.h"
 #include "mcrl2/symbolic/print.h"
+#include "mcrl2/symbolic/saturation.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
 #include "mcrl2/utilities/stopwatch.h"
 
@@ -42,9 +44,11 @@ class lpsreach_algorithm
 
     template <typename Context, bool ActionLabel>
     friend void symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
+    template <typename Context, bool ActionLabel>
+    friend sylvan::MDD symbolic::learn_successors_collect_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
-    const symbolic::symbolic_reachability_options& m_options;
+    const symbolic::symbolic_reachability_options m_options; // a copy: see symbolic::effective_options
     data::rewriter m_rewr;
     data::mutable_indexed_substitution<> m_sigma;
     data::enumerator_identifier_generator m_id_generator;
@@ -53,7 +57,20 @@ class lpsreach_algorithm
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
     std::vector<std::size_t> m_variable_order;
     symbolic_lts m_lts;
-    
+    ldd m_deadlocks; // with --deadlock: the reachable states without successors, after run()
+
+    // For parallel learning: the data specification for the learners of the workers (symbolic::worker_learner),
+    // the number that tells the learners of this instance apart, and a lock around the learning statistics.
+    data::data_specification m_dataspec;
+    std::size_t m_learner_generation = symbolic::new_learner_generation();
+    std::mutex m_learn_statistics_mutex;
+
+    // An exception during saturation must not unwind through the Lace tasks of the recursion: the first one is
+    // kept here, learning stops, and the run rethrows it after the recursion.
+    std::atomic<bool> m_saturation_failed{false};
+    std::mutex m_saturation_error_mutex;
+    std::exception_ptr m_saturation_error;
+
     /// \brief Rewrites all arguments of the given action.
     template<typename Rewriter, data::IsSubstitution Substitution>
     lps::multi_action rewrite_action(const lps::multi_action& a, const Rewriter& rewr, const Substitution& sigma)
@@ -75,10 +92,160 @@ class lpsreach_algorithm
         );
     }
 
+    // R.L := R.L U {(x,y) in R | x in X}, with the states of X distributed over the Lace workers.
+    void learn_successors_parallel(lps_summand_group& R, const ldd& X)
+    {
+      using namespace sylvan::ldds;
+      if (X == empty_set())
+      {
+        return;
+      }
+      using context_type = symbolic::parallel_learn_context<lpsreach_algorithm, lps_summand_group>;
+      context_type context(*this, R, m_learner_generation, m_rewr, m_sigma, m_dataspec, lace_workers());
+      ldd T = collect(X, symbolic::learn_successors_collect_callback<context_type, true>, &context);
+      if (context.error)
+      {
+        std::rethrow_exception(context.error);
+      }
+      // Other workers may learn for the same group at the same time (in parallel saturation). No lock may be held
+      // during the unions (see symbolic::union_atomically), so they use compare-and-swap loops. L is updated before
+      // Ldomain, so that a worker that finds a projection in Ldomain also finds its transitions in L.
+      symbolic::union_atomically(R.L, T);
+      if (m_options.cached)
+      {
+        symbolic::union_atomically(R.Ldomain, X);
+      }
+      const auto [time, calls] = context.total_statistics(); // the sum over the workers (CPU time, not wall clock time)
+      std::scoped_lock guard(m_learn_statistics_mutex); // covers no Sylvan operation
+      R.learn_time += time;
+      R.learn_calls += calls;
+    }
+
+    /// \brief The learning (expand) callback of saturation: learns the transitions of group i for the projected states X.
+    /// \details An exception must not unwind through the Lace tasks of the recursion: the first one is kept, learning
+    ///          stops, and the run rethrows it after the recursion.
+    static void saturation_expand(void* context, std::size_t i, sylvan::MDD X_)
+    {
+      auto& algorithm = *static_cast<lpsreach_algorithm*>(context);
+      if (algorithm.m_saturation_failed.load(std::memory_order_relaxed))
+      {
+        return;
+      }
+      try
+      {
+        using namespace sylvan::ldds;
+        auto& R = algorithm.m_lts.summand_groups[i];
+        ldd X(X_);
+        ldd domain(R.Ldomain.load()); // a protected copy: another worker may replace R.Ldomain meanwhile
+        ldd Y = minus(X, domain);
+        if (Y != empty_set())
+        {
+          // With the recursion in parallel on more than one worker, this is parallel learning (effective_options).
+          algorithm.learn_successors(i, R, Y);
+        }
+      }
+      catch (...)
+      {
+        std::scoped_lock guard(algorithm.m_saturation_error_mutex);
+        if (!algorithm.m_saturation_error)
+        {
+          algorithm.m_saturation_error = std::current_exception();
+        }
+        algorithm.m_saturation_failed.store(true);
+      }
+    }
+
+    /// \brief Learns the groups that read and write no parameter, for the reachable states visited. Recursive
+    /// saturation leaves them out, since they cannot add states; but their transitions (self-loops) belong to the
+    /// deadlock detection and to the symbolic LTS.
+    void learn_groups_without_parameters(const ldd& visited)
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_lts.summand_groups;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        if (R[i].read.empty() && R[i].write.empty())
+        {
+          ldd X = project(visited, R[i].Ip);
+          learn_successors(i, R[i], m_options.cached ? minus(X, R[i].Ldomain) : X);
+        }
+      }
+    }
+
+    /// \brief With --deadlock, reports the states of visited without successors, after a run that has learned the
+    /// relations of all groups for all of visited (recursive saturation). Since the successors of visited are in
+    /// visited, those are the states of visited without a successor in visited.
+    void report_deadlocks_of_complete_run(const ldd& visited)
+    {
+      using namespace sylvan::ldds;
+      if (m_options.detect_deadlocks)
+      {
+        m_deadlocks = minus(visited, symbolic::relprev_groups_parallel(visited, visited, m_lts.summand_groups));
+        mCRL2log(log::log_level_t::verbose) << "found " << std::setw(12) << print_size(m_deadlocks) << " deadlocks" << std::endl;
+      }
+    }
+
+    /// \brief Prints the learning statistics of the groups (verbose).
+    void report_learning(const std::vector<lps_summand_group>& R)
+    {
+      double total_time = 0.0;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        mCRL2log(log::log_level_t::verbose) << "group " << std::setw(4) << i << " contains " << std::setw(10) << print_size(R[i].L) << " transitions (learn time = "
+                               << std::setw(5) << std::setprecision(2) << std::fixed << R[i].learn_time << "s with " << std::setw(9) << R[i].learn_calls
+                               << " calls, cached " << print_size(R[i].Ldomain) << " values" << ")" << std::endl;
+        total_time += R[i].learn_time;
+      }
+      mCRL2log(log::log_level_t::verbose) << "learning transitions took " << total_time << "s" << std::endl;
+    }
+
+    /// \brief Computes the reachable states with recursive saturation (symbolic::saturate), learning the relations of
+    /// the groups on the fly.
+    ldd run_recursive_saturation()
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_lts.summand_groups;
+      stopwatch timer;
+
+      symbolic::saturation_context context;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        symbolic::saturation_relation r;
+        if (symbolic::make_saturation_relation(R[i], i, r))
+        {
+          context.rels.push_back(r);
+        }
+      }
+      context.parallel = m_options.recursive_saturation_parallel;
+      context.expand = &lpsreach_algorithm::saturation_expand;
+      context.expand_context = this;
+
+      std::size_t calls = 0;
+      ldd visited = symbolic::saturate(context, m_lts.initial_state, calls);
+      if (m_saturation_error)
+      {
+        std::rethrow_exception(m_saturation_error);
+      }
+
+      learn_groups_without_parameters(visited);
+      std::cout << "number of states = " << print_size(visited) << " (time = " << std::setprecision(2) << std::fixed << timer.seconds() << "s)" << std::endl;
+      report_deadlocks_of_complete_run(visited);
+      mCRL2log(log::log_level_t::verbose) << "saturation took " << calls << " passes" << std::endl;
+      report_learning(R);
+      m_lts.states = visited;
+      return visited;
+    }
+
     // R.L := R.L U {(x,y) in R | x in X}
     void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)
     {
       mCRL2log(log::log_level_t::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
+
+      if (m_options.parallel_learning)
+      {
+        learn_successors_parallel(static_cast<lps_summand_group&>(R), X);
+        return;
+      }
 
       using namespace sylvan::ldds;
       std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
@@ -115,9 +282,10 @@ class lpsreach_algorithm
 
   public:
     lpsreach_algorithm(const lps::specification& lpsspec, const symbolic::symbolic_reachability_options& options_)
-      : m_options(options_),
+      : m_options(symbolic::effective_options(options_)),
         m_rewr(symbolic::construct_rewriter(lpsspec.data(), m_options.rewrite_strategy, lps::find_function_symbols(lpsspec), m_options.remove_unused_rewrite_rules)),
-        m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false)
+        m_enumerator(m_rewr, lpsspec.data(), m_rewr, m_id_generator, false),
+        m_dataspec(lpsspec.data())
     {
       using utilities::detail::as_vector;
 
@@ -144,9 +312,15 @@ class lpsreach_algorithm
       m_summand_patterns = symbolic::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
 
       m_lts.process_parameters = symbolic::permute_copy(m_lts.process_parameters, m_variable_order);
+      // With parallel learning, all Lace workers insert into the data and action indices at the same time.
+      const std::size_t index_threads = m_options.parallel_learning ? lace_workers() : 1;
       for (const data::variable& param : m_lts.process_parameters)
       {
-        m_lts.data_index.emplace_back(param.sort());
+        m_lts.data_index.emplace_back(param.sort(), index_threads);
+      }
+      if (index_threads > 1)
+      {
+        m_lts.action_index = atermpp::indexed_set<lps::multi_action, utilities::detail::GlobalThreadSafe>(index_threads);
       }
 
       m_lts.initial_state = symbolic::state2ldd(symbolic::permute_copy(initial_state, m_variable_order), m_lts.data_index);
@@ -189,12 +363,58 @@ class lpsreach_algorithm
       }
     }
 
+    /// \brief Perform a single breadth first step, applying the transition groups in parallel.
+    /// Only for the regular mode (no chaining, no saturation): there, every group reads the same todo.
+    /// First the projections of all groups are computed in parallel, then the groups learn (one after another;
+    /// each in parallel with --parallel-learning), and then all relprods and their unions run in a parallel tree.
+    /// \returns The tuple <visited, todo, deadlocks>
+    std::tuple<ldd, ldd, ldd> step_parallel_groups(const ldd& visited, const ldd& todo, bool learn_transitions, bool detect_deadlocks)
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_lts.summand_groups;
+
+      if (learn_transitions)
+      {
+        // With --cached, the projections minus the values that have been learned before.
+        std::vector<ldd> projections = symbolic::project_groups_parallel(todo, R, m_options.cached);
+        for (std::size_t i = 0; i < R.size(); i++)
+        {
+          learn_successors(i, R[i], projections[i]);
+
+          mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_lts.data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+        }
+      }
+
+      // Every group removes visited from its successors before the unions, so that the unions only carry new
+      // states. Not with deadlock detection, which needs all successors.
+      ldd todo1 = symbolic::relprod_groups_parallel(todo, R, nullptr, detect_deadlocks ? empty_set() : visited);
+      ldd potential_deadlocks = empty_set();
+      if (detect_deadlocks)
+      {
+        // As in step(): the set of potential deadlocks shrinks group by group, which keeps the later relprevs
+        // cheap. Using the union of the successors of all groups gives the same result as the partial unions in
+        // step(), because todo1 contains every successor of todo.
+        potential_deadlocks = todo;
+        for (std::size_t i = 0; i < R.size(); i++)
+        {
+          potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+        }
+        todo1 = minus(todo1, visited);
+      }
+      return std::make_tuple(union_(visited, todo), todo1, potential_deadlocks);
+    }
+
     /// \brief Perform a single breadth first step.
     /// \returns The tuple <visited, todo, deadlocks>
     std::tuple<ldd, ldd, ldd> step(const ldd& visited, const ldd& todo, bool learn_transitions = true, bool detect_deadlocks = false)
     {
       using namespace sylvan::ldds;
       auto& R = m_lts.summand_groups;
+
+      if (m_options.parallel_groups && !m_options.saturation && !m_options.chaining && !m_options.no_relprod)
+      {
+        return step_parallel_groups(visited, todo, learn_transitions, detect_deadlocks);
+      }
 
       ldd todo1 = empty_set();
       ldd potential_deadlocks = detect_deadlocks ? todo : empty_set();
@@ -274,6 +494,10 @@ class lpsreach_algorithm
     ldd run()
     {
       using namespace sylvan::ldds;
+      if (m_options.recursive_saturation)
+      {
+        return run_recursive_saturation();
+      }
       auto& R = m_lts.summand_groups;
       std::size_t iteration_count = 0;
 
@@ -344,7 +568,14 @@ class lpsreach_algorithm
       }
 
       m_lts.states = visited;
+      m_deadlocks = deadlocks;
       return visited;
+    }
+
+    /// \returns With --deadlock, the reachable states without successors (after run()).
+    const ldd& deadlocks() const
+    {
+      return m_deadlocks;
     }
 
     const std::vector<boost::dynamic_bitset<>>& read_write_patterns() const
@@ -362,7 +593,7 @@ class lpsreach_algorithm
       return m_lts.data_index;
     }
 
-    utilities::indexed_set<lps::multi_action>& action_index()
+    atermpp::indexed_set<lps::multi_action, utilities::detail::GlobalThreadSafe>& action_index()
     {
       return m_lts.action_index;
     }
