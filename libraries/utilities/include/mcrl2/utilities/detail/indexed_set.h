@@ -233,6 +233,14 @@ inline const Key& INDEXED_SET::at(std::size_t index) const
 }
 
 INDEXED_SET_TEMPLATE
+inline const Key& INDEXED_SET::at(std::size_t index, std::size_t thread_index) const
+{
+  shared_guard guard(m_shared_mutexes[thread_index]);
+  assert(index < m_next_index);
+  return m_keys[index];
+}
+
+INDEXED_SET_TEMPLATE
 inline const Key& INDEXED_SET::operator[](std::size_t index) const
 {
   assert(index<m_keys.size());
