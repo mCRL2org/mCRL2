@@ -248,12 +248,12 @@ TASK_DECL_0(bool, test_ldd_stream_version_without_copy_nodes_task);
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
 TASK_IMPL_0(bool, test_ldd_stream_version_without_copy_nodes_task)
 {
-  // The LDD {[3]} in version 0x8306 of the format, which does not store whether a node is a copy node.
+  // The LDD {[3]} in version 0x8307 of the format, which stores whether a node is a copy node.
   std::stringstream stream;
   {
     mcrl2::utilities::obitstream output(stream);
     output.write_bits(0x8baf, 16); // BLF_MAGIC
-    output.write_bits(0x8306, 16); // BLF_VERSION
+    output.write_bits(0x8307, 16); // BLF_VERSION
     output.write_bits(0, 1);       // a new node with value 3, down true (index 1) and right false (index 0)
     output.write_integer(3);
     output.write_bits(1, 2);

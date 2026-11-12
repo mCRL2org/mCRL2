@@ -109,9 +109,6 @@ static constexpr std::uint16_t BLF_MAGIC = 0x8baf;
 ///  8 November 2026 : version changed to 0x8307 (store whether a node is a copy node)
 static constexpr std::uint16_t BLF_VERSION = 0x8307;
 
-/// \brief The version before copy nodes were stored, which can still be read.
-static constexpr std::uint16_t BLF_VERSION_WITHOUT_COPY_NODES = 0x8306;
-
 binary_ldd_ostream::binary_ldd_ostream(std::shared_ptr<mcrl2::utilities::obitstream> stream)
   : m_stream(stream)
 {
@@ -181,15 +178,7 @@ binary_ldd_istream::binary_ldd_istream(std::shared_ptr<mcrl2::utilities::ibitstr
   }
 
   std::size_t version = m_stream->read_bits(16);
-  if (version == BLF_VERSION_WITHOUT_COPY_NODES)
-  {
-    // This version wrote a copy node as an ordinary node with value 0, which cannot be told apart from a real one.
-    m_has_copy_flag = false;
-    mCRL2log(mcrl2::log::log_level_t::warning) << "The input file uses an older binary LDD format, which does not store copy nodes. "
-                                                  "If it was written by lpsreach with summand groups (for example --groups=used), "
-                                                  "its transition relations may be wrong and it should be regenerated." << std::endl;
-  }
-  else if (version != BLF_VERSION)
+  if (version != BLF_VERSION)
   {
     throw mcrl2::runtime_error("The BLF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BLF_VERSION) +
                                ") of this tool. The input file must be regenerated. ");
@@ -214,7 +203,7 @@ ldd binary_ldd_istream::get()
     }
     else
     {
-      const bool is_copy = m_has_copy_flag && m_stream->read_bits(1) != 0;
+      const bool is_copy = m_stream->read_bits(1) != 0;
       std::size_t value = is_copy ? 0 : m_stream->read_integer();
       std::size_t down_index = m_stream->read_bits(ldd_index_width(true));
       std::size_t right_index = m_stream->read_bits(ldd_index_width(true));

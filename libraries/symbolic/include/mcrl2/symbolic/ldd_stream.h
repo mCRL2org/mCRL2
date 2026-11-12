@@ -81,7 +81,6 @@ private:
   
   std::shared_ptr<mcrl2::utilities::ibitstream> m_stream;
   std::deque<sylvan::ldds::ldd> m_nodes; ///< An index of read ldds.
-  bool m_has_copy_flag = true; ///< False for the older format, which does not store whether a node is a copy node.
 };
 
 /// \brief Write the given term to the stream.
