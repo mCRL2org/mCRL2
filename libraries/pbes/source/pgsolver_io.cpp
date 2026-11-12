@@ -28,12 +28,19 @@ namespace
 using identifier_t = std::size_t;
 using priority_t = std::size_t;
 
+/// \brief The player in a parity game.
+enum class player : bool
+{
+  even = false, // player 0
+  odd = true   // player 1
+};
+
 /// \brief A node of a parity game as it is given in the input.
 struct pg_node
 {
   identifier_t id = 0;
   priority_t priority = 0;
-  bool owner = false; // false for player 0 (disjunctive), true for player 1 (conjunctive).
+  player owner = player::even;
   std::vector<identifier_t> successors;
 };
 
@@ -90,7 +97,9 @@ public:
     }
 
     // Group the equations into blocks of equal priority; within a block the input order is kept.
-    std::map<priority_t, std::vector<pbes_equation>> blocks;
+    // Use vector for O(1) lookup since priorities are contiguous and start at 0
+    std::vector<std::vector<pbes_equation>> blocks;
+    std::size_t max_priority = 0;
     for (std::size_t i = 0; i < nodes.size(); ++i)
     {
       pg_node& node = nodes[i];
@@ -112,8 +121,11 @@ public:
       }
 
       const pbes_expression rhs
-        = node.owner ? join_and(operands.begin(), operands.end()) : join_or(operands.begin(), operands.end());
+        = node.owner == player::odd ? join_and(operands.begin(), operands.end()) : join_or(operands.begin(), operands.end());
       const fixpoint_symbol sigma = node.priority % 2 == 0 ? fixpoint_symbol::nu() : fixpoint_symbol::mu();
+      
+      if (node.priority > max_priority) max_priority = node.priority;
+      if (blocks.size() <= node.priority) blocks.resize(node.priority + 1);
       blocks[node.priority].emplace_back(sigma, propositional_variable(instantiations[i].name()), rhs);
     }
 
@@ -121,17 +133,27 @@ public:
     // first equation in the BES, and in a min-parity game the lowest priority is.
     std::vector<pbes_equation> equations;
     equations.reserve(nodes.size());
-    auto append_block = [&](const auto& block)
-    {
-      equations.insert(equations.end(), block.second.begin(), block.second.end());
-    };
     if (maxpg)
     {
-      std::for_each(blocks.rbegin(), blocks.rend(), append_block);
+      // Iterate in reverse priority order (highest priority first)
+      for (std::size_t p = max_priority + 1; p-- > 0; )
+      {
+        if (!blocks[p].empty())
+        {
+          equations.insert(equations.end(), blocks[p].begin(), blocks[p].end());
+        }
+      }
     }
     else
     {
-      std::for_each(blocks.begin(), blocks.end(), append_block);
+      // Iterate in normal priority order (lowest priority first)
+      for (std::size_t p = 0; p <= max_priority; ++p)
+      {
+        if (!blocks[p].empty())
+        {
+          equations.insert(equations.end(), blocks[p].begin(), blocks[p].end());
+        }
+      }
     }
 
     result = pbes(data::data_specification(),
@@ -253,7 +275,15 @@ private:
     {
       error("the owner must be 0 or 1", owner_position);
     }
-    result.owner = owner == 1;
+
+    if (owner == 1) 
+    {
+      result.owner = player::odd;
+    } 
+    else 
+    {
+      result.owner = player::even;
+    }
 
     do
     {
