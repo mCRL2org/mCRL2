@@ -118,6 +118,14 @@ public:
   /// \return The value at position index.
   const key_type& at(size_type index) const;
 
+  /// \brief Returns a reference to the element at the given index, while other threads may insert.
+  /// \details Takes the shared lock of thread_index, so that the key table cannot be resized while it is
+  ///          read (operator[] and at(index) read it without a lock). The reference stays valid when the
+  ///          table grows later, because the keys are kept in a deque that only grows at the end.
+  /// \param index The position in the indexed set; it must have been inserted before.
+  /// \param thread_index The index of the calling thread, as for insert.
+  const key_type& at(size_type index, std::size_t thread_index) const;
+
   /// \brief Operator that provides a const reference at the position indicated by index.
   /// \param index The position in the indexed set.
   /// \return The value at position index.

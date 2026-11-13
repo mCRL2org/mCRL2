@@ -144,6 +144,11 @@ class ldd_iterator: public boost::iterator_facade<ldd_iterator, const std::uint3
 // of an LDD node is the number of "down" edges to leaf 1. All maximal paths
 // from an LDD node have the same depth.
 
+// Every ldd object protects its value from garbage collection by registering itself in Sylvan's global protection
+// table (lddmc_protect), and unregisters itself when it is destroyed. Both update a control word that all threads
+// share, so code that creates many ldd objects on many Lace workers at once contends on that word (seen on a
+// 4-socket machine as the most contended cache line). In hot parallel code, use raw MDD values on the refs stack of
+// the worker (lddmc_refs_push and lddmc_refs_pop, which are local to the worker) instead.
 class ldd
 {
   friend class Sylvan;
@@ -197,6 +202,20 @@ class ldd
     MDD get() const
     {
       return mdd;
+    }
+
+    /// \brief Sets the value to desired if it is expected, atomically, for an ldd that several threads update.
+    /// \returns Whether the value was replaced. The caller keeps desired protected until this call returns.
+    bool compare_exchange(MDD expected, MDD desired)
+    {
+      return __atomic_compare_exchange_n(&mdd, &expected, desired, false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
+    }
+
+    /// \brief The value, read atomically (acquire), for an ldd that other threads update with compare_exchange: the
+    /// reader then also sees what the writer did before it (for example, a relation updated before its domain).
+    MDD load() const
+    {
+      return __atomic_load_n(&mdd, __ATOMIC_ACQUIRE);
     }
 
     // the value

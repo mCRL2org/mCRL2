@@ -12,6 +12,7 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/symbolic_lts_io.h"
+#include "mcrl2/symbolic/gc_statistics.h"
 #include "mcrl2/symbolic/ordering.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/parallel_tool.h"
@@ -99,6 +100,11 @@ protected:
     desc.add_hidden_option("no-read", "do not discard only-read parameters");
     desc.add_hidden_option("no-write", "do not discard only-write parameters");
     desc.add_hidden_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
+    desc.add_hidden_option("parallel-groups", "apply the transition groups in parallel (without --chaining and --saturation)");
+    desc.add_hidden_option("recursive-saturation", "explore with recursive saturation and on-the-fly learning (needs --cached)");
+    desc.add_hidden_option("parallel-saturation", "--recursive-saturation with the recursion in parallel");
+    desc.add_hidden_option("reach", "explore with the REACH operation (in parallel) and on-the-fly learning (needs --cached)");
+    desc.add_hidden_option("parallel-learning", "learn the transitions of a transition group in parallel, with a rewriter per thread");
     desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
     desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
     desc.add_option("initial-ratio",
@@ -129,6 +135,23 @@ protected:
     options.no_discard_read = parser.has_option("no-read");
     options.no_discard_write = parser.has_option("no-write");
     options.no_relprod = parser.has_option("no-relprod");
+    options.parallel_groups = parser.has_option("parallel-groups");
+    options.parallel_learning = parser.has_option("parallel-learning");
+    options.recursive_saturation = parser.has_option("recursive-saturation") || parser.has_option("parallel-saturation");
+    options.recursive_saturation_parallel = parser.has_option("parallel-saturation");
+    if (options.recursive_saturation && !options.cached)
+    {
+      throw mcrl2::runtime_error("--recursive-saturation and --parallel-saturation need --cached");
+    }
+    options.reach = parser.has_option("reach");
+    if (options.reach && !options.cached)
+    {
+      throw mcrl2::runtime_error("--reach needs --cached");
+    }
+    if (options.reach && options.recursive_saturation)
+    {
+      throw mcrl2::runtime_error("--reach cannot be combined with --recursive-saturation or --parallel-saturation");
+    }
     options.info = parser.has_option("info");
     options.summand_groups = parser.option_argument("groups");
     options.variable_order = parser.option_argument("reorder");
@@ -186,9 +209,15 @@ public:
     sylvan::sylvan_set_limits(memory_limit * 1024 * 1024 * 1024, static_cast<int>(std::log2(table_ratio)), static_cast<int>(std::log2(initial_ratio)));
     sylvan::sylvan_init_package();
     sylvan::sylvan_init_ldd();
+    symbolic::install_gc_statistics();
 
     auto args = arguments{.options=options, .input_filename=input_filename(), .output_filename=output_filename()};
     bool result = lpsreach_task(&args);
+    mCRL2log(log::log_level_t::verbose) << symbolic::print_gc_statistics() << std::endl;
+    if (mCRL2logEnabled(log::log_level_t::verbose))
+    {
+      symbolic::print_sylvan_statistics(); // only with SYLVAN_STATS
+    }
 
     sylvan::sylvan_quit();
     lace_stop();

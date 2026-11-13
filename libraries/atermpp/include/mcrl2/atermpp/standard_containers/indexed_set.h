@@ -122,6 +122,13 @@ public:
     return m_set[index];
   }
 
+  /// \returns The key at the given index, while other threads may insert (see utilities::indexed_set::at).
+  [[nodiscard]] const key_type& at(size_type index, std::size_t thread_index) const
+  {
+    mcrl2::utilities::shared_guard guard = detail::g_thread_term_pool().lock_shared();
+    return m_set.at(index, thread_index);
+  }
+
   /// \returns The number of elements in the indexed set.
   [[nodiscard]] size_type size(std::size_t thread_index = 0) const
   {

@@ -31,7 +31,10 @@
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/srf_pbes.h"
 #include "mcrl2/pbes/unify_parameters.h"
+#include "mcrl2/symbolic/parallel_groups.h"
 #include "mcrl2/symbolic/print.h"
+#include "mcrl2/symbolic/reach.h"
+#include "mcrl2/symbolic/saturation.h"
 #include "mcrl2/symbolic/symbolic_reachability.h"
 
 namespace mcrl2::pbes_system {
@@ -127,10 +130,12 @@ class pbesreach_algorithm
 
     template <typename Context, bool ActionLabel>
     friend void symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
+    template <typename Context, bool ActionLabel>
+    friend sylvan::MDD symbolic::learn_successors_collect_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
     using ldd = sylvan::ldds::ldd;
-    const symbolic_reachability_options& m_options;
+    const symbolic_reachability_options m_options; // a copy: see symbolic::effective_options
     pbes_system::srf_pbes m_pbes;
     data::rewriter m_rewr;
     data::mutable_indexed_substitution<> m_sigma;
@@ -145,6 +150,14 @@ class pbesreach_algorithm
     std::vector<boost::dynamic_bitset<>> m_summand_patterns;
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
     std::vector<std::size_t> m_variable_order;
+    std::size_t m_learner_generation = symbolic::new_learner_generation(); // for parallel learning, see symbolic::worker_learner
+    std::mutex m_learn_statistics_mutex; // for parallel learning
+
+    // An exception during saturation must not unwind through the Lace tasks of the recursion: the first one is
+    // kept here, learning stops, and the run rethrows it after the recursion.
+    std::atomic<bool> m_saturation_failed{false};
+    std::mutex m_saturation_error_mutex;
+    std::exception_ptr m_saturation_error;
 
     ldd m_visited;
     ldd m_todo;
@@ -157,6 +170,35 @@ class pbesreach_algorithm
       mCRL2log(log::log_level_t::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
       using namespace sylvan::ldds;
+      if (m_options.parallel_learning)
+      {
+        // The states of X distributed over the Lace workers, each with its own rewriter, substitution and enumerator.
+        if (X == empty_set())
+        {
+          return;
+        }
+        using context_type = symbolic::parallel_learn_context<pbesreach_algorithm, pbes_summand_group>;
+        context_type context(*this, R, m_learner_generation, m_rewr, m_sigma, m_pbes.data(), lace_workers());
+        ldd T = collect(X, symbolic::learn_successors_collect_callback<context_type, false>, &context);
+        if (context.error)
+        {
+          std::rethrow_exception(context.error);
+        }
+        // Other workers may learn for the same group at the same time (in parallel saturation). No lock may be held
+        // during the unions (see symbolic::union_atomically), so they use compare-and-swap loops. L is updated
+        // before Ldomain, so that a worker that finds a projection in Ldomain also finds its transitions in L.
+        symbolic::union_atomically(R.L, T);
+        if (m_options.cached)
+        {
+          symbolic::union_atomically(R.Ldomain, X);
+        }
+        const auto [time, calls] = context.total_statistics(); // the sum over the workers (CPU time, not wall clock time)
+        std::scoped_lock guard(m_learn_statistics_mutex); // covers no Sylvan operation
+        R.learn_time += time;
+        R.learn_calls += calls;
+        return;
+      }
+
       std::pair<pbesreach_algorithm&, pbes_summand_group&> context{*this, R};
       sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<pbesreach_algorithm&, pbes_summand_group&>, false>, &context);
     }
@@ -194,7 +236,7 @@ class pbesreach_algorithm
 
   public:
     pbesreach_algorithm(const pbes_system::srf_pbes& srf_pbes, const symbolic_reachability_options& options_)
-      : m_options(options_),
+      : m_options(symbolic::effective_options(options_)),
         m_pbes(internal_preprocess(srf_pbes, options_.make_total)),
         m_rewr(symbolic::construct_rewriter(m_pbes.data(), m_options.rewrite_strategy, pbes_system::find_function_symbols(m_pbes.to_pbes()), m_options.remove_unused_rewrite_rules)),
         m_enumerator(m_rewr, m_pbes.data(), m_rewr, m_id_generator, false)
@@ -256,7 +298,8 @@ class pbesreach_algorithm
 
       for (const data::variable& param: m_process_parameters)
       {
-        m_data_index.emplace_back(param.sort());
+        // With parallel learning, all Lace workers insert into the data indices at the same time.
+        m_data_index.emplace_back(param.sort(), m_options.parallel_learning ? lace_workers() : 1);
       }
 
       mCRL2log(log::log_level_t::debug) << "Final read/write matrix:" << std::endl;
@@ -293,12 +336,56 @@ class pbesreach_algorithm
       }
     }
 
+    /// \brief Perform a single breadth first step, applying the transition groups in parallel.
+    /// Only for the regular mode (no chaining, no saturation): there, every group reads the same todo.
+    /// First the projections of all groups are computed in parallel, then the groups learn (one after another;
+    /// each in parallel with --parallel-learning), and then all relprods and their unions run in a parallel tree.
+    /// \returns The tuple <visited, todo, deadlocks>
+    std::tuple<ldd, ldd, ldd> step_parallel_groups(const ldd& visited, const ldd& todo, bool learn_transitions, bool detect_deadlocks)
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_summand_groups;
+
+      if (learn_transitions)
+      {
+        // With --cached, the projections minus the values that have been learned before.
+        std::vector<ldd> projections = symbolic::project_groups_parallel(todo, R, m_options.cached);
+        for (std::size_t i = 0; i < R.size(); i++)
+        {
+          learn_successors(i, R[i], projections[i]);
+
+          mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
+        }
+      }
+
+      ldd todo1 = symbolic::relprod_groups_parallel(todo, R);
+      ldd potential_deadlocks = empty_set();
+      if (detect_deadlocks)
+      {
+        // As in step(): the set of potential deadlocks shrinks group by group, which keeps the later relprevs
+        // cheap. Using the union of the successors of all groups gives the same result as the partial unions in
+        // step(), because todo1 contains every successor of todo.
+        potential_deadlocks = todo;
+        for (std::size_t i = 0; i < R.size(); i++)
+        {
+          potential_deadlocks = minus(potential_deadlocks, relprev(todo1, R[i].L, R[i].Ir, potential_deadlocks));
+        }
+      }
+
+      return std::make_tuple(union_(visited, todo), minus(todo1, visited), potential_deadlocks);
+    }
+
     /// \brief Perform a single breadth first step.
     /// \returns The tuple <visited, todo, deadlocks>
     std::tuple<ldd, ldd, ldd> step(const ldd& visited, const ldd& todo, bool learn_transitions = true, bool detect_deadlocks = false)
     {
       using namespace sylvan::ldds;
       auto& R = m_summand_groups;
+
+      if (m_options.parallel_groups && !m_options.saturation && !m_options.chaining && !m_options.no_relprod)
+      {
+        return step_parallel_groups(visited, todo, learn_transitions, detect_deadlocks);
+      }
 
       ldd todo1 = empty_set();
       ldd potential_deadlocks = detect_deadlocks ? todo : empty_set();
@@ -375,6 +462,122 @@ class pbesreach_algorithm
       return std::make_tuple(union_(visited, todo), minus(todo1, visited), potential_deadlocks);
     }
 
+    /// \brief The learning (expand) callback of saturation: learns the transitions of group i for the projected states X.
+    /// \details An exception must not unwind through the Lace tasks of the recursion: the first one is kept, learning
+    ///          stops, and the run rethrows it after the recursion.
+    static void saturation_expand(void* context, std::size_t i, sylvan::MDD X_)
+    {
+      auto& algorithm = *static_cast<pbesreach_algorithm*>(context);
+      if (algorithm.m_saturation_failed.load(std::memory_order_relaxed))
+      {
+        return;
+      }
+      try
+      {
+        using namespace sylvan::ldds;
+        auto& R = algorithm.m_summand_groups[i];
+        ldd X(X_);
+        ldd domain(R.Ldomain.load()); // a protected copy: another worker may replace R.Ldomain meanwhile
+        ldd Y = minus(X, domain);
+        if (Y != empty_set())
+        {
+          // With the recursion in parallel on more than one worker, this is parallel learning (effective_options).
+          algorithm.learn_successors(i, R, Y);
+        }
+      }
+      catch (...)
+      {
+        std::scoped_lock guard(algorithm.m_saturation_error_mutex);
+        if (!algorithm.m_saturation_error)
+        {
+          algorithm.m_saturation_error = std::current_exception();
+        }
+        algorithm.m_saturation_failed.store(true);
+      }
+    }
+
+    /// \brief Learns the groups that read and write no parameter, for the reachable vertices. Recursive saturation
+    /// and REACH leave them out, since they cannot add vertices; but their edges (self-loops) belong to the parity
+    /// game. (In the usual encoding every group reads the parameter of the propositional variable, so this is a
+    /// safeguard.)
+    void learn_groups_without_parameters()
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_summand_groups;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        if (R[i].read.empty() && R[i].write.empty())
+        {
+          ldd X = project(m_visited, R[i].Ip);
+          learn_successors(i, R[i], m_options.cached ? minus(X, R[i].Ldomain) : X);
+        }
+      }
+    }
+
+    /// \brief Computes the reachable vertices with recursive saturation (symbolic::saturate), learning
+    /// the relations on the fly; then the vertices without successors (if deadlocks are detected).
+    void run_recursive_saturation()
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_summand_groups;
+      symbolic::saturation_context context;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        symbolic::saturation_relation r;
+        if (symbolic::make_saturation_relation(R[i], i, r))
+        {
+          context.rels.push_back(r);
+        }
+      }
+      context.parallel = m_options.recursive_saturation_parallel;
+      context.expand = &pbesreach_algorithm::saturation_expand;
+      context.expand_context = this;
+      std::size_t calls = 0;
+      m_initial_vertex = initial_state();
+      m_visited = symbolic::saturate(context, m_initial_vertex, calls);
+      if (m_saturation_error)
+      {
+        std::rethrow_exception(m_saturation_error);
+      }
+      m_todo = empty_set();
+      learn_groups_without_parameters();
+      // All relations are learned for all reachable vertices now, and successors of reachable vertices are reachable.
+      m_deadlocks = m_options.detect_deadlocks ? minus(m_visited, symbolic::relprev_groups_parallel(m_visited, m_visited, R)) : empty_set();
+      mCRL2log(log::log_level_t::verbose) << "saturation took " << calls << " passes" << std::endl;
+    }
+
+    /// \brief Computes the reachable vertices with the REACH operation (symbolic::reach), learning the relations on
+    /// the fly; then the vertices without successors (if deadlocks are detected).
+    void run_reach()
+    {
+      using namespace sylvan::ldds;
+      auto& R = m_summand_groups;
+      std::vector<symbolic::saturation_relation> rels;
+      for (std::size_t i = 0; i < R.size(); i++)
+      {
+        symbolic::saturation_relation r;
+        if (symbolic::make_saturation_relation(R[i], i, r))
+        {
+          rels.push_back(r);
+        }
+      }
+      symbolic::reach_context context;
+      symbolic::make_reach_context(context, m_n, rels);
+      context.expand = &pbesreach_algorithm::saturation_expand;
+      context.expand_context = this;
+      m_initial_vertex = initial_state();
+      m_visited = symbolic::reach(context, m_initial_vertex);
+      if (m_saturation_error)
+      {
+        std::rethrow_exception(m_saturation_error);
+      }
+      m_todo = empty_set();
+      learn_groups_without_parameters();
+      // All relations are learned for all reachable vertices now, and successors of reachable vertices are reachable.
+      m_deadlocks = m_options.detect_deadlocks ? minus(m_visited, symbolic::relprev_groups_parallel(m_visited, m_visited, R)) : empty_set();
+      mCRL2log(log::log_level_t::verbose) << "REACH took " << context.top_iterations << " iterations on the first level" << std::endl;
+    }
+
     // post: m_visited contains the visited vertices in the parity game.
     void run(bool report_states = false)
     {
@@ -389,6 +592,17 @@ class pbesreach_algorithm
       m_visited = empty_set();
       m_todo = m_initial_vertex;
       m_deadlocks = empty_set();
+
+      if (m_options.reach)
+      {
+        run_reach();
+        on_end_while_loop();
+      }
+      else if (m_options.recursive_saturation)
+      {
+        run_recursive_saturation();
+        on_end_while_loop();
+      }
 
       while (m_todo != empty_set() && !solution_found() && (m_options.max_iterations == 0 || iteration_count < m_options.max_iterations))
       {
