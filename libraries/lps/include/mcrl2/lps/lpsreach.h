@@ -41,9 +41,7 @@ class lpsreach_algorithm
     using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
     template <typename Context, bool ActionLabel>
-    friend void symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
-    template <typename Context, bool ActionLabel>
-    friend sylvan::MDD symbolic::learn_successors_collect_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
+    friend sylvan::MDD symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
     const symbolic::symbolic_reachability_options& m_options;
@@ -58,10 +56,9 @@ class lpsreach_algorithm
     ldd m_deadlocks; // with --deadlock: the reachable states without successors, after run()
 
     // For parallel learning: the data specification for the learners of the workers (symbolic::worker_learner),
-    // the number that tells the learners of this instance apart, and a lock around the learning statistics.
+    // and the number that tells the learners of this instance apart.
     data::data_specification m_dataspec;
     std::size_t m_learner_generation = symbolic::new_learner_generation();
-    std::mutex m_learn_statistics_mutex;
 
     /// \brief Rewrites all arguments of the given action.
     template<typename Rewriter, data::IsSubstitution Substitution>
@@ -84,49 +81,14 @@ class lpsreach_algorithm
         );
     }
 
-    // R.L := R.L U {(x,y) in R | x in X}, with the states of X distributed over the Lace workers.
-    void learn_successors_parallel(lps_summand_group& R, const ldd& X)
-    {
-      using namespace sylvan::ldds;
-      if (X == empty_set())
-      {
-        return;
-      }
-      using context_type = symbolic::parallel_learn_context<lpsreach_algorithm, lps_summand_group>;
-      context_type context(*this, R, m_learner_generation, m_rewr, m_sigma, m_dataspec, lace_workers());
-      ldd T = collect(X, symbolic::learn_successors_collect_callback<context_type, true>, &context);
-      if (context.error)
-      {
-        std::rethrow_exception(context.error);
-      }
-      // Other workers may learn for the same group at the same time (in parallel saturation). No lock may be held
-      // during the unions (see symbolic::union_atomically), so they use compare-and-swap loops. L is updated before
-      // Ldomain, so that a worker that finds a projection in Ldomain also finds its transitions in L.
-      symbolic::union_atomically(R.L, T);
-      if (m_options.cached)
-      {
-        symbolic::union_atomically(R.Ldomain, X);
-      }
-      const auto [time, calls] = context.total_statistics(); // the sum over the workers (CPU time, not wall clock time)
-      std::scoped_lock guard(m_learn_statistics_mutex); // covers no Sylvan operation
-      R.learn_time += time;
-      R.learn_calls += calls;
-    }
-
     // R.L := R.L U {(x,y) in R | x in X}
-    void learn_successors(std::size_t i, symbolic::summand_group& R, const ldd& X)
+    void learn_successors(std::size_t i, lps_summand_group& R, const ldd& X)
     {
       mCRL2log(log::log_level_t::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_lts.data_index, X, R.read) << std::endl;
 
-      if (m_options.parallel_learning)
-      {
-        learn_successors_parallel(static_cast<lps_summand_group&>(R), X);
-        return;
-      }
-
-      using namespace sylvan::ldds;
-      std::pair<lpsreach_algorithm&, symbolic::summand_group&> context{*this, R};
-      sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<lpsreach_algorithm&, lps_summand_group&>, true>, &context);
+      using context_type = symbolic::learn_context<lpsreach_algorithm, lps_summand_group>;
+      context_type context(*this, R, m_options, m_learner_generation, m_rewr, m_sigma, m_enumerator, m_dataspec);
+      symbolic::learn_successors<true>(context, X, m_options.cached);
     }
 
     template <typename Specification>

@@ -122,108 +122,7 @@ void check_enumerator_solution(const EnumeratorElement& p, const summand_group&)
   }
 }
 
-/// \brief If ActionLabel is true then the multi-action will be rewritten and added to the relation.
-template <typename Context, bool ActionLabel>
-void learn_successors_callback(WorkerP*, Task*, std::uint32_t* x, std::size_t, void* context)
-{
-  using namespace sylvan::ldds;
-  using enumerator_element = data::enumerator_list_element_with_substitution<>;
-
-  auto p = reinterpret_cast<Context*>(context);
-  auto& algorithm = p->first;
-  auto& group = p->second;
-  auto& sigma = algorithm.m_sigma;
-  auto& data_index = algorithm.data_index();
-  const auto& options = algorithm.m_options;
-  const auto& rewr = algorithm.m_rewr;
-  const auto& enumerator = algorithm.m_enumerator;
-  std::size_t x_size = group.read.size();
-  std::size_t y_size = group.write.size();
-  std::size_t xy_size = x_size + y_size; 
-  
-  if constexpr (ActionLabel)
-  {
-    // One additional space for the action label.
-    xy_size += 1;
-  }
-
-  MCRL2_DECLARE_STACK_ARRAY(xy, std::uint32_t, xy_size);
-
-  // add the assignments corresponding to x to sigma
-  // add x to the transition xy
-  stopwatch learn_start;
-  for (std::size_t j = 0; j < x_size; j++)
-  {
-    sigma[group.read_parameters[j]] = data_index[group.read[j]][x[j]];
-    xy[group.read_pos[j]] = x[j];
-  }
-
-  std::size_t i = 0;
-  for (const auto& smd: group.summands)
-  {
-    data::data_expression condition = rewr(smd.condition, sigma);
-    if (!data::is_false(condition))
-    {
-      enumerator.enumerate(enumerator_element(smd.variables, condition),
-                           sigma,
-                           [&](const enumerator_element& p) {
-                             check_enumerator_solution(p, group);
-                             p.add_assignments(smd.variables, sigma, rewr);
-                             for (std::size_t j = 0; j < y_size; j++)
-                             {
-                               data::data_expression value = rewr(smd.next_state[j], sigma);
-                               assert(value != data::undefined_data_expression());
-
-                               // Determine whether this is a copy parameter, insert special value if that is the case.
-                               xy[group.write_pos[j]] = smd.copy[group.write_pos[j]] ? relprod_ignore : data_index[group.write[j]].insert(value).first;
-                             }
-
-                             if constexpr (ActionLabel)
-                             {
-                               // Action is always located on the last index of the cube.
-                               xy[xy_size - 1] = algorithm.action_index().insert(algorithm.rewrite_action(group.actions[i], rewr, sigma)).first;
-                             }
-
-                             mCRL2log(log::log_level_t::trace) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
-                             group.L = options.no_relprod ? union_cube(group.L, xy.data(), xy_size) : union_cube_copy(group.L, xy.data(), smd.copy.data(), xy_size);
-                             return false;
-                           },
-                           data::is_false
-      );
-    }
-    data::remove_assignments(sigma, smd.variables);
-
-    // group.actions has one entry per summand, also for summands whose condition is false.
-    ++i;
-  }
-  data::remove_assignments(sigma, group.read_parameters);
-  group.learn_calls += 1;
-  group.learn_time += learn_start.seconds();
-
-  if (options.cached)
-  {
-    group.Ldomain = union_cube(group.Ldomain, x, x_size);
-  }
-}
-
-/// \brief target := target U X, for an ldd that other workers may update at the same time (a compare-and-swap loop).
-/// \details No lock may be held during the union: a worker that waits in a Sylvan operation can steal a task that
-///          updates the same target, and would then wait for itself.
-inline void union_atomically(sylvan::ldds::ldd& target, const sylvan::ldds::ldd& X)
-{
-  using namespace sylvan::ldds;
-  for (;;)
-  {
-    ldd old(target.load()); // a protected copy of the current value (no garbage collection can happen in between)
-    ldd result = union_(old, X);
-    if (result == old || target.compare_exchange(old.get(), result.get()))
-    {
-      return;
-    }
-  }
-}
-
-/// \brief What one Lace worker needs to learn transitions by itself: the rewriter, the substitution and
+/// \brief What one Lace worker needs to learn transitions by itself in parallel: the rewriter, the substitution and
 /// the enumerator are not thread-safe, so every worker has its own.
 /// \details A worker makes its learner the first time it learns, and keeps it in a thread_local slot until the
 ///          worker thread ends (or until a learning pass of another algorithm instance needs a new one). The term
@@ -260,7 +159,7 @@ inline std::unique_ptr<worker_learner>& thread_worker_learner()
   return learner;
 }
 
-/// \brief A new number for each algorithm instance that learns in parallel, to tell the learners apart.
+/// \brief A new number for each algorithm instance, to tell the learners of the workers apart.
 inline std::size_t new_learner_generation()
 {
   static std::atomic<std::size_t> generation{0};
@@ -274,50 +173,57 @@ struct alignas(64) worker_learn_statistics
   std::size_t calls = 0;
 };
 
-/// \brief The context of learning the transitions of one summand group in parallel with lddmc_collect.
+/// \brief The rewriter, substitution and enumerator with which a callback learns.
+struct learn_resources
+{
+  data::mutable_indexed_substitution<>& sigma;
+  const data::rewriter& rewr;
+  const data::enumerator_algorithm<>& enumerator;
+};
+
+/// \brief The context of learning the transitions of one summand group, see learn_successors.
+/// \details Sequentially, the callback uses the rewriter, substitution and enumerator of the algorithm. In parallel,
+///          every Lace worker uses its own worker_learner, made from (a clone of) those of the algorithm.
 template <typename Algorithm, typename Group>
-struct parallel_learn_context
+struct learn_context
 {
   Algorithm& algorithm;
   Group& group;
+  bool parallel;
+  bool no_relprod;
   std::size_t generation;                       // of the algorithm instance
-  data::rewriter& rewr;                         // cloned by every worker for its learner
-  const data::mutable_indexed_substitution<>& sigma;
+  data::rewriter& rewr;                         // cloned by every worker for its learner, in parallel
+  data::mutable_indexed_substitution<>& sigma;
+  const data::enumerator_algorithm<>& enumerator;
   const data::data_specification& dataspec;
-  std::size_t number_of_workers;
+  std::size_t index_threads;                    // the number of threads of the data and action indices
   std::vector<worker_learn_statistics> statistics; // per worker
   std::atomic<bool> failed{false};
   std::mutex error_mutex;
-  std::exception_ptr error; // the first exception of a callback; the caller rethrows it after the collect
+  std::exception_ptr error; // the first exception of a callback; learn_successors rethrows it
 
-  parallel_learn_context(Algorithm& algorithm_, Group& group_, std::size_t generation_, data::rewriter& rewr_,
-                         const data::mutable_indexed_substitution<>& sigma_, const data::data_specification& dataspec_,
-                         std::size_t number_of_workers_)
-    : algorithm(algorithm_), group(group_), generation(generation_), rewr(rewr_), sigma(sigma_), dataspec(dataspec_),
-      number_of_workers(number_of_workers_), statistics(number_of_workers_)
+  learn_context(Algorithm& algorithm_, Group& group_, const symbolic_reachability_options& options,
+                std::size_t generation_, data::rewriter& rewr_, data::mutable_indexed_substitution<>& sigma_,
+                const data::enumerator_algorithm<>& enumerator_, const data::data_specification& dataspec_)
+    : algorithm(algorithm_), group(group_), parallel(options.parallel_learning), no_relprod(options.no_relprod),
+      generation(generation_), rewr(rewr_), sigma(sigma_), enumerator(enumerator_), dataspec(dataspec_),
+      index_threads(options.parallel_learning ? lace_workers() : 1), statistics(lace_workers())
   {}
 
-  /// \returns The learning time (summed over the workers, so CPU time) and the number of learned states.
-  std::pair<double, std::size_t> total_statistics() const
-  {
-    std::pair<double, std::size_t> result{0.0, 0};
-    for (const worker_learn_statistics& s: statistics)
-    {
-      result.first += s.time;
-      result.second += s.calls;
-    }
-    return result;
-  }
-
-  /// \brief The thread index for the indexed sets: 0 with one worker, worker + 1 otherwise (see utilities::indexed_set).
+  /// \brief The thread index for the indexed sets: 0 with one thread, worker + 1 otherwise (see utilities::indexed_set).
   std::size_t thread_index(const WorkerP* worker) const
   {
-    return number_of_workers == 1 ? 0 : worker->worker + 1;
+    return index_threads == 1 ? 0 : worker->worker + 1;
   }
 
-  /// \brief The learner of the calling worker, made on its first use (on this thread).
-  worker_learner& learner(const WorkerP* worker)
+  /// \brief The rewriter, substitution and enumerator for the calling worker; in parallel made on its first use.
+  learn_resources resources(const WorkerP* worker)
   {
+    if (!parallel)
+    {
+      return {sigma, rewr, enumerator};
+    }
+
     std::unique_ptr<worker_learner>& learner = thread_worker_learner();
     if (!learner || learner->generation != generation)
     {
@@ -328,32 +234,39 @@ struct parallel_learn_context
       learner.reset();
       learner = std::make_unique<worker_learner>(generation, dataspec, rewr.clone(), sigma, worker->worker);
     }
-    return *learner;
+    return {learner->sigma, learner->rewr, learner->enumerator};
+  }
+
+  void set_error(std::exception_ptr e)
+  {
+    std::scoped_lock guard(error_mutex);
+    if (!error)
+    {
+      error = std::move(e);
+    }
+    failed.store(true);
   }
 };
 
-/// \brief The parallel counterpart of learn_successors_callback, for lddmc_collect: it runs on any Lace worker and
-/// returns the transitions of the projected state x as an LDD instead of adding them to group.L, which the caller
-/// does once with the union of all of them. It uses the rewriter, substitution and enumerator of its worker, and
-/// the thread index of its worker for the (thread-safe) data and action indices.
+/// \brief Returns the transitions of the projected state x of the group of the context as an LDD. It is the
+/// callback of lddmc_collect (in parallel, on any Lace worker) and of learn_successors_sequential_callback.
+/// No exception leaves the callback, which Sylvan calls from C code; the first one is kept in the context.
 /// If ActionLabel is true then the multi-action will be rewritten and added to the relation.
 template <typename Context, bool ActionLabel>
-sylvan::MDD learn_successors_collect_callback(WorkerP* worker, Task*, std::uint32_t* x, std::size_t, void* context)
+sylvan::MDD learn_successors_callback(WorkerP* worker, Task*, std::uint32_t* x, std::size_t, void* context)
 {
-  using namespace sylvan;
   using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
   auto& p = *reinterpret_cast<Context*>(context);
   if (p.failed.load(std::memory_order_relaxed))
   {
-    return lddmc_false;
+    return sylvan::lddmc_false;
   }
 
   auto& algorithm = p.algorithm;
   auto& group = p.group;
   const std::size_t thread_index = p.thread_index(worker);
   auto& data_index = algorithm.data_index();
-  const auto& options = algorithm.m_options;
   std::size_t x_size = group.read.size();
   std::size_t y_size = group.write.size();
   std::size_t xy_size = x_size + y_size;
@@ -366,17 +279,15 @@ sylvan::MDD learn_successors_collect_callback(WorkerP* worker, Task*, std::uint3
 
   MCRL2_DECLARE_STACK_ARRAY(xy, std::uint32_t, xy_size);
 
-  MDD result = lddmc_false;
-  lddmc_refs_pushptr(&result); // a Sylvan garbage collection can happen during union_cube
+  sylvan::MDD result = sylvan::lddmc_false;
+  sylvan::lddmc_refs_pushptr(&result); // a Sylvan garbage collection can happen during union_cube
   try
   {
-    // Making the learner (a clone of the rewriter) can throw too, so it is inside the try: no exception may leave
-    // the callback, which Sylvan calls from C code.
-    worker_learner& learner = p.learner(worker);
-    auto& sigma = learner.sigma;
-    const auto& rewr = learner.rewr;
-    const auto& enumerator = learner.enumerator;
+    // Making the learner (a clone of the rewriter) can throw too, so it is inside the try.
+    auto [sigma, rewr, enumerator] = p.resources(worker);
     stopwatch learn_start;
+
+    // add the assignments corresponding to x to sigma, and x to the transition xy
     for (std::size_t j = 0; j < x_size; j++)
     {
       sigma[group.read_parameters[j]] = data_index[group.read[j]].at(x[j], thread_index);
@@ -409,15 +320,22 @@ sylvan::MDD learn_successors_collect_callback(WorkerP* worker, Task*, std::uint3
                                  xy[xy_size - 1] = algorithm.action_index().insert(algorithm.rewrite_action(group.actions[i], rewr, sigma), thread_index).first;
                                }
 
-                               result = options.no_relprod ? lddmc_union_cube(result, xy.data(), xy_size)
-                                                           : lddmc_union_cube_copy(result, xy.data(), const_cast<int*>(smd.copy.data()), xy_size);
+                               if (!p.parallel)
+                               {
+                                 // Printing reads the data indices without a lock, which is only safe sequentially.
+                                 mCRL2log(log::log_level_t::trace) << "  " << print_transition(data_index, xy.data(), group.read, group.write) << std::endl;
+                               }
+                               result = p.no_relprod ? sylvan::lddmc_union_cube(result, xy.data(), xy_size)
+                                                     : sylvan::lddmc_union_cube_copy(result, xy.data(), const_cast<int*>(smd.copy.data()), xy_size);
                                return false;
                              },
                              data::is_false
         );
       }
       data::remove_assignments(sigma, smd.variables);
-      ++i; // the index of the summand in the group (group.actions has one entry per summand)
+
+      // group.actions has one entry per summand, also for summands whose condition is false.
+      ++i;
     }
     data::remove_assignments(sigma, group.read_parameters);
     worker_learn_statistics& statistics = p.statistics[worker->worker];
@@ -426,16 +344,73 @@ sylvan::MDD learn_successors_collect_callback(WorkerP* worker, Task*, std::uint3
   }
   catch (...)
   {
-    std::scoped_lock guard(p.error_mutex);
-    if (!p.error)
-    {
-      p.error = std::current_exception();
-    }
-    p.failed.store(true);
-    result = lddmc_false;
+    p.set_error(std::current_exception());
+    result = sylvan::lddmc_false;
   }
-  lddmc_refs_popptr(1);
+  sylvan::lddmc_refs_popptr(1);
   return result;
+}
+
+/// \brief The context of learn_successors_sequential_callback: the learn context and the union of the results.
+template <typename Context>
+struct sequential_learn_context
+{
+  Context& context;
+  sylvan::ldds::ldd result = sylvan::ldds::empty_set();
+};
+
+/// \brief A callback for sat_all_nopar that adds the transitions of x, by learn_successors_callback, to the result.
+template <typename Context, bool ActionLabel>
+void learn_successors_sequential_callback(WorkerP* worker, Task* task, std::uint32_t* x, std::size_t n, void* context)
+{
+  auto& p = *reinterpret_cast<sequential_learn_context<Context>*>(context);
+  // No Sylvan operation happens between the return of the callback and the protection by T.
+  sylvan::ldds::ldd T(learn_successors_callback<Context, ActionLabel>(worker, task, x, n, &p.context));
+  p.result = sylvan::ldds::union_(p.result, T);
+}
+
+/// \brief group.L := group.L U {(x,y) in group | x in X}, with the states of X distributed over the Lace workers if
+/// context.parallel holds, and one at a time otherwise.
+/// \details It must be called from one thread at a time for the same group: group.L and group.Ldomain are updated
+///          on the calling thread, once, after all transitions have been learned.
+template <bool ActionLabel, typename Context>
+void learn_successors(Context& context, const sylvan::ldds::ldd& X, bool cached)
+{
+  using namespace sylvan::ldds;
+  if (X == empty_set())
+  {
+    return;
+  }
+
+  ldd T;
+  if (context.parallel)
+  {
+    T = collect(X, learn_successors_callback<Context, ActionLabel>, &context);
+  }
+  else
+  {
+    sequential_learn_context<Context> sequential{context};
+    sat_all_nopar(X, learn_successors_sequential_callback<Context, ActionLabel>, &sequential);
+    T = sequential.result;
+  }
+
+  if (context.error)
+  {
+    std::rethrow_exception(context.error);
+  }
+
+  auto& group = context.group;
+  group.L = union_(group.L, T);
+  if (cached)
+  {
+    group.Ldomain = union_(group.Ldomain, X);
+  }
+
+  for (const worker_learn_statistics& s: context.statistics)
+  {
+    group.learn_time += s.time; // the sum over the workers: CPU time, not wall clock time, in parallel
+    group.learn_calls += s.calls;
+  }
 }
 
 } // namespace mcrl2::symbolic
