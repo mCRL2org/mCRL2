@@ -126,9 +126,7 @@ class pbesreach_algorithm
     using enumerator_element = data::enumerator_list_element_with_substitution<>;
 
     template <typename Context, bool ActionLabel>
-    friend void symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
-    template <typename Context, bool ActionLabel>
-    friend sylvan::MDD symbolic::learn_successors_collect_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
+    friend sylvan::MDD symbolic::learn_successors_callback(WorkerP*, Task*, std::uint32_t* v, std::size_t n, void* context);
 
   protected:
     using ldd = sylvan::ldds::ldd;
@@ -148,7 +146,6 @@ class pbesreach_algorithm
     std::vector<boost::dynamic_bitset<>> m_group_patterns;
     std::vector<std::size_t> m_variable_order;
     std::size_t m_learner_generation = symbolic::new_learner_generation(); // for parallel learning, see symbolic::worker_learner
-    std::mutex m_learn_statistics_mutex; // for parallel learning
 
     ldd m_visited;
     ldd m_todo;
@@ -160,38 +157,9 @@ class pbesreach_algorithm
     {
       mCRL2log(log::log_level_t::trace) << "learn successors of summand group " << i << " for X = " << print_states(m_data_index, X, R.read) << std::endl;
 
-      using namespace sylvan::ldds;
-      if (m_options.parallel_learning)
-      {
-        // The states of X distributed over the Lace workers, each with its own rewriter, substitution and enumerator.
-        if (X == empty_set())
-        {
-          return;
-        }
-        using context_type = symbolic::parallel_learn_context<pbesreach_algorithm, pbes_summand_group>;
-        context_type context(*this, R, m_learner_generation, m_rewr, m_sigma, m_pbes.data(), lace_workers());
-        ldd T = collect(X, symbolic::learn_successors_collect_callback<context_type, false>, &context);
-        if (context.error)
-        {
-          std::rethrow_exception(context.error);
-        }
-        // Other workers may learn for the same group at the same time (in parallel saturation). No lock may be held
-        // during the unions (see symbolic::union_atomically), so they use compare-and-swap loops. L is updated
-        // before Ldomain, so that a worker that finds a projection in Ldomain also finds its transitions in L.
-        symbolic::union_atomically(R.L, T);
-        if (m_options.cached)
-        {
-          symbolic::union_atomically(R.Ldomain, X);
-        }
-        const auto [time, calls] = context.total_statistics(); // the sum over the workers (CPU time, not wall clock time)
-        std::scoped_lock guard(m_learn_statistics_mutex); // covers no Sylvan operation
-        R.learn_time += time;
-        R.learn_calls += calls;
-        return;
-      }
-
-      std::pair<pbesreach_algorithm&, pbes_summand_group&> context{*this, R};
-      sat_all_nopar(X, symbolic::learn_successors_callback<std::pair<pbesreach_algorithm&, pbes_summand_group&>, false>, &context);
+      using context_type = symbolic::learn_context<pbesreach_algorithm, pbes_summand_group>;
+      context_type context(*this, R, m_options, m_learner_generation, m_rewr, m_sigma, m_enumerator, m_pbes.data());
+      symbolic::learn_successors<false>(context, X, m_options.cached);
     }
 
     /// Applies further preprocessing steps to the SRF pbes.
