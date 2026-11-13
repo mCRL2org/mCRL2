@@ -25,6 +25,7 @@
 #ifndef SYLVAN_LDD_HPP
 #define SYLVAN_LDD_HPP
 
+#include <atomic>
 #include <cstdint>
 #include <sstream>
 #include <string>
@@ -208,14 +209,15 @@ class ldd
     /// \returns Whether the value was replaced. The caller keeps desired protected until this call returns.
     bool compare_exchange(MDD expected, MDD desired)
     {
-      return __atomic_compare_exchange_n(&mdd, &expected, desired, false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
+      return std::atomic_ref<MDD>(mdd).compare_exchange_strong(expected, desired, std::memory_order_acq_rel, std::memory_order_acquire);
     }
 
     /// \brief The value, read atomically (acquire), for an ldd that other threads update with compare_exchange: the
     /// reader then also sees what the writer did before it (for example, a relation updated before its domain).
     MDD load() const
     {
-      return __atomic_load_n(&mdd, __ATOMIC_ACQUIRE);
+      // std::atomic_ref<const T> is only available from C++26, and an atomic load does not modify the value.
+      return std::atomic_ref<MDD>(const_cast<MDD&>(mdd)).load(std::memory_order_acquire);
     }
 
     // the value
