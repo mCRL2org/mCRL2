@@ -50,6 +50,7 @@ struct symbolic_reachability_options
   bool no_discard_read = false;
   bool no_discard_write = false;
   bool no_relprod = false;
+  bool parallel_groups = false; // apply the transition groups in parallel (only without chaining and saturation)
   bool parallel_learning = false; // learn the transitions of a group in parallel (all modes)
   bool info = false;
   bool replace_dont_care = false;
@@ -74,6 +75,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
+  out << "parallel-groups = " << std::boolalpha << options.parallel_groups << std::endl;
   out << "parallel-learning = " << std::boolalpha << options.parallel_learning << std::endl;
   out << "info = " << std::boolalpha << options.info << std::endl;
   out << "groups = " << options.summand_groups << std::endl;

@@ -99,6 +99,7 @@ protected:
     desc.add_hidden_option("no-read", "do not discard only-read parameters");
     desc.add_hidden_option("no-write", "do not discard only-write parameters");
     desc.add_hidden_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
+    desc.add_hidden_option("parallel-groups", "apply the transition groups in parallel (without --chaining and --saturation)");
     desc.add_hidden_option("parallel-learning", "learn the transitions of a transition group in parallel, with a rewriter per thread");
     desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
     desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
@@ -130,6 +131,7 @@ protected:
     options.no_discard_read = parser.has_option("no-read");
     options.no_discard_write = parser.has_option("no-write");
     options.no_relprod = parser.has_option("no-relprod");
+    options.parallel_groups = parser.has_option("parallel-groups");
     options.parallel_learning = parser.has_option("parallel-learning");
     options.info = parser.has_option("info");
     options.summand_groups = parser.option_argument("groups");

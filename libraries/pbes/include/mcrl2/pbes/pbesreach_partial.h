@@ -48,6 +48,7 @@ public:
         m_options.no_relprod,
         m_options.chaining,
         m_options.compute_strategy);
+      G.set_parallel_groups(m_options.parallel_groups);
       G.print_information();
       symbolic_pbessolve_algorithm solver(G, false, m_options.compute_strategy);
 
