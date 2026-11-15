@@ -80,6 +80,53 @@ make_apply_traverser()
   return apply_traverser<Traverser>();
 }
 
+/// \brief Allows a traverser to terminate early.
+/// \details This traverser wrapper adds the option to stop a term traversal early
+/// by setting an additional class variable "terminated" to true. In that case
+/// the remainder of a term is not traversed anymore. 
+/// THIS IS EXPERIMENTAL AND NOT USED YET.
+template <class Derived>
+struct add_early_termination: public Derived
+{
+  bool terminated=false;
+
+  using derived = Derived;
+
+  using derived::enter;
+  using derived::leave;
+  using derived::apply;
+
+  
+  template <class T>
+  void enter(const T& x)
+  {
+    if (!terminated) 
+    {
+      derived::enter(x);
+    }
+  }
+
+  template <class T>
+  void leave(const T& x)
+  {
+    if (!terminated) 
+    {
+      derived::leave(x);
+    }
+  }
+
+  template <class T>
+  void apply(T x)
+  {
+std::cerr << "VISIT " << terminated << "  " << x << "\n";
+    if (!terminated) 
+    {
+      derived::apply(x);
+    }
+  }
+};
+
+
 } // namespace mcrl2::core
 
 #endif // MCRL2_CORE_TRAVERSER_H
