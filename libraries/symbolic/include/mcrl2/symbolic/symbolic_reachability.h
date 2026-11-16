@@ -51,6 +51,7 @@ struct symbolic_reachability_options
   bool no_discard_write = false;
   bool no_relprod = false;
   bool recursive_saturation = false; // recursive saturation with on-the-fly learning (instead of breadth-first steps)
+  bool reach = false; // the REACH operation with on-the-fly learning (instead of breadth-first steps)
   bool info = false;
   bool replace_dont_care = false;
   std::string summand_groups = "none";
@@ -75,6 +76,7 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
   out << "recursive-saturation = " << std::boolalpha << options.recursive_saturation << std::endl;
+  out << "reach = " << std::boolalpha << options.reach << std::endl;
   out << "info = " << std::boolalpha << options.info << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   out << "reorder = " << options.variable_order << std::endl;

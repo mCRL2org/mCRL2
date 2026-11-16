@@ -102,6 +102,7 @@ protected:
     desc.add_hidden_option("no-read", "do not discard only-read parameters");
     desc.add_hidden_option("no-write", "do not discard only-write parameters");
     desc.add_hidden_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
+    desc.add_hidden_option("reach", "explore with the REACH operation (in parallel) and on-the-fly learning (needs --cached)");
     desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
     desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
     desc.add_option("initial-ratio",
@@ -136,6 +137,15 @@ protected:
     if (options.recursive_saturation && !options.cached)
     {
       throw mcrl2::runtime_error("--recursive-saturation needs --cached");
+    }
+    options.reach = parser.has_option("reach");
+    if (options.reach && !options.cached)
+    {
+      throw mcrl2::runtime_error("--reach needs --cached");
+    }
+    if (options.reach && options.recursive_saturation)
+    {
+      throw mcrl2::runtime_error("--reach cannot be combined with --recursive-saturation");
     }
     options.info = parser.has_option("info");
     options.summand_groups = parser.option_argument("groups");
