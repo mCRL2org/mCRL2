@@ -50,6 +50,8 @@ struct symbolic_reachability_options
   bool no_discard_read = false;
   bool no_discard_write = false;
   bool no_relprod = false;
+  bool recursive_saturation = false; // recursive saturation with on-the-fly learning (instead of breadth-first steps)
+  bool reach = false; // the REACH operation with on-the-fly learning (instead of breadth-first steps)
   bool info = false;
   bool replace_dont_care = false;
   std::string summand_groups = "none";
@@ -73,6 +75,8 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
+  out << "recursive-saturation = " << std::boolalpha << options.recursive_saturation << std::endl;
+  out << "reach = " << std::boolalpha << options.reach << std::endl;
   out << "info = " << std::boolalpha << options.info << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   out << "reorder = " << options.variable_order << std::endl;
@@ -350,9 +354,29 @@ sylvan::MDD learn_successors_callback(WorkerP* worker, Task*, std::uint32_t* x, 
   return result;
 }
 
+/// \brief target := target U X, for an ldd that other workers may update and read at the same time (a
+/// compare-and-swap loop).
+/// \details No lock may be held during the union: a worker that waits in a Sylvan operation can steal a task that
+///          updates the same target, and would then wait for itself.
+inline void union_atomically(sylvan::ldds::ldd& target, const sylvan::ldds::ldd& X)
+{
+  using namespace sylvan::ldds;
+  for (;;)
+  {
+    ldd old(target.load()); // a protected copy of the current value
+    ldd result = union_(old, X);
+    if (result == old || target.compare_exchange(old.get(), result.get()))
+    {
+      return;
+    }
+  }
+}
+
 /// \brief group.L := group.L U {(x,y) in group | x in X}, with the states of X distributed over the Lace workers.
-/// \details It must be called from one thread at a time for the same group: group.L and group.Ldomain are updated
-///          on the calling thread, once, after all transitions have been learned.
+/// \details Several workers may call this for the same group at the same time (in parallel recursive saturation),
+///          while others read group.L and group.Ldomain (see saturation.h). So the group is updated with
+///          compare-and-swap loops, L before Ldomain, so that a worker that finds a projection in Ldomain also finds
+///          its transitions in L; and the statistics are updated atomically.
 template <bool ActionLabel, typename Context>
 void learn_successors(Context& context, const sylvan::ldds::ldd& X, bool cached)
 {
@@ -370,17 +394,21 @@ void learn_successors(Context& context, const sylvan::ldds::ldd& X, bool cached)
   }
 
   auto& group = context.group;
-  group.L = union_(group.L, T);
+  union_atomically(group.L, T);
   if (cached)
   {
-    group.Ldomain = union_(group.Ldomain, X);
+    union_atomically(group.Ldomain, X);
   }
 
+  double time = 0.0; // the sum over the workers: CPU time, not wall clock time, in parallel
+  std::size_t calls = 0;
   for (const worker_learn_statistics& s: context.statistics)
   {
-    group.learn_time += s.time; // the sum over the workers: CPU time, not wall clock time, in parallel
-    group.learn_calls += s.calls;
+    time += s.time;
+    calls += s.calls;
   }
+  std::atomic_ref<double>(group.learn_time).fetch_add(time, std::memory_order_relaxed);
+  std::atomic_ref<std::size_t>(group.learn_calls).fetch_add(calls, std::memory_order_relaxed);
 }
 
 } // namespace mcrl2::symbolic

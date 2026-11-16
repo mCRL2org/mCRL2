@@ -504,6 +504,9 @@ protected:
       "print the number of LDD nodes in addition to the number of elements represented as 'elements[nodes]'");
     desc.add_option("saturation",
       "reduce the amount of breadth-first iterations by applying the transition groups until fixed point");
+    desc.add_option("recursive-saturation",
+      "explore with recursive saturation, which saturates the state space from the last parameter to the first and "
+      "learns the transitions of the transition groups on the fly (requires --cached)");
     desc.add_option("solve-strategy",
       utilities::make_enum_argument<int>("NUM")
         .add_value_desc(0, "No on-the-fly solving is applied", true)
@@ -551,6 +554,7 @@ protected:
     desc.add_hidden_option("no-read", "do not discard only-read parameters");
     desc.add_hidden_option("no-write", "do not discard only-write parameters");
     desc.add_hidden_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
+    desc.add_hidden_option("reach", "explore with the REACH operation (in parallel) and on-the-fly learning (needs --cached)");
     desc.add_hidden_option("initial-ratio",
       utilities::make_optional_argument("NUM", "16"),
       "power-of-two ratio of initial and maximum table size (default 16)");
@@ -599,6 +603,20 @@ protected:
     options.no_discard_read = parser.has_option("no-read");
     options.no_discard_write = parser.has_option("no-write");
     options.no_relprod = parser.has_option("no-relprod");
+    options.recursive_saturation = parser.has_option("recursive-saturation");
+    if (options.recursive_saturation && !options.cached)
+    {
+      throw mcrl2::runtime_error("--recursive-saturation needs --cached");
+    }
+    options.reach = parser.has_option("reach");
+    if (options.reach && !options.cached)
+    {
+      throw mcrl2::runtime_error("--reach needs --cached");
+    }
+    if (options.reach && options.recursive_saturation)
+    {
+      throw mcrl2::runtime_error("--reach cannot be combined with --recursive-saturation");
+    }
     options.info = parser.has_option("info");
     options.summand_groups = parser.option_argument("groups");
     options.variable_order = parser.option_argument("reorder");
