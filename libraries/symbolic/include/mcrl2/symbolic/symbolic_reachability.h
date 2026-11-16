@@ -50,8 +50,6 @@ struct symbolic_reachability_options
   bool no_discard_read = false;
   bool no_discard_write = false;
   bool no_relprod = false;
-  bool parallel_groups = false; // apply the transition groups in parallel (only without chaining and saturation)
-  bool parallel_learning = false; // learn the transitions of a group in parallel (all modes)
   bool info = false;
   bool replace_dont_care = false;
   std::string summand_groups = "none";
@@ -75,8 +73,6 @@ std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options&
   out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
-  out << "parallel-groups = " << std::boolalpha << options.parallel_groups << std::endl;
-  out << "parallel-learning = " << std::boolalpha << options.parallel_learning << std::endl;
   out << "info = " << std::boolalpha << options.info << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   out << "reorder = " << options.variable_order << std::endl;
@@ -184,14 +180,15 @@ struct learn_resources
 };
 
 /// \brief The context of learning the transitions of one summand group, see learn_successors.
-/// \details Sequentially, the callback uses the rewriter, substitution and enumerator of the algorithm. In parallel,
-///          every Lace worker uses its own worker_learner, made from (a clone of) those of the algorithm.
+/// \details With one Lace worker, the callback uses the rewriter, substitution and enumerator of the algorithm. With
+///          several workers (--threads), learning is parallel and every worker uses its own worker_learner, made from
+///          (a clone of) those of the algorithm.
 template <typename Algorithm, typename Group>
 struct learn_context
 {
   Algorithm& algorithm;
   Group& group;
-  bool parallel;
+  bool parallel;                                // whether there are several Lace workers
   bool no_relprod;
   std::size_t generation;                       // of the algorithm instance
   data::rewriter& rewr;                         // cloned by every worker for its learner, in parallel
@@ -207,9 +204,9 @@ struct learn_context
   learn_context(Algorithm& algorithm_, Group& group_, const symbolic_reachability_options& options,
                 std::size_t generation_, data::rewriter& rewr_, data::mutable_indexed_substitution<>& sigma_,
                 const data::enumerator_algorithm<>& enumerator_, const data::data_specification& dataspec_)
-    : algorithm(algorithm_), group(group_), parallel(options.parallel_learning), no_relprod(options.no_relprod),
+    : algorithm(algorithm_), group(group_), parallel(lace_workers() > 1), no_relprod(options.no_relprod),
       generation(generation_), rewr(rewr_), sigma(sigma_), enumerator(enumerator_), dataspec(dataspec_),
-      index_threads(options.parallel_learning ? lace_workers() : 1), statistics(lace_workers())
+      index_threads(lace_workers()), statistics(lace_workers())
   {}
 
   /// \brief The thread index for the indexed sets: 0 with one thread, worker + 1 otherwise (see utilities::indexed_set).
@@ -251,7 +248,7 @@ struct learn_context
 };
 
 /// \brief Returns the transitions of the projected state x of the group of the context as an LDD. It is the
-/// callback of lddmc_collect (in parallel, on any Lace worker) and of learn_successors_sequential_callback.
+/// callback of lddmc_collect, which calls it on any Lace worker.
 /// No exception leaves the callback, which Sylvan calls from C code; the first one is kept in the context.
 /// If ActionLabel is true then the multi-action will be rewritten and added to the relation.
 template <typename Context, bool ActionLabel>
@@ -353,26 +350,7 @@ sylvan::MDD learn_successors_callback(WorkerP* worker, Task*, std::uint32_t* x, 
   return result;
 }
 
-/// \brief The context of learn_successors_sequential_callback: the learn context and the union of the results.
-template <typename Context>
-struct sequential_learn_context
-{
-  Context& context;
-  sylvan::ldds::ldd result = sylvan::ldds::empty_set();
-};
-
-/// \brief A callback for sat_all_nopar that adds the transitions of x, by learn_successors_callback, to the result.
-template <typename Context, bool ActionLabel>
-void learn_successors_sequential_callback(WorkerP* worker, Task* task, std::uint32_t* x, std::size_t n, void* context)
-{
-  auto& p = *reinterpret_cast<sequential_learn_context<Context>*>(context);
-  // No Sylvan operation happens between the return of the callback and the protection by T.
-  sylvan::ldds::ldd T(learn_successors_callback<Context, ActionLabel>(worker, task, x, n, &p.context));
-  p.result = sylvan::ldds::union_(p.result, T);
-}
-
-/// \brief group.L := group.L U {(x,y) in group | x in X}, with the states of X distributed over the Lace workers if
-/// context.parallel holds, and one at a time otherwise.
+/// \brief group.L := group.L U {(x,y) in group | x in X}, with the states of X distributed over the Lace workers.
 /// \details It must be called from one thread at a time for the same group: group.L and group.Ldomain are updated
 ///          on the calling thread, once, after all transitions have been learned.
 template <bool ActionLabel, typename Context>
@@ -384,17 +362,7 @@ void learn_successors(Context& context, const sylvan::ldds::ldd& X, bool cached)
     return;
   }
 
-  ldd T;
-  if (context.parallel)
-  {
-    T = collect(X, learn_successors_callback<Context, ActionLabel>, &context);
-  }
-  else
-  {
-    sequential_learn_context<Context> sequential{context};
-    sat_all_nopar(X, learn_successors_sequential_callback<Context, ActionLabel>, &sequential);
-    T = sequential.result;
-  }
+  ldd T = collect(X, learn_successors_callback<Context, ActionLabel>, &context);
 
   if (context.error)
   {

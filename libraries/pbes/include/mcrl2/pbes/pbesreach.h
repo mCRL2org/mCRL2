@@ -258,8 +258,8 @@ class pbesreach_algorithm
 
       for (const data::variable& param: m_process_parameters)
       {
-        // With parallel learning, all Lace workers insert into the data indices at the same time.
-        m_data_index.emplace_back(param.sort(), m_options.parallel_learning ? lace_workers() : 1);
+        // With several Lace workers, they all insert into the data indices at the same time.
+        m_data_index.emplace_back(param.sort(), lace_workers());
       }
 
       mCRL2log(log::log_level_t::debug) << "Final read/write matrix:" << std::endl;
@@ -299,7 +299,7 @@ class pbesreach_algorithm
     /// \brief Perform a single breadth first step, applying the transition groups in parallel.
     /// Only for the regular mode (no chaining, no saturation): there, every group reads the same todo.
     /// First the projections of all groups are computed in parallel, then the groups learn (one after another;
-    /// each in parallel with --parallel-learning), and then all relprods and their unions run in a parallel tree.
+    /// each in parallel), and then all relprods and their unions run in a parallel tree.
     /// \returns The tuple <visited, todo, deadlocks>
     std::tuple<ldd, ldd, ldd> step_parallel_groups(const ldd& visited, const ldd& todo, bool learn_transitions, bool detect_deadlocks)
     {
@@ -342,7 +342,7 @@ class pbesreach_algorithm
       using namespace sylvan::ldds;
       auto& R = m_summand_groups;
 
-      if (m_options.parallel_groups && !m_options.saturation && !m_options.chaining && !m_options.no_relprod)
+      if (lace_workers() > 1 && !m_options.saturation && !m_options.chaining && !m_options.no_relprod)
       {
         return step_parallel_groups(visited, todo, learn_transitions, detect_deadlocks);
       }

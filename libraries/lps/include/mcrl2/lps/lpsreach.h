@@ -152,8 +152,8 @@ class lpsreach_algorithm
       m_summand_patterns = symbolic::reorder_read_write_patterns(m_summand_patterns, m_variable_order);
 
       m_lts.process_parameters = symbolic::permute_copy(m_lts.process_parameters, m_variable_order);
-      // With parallel learning, all Lace workers insert into the data and action indices at the same time.
-      const std::size_t index_threads = m_options.parallel_learning ? lace_workers() : 1;
+      // With several Lace workers, they all insert into the data and action indices at the same time.
+      const std::size_t index_threads = lace_workers();
       for (const data::variable& param : m_lts.process_parameters)
       {
         m_lts.data_index.emplace_back(param.sort(), index_threads);
@@ -206,7 +206,7 @@ class lpsreach_algorithm
     /// \brief Perform a single breadth first step, applying the transition groups in parallel.
     /// Only for the regular mode (no chaining, no saturation): there, every group reads the same todo.
     /// First the projections of all groups are computed in parallel, then the groups learn (one after another;
-    /// each in parallel with --parallel-learning), and then all relprods and their unions run in a parallel tree.
+    /// each in parallel), and then all relprods and their unions run in a parallel tree.
     /// \returns The tuple <visited, todo, deadlocks>
     std::tuple<ldd, ldd, ldd> step_parallel_groups(const ldd& visited, const ldd& todo, bool learn_transitions, bool detect_deadlocks)
     {

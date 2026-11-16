@@ -55,14 +55,12 @@ static const std::vector<std::string> pbess = {
 
 using option_setter = std::function<void(pbes_system::symbolic_reachability_options&)>;
 
-// The modes to test, each compared with the default breadth-first exploration.
+// The modes to test, each compared with the default breadth-first exploration. With several threads, the default
+// applies the groups in parallel, whereas --chaining and --saturation apply them one after another.
 static const std::vector<std::pair<std::string, option_setter>> variants = {
-  {"--parallel-learning", [](pbes_system::symbolic_reachability_options& o) { o.parallel_learning = true; }},
-  {"--parallel-learning --cached", [](pbes_system::symbolic_reachability_options& o) { o.parallel_learning = true; o.cached = true; }},
-  {"--parallel-groups", [](pbes_system::symbolic_reachability_options& o) { o.parallel_groups = true; }},
-  {"--parallel-groups --cached", [](pbes_system::symbolic_reachability_options& o) { o.parallel_groups = true; o.cached = true; }},
-  {"--parallel-groups --parallel-learning --cached", [](pbes_system::symbolic_reachability_options& o) { o.parallel_groups = true; o.parallel_learning = true; o.cached = true; }},
-  {"--parallel-groups --deadlock", [](pbes_system::symbolic_reachability_options& o) { o.parallel_groups = true; o.detect_deadlocks = true; }},
+  {"--cached", [](pbes_system::symbolic_reachability_options& o) { o.cached = true; }},
+  {"--chaining", [](pbes_system::symbolic_reachability_options& o) { o.chaining = true; }},
+  {"--saturation", [](pbes_system::symbolic_reachability_options& o) { o.saturation = true; }},
 };
 
 /// \returns The answer, and the number of reachable vertices.
