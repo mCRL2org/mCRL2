@@ -37,10 +37,13 @@ if (MCRL2_ENABLE_STD_CHECKS)
     target_compile_definitions(mcrl2_compiler_definitions INTERFACE _LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG)
     target_compile_definitions(mcrl2_compiler_definitions INTERFACE _LIBCPP_ABI_BOUNDED_ITERATORS=1)
     target_compile_definitions(mcrl2_compiler_definitions INTERFACE _LIBCPP_ABI_BOUNDED_ITERATORS_IN_VECTOR=1)
-    target_compile_definitions(mcrl2_compiler_definitions INTERFACE _LIBCPP_ABI_BOUNDED_ITERATORS_IN_STRING=1)
     target_compile_definitions(mcrl2_compiler_definitions INTERFACE _LIBCPP_ABI_BOUNDED_UNIQUE_PTR=1)
     target_compile_definitions(mcrl2_compiler_definitions INTERFACE _LIBCPP_ABI_BOUNDED_ITERATORS_IN_STD_ARRAY=1)
     target_compile_definitions(mcrl2_compiler_definitions INTERFACE _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS=1)
+    # _LIBCPP_ABI_BOUNDED_ITERATORS_IN_STRING is intentionally not enabled: it
+    # changes std::string's iterator ABI and causes link errors with system
+    # libc++ (e.g. boost::process uses std::string::insert out-of-line). Undefining
+    # it in selected TUs would create an ABI mismatch with the rest of the build.
   endif()
 endif()
 
