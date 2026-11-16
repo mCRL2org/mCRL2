@@ -255,6 +255,7 @@ TASK_IMPL_0(bool, test_ldd_stream_version_without_copy_nodes_task)
     output.write_bits(0x8baf, 16); // BLF_MAGIC
     output.write_bits(0x8307, 16); // BLF_VERSION
     output.write_bits(0, 1);       // a new node with value 3, down true (index 1) and right false (index 0)
+    output.write_bits(0, 1);       // not a copy node
     output.write_integer(3);
     output.write_bits(1, 2);
     output.write_bits(0, 2);
