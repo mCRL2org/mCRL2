@@ -551,8 +551,6 @@ protected:
     desc.add_hidden_option("no-read", "do not discard only-read parameters");
     desc.add_hidden_option("no-write", "do not discard only-write parameters");
     desc.add_hidden_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
-    desc.add_hidden_option("parallel-groups", "apply the transition groups in parallel (in exploration without --chaining and --saturation, and in solving without --chaining)");
-    desc.add_hidden_option("parallel-learning", "learn the transitions of a transition group in parallel, with a rewriter per thread");
     desc.add_hidden_option("initial-ratio",
       utilities::make_optional_argument("NUM", "16"),
       "power-of-two ratio of initial and maximum table size (default 16)");
@@ -601,8 +599,6 @@ protected:
     options.no_discard_read = parser.has_option("no-read");
     options.no_discard_write = parser.has_option("no-write");
     options.no_relprod = parser.has_option("no-relprod");
-    options.parallel_groups = parser.has_option("parallel-groups");
-    options.parallel_learning = parser.has_option("parallel-learning");
     options.info = parser.has_option("info");
     options.summand_groups = parser.option_argument("groups");
     options.variable_order = parser.option_argument("reorder");
@@ -849,7 +845,6 @@ void solve(pbes_system::pbes pbesspec,
             options_.no_relprod,
             options_.chaining,
             options_.compute_strategy);
-          G.set_parallel_groups(options_.parallel_groups);
           G.print_information();
           pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy, options_.compute_strategy);
 
@@ -897,7 +892,6 @@ void solve(pbes_system::pbes pbesspec,
         options_.no_relprod,
         options_.chaining,
         options_.compute_strategy);
-      G.set_parallel_groups(options_.parallel_groups);
       G.print_information();
       pbes_system::symbolic_pbessolve_algorithm solver(G, options_.check_strategy, options_.compute_strategy);
 

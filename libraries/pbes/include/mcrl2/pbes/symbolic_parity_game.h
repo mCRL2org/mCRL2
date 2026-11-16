@@ -277,7 +277,7 @@ class symbolic_parity_game
     bool m_no_relprod = false;
     bool m_chaining = false;
     bool m_compute_strategy = false;
-    bool m_parallel_groups = false; // apply the relations of the summand groups in parallel (not with chaining)
+    bool m_parallel_groups = lace_workers() > 1; // apply the relations of the summand groups in parallel (not with chaining)
 
     const std::vector<symbolic::data_expression_index>& m_data_index; // for debugging only
     ldd m_all_nodes; // for debugging only
@@ -660,9 +660,6 @@ class symbolic_parity_game
     /// \brief Returns the mapping from priorities (ranks) to vertex sets.
     const std::map<std::size_t, ldd>& ranks() const { return m_rank_map; }
 
-    /// \brief Apply the relations of the summand groups in parallel where they are independent.
-    void set_parallel_groups(bool parallel_groups) { m_parallel_groups = parallel_groups; }
-
     /// \returns The set { u in U | exists v in V: u -> v }
     ldd predecessors(const ldd& U, const ldd& V) const
     {
@@ -792,7 +789,6 @@ class symbolic_parity_game
         m_chaining,
         m_compute_strategy
       );
-      result.set_parallel_groups(m_parallel_groups);
       return result;
     }
 

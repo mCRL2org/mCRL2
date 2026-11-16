@@ -251,7 +251,7 @@ class lpsreach_algorithm
       using namespace sylvan::ldds;
       auto& R = m_lts.summand_groups;
 
-      if (m_options.parallel_groups && !m_options.saturation && !m_options.chaining && !m_options.no_relprod)
+      if (lace_workers() > 1 && !m_options.saturation && !m_options.chaining && !m_options.no_relprod)
       {
         return step_parallel_groups(visited, todo, learn_transitions, detect_deadlocks);
       }
