@@ -82,46 +82,38 @@ make_apply_traverser()
 
 /// \brief Allows a traverser to terminate early.
 /// \details This traverser wrapper adds the option to stop a term traversal early
-/// by setting an additional class variable "terminated" to true. In that case
+/// by setting an additional class variable "terminate_now" to true. In that case
 /// the remainder of a term is not traversed anymore. 
-/// THIS IS EXPERIMENTAL AND NOT USED YET.
-template <class Derived>
+
+template <class Derived, bool always_do_enter=false, bool always_do_leave=false>
 struct add_early_termination: public Derived
 {
-  bool terminated=false;
+  bool terminate_now=false;
 
-  using derived = Derived;
-
-  using derived::enter;
-  using derived::leave;
-  using derived::apply;
-
-  
   template <class T>
   void enter(const T& x)
   {
-    if (!terminated) 
+    if (always_do_enter || !terminate_now) 
     {
-      derived::enter(x);
+       static_cast<Derived&>(*this).enter(x);
+    }
+  }
+
+  template <class T>
+  void apply(const T& x)
+  {
+    if (!terminate_now) 
+    {
+       static_cast<Derived&>(*this).apply(x);
     }
   }
 
   template <class T>
   void leave(const T& x)
   {
-    if (!terminated) 
+    if (always_do_leave || !terminate_now) 
     {
-      derived::leave(x);
-    }
-  }
-
-  template <class T>
-  void apply(T x)
-  {
-std::cerr << "VISIT " << terminated << "  " << x << "\n";
-    if (!terminated) 
-    {
-      derived::apply(x);
+       static_cast<Derived&>(*this).leave(x);
     }
   }
 };

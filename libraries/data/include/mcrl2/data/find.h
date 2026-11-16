@@ -215,9 +215,9 @@ make_find_free_variables_traverser(OutputIterator out, const VariableContainer& 
 }
 
 template <template <class> class Traverser>
-struct search_variable_traverser: public Traverser<search_variable_traverser<Traverser> >
+struct search_variable_traverser: public core::add_early_termination<Traverser<search_variable_traverser<Traverser> > >
 {
-  using super = Traverser<search_variable_traverser<Traverser>>;
+  using super = core::add_early_termination<Traverser<search_variable_traverser<Traverser> > >;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -231,9 +231,10 @@ struct search_variable_traverser: public Traverser<search_variable_traverser<Tra
 
   void apply(const variable& x)
   {
-    if (x == v)
+    if (!super::terminate_now && x == v)
     {
       found = true;
+      super::terminate_now = true;
     }
   }
 };
@@ -246,9 +247,9 @@ make_search_variable_traverser(const data::variable& v)
 }
 
 template <template <class> class Traverser, template <template <class> class, class> class Binder>
-struct search_free_variable_traverser: public Binder<Traverser, search_free_variable_traverser<Traverser, Binder> >
+struct search_free_variable_traverser: public core::add_early_termination<Binder<Traverser, search_free_variable_traverser<Traverser, Binder> > >
 {
-  using super = Binder<Traverser, search_free_variable_traverser<Traverser, Binder>>;
+  using super = core::add_early_termination<Binder<Traverser, search_free_variable_traverser<Traverser, Binder> > >;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -265,9 +266,10 @@ struct search_free_variable_traverser: public Binder<Traverser, search_free_vari
 
   void apply(const variable& x)
   {
-    if (v == x && !is_bound(x))
+    if (!super::terminate_now && x == v && !is_bound(x))
     {
       found = true;
+      super::terminate_now = true;
     }
   }
 };
