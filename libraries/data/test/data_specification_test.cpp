@@ -913,7 +913,7 @@ std::cerr << "#mappings " << mappings.size() << "\n";
 #else
    BOOST_CHECK(sorts.size()==10);
    BOOST_CHECK(constructors.size()==17);
-   BOOST_CHECK(mappings.size()==243);
+   BOOST_CHECK(mappings.size()==244);
 #endif
 }
 

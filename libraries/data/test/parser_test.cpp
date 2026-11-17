@@ -33,7 +33,7 @@ void parser_test()
   BOOST_CHECK(spec.mappings().size() == 204);
 #else
   BOOST_CHECK(spec.sorts().size() == 7); // Bool, Pos, S, List(S), S->List(S), Nat, @NatPair.
-  BOOST_CHECK(spec.mappings().size() == 114);
+  BOOST_CHECK(spec.mappings().size() == 115);
 #endif
   BOOST_CHECK(spec.constructors(data::basic_sort("S")).size() == 1);
 
