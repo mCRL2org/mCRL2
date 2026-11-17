@@ -18,10 +18,10 @@ namespace mcrl2::lps
 {
 
 /// \brief Maintains a multiset of bound data variables during traversal
-template <template <class> class Builder, class Derived>
-struct add_data_variable_binding: public data::add_data_variable_binding<Builder, Derived>
+template <template <class> class BuilderOrTraverser, class Derived>
+struct add_data_variable_binding: public data::add_data_variable_binding<BuilderOrTraverser, Derived>
 {
-  using super = data::add_data_variable_binding<Builder, Derived>;
+  using super = data::add_data_variable_binding<BuilderOrTraverser, Derived>;
   using super::apply;
   using super::enter;
   using super::leave;
@@ -41,13 +41,59 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
   void enter(const stochastic_action_summand& x)
   {
     increase_bind_count(x.summation_variables());
-    increase_bind_count(x.distribution().variables());
+  }
+
+  // We require this overload for the builder as we carefully need to increase and decrease the bind count.
+  void update(lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    data::variable_list result_summation_variables;
+    static_cast<Derived&>(*this).apply(result_summation_variables, x.summation_variables());
+    x.summation_variables() = result_summation_variables;
+    data::data_expression result_condition;
+    static_cast<Derived&>(*this).apply(result_condition, x.condition());
+    x.condition() = result_condition;
+    lps::multi_action result_multi_action;
+    static_cast<Derived&>(*this).apply(result_multi_action, x.multi_action());
+    x.multi_action() = result_multi_action;
+    increase_bind_count(x.distribution().variables()); // Added wrt. standard update function of the builder.
+    data::assignment_list result_assignments;
+    static_cast<Derived&>(*this).apply(result_assignments, x.assignments());
+    x.assignments() = result_assignments;
+    decrease_bind_count(x.distribution().variables()); // Added wrt. standard update function of the builder.
+    stochastic_distribution result_distribution;
+    static_cast<Derived&>(*this).apply(result_distribution, x.distribution());
+    x.distribution() = result_distribution;
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  // The lines below reroute other updates to the super class, which does not work using "using super::update"
+  // as that requires the existence of an update function in the super class. But this may be a traverser that
+  // does not have such a function. 
+  template<class T>
+  void update(T& x)
+    requires (!std::is_base_of_v<atermpp::aterm, T>)
+  {
+    super::update(x);
+  }
+
+  // We require this overload for the traverser as we carefully need to increase and decrease the bind count.
+  void apply(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    increase_bind_count(x.distribution().variables()); // Added wrt. standard update function of the builder.
+    static_cast<Derived&>(*this).apply(x.assignments());
+    decrease_bind_count(x.distribution().variables()); // Added wrt. standard update function of the builder.
+    static_cast<Derived&>(*this).apply(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
   }
 
   void leave(const stochastic_action_summand& x)
   {
     decrease_bind_count(x.summation_variables());
-    decrease_bind_count(x.distribution().variables());
   }
 
   void enter(const deadlock_summand& x)
@@ -113,10 +159,10 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
 
 // TODO: get rid of this code duplication
 // special handling for where clauses
-template <template <class> class Builder, class Derived>
-struct add_data_variable_traverser_binding: public add_data_variable_binding<Builder, Derived>
+template <template <class> class BuilderOrTraverser, class Derived>
+struct add_data_variable_traverser_binding: public add_data_variable_binding<BuilderOrTraverser, Derived>
 {
-  using super = add_data_variable_binding<Builder, Derived>;
+  using super = add_data_variable_binding<BuilderOrTraverser, Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
@@ -134,10 +180,10 @@ struct add_data_variable_traverser_binding: public add_data_variable_binding<Bui
 };
 
 // special handling for where clauses
-template <template <class> class Builder, class Derived>
-struct add_data_variable_builder_binding: public add_data_variable_binding<Builder, Derived>
+template <template <class> class BuilderOrTraverser, class Derived>
+struct add_data_variable_builder_binding: public add_data_variable_binding<BuilderOrTraverser, Derived>
 {
-  using super = add_data_variable_binding<Builder, Derived>;
+  using super = add_data_variable_binding<BuilderOrTraverser, Derived>;
   using super::enter;
   using super::leave;
   using super::apply;
