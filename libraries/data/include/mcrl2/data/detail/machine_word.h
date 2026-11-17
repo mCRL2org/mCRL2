@@ -118,7 +118,7 @@ inline bool add_overflow_word(const std::size_t n1, const std::size_t n2)
 
 inline bool add_with_carry_overflow_word(const std::size_t n1, const std::size_t n2)
 {
-  if (n1+n2+1<n1)
+  if (n1+n2+1<=n1)
   {
     return true;  // In this case there is an overflow.
   }

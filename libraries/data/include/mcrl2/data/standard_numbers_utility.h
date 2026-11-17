@@ -193,9 +193,9 @@ inline std::vector<std::size_t> add_number_vectors(const std::vector< std::size_
     std::size_t n2 = (i<v2.size()? v2[i]: 0);
 
     std::size_t sum = n1+n2+carry;
-    if (sum<n1)  // There is a carry overflow. 
+    if (sum<n1 || (carry==1 && sum==n1))  // There is a carry overflow.  
     {
-      assert(sum<n2);
+      assert(sum<=n2);
       carry=1;
     }
     else

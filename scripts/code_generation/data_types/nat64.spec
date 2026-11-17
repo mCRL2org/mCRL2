@@ -287,7 +287,9 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                                         @most_significant_digitNat(@minus_word(w1,w2)),
                                                         @concat_digit(@natpred(diff),@minus_word(w1,w2)))),
                                         if(@equals_zero(diff),
-                                               @most_significant_digitNat(@minus_word(w1,w2)),
+                                               if(==(n1,n2),
+                                                        @most_significant_digitNat(@minus_word(w1,w2)),
+                                                        @most_significant_digitNat(@zero_word)),
                                                @concat_digit(diff,@minus_word(w1,w2))));
 
      *(@most_significant_digitNat(w1),@most_significant_digitNat(w2)) =
