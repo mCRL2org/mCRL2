@@ -265,6 +265,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
 
     void execute_core() override
     {
+      super::execute_core(); // computes the global control flow graph
       start_timer("compute_global_control_flow_marking");
       compute_global_control_flow_marking(m_control_flow_graph);
       finish_timer("compute_global_control_flow_marking");

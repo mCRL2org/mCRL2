@@ -368,8 +368,10 @@ class PbespgsolveTest(PbesTest):
         super().__init__(name, ymlfile('pbespgsolve'), settings)
 
 class PbesstategraphTest(PbesTest):
-    def __init__(self, name, settings):
+    def __init__(self, name, arguments, settings):
         super().__init__(name, ymlfile('pbesstategraph'), settings)
+        if arguments:
+            self.add_command_line_options('t2', arguments)
 
 class PbessymbolicbisimTest(PbesTest):
     def __init__(self, name, settings):
@@ -602,7 +604,8 @@ available_tests = {
     'pbessolve-evidence-lts-optimization-6'       : lambda name, settings: Pbes2bool_evidence_ltsTest(name, 6, settings)                               ,
     'pbessolve-evidence-lts-optimization-7'       : lambda name, settings: Pbes2bool_evidence_ltsTest(name, 7, settings)                               ,
     'pbessolve-parelm'                            : lambda name, settings: Pbes2bool_counter_example_parelmTest(name, settings)                        ,
-    'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                          ,
+    'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, [], settings)                                      ,
+    'pbesstategraph-global'                       : lambda name, settings: PbesstategraphTest(name, ['-g'], settings)                                  ,
     'pbes-unify-parameters'                       : lambda name, settings: Pbes_unify_parametersTest(name, settings)                                   ,
     'pbes-srf'                                    : lambda name, settings: Pbes_srfTest(name, settings)                                                ,
     'stochastic-ltscompare'                       : lambda name, settings: StochasticLtscompareTest(name, settings)                                    ,
