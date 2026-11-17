@@ -538,7 +538,7 @@ eqn  @c0 = @most_significant_digitNat(@zero_word);
                                     @swap_zero(n2, +(m1, @swap_zero(n2, m2))))),
                             if(@equals_zero(n2), 
                                  if(@equals_zero(m2),
-                                      n1,
+                                      m1,
                                       @swap_zero(n1, +(@swap_zero(n1,m1), m2))),
                                  @swap_zero(+(n1, n2), +(@swap_zero(n1,m1),@swap_zero(n2,m2)))));
 
