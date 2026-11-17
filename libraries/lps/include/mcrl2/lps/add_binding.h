@@ -60,10 +60,10 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
     data::assignment_list result_assignments;
     static_cast<Derived&>(*this).apply(result_assignments, x.assignments());
     x.assignments() = result_assignments;
-    decrease_bind_count(x.distribution().variables()); // Added wrt. standard update function of the builder.
     stochastic_distribution result_distribution;
     static_cast<Derived&>(*this).apply(result_distribution, x.distribution());
     x.distribution() = result_distribution;
+    decrease_bind_count(x.distribution().variables()); // Added wrt. standard update function of the builder.
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -86,8 +86,8 @@ struct add_data_variable_binding: public data::add_data_variable_binding<Builder
     static_cast<Derived&>(*this).apply(x.multi_action());
     increase_bind_count(x.distribution().variables()); // Added wrt. standard update function of the builder.
     static_cast<Derived&>(*this).apply(x.assignments());
-    decrease_bind_count(x.distribution().variables()); // Added wrt. standard update function of the builder.
     static_cast<Derived&>(*this).apply(x.distribution());
+    decrease_bind_count(x.distribution().variables()); // Added wrt. standard update function of the builder.
     static_cast<Derived&>(*this).leave(x);
   }
 

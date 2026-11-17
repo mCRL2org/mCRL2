@@ -8334,6 +8334,7 @@ class specification_basic_type
             }
           }
 
+          assert(init.size()==pars.size());
           action_summands=temporary_spec.process().action_summands();
           deadlock_summands=temporary_spec.process().deadlock_summands();
         }
