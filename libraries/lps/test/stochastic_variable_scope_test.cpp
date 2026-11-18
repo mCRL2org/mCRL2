@@ -42,14 +42,11 @@ const std::string SPEC1 = "act a: Bool;\n"
 const std::string SPEC2 = "act a: Bool;\n"
                           "proc P(k1: Bool) = k1 -> a(k1) . dist k: Bool[1 / 2] . P(k1 = !k);\n"
                           "init P(true);\n";
-
-const data::variable k("k", data::sort_bool::bool_());
-const data::variable k1("k1", data::sort_bool::bool_());
-
 } // namespace
 
 BOOST_AUTO_TEST_CASE(test_find_free_variables1)
 {
+  const data::variable k("k", data::sort_bool::bool_());
   const lps::stochastic_specification spec = parse_stochastic(SPEC1);
   const lps::stochastic_action_summand& summand = spec.process().action_summands().front();
   const std::set<data::variable> free = lps::find_free_variables(summand);
@@ -59,6 +56,7 @@ BOOST_AUTO_TEST_CASE(test_find_free_variables1)
 
 BOOST_AUTO_TEST_CASE(test_find_free_variables2)
 { 
+  const data::variable k1("k1", data::sort_bool::bool_());
   const lps::stochastic_specification spec = parse_stochastic(SPEC2);
   const lps::stochastic_action_summand& summand = spec.process().action_summands().front();
   const std::set<data::variable> free = lps::find_free_variables(summand);
@@ -68,6 +66,7 @@ BOOST_AUTO_TEST_CASE(test_find_free_variables2)
 
 BOOST_AUTO_TEST_CASE(test_search_free_variable1)
 {
+  const data::variable k("k", data::sort_bool::bool_());
   const lps::stochastic_specification spec = parse_stochastic(SPEC1);
   const lps::stochastic_action_summand& summand = spec.process().action_summands().front();
   BOOST_CHECK_MESSAGE(lps::search_free_variable(summand, k),
@@ -76,6 +75,7 @@ BOOST_AUTO_TEST_CASE(test_search_free_variable1)
 
 BOOST_AUTO_TEST_CASE(test_search_free_variable2)
 {
+  const data::variable k("k", data::sort_bool::bool_());
   const lps::stochastic_specification spec = parse_stochastic(SPEC2);
   const lps::stochastic_action_summand& summand = spec.process().action_summands().front();
   BOOST_CHECK_MESSAGE(!lps::search_free_variable(summand, k),
@@ -84,6 +84,7 @@ BOOST_AUTO_TEST_CASE(test_search_free_variable2)
 
 BOOST_AUTO_TEST_CASE(test_replace_free_variables1)
 {
+  const data::variable k("k", data::sort_bool::bool_());
   const lps::stochastic_specification spec = parse_stochastic(SPEC1);
   lps::stochastic_action_summand summand = spec.process().action_summands().front();
   data::mutable_map_substitution<> sigma;
@@ -99,6 +100,7 @@ BOOST_AUTO_TEST_CASE(test_replace_free_variables1)
 
 BOOST_AUTO_TEST_CASE(test_replace_free_variables2)
 {
+  const data::variable k("k", data::sort_bool::bool_());
   const lps::stochastic_specification spec = parse_stochastic(SPEC2);
   lps::stochastic_action_summand summand = spec.process().action_summands().front();
   data::mutable_map_substitution<> sigma;
