@@ -33,12 +33,6 @@ using namespace mcrl2::lts;
 namespace
 {
 
-#ifdef NDEBUG
-constexpr bool assertions_enabled = false;
-#else
-constexpr bool assertions_enabled = true;
-#endif
-
 using probabilistic_state_t = probabilistic_lts_lts_t::probabilistic_state_t;
 
 // Action labels and process parameters shared by the tests.
@@ -370,8 +364,6 @@ BOOST_AUTO_TEST_CASE(round_trip_large)
     l.add_transition(
       transition(generator() % number_of_states, labels[generator() % labels.size()], generator() % number_of_states));
   }
-  // Ensure that the highest state occurs in a transition; see isolated_states_are_kept for why.
-  l.add_transition(transition(0, labels[0], number_of_states - 1));
   l.set_initial_state(0);
   check_round_trip(l);
 }
@@ -520,9 +512,9 @@ BOOST_AUTO_TEST_CASE(hidden_labels_are_written_as_tau)
 }
 
 // States that do not occur in any transition, and that have a higher index than every state that does, must survive
-// a round trip, including their state labels. Currently the number of states is derived from the transitions only,
-// so such states are lost. See https://github.com/mCRL2org/mCRL2/issues/1975; remove expected_failures once fixed.
-BOOST_AUTO_TEST_CASE(isolated_states_are_kept, *boost::unit_test::expected_failures(3))
+// a round trip, including their state labels. See https://github.com/mCRL2org/mCRL2/issues/1975. Without state labels
+// the .lts format does not store the number of states, so there only the initial state is guaranteed to be kept.
+BOOST_AUTO_TEST_CASE(isolated_states_are_kept)
 {
   lts_lts_t l;
   set_header(l);
@@ -539,12 +531,9 @@ BOOST_AUTO_TEST_CASE(isolated_states_are_kept, *boost::unit_test::expected_failu
   BOOST_CHECK(write_lts(loaded) == write_lts(l));
 }
 
-// The initial state must be a state of the loaded LTS, even if it does not occur in any transition. Currently it can
-// end up outside the LTS. See https://github.com/mCRL2org/mCRL2/issues/1974; remove expected_failures and enable_if
-// once fixed. The test only runs without assertions: with assertions, loading aborts in lts::set_initial_state, which
-// corrupts the aterm pool for the test cases that follow.
-BOOST_AUTO_TEST_CASE(initial_state_is_a_state,
-  *boost::unit_test::expected_failures(1) * boost::unit_test::enable_if<!assertions_enabled>())
+// The initial state must be a state of the loaded LTS, even if it does not occur in any transition.
+// See https://github.com/mCRL2org/mCRL2/issues/1974.
+BOOST_AUTO_TEST_CASE(initial_state_is_a_state)
 {
   lts_lts_t l;
   set_header(l);
@@ -552,9 +541,33 @@ BOOST_AUTO_TEST_CASE(initial_state_is_a_state,
   l.add_transition(transition(0, l.add_action(make_label({action_b()})), 1));
   l.set_initial_state(4);
 
-  const lts_lts_t loaded = read_lts<lts_lts_t>(write_lts(l));
+  const std::string bytes = write_lts(l);
+  const lts_lts_t loaded = read_lts<lts_lts_t>(bytes);
   BOOST_CHECK_EQUAL(loaded.initial_state(), 4U);
-  BOOST_CHECK_LT(loaded.initial_state(), loaded.num_states());
+  BOOST_CHECK_EQUAL(loaded.num_states(), 5U);
+
+  // The same holds when the LTS is read as a probabilistic LTS.
+  const probabilistic_lts_lts_t probabilistic = read_lts<probabilistic_lts_lts_t>(bytes);
+  BOOST_CHECK_EQUAL(describe(probabilistic.initial_probabilistic_state()), "4");
+  BOOST_CHECK_EQUAL(probabilistic.num_states(), 5U);
+}
+
+// Every state in the initial distribution of a probabilistic LTS must be a state of the loaded LTS.
+BOOST_AUTO_TEST_CASE(initial_distribution_states_are_states)
+{
+  probabilistic_lts_lts_t l;
+  l.set_data(data::data_specification());
+  l.set_num_states(6, false);
+  const std::size_t b = l.add_action(make_label({action_b()}));
+  l.add_transition(transition(0, b, l.add_probabilistic_state(probabilistic_state_t(1))));
+  probabilistic_state_t initial;
+  initial.add(0, lps::probabilistic_data_expression(1, 2));
+  initial.add(5, lps::probabilistic_data_expression(1, 2));
+  l.set_initial_probabilistic_state(initial);
+
+  const probabilistic_lts_lts_t loaded = read_lts<probabilistic_lts_lts_t>(write_lts(l));
+  BOOST_CHECK_EQUAL(loaded.num_states(), 6U);
+  BOOST_CHECK_EQUAL(describe(loaded.initial_probabilistic_state()), describe(initial));
 }
 
 BOOST_AUTO_TEST_CASE(probabilistic_round_trip)

@@ -173,6 +173,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
 
   // Keep track of the number of states (derived from the transitions).
   std::size_t number_of_states = 1;
+  std::size_t number_of_state_labels = 0;
 
   aterm term;
   action_label_lts action;
@@ -267,6 +268,7 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
     {
       // Lists always represent state labels, only need to add the indices.
       lts.add_state(reinterpret_cast<const state_label_lts&>(term));
+      ++number_of_state_labels;
     }
     else if (term == initial_state_mark())
     {
@@ -284,6 +286,10 @@ static void read_lts(atermpp::aterm_istream& stream, LTS& lts)
   // The initial state can only be set after the states are known.
   if (initial_state)
   {
+    // The initial state, and the states that have a state label, are states as well, even when they occur in no
+    // transition.
+    number_of_states = std::max({number_of_states, initial_state->maximal_state() + 1, number_of_state_labels});
+
     // If the lts has no state labels, we need to add empty states labels.
     lts.set_num_states(number_of_states, lts.has_state_info());
 
