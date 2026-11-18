@@ -19,6 +19,9 @@ cons @c1 <"c1">: Pos                                                            
 % successor functions of different types, as this one is a constructor. 
      @succ_pos <"succpos">:Pos <"arg"> -> Pos                                                         internal defined_by_rewrite_rules;
 
+% It is possible to write down @most_significant_digit(@zero_word). By the definition of the constructors above,
+% this is equal to an arbitrary applications of @succ_pos to @c1, i.e., an arbitrary number >= 1. The equations below
+% should for every such value have a model where @most_significant_digit(@zero_word) is equal to such value. 
 map  @most_significant_digit <"most_significant_digit">: @word <"arg"> -> Pos                         internal defined_by_rewrite_rules;
      @concat_digit <"concat_digit">: Pos <"arg1"> # @word <"arg2"> -> Pos                             internal defined_by_rewrite_rules;
      @equals_one <"equals_one">: Pos <"arg"> -> Bool                                                  internal defined_by_rewrite_rules;
@@ -46,39 +49,39 @@ var  b: Bool;
      w2: @word;
      overflow: @word;
 eqn  @c1 = @most_significant_digit(@one_word);
-     @equals_one(@most_significant_digit(w)) = @equals_one_word(w);
+     !(@equals_zero_word(w)) -> @equals_one(@most_significant_digit(w)) = @equals_one_word(w);
      @equals_one(@concat_digit(p,w)) = false;
      @equals_one(@succ_pos(p)) = false;
      succ(p) = @succ_pos(p);
-     @succ_pos(@most_significant_digit(w1)) = if(@equals_max_word(w1),
-                                                 @concat_digit(@most_significant_digit(@one_word),@zero_word),
-                                                 @most_significant_digit(@succ_word(w1)));
+     !(@equals_zero_word(w1)) -> @succ_pos(@most_significant_digit(w1)) = if(@equals_max_word(w1),
+                                                                                 @concat_digit(@most_significant_digit(@one_word),@zero_word),
+                                                                                 @most_significant_digit(@succ_word(w1)));
      @succ_pos(@concat_digit(p,w1)) = if(@equals_max_word(w1),
                                              @concat_digit(@succ_pos(p),@zero_word),
                                              @concat_digit(p,@succ_word(w1)));
  
 % The rules for comparison operators must be explicitly be defined on succ (= @succ_pos) to allow enumeration of positive numbers.
-     ==(@most_significant_digit(w1),@most_significant_digit(w2)) = @equal(w1,w2);
-     ==(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
-     ==(@most_significant_digit(w1),@concat_digit(p,w2)) = false;
+     &&(!(@equals_zero_word(w1)),!(@equals_zero_word(w2))) -> ==(@most_significant_digit(w1),@most_significant_digit(w2)) = @equal(w1,w2);
+     !(@equals_zero_word(w2)) -> ==(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
+     !(@equals_zero_word(w1)) -> ==(@most_significant_digit(w1),@concat_digit(p,w2)) = false;
      ==(@concat_digit(p1,w1),@concat_digit(p2,w2)) = &&(@equal(w1,w2),==(p1,p2));
      (@equals_one(p2)) -> ==(@succ_pos(p1),p2) = false;
      !(@equals_one(p2)) -> ==(@succ_pos(p1),p2) = ==(p1,@pospred(p2));
      (@equals_one(p1)) -> ==(p1, @succ_pos(p2)) = false;
      !(@equals_one(p1)) -> ==(p1, @succ_pos(p2)) = ==(@pospred(p1),p2);
  
-     <(@most_significant_digit(w1),@most_significant_digit(w2)) = @less(w1,w2);
-     <(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
-     <(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
+     &&(!(@equals_zero_word(w1)),!(@equals_zero_word(w2))) -> <(@most_significant_digit(w1),@most_significant_digit(w2)) = @less(w1,w2);
+     !(@equals_zero_word(w2)) -> <(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
+     !(@equals_zero_word(w1)) -> <(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
      <(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(@less(w1,w2),<=(p1,p2),<(p1,p2));
      <(@succ_pos(p1),p2) = &&(<(@most_significant_digit(@two_word),p2),<(p1,@pospred(p2)));
      <(p1, @succ_pos(p2)) = <=(p1,p2);
      less_total(p,p1) = <(p,p1);
      @equals_one_word(w1) ->  <(p,@most_significant_digit(w1)) = false;
  
-     <=(@most_significant_digit(w1),@most_significant_digit(w2)) = @less_equal(w1,w2);
-     <=(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
-     <=(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
+     &&(!(@equals_zero_word(w1)),!(@equals_zero_word(w2))) -> <=(@most_significant_digit(w1),@most_significant_digit(w2)) = @less_equal(w1,w2);
+     !(@equals_zero_word(w2)) -> <=(@concat_digit(p,w1),@most_significant_digit(w2)) = false;
+     !(@equals_zero_word(w1)) -> <=(@most_significant_digit(w1),@concat_digit(p,w2)) = true;
      <=(@concat_digit(p1,w1),@concat_digit(p2,w2)) = if(@less_equal(w1,w2),<=(p1,p2),<(p1,p2));
      <=(@succ_pos(p1),p2) = <(p1,p2);
      <=(p1, @succ_pos(p2)) = ||(@equals_one(p1),<=(@pospred(p1),p2));
@@ -87,9 +90,9 @@ eqn  @c1 = @most_significant_digit(@one_word);
      max(p1,p2) = if(<=(p1,p2),p2,p1);
      min(p1,p2) = if(<=(p1,p2),p1,p2);
 
-     @pospred(@most_significant_digit(w1)) = if(@equals_one_word(w1),
-                                                         @most_significant_digit(@one_word),
-                                                         @most_significant_digit(@pred_word(w1)));
+     !(@equals_zero_word(w1)) -> @pospred(@most_significant_digit(w1)) = if(@equals_one_word(w1),
+                                                                               @most_significant_digit(@one_word),
+                                                                               @most_significant_digit(@pred_word(w1)));
      @pospred(@concat_digit(p,w1)) = if(@equals_zero_word(w1),
                                             if(@equals_one(p),
                                                          @most_significant_digit(@max_word),
@@ -97,11 +100,13 @@ eqn  @c1 = @most_significant_digit(@one_word);
                                             @concat_digit(p,@pred_word(w1)));
      @pospred(@succ_pos(p)) = p;
 
-     +(@most_significant_digit(w1),@most_significant_digit(w2)) =
+     &&(!(@equals_zero_word(w1)),!(@equals_zero_word(w2))) -> 
+                             +(@most_significant_digit(w1),@most_significant_digit(w2)) =
                                      if(@add_overflow_word(w1,w2),
                                                     @concat_digit(@most_significant_digit(@one_word),@add_word(w1,w2)),
                                                     @most_significant_digit(@add_word(w1,w2)));
-     @add_with_carry(@most_significant_digit(w1),@most_significant_digit(w2)) =
+     &&(!(@equals_zero_word(w1)),!(@equals_zero_word(w2))) ->
+                             @add_with_carry(@most_significant_digit(w1),@most_significant_digit(w2)) =
                                      if(@add_with_carry_overflow_word(w1,w2),
                                                     @concat_digit(@most_significant_digit(@one_word),(@add_with_carry_word(w1,w2))),
                                                     @most_significant_digit(@add_with_carry_word(w1,w2)));
@@ -113,23 +118,23 @@ eqn  @c1 = @most_significant_digit(@one_word);
 %                                                                         @add_word(w1,w2));
 %     +(@concat_digit(p1,w1),@concat_digit(p2,w2)) = @concat_digit(+(@most_significant_digit(@add_overflow_word(w1,w2)), +(p1,p2)),
 %                                                                       @add_word(w1,w2));
-     +(@concat_digit(p1,w1),@most_significant_digit(w2)) = 
-                   if(@add_overflow_word(w1,w2),
-                                       @concat_digit(@succ_pos(p1),@add_word(w1,w2)),
-                                       @concat_digit(p1, @add_word(w1,w2)));
-     @add_with_carry(@concat_digit(p1,w1),@most_significant_digit(w2)) = 
-                   if(@add_with_carry_overflow_word(w1,w2),
-                                       @concat_digit(@succ_pos(p1),@add_with_carry_word(w1,w2)),
-                                       @concat_digit(p1, @add_with_carry_word(w1,w2)));
+     !(@equals_zero_word(w2)) -> +(@concat_digit(p1,w1),@most_significant_digit(w2)) = 
+                                       if(@add_overflow_word(w1,w2),
+                                                           @concat_digit(@succ_pos(p1),@add_word(w1,w2)),
+                                                           @concat_digit(p1, @add_word(w1,w2)));
+     !(@equals_zero_word(w2)) ->  @add_with_carry(@concat_digit(p1,w1),@most_significant_digit(w2)) = 
+                                        if(@add_with_carry_overflow_word(w1,w2),
+                                                            @concat_digit(@succ_pos(p1),@add_with_carry_word(w1,w2)),
+                                                            @concat_digit(p1, @add_with_carry_word(w1,w2)));
 
-     +(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
-                   if(@add_overflow_word(w1,w2),
-                                       @concat_digit(@succ_pos(p2),@add_word(w1,w2)),
-                                       @concat_digit(p2, @add_word(w1,w2)));
-     @add_with_carry(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
-                   if(@add_with_carry_overflow_word(w1,w2),
-                                       @concat_digit(@succ_pos(p2),@add_with_carry_word(w1,w2)),
-                                       @concat_digit(p2, @add_with_carry_word(w1,w2)));
+     !(@equals_zero_word(w1)) -> +(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
+                                        if(@add_overflow_word(w1,w2),
+                                                            @concat_digit(@succ_pos(p2),@add_word(w1,w2)),
+                                                            @concat_digit(p2, @add_word(w1,w2)));
+     !(@equals_zero_word(w1)) -> @add_with_carry(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
+                                        if(@add_with_carry_overflow_word(w1,w2),
+                                                            @concat_digit(@succ_pos(p2),@add_with_carry_word(w1,w2)),
+                                                            @concat_digit(p2, @add_with_carry_word(w1,w2)));
 
      +(@concat_digit(p1,w1),@concat_digit(p2,w2)) = 
                    if(@add_overflow_word(w1,w2),
@@ -155,16 +160,19 @@ eqn  @c1 = @most_significant_digit(@one_word);
 %                                                 whr mult=@times_word(w1,w2),
 %                                                     overflow=@times_overflow_word(w1,w2) end;
  
-     *(@most_significant_digit(w1),@most_significant_digit(w2)) =
-                @times_whr_mult_overflow(@times_word(w1,w2),@times_overflow_word(w1,w2));
-     *(@most_significant_digit(w1),@concat_digit(p2,w2)) = @concat_digit(
+     &&(!(@equals_zero_word(w1)),!(@equals_zero_word(w2))) -> 
+          *(@most_significant_digit(w1),@most_significant_digit(w2)) =
+                      @times_whr_mult_overflow(@times_word(w1,w2),@times_overflow_word(w1,w2));
+
+     !(@equals_zero_word(w1)) ->  *(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
+                                                         @concat_digit(
                                                                   @times_overflow(p2,w1,@times_overflow_word(w1,w2)),
                                                                   @times_word(w1,w2));
 
-     *(@concat_digit(p1,w1),@most_significant_digit(w2)) = 
-                                     @concat_digit(
-                                           @times_overflow(p1,w2,@times_overflow_word(w1,w2)),
-                                           @times_word(w1,w2));
+     !(@equals_zero_word(w2)) -> *(@concat_digit(p1,w1),@most_significant_digit(w2)) = 
+                                                  @concat_digit(
+                                                        @times_overflow(p1,w2,@times_overflow_word(w1,w2)),
+                                                        @times_word(w1,w2));
 
      *(@concat_digit(p1,w1),@concat_digit(p2,w2)) = 
                               if(<(p1, p2),
@@ -175,21 +183,23 @@ eqn  @c1 = @most_significant_digit(@one_word);
 %     @times_ordered(@most_significant_digit(w1),@most_significant_digit(w2)) =
 %                @times_whr_mult_overflow(@times_word(w1,w2),@times_overflow_word(w1,w2));
 
-     @times_ordered(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
+     !(@equals_zero_word(w1)) -> @times_ordered(@most_significant_digit(w1),@concat_digit(p2,w2)) = 
                                                            @concat_digit(
                                                                   @times_overflow(p2,w1,@times_overflow_word(w1,w2)),
                                                                   @times_word(w1,w2));
 
-     @times_ordered(@concat_digit(p1,w1),p2) = +(@concat_digit(@times_ordered(p1,p2),@zero_word), @times_overflow(p2,w1,@zero_word));
+     @equals_zero_word(w1) -> @times_ordered(@concat_digit(p1,w1),p2) = @concat_digit(@times_ordered(p1,p2),@zero_word);
+     !(@equals_zero_word(w1)) -> @times_ordered(@concat_digit(p1,w1),p2) = 
+                                    +(@concat_digit(@times_ordered(p1,p2),@zero_word), @times_overflow(p2,w1,@zero_word));
 
      @times_whr_mult_overflow(w1,w2) = if(@equals_zero_word(w2),
                                               @most_significant_digit(w1),
                                               @concat_digit(@most_significant_digit(w2),w1));
  
-     @times_overflow(@most_significant_digit(w1),w2,overflow) =
+     !(@equals_zero_word(w1)) -> @times_overflow(@most_significant_digit(w1),w2,overflow) =
                 @times_whr_mult_overflow(@times_with_carry_word(w1,w2,overflow),@times_with_carry_overflow_word(w1,w2,overflow));
 
-     @times_overflow(@concat_digit(p1,w1),w2,overflow) = 
+     !(@equals_zero_word(w2)) -> @times_overflow(@concat_digit(p1,w1),w2,overflow) = 
                                               @concat_digit(
                                                          @times_overflow(p1,w2,@times_with_carry_overflow_word(w1,w2,overflow)),
                                                          @times_with_carry_word(w1,w2,overflow));
