@@ -98,7 +98,7 @@ eqn ==(@c0, @cNat(p)) = false;
     @natpred(@cNat(@c1)) = @c0;
     @natpred(@cNat(@cDub(false,@c1))) = @cNat(@c1);
     @natpred(@cNat(@cDub(false,@cDub(b,p)))) = @dub(true,pred(@cDub(b,p)));
-    @natpred(@cNat(@cDub(true,p))) = @cNat(@cDub(true,p));
+    @natpred(@cNat(@cDub(true,p))) = @cNat(@cDub(false,p));
     @dubsucc(@c0) = @c1;
     @dubsucc(@cNat(p)) = @cDub(true,p);
     @dub(false,@c0) = @c0;

@@ -2384,7 +2384,7 @@ namespace mcrl2::data::sort_nat
         result.emplace_back(variable_list(), natpred(cnat(sort_pos::c1())), c0());
         result.emplace_back(variable_list(), natpred(cnat(sort_pos::cdub(sort_bool::false_(), sort_pos::c1()))), cnat(sort_pos::c1()));
         result.emplace_back(variable_list({vb, vp}), natpred(cnat(sort_pos::cdub(sort_bool::false_(), sort_pos::cdub(vb, vp)))), dub(sort_bool::true_(), pred(sort_pos::cdub(vb, vp))));
-        result.emplace_back(variable_list({vp}), natpred(cnat(sort_pos::cdub(sort_bool::true_(), vp))), cnat(sort_pos::cdub(sort_bool::true_(), vp)));
+        result.emplace_back(variable_list({vp}), natpred(cnat(sort_pos::cdub(sort_bool::true_(), vp))), cnat(sort_pos::cdub(sort_bool::false_(), vp)));
         result.emplace_back(variable_list(), dubsucc(c0()), sort_pos::c1());
         result.emplace_back(variable_list({vp}), dubsucc(cnat(vp)), sort_pos::cdub(sort_bool::true_(), vp));
         result.emplace_back(variable_list(), dub(sort_bool::false_(), c0()), c0());
