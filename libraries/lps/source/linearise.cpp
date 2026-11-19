@@ -4237,7 +4237,7 @@ class specification_basic_type
             }
             else
             {
-              stackvar=variable(spec.fresh_identifier_generator(s3), sort_pos::pos());
+              stackvar=variable(spec.fresh_identifier_generator(s3), sort_nat::nat());
             }
             spec.insertvariable(stackvar,true);
           }
@@ -4258,7 +4258,7 @@ class specification_basic_type
             else
             {
               variable_list temp=parlist;
-              temp.push_front(variable("state",sort_pos::pos()));
+              temp.push_front(variable("state",sort_nat::nat()));
               opns=(stackoperations*) new stackoperations(temp,spec);
               stackvar = variable(spec.fresh_identifier_generator(s3), opns->stacksort);
               spec.insertvariable(stackvar,true);
@@ -4309,7 +4309,7 @@ class specification_basic_type
       if (!options.newstate)
       {
         assignment_list result=t;
-        result.push_front(assignment(stack.stackvar,sort_pos::pos(i)));
+        result.push_front(assignment(stack.stackvar,sort_nat::nat(i)));
         return result;
       }
 
@@ -4361,7 +4361,7 @@ class specification_basic_type
       if (!options.newstate)
       {
         data_expression_list result=t;
-        result.push_front(sort_pos::pos(i));
+        result.push_front(sort_nat::nat(i));
         return result;
       }
 

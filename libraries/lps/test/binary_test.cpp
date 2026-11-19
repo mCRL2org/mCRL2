@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(case_4)
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_pos::pos() || i->sort() == sort_bool::bool_());
+    BOOST_CHECK(i->sort() == sort_nat::nat() || i->sort() == sort_bool::bool_());
     if (i->sort() == sort_bool::bool_())
     {
       ++bool_param_count;

@@ -479,7 +479,7 @@ data_equation unfold_pattern_matching(
     rules.push_back(rule);
   }
 #ifdef MCRL2_ENABLE_MACHINENUMBERS
-  assert(rules.size() != 0 || sort_pos::is_most_significant_digit_function_symbol(mapping));
+  assert(rules.size() != 0 || sort_nat::is_most_significant_digit_nat_function_symbol(mapping));
 #else 
   assert(rules.size() != 0);
 #endif
