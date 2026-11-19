@@ -12,8 +12,10 @@
 #define BOOST_TEST_MODULE stategraph_test
 #include <boost/test/included/unit_test.hpp>
 
+#include "mcrl2/pbes/detail/pbessolve_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/significant_variables.h"
+#include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/detail/split.h"
 
@@ -321,6 +323,48 @@ BOOST_AUTO_TEST_CASE(test_local_stategraph)
   pbesstategraph_options options;
   options.use_global_variant = false;
   pbes_system::detail::local_reset_variables_algorithm(p, options).run();
+}
+
+// Checks that both the local and the global variant of stategraph preserve the solution.
+// The PBESs must have a finite instantiation.
+BOOST_AUTO_TEST_CASE(test_stategraph_preserves_solution)
+{
+  const std::vector<std::string> pbes_texts = {
+    // The global variant used to compute no control flow graph, and replaced every PVI by true.
+    "pbes mu X = X;\n"
+    "init X;\n",
+
+    "pbes nu X(b: Bool) = !b && X(true);\n"
+    "init X(false);\n",
+
+    "pbes mu X(c: Bool, d: Bool) = (val(c) && Y(false, d)) || (val(!c) && X(true, !d));\n"
+    "     mu Y(c: Bool, d: Bool) = val(d) || (val(!c) && Y(true, false));\n"
+    "init X(false, false);\n",
+
+    "pbes nu X(c: Pos, d: Bool) = (val(c == 1) => exists e: Bool. X(2, e)) && (val(c == 2) => Y(1, d));\n"
+    "     mu Y(c: Pos, d: Bool) = (val(c == 1) && val(d)) || (val(c == 1) && Y(2, d));\n"
+    "init X(1, false);\n",
+  };
+
+  for (const std::string& text: pbes_texts)
+  {
+    const pbes p = txt2pbes(text, false);
+    const bool expected = pbes_system::detail::pbessolve(p);
+    for (bool use_global_variant: {false, true})
+    {
+      pbes q = p;
+      pbesstategraph_options options;
+      options.use_global_variant = use_global_variant;
+      pbes_system::stategraph(q, options);
+      const bool result = pbes_system::detail::pbessolve(q);
+      if (result != expected)
+      {
+        std::cout << "--- stategraph (" << (use_global_variant ? "global" : "local") << ") changed the solution ---\n"
+                  << text << "\nresult = " << q << std::endl;
+      }
+      BOOST_CHECK_EQUAL(result, expected);
+    }
+  }
 }
 
 // Test cases provided by Tim Willemse, 28-06-2013
