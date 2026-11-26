@@ -46,7 +46,7 @@ public:
         data_index(),
         V,
         m_options.no_relprod,
-        m_options.chaining,
+        m_options.uses_chaining(),
         m_options.compute_strategy);
       G.print_information();
       symbolic_pbessolve_algorithm solver(G, false, m_options.compute_strategy);

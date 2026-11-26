@@ -21,6 +21,7 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/symbolic/alternative_relprod.h"
 #include "mcrl2/symbolic/summand_group.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/stopwatch.h"
 
 #include <sylvan_ldd.hpp>
@@ -32,51 +33,151 @@
 
 namespace mcrl2::symbolic {
 
+/// \brief The algorithm that computes the reachable states (option --exploration).
+enum class exploration_method
+{
+  bfs,               // breadth-first: every iteration applies all transition groups to the same todo set
+  chaining,          // breadth-first, but every group is applied to the result of the previous groups
+  fixpoint,          // breadth-first, but every group is applied until a fixpoint is reached
+  fixpoint_chaining, // as fixpoint, followed by a fixpoint of the groups applied so far
+  saturation,        // recursive saturation with on-the-fly learning (requires caching)
+  reach              // the REACH operation with on-the-fly learning (requires caching)
+};
+
+inline
+std::string print_exploration_method(exploration_method m)
+{
+  switch (m)
+  {
+    case exploration_method::bfs: return "bfs";
+    case exploration_method::chaining: return "chaining";
+    case exploration_method::fixpoint: return "fixpoint";
+    case exploration_method::fixpoint_chaining: return "fixpoint-chaining";
+    case exploration_method::saturation: return "saturation";
+    case exploration_method::reach: return "reach";
+  }
+  throw mcrl2::runtime_error("unknown exploration method");
+}
+
+inline
+exploration_method parse_exploration_method(const std::string& s)
+{
+  for (exploration_method m: {exploration_method::bfs, exploration_method::chaining, exploration_method::fixpoint,
+                              exploration_method::fixpoint_chaining, exploration_method::saturation, exploration_method::reach})
+  {
+    if (s == print_exploration_method(m))
+    {
+      return m;
+    }
+  }
+  throw mcrl2::runtime_error("unknown exploration method " + s);
+}
+
+inline
+std::istream& operator>>(std::istream& is, exploration_method& m)
+{
+  try
+  {
+    std::string s;
+    is >> s;
+    m = parse_exploration_method(s);
+  }
+  catch (const mcrl2::runtime_error&)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
+inline
+std::ostream& operator<<(std::ostream& os, exploration_method m)
+{
+  return os << print_exploration_method(m);
+}
+
+inline
+std::string description(exploration_method m)
+{
+  switch (m)
+  {
+    case exploration_method::bfs:
+      return "breadth-first search, applying all transition groups to the states found in the previous iteration";
+    case exploration_method::chaining:
+      return "breadth-first search, applying the transition groups consecutively, each to the result of the previous ones";
+    case exploration_method::fixpoint:
+      return "breadth-first search, applying each transition group until a fixpoint is reached";
+    case exploration_method::fixpoint_chaining:
+      return "as fixpoint, but after each transition group also applies all previous groups until a fixpoint is reached";
+    case exploration_method::saturation:
+      return "recursive saturation, which saturates the state space from the last parameter to the first and learns the "
+             "transitions of the transition groups on the fly (implies --cached)";
+    case exploration_method::reach:
+      return "the REACH operation (in parallel) with on-the-fly learning (implies --cached)";
+  }
+  throw mcrl2::runtime_error("unknown exploration method");
+}
+
 struct symbolic_reachability_options
 {
   data::rewrite_strategy rewrite_strategy = data::rewrite_strategy::jitty;
   std::size_t max_workers = 0;
   std::size_t max_iterations = 0;
+  exploration_method exploration = exploration_method::bfs;
   bool cached = false;
-  bool chaining = false;
   bool detect_deadlocks = false;
   bool one_point_rule_rewrite = false;
   bool print_exact = false;
   bool print_nodesize = false;
   bool replace_constants_by_variables = false;
   bool remove_unused_rewrite_rules = false;
-  bool saturation = false;
   bool no_discard = false;
   bool no_discard_read = false;
   bool no_discard_write = false;
   bool no_relprod = false;
-  bool recursive_saturation = false; // recursive saturation with on-the-fly learning (instead of breadth-first steps)
-  bool reach = false; // the REACH operation with on-the-fly learning (instead of breadth-first steps)
   bool info = false;
   bool replace_dont_care = false;
   std::string summand_groups = "none";
   std::string variable_order = "none";
   std::string dot_file;
+
+  /// \brief Whether the transition groups are applied consecutively (chaining, fixpoint-chaining).
+  bool uses_chaining() const
+  {
+    return exploration == exploration_method::chaining || exploration == exploration_method::fixpoint_chaining;
+  }
+
+  /// \brief Whether every transition group is applied until a fixpoint (fixpoint, fixpoint-chaining).
+  bool uses_group_fixpoint() const
+  {
+    return exploration == exploration_method::fixpoint || exploration == exploration_method::fixpoint_chaining;
+  }
+
+  /// \brief Sets the exploration method; saturation and REACH need the caching of the learned values.
+  void set_exploration(exploration_method m)
+  {
+    exploration = m;
+    if (m == exploration_method::saturation || m == exploration_method::reach)
+    {
+      cached = true;
+    }
+  }
 };
 
 inline
 std::ostream& operator<<(std::ostream& out, const symbolic_reachability_options& options)
 {
   out << "rewrite-strategy = " << options.rewrite_strategy << std::endl;
+  out << "exploration = " << options.exploration << std::endl;
   out << "cached = " << std::boolalpha << options.cached << std::endl;
-  out << "chaining = " << std::boolalpha << options.chaining << std::endl;
   out << "detect_deadlocks = " << std::boolalpha << options.detect_deadlocks << std::endl;
   out << "one-point-rule-rewrite = " << std::boolalpha << options.one_point_rule_rewrite << std::endl;
   out << "print_nodesize = " << std::boolalpha << options.print_nodesize << std::endl;
   out << "replace-constants-by-variables = " << std::boolalpha << options.replace_constants_by_variables << std::endl;
   out << "remove-unused-rewrite-rules = " << std::boolalpha << options.remove_unused_rewrite_rules << std::endl;
-  out << "saturation = " << std::boolalpha << options.saturation << std::endl;
   out << "no-discard = " << std::boolalpha << options.no_discard << std::endl;
   out << "no-read = " << std::boolalpha << options.no_discard_read << std::endl;
   out << "no-write = " << std::boolalpha << options.no_discard_write << std::endl;
   out << "no-relprod = " << std::boolalpha << options.no_relprod << std::endl;
-  out << "recursive-saturation = " << std::boolalpha << options.recursive_saturation << std::endl;
-  out << "reach = " << std::boolalpha << options.reach << std::endl;
   out << "info = " << std::boolalpha << options.info << std::endl;
   out << "groups = " << options.summand_groups << std::endl;
   out << "reorder = " << options.variable_order << std::endl;

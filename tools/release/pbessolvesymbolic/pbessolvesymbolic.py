@@ -119,10 +119,7 @@ def run(args):
         opts.append('--split-condition')
     if args.cached:
         opts.append('--cached')
-    if args.chaining:
-        opts.append('--chaining')
-    if args.saturation:
-        opts.append('--saturation')
+    opts.append(f'--exploration={args.exploration}')
     if args.reset:
         opts.append('--reset')
     if args.verbose:
@@ -141,13 +138,12 @@ def main():
 
     cmdline_parser.add_argument('-c', '--split-condition', help="directly passed to pbessolvesymbolic", action='store_true')
     cmdline_parser.add_argument('--cached', help="directly passed to pbessolvesymbolic", action='store_true')
-    cmdline_parser.add_argument('--chaining', help="directly passed to pbessolvesymbolic", action='store_true')
+    cmdline_parser.add_argument('--exploration', help="directly passed to pbessolvesymbolic", choices=['bfs', 'chaining', 'fixpoint', 'fixpoint-chaining', 'saturation'], default='bfs')
     cmdline_parser.add_argument('--groups', help="none, used, or simple", default='none')
     cmdline_parser.add_argument('-s', '--solve-strategy', help="directly passed to pbessolvesymbolic", type=int, default=2)
     cmdline_parser.add_argument('-m', '--memory-limit', help="directly passed to pbessolvesymbolic", type=int, default=3)
     cmdline_parser.add_argument('-r', '--rewriter', help="directly passed to pbessolvesymbolic", type=str, default='jitty')
     cmdline_parser.add_argument('--reset', help="directly passed to pbessolvesymbolic", action='store_true')
-    cmdline_parser.add_argument('--saturation', help="directly passed to pbessolvesymbolic", action='store_true')
     cmdline_parser.add_argument('--threads', help="directly passed to pbessolvesymbolic", type=int, default=1)
     cmdline_parser.add_argument('-v', '--verbose', help="directly passed to pbessolvesymbolic", action='store_true')
 

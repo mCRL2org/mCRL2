@@ -305,7 +305,7 @@ class pbesreach_algorithm
     }
 
     /// \brief Perform a single breadth first step, applying the transition groups in parallel.
-    /// Only for the regular mode (no chaining, no saturation): there, every group reads the same todo.
+    /// Only for breadth-first search there, every group reads the same todo.
     /// First the projections of all groups are computed in parallel, then the groups learn (one after another;
     /// each in parallel), and then all relprods and their unions run in a parallel tree.
     /// \returns The tuple <visited, todo, deadlocks>
@@ -350,7 +350,8 @@ class pbesreach_algorithm
       using namespace sylvan::ldds;
       auto& R = m_summand_groups;
 
-      if (lace_workers() > 1 && !m_options.saturation && !m_options.chaining && !m_options.no_relprod)
+      const bool chaining = m_options.uses_chaining();
+      if (lace_workers() > 1 && m_options.exploration == symbolic::exploration_method::bfs && !m_options.no_relprod)
       {
         return step_parallel_groups(visited, todo, learn_transitions, detect_deadlocks);
       }
@@ -358,22 +359,22 @@ class pbesreach_algorithm
       ldd todo1 = empty_set();
       ldd potential_deadlocks = detect_deadlocks ? todo : empty_set();
 
-      if (!m_options.saturation)
+      if (!m_options.uses_group_fixpoint())
       {
-        // regular and chaining.
-        todo1 = m_options.chaining ? todo : empty_set();
+        // bfs and chaining.
+        todo1 = chaining ? todo : empty_set();
 
         for (std::size_t i = 0; i < R.size(); i++)
         {
           if (learn_transitions)
           {
-            ldd proj = project(m_options.chaining ? todo1 : todo, R[i].Ip);
+            ldd proj = project(chaining ? todo1 : todo, R[i].Ip);
             learn_successors(i, R[i], m_options.cached ? minus(proj, R[i].Ldomain) : proj);
 
             mCRL2log(log::log_level_t::trace) << "L =\n" << print_relation(m_data_index, R[i].L, R[i].read, R[i].write) << std::endl;
           }
 
-          todo1 = union_(todo1, relprod_impl(m_options.chaining ? todo1 : todo, R[i], i));
+          todo1 = union_(todo1, relprod_impl(chaining ? todo1 : todo, R[i], i));
 
           if (detect_deadlocks)
           {
@@ -383,7 +384,7 @@ class pbesreach_algorithm
       }
       else
       {
-        // saturation and chaining
+        // fixpoint and fixpoint-chaining
         todo1 = todo;
         ldd todo1_old; // the old todo set.
 
@@ -411,7 +412,7 @@ class pbesreach_algorithm
           }
 
           // Apply all previously learned transition relations repeatedly.
-          if (m_options.chaining)
+          if (chaining)
           {
             do
             {
@@ -561,12 +562,12 @@ class pbesreach_algorithm
       m_todo = m_initial_vertex;
       m_deadlocks = empty_set();
 
-      if (m_options.reach)
+      if (m_options.exploration == symbolic::exploration_method::reach)
       {
         run_reach();
         on_end_while_loop();
       }
-      else if (m_options.recursive_saturation)
+      else if (m_options.exploration == symbolic::exploration_method::saturation)
       {
         run_recursive_saturation();
         on_end_while_loop();

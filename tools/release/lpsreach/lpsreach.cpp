@@ -67,8 +67,15 @@ protected:
       'm');
 
     desc.add_option("cached", "use transition group caching to speed up state space exploration");
-    desc.add_option("chaining",
-      "reduce the amount of breadth-first iterations by applying the transition groups consecutively");
+    desc.add_option("exploration",
+      utilities::make_enum_argument<symbolic::exploration_method>("NAME")
+        .add_value(symbolic::exploration_method::bfs, true)
+        .add_value(symbolic::exploration_method::chaining)
+        .add_value(symbolic::exploration_method::fixpoint)
+        .add_value(symbolic::exploration_method::fixpoint_chaining)
+        .add_value(symbolic::exploration_method::saturation)
+        .add_hidden_value(symbolic::exploration_method::reach),
+      "compute the reachable states with method NAME:");
     desc.add_option("deadlock", "report the number of deadlocks (i.e. states with no outgoing transitions).");
     desc.add_option("info", "print read/write information of the summands");
     desc.add_option("groups",
@@ -90,19 +97,12 @@ protected:
       "prints the sizes of LDDs exactly when within the representable range, and in scientific notation otherwise");
     desc.add_option("print-nodesize",
       "print the number of LDD nodes in addition to the number of elements represented as 'elements[nodes]'");
-    desc.add_option("saturation",
-      "reduce the amount of breadth-first iterations required by applying the transition groups until fixed point is "
-      "reached");
-    desc.add_option("recursive-saturation",
-      "explore with recursive saturation, which saturates the state space from the last parameter to the first and "
-      "learns the transitions of the transition groups on the fly (requires --cached)");
     desc.add_option("replace-dont-care",
       "replace parameters assignments to don't care variables by assignments to the parameter itself");
     desc.add_hidden_option("no-discard", "do not discard any parameters");
     desc.add_hidden_option("no-read", "do not discard only-read parameters");
     desc.add_hidden_option("no-write", "do not discard only-write parameters");
     desc.add_hidden_option("no-relprod", "use an inefficient alternative version of relprod (for debugging)");
-    desc.add_hidden_option("reach", "explore with the REACH operation (in parallel) and on-the-fly learning (needs --cached)");
     desc.add_hidden_option("no-remove-unused-rewrite-rules", "do not remove unused rewrite rules. ", 'u');
     desc.add_hidden_option("no-one-point-rule-rewrite", "do not apply the one point rule rewriter");
     desc.add_option("initial-ratio",
@@ -120,7 +120,7 @@ protected:
   {
     super::parse_options(parser);
     options.cached = parser.has_option("cached");
-    options.chaining = parser.has_option("chaining");
+    options.set_exploration(parser.option_argument_as<symbolic::exploration_method>("exploration"));
     options.detect_deadlocks = parser.has_option("deadlock");
     options.one_point_rule_rewrite = !parser.has_option("no-one-point-rule-rewrite");
     options.print_exact = parser.has_option("print-exact");
@@ -128,25 +128,10 @@ protected:
     options.replace_dont_care = parser.has_option("replace-dont-care");
     options.remove_unused_rewrite_rules = !parser.has_option("no-remove-unused-rewrite-rules");
     options.replace_constants_by_variables = false; // This option cannot be used in the symbolic algorithm
-    options.saturation = parser.has_option("saturation");
     options.no_discard = parser.has_option("no-discard");
     options.no_discard_read = parser.has_option("no-read");
     options.no_discard_write = parser.has_option("no-write");
     options.no_relprod = parser.has_option("no-relprod");
-    options.recursive_saturation = parser.has_option("recursive-saturation");
-    if (options.recursive_saturation && !options.cached)
-    {
-      throw mcrl2::runtime_error("--recursive-saturation needs --cached");
-    }
-    options.reach = parser.has_option("reach");
-    if (options.reach && !options.cached)
-    {
-      throw mcrl2::runtime_error("--reach needs --cached");
-    }
-    if (options.reach && options.recursive_saturation)
-    {
-      throw mcrl2::runtime_error("--reach cannot be combined with --recursive-saturation");
-    }
     options.info = parser.has_option("info");
     options.summand_groups = parser.option_argument("groups");
     options.variable_order = parser.option_argument("reorder");
