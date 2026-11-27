@@ -56,15 +56,26 @@ static const std::vector<std::string> pbess = {
 using option_setter = std::function<void(pbes_system::symbolic_reachability_options&)>;
 
 // The modes to test, each compared with the default breadth-first exploration. With several threads, the default
-// applies the groups in parallel, whereas --chaining and --saturation apply them one after another.
+// applies the groups in parallel, whereas the other exploration methods apply them one after another.
+static option_setter exploration(symbolic::exploration_method m, bool cached = false, bool deadlock = false)
+{
+  return [=](pbes_system::symbolic_reachability_options& o)
+  {
+    o.cached = cached;
+    o.set_exploration(m);
+    o.detect_deadlocks = deadlock;
+  };
+}
+
 static const std::vector<std::pair<std::string, option_setter>> variants = {
-  {"--cached", [](pbes_system::symbolic_reachability_options& o) { o.cached = true; }},
-  {"--chaining", [](pbes_system::symbolic_reachability_options& o) { o.chaining = true; }},
-  {"--saturation", [](pbes_system::symbolic_reachability_options& o) { o.saturation = true; }},
-  {"--recursive-saturation --cached", [](pbes_system::symbolic_reachability_options& o) { o.recursive_saturation = true; o.cached = true; }},
-  {"--recursive-saturation --cached --deadlock", [](pbes_system::symbolic_reachability_options& o) { o.recursive_saturation = true; o.cached = true; o.detect_deadlocks = true; }},
-  {"--reach --cached", [](pbes_system::symbolic_reachability_options& o) { o.reach = true; o.cached = true; }},
-  {"--reach --cached --deadlock", [](pbes_system::symbolic_reachability_options& o) { o.reach = true; o.cached = true; o.detect_deadlocks = true; }},
+  {"--cached", exploration(symbolic::exploration_method::bfs, true)},
+  {"--exploration=chaining", exploration(symbolic::exploration_method::chaining)},
+  {"--exploration=fixpoint", exploration(symbolic::exploration_method::fixpoint)},
+  {"--exploration=fixpoint-chaining --cached", exploration(symbolic::exploration_method::fixpoint_chaining, true)},
+  {"--exploration=saturation", exploration(symbolic::exploration_method::saturation)},
+  {"--exploration=saturation --deadlock", exploration(symbolic::exploration_method::saturation, false, true)},
+  {"--exploration=reach", exploration(symbolic::exploration_method::reach)},
+  {"--exploration=reach --deadlock", exploration(symbolic::exploration_method::reach, false, true)},
 };
 
 /// \returns The answer, and the number of reachable vertices.
@@ -78,7 +89,7 @@ static std::pair<bool, double> solve(const pbes_system::pbes& p, const pbes_syst
     return {sylvan::ldds::includes(reach.partial_solution().winning[0], reach.initial_state()), sylvan::ldds::satcount(reach.V())};
   }
   pbes_system::symbolic_parity_game G(reach.pbes(), reach.summand_groups(), reach.data_index(), reach.V(),
-                                      options.no_relprod, options.chaining, options.compute_strategy);
+                                      options.no_relprod, options.uses_chaining(), options.compute_strategy);
   pbes_system::symbolic_pbessolve_algorithm solver(G, options.check_strategy, options.compute_strategy);
   auto [result, solution] = solver.solve(reach.initial_state(), reach.V(), reach.deadlocks(), reach.partial_solution());
   return {result, sylvan::ldds::satcount(reach.V())};

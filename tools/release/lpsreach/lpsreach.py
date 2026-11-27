@@ -117,12 +117,9 @@ def run(args):
     opts = [f'--memory-limit={args.memory_limit}', f'--rewriter={args.rewriter}', f'--threads={args.threads}', f'--groups={args.groups}']
     if args.cached:
         opts.append('--cached')
-    if args.chaining:
-        opts.append('--chaining')
+    opts.append(f'--exploration={args.exploration}')
     if args.deadlock:
         opts.append('--deadlock')
-    if args.saturation:
-        opts.append('--saturation')
     if args.verbose:
         opts.append('--verbose')
         opts.append('--print-nodesize')
@@ -140,12 +137,11 @@ def main():
     cmdline_parser.add_argument('iterations', help="the number of iterations of hill climbing", type=int, default=1000, nargs='?')
 
     cmdline_parser.add_argument('--cached', help="directly passed to lpsreach", action='store_true')
-    cmdline_parser.add_argument('--chaining', help="directly passed to lpsreach", action='store_true')
+    cmdline_parser.add_argument('--exploration', help="directly passed to lpsreach", choices=['bfs', 'chaining', 'fixpoint', 'fixpoint-chaining', 'saturation'], default='bfs')
     cmdline_parser.add_argument('--deadlock', help="directly passed to lpsreach", action='store_true')
     cmdline_parser.add_argument('--groups', help="none or simple", default='none')
     cmdline_parser.add_argument('-m', '--memory-limit', help="directly passed to lpsreach", type=int, default=3)
     cmdline_parser.add_argument('-r', '--rewriter', help="directly passed to lpsreach", type=str, default='jitty')
-    cmdline_parser.add_argument('--saturation', help="directly passed to lpsreach", action='store_true')
     cmdline_parser.add_argument('--threads', help="directly passed to pbessolvesymbolic", type=int, default=1)
     cmdline_parser.add_argument('-v', '--verbose', help="directly passed to lpsreach", action='store_true')
 

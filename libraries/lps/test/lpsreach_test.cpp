@@ -61,15 +61,29 @@ static const std::vector<std::string> specifications = {
 using option_setter = std::function<void(symbolic::symbolic_reachability_options&)>;
 
 // The modes to test, each compared with the default breadth-first exploration. With several threads, the default
-// applies the groups in parallel, whereas --chaining and --saturation apply them one after another.
+// applies the groups in parallel, whereas the other exploration methods apply them one after another.
+static option_setter exploration(symbolic::exploration_method m, bool cached = false, bool deadlock = false)
+{
+  return [=](symbolic::symbolic_reachability_options& o)
+  {
+    o.cached = cached;
+    o.set_exploration(m);
+    o.detect_deadlocks = deadlock;
+  };
+}
+
 static const std::vector<std::pair<std::string, option_setter>> variants = {
-  {"--cached", [](symbolic::symbolic_reachability_options& o) { o.cached = true; }},
-  {"--chaining --deadlock", [](symbolic::symbolic_reachability_options& o) { o.chaining = true; o.detect_deadlocks = true; }},
-  {"--saturation", [](symbolic::symbolic_reachability_options& o) { o.saturation = true; }},
-  {"--recursive-saturation --cached", [](symbolic::symbolic_reachability_options& o) { o.recursive_saturation = true; o.cached = true; }},
-  {"--recursive-saturation --cached --deadlock", [](symbolic::symbolic_reachability_options& o) { o.recursive_saturation = true; o.cached = true; o.detect_deadlocks = true; }},
-  {"--reach --cached", [](symbolic::symbolic_reachability_options& o) { o.reach = true; o.cached = true; }},
-  {"--reach --cached --deadlock", [](symbolic::symbolic_reachability_options& o) { o.reach = true; o.cached = true; o.detect_deadlocks = true; }},
+  {"--cached", exploration(symbolic::exploration_method::bfs, true)},
+  {"--exploration=chaining --deadlock", exploration(symbolic::exploration_method::chaining, false, true)},
+  {"--exploration=chaining --cached", exploration(symbolic::exploration_method::chaining, true)},
+  {"--exploration=fixpoint", exploration(symbolic::exploration_method::fixpoint)},
+  {"--exploration=fixpoint --deadlock", exploration(symbolic::exploration_method::fixpoint, false, true)},
+  {"--exploration=fixpoint-chaining", exploration(symbolic::exploration_method::fixpoint_chaining)},
+  {"--exploration=fixpoint-chaining --cached --deadlock", exploration(symbolic::exploration_method::fixpoint_chaining, true, true)},
+  {"--exploration=saturation", exploration(symbolic::exploration_method::saturation)},
+  {"--exploration=saturation --deadlock", exploration(symbolic::exploration_method::saturation, false, true)},
+  {"--exploration=reach", exploration(symbolic::exploration_method::reach)},
+  {"--exploration=reach --deadlock", exploration(symbolic::exploration_method::reach, false, true)},
 };
 
 /// \returns The number of reachable states, and the number of deadlocks (if options.detect_deadlocks).
